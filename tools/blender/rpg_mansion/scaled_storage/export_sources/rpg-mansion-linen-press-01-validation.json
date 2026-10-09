@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-linen-press-01",
+  "dimensions_mm": [
+    1003.000020980835,
+    591.0000205039978,
+    1950.0000476837158
+  ],
+  "bounds_m": [
+    [
+      -0.5015000104904175,
+      -0.2955000102519989,
+      0.0
+    ],
+    [
+      0.5015000104904175,
+      0.2955000102519989,
+      1.9500000476837158
+    ]
+  ],
+  "triangles": 2976,
+  "uv": {
+    "meters_per_uv": 7.361444579335215,
+    "min": 6.657915369237583,
+    "max": 9.654614276862684,
+    "p05": 6.966839718589032,
+    "p95": 9.389702097085209,
+    "total_triangles": 2976,
+    "valid_triangles": 2976,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.003": "wood",
+    "Mansion walnut mouldings.003": "wood",
+    "Mansion walnut veneered fields.003": "wood",
+    "Mansion patinated brass.003": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 136604,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "9830a37f0dfcb46a998cb328229aa5c8b72bc275a3a6dc299c683a03abcdad3f",
+  "sourceSha256": "f35be66ee12f57bf7180a187736b31074e5a95fbb45f467d2e332c3bd42c192b",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "a7193fd52fd752a253cfc235dec1a35e589dd87c6ee3d57f0f23cb62eb3665f9",
+    "authoredDataSignature": "0c3f88fd43428d0b43c4a1eecb78a6f11acd2782dbe033539de4afcc6f80bd6d",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

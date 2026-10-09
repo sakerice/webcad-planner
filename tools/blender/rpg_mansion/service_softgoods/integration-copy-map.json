@@ -1,0 +1,694 @@
+{
+  "sourceRoot": "Self-contained period service and softgoods candidate",
+  "destinationRoot": "Review repository chosen by integrator",
+  "doesNotChangeFiles": true,
+  "appIntegrationAuthorized": false,
+  "newConstructionCount": 3,
+  "functionalFootprintVariantCount": 1,
+  "files": [
+    {
+      "source": "CONSTRUCTION-CONTRACT.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/CONSTRUCTION-CONTRACT.json",
+      "sha256": "49e9382009f74d05f3c3ae8c16966c0f7e34f4808b885e806baff33e0c78e6b8",
+      "bytes": 9340
+    },
+    {
+      "source": "README.md",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/README.md",
+      "sha256": "1da43c7203200bd85c5d3ba84ad338cdf23f8f2c48a248ac026f54502ea9be0d",
+      "bytes": 6567
+    },
+    {
+      "source": "audit_existing.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/audit_existing.py",
+      "sha256": "8932048bf15eb2c93045f45c463279db59d6cbec6068c697ce4c236b830f60c9",
+      "bytes": 1882
+    },
+    {
+      "source": "authoring_sources/rpg-mansion-hinged-timber-drying-frame-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-hinged-timber-drying-frame-01.blend",
+      "sha256": "4169a7799d9bc7845f90b53ec66b206f77a5d6628e0379215f455c2fe7ebfd7c",
+      "bytes": 124163
+    },
+    {
+      "source": "authoring_sources/rpg-mansion-manual-wash-tub-board-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-manual-wash-tub-board-01.blend",
+      "sha256": "dc0b96d5e06717a862d40f91604d0da916ba345155d88dcf56cead6e6b7d0a8d",
+      "bytes": 153426
+    },
+    {
+      "source": "authoring_sources/rpg-mansion-narrow-hall-runner-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-narrow-hall-runner-01.blend",
+      "sha256": "be7e0fcdcf99e10f3ec171a76bf14883d90b94ed20409b10aead2f8b8be3c4f6",
+      "bytes": 98812
+    },
+    {
+      "source": "authoring_sources/rpg-mansion-period-range-canopy-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-period-range-canopy-01.blend",
+      "sha256": "0b830de8ba7eb10f9b5d7c15952e9faaca0815a15e6f8fb2ab78dd007a403346",
+      "bytes": 126166
+    },
+    {
+      "source": "build.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/build.py",
+      "sha256": "c3bc19f0a73e19a3635327249dd49912269803c8660c7a9523c9250bc8a7e32c",
+      "bytes": 9419
+    },
+    {
+      "source": "build_proofs.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/build_proofs.py",
+      "sha256": "03eb168cb85a81fdfe64991245c13e1a5f2b57c978ac7d478565136234f0f5fe",
+      "bytes": 9129
+    },
+    {
+      "source": "common.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/common.py",
+      "sha256": "b83789fb6d5f9799b047f3f215fc573eeeb5bca13c956ef328652c037f5c5716",
+      "bytes": 5563
+    },
+    {
+      "source": "coverage_closure.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/coverage_closure.py",
+      "sha256": "a118da28b3f1939542e44821f2169ea9236f81efffd3c4264f3a55d5d90d4509",
+      "bytes": 2513
+    },
+    {
+      "source": "descriptors.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/descriptors.json",
+      "sha256": "bfa010cd384a5c521adb55771e9645c0c0a5a3ea7d36f9bf5628f7d8fefd14f4",
+      "bytes": 22903
+    },
+    {
+      "source": "evidence/existing-bedroom-bedding-reuse-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/existing-bedroom-bedding-reuse-front.png",
+      "sha256": "bf711607382407e9d41ed03fee197ccb6eacb135d589c9eb77ddc5fb99649813",
+      "bytes": 881128
+    },
+    {
+      "source": "evidence/existing-bedroom-bedding-reuse-scene-top.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/existing-bedroom-bedding-reuse-scene-top.png",
+      "sha256": "91b1245d763e82e060b0be58e3e037ba92c0ad5b9d2bcdaf5ecfd99c07a58361",
+      "bytes": 989918
+    },
+    {
+      "source": "evidence/existing-bedroom-bedding-reuse-scene.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/existing-bedroom-bedding-reuse-scene.png",
+      "sha256": "514f2b8697fed264205d4ef0b551fe12459093cdf999a0b76d119354f4389aa9",
+      "bytes": 794197
+    },
+    {
+      "source": "evidence/kitchen-scullery-installed-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/kitchen-scullery-installed-front.png",
+      "sha256": "9c4bda70bcfcf5d075ddfb67258d3ead8d57c99c0bf1fa37109a893cfc2e4c1b",
+      "bytes": 975387
+    },
+    {
+      "source": "evidence/kitchen-scullery-installed-scene-top.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/kitchen-scullery-installed-scene-top.png",
+      "sha256": "e72732599c2b6c6fb0c14317fe0b5bb3645407db379e914c71ad807812604a27",
+      "bytes": 817573
+    },
+    {
+      "source": "evidence/kitchen-scullery-installed-scene.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/kitchen-scullery-installed-scene.png",
+      "sha256": "3532d817af0f29a93def39848cee3af351dbc8df89daa147ef198e5129b7998d",
+      "bytes": 872212
+    },
+    {
+      "source": "evidence/manual-laundry-installed-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/manual-laundry-installed-front.png",
+      "sha256": "92d3622fb6006a113ec950c177cfc9a022f98559ef56c11978d3b312596a7a8e",
+      "bytes": 843977
+    },
+    {
+      "source": "evidence/manual-laundry-installed-scene-top.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/manual-laundry-installed-scene-top.png",
+      "sha256": "6d2d71a1335cbe39c194fde4205379c2c3da98d87d653c8b5c12e6abdf15cc97",
+      "bytes": 1093031
+    },
+    {
+      "source": "evidence/manual-laundry-installed-scene.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/manual-laundry-installed-scene.png",
+      "sha256": "469869aea42360c72e968be246af1cd1904f5f26346531fd89abae6a9dd61c40",
+      "bytes": 856100
+    },
+    {
+      "source": "evidence/narrow-hall-installed-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/narrow-hall-installed-front.png",
+      "sha256": "8f9555e898e09f08f16537ea222bc77c84271f4a5d242bf7df165e3c5cb24bdd",
+      "bytes": 780325
+    },
+    {
+      "source": "evidence/narrow-hall-installed-scene-top.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/narrow-hall-installed-scene-top.png",
+      "sha256": "d444b24c1005f94a56fd3294237ee2c81d8e3185037d507f5d39ba1f9db56c17",
+      "bytes": 647760
+    },
+    {
+      "source": "evidence/narrow-hall-installed-scene.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/narrow-hall-installed-scene.png",
+      "sha256": "51ff73ef9e7fb1a4ea17579c2c752310a0b575e87189bf70e9f8eb3176952acd",
+      "bytes": 684692
+    },
+    {
+      "source": "evidence/rpg-mansion-hinged-timber-drying-frame-01-finish-channels.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-finish-channels.png",
+      "sha256": "78dd067240b9d572427e229b614adfb337d569ac4d2d68d112c80f787104c43a",
+      "bytes": 258107
+    },
+    {
+      "source": "evidence/rpg-mansion-hinged-timber-drying-frame-01-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-front.png",
+      "sha256": "fce2d27ad4a8911d2ab1163a84d7b9fd5af1aa1c99b520ae8ab762306e9cf185",
+      "bytes": 224196
+    },
+    {
+      "source": "evidence/rpg-mansion-hinged-timber-drying-frame-01-left.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-left.png",
+      "sha256": "f500219783938899bb53a5679193f4c0be440cbff5a13250828d1d9ce78b372f",
+      "bytes": 171577
+    },
+    {
+      "source": "evidence/rpg-mansion-hinged-timber-drying-frame-01-rear.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-rear.png",
+      "sha256": "aca03963ccff4e8a924e91d77a76c30e11c3aa81042a9717de4897c6aea283b6",
+      "bytes": 224152
+    },
+    {
+      "source": "evidence/rpg-mansion-hinged-timber-drying-frame-01-right.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-right.png",
+      "sha256": "2787c367de3bafce2d646d420deea8060a802849be9b269d1b170de2c51091da",
+      "bytes": 177808
+    },
+    {
+      "source": "evidence/rpg-mansion-hinged-timber-drying-frame-01-under.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-under.png",
+      "sha256": "4dad1225e7f6d7920d4302e2acc5c7cbc5fee9fe5e5ce1fb5baf982242a68631",
+      "bytes": 252931
+    },
+    {
+      "source": "evidence/rpg-mansion-manual-wash-tub-board-01-finish-channels.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-finish-channels.png",
+      "sha256": "8bab1cf905b5a08b4e22fd43e79a15936decf5e496b98b6f012c74f1d5249c22",
+      "bytes": 281777
+    },
+    {
+      "source": "evidence/rpg-mansion-manual-wash-tub-board-01-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-front.png",
+      "sha256": "e1c25a5fb2da406cbe49d3bd9fa97bd08827e34f20f1b2da6737bc1723c3ce9a",
+      "bytes": 237774
+    },
+    {
+      "source": "evidence/rpg-mansion-manual-wash-tub-board-01-left.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-left.png",
+      "sha256": "01b14c7bebfd77232602f88c1be4a9e8e5b0ff2b165d750ee767bb10abfc93a5",
+      "bytes": 206659
+    },
+    {
+      "source": "evidence/rpg-mansion-manual-wash-tub-board-01-rear.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-rear.png",
+      "sha256": "d372f7541ce14de4626869e4910a0e0fbb8ac8e67b34b3227e8fa386971953d8",
+      "bytes": 240348
+    },
+    {
+      "source": "evidence/rpg-mansion-manual-wash-tub-board-01-right.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-right.png",
+      "sha256": "d9bc1ea8097a724ac49dff87f0f83ec8ceb6be48b40f58350d0cb965dfb76e0b",
+      "bytes": 208632
+    },
+    {
+      "source": "evidence/rpg-mansion-manual-wash-tub-board-01-under.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-under.png",
+      "sha256": "7f7e3de213f95fa068140e81578326c697038cb1e7ce8f3287c8333fe841a847",
+      "bytes": 299467
+    },
+    {
+      "source": "evidence/rpg-mansion-narrow-hall-runner-01-finish-channels.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-finish-channels.png",
+      "sha256": "3dcc293e1b0e152b9130d806ea446163f71bdc76c07c3625cf7dba46473cafc3",
+      "bytes": 175006
+    },
+    {
+      "source": "evidence/rpg-mansion-narrow-hall-runner-01-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-front.png",
+      "sha256": "3105af07c55310e9c464f5ebb146e13fbc0a7968e07a815a51e9df90798a9d00",
+      "bytes": 116004
+    },
+    {
+      "source": "evidence/rpg-mansion-narrow-hall-runner-01-left.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-left.png",
+      "sha256": "98876813b046b8598f480c8642cd6b909ebf25e920260cca268c123639fb6a73",
+      "bytes": 114889
+    },
+    {
+      "source": "evidence/rpg-mansion-narrow-hall-runner-01-rear.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-rear.png",
+      "sha256": "1c36905f35ae85e927fff7b496186d63d81e46b5a9f5a70b2ba8308295edda1c",
+      "bytes": 115591
+    },
+    {
+      "source": "evidence/rpg-mansion-narrow-hall-runner-01-right.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-right.png",
+      "sha256": "b708c282e6eda5a9d8de596ba1d48027ff577f2fd8570d9b89116746d72af138",
+      "bytes": 116697
+    },
+    {
+      "source": "evidence/rpg-mansion-narrow-hall-runner-01-under.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-under.png",
+      "sha256": "f331c5801cc44581e2393da05efe414f4b8087bc692ceb2b7cc2b916f76f2c03",
+      "bytes": 221437
+    },
+    {
+      "source": "evidence/rpg-mansion-period-range-canopy-01-finish-channels.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-finish-channels.png",
+      "sha256": "6fb383e9cb5337e8ebbfab67dd1d2d41bdee01bf4fb76d9b7ad96ffd91dc157d",
+      "bytes": 269972
+    },
+    {
+      "source": "evidence/rpg-mansion-period-range-canopy-01-front.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-front.png",
+      "sha256": "65b79352d112c186b188cdfcd213328927cb9dcce4cb92983bdc9e2f62bc19b3",
+      "bytes": 232769
+    },
+    {
+      "source": "evidence/rpg-mansion-period-range-canopy-01-left.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-left.png",
+      "sha256": "81f1c5fc337e4e7dab1ae6e600bc5d607ddd75f2fd637d0989d1f9e1a9a09e0e",
+      "bytes": 214868
+    },
+    {
+      "source": "evidence/rpg-mansion-period-range-canopy-01-rear.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-rear.png",
+      "sha256": "a118e658125c7419b2fd1dfd6f5bb9550cd438527aad125a8f84b9ff4bb50f8c",
+      "bytes": 209353
+    },
+    {
+      "source": "evidence/rpg-mansion-period-range-canopy-01-right.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-right.png",
+      "sha256": "994bb9d40a81afae745c45a61e30413a177ec321361e097716cbbd4b189f1cd4",
+      "bytes": 212708
+    },
+    {
+      "source": "evidence/rpg-mansion-period-range-canopy-01-under.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-under.png",
+      "sha256": "a7279c93432f1de6db5d13d6c39481e9a5ee21cf4a984b6de3e50338ea7ecc1c",
+      "bytes": 264959
+    },
+    {
+      "source": "evidence/service-softgoods-all-sides.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/service-softgoods-all-sides.png",
+      "sha256": "c91e16abbd7f31ed5319232f085a8a3c193b1cb863c28315fe54a88649eec8a1",
+      "bytes": 388171
+    },
+    {
+      "source": "evidence/service-softgoods-installed-scenes.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/service-softgoods-installed-scenes.png",
+      "sha256": "ff89b67de39e43d70f21b8459abd838f41d7de9f16f8ea803f6fa4bf831ce181",
+      "bytes": 539440
+    },
+    {
+      "source": "evidence/service-softgoods-material-channels.png",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/evidence/service-softgoods-material-channels.png",
+      "sha256": "cbb0aa7583b511fd75b79e8b1e511aa82bf9531b16316f2ce815f5103356cbad",
+      "bytes": 200914
+    },
+    {
+      "source": "finalize.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/finalize.py",
+      "sha256": "4ea01fe0c5e2ae4a9448d4b579bfb3fd14147a4914dbe8c6d23d2776c6a702a7",
+      "bytes": 6147
+    },
+    {
+      "source": "forms.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/forms.py",
+      "sha256": "29b2f5b8eb2e6714c0cfd0fc96443106a5fefdaed537f5365bfe30e509183eba",
+      "bytes": 10114
+    },
+    {
+      "source": "freeze_candidate.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/freeze_candidate.py",
+      "sha256": "497f9132c8a1d3078442411585f761d33cf96b1efdeda42af534dce3ac64e1e5",
+      "bytes": 1224
+    },
+    {
+      "source": "helpers/exterior_build.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/helpers/exterior_build.py",
+      "sha256": "224add9eeeacc0c35da86cfa1fb3fa3a42ba001102fc3e82324b143a0f4ee1e1",
+      "bytes": 19941
+    },
+    {
+      "source": "helpers/model_kit.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/helpers/model_kit.py",
+      "sha256": "7614800d979239e08aa8c14c237bedb53685acce92c4ed9931ddfc3ea9bb432f",
+      "bytes": 13836
+    },
+    {
+      "source": "helpers/native_utils.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/helpers/native_utils.py",
+      "sha256": "08616cea07ceac0a989ba33db0754b3ce45aff0954b2000b794b6a63cc41621a",
+      "bytes": 5481
+    },
+    {
+      "source": "helpers/png_metadata.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/helpers/png_metadata.py",
+      "sha256": "dfa11faf1382666a9a29eadb7bf72500b7b97c21085637ebb034a2ae907edada",
+      "bytes": 688
+    },
+    {
+      "source": "helpers/provenance.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/helpers/provenance.json",
+      "sha256": "4d3ca08b2d14b3412aec3e703272051f8b26d95ad94eae4bd0488ebdefac3af8",
+      "bytes": 1423
+    },
+    {
+      "source": "helpers/qa_asset_delivery.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/helpers/qa_asset_delivery.py",
+      "sha256": "55befe8339de8e6089340e865186bdd1008cf9ed5ee53486ced779172459cee9",
+      "bytes": 39230
+    },
+    {
+      "source": "helpers/shape_kit.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/helpers/shape_kit.py",
+      "sha256": "260e124675d9ba3f00dfc861c03e058d46463fecc7290dc42aff3224a856b28e",
+      "bytes": 6733
+    },
+    {
+      "source": "integration-descriptors.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/integration-descriptors.json",
+      "sha256": "eb4b87a2b02e69f5d7c5eb98f75d554dbabbe4539a5933df1611966fb236f1a0",
+      "bytes": 25053
+    },
+    {
+      "source": "material_evidence.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/material_evidence.py",
+      "sha256": "1e4c512280ae272e26a2036fb8ee88648b9ae969ff563e9821a79ca84f1da099",
+      "bytes": 1568
+    },
+    {
+      "source": "models/rpg-mansion-hinged-timber-drying-frame-01.glb",
+      "destination": "assets/models/packs/rpg-mansion/models/rpg-mansion-hinged-timber-drying-frame-01.glb",
+      "sha256": "22726a3e9d37cd3868850c0bad20da3b707c23d5c11eccb08965621b05cc616a",
+      "bytes": 238456
+    },
+    {
+      "source": "models/rpg-mansion-manual-wash-tub-board-01.glb",
+      "destination": "assets/models/packs/rpg-mansion/models/rpg-mansion-manual-wash-tub-board-01.glb",
+      "sha256": "1f54d3d6e7a0fc05522c467445b7a767a543efc393b47a27cf22267637527195",
+      "bytes": 350904
+    },
+    {
+      "source": "models/rpg-mansion-narrow-hall-runner-01.glb",
+      "destination": "assets/models/packs/rpg-mansion/models/rpg-mansion-narrow-hall-runner-01.glb",
+      "sha256": "2d70abca8105aec18d2e4cef833b7df34dea3976dfd0e33cd83caabc866b2024",
+      "bytes": 39188
+    },
+    {
+      "source": "models/rpg-mansion-period-range-canopy-01.glb",
+      "destination": "assets/models/packs/rpg-mansion/models/rpg-mansion-period-range-canopy-01.glb",
+      "sha256": "f978a061d0dafc3c547a2620c2c2cf8bb0f006ab4de7ea62656b486877888e0a",
+      "bytes": 269716
+    },
+    {
+      "source": "previews/rpg-mansion-hinged-timber-drying-frame-01-thumb.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hinged-timber-drying-frame-01-thumb.png",
+      "sha256": "6bab00a4805f70fa0a416f880e70d4f21f51f2e13841dfc84675bf5e3e84a3bf",
+      "bytes": 259440
+    },
+    {
+      "source": "previews/rpg-mansion-hinged-timber-drying-frame-01-top.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hinged-timber-drying-frame-01-top.png",
+      "sha256": "f987f1c5ba6f96d00af4aaeefdec1512d0446b4cc4fbb60d1f593f7ef7d4ea6f",
+      "bytes": 256155
+    },
+    {
+      "source": "previews/rpg-mansion-manual-wash-tub-board-01-thumb.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-manual-wash-tub-board-01-thumb.png",
+      "sha256": "498594fee89f25df76f65e70f17bcc8eff5aa9abd575cea4350246c6a2e10f89",
+      "bytes": 260745
+    },
+    {
+      "source": "previews/rpg-mansion-manual-wash-tub-board-01-top.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-manual-wash-tub-board-01-top.png",
+      "sha256": "0be9c1cfefcbe8513255fdb8094e0783878de5cb35f8c044291751ec99c5eb18",
+      "bytes": 273228
+    },
+    {
+      "source": "previews/rpg-mansion-narrow-hall-runner-01-thumb.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-narrow-hall-runner-01-thumb.png",
+      "sha256": "d05c5472ab71976be67aa46e87ec5d58f9a715d72356254445e7a382ea25b266",
+      "bytes": 179955
+    },
+    {
+      "source": "previews/rpg-mansion-narrow-hall-runner-01-top.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-narrow-hall-runner-01-top.png",
+      "sha256": "c1265ac114338aff33114d9e20187fca056873b82c525d767789058d9677db1b",
+      "bytes": 223217
+    },
+    {
+      "source": "previews/rpg-mansion-period-range-canopy-01-thumb.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-period-range-canopy-01-thumb.png",
+      "sha256": "bdba860b0366ee2fbfdf11ae56556543ef7a209dd430611e3f88db9c50338aa7",
+      "bytes": 242693
+    },
+    {
+      "source": "previews/rpg-mansion-period-range-canopy-01-top.png",
+      "destination": "assets/models/packs/rpg-mansion/previews/rpg-mansion-period-range-canopy-01-top.png",
+      "sha256": "95bb1f248fea0aabce52e7e598a29d65f6df404b0beb89658138493b2d8561e5",
+      "bytes": 293419
+    },
+    {
+      "source": "proofs/existing-bedroom-bedding-reuse.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/existing-bedroom-bedding-reuse.blend",
+      "sha256": "4ef765f78f4cb4e6be1d5baec55b6d7733b6a02f5352138eb45a4d866a19245b",
+      "bytes": 197935
+    },
+    {
+      "source": "proofs/inputs/accepted-input-manifest.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/accepted-input-manifest.json",
+      "sha256": "b6116e55e6ddf00e7038d4b1262a330c0ef4b4312e93bb6fddad16d877dd8d85",
+      "bytes": 3289
+    },
+    {
+      "source": "proofs/inputs/rpg-mansion-console-01.glb",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/rpg-mansion-console-01.glb",
+      "sha256": "bc6272d9e95821624197d2c04e42a9d5086cc3a2602194a3f2f43dbb4967bc69",
+      "bytes": 51260
+    },
+    {
+      "source": "proofs/inputs/rpg-mansion-kitchen-cast-iron-range-750-01.glb",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/rpg-mansion-kitchen-cast-iron-range-750-01.glb",
+      "sha256": "871181b83573ad885e408ccc496b43e400b0192e8b805ecb07492a358ee2d8cb",
+      "bytes": 89416
+    },
+    {
+      "source": "proofs/inputs/rpg-mansion-kitchen-draining-stand-900-01.glb",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/rpg-mansion-kitchen-draining-stand-900-01.glb",
+      "sha256": "a3ec8ef5990ce00e0e0403b83b559a02a582972f9e85ce6890aa573822f4cb7f",
+      "bytes": 50216
+    },
+    {
+      "source": "proofs/inputs/rpg-mansion-mirror-01.glb",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/rpg-mansion-mirror-01.glb",
+      "sha256": "459c251acacc6a9910dd4f01c29b843a03cf494db9daaa65c0cbe26bb9c2d028",
+      "bytes": 13572
+    },
+    {
+      "source": "proofs/inputs/rpg-mansion-narrow-servants-bed-01.glb",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/rpg-mansion-narrow-servants-bed-01.glb",
+      "sha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41",
+      "bytes": 206956
+    },
+    {
+      "source": "proofs/inputs/rpg-mansion-rug-01.glb",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/rpg-mansion-rug-01.glb",
+      "sha256": "1edecea53c2d9dc87d964897ea760c75fa0ab1778d1e0907dc920322ed97b841",
+      "bytes": 11320
+    },
+    {
+      "source": "proofs/inputs/rpg-mansion-scullery-sink-900-01.glb",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/inputs/rpg-mansion-scullery-sink-900-01.glb",
+      "sha256": "5ac8b27d400a18d39b160b980608eea7132caf69535a3d2b0bf6b78ee36a9e6a",
+      "bytes": 150960
+    },
+    {
+      "source": "proofs/kitchen-scullery-installed.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/kitchen-scullery-installed.blend",
+      "sha256": "ab5d7bb7087b13718324f3f77b4a30c82308c7a39f82c4c41d8577c0c10888ef",
+      "bytes": 489063
+    },
+    {
+      "source": "proofs/manual-laundry-installed.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/manual-laundry-installed.blend",
+      "sha256": "fbc67775645f79bfa7734b4df73ff8edff8e2c9a039aba5d2f20bafd4e0b6d0c",
+      "bytes": 594304
+    },
+    {
+      "source": "proofs/narrow-hall-installed.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/proofs/narrow-hall-installed.blend",
+      "sha256": "43e295128d03949407a8bf95556131d3bd184f9a32e7b613d4037500100bf7b9",
+      "bytes": 170120
+    },
+    {
+      "source": "refine_laundry_proof.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/refine_laundry_proof.py",
+      "sha256": "cde874cd7416426113b8256d4d2b15b6fcaffef19c1ce126b02c37965bfe9c27",
+      "bytes": 1547
+    },
+    {
+      "source": "render_saved_proofs.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/render_saved_proofs.py",
+      "sha256": "c479ed313a1c70ad667d6893b8c36588066e7c77190e6fa3510e55f605eb31ab",
+      "bytes": 725
+    },
+    {
+      "source": "reports/actual-byte-qa.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/actual-byte-qa.json",
+      "sha256": "0ec4e9d2677e5592492426ac9c8edcc8625739b5a9274edc0e2306d1855aff15",
+      "bytes": 31457
+    },
+    {
+      "source": "reports/audited-input-preservation.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/audited-input-preservation.json",
+      "sha256": "7c6aa7979467bf02275e2e03c3d7bae01b2c0b535dcef77e1068635a6190d96a",
+      "bytes": 5675
+    },
+    {
+      "source": "reports/coverage-audit-decision.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/coverage-audit-decision.json",
+      "sha256": "be70faf9f35aa20e63a2209c7502580201ba1f7b8b1ba72fc22e4ed441ee1e9c",
+      "bytes": 7805
+    },
+    {
+      "source": "reports/coverage-closure.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/coverage-closure.json",
+      "sha256": "1275463be4cd04093866e8ac57f7b6ef453627b649a99a1fe5fff621a868b58e",
+      "bytes": 4308
+    },
+    {
+      "source": "reports/existing-oven-bedding-audit.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/existing-oven-bedding-audit.json",
+      "sha256": "1d732a5a2ff760dad2d39bedbe27c92a6a27ecdf3379efb4b2f14d42f2c62354",
+      "bytes": 580464
+    },
+    {
+      "source": "reports/exported-corner-normal-check.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/exported-corner-normal-check.json",
+      "sha256": "867e1168109a1e5d55ee83cf16337f05e26ee7dddfac5f6c27f03c6a030d0dea",
+      "bytes": 3663
+    },
+    {
+      "source": "reports/installation-proofs.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/installation-proofs.json",
+      "sha256": "0568f196f0e4e8fdf61c7727ba455098fc9a29af1825f8d2c7b265e292026f6d",
+      "bytes": 9911
+    },
+    {
+      "source": "reports/material-channel-witnesses.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/material-channel-witnesses.json",
+      "sha256": "89f54ad2ccb30aefc24e1b2a3e00792eb8817215ef9147d3ddad2e2ac7964e1f",
+      "bytes": 3171
+    },
+    {
+      "source": "reports/material-isolation-qa.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/material-isolation-qa.json",
+      "sha256": "1004f1ccfab2884001ac28f4596256a5686251bf479aa5267826f918df49e5e6",
+      "bytes": 4258
+    },
+    {
+      "source": "reports/native-contacts.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/native-contacts.json",
+      "sha256": "237dbb85805053e3e901c00a8b469c2879a48daaf5c9dcd1762ff2b10f99ae82",
+      "bytes": 8629
+    },
+    {
+      "source": "reports/qa-repair-part-preservation.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/qa-repair-part-preservation.json",
+      "sha256": "ea500078c4b99e1e79919ea3520f34b8ecf98774e4ef096d562e164dc950df5b",
+      "bytes": 26848
+    },
+    {
+      "source": "reports/qa-repair-v2.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/reports/qa-repair-v2.json",
+      "sha256": "ad17ff5735202f3ea4f3fb804f78feef2e5c194b94942cbce067c81e24a75f51",
+      "bytes": 4459
+    },
+    {
+      "source": "rights-and-provenance.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/rights-and-provenance.json",
+      "sha256": "104b31046f78ac99c9977930b2c000dd7316feddf07aba3259bf357ff06969d7",
+      "bytes": 584
+    },
+    {
+      "source": "sources/rpg-mansion-hinged-timber-drying-frame-01-validation.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-hinged-timber-drying-frame-01-validation.json",
+      "sha256": "e950a0d324b6308dbed7cf321fa2753e7c87b62c2f92b4a8c944f8b48dae88dd",
+      "bytes": 18139
+    },
+    {
+      "source": "sources/rpg-mansion-hinged-timber-drying-frame-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-hinged-timber-drying-frame-01.blend",
+      "sha256": "3eb2330b80eb9ecb15d50637358e3a99b72ba1ed436a392ab2e5989ac334c676",
+      "bytes": 199688
+    },
+    {
+      "source": "sources/rpg-mansion-manual-wash-tub-board-01-validation.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-manual-wash-tub-board-01-validation.json",
+      "sha256": "5d441017767e8c05441ba895342b518be74e15d7299b6053f60c2adb2a8011bb",
+      "bytes": 17854
+    },
+    {
+      "source": "sources/rpg-mansion-manual-wash-tub-board-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-manual-wash-tub-board-01.blend",
+      "sha256": "37ef9cc9d49df3097cba9a949ef3bc430dd8d7f6c0e01c61121f2a8abb42d10e",
+      "bytes": 255103
+    },
+    {
+      "source": "sources/rpg-mansion-narrow-hall-runner-01-validation.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-narrow-hall-runner-01-validation.json",
+      "sha256": "9f1a2ff29fb98afac940e0e213cf316866f45e24b2978e5a430ef970cc847ea3",
+      "bytes": 10650
+    },
+    {
+      "source": "sources/rpg-mansion-narrow-hall-runner-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-narrow-hall-runner-01.blend",
+      "sha256": "96ddf653076fc7accc36ab1afa0a657c43297b1c56d4734a35034c129633b6f1",
+      "bytes": 111843
+    },
+    {
+      "source": "sources/rpg-mansion-period-range-canopy-01-validation.json",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-period-range-canopy-01-validation.json",
+      "sha256": "6d81a868c4aa3ddeb1f88d14d1b34c7b4ca204b7ded604bfe628b160dde01e63",
+      "bytes": 11075
+    },
+    {
+      "source": "sources/rpg-mansion-period-range-canopy-01.blend",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-period-range-canopy-01.blend",
+      "sha256": "eed6e2de6f11435780d24a05fd2d0b668c17cfbfa5a898bfd4384e5afb3d80d1",
+      "bytes": 212226
+    },
+    {
+      "source": "verify_actual.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/verify_actual.py",
+      "sha256": "091db86bf6a22c60832e99230d5d4a92e5d991ffd04f91228692c31d78d540ab",
+      "bytes": 752
+    },
+    {
+      "source": "verify_audit_and_channels.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/verify_audit_and_channels.py",
+      "sha256": "49482e2fe5001479066acc85ab2269a21b15008af82bd5fc7b1e681633f4c05c",
+      "bytes": 2554
+    },
+    {
+      "source": "verify_native.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/verify_native.py",
+      "sha256": "ef7dfdf1e449b8ddbef40093aae4d413a6cc8f7a9ed3e46963b3d9f484db2abb",
+      "bytes": 7726
+    },
+    {
+      "source": "verify_revision.py",
+      "destination": "tools/blender/rpg_mansion/service_softgoods/verify_revision.py",
+      "sha256": "e588d4903c018500030abd9363292167ffb9290693893051db28f46f7610539b",
+      "bytes": 2065
+    }
+  ]
+}

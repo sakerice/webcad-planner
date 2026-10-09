@@ -1,0 +1,1349 @@
+{
+  "productId": "rpg-mansion-fitted-six-panel-door-1200-01",
+  "modelSha256": "96be7522c86ac346d375e87a16a8f4d9b3025ab655eca846da25f33ad9c403b7",
+  "host": {
+    "descriptor": {
+      "id": "rpg-mansion-rectangular-doorway-bay-01",
+      "name": "1800mm open rectangular doorway bay",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-rear.png",
+      "w": 1800,
+      "d": 288,
+      "h": 3000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 280,
+      "glbBytes": 22584,
+      "nativePartCount": 15,
+      "finishChannels": [
+        {
+          "key": "plaster",
+          "label": "plaster",
+          "default": "#d8cfb7"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#70503b"
+        }
+      ],
+      "moduleContract": {
+        "role": "Actual 1200 x 2400mm clear through-opening within 1800mm grid bay",
+        "nominalWidthMm": 1800,
+        "wallHeightMm": 3000,
+        "wallThicknessMm": 240,
+        "clearOpeningMm": [
+          1200,
+          2400
+        ],
+        "connections": [
+          {
+            "label": "left",
+            "point": [
+              -0.9,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.9,
+              0.01900000125169754,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.9,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.9,
+              0.0,
+              -0.01900000125169754
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "right",
+            "point": [
+              0.9,
+              0,
+              0
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              0.9,
+              0.01900000125169754,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.9,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.9,
+              0.0,
+              -0.01900000125169754
+            ],
+            "normalGltf": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          0.01900000125169754,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 0,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "assetBottomMm": 0,
+          "groundDatumMm": 0,
+          "explanation": "Place at ground level; no source-origin or scale change required."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          -0.01900000125169754
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "measuredEnvelopeMm": {
+        "w": 1800.0,
+        "d": 288.0,
+        "h": 3000.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 1800,
+        "d": 288,
+        "h": 3000
+      },
+      "dimensionToleranceMm": 0.1,
+      "hashes": {
+        "model": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+        "sourceBlend": "7b9191be26cc883b44e951171cdd9c492b97ae4b923b25edc383d15d26efeb8d",
+        "exportBlend": "7b9191be26cc883b44e951171cdd9c492b97ae4b923b25edc383d15d26efeb8d",
+        "authoringBlend": "2b9c3e06ff42e0378bbe144dd4aa63175d21723a16a6f75e49921bd82ad7c9df",
+        "thumb": "3a469cfdd79ac303d6a028867a2af1b3240cfafc31498ca9537499b6763b7e3b",
+        "top": "78dc91d118f374ecdbcc7fbdcaa85ddd380e6d2b2f7d4ab1901d7013c9c39b45",
+        "front": "d75e9b15be136fcc0743f919a72716d823c98b215eb322db6d5e10d910e83eb1",
+        "rear": "a323a1469faace48eb04d75753b0b37ec608c1b3b5cd78706f3ff678f3b5b5fc"
+      }
+    },
+    "file": "inputs/rpg-mansion-rectangular-doorway-bay-01.glb",
+    "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+    "sourceSnapshot": "mansion-integration-20261008T0712/repo",
+    "alsoVerifiedUnchangedSnapshot": "mansion-integration-20261008T0737/repo",
+    "alsoVerifiedUnchangedSha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc"
+  },
+  "floor": {
+    "descriptor": {
+      "id": "rpg-mansion-herringbone-parquet-tile-01",
+      "name": "1200mm herringbone parquet floor tile",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-herringbone-parquet-tile-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-herringbone-parquet-tile-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-herringbone-parquet-tile-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-rear.png",
+      "w": 1200,
+      "d": 1200,
+      "h": 75,
+      "defaultElevation": -75,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture_expansion/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 684,
+      "glbBytes": 49476,
+      "nativePartCount": 57,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#b88a50"
+        }
+      ],
+      "moduleContract": {
+        "role": "True clipped herringbone boards on a continuous support substrate; repeating solid floor with0.8mm half-joints",
+        "nominalFootprintMm": [
+          1200,
+          1200
+        ],
+        "substrateThicknessMm": 60,
+        "wearLayerMm": 15,
+        "installationElevationMm": -75,
+        "finishedFloorDatumMm": 0,
+        "connections": [
+          {
+            "label": "west",
+            "point": [
+              -0.6,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.6,
+              0.0,
+              -0.0
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "east",
+            "point": [
+              0.6,
+              0,
+              0
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              0.6,
+              0.0,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.6,
+              0.0,
+              -0.0
+            ],
+            "normalGltf": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "front",
+            "point": [
+              0,
+              -0.6,
+              0
+            ],
+            "normal": [
+              0,
+              -1,
+              0
+            ],
+            "assetPointM": [
+              0.0,
+              -0.6,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          {
+            "label": "rear",
+            "point": [
+              0,
+              0.6,
+              0
+            ],
+            "normal": [
+              0,
+              1,
+              0
+            ],
+            "assetPointM": [
+              0.0,
+              0.6,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              -0.6
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              -0.6
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              -1.0
+            ]
+          },
+          {
+            "label": "bottom",
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              -0.0
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          },
+          {
+            "label": "top",
+            "point": [
+              0,
+              0,
+              0.075
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "assetPointM": [
+              0.0,
+              0.0,
+              0.075
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.075,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.075,
+              -0.0
+            ],
+            "normalGltf": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / glTF Y-axis rotations in90-degree steps; no mirror or scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": -75,
+        "wallTopDatumMm": 3000,
+        "constructionToAssetTranslationGltfM": [
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+        "placementExample": {
+          "assetBottomMm": -75,
+          "finishedFloorMm": 0,
+          "explanation": "Floor substrate extends75mm below wall ground datum."
+        }
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Root visually accepted; sealed for independent certification",
+      "measuredEnvelopeMm": {
+        "w": 1200.0,
+        "d": 1200.0,
+        "h": 75.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 1200,
+        "d": 1200,
+        "h": 75
+      },
+      "dimensionToleranceMm": 0.1,
+      "independentConstructionCount": 1,
+      "hashes": {
+        "model": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01",
+        "sourceBlend": "f1b5af06c25f35013d6cefa577fc2f7e118597b4ad374a63fd82f549a1e9854f",
+        "exportBlend": "f1b5af06c25f35013d6cefa577fc2f7e118597b4ad374a63fd82f549a1e9854f",
+        "authoringBlend": "afd8aa5c4ce82284acb0feea73860c3dedf8c1c72cffd1f6dc770a9d0d0743f9",
+        "thumb": "1aad2923cebcfc540c8a7cf93de85cd99990df3107bfb7570405c536c2404ea7",
+        "top": "09c6713b8c03530be6bc994c8ec791c2cdc5d11c53604b67459ab5dc701ad3da",
+        "front": "ce8cef70711bbd5a9404c97d52140563f86fe44a01bfb531ff20e0089c630c82",
+        "rear": "69149fcf47747c2ad54c1d66b76ef7c6748ff7b03795b1f388ff3f5982c61adf"
+      },
+      "rootVisualAcceptance": {
+        "status": "accepted",
+        "date": "2026-10-08",
+        "scope": "Original geometry/style and isolated/assembled views; final window material alpha0.10 and roughness0.08 explicitly authorized"
+      }
+    },
+    "file": "inputs/rpg-mansion-herringbone-parquet-tile-01.glb",
+    "sha256": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01",
+    "sourceSnapshot": "mansion-integration-20261008T0712/repo",
+    "alsoVerifiedUnchangedSnapshot": "mansion-integration-20261008T0737/repo",
+    "alsoVerifiedUnchangedSha256": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01"
+  },
+  "hostTransformBlenderM": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      -0.01900000125169754
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "floorTransformsBlenderM": [
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        -1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -1.7999999523162842
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        -1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -0.6000000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        -1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.6000000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        -1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        1.7999999523162842
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -1.7999999523162842
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -0.6000000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.6000000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        1.7999999523162842
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -1.7999999523162842
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -0.6000000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.6000000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0,
+        0.0,
+        1.2000000476837158
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        1.7999999523162842
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.07500000298023224
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  ],
+  "doorTransformBlenderM": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      -0.01850000023841858
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      -0.14000000059604645
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.012000000104308128
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+  "actualImportedOpeningProbeRays": [
+    {
+      "origin": [
+        0,
+        -0.14,
+        0.1
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        -0.14000000059604645,
+        0.10000000149011612
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        -0.14,
+        0.1
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        -0.14000000059604645,
+        0.10000000149011612
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        -0.14,
+        1.2
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        -0.14000000059604645,
+        1.2000000476837158
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        -0.14,
+        1.2
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        -0.14000000059604645,
+        1.2000000476837158
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        -0.14,
+        2.39
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        -0.14000000059604645,
+        2.390000104904175
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        -0.14,
+        2.39
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        -0.14000000059604645,
+        2.390000104904175
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0,
+        0.1
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        0.0,
+        0.10000000149011612
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0,
+        0.1
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        0.0,
+        0.10000000149011612
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0,
+        1.2
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        0.0,
+        1.2000000476837158
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0,
+        1.2
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        0.0,
+        1.2000000476837158
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0,
+        2.39
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        0.0,
+        2.390000104904175
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0,
+        2.39
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        0.0,
+        2.390000104904175
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0.12,
+        0.1
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        0.11999999731779099,
+        0.10000000149011612
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0.12,
+        0.1
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        0.11999999731779099,
+        0.10000000149011612
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0.12,
+        1.2
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        0.11999999731779099,
+        1.2000000476837158
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0.12,
+        1.2
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        0.11999999731779099,
+        1.2000000476837158
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0.12,
+        2.39
+      ],
+      "direction": [
+        -1,
+        0,
+        0
+      ],
+      "hit": [
+        -0.6000000238418579,
+        0.11999999731779099,
+        2.390000104904175
+      ],
+      "distanceM": 0.6000000238418579
+    },
+    {
+      "origin": [
+        0,
+        0.12,
+        2.39
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "hit": [
+        0.6000000238418579,
+        0.11999999731779099,
+        2.390000104904175
+      ],
+      "distanceM": 0.6000000238418579
+    }
+  ],
+  "actualImportedHeadHitM": [
+    0.0,
+    0.0,
+    2.4000000953674316
+  ],
+  "actualImportedFloorHitM": [
+    0.13699999451637268,
+    0.18299999833106995,
+    0.0
+  ],
+  "openingMm": [
+    1200,
+    2400
+  ],
+  "finishedFloorMm": 0,
+  "measuredJambDepthMm": 280,
+  "bodyLeafMm": [
+    1192,
+    44,
+    2384
+  ],
+  "closedLeafGapsMm": {
+    "left": 4,
+    "right": 4,
+    "top": 4,
+    "bottom": 12
+  },
+  "hingePinAxisInstalledBlenderM": [
+    -0.6100000143051147,
+    -0.18000000715255737,
+    0.0
+  ],
+  "staticManualOnly": true,
+  "nativeDoorSemantics": false,
+  "codeCertification": false,
+  "countedProducts": 1,
+  "proofPosesCountedAsProducts": 0,
+  "intentionalBeddingContactsMm": {
+    "hostHingePlate": 0.5,
+    "leafHingeStrap": 0.5,
+    "hostStrikeEar": 0.5,
+    "leafLatchCasing": 0.5
+  },
+  "hardwareDesign": "Surface offset hinges and surface rim-latch keep require no cuts in the accepted jamb. 0.2mm nominal pin/bore radial gap; 1mm knuckle axial gaps. Bolt is shown engaged in closed state and manually retracted35mm before the QA-only swing.",
+  "placementClearance": {
+    "frontFurnitureFreeDepthMm": 1300,
+    "rearFurnitureFreeDepthMm": 900,
+    "projectDoorFrontGuidelineMm": 900,
+    "hallGuidelineMm": 750,
+    "notBuildingCode": true
+  },
+  "closedScene": "proofs/door-closed-installed.blend",
+  "closedAuthoringVsActualGlbVertexSetIdenticalAt1Micrometre": true,
+  "sampledManualSwing": [
+    {
+      "degrees": 0,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 5,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 10,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 15,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 20,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 25,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 30,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 35,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 40,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 45,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 50,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 55,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 60,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 65,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 70,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 75,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 80,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 85,
+      "movingStationarySurfaceTriangleIntersections": 0
+    },
+    {
+      "degrees": 90,
+      "movingStationarySurfaceTriangleIntersections": 0
+    }
+  ],
+  "sampleSpacingDegrees": 5,
+  "continuousSweptVolumeCertified": false,
+  "manual90MovingBoundsBlenderM": [
+    [
+      -0.6800000071525574,
+      -1.3949999809265137,
+      0.012000000104308128
+    ],
+    [
+      -0.46000000834465027,
+      -0.17100000381469727,
+      2.3959999084472656
+    ]
+  ],
+  "manual90ClearPassageWidthMm": 1060.0000083446503,
+  "manual90Exceeds750mmGuideline": true,
+  "manualPoseProcedure": "Keep host, floor, stationary-host hinges/pins and strike in place; translate only moving-bolt -35mm on construction X; rotate moving-leaf and retracted moving-bolt -90deg around Blender +Z through(-610,-180)mm. No deformation, remesh, hierarchy or animation is delivered. This editable scene is QA-only.",
+  "manualOpenScene": "proofs/door-manual-open-qa-only.blend",
+  "checks": {
+    "hostHashUnchanged": true,
+    "floorHashUnchanged": true,
+    "exactClosedSourceGeometry": true,
+    "openingProbeDimensions": true,
+    "finishedFloorContact": true,
+    "manual90Passage": true,
+    "sampledSwingSurfaceClear": true
+  }
+}

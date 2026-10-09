@@ -1,0 +1,1086 @@
+{
+  "newProductCount": 5,
+  "newConstructionCount": 5,
+  "excludedFixtureCount": 2,
+  "existingReusedProductCount": 1,
+  "items": [
+    {
+      "id": "rpg-mansion-full-height-traverse-drape-01",
+      "scene": "proofs/rpg-mansion-full-height-traverse-drape-01-installed.blend",
+      "host": {
+        "id": "rpg-mansion-tall-fixed-french-window-bay-01",
+        "file": "proofs/inputs/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+        "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642",
+        "source": "Accepted integrated240 snapshot; copied unchanged",
+        "moduleContract": {
+          "role": "True floor-open wall aperture, fixed timber French frames and eight clear glazing panes",
+          "connections": [
+            {
+              "label": "left",
+              "point": [
+                -0.6,
+                0,
+                0
+              ],
+              "normal": [
+                -1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                -0.6,
+                0.04500000178813934,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                -0.6,
+                0,
+                0
+              ],
+              "assetPointGltfM": [
+                -0.6,
+                0.0,
+                -0.04500000178813934
+              ],
+              "normalGltf": [
+                -1,
+                0,
+                0
+              ]
+            },
+            {
+              "label": "right",
+              "point": [
+                0.6,
+                0,
+                0
+              ],
+              "normal": [
+                1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                0.6,
+                0.04500000178813934,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                0.6,
+                0,
+                0
+              ],
+              "assetPointGltfM": [
+                0.6,
+                0.0,
+                -0.04500000178813934
+              ],
+              "normalGltf": [
+                1,
+                0,
+                0
+              ]
+            },
+            {
+              "label": "wall-top",
+              "point": [
+                0,
+                0,
+                3
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ],
+              "assetPointM": [
+                0.0,
+                0.04500000178813934,
+                3.0
+              ],
+              "constructionPointGltfM": [
+                0,
+                3,
+                0
+              ],
+              "assetPointGltfM": [
+                0.0,
+                3.0,
+                -0.04500000178813934
+              ],
+              "normalGltf": [
+                0,
+                1,
+                0
+              ]
+            }
+          ],
+          "nominalWidthMm": 1200,
+          "wallHeightMm": 3000,
+          "wallThicknessMm": 240,
+          "wallApertureMm": {
+            "width": 1040,
+            "bottom": 0,
+            "top": 2750
+          },
+          "frameClearOpeningMm": {
+            "width": 920,
+            "bottom": 90,
+            "top": 2680
+          },
+          "fixedGlazing": true,
+          "operable": false,
+          "nativeWallCutting": false,
+          "glassThicknessMm": 8,
+          "constructionToAssetTranslationM": [
+            -0.0,
+            0.04500000178813934,
+            -0.0
+          ],
+          "units": "metres",
+          "connectionFrame": "Blender XYZ / Z up",
+          "allowedAssemblyTransforms": "Rigid translation and Z-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+          "gridMm": [
+            1200,
+            600
+          ],
+          "defaultAssetBottomElevationMm": 0,
+          "wallTopDatumMm": 3000,
+          "constructionToAssetTranslationGltfM": [
+            -0.0,
+            -0.0,
+            -0.04500000178813934
+          ],
+          "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; bottom-centre origin",
+          "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+          "glazingMaterial": {
+            "appearance": "Lightly tinted fixed glazing; current exported transmission testing required",
+            "alpha": 0.1,
+            "roughness": 0.08,
+            "glassThicknessMm": 8
+          }
+        },
+        "w": 1200,
+        "d": 370,
+        "h": 3000
+      },
+      "hostExcludedFromProductCount": false,
+      "wallApertureMm": {
+        "width": 1040,
+        "bottom": 0,
+        "top": 2750
+      },
+      "frameClearOpeningMm": {
+        "width": 920,
+        "bottom": 90,
+        "top": 2680
+      },
+      "outerDressingWidthMm": 1240.0,
+      "widthSurplusToWallApertureMm": 200.0,
+      "widthSurplusToVisibleFrameClearMm": 320.0,
+      "sourceWidthAllowanceMm": [
+        100,
+        400
+      ],
+      "physicalWallContactPlaneM": 0.11999999731779099,
+      "actualWallPlaneM": 0.12,
+      "wallContactErrorMm": 2.682209010451686e-06,
+      "maximumRoomSideProjectionMm": 184.70004677772522,
+      "projectAttachmentLimitMm": 300,
+      "attachmentAboveApertureMm": 76,
+      "defaultBottomElevationMm": 74.902,
+      "actualInstalledBoundsM": [
+        [
+          -0.6200000047683716,
+          0.1199999451637268,
+          0.07490192353725433
+        ],
+        [
+          0.6200000047683716,
+          0.3047000467777252,
+          2.8540000915527344
+        ]
+      ],
+      "rigidTransformBlenderM": [
+        [
+          -1.0,
+          -8.742277657347586e-08,
+          0.0,
+          8.073492985261055e-09
+        ],
+        [
+          8.742277657347586e-08,
+          -1.0,
+          0.0,
+          0.212349995970726
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.07490192353725433
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "modelSha256": "74f314e1349f536e059eed1b4ce47073053709889290b8b1ae32f1d7ea480f2d",
+      "static": true,
+      "manualPlacement": true,
+      "complianceClaim": false,
+      "checks": {
+        "widthFit": true,
+        "wallContact": true,
+        "interiorSide": true,
+        "attachmentDistance": true,
+        "apertureVerticalEnvelopeCoverage": true
+      },
+      "coverageNote": "Intentional floor clearance; coverage starts below the90mm clear-glazing bottom, not at the zero-height structural aperture bottom.",
+      "sceneSha256": "049a0f35d6b86cbcd6e9534fb9a2d58fb3b1169da1c7b5738a8966bb558034c6"
+    },
+    {
+      "id": "rpg-mansion-roman-batten-shade-01",
+      "scene": "proofs/rpg-mansion-roman-batten-shade-01-installed.blend",
+      "host": {
+        "id": "rpg-mansion-raised-sill-fixed-window-bay-01",
+        "file": "proofs/inputs/rpg-mansion-raised-sill-fixed-window-bay-01.glb",
+        "sha256": "dd11cb6009a7364bd6d5baf93b8413ea6771bfba245e5f42b19f4d478a343807",
+        "source": "Accepted integrated240 snapshot; copied unchanged",
+        "moduleContract": {
+          "role": "Real wall aperture occupied by fixed four-pane glazing, timber mullion/transom and projecting stone sill",
+          "nominalWidthMm": 1200,
+          "wallHeightMm": 3000,
+          "wallThicknessMm": 240,
+          "wallApertureMm": {
+            "width": 920,
+            "bottom": 800,
+            "top": 2600
+          },
+          "frameClearOpeningMm": {
+            "width": 760,
+            "bottom": 880,
+            "top": 2520
+          },
+          "fixedGlazing": true,
+          "nativeWallCutting": false,
+          "glassThicknessMm": 8,
+          "connections": [
+            {
+              "label": "left",
+              "point": [
+                -0.6,
+                0,
+                0
+              ],
+              "normal": [
+                -1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                -0.6,
+                0.03999999910593033,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                -0.6,
+                0.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                -0.6,
+                0.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                -1.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "right",
+              "point": [
+                0.6,
+                0,
+                0
+              ],
+              "normal": [
+                1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                0.6,
+                0.03999999910593033,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                0.6,
+                0.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                0.6,
+                0.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                1.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "wall-top",
+              "point": [
+                0,
+                0,
+                3
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ],
+              "assetPointM": [
+                0.0,
+                0.03999999910593033,
+                3.0
+              ],
+              "constructionPointGltfM": [
+                0.0,
+                3.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                0.0,
+                3.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                0.0,
+                1.0,
+                0.0
+              ]
+            }
+          ],
+          "constructionToAssetTranslationM": [
+            -0.0,
+            0.03999999910593033,
+            -0.0
+          ],
+          "units": "metres",
+          "connectionFrame": "Blender XYZ / Z up",
+          "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / glTF Y-axis rotations in90-degree steps; no mirror or scale",
+          "gridMm": [
+            1200,
+            600
+          ],
+          "defaultAssetBottomElevationMm": 0,
+          "wallTopDatumMm": 3000,
+          "constructionToAssetTranslationGltfM": [
+            -0.0,
+            -0.0,
+            -0.03999999910593033
+          ],
+          "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use exported bottom-centre origin",
+          "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+          "placementExample": {
+            "assetBottomMm": 0,
+            "wallTopMm": 3000
+          },
+          "glazingMaterial": {
+            "appearance": "Lightly tinted fixed glazing with tested visible transmission",
+            "alpha": 0.1,
+            "roughness": 0.08,
+            "glassThicknessMm": 8
+          }
+        },
+        "w": 1200,
+        "d": 360,
+        "h": 3000
+      },
+      "hostExcludedFromProductCount": false,
+      "wallApertureMm": {
+        "width": 920,
+        "bottom": 800,
+        "top": 2600
+      },
+      "frameClearOpeningMm": {
+        "width": 760,
+        "bottom": 880,
+        "top": 2520
+      },
+      "outerDressingWidthMm": 1000.0,
+      "widthSurplusToWallApertureMm": 80.0,
+      "widthSurplusToVisibleFrameClearMm": 240.0,
+      "sourceWidthAllowanceMm": [
+        0,
+        100
+      ],
+      "physicalWallContactPlaneM": 0.11999999731779099,
+      "actualWallPlaneM": 0.12,
+      "wallContactErrorMm": 2.682209010451686e-06,
+      "maximumRoomSideProjectionMm": 149.92329955101013,
+      "projectAttachmentLimitMm": 200,
+      "attachmentAboveApertureMm": 42,
+      "defaultBottomElevationMm": 750.0,
+      "actualInstalledBoundsM": [
+        [
+          -0.5,
+          0.119999960064888,
+          0.75
+        ],
+        [
+          0.5,
+          0.26992329955101013,
+          2.677999973297119
+        ]
+      ],
+      "rigidTransformBlenderM": [
+        [
+          -1.0,
+          -8.742277657347586e-08,
+          0.0,
+          6.553353415483798e-09
+        ],
+        [
+          8.742277657347586e-08,
+          -1.0,
+          0.0,
+          0.19496162235736847
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.75
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "modelSha256": "85a651b48070f0f65fb97134289b4a3b529ca81a484f4fe7f2f1f7bc2b5fc7ac",
+      "static": true,
+      "manualPlacement": true,
+      "complianceClaim": false,
+      "checks": {
+        "widthFit": true,
+        "wallContact": true,
+        "interiorSide": true,
+        "attachmentDistance": true,
+        "apertureVerticalEnvelopeCoverage": true
+      },
+      "sceneSha256": "2643c312979e3ffb3f353b92b3df154d2ba4df5e0a1a7d313b56eb931955f340"
+    },
+    {
+      "id": "rpg-mansion-short-paired-curtain-01",
+      "scene": "proofs/rpg-mansion-short-paired-curtain-01-installed.blend",
+      "host": {
+        "id": "rpg-mansion-raised-sill-fixed-window-bay-01",
+        "file": "proofs/inputs/rpg-mansion-raised-sill-fixed-window-bay-01.glb",
+        "sha256": "dd11cb6009a7364bd6d5baf93b8413ea6771bfba245e5f42b19f4d478a343807",
+        "source": "Accepted integrated240 snapshot; copied unchanged",
+        "moduleContract": {
+          "role": "Real wall aperture occupied by fixed four-pane glazing, timber mullion/transom and projecting stone sill",
+          "nominalWidthMm": 1200,
+          "wallHeightMm": 3000,
+          "wallThicknessMm": 240,
+          "wallApertureMm": {
+            "width": 920,
+            "bottom": 800,
+            "top": 2600
+          },
+          "frameClearOpeningMm": {
+            "width": 760,
+            "bottom": 880,
+            "top": 2520
+          },
+          "fixedGlazing": true,
+          "nativeWallCutting": false,
+          "glassThicknessMm": 8,
+          "connections": [
+            {
+              "label": "left",
+              "point": [
+                -0.6,
+                0,
+                0
+              ],
+              "normal": [
+                -1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                -0.6,
+                0.03999999910593033,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                -0.6,
+                0.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                -0.6,
+                0.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                -1.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "right",
+              "point": [
+                0.6,
+                0,
+                0
+              ],
+              "normal": [
+                1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                0.6,
+                0.03999999910593033,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                0.6,
+                0.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                0.6,
+                0.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                1.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "wall-top",
+              "point": [
+                0,
+                0,
+                3
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ],
+              "assetPointM": [
+                0.0,
+                0.03999999910593033,
+                3.0
+              ],
+              "constructionPointGltfM": [
+                0.0,
+                3.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                0.0,
+                3.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                0.0,
+                1.0,
+                0.0
+              ]
+            }
+          ],
+          "constructionToAssetTranslationM": [
+            -0.0,
+            0.03999999910593033,
+            -0.0
+          ],
+          "units": "metres",
+          "connectionFrame": "Blender XYZ / Z up",
+          "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / glTF Y-axis rotations in90-degree steps; no mirror or scale",
+          "gridMm": [
+            1200,
+            600
+          ],
+          "defaultAssetBottomElevationMm": 0,
+          "wallTopDatumMm": 3000,
+          "constructionToAssetTranslationGltfM": [
+            -0.0,
+            -0.0,
+            -0.03999999910593033
+          ],
+          "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use exported bottom-centre origin",
+          "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+          "placementExample": {
+            "assetBottomMm": 0,
+            "wallTopMm": 3000
+          },
+          "glazingMaterial": {
+            "appearance": "Lightly tinted fixed glazing with tested visible transmission",
+            "alpha": 0.1,
+            "roughness": 0.08,
+            "glassThicknessMm": 8
+          }
+        },
+        "w": 1200,
+        "d": 360,
+        "h": 3000
+      },
+      "hostExcludedFromProductCount": false,
+      "wallApertureMm": {
+        "width": 920,
+        "bottom": 800,
+        "top": 2600
+      },
+      "frameClearOpeningMm": {
+        "width": 760,
+        "bottom": 880,
+        "top": 2520
+      },
+      "outerDressingWidthMm": 1220.0,
+      "widthSurplusToWallApertureMm": 300.0,
+      "widthSurplusToVisibleFrameClearMm": 460.0,
+      "sourceWidthAllowanceMm": [
+        100,
+        400
+      ],
+      "physicalWallContactPlaneM": 0.11999998986721039,
+      "actualWallPlaneM": 0.12,
+      "wallContactErrorMm": 1.0132789607375514e-05,
+      "maximumRoomSideProjectionMm": 197.80004501342773,
+      "projectAttachmentLimitMm": 300,
+      "attachmentAboveApertureMm": 90,
+      "defaultBottomElevationMm": 644.902,
+      "actualInstalledBoundsM": [
+        [
+          -0.6100000143051147,
+          0.11999993771314621,
+          0.6449019312858582
+        ],
+        [
+          0.6100000143051147,
+          0.31780004501342773,
+          2.7100000381469727
+        ]
+      ],
+      "rigidTransformBlenderM": [
+        [
+          -1.0,
+          -8.742277657347586e-08,
+          0.0,
+          8.646113158761182e-09
+        ],
+        [
+          8.742277657347586e-08,
+          -1.0,
+          0.0,
+          0.21889999508857727
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6449019312858582
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "modelSha256": "49f88f98a4e42faff80f21bea4a2b03df3f78fec9114331b3f7069cb0763e26c",
+      "static": true,
+      "manualPlacement": true,
+      "complianceClaim": false,
+      "checks": {
+        "widthFit": true,
+        "wallContact": true,
+        "interiorSide": true,
+        "attachmentDistance": true,
+        "apertureVerticalEnvelopeCoverage": true
+      },
+      "sceneSha256": "de6ed17f83a19bccd8c5533f712bd1db847f7db60d13ee09018cbc3b4f02d9b0"
+    },
+    {
+      "id": "rpg-mansion-timber-venetian-blind-01",
+      "scene": "proofs/rpg-mansion-timber-venetian-blind-01-installed.blend",
+      "host": {
+        "id": "rpg-mansion-raised-sill-fixed-window-bay-01",
+        "file": "proofs/inputs/rpg-mansion-raised-sill-fixed-window-bay-01.glb",
+        "sha256": "dd11cb6009a7364bd6d5baf93b8413ea6771bfba245e5f42b19f4d478a343807",
+        "source": "Accepted integrated240 snapshot; copied unchanged",
+        "moduleContract": {
+          "role": "Real wall aperture occupied by fixed four-pane glazing, timber mullion/transom and projecting stone sill",
+          "nominalWidthMm": 1200,
+          "wallHeightMm": 3000,
+          "wallThicknessMm": 240,
+          "wallApertureMm": {
+            "width": 920,
+            "bottom": 800,
+            "top": 2600
+          },
+          "frameClearOpeningMm": {
+            "width": 760,
+            "bottom": 880,
+            "top": 2520
+          },
+          "fixedGlazing": true,
+          "nativeWallCutting": false,
+          "glassThicknessMm": 8,
+          "connections": [
+            {
+              "label": "left",
+              "point": [
+                -0.6,
+                0,
+                0
+              ],
+              "normal": [
+                -1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                -0.6,
+                0.03999999910593033,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                -0.6,
+                0.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                -0.6,
+                0.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                -1.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "right",
+              "point": [
+                0.6,
+                0,
+                0
+              ],
+              "normal": [
+                1,
+                0,
+                0
+              ],
+              "assetPointM": [
+                0.6,
+                0.03999999910593033,
+                0.0
+              ],
+              "constructionPointGltfM": [
+                0.6,
+                0.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                0.6,
+                0.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                1.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "wall-top",
+              "point": [
+                0,
+                0,
+                3
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ],
+              "assetPointM": [
+                0.0,
+                0.03999999910593033,
+                3.0
+              ],
+              "constructionPointGltfM": [
+                0.0,
+                3.0,
+                0.0
+              ],
+              "assetPointGltfM": [
+                0.0,
+                3.0,
+                -0.03999999910593033
+              ],
+              "normalGltf": [
+                0.0,
+                1.0,
+                0.0
+              ]
+            }
+          ],
+          "constructionToAssetTranslationM": [
+            -0.0,
+            0.03999999910593033,
+            -0.0
+          ],
+          "units": "metres",
+          "connectionFrame": "Blender XYZ / Z up",
+          "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / glTF Y-axis rotations in90-degree steps; no mirror or scale",
+          "gridMm": [
+            1200,
+            600
+          ],
+          "defaultAssetBottomElevationMm": 0,
+          "wallTopDatumMm": 3000,
+          "constructionToAssetTranslationGltfM": [
+            -0.0,
+            -0.0,
+            -0.03999999910593033
+          ],
+          "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use exported bottom-centre origin",
+          "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+          "placementExample": {
+            "assetBottomMm": 0,
+            "wallTopMm": 3000
+          },
+          "glazingMaterial": {
+            "appearance": "Lightly tinted fixed glazing with tested visible transmission",
+            "alpha": 0.1,
+            "roughness": 0.08,
+            "glassThicknessMm": 8
+          }
+        },
+        "w": 1200,
+        "d": 360,
+        "h": 3000
+      },
+      "hostExcludedFromProductCount": false,
+      "wallApertureMm": {
+        "width": 920,
+        "bottom": 800,
+        "top": 2600
+      },
+      "frameClearOpeningMm": {
+        "width": 760,
+        "bottom": 880,
+        "top": 2520
+      },
+      "outerDressingWidthMm": 1000.0,
+      "widthSurplusToWallApertureMm": 80.0,
+      "widthSurplusToVisibleFrameClearMm": 240.0,
+      "sourceWidthAllowanceMm": [
+        0,
+        100
+      ],
+      "physicalWallContactPlaneM": 0.12000000476837158,
+      "actualWallPlaneM": 0.12,
+      "wallContactErrorMm": 4.768371586472142e-06,
+      "maximumRoomSideProjectionMm": 163.00002217292786,
+      "projectAttachmentLimitMm": 200,
+      "attachmentAboveApertureMm": 58,
+      "defaultBottomElevationMm": 729.5,
+      "actualInstalledBoundsM": [
+        [
+          -0.5,
+          0.1199999675154686,
+          0.7294999957084656
+        ],
+        [
+          0.5,
+          0.28300002217292786,
+          2.694000005722046
+        ]
+      ],
+      "rigidTransformBlenderM": [
+        [
+          -1.0,
+          -8.742277657347586e-08,
+          0.0,
+          7.1249557365149485e-09
+        ],
+        [
+          8.742277657347586e-08,
+          -1.0,
+          0.0,
+          0.20149999856948853
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7294999957084656
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "modelSha256": "04ecfee8b60b4b16ef18412ba424b1714e9db5a2dac53f0e7704dd32971e439d",
+      "static": true,
+      "manualPlacement": true,
+      "complianceClaim": false,
+      "checks": {
+        "widthFit": true,
+        "wallContact": true,
+        "interiorSide": true,
+        "attachmentDistance": true,
+        "apertureVerticalEnvelopeCoverage": true
+      },
+      "sceneSha256": "8987e8ed6800266508a6170e0d4a42b45fa79dc82954c4b88caaca2b5b0b12cd"
+    },
+    {
+      "id": "rpg-mansion-narrow-roller-screen-01",
+      "scene": "proofs/rpg-mansion-narrow-roller-screen-01-installed.blend",
+      "host": {
+        "label": "Excluded640mm narrow utility-window fixture",
+        "countedAsProduct": false
+      },
+      "hostExcludedFromProductCount": true,
+      "wallApertureMm": {
+        "width": 640,
+        "bottom": 1100,
+        "top": 2200
+      },
+      "frameClearOpeningMm": {
+        "width": 540,
+        "bottom": 1150,
+        "top": 2150
+      },
+      "outerDressingWidthMm": 700.0,
+      "widthSurplusToWallApertureMm": 60.0,
+      "widthSurplusToVisibleFrameClearMm": 160.0,
+      "sourceWidthAllowanceMm": [
+        0,
+        100
+      ],
+      "physicalWallContactPlaneM": 0.11999999731779099,
+      "actualWallPlaneM": 0.12,
+      "wallContactErrorMm": 2.682209010451686e-06,
+      "maximumRoomSideProjectionMm": 146.80761575698853,
+      "projectAttachmentLimitMm": 200,
+      "attachmentAboveApertureMm": 60,
+      "defaultBottomElevationMm": 1033.626,
+      "actualInstalledBoundsM": [
+        [
+          -0.3499999940395355,
+          0.1199999675154686,
+          1.0336263179779053
+        ],
+        [
+          0.3499999940395355,
+          0.2668076157569885,
+          2.2920000553131104
+        ]
+      ],
+      "rigidTransformBlenderM": [
+        [
+          -1.0,
+          -8.742277657347586e-08,
+          0.0,
+          6.417165021588289e-09
+        ],
+        [
+          8.742277657347586e-08,
+          -1.0,
+          0.0,
+          0.19340381026268005
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.0336263179779053
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "modelSha256": "15301d05f90f89e67e1e8cca437a9fd4f1d7155c137ba17b4747973ba62fdad5",
+      "static": true,
+      "manualPlacement": true,
+      "complianceClaim": false,
+      "checks": {
+        "widthFit": true,
+        "wallContact": true,
+        "interiorSide": true,
+        "attachmentDistance": true,
+        "apertureVerticalEnvelopeCoverage": true
+      },
+      "sceneSha256": "0b8dc0b3624eea31a18bcde4d93ea98f28f504e9269ef7f179d5005b62571d2e"
+    },
+    {
+      "id": "existing-curtain-reuse",
+      "existingInput": {
+        "id": "rpg-mansion-curtain-01",
+        "file": "proofs/inputs/rpg-mansion-curtain-01.glb",
+        "sha256": "dc0e749533c6e8db97eea40aa72c6c3ff66cb24c98756504a9e5512cd639698c",
+        "source": "Accepted integrated240 snapshot; copied unchanged",
+        "moduleContract": null,
+        "w": 2150,
+        "d": 270,
+        "h": 2370
+      },
+      "newProductCount": 0,
+      "newConstructionCount": 0,
+      "fixtureExcluded": true,
+      "fixtureApertureMm": {
+        "width": 1900,
+        "bottom": 0,
+        "top": 2300
+      },
+      "widthSurplusMm": 250,
+      "sourceWidthAllowanceMm": [
+        100,
+        400
+      ],
+      "note": "Visual reuse example only; existing geometry remains byte-identical. This fixture is not a certified asset and does not expand the catalog. Existing curtain hardware/contact is not retroactively certified.",
+      "actualInstalledBoundsM": [
+        [
+          -1.0750000476837158,
+          0.15999990701675415,
+          0.03999999910593033
+        ],
+        [
+          1.0750000476837158,
+          0.43000006675720215,
+          2.4099998474121094
+        ]
+      ],
+      "scene": "proofs/existing-curtain-reuse.blend",
+      "sceneSha256": "68d121ccf2bc1335f6179bfb22eedfa68df5e024eea8fb45b900bb7cb0a75e70"
+    }
+  ]
+}

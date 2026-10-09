@@ -1,0 +1,120 @@
+{
+  "model": "rpg-mansion-kitchen-plate-rack-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    349.9999940395355,
+    699.999988079071
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.17499999701976776,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.17499999701976776,
+      0.699999988079071
+    ]
+  ],
+  "triangles": 3836,
+  "uv": {
+    "meters_per_uv": 3.179570421520092,
+    "min": 2.854475310899349,
+    "max": 4.479434132182791,
+    "p05": 2.95931231469631,
+    "p95": 3.670596166895493,
+    "total_triangles": 3836,
+    "valid_triangles": 3836,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut": "wood",
+    "Carved walnut moulding": "wood",
+    "Antique brass hardware": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 134812,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "41961f19224941587fc2cde9a22ff59609f0027e10a6141773c1087d47e877ab",
+  "source_sha256": "74096c4f7e004bf8cee3f747dbeaf58847fc0cac6d3f4f54d601468fcbab3ee8",
+  "source_bytes": 193795,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    899.9999761581421,
+    349.9999940395355,
+    699.999988079071
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.44999998807907104,
+      0.0,
+      -0.17499999701976776
+    ],
+    [
+      0.44999998807907104,
+      0.699999988079071,
+      0.17499999701976776
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 3836,
+    "valid_triangles": 3836,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 2.95931232340451,
+    "p95": 3.6705961143147303,
+    "p95_p05": 1.2403544179115003,
+    "median": 3.1795703897125005
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-plate-rack-900-01.glb",
+      "sha256": "41961f19224941587fc2cde9a22ff59609f0027e10a6141773c1087d47e877ab",
+      "bytes": 134812
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-plate-rack-900-01.blend",
+      "sha256": "74096c4f7e004bf8cee3f747dbeaf58847fc0cac6d3f4f54d601468fcbab3ee8",
+      "bytes": 193795
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-plate-rack-900-01-thumb.png",
+      "sha256": "fb540bbb192587b534b3f02aa7ad084de8fc840682e4077311415c9d341fadc5",
+      "bytes": 256303
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-plate-rack-900-01-top.png",
+      "sha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2",
+      "bytes": 184664
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-front.png",
+      "sha256": "44eee49b87ce31836ef30e300e1a7a431488e2ee279083d288ca32fc2d039c59",
+      "bytes": 694795
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-rear.png",
+      "sha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e",
+      "bytes": 573730
+    }
+  }
+}

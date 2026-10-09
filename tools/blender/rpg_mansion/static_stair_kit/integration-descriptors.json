@@ -1,0 +1,975 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・階段と手摺",
+  "assetSet": "rpg-mansion",
+  "stage": "candidate-requires-independent-acceptance",
+  "counting": {
+    "newCore": 4,
+    "dimensionalVariants": 3,
+    "hostFittingVariants": 2,
+    "connectorAccessories": 1,
+    "total": 10
+  },
+  "sourceDescriptorSha256": "c2646462bb7ad5c0267f308a7c23a7cfd1db32974b74e212be484583eec645a6",
+  "items": [
+    {
+      "id": "rpg-mansion-stair-flight-nine-riser-01",
+      "name": "Nine-riser housed timber stair flight",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-flight-nine-riser-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-flight-nine-riser-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-flight-nine-riser-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-flight-nine-riser-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 1184.0,
+      "d": 2359.9999,
+      "h": 1500.0,
+      "defaultElevation": 0,
+      "triangles": 4304,
+      "triangleBudget": 12000,
+      "glbBytes": 311068,
+      "sha256": "d1f50da9939badc8263ecdaab7c4b23d03052dc7010584272902d7da1b4cfa68",
+      "sourceSha256": "7955e1a1977b18ef8f208a4ce33dffa7baa449f281c517ef0c2ff7dea150858c",
+      "authoringSha256": "b392d6eccd1c627ea52a72e90744547d3dea43e1dc632ab06d38445d523bc7f7",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "role": "flight",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Closed-riser housed timber flight",
+        "riserCount": 9,
+        "treadCount": 8,
+        "riserM": 0.16666666666666666,
+        "goingM": 0.28,
+        "riseM": 1.5,
+        "runM": 2.24,
+        "clearWidthM": 1.0,
+        "bottomFinishedFloorM": 0,
+        "topFinishedFloorM": 1.5,
+        "footPlaneM": 0,
+        "headBearingUndersideM": 1.31,
+        "headBearingPlaneM": 1.32,
+        "notchedStringerBearingPlaneM": 1.32,
+        "footPlateTopM": 0.008,
+        "footPlateRearExtensionM": 0.06,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "assemblyEndM": [
+          0,
+          2.24,
+          1.5
+        ],
+        "upperTransitionTongueM": 0.06,
+        "headBearingNote": "Place landing front edge60 mm beyond the last riser: the tongue meets it without deck overlap. Head shoe undersides at rise minus190 mm bear on the projecting ledge. Foot plates extend60 mm behind the first riser and bear on the preceding landing; under-stair passage is not claimed.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -1.1200000047683716,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -0.5920000076293945,
+            -0.05999999865889549,
+            0.0
+          ],
+          [
+            0.5920000076293945,
+            2.299999952316284,
+            1.5
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "paint",
+          "label": "paint",
+          "default": "#d8ceb5"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-flight-nine-riser-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-flight-nine-riser-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-flight-nine-riser-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-flight-nine-riser-01-rear.png",
+      "hashes": {
+        "model": "d1f50da9939badc8263ecdaab7c4b23d03052dc7010584272902d7da1b4cfa68",
+        "sourceBlend": "7955e1a1977b18ef8f208a4ce33dffa7baa449f281c517ef0c2ff7dea150858c",
+        "authoringBlend": "b392d6eccd1c627ea52a72e90744547d3dea43e1dc632ab06d38445d523bc7f7",
+        "thumb": "270a681c1599a8a6ec2255126b279b3f2bfddd289eb6f53f2e2411424f88a9da",
+        "top": "83005a23836ca8a61abbf099a93ee896d3ae4046e6765408eb63e271888a3853",
+        "front": "f2fd146d8818fffdf15eea0357229aa41c225d7ed726948e4677b6d20d66f44f",
+        "rear": "9bc993b651bff34962f6a4ed488a0eeaa1b1a70d8799a5f0005d1896323e4ac0"
+      },
+      "geometrySignature": "closed-sawtooth-housed-stringers-closed-risers-bullnose-treads-transverse-bearers-notched-end-shoes"
+    },
+    {
+      "id": "rpg-mansion-stair-flight-eighteen-riser-01",
+      "name": "Eighteen-riser full-storey timber stair flight",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-flight-eighteen-riser-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-flight-eighteen-riser-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-flight-eighteen-riser-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-flight-eighteen-riser-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 1184.0,
+      "d": 4880.0001,
+      "h": 3000.0,
+      "defaultElevation": 0,
+      "triangles": 8336,
+      "triangleBudget": 22000,
+      "glbBytes": 595672,
+      "sha256": "0c45505b42fa60f15e974f85dd729874f5d3942c9589bfd15f4b064d5f2f687d",
+      "sourceSha256": "82eba042f8fc62b0fd26bdc9b4350d4748f37d696b15c95415c8895e022395b2",
+      "authoringSha256": "4716297ea72c840c06fda63c16505e9cfc2830af750dc7e979db05b18bc3b360",
+      "countingClass": "dimensional-variant",
+      "coreConstructionCount": 0,
+      "role": "flight",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Closed-riser housed timber flight",
+        "riserCount": 18,
+        "treadCount": 17,
+        "riserM": 0.16666666666666666,
+        "goingM": 0.28,
+        "riseM": 3.0,
+        "runM": 4.760000000000001,
+        "clearWidthM": 1.0,
+        "bottomFinishedFloorM": 0,
+        "topFinishedFloorM": 3.0,
+        "footPlaneM": 0,
+        "headBearingUndersideM": 2.81,
+        "headBearingPlaneM": 2.82,
+        "notchedStringerBearingPlaneM": 2.82,
+        "footPlateTopM": 0.008,
+        "footPlateRearExtensionM": 0.06,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "assemblyEndM": [
+          0,
+          4.760000000000001,
+          3.0
+        ],
+        "upperTransitionTongueM": 0.06,
+        "headBearingNote": "Place landing front edge60 mm beyond the last riser: the tongue meets it without deck overlap. Head shoe undersides at rise minus190 mm bear on the projecting ledge. Foot plates extend60 mm behind the first riser and bear on the preceding landing; under-stair passage is not claimed.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -2.380000114440918,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -0.5920000076293945,
+            -0.05999999865889549,
+            0.0
+          ],
+          [
+            0.5920000076293945,
+            4.820000171661377,
+            3.0
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "paint",
+          "label": "paint",
+          "default": "#d8ceb5"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-flight-eighteen-riser-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-flight-eighteen-riser-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-flight-eighteen-riser-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-flight-eighteen-riser-01-rear.png",
+      "hashes": {
+        "model": "0c45505b42fa60f15e974f85dd729874f5d3942c9589bfd15f4b064d5f2f687d",
+        "sourceBlend": "82eba042f8fc62b0fd26bdc9b4350d4748f37d696b15c95415c8895e022395b2",
+        "authoringBlend": "4716297ea72c840c06fda63c16505e9cfc2830af750dc7e979db05b18bc3b360",
+        "thumb": "071c472cd40c63c3b06771723a351efaa42b4f7b30785e953f6af1a6a97f03c9",
+        "top": "6b33c96ade01ca7ede0107c11503d9164896d9886dbbccbc8dd1f467d1975c06",
+        "front": "8bc103561c54f8f1e0ff5a66078b17fce17f3b402c48ca6b7e517d90cb91b537",
+        "rear": "d9a97e54a26942ca26ff72050b5be3014e6b9d1449cc21d036132811ec42e375"
+      },
+      "geometrySignature": "closed-sawtooth-housed-stringers-closed-risers-bullnose-treads-transverse-bearers-notched-end-shoes"
+    },
+    {
+      "id": "rpg-mansion-stair-square-supported-landing-01",
+      "name": "1160 mm grounded square stair landing",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-square-supported-landing-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-square-supported-landing-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-square-supported-landing-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-square-supported-landing-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 1240.0,
+      "d": 1290.0,
+      "h": 1500.0,
+      "defaultElevation": 0,
+      "triangles": 3396,
+      "triangleBudget": 14000,
+      "glbBytes": 243852,
+      "sha256": "df9098e06af115568e321fa568feee64bca50d1cf19fdc44c90846bdef8e0349",
+      "sourceSha256": "213f3ad01bdc03c77485ad93ad69b42c3bbb0d3725eba0bb9effcb2ddfc2beab",
+      "authoringSha256": "1402a603854a233ac0ffce1822a7af1d07a8e174bd2680fbfd6766396500efd6",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "role": "landing",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Ground-supported framed timber landing",
+        "walkingSurfaceM": 1.5,
+        "undersideDeckM": 1.46,
+        "headerBottomM": 1.29,
+        "receivingBearingTopM": 1.31,
+        "walkingWidthM": 1.16,
+        "walkingDepthM": 1.16,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "receivingFlightY": 0,
+        "exitFlightY": 1.16,
+        "groundPlaneM": 0,
+        "clearGuardInsideWidthM": 0.9999999999999999,
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.5800000429153442,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -0.6200000047683716,
+            -0.06499999761581421,
+            0.0
+          ],
+          [
+            0.6200000047683716,
+            1.225000023841858,
+            1.5
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "paint",
+          "label": "paint",
+          "default": "#d8ceb5"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-square-supported-landing-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-square-supported-landing-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-square-supported-landing-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-square-supported-landing-01-rear.png",
+      "hashes": {
+        "model": "df9098e06af115568e321fa568feee64bca50d1cf19fdc44c90846bdef8e0349",
+        "sourceBlend": "213f3ad01bdc03c77485ad93ad69b42c3bbb0d3725eba0bb9effcb2ddfc2beab",
+        "authoringBlend": "1402a603854a233ac0ffce1822a7af1d07a8e174bd2680fbfd6766396500efd6",
+        "thumb": "ddde51cc8b0f89495656ddcb3775bd26f8cc20c121832f35f9207e148f0d6858",
+        "top": "0ccb2a07ba4f67ec98a5d7010c8ada13fa14b9c2f2d15abdf2b8e1ba681269b0",
+        "front": "bb9a48a14bf4da66937addeaa78f5269790d3ba78cdd5a009a6d472e8acdbda6",
+        "rear": "8da04b494b0f69e3df05488c689800d9bdab52466d26961c1e01b09831eed9e8"
+      },
+      "geometrySignature": "planked-deck-framed-aprons-cross-joists-braced-grounded-posts-and-receiver-ledges"
+    },
+    {
+      "id": "rpg-mansion-stair-return-supported-landing-01",
+      "name": "2400 mm grounded return stair landing",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-return-supported-landing-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-return-supported-landing-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-return-supported-landing-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-return-supported-landing-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 2480.0,
+      "d": 1290.0,
+      "h": 1500.0,
+      "defaultElevation": 0,
+      "triangles": 3612,
+      "triangleBudget": 16000,
+      "glbBytes": 258948,
+      "sha256": "5d997984e301bced4299e96774c42a86570a152f63a302193c6faabc0db6dd00",
+      "sourceSha256": "d0fe25babb60f7085ec6f1c5ec081ac118fcc20e841c901592f8a06c5e2905a4",
+      "authoringSha256": "3641343459eee4cec270ced8f3dff815dbfbbf9ae3ae10ede718867a18c25e87",
+      "countingClass": "dimensional-variant",
+      "coreConstructionCount": 0,
+      "role": "landing",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Ground-supported framed timber landing",
+        "walkingSurfaceM": 1.5,
+        "undersideDeckM": 1.46,
+        "headerBottomM": 1.29,
+        "receivingBearingTopM": 1.31,
+        "walkingWidthM": 2.4,
+        "walkingDepthM": 1.16,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "receivingFlightY": 0,
+        "exitFlightY": 1.16,
+        "groundPlaneM": 0,
+        "clearGuardInsideWidthM": 2.2399999999999998,
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.5800000429153442,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -1.2400000095367432,
+            -0.06499999761581421,
+            0.0
+          ],
+          [
+            1.2400000095367432,
+            1.225000023841858,
+            1.5
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "paint",
+          "label": "paint",
+          "default": "#d8ceb5"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-return-supported-landing-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-return-supported-landing-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-return-supported-landing-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-return-supported-landing-01-rear.png",
+      "hashes": {
+        "model": "5d997984e301bced4299e96774c42a86570a152f63a302193c6faabc0db6dd00",
+        "sourceBlend": "d0fe25babb60f7085ec6f1c5ec081ac118fcc20e841c901592f8a06c5e2905a4",
+        "authoringBlend": "3641343459eee4cec270ced8f3dff815dbfbbf9ae3ae10ede718867a18c25e87",
+        "thumb": "ee63900b3d84d277cc6855894fefe89a831c703665bf629aa882a87519820e94",
+        "top": "bea2ec860c173b701a345c8b0e65ed56d40c834d4b618541ab9fd336ed2c2dce",
+        "front": "db9cd0674caadbce54f2fa6381a49586829999b232a24e0974f6b6f6b3ea6fb6",
+        "rear": "3a7e8d0258dc6a418b91f41b1ad420fe60d11ec30b87c30474887fc1ea4b4398"
+      },
+      "geometrySignature": "planked-deck-framed-aprons-cross-joists-braced-grounded-posts-and-receiver-ledges"
+    },
+    {
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "name": "Straight landing guard with central support",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-landing-guard-straight-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-landing-guard-straight-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-landing-guard-straight-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 120.0,
+      "d": 1219.9999,
+      "h": 1050.0,
+      "defaultElevation": 0,
+      "triangles": 4400,
+      "triangleBudget": 14000,
+      "glbBytes": 305164,
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "sourceSha256": "5f1af487904cf63d136d933b345c87e34a3bdf9f9e90a5e004d5a27f4b50c985",
+      "authoringSha256": "de27bf01e824fe756d9b75138df17d1bf32828049f3c9a622609301b9502a968",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "role": "landing-guard",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Horizontal landing guard straight",
+        "mountingPlaneM": 0,
+        "handrailCenterM": 0.95,
+        "handrailRadiusM": 0.035,
+        "nominalGuardTopM": 1.05,
+        "clearBoundaryOffsetM": 0.06,
+        "shape": "straight",
+        "runM": 1.08,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "connectionNote": "Horizontal rail ends join the integral raked newel shafts. Only intermediate/corner posts are included, avoiding duplicate posts at flight connections. The start of an upper flight has a vertical 166.667 mm transition carried by its solid newel shaft.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.550000011920929,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -0.05999999865889549,
+            -0.05999999865889549,
+            0.0
+          ],
+          [
+            0.05999999865889549,
+            1.159999966621399,
+            1.0499999523162842
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-landing-guard-straight-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-landing-guard-straight-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-landing-guard-straight-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-landing-guard-straight-01-rear.png",
+      "hashes": {
+        "model": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+        "sourceBlend": "5f1af487904cf63d136d933b345c87e34a3bdf9f9e90a5e004d5a27f4b50c985",
+        "authoringBlend": "de27bf01e824fe756d9b75138df17d1bf32828049f3c9a622609301b9502a968",
+        "thumb": "65b0dd4af1bc8faa962c36123ceade8499b395547b87da4daba571eaa9fad283",
+        "top": "0df45e442df9af79ddb4cd1a758349b5cb88d13472df60f6bb260e8940e2540d",
+        "front": "bce5b97138bfc455ba3f0d30c0d3e0b513ecb5fb5770870ed0725ec568c0fb7f",
+        "rear": "2ee548be65f7b2c3fe6d9012e9bac03772b4489df7c413d68594dba972048d24"
+      },
+      "geometrySignature": "turned-spindles-horizontal-hand-bottom-rails-supported-midspan-or-corner-posts"
+    },
+    {
+      "id": "rpg-mansion-stair-landing-guard-corner-01",
+      "name": "Quarter-turn landing corner guard",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-landing-guard-corner-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-landing-guard-corner-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-landing-guard-corner-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-landing-guard-corner-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 1180.0001,
+      "d": 1239.9999,
+      "h": 1050.0,
+      "defaultElevation": 0,
+      "triangles": 7868,
+      "triangleBudget": 22000,
+      "glbBytes": 541048,
+      "sha256": "412149c79231aad3e0a790dd8b67ec35025190bc3f6172e46459d64b42120b6f",
+      "sourceSha256": "f831f50150a48c21ea991e2e3841b4b2451cdf2aea36b467d51f3f4812a27319",
+      "authoringSha256": "e3ce35e59d09228223761b066db98339fb2c5a228506986097439eaa656bee75",
+      "countingClass": "host-fitting-variant",
+      "coreConstructionCount": 0,
+      "role": "landing-guard",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Horizontal landing guard corner",
+        "mountingPlaneM": 0,
+        "handrailCenterM": 0.95,
+        "handrailRadiusM": 0.035,
+        "nominalGuardTopM": 1.05,
+        "clearBoundaryOffsetM": 0.06,
+        "shape": "corner",
+        "runM": 1.08,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "connectionNote": "Horizontal rail ends join the integral raked newel shafts. Only intermediate/corner posts are included, avoiding duplicate posts at flight connections. The start of an upper flight has a vertical 166.667 mm transition carried by its solid newel shaft.",
+        "bottomCenterTranslationBlenderM": [
+          0.010000020265579224,
+          -0.5600000023841858,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -0.6000000238418579,
+            -0.05999999865889549,
+            0.0
+          ],
+          [
+            0.5799999833106995,
+            1.1799999475479126,
+            1.0499999523162842
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-landing-guard-corner-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-landing-guard-corner-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-landing-guard-corner-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-landing-guard-corner-01-rear.png",
+      "hashes": {
+        "model": "412149c79231aad3e0a790dd8b67ec35025190bc3f6172e46459d64b42120b6f",
+        "sourceBlend": "f831f50150a48c21ea991e2e3841b4b2451cdf2aea36b467d51f3f4812a27319",
+        "authoringBlend": "e3ce35e59d09228223761b066db98339fb2c5a228506986097439eaa656bee75",
+        "thumb": "3bfefb5673bd40199f3f32762d26c710b477cf0238855cd410fb5911ac25ae81",
+        "top": "436cf3a6bb1447dd3c16ad8fa9448c8d2bd9bbb61c2d8324ee5b0eccf5f55ab0",
+        "front": "f80f7bdee55154cf17cbd3a151e32f42239bdc07cd1dd4459fada32c46402a42",
+        "rear": "1a73cef74c4becf9ce49b7ff2d5cbc4dcfbda19068aa833c3d052d2b291231c5"
+      },
+      "geometrySignature": "turned-spindles-horizontal-hand-bottom-rails-supported-midspan-or-corner-posts"
+    },
+    {
+      "id": "rpg-mansion-stair-landing-guard-return-01",
+      "name": "Return landing U-shaped guard",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-landing-guard-return-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-landing-guard-return-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-landing-guard-return-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-landing-guard-return-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 2440.0001,
+      "d": 1239.9999,
+      "h": 1050.0,
+      "defaultElevation": 0,
+      "triangles": 16324,
+      "triangleBudget": 40000,
+      "glbBytes": 1119372,
+      "sha256": "c5c1c61d420866fecde91ccff467e8ce84ab384edee0ea410b1d1a6734294817",
+      "sourceSha256": "da160e78384f85b00977f626e5439b2a9791bab160334a78816ace403b32e6ef",
+      "authoringSha256": "85e0a63b10170257acefdc45e97c82373b80b517f976a9142ac5279afc3e1cee",
+      "countingClass": "host-fitting-variant",
+      "coreConstructionCount": 0,
+      "role": "landing-guard",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Horizontal landing guard return",
+        "mountingPlaneM": 0,
+        "handrailCenterM": 0.95,
+        "handrailRadiusM": 0.035,
+        "nominalGuardTopM": 1.05,
+        "clearBoundaryOffsetM": 0.06,
+        "shape": "return",
+        "runM": 1.08,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "connectionNote": "Horizontal rail ends join the integral raked newel shafts. Only intermediate/corner posts are included, avoiding duplicate posts at flight connections. The start of an upper flight has a vertical 166.667 mm transition carried by its solid newel shaft.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.5600000023841858,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -1.2200000286102295,
+            -0.05999999865889549,
+            0.0
+          ],
+          [
+            1.2200000286102295,
+            1.1799999475479126,
+            1.0499999523162842
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-landing-guard-return-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-landing-guard-return-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-landing-guard-return-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-landing-guard-return-01-rear.png",
+      "hashes": {
+        "model": "c5c1c61d420866fecde91ccff467e8ce84ab384edee0ea410b1d1a6734294817",
+        "sourceBlend": "da160e78384f85b00977f626e5439b2a9791bab160334a78816ace403b32e6ef",
+        "authoringBlend": "85e0a63b10170257acefdc45e97c82373b80b517f976a9142ac5279afc3e1cee",
+        "thumb": "c4861b41769aeb306a3bdc5826a813a9e13fd533ee7772cb7b2da93e48e96796",
+        "top": "c8b703ac71161506e2aa5786dde1e6bf9fc5104ef0c3a09c1d26da5d4ebc56fb",
+        "front": "b12152d453b2918dbacafc95ee3ef02035146b0f4642b80773af520e330f6e0d",
+        "rear": "f71bb1319eaf1ca5fd207e1a45e6e24a26700eb1e007a2763333b379d7811b71"
+      },
+      "geometrySignature": "turned-spindles-horizontal-hand-bottom-rails-supported-midspan-or-corner-posts"
+    },
+    {
+      "id": "rpg-mansion-stair-guard-nine-riser-01",
+      "name": "Nine-riser turned walnut raked guard",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-guard-nine-riser-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-guard-nine-riser-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-guard-nine-riser-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-guard-nine-riser-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 120.0,
+      "d": 2359.9999,
+      "h": 2383.3332,
+      "defaultElevation": 0,
+      "triangles": 9272,
+      "triangleBudget": 30000,
+      "glbBytes": 639008,
+      "sha256": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5",
+      "sourceSha256": "892cd6c9dbd0ba160b2bbd225d2a436f6115a4dbd3e814756cc93214830b5acd",
+      "authoringSha256": "4153c24b9ac80986966691bd7e3e399797e617748c262678e553ff84e84effc8",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "role": "raked-guard",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Raked turned spindle handrail with integral end newels",
+        "flightRisers": 9,
+        "runM": 2.24,
+        "riseM": 1.3333333333333333,
+        "handrailAbovePitchLineM": 0.95,
+        "handrailRadiusM": 0.035,
+        "railAxisX": 0.54,
+        "pairedFlightNominalClearWidthM": 1.0,
+        "minimumClearBetweenNewelCapsM": 0.96,
+        "maxNominalBalusterPitchM": 0.09333333333333334,
+        "lowerNewelBaseM": 0.16666666666666666,
+        "upperNewelBaseM": 1.5,
+        "shoeOffsetFromRiserM": 0.1,
+        "upperHandrailCenterM": 2.45,
+        "lowerHandrailCenterM": 1.1166666666666667,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "mountNote": "Right module uses authored x=540 mm. Left uses x translation -1080 mm, without mesh mirroring. Newel feet and shoes intentionally bear/seat into tread or transition tongue.",
+        "bottomCenterTranslationBlenderM": [
+          -0.5400000214576721,
+          -1.1200000047683716,
+          -0.1666666716337204
+        ],
+        "constructionBoundsM": [
+          [
+            0.47999998927116394,
+            -0.05999999865889549,
+            0.1666666716337204
+          ],
+          [
+            0.6000000238418579,
+            2.299999952316284,
+            2.549999952316284
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-guard-nine-riser-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-guard-nine-riser-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-guard-nine-riser-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-guard-nine-riser-01-rear.png",
+      "hashes": {
+        "model": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5",
+        "sourceBlend": "892cd6c9dbd0ba160b2bbd225d2a436f6115a4dbd3e814756cc93214830b5acd",
+        "authoringBlend": "4153c24b9ac80986966691bd7e3e399797e617748c262678e553ff84e84effc8",
+        "thumb": "8c58ccc725ca2f405d95158339ea9f0a31d80d73208bc86fffd5de6af86b5e45",
+        "top": "12563718a2fb6db0e6624037191548ef155663f306dd1a7351c6b9d6f715f963",
+        "front": "32179f7d511252b4f81ba2b76a80ea9cae2889d122d72cde0a5138ab8557956b",
+        "rear": "0ac39aebd1760ac697d15140f408a7884e6e24720f0a85f7f2f9b558a69183ef"
+      },
+      "geometrySignature": "turned-spindles-continuous-raked-hand-bottom-rails-top-seated-newels-and-tread-shoes"
+    },
+    {
+      "id": "rpg-mansion-stair-guard-eighteen-riser-01",
+      "name": "Eighteen-riser turned walnut raked guard",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-guard-eighteen-riser-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-guard-eighteen-riser-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-guard-eighteen-riser-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-guard-eighteen-riser-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 120.0,
+      "d": 4880.0001,
+      "h": 3883.3334,
+      "defaultElevation": 0,
+      "triangles": 18164,
+      "triangleBudget": 58000,
+      "glbBytes": 1245356,
+      "sha256": "6767927850f85ca8c36265abf890796db6452a6356dafa2199a3ecedbdd8f5e0",
+      "sourceSha256": "e386a862afe2d33b5d76e9a7cb1e8f70ce70f95b051538def71288733e602061",
+      "authoringSha256": "061890fe49298809522fa09d4ffc09e1273fac788ca1c1d123b28ea2a6c4dd44",
+      "countingClass": "dimensional-variant",
+      "coreConstructionCount": 0,
+      "role": "raked-guard",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Raked turned spindle handrail with integral end newels",
+        "flightRisers": 18,
+        "runM": 4.760000000000001,
+        "riseM": 2.833333333333333,
+        "handrailAbovePitchLineM": 0.95,
+        "handrailRadiusM": 0.035,
+        "railAxisX": 0.54,
+        "pairedFlightNominalClearWidthM": 1.0,
+        "minimumClearBetweenNewelCapsM": 0.96,
+        "maxNominalBalusterPitchM": 0.09333333333333334,
+        "lowerNewelBaseM": 0.16666666666666666,
+        "upperNewelBaseM": 3.0,
+        "shoeOffsetFromRiserM": 0.1,
+        "upperHandrailCenterM": 3.95,
+        "lowerHandrailCenterM": 1.1166666666666667,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "mountNote": "Right module uses authored x=540 mm. Left uses x translation -1080 mm, without mesh mirroring. Newel feet and shoes intentionally bear/seat into tread or transition tongue.",
+        "bottomCenterTranslationBlenderM": [
+          -0.5400000214576721,
+          -2.380000114440918,
+          -0.1666666716337204
+        ],
+        "constructionBoundsM": [
+          [
+            0.47999998927116394,
+            -0.05999999865889549,
+            0.1666666716337204
+          ],
+          [
+            0.6000000238418579,
+            4.820000171661377,
+            4.050000190734863
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-guard-eighteen-riser-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-guard-eighteen-riser-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-guard-eighteen-riser-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-guard-eighteen-riser-01-rear.png",
+      "hashes": {
+        "model": "6767927850f85ca8c36265abf890796db6452a6356dafa2199a3ecedbdd8f5e0",
+        "sourceBlend": "e386a862afe2d33b5d76e9a7cb1e8f70ce70f95b051538def71288733e602061",
+        "authoringBlend": "061890fe49298809522fa09d4ffc09e1273fac788ca1c1d123b28ea2a6c4dd44",
+        "thumb": "f8d7375fc7f3939802098bad614ac520de8ffa7f51ec0a818966e25ff3660916",
+        "top": "f5f2cb496d21dd1aba0aa8c56dbba43c291b9ee7aaf22e9ac816ca6541222c7e",
+        "front": "4c3c595f2706c54680930ef251ff42b49308d16e2322fd40a3042ce84d18c13b",
+        "rear": "198e350bf62c2ab1bf3f81a0ef1973002317113330d9733f905baf704859989c"
+      },
+      "geometrySignature": "turned-spindles-continuous-raked-hand-bottom-rails-top-seated-newels-and-tread-shoes"
+    },
+    {
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "name": "Terminal handrail receiver newel",
+      "group": "住設",
+      "category": "階段・手摺",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/static_stair_kit/sources/rpg-mansion-stair-terminal-receiver-newel-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/static_stair_kit/authoring_sources/rpg-mansion-stair-terminal-receiver-newel-01.blend",
+      "validation": "tools/blender/rpg_mansion/static_stair_kit/reports/rpg-mansion-stair-terminal-receiver-newel-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/static_stair_kit/build.py",
+      "w": 220.0,
+      "d": 220.0,
+      "h": 1050.0,
+      "defaultElevation": 0,
+      "triangles": 1512,
+      "triangleBudget": 3000,
+      "glbBytes": 109796,
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "sourceSha256": "697484627c14b773abcb7995d58dd8d4a60f48854dd2ae60c3dd99591866ce94",
+      "authoringSha256": "5b1cbcb49ab0848c669d26a0e22b4d98213660cf02a6a4f70e2dd7e8cff47d55",
+      "countingClass": "zero-core-accessory",
+      "coreConstructionCount": 0,
+      "role": "newel",
+      "staticProp": true,
+      "provenance": "original",
+      "freshQARequired": true,
+      "installationDatums": {
+        "role": "Terminal receiver newel accessory",
+        "mountingPlaneM": 0,
+        "handrailCenterM": 0.95,
+        "receiverEndPlanesX": [
+          -0.11,
+          0.11
+        ],
+        "receiverEndPlanesY": [
+          -0.11,
+          0.11
+        ],
+        "lowerReceiverCenterM": 0.11,
+        "assemblyStartM": [
+          0,
+          0,
+          0
+        ],
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "constructionBoundsM": [
+          [
+            -0.10999999940395355,
+            -0.10999999940395355,
+            0.0
+          ],
+          [
+            0.10999999940395355,
+            0.10999999940395355,
+            1.0499999523162842
+          ]
+        ],
+        "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#a48245"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#92633c"
+        }
+      ],
+      "placementNotes": "Static manually placed module. Use documented rigid installation datums. No native stair routing, floor cutting, traversal, building-code or structural/load certification. Parts may include intentional joinery seating; see assembly contacts.",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-terminal-receiver-newel-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stair-terminal-receiver-newel-01-top.png",
+      "front": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-terminal-receiver-newel-01-front.png",
+      "rear": "tools/blender/rpg_mansion/static_stair_kit/evidence/rpg-mansion-stair-terminal-receiver-newel-01-rear.png",
+      "hashes": {
+        "model": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+        "sourceBlend": "697484627c14b773abcb7995d58dd8d4a60f48854dd2ae60c3dd99591866ce94",
+        "authoringBlend": "5b1cbcb49ab0848c669d26a0e22b4d98213660cf02a6a4f70e2dd7e8cff47d55",
+        "thumb": "3fac837bff5ec08bb9afa1e0d7ec6b43ac8cf2964612d6fed71482d0f6c13ef5",
+        "top": "4a7da059794a761eee26141a238459f33c81fdfdbd3b57b338805e84c0082d51",
+        "front": "b73ef6bcbe738f5ee90cc024490b92836f7ca12f02dfa5cfd2c8cbd02bbf1f01",
+        "rear": "b03ff4441d0e93ee1b020eb718d0286f34c10cf1d37bd851be60fa9075890e22"
+      },
+      "geometrySignature": "chamfered-walnut-newel-brass-collars-four-way-hand-and-lower-rail-receiver-tenons"
+    }
+  ]
+}

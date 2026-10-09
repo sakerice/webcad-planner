@@ -1,0 +1,202 @@
+{
+  "model": "rpg-mansion-arched-reading-floor-lamp-01",
+  "dimensions_mm": [
+    1271.5237140655518,
+    360.00001430511475,
+    1851.9999980926514
+  ],
+  "bounds_m": [
+    [
+      -0.6357618570327759,
+      -0.18000000715255737,
+      0.0
+    ],
+    [
+      0.6357618570327759,
+      0.18000000715255737,
+      1.8519999980926514
+    ]
+  ],
+  "triangles": 1804,
+  "uv": {
+    "meters_per_uv": 1.8741448383985015,
+    "min": 1.8501324947439202,
+    "max": 1.9040018438173307,
+    "p05": 1.8737241482146276,
+    "p95": 1.8744459606806678,
+    "total_triangles": 1804,
+    "valid_triangles": 1804,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Honed dark limestone counterweight": "stone",
+    "Antique brass structure": "metal",
+    "Bronzed iron structure": "metal",
+    "Porcelain socket insulator": "ceramic",
+    "Ivory enamel spun metal shades": "shade",
+    "Opal bulb glass static appearance": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 131360,
+  "datums": {
+    "supportProbes": [
+      {
+        "parts": [
+          "Arched reading head stem",
+          "Arched reading head porcelain"
+        ],
+        "pointOriginalM": [
+          0.4847630560398102,
+          0.0,
+          1.556006908416748
+        ]
+      },
+      {
+        "parts": [
+          "Arched reading head porcelain",
+          "Arched reading head opal bulb"
+        ],
+        "pointOriginalM": [
+          0.47593003511428833,
+          0.0,
+          1.5015182495117188
+        ]
+      },
+      {
+        "parts": [
+          "Arched reading head stem",
+          "Arched reading head retaining collar"
+        ],
+        "pointOriginalM": [
+          0.5148035883903503,
+          0.0,
+          1.5860874652862549
+        ]
+      },
+      {
+        "parts": [
+          "Arched reading head retaining collar",
+          "Arched reading head open reflector"
+        ],
+        "pointOriginalM": [
+          0.5275052189826965,
+          0.0,
+          1.5868245363235474
+        ]
+      },
+      {
+        "parts": [
+          "Arched lamp limestone counterweight",
+          "Arched lamp base collar"
+        ],
+        "pointOriginalM": [
+          -0.4,
+          0,
+          0.084
+        ]
+      },
+      {
+        "parts": [
+          "Arched lamp base collar",
+          "Continuous arched reading support"
+        ],
+        "pointOriginalM": [
+          -0.4,
+          0,
+          0.112
+        ]
+      },
+      {
+        "parts": [
+          "Continuous arched reading support",
+          "Arched reading head stem"
+        ],
+        "pointOriginalM": [
+          0.5,
+          0,
+          1.65
+        ]
+      }
+    ],
+    "cavityRays": [
+      {
+        "part": "Arched reading head open reflector",
+        "originOriginalM": [
+          0.5423570871353149,
+          0.0,
+          1.307610034942627
+        ],
+        "direction": [
+          0.16001847386360168,
+          0.0,
+          0.9871140122413635
+        ],
+        "rangeM": [
+          0.13799999999999998,
+          0.27599999999999997
+        ]
+      },
+      {
+        "part": "Arched reading head open reflector",
+        "originOriginalM": [
+          0.4470019042491913,
+          0.0,
+          1.3230677843093872
+        ],
+        "direction": [
+          0.16001847386360168,
+          0.0,
+          0.9871140122413635
+        ],
+        "rangeM": [
+          null,
+          null
+        ]
+      }
+    ],
+    "installation": {
+      "mount": "floor",
+      "defaultElevationMm": 0,
+      "note": "Original static decorative fixture with geometric support; no configured runtime light or physical certification."
+    },
+    "bulb": {
+      "materialEmissionStrength": 0.3,
+      "runtimeLightObjects": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      0.004238158464431763,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.6399999856948853,
+        -0.18000000715255737,
+        0.0
+      ],
+      [
+        0.6315236687660217,
+        0.18000000715255737,
+        1.8519999980926514
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.002157973525802011,
+    0.0002925625040006707,
+    0.00018013751438653952,
+    7.076945864052202e-05,
+    0.0010039083639033677,
+    0.015293377459895662,
+    0.0002059454297220024,
+    0.0004946392409976852
+  ],
+  "source_sha256": "0f5b1a00c3b13ef1b33bf7ae40c4d885677d144253a52c060e580b35f2795a86",
+  "glb_sha256": "2bc515fd531dac6621ec365a430ca0f1f9dab72243372f506f8905702cf0a413"
+}

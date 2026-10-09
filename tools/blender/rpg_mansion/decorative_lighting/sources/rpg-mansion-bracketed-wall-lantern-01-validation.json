@@ -1,0 +1,117 @@
+{
+  "model": "rpg-mansion-bracketed-wall-lantern-01",
+  "dimensions_mm": [
+    300.00001192092896,
+    323.49997758865356,
+    600.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.15000000596046448,
+      -0.16174998879432678,
+      0.0
+    ],
+    [
+      0.15000000596046448,
+      0.16174998879432678,
+      0.6000000238418579
+    ]
+  ],
+  "triangles": 1940,
+  "uv": {
+    "meters_per_uv": 1.7479161814869606,
+    "min": 1.725105974421568,
+    "max": 1.767470652737184,
+    "p05": 1.7471971852007653,
+    "p95": 1.7486022720860082,
+    "total_triangles": 1940,
+    "valid_triangles": 1940,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Bronzed iron structure": "metal",
+    "Antique brass structure": "metal",
+    "Clear lightly tinted glass": "glass",
+    "Porcelain socket insulator": "ceramic",
+    "Opal bulb glass static appearance": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 137864,
+  "datums": {
+    "installation": {
+      "mount": "wall-bracket",
+      "wallContactPlaneBlenderY": 0.151,
+      "defaultElevationMm": 1500,
+      "wallAnchorPart": "Wall mounting plate",
+      "note": "Back of plate lies on declared wall plane. Lantern bottom at 1500mm; no electrical fitting or runtime Light.",
+      "wallContactPlaneGltfZ": -0.16175000315904617
+    },
+    "shade": {
+      "construction": "four closed 3mm glass panels within metal frame; hollow hip roof and visible inner socket",
+      "glassThicknessMm": 3
+    },
+    "bulb": {
+      "type": "mesh opal bulb",
+      "materialEmissionStrength": 0.3,
+      "runtimeLightObjects": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.010750003159046173,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.15000000596046448,
+        -0.17249999940395355,
+        0.0
+      ],
+      [
+        0.15000000596046448,
+        0.1509999930858612,
+        0.6000000238418579
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0001040341454370264,
+    0.00010403485998722316,
+    8.191068603006596e-05,
+    8.191068134048389e-05,
+    6.721462546011026e-05,
+    6.721465664819941e-05,
+    0.00032011122918144497,
+    9.128356733612009e-06,
+    9.128188735256042e-06,
+    0.000197569510722436,
+    0.00019756820832602284,
+    0.00016757989487814498,
+    0.00016757960383984036,
+    0.0008925632840449296,
+    4.75177588062555e-06,
+    5.735540791344344e-06,
+    7.817206353699645e-05,
+    9.360002763969533e-07,
+    9.960956515797648e-05,
+    4.751777851197403e-06,
+    0.0005697914892455932,
+    7.364904433870834e-05,
+    8.639949934755953e-07,
+    8.639690491918374e-07,
+    0.0002862503586425665,
+    0.00013155870160138267,
+    4.4172447031106295e-05,
+    0.0019270613404766361,
+    0.0008317067561544416,
+    0.00010403489868811752,
+    0.00010403463428095468
+  ],
+  "source_sha256": "4657f30a8ef97be3582de02588994dbb77c6cd8f95df83acde29dea9f563c3d4",
+  "glb_sha256": "e87629efe628a8b14f5817ac32b0453366b6b09ac71e71437113c001de1bc98b"
+}

@@ -1,0 +1,276 @@
+{
+  "newProductCount": 4,
+  "newConstructionCount": 3,
+  "functionalFootprintVariantCount": 1,
+  "items": [
+    {
+      "id": "kitchen-scullery-installed",
+      "newProducts": [
+        "rpg-mansion-period-range-canopy-01"
+      ],
+      "acceptedInputs": [
+        {
+          "id": "rpg-mansion-kitchen-cast-iron-range-750-01",
+          "file": "proofs/inputs/rpg-mansion-kitchen-cast-iron-range-750-01.glb",
+          "sha256": "871181b83573ad885e408ccc496b43e400b0192e8b805ecb07492a358ee2d8cb",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-cast-iron-range-750-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 750,
+          "d": 650,
+          "h": 863.5,
+          "countedAsNew": false
+        },
+        {
+          "id": "rpg-mansion-scullery-sink-900-01",
+          "file": "proofs/inputs/rpg-mansion-scullery-sink-900-01.glb",
+          "sha256": "5ac8b27d400a18d39b160b980608eea7132caf69535a3d2b0bf6b78ee36a9e6a",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-sink-900-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 900,
+          "d": 650,
+          "h": 1162.67,
+          "countedAsNew": false
+        },
+        {
+          "id": "rpg-mansion-kitchen-draining-stand-900-01",
+          "file": "proofs/inputs/rpg-mansion-kitchen-draining-stand-900-01.glb",
+          "sha256": "a3ec8ef5990ce00e0e0403b83b559a02a582972f9e85ce6890aa573822f4cb7f",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-draining-stand-900-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 900,
+          "d": 650,
+          "h": 900,
+          "countedAsNew": false
+        }
+      ],
+      "rangeBoundsM": [
+        [
+          -0.375,
+          -0.32499998807907104,
+          0.0
+        ],
+        [
+          0.375,
+          0.32499998807907104,
+          0.8634999990463257
+        ]
+      ],
+      "canopyBoundsM": [
+        [
+          -0.4699999988079071,
+          -0.4179999828338623,
+          1.6100000143051147
+        ],
+        [
+          0.4699999988079071,
+          0.36000001430511475,
+          2.819999933242798
+        ]
+      ],
+      "actualHobClearanceMm": 746.5000152587891,
+      "rangeBackToWallMm": 35.00001192092894,
+      "wallContactPlaneBlenderY": 0.36,
+      "hoodBracketRearPlaneBlenderY": 0.36,
+      "minimumWorkingAisleMm": 1375.000011920929,
+      "checks": {
+        "hobClearanceAtLeast700mm": true,
+        "workingAisleAtLeast1000mm": true,
+        "rangeFitsUnderCanopy": true,
+        "rangeBackDoesNotPenetrateWall": true
+      },
+      "limitations": "Static visual service assembly. Canopy is not a ventilation system; accepted range is not physically operable. Room fixtures are excluded from catalogue count.",
+      "scene": "proofs/kitchen-scullery-installed.blend",
+      "sceneSha256": "ab5d7bb7087b13718324f3f77b4a30c82308c7a39f82c4c41d8577c0c10888ef"
+    },
+    {
+      "id": "manual-laundry-installed",
+      "newProducts": [
+        "rpg-mansion-manual-wash-tub-board-01",
+        "rpg-mansion-hinged-timber-drying-frame-01"
+      ],
+      "acceptedInputs": [
+        {
+          "id": "rpg-mansion-scullery-sink-900-01",
+          "file": "proofs/inputs/rpg-mansion-scullery-sink-900-01.glb",
+          "sha256": "5ac8b27d400a18d39b160b980608eea7132caf69535a3d2b0bf6b78ee36a9e6a",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-sink-900-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 900,
+          "d": 650,
+          "h": 1162.67,
+          "countedAsNew": false
+        },
+        {
+          "id": "rpg-mansion-kitchen-draining-stand-900-01",
+          "file": "proofs/inputs/rpg-mansion-kitchen-draining-stand-900-01.glb",
+          "sha256": "a3ec8ef5990ce00e0e0403b83b559a02a582972f9e85ce6890aa573822f4cb7f",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-draining-stand-900-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 900,
+          "d": 650,
+          "h": 900,
+          "countedAsNew": false
+        }
+      ],
+      "tubBoundsM": [
+        [
+          -1.3046000003814697,
+          -0.5914997458457947,
+          0.0
+        ],
+        [
+          -0.3954000473022461,
+          -0.008500277996063232,
+          1.1749356985092163
+        ]
+      ],
+      "dryingFrameBoundsM": [
+        [
+          0.4179999828338623,
+          -0.5139551758766174,
+          0.0
+        ],
+        [
+          1.3819999694824219,
+          0.3139551877975464,
+          1.204979658126831
+        ]
+      ],
+      "frontWorkingAisleMm": 1208.5002541542053,
+      "interEquipmentGapMm": 813.4000301361084,
+      "frameToRearDrainerClearanceMm": 836.0449075698853,
+      "checks": {
+        "clearFrontWorkingAisleAtLeast1000mm": true,
+        "partsRestOnFloor": true,
+        "distinctFloorFootprints": true,
+        "interEquipmentAccessAtLeast750mm": true,
+        "rackInsideRoom": true,
+        "noDrainerFrameOverlap": true
+      },
+      "limitations": "Empty basin, washboard and deployed drying frame are static. No powered washer/pan, water, cloth or folding behavior. Source contact measurements accompany this room arrangement.",
+      "scene": "proofs/manual-laundry-installed.blend",
+      "sceneSha256": "fbc67775645f79bfa7734b4df73ff8edff8e2c9a039aba5d2f20bafd4e0b6d0c"
+    },
+    {
+      "id": "narrow-hall-installed",
+      "newProducts": [
+        "rpg-mansion-narrow-hall-runner-01"
+      ],
+      "acceptedInputs": [
+        {
+          "id": "rpg-mansion-console-01",
+          "file": "proofs/inputs/rpg-mansion-console-01.glb",
+          "sha256": "bc6272d9e95821624197d2c04e42a9d5086cc3a2602194a3f2f43dbb4967bc69",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-console-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 1200,
+          "d": 400,
+          "h": 860,
+          "countedAsNew": false
+        },
+        {
+          "id": "rpg-mansion-mirror-01",
+          "file": "proofs/inputs/rpg-mansion-mirror-01.glb",
+          "sha256": "459c251acacc6a9910dd4f01c29b843a03cf494db9daaa65c0cbe26bb9c2d028",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-mirror-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 750,
+          "d": 100,
+          "h": 1520,
+          "countedAsNew": false
+        }
+      ],
+      "comparisonInput": {
+        "id": "rpg-mansion-rug-01",
+        "file": "proofs/inputs/rpg-mansion-rug-01.glb",
+        "sha256": "1edecea53c2d9dc87d964897ea760c75fa0ab1778d1e0907dc920322ed97b841",
+        "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-rug-01.glb",
+        "sourceRootLabel": "Immutable accepted project original snapshot",
+        "w": 1400,
+        "d": 2000,
+        "h": 10,
+        "countedAsNew": false
+      },
+      "hallClearWidthMm": 1250,
+      "existingRugFullFootprintMm": [
+        1400,
+        2000
+      ],
+      "existingRugFitsAtEitherRightAngle": false,
+      "runnerBoundsM": [
+        [
+          -0.3799999952316284,
+          -1.5,
+          0.0
+        ],
+        [
+          0.3799999952316284,
+          1.5,
+          0.007600000128149986
+        ]
+      ],
+      "runnerFloorContactMm": 0.0,
+      "walkingPlaneMaxMm": 7.600000128149986,
+      "sideFloorMarginsMm": [
+        245.00000476837158,
+        245.00000476837158
+      ],
+      "consoleFrontClearanceMm": 899.9998569488525,
+      "thresholdToRunnerStartMm": 1299.9999999999998,
+      "checks": {
+        "existingRugCannotFit": true,
+        "runnerFits": true,
+        "runnerRestingOnFloor": true,
+        "walkingPlaneBelow10mm": true,
+        "consoleClearanceAtLeast900mm": true,
+        "hallClearWidthAtLeast750mm": true
+      },
+      "counting": "One useful functional-footprint variant, zero new core constructions. No geometry copied or detached from the older rug.",
+      "limitations": "Hall is an excluded static proof fixture. No native room/wall/door connection or walking collision behavior.",
+      "scene": "proofs/narrow-hall-installed.blend",
+      "sceneSha256": "43e295128d03949407a8bf95556131d3bd184f9a32e7b613d4037500100bf7b9"
+    },
+    {
+      "id": "existing-bedroom-bedding-reuse",
+      "newProducts": [],
+      "acceptedInputs": [
+        {
+          "id": "rpg-mansion-narrow-servants-bed-01",
+          "file": "proofs/inputs/rpg-mansion-narrow-servants-bed-01.glb",
+          "sha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41",
+          "sourceModel": "assets/models/packs/rpg-mansion/models/rpg-mansion-narrow-servants-bed-01.glb",
+          "sourceRootLabel": "Immutable accepted project original snapshot",
+          "w": 900,
+          "d": 2050,
+          "h": 990,
+          "countedAsNew": false
+        }
+      ],
+      "bedBoundsM": [
+        [
+          -0.44999998807907104,
+          -0.25,
+          0.0
+        ],
+        [
+          0.44999998807907104,
+          1.7999999523162842,
+          0.9900000095367432
+        ]
+      ],
+      "sideClearancesMm": [
+        1050.000011920929,
+        1050.000011920929
+      ],
+      "footClearanceMm": 1550.0,
+      "newBeddingCount": 0,
+      "checks": {
+        "sideClearancesAtLeast750mm": true,
+        "footClearanceAtLeast900mm": true
+      },
+      "limitations": "Accepted mattress, pillow and cover reused unchanged in the bed GLB. This is not a new standalone bedding item.",
+      "scene": "proofs/existing-bedroom-bedding-reuse.blend",
+      "sceneSha256": "4ef765f78f4cb4e6be1d5baec55b6d7733b6a02f5352138eb45a4d866a19245b"
+    }
+  ]
+}

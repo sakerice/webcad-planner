@@ -1,0 +1,207 @@
+{
+  "id": "rpg-mansion-planter-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-planter-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-planter-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-planter-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 20,
+  "validation": {
+    "model": "rpg-mansion-planter-01",
+    "dimensions_mm": [
+      949.999988079071,
+      800.000011920929,
+      1360.0000143051147
+    ],
+    "bounds_m": [
+      [
+        -0.4749999940395355,
+        -0.4000000059604645,
+        0.0
+      ],
+      [
+        0.4749999940395355,
+        0.4000000059604645,
+        1.3600000143051147
+      ]
+    ],
+    "triangles": 1690,
+    "uv": {
+      "meters_per_uv": 2.5821983744978896,
+      "min": 2.2204815074005952,
+      "max": 3.048617119048942,
+      "p05": 2.375840623154671,
+      "p95": 2.8881934659838473,
+      "total_triangles": 1690,
+      "valid_triangles": 1690,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG ceramic": "ceramic",
+      "RPG soil": null,
+      "RPG leaf": "foliage"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 64476
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "56a84c99343e3db6259dcb273efaa68389301a13ab86df5dbfba32face7115c0",
+    "bytes": 64476,
+    "triangles": 1690,
+    "bounds_gltf_m": [
+      [
+        -0.4749999940395355,
+        0.0,
+        -0.4000000059604645
+      ],
+      [
+        0.4749999940395355,
+        1.3600000143051147,
+        0.4000000059604645
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      949.999988079071,
+      800.000011920929,
+      1360.0000143051147
+    ],
+    "geometry_material_sha256_1e7": "1ed044b518c77fc02b67cc19c08dc0d806b02749cef15454f4ae7ee3646c305e",
+    "geometry_material_uv_sha256_1e7": "6cc7d7c04e4f8c2cd870d4f68c3a5b983ffff36f6c5beac3efbff1ee5d5b4c06",
+    "finish_channels": [
+      "ceramic",
+      "foliage"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 316
+      },
+      {
+        "material": "RPG leaf",
+        "channel": "foliage",
+        "triangles": 1314
+      },
+      {
+        "material": "RPG soil",
+        "channel": null,
+        "triangles": 60
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "a4b255d7b5c9759438ea69d7d36445e13d381acdf240dc30105298898f0194a1",
+    "bytes": 64680,
+    "triangles": 1690,
+    "bounds_gltf_m": [
+      [
+        -0.4749999940395355,
+        0.0,
+        -0.4000000059604645
+      ],
+      [
+        0.4749999940395355,
+        1.3600000143051147,
+        0.4000000059604645
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      949.999988079071,
+      800.000011920929,
+      1360.0000143051147
+    ],
+    "geometry_material_sha256_1e7": "1ed044b518c77fc02b67cc19c08dc0d806b02749cef15454f4ae7ee3646c305e",
+    "geometry_material_uv_sha256_1e7": "6cc7d7c04e4f8c2cd870d4f68c3a5b983ffff36f6c5beac3efbff1ee5d5b4c06",
+    "finish_channels": [
+      "ceramic",
+      "foliage"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 316
+      },
+      {
+        "material": "RPG leaf",
+        "channel": "foliage",
+        "triangles": 1314
+      },
+      {
+        "material": "RPG soil",
+        "channel": null,
+        "triangles": 60
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 3.46,
+  "source_sha256": "72ed61141c3fb2de9eb61b74de449334ead4a3918e3eae6d99064d5c235ee143",
+  "front_sha256": "99211504f614ea3bf30c00f32304a6d4b502a8644969add6890e15cac350bc4e",
+  "rear_sha256": "c5e1acf8d4a60992491c1152e0963da50efe6896306dabb226264b96a34c884d",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:23.329442+00:00",
+    "source_sha256_before": "7757df1677d5751266ecf367322b45065c1d97e582d345bc18209011718c1ce6",
+    "source_sha256_after": "3b8c67c90d8be854a1a33da92c43ea4a45d09fd8808022404558d0169fb30052",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "8efef265a8da113930dbe8392887a9ad0036f76f9a32e11997efc2e5f6d129a7",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.903471+00:00",
+    "source_sha256_before": "3b8c67c90d8be854a1a33da92c43ea4a45d09fd8808022404558d0169fb30052",
+    "source_sha256_after": "72ed61141c3fb2de9eb61b74de449334ead4a3918e3eae6d99064d5c235ee143",
+    "mesh_geometry_uv_material_digest_preserved": "62eb7993dbd9f28a0e4998e93bc363dd5a6fdbe34536b96ebd57e62fc232e929",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-planter-01-rear.png",
+        "render_filepath": "//rpg-mansion-planter-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "72ed61141c3fb2de9eb61b74de449334ead4a3918e3eae6d99064d5c235ee143",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

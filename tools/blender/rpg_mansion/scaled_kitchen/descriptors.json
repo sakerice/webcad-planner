@@ -1,0 +1,857 @@
+{
+ "set": "rpg-mansion",
+ "name": "RPGアセット",
+ "items": [
+  {
+   "id": "rpg-mansion-scullery-sink-900-01",
+   "name": "白陶器ボウルのスカラリー流し台 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-sink",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-sink-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-sink-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-sink-900-01-top.png",
+   "w": 900,
+   "d": 650,
+   "h": 1162.67,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    },
+    {
+     "key": "ceramic",
+     "label": "陶器",
+     "default": "#ddd5bd"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-scullery-sink-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-scullery-sink-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-sink-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-sink-900-01-rear.png",
+   "placementNotes": "900mm single-bowl scullery sink with a 850mm worktop and connected 1162.67mm swan-neck tap. Static basin and tap, no water simulation. Intended footprint matches the standard 900mm sink module; source geometry unavailable here. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-four-drawer-750-01",
+   "name": "四段引出しの石天板キッチン台 750",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-four-drawer-750-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-four-drawer-750-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-four-drawer-750-01-top.png",
+   "w": 750,
+   "d": 650,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-four-drawer-750-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-four-drawer-750-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-rear.png",
+   "placementNotes": "Four graduated drawers, 850mm worktop, 750x650mm floor module. Drawers are fixed geometry. A genuinely different four-tier arrangement from the existing 450mm three-drawer cabinet. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-bottle-rack-300-01",
+   "name": "九区画のボトル収納キッチン台 300",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-bottle-rack-300-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bottle-rack-300-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bottle-rack-300-01-top.png",
+   "w": 300,
+   "d": 650,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-bottle-rack-300-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-bottle-rack-300-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-rear.png",
+   "placementNotes": "Narrow open nine-cell bottle storage base with supported shelves and 850mm stone worktop. Fixed storage, no animation. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-three-drawer-600-01",
+   "name": "三段引出しの石天板キッチン台 600",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-three-drawer-600-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-600-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-600-01-top.png",
+   "w": 600,
+   "d": 650,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-three-drawer-600-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-three-drawer-600-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-600-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-600-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-three-drawer-900-01",
+   "name": "幅広三段引出しのキッチン台 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-three-drawer-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-900-01-top.png",
+   "w": 900,
+   "d": 650,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-three-drawer-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-three-drawer-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-single-door-300-01",
+   "name": "片開きの細幅キッチン戸棚 300",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-single-door-300-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-single-door-300-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-single-door-300-01-top.png",
+   "w": 300,
+   "d": 650,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-single-door-300-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-single-door-300-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-cutlery-cupboard-750-01",
+   "name": "カトラリー引出し付き戸棚 750",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-cutlery-cupboard-750-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cutlery-cupboard-750-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cutlery-cupboard-750-01-top.png",
+   "w": 750,
+   "d": 650,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-cutlery-cupboard-750-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-cutlery-cupboard-750-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cutlery-cupboard-750-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cutlery-cupboard-750-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-double-door-900-01",
+   "name": "両開きの石天板キッチン戸棚 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-double-door-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-double-door-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-double-door-900-01-top.png",
+   "w": 900,
+   "d": 650,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-double-door-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-double-door-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-scullery-double-sink-1200-01",
+   "name": "双ボウルのスカラリー流し台 1200",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-sink",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-double-sink-1200-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1200-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1200-01-top.png",
+   "w": 1200,
+   "d": 650,
+   "h": 1162.67,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    },
+    {
+     "key": "ceramic",
+     "label": "陶器",
+     "default": "#ddd5bd"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-scullery-double-sink-1200-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-scullery-double-sink-1200-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1200-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1200-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-scullery-double-sink-1800-01",
+   "name": "大幅双ボウルの使用人室流し台 1800",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-sink",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-double-sink-1800-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1800-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1800-01-top.png",
+   "w": 1800,
+   "d": 650,
+   "h": 1162.67,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    },
+    {
+     "key": "ceramic",
+     "label": "陶器",
+     "default": "#ddd5bd"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-scullery-double-sink-1800-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-scullery-double-sink-1800-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-glazed-wall-900-01",
+   "name": "ガラス扉の壁付食器戸棚 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-glazed-wall-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-glazed-wall-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-glazed-wall-900-01-top.png",
+   "w": 900,
+   "d": 350,
+   "h": 700,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "glass",
+     "label": "ガラス",
+     "default": "#8eaaa8"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-glazed-wall-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-glazed-wall-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Wall installation required; bottom default 1400mm, rear mounting plates must be aligned manually.",
+   "defaultElevation": 1400
+  },
+  {
+   "id": "rpg-mansion-kitchen-spice-wall-450-01",
+   "name": "四列スパイス瓶の壁付戸棚 450",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-spice-wall-450-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-spice-wall-450-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-spice-wall-450-01-top.png",
+   "w": 450,
+   "d": 350,
+   "h": 700,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "ceramic",
+     "label": "陶器",
+     "default": "#ddd5bd"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-spice-wall-450-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-spice-wall-450-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Wall installation required; bottom default 1400mm, rear mounting plates must be aligned manually.",
+   "defaultElevation": 1400
+  },
+  {
+   "id": "rpg-mansion-kitchen-plate-rack-900-01",
+   "name": "九仕切りの壁付皿立て 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-plate-rack-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-plate-rack-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-plate-rack-900-01-top.png",
+   "w": 900,
+   "d": 350,
+   "h": 700,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-plate-rack-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-plate-rack-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Wall installation required; bottom default 1400mm, rear mounting plates must be aligned manually.",
+   "defaultElevation": 1400
+  },
+  {
+   "id": "rpg-mansion-kitchen-tall-larder-900-01",
+   "name": "通気扉の高い食料庫 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-tall-larder-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-tall-larder-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-tall-larder-900-01-top.png",
+   "w": 900,
+   "d": 650,
+   "h": 2100,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-tall-larder-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-tall-larder-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed."
+  },
+  {
+   "id": "rpg-mansion-kitchen-pull-pantry-450-01",
+   "name": "細幅上下収納のパントリー 450",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-pull-pantry-450-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pull-pantry-450-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pull-pantry-450-01-top.png",
+   "w": 450,
+   "d": 650,
+   "h": 2100,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-pull-pantry-450-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-pull-pantry-450-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed."
+  },
+  {
+   "id": "rpg-mansion-kitchen-service-island-2100-01",
+   "name": "両面化粧の使用人室アイランド 2100",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-service-island-2100-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-service-island-2100-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-service-island-2100-01-top.png",
+   "w": 2100,
+   "d": 900,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-service-island-2100-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-service-island-2100-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-baking-dresser-1200-01",
+   "name": "粉壺棚付きの製パン作業台 1200",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-baking-dresser-1200-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-baking-dresser-1200-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-baking-dresser-1200-01-top.png",
+   "w": 1200,
+   "d": 650,
+   "h": 1900,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    },
+    {
+     "key": "ceramic",
+     "label": "陶器",
+     "default": "#ddd5bd"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-baking-dresser-1200-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-baking-dresser-1200-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-diagonal-corner-900-01",
+   "name": "斜め扉のコーナーキッチン戸棚 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-diagonal-corner-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-diagonal-corner-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-diagonal-corner-900-01-top.png",
+   "w": 900,
+   "d": 900,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-diagonal-corner-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-diagonal-corner-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-diagonal-corner-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-diagonal-corner-900-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-l-corner-right-900-01",
+   "name": "右返しL字天板のコーナーキッチン戸棚 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-l-corner-right-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-l-corner-right-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-l-corner-right-900-01-top.png",
+   "w": 900,
+   "d": 900,
+   "h": 850,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-l-corner-right-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-l-corner-right-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-rear.png",
+   "placementNotes": "True right-return L-shaped 900x900mm corner footprint with a 250mm open notch and three cabinet fronts on two orientations. 850mm worktop. Fixed geometry; no opening-door mechanism. Paired orientation alternative to existing left-return corner. Countertop top is 850mm independently of overall fixture/cabinet height."
+  },
+  {
+   "id": "rpg-mansion-kitchen-bread-safe-600-01",
+   "name": "ルーバー扉のパン保管棚 600",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-bread-safe-600-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bread-safe-600-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bread-safe-600-01-top.png",
+   "w": 600,
+   "d": 450,
+   "h": 1500,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-bread-safe-600-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-bread-safe-600-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bread-safe-600-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bread-safe-600-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed."
+  },
+  {
+   "id": "rpg-mansion-kitchen-cast-iron-range-750-01",
+   "name": "三口の鋳鉄キッチンレンジ 750",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "cooktop",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-cast-iron-range-750-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cast-iron-range-750-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cast-iron-range-750-01-top.png",
+   "w": 750,
+   "d": 650,
+   "h": 863.5,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金属",
+     "default": "#b29455"
+    },
+    {
+     "key": "iron",
+     "label": "鋳鉄",
+     "default": "#343b3b"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-cast-iron-range-750-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-cast-iron-range-750-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed."
+  },
+  {
+   "id": "rpg-mansion-kitchen-draining-stand-900-01",
+   "name": "すのこ天板の食器水切り台 900",
+   "group": "住設",
+   "category": "キッチン",
+   "kind": "kitchen-storage",
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-draining-stand-900-01.glb",
+   "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-draining-stand-900-01-thumb.png",
+   "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-draining-stand-900-01-top.png",
+   "w": 900,
+   "d": 650,
+   "h": 900,
+   "provenance": "original",
+   "assetSet": "rpg-mansion",
+   "previewVersion": 1,
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#493025"
+    },
+    {
+     "key": "stone",
+     "label": "石材",
+     "default": "#b8ad96"
+    }
+   ],
+   "sourceBlend": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-draining-stand-900-01.blend",
+   "validation": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-draining-stand-900-01-validation.json",
+   "builder": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+   "front": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-front.png",
+   "rear": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-rear.png",
+   "placementNotes": "Original fixed period-adapted furniture; intended dimensions authored directly. Cabinet fronts, drawer fronts, appliances and fixtures are static geometry. No mechanical or water simulation is claimed."
+  }
+ ]
+}

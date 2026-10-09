@@ -1,0 +1,194 @@
+{
+  "id": "rpg-mansion-chandelier-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-chandelier-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-chandelier-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-chandelier-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 25,
+  "validation": {
+    "model": "rpg-mansion-chandelier-01",
+    "dimensions_mm": [
+      889.9999856948853,
+      790.0000214576721,
+      610.0000143051147
+    ],
+    "bounds_m": [
+      [
+        -0.4449999928474426,
+        -0.39500001072883606,
+        0.0
+      ],
+      [
+        0.4449999928474426,
+        0.39500001072883606,
+        0.6100000143051147
+      ]
+    ],
+    "triangles": 3004,
+    "uv": {
+      "meters_per_uv": 1.9267075221408345,
+      "min": 1.6495108834310304,
+      "max": 2.4756202300083054,
+      "p05": 1.7508570836116293,
+      "p95": 2.2126179725331663,
+      "total_triangles": 3004,
+      "valid_triangles": 3004,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Antique brass": "metal",
+      "RPG Wax": null
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 110824
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "fa7af0ba4746fd5ad9b93db19dcca868177db8269d9320ae40473c287ffb42b6",
+    "bytes": 110824,
+    "triangles": 3004,
+    "bounds_gltf_m": [
+      [
+        -0.4449999928474426,
+        0.0,
+        -0.39500001072883606
+      ],
+      [
+        0.4449999928474426,
+        0.6100000143051147,
+        0.39500001072883606
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      889.9999856948853,
+      790.0000214576721,
+      610.0000143051147
+    ],
+    "geometry_material_sha256_1e7": "0c95ec1b16849ee8ee9110db7f688e29982381392afdaa2b39235a14389f7072",
+    "geometry_material_uv_sha256_1e7": "64a8b51c4a1c8f4199c88eae5771cc7d4c34bd888677bf8336a6661560c1a395",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 2644
+      },
+      {
+        "material": "RPG Wax",
+        "channel": null,
+        "triangles": 360
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "a8df412b092f913492948e7246de9d0a6b044d47cb3b3396dc6252fc6a4eca90",
+    "bytes": 111028,
+    "triangles": 3004,
+    "bounds_gltf_m": [
+      [
+        -0.4449999928474426,
+        0.0,
+        -0.39500001072883606
+      ],
+      [
+        0.4449999928474426,
+        0.6100000143051147,
+        0.39500001072883606
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      889.9999856948853,
+      790.0000214576721,
+      610.0000143051147
+    ],
+    "geometry_material_sha256_1e7": "0c95ec1b16849ee8ee9110db7f688e29982381392afdaa2b39235a14389f7072",
+    "geometry_material_uv_sha256_1e7": "64a8b51c4a1c8f4199c88eae5771cc7d4c34bd888677bf8336a6661560c1a395",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 2644
+      },
+      {
+        "material": "RPG Wax",
+        "channel": null,
+        "triangles": 360
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 3.27,
+  "source_sha256": "723ec5d964736af361b778c51697a8592117267d66744316080cea5daced0cd8",
+  "front_sha256": "bcea4337e421baf22ba609581de27a605c30b3701cd0282c0b9067c2e68ea4a6",
+  "rear_sha256": "25b7e0a5ba5c1fde0db41270755c8fa2ecec22c3b99ff74ff95ab2b226b509b6",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:22.700205+00:00",
+    "source_sha256_before": "f6c32fcc87a82bd12be86f52400f7d8eaea6e37f68234b66a8474072f554f395",
+    "source_sha256_after": "c4cdf0e581ccb204577c168f6b8d7b1e4d576df0c24c25943dd38acebe77ab38",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "d762f417b25eff70b2f8df5cd73104867fca2c35629803db1dd99f78f92bb04d",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:29.413359+00:00",
+    "source_sha256_before": "c4cdf0e581ccb204577c168f6b8d7b1e4d576df0c24c25943dd38acebe77ab38",
+    "source_sha256_after": "723ec5d964736af361b778c51697a8592117267d66744316080cea5daced0cd8",
+    "mesh_geometry_uv_material_digest_preserved": "c9d96bf7e5cb8d9d876103a02e62ab5292518f5e8af75a83b06a0e80af5d784c",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-chandelier-01-rear.png",
+        "render_filepath": "//rpg-mansion-chandelier-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "723ec5d964736af361b778c51697a8592117267d66744316080cea5daced0cd8",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

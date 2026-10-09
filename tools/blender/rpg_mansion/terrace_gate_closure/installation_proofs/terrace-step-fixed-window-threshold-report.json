@@ -1,0 +1,678 @@
+{
+  "case": "terrace-step-fixed-window-threshold",
+  "source": "terrace-step-fixed-window-threshold.blend",
+  "sourceSha256": "e749d14a326cb64d946d9e0c99a01978b4f5603f484c5ff4af0c21e10a90cd39",
+  "products": [
+    {
+      "label": "Terrace",
+      "asset": "rpg-mansion-garden-supported-oak-terrace-01",
+      "file": "models/rpg-mansion-garden-supported-oak-terrace-01.glb",
+      "sha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6",
+      "newCandidate": true,
+      "positionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "actualBoundsBlenderM": [
+        [
+          -1.2000000476837158,
+          -0.8999999761581421,
+          0.0
+        ],
+        [
+          1.2000000476837158,
+          0.8999999761581421,
+          0.3206000030040741
+        ]
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "label": "Accepted access step",
+      "asset": "rpg-mansion-garden-two-riser-deck-step-01",
+      "file": "inputs/rpg-mansion-garden-two-riser-deck-step-01.glb",
+      "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3",
+      "newCandidate": false,
+      "positionBlenderM": [
+        0,
+        -1.2325,
+        0
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.2324999570846558
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "actualBoundsBlenderM": [
+        [
+          -0.550000011920929,
+          -1.5649999380111694,
+          0.0
+        ],
+        [
+          0.550000011920929,
+          -0.8999999761581421,
+          0.3206000030040741
+        ]
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "label": "Accepted fixed French bay",
+      "asset": "rpg-mansion-tall-fixed-french-window-bay-01",
+      "file": "inputs/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+      "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642",
+      "newCandidate": false,
+      "positionBlenderM": [
+        0,
+        1.015,
+        0.23
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0149999856948853
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.23000000417232513
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "actualBoundsBlenderM": [
+        [
+          -0.6000000238418579,
+          0.8299999833106995,
+          0.23000000417232513
+        ],
+        [
+          0.6000000238418579,
+          1.2000000476837158,
+          3.2300000190734863
+        ]
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "gate": "actual-surface-contact",
+      "object": "Terrace",
+      "pointM": [
+        -1.05,
+        -0.6,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        -1.05,
+        -0.6,
+        0
+      ],
+      "distanceM": 2.6656007889869215e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Terrace",
+      "pointM": [
+        0,
+        -0.6,
+        0
+      ],
+      "distanceM": 1.4901161193847656e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        0,
+        -0.6,
+        0
+      ],
+      "distanceM": 4.339283634635649e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Terrace",
+      "pointM": [
+        1.05,
+        -0.6,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        1.05,
+        -0.6,
+        0
+      ],
+      "distanceM": 2.384185791015625e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Terrace",
+      "pointM": [
+        -1.05,
+        0.6,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        -1.05,
+        0.6,
+        0
+      ],
+      "distanceM": 1.6858739115832577e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Terrace",
+      "pointM": [
+        0,
+        0.6,
+        0
+      ],
+      "distanceM": 7.450580596923828e-09,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        0,
+        0.6,
+        0
+      ],
+      "distanceM": 1.6858739115832577e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Terrace",
+      "pointM": [
+        1.05,
+        0.6,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        1.05,
+        0.6,
+        0
+      ],
+      "distanceM": 2.384185791015625e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted access step",
+      "pointM": [
+        -0.43,
+        -1.4925,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        -0.43,
+        -1.4925,
+        0
+      ],
+      "distanceM": 2.4575624024691933e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted access step",
+      "pointM": [
+        -0.43,
+        -0.9824999999999999,
+        0
+      ],
+      "distanceM": 6.664001972467304e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        -0.43,
+        -0.9824999999999999,
+        0
+      ],
+      "distanceM": 1.3328003944934608e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted access step",
+      "pointM": [
+        0,
+        -1.4925,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        0,
+        -1.4925,
+        0
+      ],
+      "distanceM": 1.1920928955078125e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted access step",
+      "pointM": [
+        0,
+        -0.9824999999999999,
+        0
+      ],
+      "distanceM": 6.244724204407248e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        0,
+        -0.9824999999999999,
+        0
+      ],
+      "distanceM": 1.7881393432617188e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted access step",
+      "pointM": [
+        0.43,
+        -1.4925,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        0.43,
+        -1.4925,
+        0
+      ],
+      "distanceM": 2.4575624024691933e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted access step",
+      "pointM": [
+        0.43,
+        -0.9824999999999999,
+        0
+      ],
+      "distanceM": 6.664001972467304e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded continuous ground",
+      "pointM": [
+        0.43,
+        -0.9824999999999999,
+        0
+      ],
+      "distanceM": 1.884864389012364e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-ray-datum",
+      "passed": true,
+      "object": "Terrace",
+      "originM": [
+        0.3,
+        -0.825,
+        0.6
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.30000001192092896,
+        -0.824999988079071,
+        0.31999996304512024
+      ],
+      "distanceM": 0.28000006079673767,
+      "expectedDistanceM": 0.28,
+      "toleranceM": 0.00015
+    },
+    {
+      "gate": "actual-ray-datum",
+      "passed": true,
+      "object": "Accepted access step",
+      "originM": [
+        0.3,
+        -0.9595,
+        0.6
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.30000001192092896,
+        -0.9595000147819519,
+        0.3199999928474426
+      ],
+      "distanceM": 0.2800000309944153,
+      "expectedDistanceM": 0.28,
+      "toleranceM": 0.00015
+    },
+    {
+      "gate": "matching-screw-crown",
+      "passed": true,
+      "object": "Terrace",
+      "actualTopM": 0.3206000030040741,
+      "expectedTopM": 0.3206
+    },
+    {
+      "gate": "matching-screw-crown",
+      "passed": true,
+      "object": "Accepted access step",
+      "actualTopM": 0.3206000030040741,
+      "expectedTopM": 0.3206
+    },
+    {
+      "gate": "upper-tread-to-terrace-joint",
+      "passed": true,
+      "timberJointGapMm": 8,
+      "stepWidthMm": 1100,
+      "projectCirculationGuidelineMm": 750,
+      "appliesTo": "Static clear walking surface geometry; not code certification."
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted fixed French bay",
+      "pointM": [
+        -0.56,
+        1.015,
+        0.23
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded window foundation",
+      "pointM": [
+        -0.56,
+        1.015,
+        0.23
+      ],
+      "distanceM": 5.960464477539063e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted fixed French bay",
+      "pointM": [
+        0.56,
+        1.015,
+        0.23
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Excluded window foundation",
+      "pointM": [
+        0.56,
+        1.015,
+        0.23
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-ray-datum",
+      "passed": true,
+      "object": "Accepted fixed French bay",
+      "originM": [
+        0.2,
+        0.94,
+        0.35
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.20000000298023224,
+        0.9399999976158142,
+        0.3199999928474426
+      ],
+      "distanceM": 0.029999997466802597,
+      "expectedDistanceM": 0.03,
+      "toleranceM": 0.00015
+    },
+    {
+      "gate": "actual-ray-datum",
+      "passed": true,
+      "object": "Accepted fixed French bay",
+      "originM": [
+        0.2,
+        0.9,
+        0.32
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.20000000298023224,
+        0.8999999761581421,
+        0.28999999165534973
+      ],
+      "distanceM": 0.030000001192092896,
+      "expectedDistanceM": 0.03,
+      "toleranceM": 0.00015
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Terrace",
+      "pointM": [
+        0.2,
+        0.86,
+        0.294
+      ],
+      "distanceM": 7.4595309342839755e-06,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-surface-contact",
+      "object": "Accepted fixed French bay",
+      "pointM": [
+        0.2,
+        0.9,
+        0.29
+      ],
+      "distanceM": 4.846177489525871e-06,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "weather-nose-recess",
+      "passed": true,
+      "boardUndersideMm": 294,
+      "weatherNoseTopMm": 290,
+      "minimumVerticalGapMm": 4,
+      "fasciaRecessWidthMm": 1060,
+      "weatherNoseWidthMm": 1040,
+      "sideGapEachMm": 10,
+      "centreJoistRearYMm": 820,
+      "noseFrontYMm": 830
+    },
+    {
+      "gate": "fixed-window-threshold-level",
+      "passed": true,
+      "bayBottomMm": 230,
+      "woodSillTopMm": 320,
+      "deckTopMm": 320,
+      "timberJointGapMm": 12,
+      "staticState": "Fixed glazing remains closed and does not provide passage."
+    }
+  ],
+  "passed": true,
+  "excludedFixtures": [
+    "Excluded continuous ground",
+    "Excluded window foundation"
+  ],
+  "limits": "Static original visual assets, rigid manual assembly only. No automatic openings, native deck/gate links, gate animation, load engineering or code certification."
+}

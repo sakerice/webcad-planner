@@ -1,0 +1,427 @@
+{
+  "method": "Pillow composition of existing delivered PNG bytes; no new Blender renders",
+  "itemCount": 22,
+  "descriptorSha256": "4bab84087e1fe8bee3285ea30e97d8eefe7a3b8a863a30e80d319da7d2f4c04c",
+  "sheets": [
+    {
+      "view": "front",
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/kitchen-final-front-contact-sheet.png",
+      "bytes": 1200794,
+      "sha256": "bec6b6240e9e7ca8af2f69c2e8a3c87daaaaae9552bb748fdf67fcc552bbf2c2",
+      "inputs": [
+        {
+          "id": "rpg-mansion-scullery-sink-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-sink-900-01-front.png",
+          "bytes": 586943,
+          "sha256": "27b9d2a6a764e711ae8947678d22332a86984cac41508931e6b8e2b8aec57258"
+        },
+        {
+          "id": "rpg-mansion-kitchen-four-drawer-750-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-front.png",
+          "bytes": 727755,
+          "sha256": "30544cc5c1de2badf1b6d9cb42782b9b4da640f4b0887bde29fda76e0afe8a19"
+        },
+        {
+          "id": "rpg-mansion-kitchen-bottle-rack-300-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-front.png",
+          "bytes": 512887,
+          "sha256": "6ba70708cce4989a76d313eea69a42e0ce943370233cb8328199524b4312f1a9"
+        },
+        {
+          "id": "rpg-mansion-kitchen-three-drawer-600-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-600-01-front.png",
+          "bytes": 651006,
+          "sha256": "1ddbe4147008f384021c61393fa2b29eb37982eecb89e05415e0b2ac481bc237"
+        },
+        {
+          "id": "rpg-mansion-kitchen-three-drawer-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-front.png",
+          "bytes": 724317,
+          "sha256": "707c2440e0f8d096c438151e76718c6b5b9f53bb913f3a1a2133ef81a8c956d5"
+        },
+        {
+          "id": "rpg-mansion-kitchen-single-door-300-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-front.png",
+          "bytes": 491710,
+          "sha256": "dc36664aa6ea6f5c19bd0c59c82e8658e50d028fb8648b52f5de7ab60ace7c93"
+        },
+        {
+          "id": "rpg-mansion-kitchen-cutlery-cupboard-750-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cutlery-cupboard-750-01-front.png",
+          "bytes": 707344,
+          "sha256": "921f9cd9b87af8fe01eb29a84e29b369f32786118bf289d4fe956f083e0cf448"
+        },
+        {
+          "id": "rpg-mansion-kitchen-double-door-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-front.png",
+          "bytes": 707864,
+          "sha256": "6d34d582d0a985d355cd9c34c0f52a1b68bcbccbf301855ceef22bc2353d2c25"
+        },
+        {
+          "id": "rpg-mansion-scullery-double-sink-1200-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1200-01-front.png",
+          "bytes": 629458,
+          "sha256": "133350345d38d6acf76558f3c125113440d2f638bbd35c7d675ede9ae1312f9e"
+        },
+        {
+          "id": "rpg-mansion-scullery-double-sink-1800-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-front.png",
+          "bytes": 503476,
+          "sha256": "eccac8b85ca9427bd90fec31a9680d06f52fd0a7be8f5b2092d4c8bcd97e7d5b"
+        },
+        {
+          "id": "rpg-mansion-kitchen-glazed-wall-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-front.png",
+          "bytes": 676015,
+          "sha256": "654a241652962d00337a270490ae244b9d38ffaf884ec0d5228faf7dd5d1a15c"
+        },
+        {
+          "id": "rpg-mansion-kitchen-spice-wall-450-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-front.png",
+          "bytes": 685053,
+          "sha256": "2235b21ac30ba00f9c0b01d29628f098763485b19f36085a3c83ea5425ac4ce0"
+        },
+        {
+          "id": "rpg-mansion-kitchen-plate-rack-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-front.png",
+          "bytes": 694795,
+          "sha256": "44eee49b87ce31836ef30e300e1a7a431488e2ee279083d288ca32fc2d039c59"
+        },
+        {
+          "id": "rpg-mansion-kitchen-tall-larder-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-front.png",
+          "bytes": 521208,
+          "sha256": "64adab18b44c0aa541709a6a2aaee89e3e9f29640d8aaaa2b46928c4a9c11220"
+        },
+        {
+          "id": "rpg-mansion-kitchen-pull-pantry-450-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-front.png",
+          "bytes": 427854,
+          "sha256": "f00959ff0edd71173da95f125b660cfba816b574250ed6b4dc51de18f99af93b"
+        },
+        {
+          "id": "rpg-mansion-kitchen-service-island-2100-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-front.png",
+          "bytes": 466531,
+          "sha256": "b16d4dd00282070562ce38a5bb54d30ee0a391234ddc8aabb2caeb3d1af5c0dd"
+        },
+        {
+          "id": "rpg-mansion-kitchen-baking-dresser-1200-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-front.png",
+          "bytes": 638442,
+          "sha256": "ef3574403694f3b3834fd643402ed1105363a70b49446b4a92d8c9a7a8af7ad1"
+        },
+        {
+          "id": "rpg-mansion-kitchen-diagonal-corner-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-diagonal-corner-900-01-front.png",
+          "bytes": 703848,
+          "sha256": "0dd4c672861c757e16214c00f5e0960d23ff0d5234d8144e7d1ce8f193ede96a"
+        },
+        {
+          "id": "rpg-mansion-kitchen-l-corner-right-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-front.png",
+          "bytes": 741457,
+          "sha256": "7e9291d436d3839dce40b11ff99b1c01c6d74fdd58d48d865a09a551f7956dc3"
+        },
+        {
+          "id": "rpg-mansion-kitchen-bread-safe-600-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bread-safe-600-01-front.png",
+          "bytes": 553791,
+          "sha256": "07b506f988e28ddaf4545505c9fd0f2926275a9232ac7dd0e37142c33a4a058f"
+        },
+        {
+          "id": "rpg-mansion-kitchen-cast-iron-range-750-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-front.png",
+          "bytes": 629777,
+          "sha256": "d06c18c85d13476711a696e6139a32854e19fb398e9a62a640a14029ee5d8b1b"
+        },
+        {
+          "id": "rpg-mansion-kitchen-draining-stand-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-front.png",
+          "bytes": 538582,
+          "sha256": "22502867ceff39caca8477b107291fa352cd16b4dc8ffa5eb1e0e7776b1a73c2"
+        }
+      ]
+    },
+    {
+      "view": "top",
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/kitchen-final-top-contact-sheet.png",
+      "bytes": 851798,
+      "sha256": "70190108da280d7ca4de8e3740f220c416839448c261da8b3e39464140e9e0ec",
+      "inputs": [
+        {
+          "id": "rpg-mansion-scullery-sink-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-sink-900-01-top.png",
+          "bytes": 254930,
+          "sha256": "66d0a0fa2d38af1dbdc70ca0c71fd8c8d2c6beb05c331dc0394bf2d36519790f"
+        },
+        {
+          "id": "rpg-mansion-kitchen-four-drawer-750-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-four-drawer-750-01-top.png",
+          "bytes": 228172,
+          "sha256": "d02e14634acd53cbeb2dbb8e6fc2b9554ccc7452ac5572301e59d428844883b2"
+        },
+        {
+          "id": "rpg-mansion-kitchen-bottle-rack-300-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bottle-rack-300-01-top.png",
+          "bytes": 201116,
+          "sha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49"
+        },
+        {
+          "id": "rpg-mansion-kitchen-three-drawer-600-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-600-01-top.png",
+          "bytes": 239467,
+          "sha256": "3231e0ce3c64e223dc54bb1cd2be62e1d30dca769ad3d4b3220394c48030a49a"
+        },
+        {
+          "id": "rpg-mansion-kitchen-three-drawer-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-900-01-top.png",
+          "bytes": 208481,
+          "sha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8"
+        },
+        {
+          "id": "rpg-mansion-kitchen-single-door-300-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-single-door-300-01-top.png",
+          "bytes": 201116,
+          "sha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49"
+        },
+        {
+          "id": "rpg-mansion-kitchen-cutlery-cupboard-750-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cutlery-cupboard-750-01-top.png",
+          "bytes": 228172,
+          "sha256": "d02e14634acd53cbeb2dbb8e6fc2b9554ccc7452ac5572301e59d428844883b2"
+        },
+        {
+          "id": "rpg-mansion-kitchen-double-door-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-double-door-900-01-top.png",
+          "bytes": 208481,
+          "sha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8"
+        },
+        {
+          "id": "rpg-mansion-scullery-double-sink-1200-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1200-01-top.png",
+          "bytes": 222906,
+          "sha256": "bdb3cb2c33b1d71fbfd1287a52355c0d3018bdb3b321294ac8d9f58a9511dcf3"
+        },
+        {
+          "id": "rpg-mansion-scullery-double-sink-1800-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1800-01-top.png",
+          "bytes": 183588,
+          "sha256": "04ef3cd53952900f65804d8881b20fe631cbabde759eb9bd8bd2d792c3486d69"
+        },
+        {
+          "id": "rpg-mansion-kitchen-glazed-wall-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-glazed-wall-900-01-top.png",
+          "bytes": 184664,
+          "sha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2"
+        },
+        {
+          "id": "rpg-mansion-kitchen-spice-wall-450-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-spice-wall-450-01-top.png",
+          "bytes": 253758,
+          "sha256": "61792bcbc2bb7e47e5eadf3dd6b67132be3c1f39f1de6cb63010d1c470e1980e"
+        },
+        {
+          "id": "rpg-mansion-kitchen-plate-rack-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-plate-rack-900-01-top.png",
+          "bytes": 184664,
+          "sha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2"
+        },
+        {
+          "id": "rpg-mansion-kitchen-tall-larder-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-tall-larder-900-01-top.png",
+          "bytes": 239749,
+          "sha256": "da26bec2fe3c6c78674d5dfabd1fe85901b6cc1404d8ea156d52297af7dde53b"
+        },
+        {
+          "id": "rpg-mansion-kitchen-pull-pantry-450-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pull-pantry-450-01-top.png",
+          "bytes": 253710,
+          "sha256": "a93841fade2165a33a27ee992fa667f0dc3983929db54435801cdb671c9f7744"
+        },
+        {
+          "id": "rpg-mansion-kitchen-service-island-2100-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-service-island-2100-01-top.png",
+          "bytes": 170370,
+          "sha256": "ac31387c199e93e46f56bf946f4e6bb95b62b9268a7a1b06719dc5abc177485a"
+        },
+        {
+          "id": "rpg-mansion-kitchen-baking-dresser-1200-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-baking-dresser-1200-01-top.png",
+          "bytes": 213773,
+          "sha256": "acd2e6da63088f15c9f53b765d99f850c68269525eae4f2c59e12bec5bcf25d1"
+        },
+        {
+          "id": "rpg-mansion-kitchen-diagonal-corner-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-diagonal-corner-900-01-top.png",
+          "bytes": 249816,
+          "sha256": "bda14df3912fee435d2898541e799f31dcfdcf28ec6f48ad936a153345185855"
+        },
+        {
+          "id": "rpg-mansion-kitchen-l-corner-right-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-l-corner-right-900-01-top.png",
+          "bytes": 240720,
+          "sha256": "011011480c3d75a17b81725379b8c9e2e178addf161c33dbe5f4fa0e9af08a4d"
+        },
+        {
+          "id": "rpg-mansion-kitchen-bread-safe-600-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bread-safe-600-01-top.png",
+          "bytes": 246969,
+          "sha256": "c8e28427899202af2667643bf4522f82885cfd437319187eac8758e18b2ad36c"
+        },
+        {
+          "id": "rpg-mansion-kitchen-cast-iron-range-750-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cast-iron-range-750-01-top.png",
+          "bytes": 243499,
+          "sha256": "73a7a6c9b5e06d5d9b2fa6392624ac83e965df2eb7fbffb140c4fbcd2f45b360"
+        },
+        {
+          "id": "rpg-mansion-kitchen-draining-stand-900-01",
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-draining-stand-900-01-top.png",
+          "bytes": 257220,
+          "sha256": "cac923a6aaabc3b4822aa1be896c37996660e2bf261d6b2ab0361c8e3e0776a2"
+        }
+      ]
+    },
+    {
+      "view": "rear",
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/kitchen-final-rear-contact-sheet.png",
+      "bytes": 886973,
+      "sha256": "18d92c01676fd641bde5f4860271e515d66a3039f5a24a8431d12ae10a707ec3",
+      "inputs": [
+        {
+          "id": "rpg-mansion-scullery-sink-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-sink-900-01-rear.png",
+          "bytes": 544928,
+          "sha256": "a032247ae7b6bffc9816d37cf8075b3ff5a2a26b32d7d414f1a74bb36542defb"
+        },
+        {
+          "id": "rpg-mansion-kitchen-four-drawer-750-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-rear.png",
+          "bytes": 649809,
+          "sha256": "836c1442808dc22235f1dac2e14b0a1409193cf9384bfdfcfd97721142b84957"
+        },
+        {
+          "id": "rpg-mansion-kitchen-bottle-rack-300-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-rear.png",
+          "bytes": 470165,
+          "sha256": "3ee76f6aee3684a39fd552e321f4b35552b72c54354537d5ac77236dcb8cbe19"
+        },
+        {
+          "id": "rpg-mansion-kitchen-three-drawer-600-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-600-01-rear.png",
+          "bytes": 595552,
+          "sha256": "140c62a1a3b308cabeed3f05fc9af89ba171bd32f2774373f85fec5da6aaaed4"
+        },
+        {
+          "id": "rpg-mansion-kitchen-three-drawer-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-rear.png",
+          "bytes": 659010,
+          "sha256": "fc4df01875e57be36a9caa2e13e84bc30deb587fef4a54dcfbf56dd86c24c1fe"
+        },
+        {
+          "id": "rpg-mansion-kitchen-single-door-300-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-rear.png",
+          "bytes": 470171,
+          "sha256": "57dc227a813c5fec6875d76c590bfb0258c2aca377e712bf8965e6c97cf57779"
+        },
+        {
+          "id": "rpg-mansion-kitchen-cutlery-cupboard-750-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cutlery-cupboard-750-01-rear.png",
+          "bytes": 649809,
+          "sha256": "836c1442808dc22235f1dac2e14b0a1409193cf9384bfdfcfd97721142b84957"
+        },
+        {
+          "id": "rpg-mansion-kitchen-double-door-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-rear.png",
+          "bytes": 659011,
+          "sha256": "cc9370ece8a1b8e80fdd242c4f20272d94190e89640bd58be9c8d6bbee19acb4"
+        },
+        {
+          "id": "rpg-mansion-scullery-double-sink-1200-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1200-01-rear.png",
+          "bytes": 584026,
+          "sha256": "aa27a06550a474a9192eadc983d0181252765a6855bab36c2f1721556a3c07d8"
+        },
+        {
+          "id": "rpg-mansion-scullery-double-sink-1800-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-rear.png",
+          "bytes": 468152,
+          "sha256": "0ca3b071f8763a6d3233b182408851e342c09109699e4e8b0d808981f265d4aa"
+        },
+        {
+          "id": "rpg-mansion-kitchen-glazed-wall-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-rear.png",
+          "bytes": 573730,
+          "sha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e"
+        },
+        {
+          "id": "rpg-mansion-kitchen-spice-wall-450-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-rear.png",
+          "bytes": 563886,
+          "sha256": "00684aac22a6785120f70bb63e19d256ed150a7c3f3b43604b9bf902f7d8a954"
+        },
+        {
+          "id": "rpg-mansion-kitchen-plate-rack-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-rear.png",
+          "bytes": 573730,
+          "sha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e"
+        },
+        {
+          "id": "rpg-mansion-kitchen-tall-larder-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-rear.png",
+          "bytes": 484892,
+          "sha256": "5cbc473b8f800d6432b294eba9560c047bbfc1f7f1fe419323ae3829cf87c884"
+        },
+        {
+          "id": "rpg-mansion-kitchen-pull-pantry-450-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-rear.png",
+          "bytes": 409147,
+          "sha256": "65438c39a023e8455d1ee2d174e72081447edb9157e8d4cef11a40a3e3b3e34d"
+        },
+        {
+          "id": "rpg-mansion-kitchen-service-island-2100-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-rear.png",
+          "bytes": 440938,
+          "sha256": "92c4c5b5de6ec49ddcda62841416259109ea04fde034ff9bad0226915b7cb7f8"
+        },
+        {
+          "id": "rpg-mansion-kitchen-baking-dresser-1200-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-rear.png",
+          "bytes": 558058,
+          "sha256": "eb63ec406eb99b147c9b3ad20f93dd1ab4487aaec53e96d17753eec120b57673"
+        },
+        {
+          "id": "rpg-mansion-kitchen-diagonal-corner-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-diagonal-corner-900-01-rear.png",
+          "bytes": 643780,
+          "sha256": "60ba63980e88fa4d80158b210cdd070706e2542ab8c34f8f5a590b65b02aad05"
+        },
+        {
+          "id": "rpg-mansion-kitchen-l-corner-right-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-rear.png",
+          "bytes": 651259,
+          "sha256": "de35c4c213a1c39ae2809e1539488f435cddd493a86bc0fa3f09244eb65d5009"
+        },
+        {
+          "id": "rpg-mansion-kitchen-bread-safe-600-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bread-safe-600-01-rear.png",
+          "bytes": 478267,
+          "sha256": "80839412495907251f3e9981e0a82f66e9ccbe169da490fde3730ee4c3f295b7"
+        },
+        {
+          "id": "rpg-mansion-kitchen-cast-iron-range-750-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-rear.png",
+          "bytes": 604213,
+          "sha256": "e9e955734961cec4425f04f0ccc65d8b1802c97e354c0de88e2ab72b92f0602e"
+        },
+        {
+          "id": "rpg-mansion-kitchen-draining-stand-900-01",
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-rear.png",
+          "bytes": 536143,
+          "sha256": "93c3dfe7d7c2530230ae3675098bee1398615174aa01e0bb27cbef94d5b0fd41"
+        }
+      ]
+    }
+  ]
+}

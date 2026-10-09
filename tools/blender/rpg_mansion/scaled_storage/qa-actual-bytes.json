@@ -1,0 +1,6607 @@
+{
+  "scope": "Final actual GLB and all four 512px PNG views; final saved-source/re-export/contact hashes checked; browser runtime not tested",
+  "items": [
+    {
+      "id": "rpg-mansion-bow-commode-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bow-commode-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "66a126ab7f0e65515d3fec9d7c96a7789172c92e4a39fcbabe37ad7cf8f3f974",
+      "git_blob_sha": "e587fb6c63e606be2b961e0c8876c47b4b5f6fb6",
+      "bytes": 201448,
+      "actual_bounds_gltf_m": [
+        [
+          -0.5,
+          0.0,
+          -0.25
+        ],
+        [
+          0.5,
+          0.8999999761581421,
+          0.25
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1000.0,
+        500.0,
+        899.9999761581421
+      ],
+      "dimension_error_mm": [
+        0.0,
+        0.0,
+        -2.384185791015625e-05
+      ],
+      "triangles": 4812,
+      "uv": {
+        "triangles": 4812,
+        "valid_triangles": 4812,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 4.88927216733173,
+        "p95": 6.119068474384986,
+        "p95_p05": 1.2515295252471912,
+        "median": 5.15238248082815
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bow-commode-01-thumb.png",
+          "sha256": "55198697c1c9fcc2855dd8d9d02f51959433485915a89464d2dad2baf44c1f68",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 112288,
+          "pixel_bbox_alpha_gt_0": [
+            65,
+            53,
+            456,
+            449
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            66,
+            54,
+            456,
+            449
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bow-commode-01-top.png",
+          "sha256": "4339b8027e1ca634fd2f52303b3f459f48169cc78f023bd2b451258cdd10171e",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 81937,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            152,
+            462,
+            360
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            153,
+            461,
+            359
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass|metal": {
+            "points": 872,
+            "digest": "057e984a6474aa8ecd75884ba37c4c1a739ad7be3f9262a42df6b9f79841c32e"
+          },
+          "Mansion walnut heartwood|wood": {
+            "points": 540,
+            "digest": "5aa60b9c297fa5e18dd389c1df6c8ba73ff6348f68299066826039c225c45b6e"
+          },
+          "Mansion walnut mouldings|wood": {
+            "points": 648,
+            "digest": "4693fd48beacb4f5b9321e5b92288b3b6b9592d227282cfdd685fa627f232e46"
+          },
+          "Mansion walnut veneered fields|wood": {
+            "points": 432,
+            "digest": "d0401b6048cdc6690a190ba9c55ff8886344b817dce73919ac2d553e5440f54a"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass|metal": 1684,
+          "Mansion walnut heartwood|wood": 1032,
+          "Mansion walnut mouldings|wood": 1244,
+          "Mansion walnut veneered fields|wood": 852
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass|metal": "be932631f853712cf0345619277f053dac5265eb6ae8acf024a352962604c8a2",
+          "Mansion walnut heartwood|wood": "208c76a8df1d4d30978a1d17ec97a85731d031e923ee7f2788f15fdea88775b7",
+          "Mansion walnut mouldings|wood": "fc26163fae44e9578d8fefb1dbd1647e235e4457af7325476e1950e7756e0643",
+          "Mansion walnut veneered fields|wood": "15d959ddb130113a25e97136a7d68fa04caf88d96619adf22401bf7d8ea1527f"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass|metal": "cc1ea7054f170a11a8f14572839067b9a5ec0f5352ddc3bb70860618cfb558f2",
+          "Mansion walnut heartwood|wood": "9f6f6d7ca976de3d57e728c2e2de381f83a8de814d89e0dc64a6ac85f4421ac8",
+          "Mansion walnut mouldings|wood": "cf56fefde321aeacb1ca75e48112c078f3828ec3e801889b9c8fddab3dc9da0e",
+          "Mansion walnut veneered fields|wood": "3f21b5e9013be54176f9ac39c8071f645df5795c975d525659aa8a13659c0c8d"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-bow-commode-01-front.png",
+          "sha256": "0f30c8e0424b3f31289c93e415a613f813c402bca3625c9cf4c91a59c40f1d07",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 133078,
+          "pixel_bbox_alpha_gt_0": [
+            41,
+            63,
+            471,
+            449
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            42,
+            63,
+            470,
+            449
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-bow-commode-01-rear.png",
+          "sha256": "3bf295809a4c07cb0a5e53bd8d3c9cac68c83e22b5889ad0c1b6cd7d26cadc29",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 112730,
+          "pixel_bbox_alpha_gt_0": [
+            56,
+            57,
+            447,
+            451
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            56,
+            58,
+            446,
+            451
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-arched-vitrine-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-vitrine-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "a7d05673697d92bdf0a72751e06b0a42e00222f4fdfca42aed90afbd6d17552d",
+      "git_blob_sha": "94e6f88d81e3ab41e23c621405b04ea76f376715",
+      "bytes": 176372,
+      "actual_bounds_gltf_m": [
+        [
+          -0.44999998807907104,
+          0.0,
+          -0.20999999344348907
+        ],
+        [
+          0.44999998807907104,
+          1.899999976158142,
+          0.20999999344348907
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        899.9999761581421,
+        419.99998688697815,
+        1899.999976158142
+      ],
+      "dimension_error_mm": [
+        -2.384185791015625e-05,
+        -1.3113021850585938e-05,
+        -2.384185791015625e-05
+      ],
+      "triangles": 3932,
+      "uv": {
+        "triangles": 3932,
+        "valid_triangles": 3932,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 7.65731520857478,
+        "p95": 10.44841372515081,
+        "p95_p05": 1.3645009302281972,
+        "median": 8.919576742077627
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "alphaMode": "BLEND",
+          "doubleSided": true,
+          "extensions": {
+            "KHR_materials_transmission": {
+              "transmissionFactor": 0.9399999976158142
+            },
+            "KHR_materials_ior": {
+              "ior": 1.4500000476837158
+            }
+          },
+          "extras": {
+            "finishChannel": "glass"
+          },
+          "name": "Mansion clear antique glazing",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.6938717365264893,
+              0.7681511640548706,
+              0.7230551242828369,
+              0.11999999731779099
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.07999999821186066
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "glass",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "glass",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-vitrine-01-thumb.png",
+          "sha256": "103db22b2ef957465e915c7492e04179cad3f6be806722d6a957c93872d2ec89",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 59044,
+          "pixel_bbox_alpha_gt_0": [
+            162,
+            62,
+            349,
+            446
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            163,
+            62,
+            349,
+            446
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-vitrine-01-top.png",
+          "sha256": "92e4b4c125e8f4bd5f5797310d6bb802850964c83f028e440cb42bb8ffc429b5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 79782,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            159,
+            462,
+            353
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            160,
+            461,
+            352
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion clear antique glazing|glass": {
+            "points": 52,
+            "digest": "e30a6be57a0704370ccd3927d653cb4be60ebaab19d2b53e82ee3f1aea540a5e"
+          },
+          "Mansion patinated brass.001|metal": {
+            "points": 368,
+            "digest": "6ecaf9faeddc5c2e4c9fa18a3fdeb8b5af803c51781b595cfa3e52bbb40b01ac"
+          },
+          "Mansion walnut heartwood.001|wood": {
+            "points": 408,
+            "digest": "678eb8ebe0b87bc12293f32bac1bbe5735c1e9050690486b0a5a18219240190b"
+          },
+          "Mansion walnut mouldings.001|wood": {
+            "points": 1096,
+            "digest": "a8dcdea8efa556d78f67044899d80ae6de191663e864ae6ca922dcec5e7f9ab7"
+          },
+          "Mansion walnut veneered fields.001|wood": {
+            "points": 168,
+            "digest": "252d8951ce765e3d9f921b9600fd4aacdccd46608331b78c55a07bec7275dfcd"
+          }
+        },
+        "triangle_counts": {
+          "Mansion clear antique glazing|glass": 96,
+          "Mansion patinated brass.001|metal": 680,
+          "Mansion walnut heartwood.001|wood": 780,
+          "Mansion walnut mouldings.001|wood": 2068,
+          "Mansion walnut veneered fields.001|wood": 308
+        },
+        "triangle_surfaces": {
+          "Mansion clear antique glazing|glass": "ef430c667610b75a1b1d4ca639c2aa3bf33619077cc99723b733e27d7179d97f",
+          "Mansion patinated brass.001|metal": "dd3de18563aa11d488a5f2676bf98f329d04312cd8527bc46aa570b3a4dae3b7",
+          "Mansion walnut heartwood.001|wood": "19a0aea2fa59fea69faab3c068c319de27d608bf975e43c15b4309dbe44a4284",
+          "Mansion walnut mouldings.001|wood": "bfd6ab6d0de407812d5465406fc7ca8ea2ec219ae9f00c72861016c532eecf86",
+          "Mansion walnut veneered fields.001|wood": "001b9b2a8d7e51d52332bd3c8034a9b923538c151a46e9f796ada0d16207355d"
+        },
+        "uv_triangle_mapping": {
+          "Mansion clear antique glazing|glass": "8560995d9cb5b4f62bdb1fb9d6272e28e17e25242b1ba3b742602077af09ba62",
+          "Mansion patinated brass.001|metal": "c2993fa311fd4560d78bf1443ba2165a58dcfabaaa11835643394384d4707fc0",
+          "Mansion walnut heartwood.001|wood": "a64d898b534a30e30ff653136e01dd6941a50428ae61eac8f3531d5d82deeed3",
+          "Mansion walnut mouldings.001|wood": "a9efbd3cd65dc307b3605db8a938017d6389c3e0c7038a7b8731a34bd0c6b644",
+          "Mansion walnut veneered fields.001|wood": "96733095c02c59615fa7fe8f98635a3dc886794244abd144d873bfc524f61b8a"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-vitrine-01-front.png",
+          "sha256": "b57bd5b03489b7e2c830821a570e8c89311751c431a29b3ab294bb0083ac74dd",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 76370,
+          "pixel_bbox_alpha_gt_0": [
+            154,
+            41,
+            358,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            154,
+            42,
+            358,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-vitrine-01-rear.png",
+          "sha256": "1e277e5bed142205da2ba3c2040695e5af74ccfc13201724d13762d0a6814532",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 59035,
+          "pixel_bbox_alpha_gt_0": [
+            163,
+            62,
+            349,
+            446
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            163,
+            62,
+            349,
+            446
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-slant-bureau-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slant-bureau-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "db53d31cbd4e3f498145a3525cd9723ad70539bb1c1c6f40f26424f3f6a4f162",
+      "git_blob_sha": "eceb1a2fb95a021e7c14805cf1149ed8c4fc607f",
+      "bytes": 198912,
+      "actual_bounds_gltf_m": [
+        [
+          -0.5,
+          0.0,
+          -0.27000001072883606
+        ],
+        [
+          0.5,
+          1.2000000476837158,
+          0.27000001072883606
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1000.0,
+        540.0000214576721,
+        1200.0000476837158
+      ],
+      "dimension_error_mm": [
+        0.0,
+        2.1457672119140625e-05,
+        4.76837158203125e-05
+      ],
+      "triangles": 4616,
+      "uv": {
+        "triangles": 4616,
+        "valid_triangles": 4616,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 7.709117027493131,
+        "p95": 10.453633486084557,
+        "p95_p05": 1.3560091835165582,
+        "median": 8.16406154605413
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.002",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.002",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.002",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.002",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slant-bureau-01-thumb.png",
+          "sha256": "75529fb8a3bedc5d1772710927baf699a9e6e1e2835151db4c77014930d4171c",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 107488,
+          "pixel_bbox_alpha_gt_0": [
+            89,
+            44,
+            426,
+            462
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            89,
+            44,
+            425,
+            462
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slant-bureau-01-top.png",
+          "sha256": "f608d7892799a747c44bbfa2eae7fa1cb0b8d5531319e06e1222d8ab0d6df94c",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 89913,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            144,
+            462,
+            368
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            145,
+            461,
+            367
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass.002|metal": {
+            "points": 1056,
+            "digest": "53d0b7259ba14d2be97724627057ccef5990e3a0e4f20fa9fc7b49ab7f14356f"
+          },
+          "Mansion walnut heartwood.002|wood": {
+            "points": 840,
+            "digest": "491153dbb3aa4bfa316f3e50509534a0096fec5ac5f3b09f1fdf57332174b1bc"
+          },
+          "Mansion walnut mouldings.002|wood": {
+            "points": 432,
+            "digest": "c6310d7d293af54cb17120567016a7e1be0a12f50f93dc2f2e42bd2bb34de5f8"
+          },
+          "Mansion walnut veneered fields.002|wood": {
+            "points": 96,
+            "digest": "18767447f43d50efd066d3bf1b1ecd24d5c6d9ceca3d94e140cd02cffdac8d66"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass.002|metal": 2040,
+          "Mansion walnut heartwood.002|wood": 1572,
+          "Mansion walnut mouldings.002|wood": 828,
+          "Mansion walnut veneered fields.002|wood": 176
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass.002|metal": "f0c91dd4afd642c3771962d5d7bfd8e1e0626e6309638939a5ccf1232d3b22a5",
+          "Mansion walnut heartwood.002|wood": "be93311336e04507b1dbcb486a677ed68c86bb474ccae3be5250e6e3ef9e4dd9",
+          "Mansion walnut mouldings.002|wood": "8c8151660fe2f4c23e5d798fd1385984e899a1cbc0b1b22fc6d9d07ca3408c31",
+          "Mansion walnut veneered fields.002|wood": "53752a605c795d8452c43ce7b3c17ae9f8a03aa6804e257dd781b3c1399644e4"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass.002|metal": "f425c767e8f59eab180c32f336ab1ff3761d134b446579d51bb53c069242e7ab",
+          "Mansion walnut heartwood.002|wood": "0ec971d85e49f656ef286437eab00ee887b0ff6dd140f3d5a6e5789b537b8bbb",
+          "Mansion walnut mouldings.002|wood": "9d05b9a3de2b7ea7356466eb09cceab860f6906cdcfd9d4be908202dd5f62027",
+          "Mansion walnut veneered fields.002|wood": "29e072abe5a3a52174ac5d5ecfc7113194ed59654abaaec0e832492b21906e34"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-slant-bureau-01-front.png",
+          "sha256": "e7513711898689d22281d6aed8f9329c2d77989beac9f4840fdf8a02c6e0585d",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 129119,
+          "pixel_bbox_alpha_gt_0": [
+            77,
+            41,
+            435,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            78,
+            42,
+            434,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-slant-bureau-01-rear.png",
+          "sha256": "508bef830490fcbbf343725f202c73e6f9385d7bab1fdf1f45f4142190d8b139",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 97036,
+          "pixel_bbox_alpha_gt_0": [
+            86,
+            77,
+            423,
+            462
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            87,
+            77,
+            423,
+            462
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-linen-press-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-linen-press-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "9830a37f0dfcb46a998cb328229aa5c8b72bc275a3a6dc299c683a03abcdad3f",
+      "git_blob_sha": "d325f02ed28817de04203c65cb5d24ee55b0e5a1",
+      "bytes": 136604,
+      "actual_bounds_gltf_m": [
+        [
+          -0.5015000104904175,
+          0.0,
+          -0.2955000102519989
+        ],
+        [
+          0.5015000104904175,
+          1.9500000476837158,
+          0.2955000102519989
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1003.000020980835,
+        591.0000205039978,
+        1950.0000476837158
+      ],
+      "dimension_error_mm": [
+        2.09808349609375e-05,
+        2.0503997802734375e-05,
+        4.76837158203125e-05
+      ],
+      "triangles": 2976,
+      "uv": {
+        "triangles": 2976,
+        "valid_triangles": 2976,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 6.966839733410915,
+        "p95": 9.390187411823895,
+        "p95_p05": 1.3478403079650758,
+        "median": 7.361403683732588
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.003",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.003",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.003",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.003",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-linen-press-01-thumb.png",
+          "sha256": "6b956451b5d867aec9c0705edb6288f25eb4dc8f8c1d1aedfa16ef89e51d6429",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 71680,
+          "pixel_bbox_alpha_gt_0": [
+            148,
+            57,
+            364,
+            452
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            149,
+            58,
+            363,
+            452
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-linen-press-01-top.png",
+          "sha256": "6ceccac16a6fa8f9c116eb8f9243bdc54f092c519e7470b17ac4600a6d1a8952",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 100373,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            134,
+            462,
+            378
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            135,
+            461,
+            377
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass.003|metal": {
+            "points": 624,
+            "digest": "d9d8a369e5c1e49333317d3e1c0848e71aa5b48ba6ba08c31bff8dd22d50e69d"
+          },
+          "Mansion walnut heartwood.003|wood": {
+            "points": 504,
+            "digest": "cb1635ceba94ada1e2fb453fcd2fbab44d8acf5553fa50d06785813b3c0f8c8f"
+          },
+          "Mansion walnut mouldings.003|wood": {
+            "points": 344,
+            "digest": "0036a196deaae93bcccdabe74efa2870393eb05745efa23a378867271c61cd62"
+          },
+          "Mansion walnut veneered fields.003|wood": {
+            "points": 96,
+            "digest": "abebdd6bb989da056a9b6f52ce10e31ed93f86f5b1b9ddec3f0938049445bcdb"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass.003|metal": 1184,
+          "Mansion walnut heartwood.003|wood": 956,
+          "Mansion walnut mouldings.003|wood": 660,
+          "Mansion walnut veneered fields.003|wood": 176
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass.003|metal": "fc30f596c3920c6ad5dd8bbdba2669aa44b16f3f49c5b792392ea5d11e73c9e1",
+          "Mansion walnut heartwood.003|wood": "023a8e3f4f2d656c06b0ca7d4f8827be6460c3023cae6c488baf215bcc30200b",
+          "Mansion walnut mouldings.003|wood": "0177c9d7e1c52de3c30935b8612b876cd9aecbb96d69de8d71cdb8b33ad4dd61",
+          "Mansion walnut veneered fields.003|wood": "83666329c144efc5c06244abf977215129e313812c928934589bc8fafcfbf2ed"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass.003|metal": "c5be3cdb81ff72e7a65779c3ede10e33743a814e27018b6192c2fd2813f5e2b3",
+          "Mansion walnut heartwood.003|wood": "d2caddbada09e65dce40de47da27f571cd76145dceac5de5d4cf89f80fbcd61c",
+          "Mansion walnut mouldings.003|wood": "40ac624ee3fb74f09fbc2fb8a2f350b9034b81f7545892b4f270e2e82a339ed8",
+          "Mansion walnut veneered fields.003|wood": "1f24e31767cf83af1a0d84fee5380160712fca11ebb24c7fbfbfa3d2d854fad2"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-linen-press-01-front.png",
+          "sha256": "da6fb447df2d65540fe76142e6d82a9afdff604027266b75fe31a6b7ddc1911c",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 85532,
+          "pixel_bbox_alpha_gt_0": [
+            145,
+            41,
+            367,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            146,
+            42,
+            366,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-linen-press-01-rear.png",
+          "sha256": "cdec0e4d5ddbff51808c1912449f389163da42a801ee7722c960b8c11bf90ba5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 71680,
+          "pixel_bbox_alpha_gt_0": [
+            148,
+            57,
+            364,
+            452
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            149,
+            58,
+            363,
+            452
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-louver-cupboard-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-louver-cupboard-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "457b08db71f07840ba17338e7a2bbc1b0b5ed1f75486ab4533212c424c333220",
+      "git_blob_sha": "00ea1c5318ebb6a023245d01070fb2c93410dc48",
+      "bytes": 127432,
+      "actual_bounds_gltf_m": [
+        [
+          -0.41499999165534973,
+          0.0,
+          -0.20000000298023224
+        ],
+        [
+          0.41499999165534973,
+          1.1399999856948853,
+          0.20000000298023224
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        829.9999833106995,
+        400.0000059604645,
+        1139.9999856948853
+      ],
+      "dimension_error_mm": [
+        -1.6689300537109375e-05,
+        5.9604644775390625e-06,
+        -1.430511474609375e-05
+      ],
+      "triangles": 2788,
+      "uv": {
+        "triangles": 2788,
+        "valid_triangles": 2788,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 4.772493332307845,
+        "p95": 5.975715449882798,
+        "p95_p05": 1.2521160395195583,
+        "median": 5.070143644973328
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.004",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.004",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.004",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.004",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-louver-cupboard-01-thumb.png",
+          "sha256": "a2c769bf264c107dd569f2559c2be7ad8456a0793211c10dd51906b82f26ee59",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 95567,
+          "pixel_bbox_alpha_gt_0": [
+            112,
+            50,
+            400,
+            457
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            112,
+            51,
+            400,
+            457
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-louver-cupboard-01-top.png",
+          "sha256": "9e09214ca3df7192ec1d1d0affd91854a2835dc51b75bad4a876eb364360b7fd",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 82288,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            156,
+            462,
+            356
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            157,
+            461,
+            355
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass.004|metal": {
+            "points": 176,
+            "digest": "31b8236b504b7b2af301219d652089c5604bc6f0ac7111cac3f3a8fc52eaff0f"
+          },
+          "Mansion walnut heartwood.004|wood": {
+            "points": 456,
+            "digest": "2cd36f9793d0d7ea34bbaf2d5c897be7e1e6757af1e46a1ecfda4a51bce292e8"
+          },
+          "Mansion walnut mouldings.004|wood": {
+            "points": 240,
+            "digest": "5b0d796c4f49f9909aa634c94a23de94e974f135722040900929f409a3d200b3"
+          },
+          "Mansion walnut veneered fields.004|wood": {
+            "points": 624,
+            "digest": "7cd6eac7851d9a7cf3ce0e8883bb78a1115779773c4b50211b428f9be2d448d5"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass.004|metal": 336,
+          "Mansion walnut heartwood.004|wood": 868,
+          "Mansion walnut mouldings.004|wood": 440,
+          "Mansion walnut veneered fields.004|wood": 1144
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass.004|metal": "09fb9b0cd125c7133a8dadf82298728f000970c627937a2f74de4e405e2cd721",
+          "Mansion walnut heartwood.004|wood": "5e6c1111786a6fa245df1e74919314d9d1c61062310a829b3ee9869469a8c63b",
+          "Mansion walnut mouldings.004|wood": "cf8694c09fcdf578b2b6710c91bcb4f1e27343fb81f7e376a2bbf48dc5fb55bd",
+          "Mansion walnut veneered fields.004|wood": "a20b50d0ef3bf8d6eb01171557e7ad6a30819ac4fd348d78d770081ec7240c56"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass.004|metal": "4b5ae926cc315390ac6e6baac3dcd7957a9e6e24e31f879309db2079dc2865c8",
+          "Mansion walnut heartwood.004|wood": "92f3f689f0637f2e228d74b9e6b994d1f7f1f3d2051fd12ddaf651327a9773f4",
+          "Mansion walnut mouldings.004|wood": "e701e3180d2ba00b9535a76c1cc888ea45ad7272e95093f19f7dfc985482bbcd",
+          "Mansion walnut veneered fields.004|wood": "631ce4d3d81f390f48d9508ffbcef06e00a94ed1e924ea75d73fe40dd5659467"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-louver-cupboard-01-front.png",
+          "sha256": "7546f3c8b1e3281ad722ee6d5e58b51f18411a65b5d049aa74d3745764253fb0",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 118321,
+          "pixel_bbox_alpha_gt_0": [
+            100,
+            41,
+            413,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            100,
+            42,
+            412,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-louver-cupboard-01-rear.png",
+          "sha256": "4a01eedeac5394d9dded4e224641214ada8e8da77426faaa26c2d1bd576429f9",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 95586,
+          "pixel_bbox_alpha_gt_0": [
+            112,
+            50,
+            400,
+            457
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            112,
+            51,
+            400,
+            457
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-open-etagere-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-open-etagere-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "027b78d418f2c6a76f879746b9aad0d43e427c491b53aacf02f6045ba1b26b52",
+      "git_blob_sha": "7a5e2f12f1e0f6e2ce8adfedd86294683ccf5d14",
+      "bytes": 65500,
+      "actual_bounds_gltf_m": [
+        [
+          -0.4000000059604645,
+          0.0,
+          -0.1599999964237213
+        ],
+        [
+          0.4000000059604645,
+          1.7400000095367432,
+          0.1599999964237213
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        800.000011920929,
+        319.9999928474426,
+        1740.0000095367432
+      ],
+      "dimension_error_mm": [
+        1.1920928955078125e-05,
+        -7.152557373046875e-06,
+        9.5367431640625e-06
+      ],
+      "triangles": 1492,
+      "uv": {
+        "triangles": 1492,
+        "valid_triangles": 1492,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.568144718229055,
+        "p95": 4.8463489411172755,
+        "p95_p05": 1.3582265641743982,
+        "median": 3.951026105259925
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.005",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.005",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.005",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.005",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-open-etagere-01-thumb.png",
+          "sha256": "a9660e48563d0b51ea47e45b2f63710b81abcf0dfa348892b062d537fa5362a9",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 37267,
+          "pixel_bbox_alpha_gt_0": [
+            168,
+            66,
+            344,
+            447
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            168,
+            66,
+            344,
+            446
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-open-etagere-01-top.png",
+          "sha256": "62ab9c132ae6865f3618daec7f5fc1f50f32e97d90939aa5965eecf779110b0b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 68379,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            173,
+            462,
+            339
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            173,
+            461,
+            339
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass.005|metal": {
+            "points": 192,
+            "digest": "7316258980067eaafc08343b6c68f0cfc0004690ec22845aea85ba6633218269"
+          },
+          "Mansion walnut heartwood.005|wood": {
+            "points": 360,
+            "digest": "7738d86d7218041e4939b9ce745338bea8d7f4e3706143f0bd31d4a61f5d0f48"
+          },
+          "Mansion walnut mouldings.005|wood": {
+            "points": 120,
+            "digest": "a5d0f1a31e9d9e0632139a27c35606ba7f15dae073c409ed9f09ebb947820495"
+          },
+          "Mansion walnut veneered fields.005|wood": {
+            "points": 120,
+            "digest": "b3b64fd1f168ce83583b9a17a0f85f488f36114e3fc9e7813ef943683902cca4"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass.005|metal": 368,
+          "Mansion walnut heartwood.005|wood": 684,
+          "Mansion walnut mouldings.005|wood": 220,
+          "Mansion walnut veneered fields.005|wood": 220
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass.005|metal": "cfec907a052bebc3da27c1cc60ecfaab3feb4091071bf256aae778b2059f68b4",
+          "Mansion walnut heartwood.005|wood": "d83153a61cfb706cb1b6bdccff2a0938d5fdb52aa07e6e11c858dd3aea84c8be",
+          "Mansion walnut mouldings.005|wood": "253a5c54eb5d7ea18d452ee42d341a0570ecbe5dd84e6f6b9b6ac104b2760f38",
+          "Mansion walnut veneered fields.005|wood": "ee050f2034e74b632a33612647a64f84470115af06b8ba9444f88171762609e5"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass.005|metal": "d380ab5341bdeb4dc209c7ba0db7da1ca16f97177a2ec2202bf785fc49b8987d",
+          "Mansion walnut heartwood.005|wood": "43e388878fcc37cd5f5caeed6907144043558437457a7c89bf3ab6232199c1bf",
+          "Mansion walnut mouldings.005|wood": "d0127b037c52a9f0d3bfc32f82b6b6dec2a3e3b56bb598df98230d2931fae317",
+          "Mansion walnut veneered fields.005|wood": "23eeb7b4251455be15513de46fa8d293e38c8435d211006a282569eb67b5c6b6"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-open-etagere-01-front.png",
+          "sha256": "a7698073549b1622552c73ba53e9fd2a5cf865e0cf96c5504c10d675a41bf89d",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 31581,
+          "pixel_bbox_alpha_gt_0": [
+            156,
+            42,
+            355,
+            470
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            157,
+            42,
+            355,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-open-etagere-01-rear.png",
+          "sha256": "66809bc4c0e262e1b027a9edc437fcbf4678622bfb5bc50869e0e4b681c09d5a",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 30924,
+          "pixel_bbox_alpha_gt_0": [
+            168,
+            66,
+            344,
+            447
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            168,
+            66,
+            344,
+            446
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-oval-pedestal-cabinet-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-pedestal-cabinet-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "253d4d8dfea9dc0b6db3b0e109160f88932a787b502a13c907b4bfa8a7c76677",
+      "git_blob_sha": "e914244e617c29b2af14092cfc13a4f24f145624",
+      "bytes": 35760,
+      "actual_bounds_gltf_m": [
+        [
+          -0.15800000727176666,
+          0.0,
+          -0.13300000131130219
+        ],
+        [
+          0.15800000727176666,
+          0.7639999985694885,
+          0.13300000131130219
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        316.0000145435333,
+        266.00000262260437,
+        763.9999985694885
+      ],
+      "dimension_error_mm": [
+        1.4543533325195312e-05,
+        2.6226043701171875e-06,
+        -1.430511474609375e-06
+      ],
+      "triangles": 808,
+      "uv": {
+        "triangles": 808,
+        "valid_triangles": 808,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.1833751390284442,
+        "p95": 1.4210663715608647,
+        "p95_p05": 1.2008587342197894,
+        "median": 1.2841333847157035
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.009",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.009",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.008",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.009",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-cabinet-01-thumb.png",
+          "sha256": "ba02322153aaafe310405c2a362c98ab723ac4d06aad1d5e28dd5addcc4ed6cd",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 45178,
+          "pixel_bbox_alpha_gt_0": [
+            184,
+            65,
+            328,
+            445
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            184,
+            65,
+            328,
+            445
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-cabinet-01-top.png",
+          "sha256": "d9324be598618cf4e19323c1c77884e2bb70c03f9ce90b2c470a679b1c98c8d2",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 110789,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            82,
+            462,
+            429
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            83,
+            461,
+            429
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass.009|metal": {
+            "points": 88,
+            "digest": "45f68177512e9014f579b94116cc227fad07bc46e3eebf02679556d28d3ada60"
+          },
+          "Mansion walnut heartwood.009|wood": {
+            "points": 48,
+            "digest": "861e54b9331075428c9e138c7d940bcc67fa3ccf50c11842b368f15c7e2f462b"
+          },
+          "Mansion walnut mouldings.009|wood": {
+            "points": 168,
+            "digest": "13585b35362c4d2f3be448aa98844a2360bbd06f37129c9bb6ff82f24575c46f"
+          },
+          "Mansion walnut veneered fields.008|wood": {
+            "points": 112,
+            "digest": "231646bc29e4aa9fa3d6a3126a72f379bfe6194bcd0a2e5a676a4f1a16bf809e"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass.009|metal": 168,
+          "Mansion walnut heartwood.009|wood": 92,
+          "Mansion walnut mouldings.009|wood": 328,
+          "Mansion walnut veneered fields.008|wood": 220
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass.009|metal": "bf7484f35bdfe94eeeb1d679b0f2de7b5ec15d3f00abadf2f36e57f77d79b6c2",
+          "Mansion walnut heartwood.009|wood": "f01c26c3e1b31fb544813150298231060cae3e846a755b0918b23ac385608dcb",
+          "Mansion walnut mouldings.009|wood": "95575f639c1c7f52d4c7ddaa5996843ccc20851d128b5938f1367a4fc4dafa2a",
+          "Mansion walnut veneered fields.008|wood": "1cb90347fbdd230ff94834fba8150c323e8ce37b11d453f28991f43764420c02"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass.009|metal": "d5e0090c7fe34fcec68822f785aec7b37f0cd39792e02fd6bb9d96358c07d261",
+          "Mansion walnut heartwood.009|wood": "a7435f2eaf0788109890f0f6cdcb341a5caa22973c26b58390a0629d5eca7b77",
+          "Mansion walnut mouldings.009|wood": "68558f2c55ce0dbcd53670eb1db9b1093160a3c5710239ba7829568eb9222a79",
+          "Mansion walnut veneered fields.008|wood": "3b5e8e5223f637f4975d9357fe953b597bac65f19ff5d981951d7460f8852f99"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-oval-pedestal-cabinet-01-front.png",
+          "sha256": "1e35e92ad69c078f2065219e16322c503a6fe110287f8f733facbcf4bb6d1724",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 63264,
+          "pixel_bbox_alpha_gt_0": [
+            166,
+            41,
+            346,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            167,
+            42,
+            345,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-oval-pedestal-cabinet-01-rear.png",
+          "sha256": "030da4fed0d3bd17e3ec4b4ee7702e87da196cc49131cf7632bb36b4412bf9ab",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 45179,
+          "pixel_bbox_alpha_gt_0": [
+            184,
+            65,
+            328,
+            445
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            184,
+            65,
+            328,
+            445
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-apothecary-chest-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-apothecary-chest-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "19dc63e5d5b365f58bbd6aae7d5d69743b0935f4283966c9827fee9bf33897e7",
+      "git_blob_sha": "dcfffa9fe31e02423d879f29ffcb30c313dffc24",
+      "bytes": 183684,
+      "actual_bounds_gltf_m": [
+        [
+          -0.43700000643730164,
+          0.0,
+          -0.2345000058412552
+        ],
+        [
+          0.43700000643730164,
+          1.059000015258789,
+          0.2345000058412552
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        874.0000128746033,
+        469.0000116825104,
+        1059.000015258789
+      ],
+      "dimension_error_mm": [
+        1.2874603271484375e-05,
+        1.1682510375976562e-05,
+        1.52587890625e-05
+      ],
+      "triangles": 3780,
+      "uv": {
+        "triangles": 3780,
+        "valid_triangles": 3780,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.304949475688187,
+        "p95": 7.182428806185657,
+        "p95_p05": 1.3539108787183902,
+        "median": 5.609051295020848
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.010",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.010",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.009",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.010",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-apothecary-chest-01-thumb.png",
+          "sha256": "964fe8177fbc3f11794a8b4ae1e36058fafa9c1129322c652be5807e0cb3357d",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 109647,
+          "pixel_bbox_alpha_gt_0": [
+            88,
+            44,
+            424,
+            463
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            89,
+            45,
+            423,
+            463
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-apothecary-chest-01-top.png",
+          "sha256": "563a897cf6590b98629eb5f1c7b775718b7da8fa74d0ae75f07cc52c258b1855",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 91448,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            145,
+            462,
+            367
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            145,
+            461,
+            367
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass.010|metal": {
+            "points": 1024,
+            "digest": "9de53a5bc7bc672f093fe66a790d3ea1987dbd1554fd3c725399635dcef8b02d"
+          },
+          "Mansion walnut heartwood.010|wood": {
+            "points": 480,
+            "digest": "d16b91c499869c0356f5edba85a6d968bd5aa36d37af2405ec819f01d76eda48"
+          },
+          "Mansion walnut mouldings.010|wood": {
+            "points": 168,
+            "digest": "96f314d5de816f4f4feddcb3390f00eef34cc0e3335947d422790078d15d1d39"
+          },
+          "Mansion walnut veneered fields.009|wood": {
+            "points": 384,
+            "digest": "5a402c31e06c7f360664596e08da446a49a39e9baab0cfe9b3fc5176730401b0"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass.010|metal": 1856,
+          "Mansion walnut heartwood.010|wood": 912,
+          "Mansion walnut mouldings.010|wood": 308,
+          "Mansion walnut veneered fields.009|wood": 704
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass.010|metal": "8086c17d63a1535767421b18bb43db65d7c4e30ed7a028f7420888d18e1b9bfd",
+          "Mansion walnut heartwood.010|wood": "547ff7d0d21b79935bb942d96a7a133fe3ffd62c1ff061084373585c9594b992",
+          "Mansion walnut mouldings.010|wood": "07e66180762f2b21b8c2be04f13fded4b3f2e60f837693c973a9d69c60b4b108",
+          "Mansion walnut veneered fields.009|wood": "488a4cb01c55b9c32681e4a9f471e918ed7fc9da185b38172f479401fb2c0d36"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass.010|metal": "dcd5d21447882ff952a85495fda17ee38359ba5d2351040d578c8ea03e8ef707",
+          "Mansion walnut heartwood.010|wood": "f9c83014be9f8ca62307c2b5aef0939bdabdd991290921b5bce429bd51173ebd",
+          "Mansion walnut mouldings.010|wood": "456c7c6f5af1a6d40092eed4164680d5f78aec69f732234345aa3354024c2051",
+          "Mansion walnut veneered fields.009|wood": "40df5248ca81c83356ea58167abbc3a3202ecd2619e46a3e5be10f10e99b7cd1"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-apothecary-chest-01-front.png",
+          "sha256": "7ac7391bf02bdf8757c5a6e3869462b2547dfca4f1f6a71b59f35e2678d6cc62",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 128972,
+          "pixel_bbox_alpha_gt_0": [
+            79,
+            41,
+            434,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            79,
+            42,
+            433,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-apothecary-chest-01-rear.png",
+          "sha256": "112a0a7fe27ea667ec515281df70d6493e332ded44c840b567c6db8671f9b727",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 109653,
+          "pixel_bbox_alpha_gt_0": [
+            88,
+            44,
+            424,
+            463
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            89,
+            45,
+            423,
+            463
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-blanket-coffer-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-blanket-coffer-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "e720cfdcb9e3d55c878aeb78f2ea240952ca42e7d02955221d7ca0d94712d756",
+      "git_blob_sha": "e97bc9da63e12c771418b0e94ae92470a989a760",
+      "bytes": 79044,
+      "actual_bounds_gltf_m": [
+        [
+          -0.550000011920929,
+          0.0,
+          -0.30000001192092896
+        ],
+        [
+          0.550000011920929,
+          0.6000000238418579,
+          0.30000001192092896
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1100.000023841858,
+        600.0000238418579,
+        600.0000238418579
+      ],
+      "dimension_error_mm": [
+        2.384185791015625e-05,
+        2.384185791015625e-05,
+        2.384185791015625e-05
+      ],
+      "triangles": 1808,
+      "uv": {
+        "triangles": 1808,
+        "valid_triangles": 1808,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.7001548077655895,
+        "p95": 4.910050512115346,
+        "p95_p05": 1.326985157975154,
+        "median": 4.3453578306197045
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.011",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.010",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.011",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.011",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-blanket-coffer-01-thumb.png",
+          "sha256": "c53bfffc5039942ac5a1a644a9d17c76d010ba09ab33f6f72ea5e8ceec327fc3",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 79208,
+          "pixel_bbox_alpha_gt_0": [
+            52,
+            108,
+            460,
+            394
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            52,
+            108,
+            460,
+            394
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-blanket-coffer-01-top.png",
+          "sha256": "4eac7722299725870b0c386b95f82657f743d8afb945d2bd8b89e33c59ee8f78",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 93012,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            143,
+            462,
+            369
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            144,
+            461,
+            368
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass.011|metal": {
+            "points": 208,
+            "digest": "0464e90e6be411ebd7dd9d487b951d28134716bd6759e3d646837e80b7ecd6a9"
+          },
+          "Mansion walnut heartwood.011|wood": {
+            "points": 312,
+            "digest": "799908e8a9fe507b986e919a67aed6d95a8e0d76e63ce89f5c86b07761c7c5b6"
+          },
+          "Mansion walnut mouldings.011|wood": {
+            "points": 288,
+            "digest": "d79e28e9ddd9276e19055bd85d9c0f9f58daa834a5e2374228985f2f1dd4d723"
+          },
+          "Mansion walnut veneered fields.010|wood": {
+            "points": 168,
+            "digest": "a53ad065d9864d57cbf7682f851bd2c28f46e8110a5774b7894450c6e1f0d746"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass.011|metal": 400,
+          "Mansion walnut heartwood.011|wood": 572,
+          "Mansion walnut mouldings.011|wood": 528,
+          "Mansion walnut veneered fields.010|wood": 308
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass.011|metal": "7075de86c9f2c3249eacd8da241091d374dc8c2c920343d070e136d488a7508b",
+          "Mansion walnut heartwood.011|wood": "d7d57b82fd6b0cd21de01eb0c96db8b62a91ae82dde8ff57916f22f6ad952450",
+          "Mansion walnut mouldings.011|wood": "4d3a4b9779bb23e7cc03ae19380b77020662abf94d69b922b1d920896c84ea22",
+          "Mansion walnut veneered fields.010|wood": "7aa78262c7c54b9807834721db40da609bef9ee7ad425cadf2da226e2f39f143"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass.011|metal": "0b9128b21c8d406e302721e8bd02914cefd35a7ab9fe08565a5b6c6281df4003",
+          "Mansion walnut heartwood.011|wood": "4629eb806f93d315af5812bd3236e20f2308ca7da9a4dee41bc22502c079b0b3",
+          "Mansion walnut mouldings.011|wood": "6d75882be6ce69b675139e19af29c44f0bdc3f15831be6a55080fbc998937d2a",
+          "Mansion walnut veneered fields.010|wood": "0c816b98c935ad6e39b73581266979322a1575ccf9c176fadd74a33acb58a722"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-blanket-coffer-01-front.png",
+          "sha256": "af6b145dfe70e900bbae6c41c99f5a8261f6a09722bd9f53491ea86168905857",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 76926,
+          "pixel_bbox_alpha_gt_0": [
+            41,
+            138,
+            471,
+            374
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            42,
+            139,
+            470,
+            373
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-blanket-coffer-01-rear.png",
+          "sha256": "6ae6c2acfddb99c12ab90aca2d330b8cc0ff9b4c5515e7a8d8ff0a8ed49ddc2c",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 79208,
+          "pixel_bbox_alpha_gt_0": [
+            52,
+            108,
+            460,
+            394
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            52,
+            108,
+            460,
+            394
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-glazed-credenza-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-glazed-credenza-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "0d94f86db1fc22a1efdc0b6bde80f5050e56ce213eac4455e1a616ba08abc839",
+      "git_blob_sha": "cb91950dd39bf509693091459e9cf12e01aaf84e",
+      "bytes": 119180,
+      "actual_bounds_gltf_m": [
+        [
+          -0.800000011920929,
+          0.0,
+          -0.22499999403953552
+        ],
+        [
+          0.800000011920929,
+          0.7099999785423279,
+          0.22499999403953552
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1600.000023841858,
+        449.99998807907104,
+        709.9999785423279
+      ],
+      "dimension_error_mm": [
+        2.384185791015625e-05,
+        -1.1920928955078125e-05,
+        -2.1457672119140625e-05
+      ],
+      "triangles": 2596,
+      "uv": {
+        "triangles": 2596,
+        "valid_triangles": 2596,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.303424249280096,
+        "p95": 7.186189834694954,
+        "p95_p05": 1.355009423519235,
+        "median": 5.627700149105321
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood.014",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings.014",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "alphaMode": "BLEND",
+          "doubleSided": true,
+          "extensions": {
+            "KHR_materials_transmission": {
+              "transmissionFactor": 0.9399999976158142
+            },
+            "KHR_materials_ior": {
+              "ior": 1.4500000476837158
+            }
+          },
+          "extras": {
+            "finishChannel": "glass"
+          },
+          "name": "Mansion clear antique glazing.002",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.6938717365264893,
+              0.7681511640548706,
+              0.7230551242828369,
+              0.11999999731779099
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.07999999821186066
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass.014",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields.013",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "glass",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "glass",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-glazed-credenza-01-thumb.png",
+          "sha256": "5c81315a3019c51788a366d5dd0fabe2bddb7fdeff3d1c19afc77c92b819bc15",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 56291,
+          "pixel_bbox_alpha_gt_0": [
+            77,
+            136,
+            435,
+            372
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            77,
+            137,
+            435,
+            371
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-glazed-credenza-01-top.png",
+          "sha256": "e858e1cf2b8191b98d57e9abec2bcb84c4e6465b1a7952111ed7967e80642bd5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 48581,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            197,
+            462,
+            315
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            198,
+            461,
+            314
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion clear antique glazing.002|glass": {
+            "points": 48,
+            "digest": "03f76d13aef28850ad1b1bb0d023758a42196aa3419d1c25654c4ae78965e985"
+          },
+          "Mansion patinated brass.014|metal": {
+            "points": 352,
+            "digest": "e3f366ecb8fa0eda2babb9b9f90629edb89ef14bac0436f84b2858dc9d7d0638"
+          },
+          "Mansion walnut heartwood.014|wood": {
+            "points": 624,
+            "digest": "e8af07dad6e8aab1c88b331b3bb3520495a38844b864a32dc44c3f0526fd94ba"
+          },
+          "Mansion walnut mouldings.014|wood": {
+            "points": 320,
+            "digest": "83a605a48214ddf2c7247289da4f04db394fcf7dad81fb0e0508128ac2a3d185"
+          },
+          "Mansion walnut veneered fields.013|wood": {
+            "points": 24,
+            "digest": "b5cdcaf810c5c38eca1c6e4ec06b9578903f43e274889f2fa2ca8e42e0262f84"
+          }
+        },
+        "triangle_counts": {
+          "Mansion clear antique glazing.002|glass": 88,
+          "Mansion patinated brass.014|metal": 672,
+          "Mansion walnut heartwood.014|wood": 1176,
+          "Mansion walnut mouldings.014|wood": 616,
+          "Mansion walnut veneered fields.013|wood": 44
+        },
+        "triangle_surfaces": {
+          "Mansion clear antique glazing.002|glass": "bdd9cd5a57af498b2d5c56f4925314ea5747a9508727500874e57b0a413e1a39",
+          "Mansion patinated brass.014|metal": "8d3bcf8d880a931961c4f0a8480ac1a365dcfd338e29ab90c12594eae51c9705",
+          "Mansion walnut heartwood.014|wood": "a37221d4fe34981efe365d268b2ad467b07c2577d0c6423070fb8f2515c838dd",
+          "Mansion walnut mouldings.014|wood": "2a501f5cfc0f682c93022671893bf8a0bd2fa8c81f229b758099f461fb85a580",
+          "Mansion walnut veneered fields.013|wood": "4c03ad9efefd0154ed9adbd2006eb677d069ed9c134709922ab7aa8cee2810de"
+        },
+        "uv_triangle_mapping": {
+          "Mansion clear antique glazing.002|glass": "ef4a36810469fc1d5b3cb8698ae090178ed35346f54ec10feaa0b314f61c53f4",
+          "Mansion patinated brass.014|metal": "6efd4e7688794c69ca29543d81e5381810563caf000501d26ccd039ea92c8d0d",
+          "Mansion walnut heartwood.014|wood": "76fef0bbcc0f96df538eb015d2c3a01bcd4d41238dc461b28593cb714b31e19e",
+          "Mansion walnut mouldings.014|wood": "c4fff11e6372b5dd2f50ceecf2c90eae92cc3ea062c6fce26c34cba91a9fb18b",
+          "Mansion walnut veneered fields.013|wood": "035d329793585a21e8b35491629d6e7e0c21b08133891c85e2593b9acca6ed89"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-glazed-credenza-01-front.png",
+          "sha256": "a047616ce0c2d98460a3de7c7bb5c734588c86bb475339c51e5343104096f8dd",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 68481,
+          "pixel_bbox_alpha_gt_0": [
+            42,
+            160,
+            471,
+            352
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            42,
+            161,
+            470,
+            351
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-glazed-credenza-01-rear.png",
+          "sha256": "c3ee1a62d1c049655a113bf1f8c01ddf9fdc971806b0c20f9d81712b3df52454",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 56301,
+          "pixel_bbox_alpha_gt_0": [
+            77,
+            136,
+            435,
+            372
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            77,
+            137,
+            435,
+            371
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-tambour-music-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tambour-music-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "b4e291c2b4ebdd0964129fe89799bbcf883e7a500b81c1c76e6a40825d6ba1a2",
+      "git_blob_sha": "fdc23f84f9fa3d615e9e8b8510118b6b7e5af42f",
+      "bytes": 88684,
+      "actual_bounds_gltf_m": [
+        [
+          -0.375,
+          0.0,
+          -0.15000000596046448
+        ],
+        [
+          0.375,
+          0.800000011920929,
+          0.15000000596046448
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        750.0,
+        300.00001192092896,
+        800.000011920929
+      ],
+      "dimension_error_mm": [
+        0.0,
+        1.1920928955078125e-05,
+        1.1920928955078125e-05
+      ],
+      "triangles": 2144,
+      "uv": {
+        "triangles": 2144,
+        "valid_triangles": 2144,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.422095888168671,
+        "p95": 4.647190938537284,
+        "p95_p05": 1.3579955356026625,
+        "median": 4.017521425389781
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tambour-music-01-thumb.png",
+          "sha256": "95141348bfa9d4da2c3f9b6dd35569e2ad7f937b3783d575e2e4b2bc39c5dc4a",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 115281,
+          "pixel_bbox_alpha_gt_0": [
+            78,
+            44,
+            434,
+            461
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            78,
+            45,
+            434,
+            461
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tambour-music-01-top.png",
+          "sha256": "873392e2fd81ef450fb7afda826237d354948a8eac9eb31f4c53297391216c99",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 68370,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            173,
+            462,
+            339
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            173,
+            461,
+            339
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass|metal": {
+            "points": 72,
+            "digest": "f0b913f7f60e29d646f99eabb302f5db9479473ef6bb90dab4e83f5e91059945"
+          },
+          "Mansion walnut heartwood|wood": {
+            "points": 456,
+            "digest": "862ddcb05eb0f234ba01bbfaeb78fc721b69dc8da04b2cd5f7dbd00392493ca0"
+          },
+          "Mansion walnut mouldings|wood": {
+            "points": 168,
+            "digest": "35da2c156d9a56277f51796999645b3f7b62a23240673b2410717d2227cc1060"
+          },
+          "Mansion walnut veneered fields|wood": {
+            "points": 456,
+            "digest": "8fa2d79a8646c72d58e2bbecf48852a50ecdad1b248a9ec3b6f2cde4bb7575a6"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass|metal": 132,
+          "Mansion walnut heartwood|wood": 868,
+          "Mansion walnut mouldings|wood": 308,
+          "Mansion walnut veneered fields|wood": 836
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass|metal": "24b1a7240a9ccb6137e8321631e7f1eaacf1a8b8139cbedc39daa05971be0f32",
+          "Mansion walnut heartwood|wood": "1e3ef597ae90f913c3a590b0d6911a12c9347aa1a584e13a0b90be65ea865562",
+          "Mansion walnut mouldings|wood": "9ca99bf0ccd279f2f6a3bb8e552dd92b223d94ffbf4600b3ca20a87e6d1df134",
+          "Mansion walnut veneered fields|wood": "13fd63c1d2de1ee586a2518a717b48eaa12d3ce8b0820e386d334090677f12ad"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass|metal": "5d6ea8536c31a2e056f684f4845bb22f2b3b9061a85270bd80a73e265c95c54d",
+          "Mansion walnut heartwood|wood": "37708ba6e3dc723c6088a09cf1207d891b774c9b99201787fd7684b3b6085da6",
+          "Mansion walnut mouldings|wood": "daaf6b8faf8cfcc0214325aaea408958089ebf83c1d3978ba2d43d6fda55c407",
+          "Mansion walnut veneered fields|wood": "17ecae71e6ac1e7c98ac91ef6f331b1751bf459fa44a1521dde0605908a6c1b6"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-tambour-music-01-front.png",
+          "sha256": "9d74f73907125580e4473049968dc2b6c7626ca77d52e8c4fa337badbf7d68aa",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 145888,
+          "pixel_bbox_alpha_gt_0": [
+            55,
+            41,
+            457,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            55,
+            42,
+            457,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-tambour-music-01-rear.png",
+          "sha256": "b6cb34c07578941a722a778e7c627969103033f7b348e5e606a0231e48331ee2",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 115282,
+          "pixel_bbox_alpha_gt_0": [
+            78,
+            44,
+            434,
+            461
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            78,
+            45,
+            434,
+            461
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-arched-armoire-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-armoire-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "0a0f5d0410f1aabdd90932619bf34897a71301fdee97847489bdad65046b228e",
+      "git_blob_sha": "edb009ee030bd264545b3673630267e9a262dde0",
+      "bytes": 118692,
+      "actual_bounds_gltf_m": [
+        [
+          -0.5644999742507935,
+          0.0,
+          -0.3865000009536743
+        ],
+        [
+          0.5644999742507935,
+          2.2130000591278076,
+          0.3865000009536743
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1128.999948501587,
+        773.0000019073486,
+        2213.0000591278076
+      ],
+      "dimension_error_mm": [
+        -5.14984130859375e-05,
+        1.9073486328125e-06,
+        5.91278076171875e-05
+      ],
+      "triangles": 2648,
+      "uv": {
+        "triangles": 2648,
+        "valid_triangles": 2648,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 7.882132922217913,
+        "p95": 10.679959468590106,
+        "p95_p05": 1.3549580518346456,
+        "median": 9.040162012101252
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-armoire-01-thumb.png",
+          "sha256": "28cb36f291638a2503f59962e997148e374491ce1f412d3a590abcdf8920fc9b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 74630,
+          "pixel_bbox_alpha_gt_0": [
+            144,
+            63,
+            368,
+            454
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            145,
+            64,
+            367,
+            454
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-armoire-01-top.png",
+          "sha256": "a4534f6e786b6bcdedd7281efadecdabd8c0f8931f564ef6d65b3a8b13d60ce9",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 116206,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            114,
+            462,
+            398
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            115,
+            461,
+            397
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass|metal": {
+            "points": 240,
+            "digest": "e51ca992074642167bef7c02ae61cf741be9f65817b75fef7e6135839d44750f"
+          },
+          "Mansion walnut heartwood|wood": {
+            "points": 480,
+            "digest": "9bd37220710e54724901ee15269a514036ec015612707ed1fd563881c1f97423"
+          },
+          "Mansion walnut mouldings|wood": {
+            "points": 568,
+            "digest": "2340803021f8cf646545028fc84158f5db24f1c28dcd46c8f016cdd0580858a4"
+          },
+          "Mansion walnut veneered fields|wood": {
+            "points": 96,
+            "digest": "cb65e12e25372e1a0e085d275843e7465c7da539f33c6f153092c041ee358297"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass|metal": 452,
+          "Mansion walnut heartwood|wood": 912,
+          "Mansion walnut mouldings|wood": 1108,
+          "Mansion walnut veneered fields|wood": 176
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass|metal": "093398819b6d776bc37afcc4e749b79c7e47c07767ad97eac0073ecc8df27e0a",
+          "Mansion walnut heartwood|wood": "e1f34457576fb7315028cbcff780b43926507658acb034ef30010fc42f351428",
+          "Mansion walnut mouldings|wood": "3c4cf9e84dcb664664b6639e9308b7672150901a917a10ec25b3067c83c7070b",
+          "Mansion walnut veneered fields|wood": "3e46661152b3d41f9eacce906bf432769abb17665375365933e6ad64d1f0a92f"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass|metal": "9accec96fbc3d392f4cca13219ef8b1d5d018655591266a8a0528268d515efa2",
+          "Mansion walnut heartwood|wood": "905c6453100e3139008c8f96d3768a10f645fc4df0743212a5bcf1ab02e965be",
+          "Mansion walnut mouldings|wood": "ec78489039c1206b2a95941163de219eb3b0a4ffcd7de254e8f375c5a14844d5",
+          "Mansion walnut veneered fields|wood": "8dcc76f901dc9d5ce12ed56c254ee94d122f0dce62a1dcc10bae66fed75c9a28"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-armoire-01-front.png",
+          "sha256": "bb6c56ef2db3f77a2eeec2af501c3a10f2e5b60b93bcc3efa11e1a24013780a9",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 85114,
+          "pixel_bbox_alpha_gt_0": [
+            146,
+            42,
+            366,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            147,
+            42,
+            365,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-armoire-01-rear.png",
+          "sha256": "a2761f9d31a7576f568f98319dc43a028712bc9a566c8e375c364a564bc06af8",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 74638,
+          "pixel_bbox_alpha_gt_0": [
+            144,
+            63,
+            368,
+            454
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            145,
+            64,
+            367,
+            454
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-corner-vitrine-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-corner-vitrine-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "e0399c46fd72dc3fd15cec2efe9061f7d68953216dafcd80ba79e71bcb896e46",
+      "git_blob_sha": "800551649373f7efafad032ecda00a9231bb1d50",
+      "bytes": 72028,
+      "actual_bounds_gltf_m": [
+        [
+          -0.3499999940395355,
+          0.0,
+          -0.3499999940395355
+        ],
+        [
+          0.3499999940395355,
+          1.850000023841858,
+          0.3499999940395355
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        699.999988079071,
+        699.999988079071,
+        1850.000023841858
+      ],
+      "dimension_error_mm": [
+        -1.1920928955078125e-05,
+        -1.1920928955078125e-05,
+        2.384185791015625e-05
+      ],
+      "triangles": 1620,
+      "uv": {
+        "triangles": 1620,
+        "valid_triangles": 1620,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.3090431974526044,
+        "p95": 7.023178693036215,
+        "p95_p05": 1.3228708887518734,
+        "median": 6.026511093744569
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "alphaMode": "BLEND",
+          "doubleSided": true,
+          "extensions": {
+            "KHR_materials_transmission": {
+              "transmissionFactor": 0.9399999976158142
+            },
+            "KHR_materials_ior": {
+              "ior": 1.4500000476837158
+            }
+          },
+          "extras": {
+            "finishChannel": "glass"
+          },
+          "name": "Mansion clear antique glazing",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.6938717365264893,
+              0.7681511640548706,
+              0.7230551242828369,
+              0.11999999731779099
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.07999999821186066
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "glass",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "glass",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-corner-vitrine-01-thumb.png",
+          "sha256": "868d40fcb033b2ec36723ccc8723f9ed0cdd65550f8a6ab21f914c8feb781ec3",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 57530,
+          "pixel_bbox_alpha_gt_0": [
+            184,
+            58,
+            350,
+            442
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            185,
+            58,
+            350,
+            441
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-corner-vitrine-01-top.png",
+          "sha256": "f21e64bf730afe9bf095d6178749fd9b3c33b0ad765e2af09e14c32df278f026",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 148421,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            50,
+            462,
+            462
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            51,
+            461,
+            461
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion clear antique glazing|glass": {
+            "points": 26,
+            "digest": "90de94b0d8ce4ba8b04151df3a39f5174bdd314f5eee601b92f5daf2c843c51e"
+          },
+          "Mansion patinated brass|metal": {
+            "points": 136,
+            "digest": "085b2a5ddabb7e75336cb840979fc51a5a3d440e0e4d648f3eb355acb5b3e343"
+          },
+          "Mansion walnut heartwood|wood": {
+            "points": 264,
+            "digest": "e589c193e9b245ed1c8536ff9ff8823d953823d5d5bca866710e49ce197f6f71"
+          },
+          "Mansion walnut mouldings|wood": {
+            "points": 432,
+            "digest": "b56d97d4142a5bd5386b84697a5945a353b2f57098afb4dbaaa1d3636aab427c"
+          }
+        },
+        "triangle_counts": {
+          "Mansion clear antique glazing|glass": 48,
+          "Mansion patinated brass|metal": 256,
+          "Mansion walnut heartwood|wood": 496,
+          "Mansion walnut mouldings|wood": 820
+        },
+        "triangle_surfaces": {
+          "Mansion clear antique glazing|glass": "6ad0eece3c4339fe8edd4bee037768a7c03ca033bbd0115616f8fc6af8b32660",
+          "Mansion patinated brass|metal": "7c843cee9aab1b8794b5cded880247d61b0d9c82a4dfbce12f9450470d028c61",
+          "Mansion walnut heartwood|wood": "3d8764c241645c83e7c9fec96f24a576d0eca365dfa2cb72097d17bd65398b48",
+          "Mansion walnut mouldings|wood": "c088ad07d185c3fae4d3d14b0fe8d2bcd895999bdafeba9dad4c977b8d7352e5"
+        },
+        "uv_triangle_mapping": {
+          "Mansion clear antique glazing|glass": "ed4dfb0b7040461a58f43aa0a65b337667a07d371946924d4cdeb804ee1747ec",
+          "Mansion patinated brass|metal": "5097b70e69bba32e0f479839c8deea9cff6bafae8e63196cc74eee39df527f7e",
+          "Mansion walnut heartwood|wood": "830721826f53743a00bea9d05d7967bd798db74bc5120742eab705de7840f3c4",
+          "Mansion walnut mouldings|wood": "87abe3379a5ff5b6bb49d51449a8bc9a956cbe91136f8f7a684034975e279dea"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-corner-vitrine-01-front.png",
+          "sha256": "3b13d850a519025a8ac0e0c2f8d10e9fdb2a57cad52dccf10a28af29c054e727",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 66011,
+          "pixel_bbox_alpha_gt_0": [
+            174,
+            41,
+            338,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            175,
+            42,
+            337,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-corner-vitrine-01-rear.png",
+          "sha256": "ff8b484d9076defb8edb9aaed7005d32b58983d6fe3969bc8252e400b2af6ad2",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 57579,
+          "pixel_bbox_alpha_gt_0": [
+            161,
+            62,
+            328,
+            451
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            162,
+            62,
+            327,
+            450
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-map-flatfile-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-map-flatfile-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "47497152cb337042d55cf3a85430b10e08b67ccdcaec275f7f1602f096129ce8",
+      "git_blob_sha": "c7255899ff8e267b55043839be4cf4d8030a7847",
+      "bytes": 177160,
+      "actual_bounds_gltf_m": [
+        [
+          -0.6830000281333923,
+          0.0,
+          -0.2574999928474426
+        ],
+        [
+          0.6830000281333923,
+          0.9340000152587891,
+          0.2574999928474426
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1366.0000562667847,
+        514.9999856948853,
+        934.0000152587891
+      ],
+      "dimension_error_mm": [
+        5.626678466796875e-05,
+        -1.430511474609375e-05,
+        1.52587890625e-05
+      ],
+      "triangles": 3764,
+      "uv": {
+        "triangles": 3764,
+        "valid_triangles": 3764,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 6.960164687191636,
+        "p95": 9.221454788542397,
+        "p95_p05": 1.32489031552832,
+        "median": 7.348562647357277
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-map-flatfile-01-thumb.png",
+          "sha256": "ea4a4a63b2162d404b867ebe4db77b40d8dd8decc1c2a94b48602b1ce5b7a776",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 88904,
+          "pixel_bbox_alpha_gt_0": [
+            68,
+            94,
+            444,
+            414
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            68,
+            94,
+            444,
+            414
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-map-flatfile-01-top.png",
+          "sha256": "d1df6fb95a896be1388a6721d61a269e83ca06eb9235ff86866af9a9c8b444e0",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 64284,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            177,
+            462,
+            335
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            178,
+            461,
+            334
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass|metal": {
+            "points": 1056,
+            "digest": "ba4e5ea8b3e00f1f1316399b5129ceb954363402518cf06a8848cc68f137b3ca"
+          },
+          "Mansion walnut heartwood|wood": {
+            "points": 552,
+            "digest": "5290c154ac7743b560c54921bade757eb420385da0f0ae841ae56c6784feafef"
+          },
+          "Mansion walnut mouldings|wood": {
+            "points": 240,
+            "digest": "27a8b018c0804600b0404dac18660498b0c957ff0822f230d4ba542374736e51"
+          },
+          "Mansion walnut veneered fields|wood": {
+            "points": 144,
+            "digest": "a17764661875365e591106a02c2873333fb20994969baf22b4eeca2417551c08"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass|metal": 2016,
+          "Mansion walnut heartwood|wood": 1044,
+          "Mansion walnut mouldings|wood": 440,
+          "Mansion walnut veneered fields|wood": 264
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass|metal": "70483bfffcf5e6c416cb370f1667c2d8b9592dd4160c431bc5c36f514acbf62f",
+          "Mansion walnut heartwood|wood": "0e8b36d9a902a5fbdd989c11bce9a8698a73bd007246004e487c1bf979257c1f",
+          "Mansion walnut mouldings|wood": "9eb6ae57fad226064c166a43bb758e3fac8c3598347348a7f28bbc812a025ab6",
+          "Mansion walnut veneered fields|wood": "dfc21bb9efc670c5bd117774b46c2c6bdb147b0e3ba1dceba7fbb86ac3927f15"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass|metal": "e4e59266f45a90c31eee3310cd258625b94d55be199ba5eec7e15899afa28b2a",
+          "Mansion walnut heartwood|wood": "c05d1f9da1f699e134c9ab9446d03d5b517539d81224d159d670a8a50580bdc8",
+          "Mansion walnut mouldings|wood": "03f6a52908a310531ee485a54f20bd4502a72e5d061377210a06e8734ab1853b",
+          "Mansion walnut veneered fields|wood": "b2b692e70d1a0738888e7c27e288c5d7191c71e41f8429c5adb9af3a259b0ce4"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-map-flatfile-01-front.png",
+          "sha256": "e642d6d95187da6b602122c259d4c93f960f64bf1c7c0a5f212797ebe63d73ed",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 107608,
+          "pixel_bbox_alpha_gt_0": [
+            42,
+            109,
+            470,
+            403
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            42,
+            109,
+            470,
+            403
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-map-flatfile-01-rear.png",
+          "sha256": "0a33e23e634e5a96859e839dc339d79cdda95ac49e8ca40392457eebddd9205b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 88918,
+          "pixel_bbox_alpha_gt_0": [
+            68,
+            94,
+            444,
+            414
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            68,
+            94,
+            444,
+            414
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-letter-pigeonhole-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-letter-pigeonhole-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "1df799c9309ff9c2185d71a1852d2504521b4f863691d3bf5a52cf84adc9eb0e",
+      "git_blob_sha": "92166b9879be0b49d7f423013b8f5e7bb71b944e",
+      "bytes": 93480,
+      "actual_bounds_gltf_m": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.14000000059604645
+        ],
+        [
+          0.6000000238418579,
+          1.3899999856948853,
+          0.14000000059604645
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1200.0000476837158,
+        280.0000011920929,
+        1389.9999856948853
+      ],
+      "dimension_error_mm": [
+        4.76837158203125e-05,
+        1.1920928955078125e-06,
+        -1.430511474609375e-05
+      ],
+      "triangles": 2084,
+      "uv": {
+        "triangles": 2084,
+        "valid_triangles": 2084,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 4.92158438626635,
+        "p95": 6.663638416824011,
+        "p95_p05": 1.3539620361725082,
+        "median": 5.3076793705641405
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.1384316086769104,
+              0.05951123684644699,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Mansion walnut veneered fields",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.0802198201417923,
+              0.039546236395835876,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3799999952316284
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Mansion patinated brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.33716362714767456,
+              0.19806931912899017,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.36000001430511475
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no imported geometry or imagery",
+        "source": "tools/blender/rpg_mansion/scaled_storage/build.py",
+        "designBasis": "Intended footprint; no measured antique reference"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-letter-pigeonhole-01-thumb.png",
+          "sha256": "03bccad87212a800eef1050c299b6c575c47f6549090bcf9db6dad549a5a7639",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 97883,
+          "pixel_bbox_alpha_gt_0": [
+            105,
+            53,
+            407,
+            455
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            106,
+            53,
+            406,
+            455
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-letter-pigeonhole-01-top.png",
+          "sha256": "1c0b475a35e7168407a70a96599e9df2e92721ff9ff339a24377081f1016db09",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 40359,
+          "pixel_bbox_alpha_gt_0": [
+            50,
+            207,
+            462,
+            305
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            51,
+            208,
+            461,
+            304
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Mansion patinated brass|metal": {
+            "points": 176,
+            "digest": "6780fcc031a90bc2fe5ab5c62381c94527b836ece112c865a9afcfd284fbc395"
+          },
+          "Mansion walnut heartwood|wood": {
+            "points": 600,
+            "digest": "a731646c5036cbdf2d04cce4c40ad0aab0c2e1122b43e37ad263c0cc13369384"
+          },
+          "Mansion walnut mouldings|wood": {
+            "points": 288,
+            "digest": "1fe6e2521470879cc41ed4fca6ddf2543e3e0bdcb623fa5797332804394ce5ca"
+          },
+          "Mansion walnut veneered fields|wood": {
+            "points": 48,
+            "digest": "9dcb1d391bea2c907119942384e4691e52fc868ccc12494ba185fb615ad581ec"
+          }
+        },
+        "triangle_counts": {
+          "Mansion patinated brass|metal": 336,
+          "Mansion walnut heartwood|wood": 1132,
+          "Mansion walnut mouldings|wood": 528,
+          "Mansion walnut veneered fields|wood": 88
+        },
+        "triangle_surfaces": {
+          "Mansion patinated brass|metal": "10281f8324ef8a4df74a75c233f922ddad3215db67384f25335bc8b983634fd3",
+          "Mansion walnut heartwood|wood": "544485364f841759caef68057af2e1751591ec3128e05545bc65f3ebc1b35560",
+          "Mansion walnut mouldings|wood": "280987e3b239d49e2aa6fff4db0cb43def030f70c09fdbcfa5d0a2e976752fff",
+          "Mansion walnut veneered fields|wood": "6e59f68d63265c404a9a8b616ea40869eef1fafa82bf02e05b2e6219bfaae8ed"
+        },
+        "uv_triangle_mapping": {
+          "Mansion patinated brass|metal": "974f69162266c7bd7c15c0a262683f170daf7e4c4aad2960af05c9c6b1a047ff",
+          "Mansion walnut heartwood|wood": "77e124d249d63b23ea3603ccfc8a7ce74465c6c2de0a1b73544989d929612c98",
+          "Mansion walnut mouldings|wood": "d303d2f047f7a821d42c0857952234fdc5db4af6a2a852ea5eca7bdfb2836059",
+          "Mansion walnut veneered fields|wood": "cd40815855e04985b5e3f442697b9721322f8499ad2ab4ab4c26b2f48d418fcc"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "strictMeshCount": 1,
+      "strictSceneCount": 1,
+      "evidenceImages": [
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-letter-pigeonhole-01-front.png",
+          "sha256": "c52c8f689386e31542d9e9686e95e544f9d0402fc66172e4f1927abe0abf84c5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 142924,
+          "pixel_bbox_alpha_gt_0": [
+            70,
+            41,
+            441,
+            471
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            71,
+            42,
+            441,
+            470
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-letter-pigeonhole-01-rear.png",
+          "sha256": "d52c7c8dc2acd08b915f08eded889b576868fd68d19f9ea410101bd68fad3ba0",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 97897,
+          "pixel_bbox_alpha_gt_0": [
+            105,
+            53,
+            407,
+            455
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            106,
+            53,
+            406,
+            455
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ]
+    }
+  ],
+  "totalTriangles": 41868,
+  "totalGlbBytes": 1873980,
+  "glbFileCount": 15,
+  "errors": []
+}

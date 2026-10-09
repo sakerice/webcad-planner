@@ -1,0 +1,4258 @@
+{
+  "descriptor_sha256": "56570898d05c97b5b94841f19448afd64b2f0461af5b37739b8cb6c4d3918aa6",
+  "items": [
+    {
+      "id": "rpg-mansion-copper-bateau-cradle-bath-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-copper-bateau-cradle-bath-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "7ec1383a76a98330baa975e3345162bc5e1640027cc062c51dc5124741314ad1",
+      "git_blob_sha": "bba466ef006a8347b65e5a454be895f1c52ea1f1",
+      "bytes": 95096,
+      "actual_bounds_gltf_m": [
+        [
+          -0.8999999761581421,
+          0.0,
+          -0.3799999952316284
+        ],
+        [
+          0.8999999761581421,
+          0.7260000109672546,
+          0.3799999952316284
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1799.9999523162842,
+        759.9999904632568,
+        726.0000109672546
+      ],
+      "dimension_error_mm": [
+        -4.76837158203125e-05,
+        -9.5367431640625e-06,
+        1.0967254638671875e-05
+      ],
+      "triangles": 1304,
+      "uv": {
+        "triangles": 1304,
+        "valid_triangles": 1304,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.814037664383054,
+        "p95": 3.815084692377288,
+        "p95_p05": 1.0002745195738396,
+        "median": 3.814628297297127
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Hand-formed warm copper bath",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.366252601146698,
+              0.1441284716129303,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.8600000143051147,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Dark walnut WC seat",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.0382043719291687,
+              0.021219009533524513,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-copper-bateau-cradle-bath-01-thumb.png",
+          "sha256": "4c4b429e95078e687177309aa6c13fe3757745cff06c46a9d2ac46f1292fa1f3",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 97329,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            102,
+            489,
+            410
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            102,
+            488,
+            410
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-copper-bateau-cradle-bath-01-top.png",
+          "sha256": "f5669f860bc102fb25aecdab802802a23a8caef5843227f410266c4515ae7eb0",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 72601,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            157,
+            489,
+            355
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            24,
+            157,
+            489,
+            355
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 48,
+            "digest": "084c6fc86fb6b35849feb2637f7a7ffb6d59727cf451f37150e91589d2b8cb8b"
+          },
+          "Dark walnut WC seat|wood": {
+            "points": 96,
+            "digest": "a107f3e805e3ea9bf2921efa0416fba5310ff513ea1521c74b336328596ad03e"
+          },
+          "Hand-formed warm copper bath|metal": {
+            "points": 528,
+            "digest": "589180b3764ed6f692aedfabd39a7b2660b3e136b6f572a72ee97bb033bfe2e5"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 92,
+          "Dark walnut WC seat|wood": 176,
+          "Hand-formed warm copper bath|metal": 1036
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "91a451479ca826f4fbec1035c4c9a4f87ee1ff581bca8f13d44c3de0a8ab5951",
+          "Dark walnut WC seat|wood": "c9b0c6f1d197f5ddf79988c0676ea11c81a6fe3aa460643bdcc036e35f865144",
+          "Hand-formed warm copper bath|metal": "46a107b93cf57bbd2098f79c450671390bf33239be0f6e884d7b6d54f38d8812"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "b959f497eedd5779016d0db2b10d1c0f010cfa1092f820a7c749109eb5264028",
+          "Dark walnut WC seat|wood": "969bce4caf30acc8c5822fb8ba5b91de477c97d96f8b739100f09fb78053bbda",
+          "Hand-formed warm copper bath|metal": "4b6721c8bf52fcab5d716f3fc735c85645bde84e20f1e835ca700109654af8ab"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "4c4b429e95078e687177309aa6c13fe3757745cff06c46a9d2ac46f1292fa1f3",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "f5669f860bc102fb25aecdab802802a23a8caef5843227f410266c4515ae7eb0",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "a5c501d3121fde91a652192463dc5fde8fe8303cf68418de7eccefa1b19f8f89",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "4152499a95b3054f560bc98498145f05432efda892981051f9f894cee2f74e96",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "23c474f664b27e268eed6a3e40d6145fce3b5732dbf6b2146815833d3fb5a94f",
+          "bytes": 142677,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "23f846924e7e1b57d6c97ec25058692c7d78cc02a50ba30158974a990b4179ce",
+          "bytes": 117976,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-paneled-built-in-bath-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-built-in-bath-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "e9afc159b2fd2b45769613c3a3f154288a2716a4decf31a4e4cb260666a2460d",
+      "git_blob_sha": "f77b4fc702564336d5083884c5fb56c1bbc6426e",
+      "bytes": 145280,
+      "actual_bounds_gltf_m": [
+        [
+          -0.902999997138977,
+          0.0,
+          -0.4194999933242798
+        ],
+        [
+          0.902999997138977,
+          0.6100000143051147,
+          0.4194999933242798
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1805.999994277954,
+        838.9999866485596,
+        610.0000143051147
+      ],
+      "dimension_error_mm": [
+        -5.7220458984375e-06,
+        -1.33514404296875e-05,
+        1.430511474609375e-05
+      ],
+      "triangles": 1956,
+      "uv": {
+        "triangles": 1956,
+        "valid_triangles": 1956,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 6.315460100618508,
+        "p95": 6.3198156861553905,
+        "p95_p05": 1.0006896703434887,
+        "median": 6.317703413574611
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Dark walnut WC seat",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.0382043719291687,
+              0.021219009533524513,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-built-in-bath-01-thumb.png",
+          "sha256": "61088f4eda18fba391d18a5616f2afffdec03c0e71d5ff76c5037218cf61cc6e",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 89159,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            126,
+            489,
+            386
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            126,
+            489,
+            386
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-built-in-bath-01-top.png",
+          "sha256": "341f5d50b9b464c0af285696f0823fa31dcf736372c507d98e94031be15711c0",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 100663,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            147,
+            489,
+            365
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            148,
+            489,
+            364
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 48,
+            "digest": "fdca6673d09442ed4ed8a13f986b7787c25d4c84081b89f5b8849f4e3a4442eb"
+          },
+          "Dark walnut WC seat|wood": {
+            "points": 600,
+            "digest": "6f18af2ddad87edd696c1768ae065ebe9d528534b87cb5c43bd76e48263bc030"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 384,
+            "digest": "7a2566e8e28f2a1f951c9648c04e0a36f3af4135f841ce1c1d7b2762b2e88243"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 92,
+          "Dark walnut WC seat|wood": 1100,
+          "Ivory fired porcelain|ceramic": 764
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "f21f9be53d46a1367fbad3364886d1426e3fe127321ffd47a27950388d86ceb4",
+          "Dark walnut WC seat|wood": "d5a7af84a9c988153ede6cbcbc79fd481033454228c37c76b1729e27a2d625a4",
+          "Ivory fired porcelain|ceramic": "016adf85d00066ebe35c87a5c4bcb57e3e0cc0d63a0ee53c66df0b818ecfa701"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "8d6b06b8addc45bf37a4164ad739a02d230c9ae5d3f78aa451f958feaf999210",
+          "Dark walnut WC seat|wood": "4d2b5930e5df44323c46f8c9b340f70165197a02d0ac4508e5f72d608afb4bf7",
+          "Ivory fired porcelain|ceramic": "00a620d88dc6ec1b9474175226430c8ae177270f3d43413e9a68cb64bfa108a5"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "61088f4eda18fba391d18a5616f2afffdec03c0e71d5ff76c5037218cf61cc6e",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "341f5d50b9b464c0af285696f0823fa31dcf736372c507d98e94031be15711c0",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "a1bb41b1044fafe0942a6ea5f9170fdd4ece2104a3a14aee81d285d7c44531c0",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "90c544204c1090e92a085f64fa8d299fb8a256c31ceb68952133fcab3a0f2e77",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "e094b81cb1f1aeadba8d53ebdc60ae0626fa19488700c6ca52288f4ea125f6af",
+          "bytes": 168518,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "fdd55e64ded5d85bbcd877bfe53d41764e282e251ff231137f9818c56c7151de",
+          "bytes": 126861,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-quadrant-corner-bath-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-quadrant-corner-bath-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "b8fe2301cf84bb5c0c0548b3cec70a2214ebfe095997b9ed0bd491889327fede",
+      "git_blob_sha": "f1bcfe09e5ab0bc7641481d5b95b9d30f2e30f27",
+      "bytes": 45720,
+      "actual_bounds_gltf_m": [
+        [
+          -0.6499999761581421,
+          0.0,
+          -0.6499999761581421
+        ],
+        [
+          0.6499999761581421,
+          0.6100000143051147,
+          0.6499999761581421
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1299.9999523162842,
+        1299.9999523162842,
+        610.0000143051147
+      ],
+      "dimension_error_mm": [
+        -4.76837158203125e-05,
+        -4.76837158203125e-05,
+        1.430511474609375e-05
+      ],
+      "triangles": 628,
+      "uv": {
+        "triangles": 628,
+        "valid_triangles": 628,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.0467024867958097,
+        "p95": 3.047715342486488,
+        "p95_p05": 1.0003324432546556,
+        "median": 3.0471078440023387
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-quadrant-corner-bath-01-thumb.png",
+          "sha256": "160992f17fe35084a563ca6af09a36ed126fca8a383316af254e1872c25c6c12",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 140148,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            57,
+            489,
+            455
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            58,
+            488,
+            454
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-quadrant-corner-bath-01-top.png",
+          "sha256": "e07fe8a15d0712eec7c2f03c0c355e82e25a332d45d375a67dab3228a0ff4d71",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 170582,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            23,
+            489,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            23,
+            489,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 88,
+            "digest": "51a37b55189cec2e1ab1c4b45a07dcaba4c210f3b3c4c11b3aa0e6b015f42750"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 234,
+            "digest": "e99ba66b0d3b169a9c4e1683bca4d484e5c37f80a4910b2486ac8c27f1d2d0f1"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 164,
+          "Ivory fired porcelain|ceramic": 464
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "6a0222947dd36c325519cfb78ccf44b12c987ea3ee7319959077b1660b7def0b",
+          "Ivory fired porcelain|ceramic": "ee79abddebcc06abef68c3722e317fc46615ababc81c28d3490d7ef6de7f12b9"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "ae223c097624f7df5a5c2c29458fec8271b00a2bc0470b8847c7e5467b316a6e",
+          "Ivory fired porcelain|ceramic": "9e8defd36268da8d861c155613f708f0e72c57b7733941b294c06b2bda72b48a"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "160992f17fe35084a563ca6af09a36ed126fca8a383316af254e1872c25c6c12",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "e07fe8a15d0712eec7c2f03c0c355e82e25a332d45d375a67dab3228a0ff4d71",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "a2c6e4c1849a3ab2abae41810b47b75da4c56ce02cc20592898cae6c0d7ca95a",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "5e35a0051d1d75cc195e12e513088fd786fc09c1e4b84bf54c5d8c747917cc0a",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "a472a49fc93b244d91e8063a118d185113fd8aa491580614b4c5c39304b21353",
+          "bytes": 116397,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "94c90c239ad01c07ca80605da7d73d258cacc4ea46bc4909880f351df6358150",
+          "bytes": 103790,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-deep-seated-hip-bath-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-deep-seated-hip-bath-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "c3f756ccd10567cca7ebb7bded521b5dd58e2ea614d936e7742dc23f8e0e3cc9",
+      "git_blob_sha": "b26ee47b64bc7dc4869c23fbc71209ee746da34e",
+      "bytes": 76792,
+      "actual_bounds_gltf_m": [
+        [
+          -0.5899999737739563,
+          0.0,
+          -0.38999998569488525
+        ],
+        [
+          0.5899999737739563,
+          0.8600000143051147,
+          0.38999998569488525
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1179.9999475479126,
+        779.9999713897705,
+        860.0000143051147
+      ],
+      "dimension_error_mm": [
+        -5.245208740234375e-05,
+        -2.86102294921875e-05,
+        1.430511474609375e-05
+      ],
+      "triangles": 1106,
+      "uv": {
+        "triangles": 1106,
+        "valid_triangles": 1106,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.3406949610836496,
+        "p95": 3.3413361178659455,
+        "p95_p05": 1.0001919231745984,
+        "median": 3.341105840678157
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-deep-seated-hip-bath-01-thumb.png",
+          "sha256": "176c5c6cc7a349e70298fa570aebc36f1435faa57939131f3b2a0653f841571b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 181150,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            27,
+            489,
+            485
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            28,
+            489,
+            484
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-deep-seated-hip-bath-01-top.png",
+          "sha256": "3ff5165bba1bd79209bff39b8da66148d785129134d1a2c47675f21c5e7a07ce",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 113190,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            102,
+            489,
+            410
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            102,
+            489,
+            410
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 128,
+            "digest": "2ce5a42ad869bb266a8dc1e3f67f9881fc2f8eee6ae9c28c7171a20cb8c8d3ba"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 435,
+            "digest": "e3bd733935e647a1ba91054e22dc275cd77d99a0fd8b329d74125d64f5d4d482"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 244,
+          "Ivory fired porcelain|ceramic": 862
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "24a45245d650a361ad3ab79335de2192b43ecd28729d4b8c70edee0d494714ae",
+          "Ivory fired porcelain|ceramic": "b1bdafda638c86a8dbcde56824bd912a012bd690209af00edc4a364a069d433c"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "a4ad2e2298ad406265b98697dce6f03f17da0b194621e67006d2373fb6521b5a",
+          "Ivory fired porcelain|ceramic": "46cb6114553da4d2de8b3697d22b5306c4165c5d6eff585ee54958430eea8acb"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "176c5c6cc7a349e70298fa570aebc36f1435faa57939131f3b2a0653f841571b",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "3ff5165bba1bd79209bff39b8da66148d785129134d1a2c47675f21c5e7a07ce",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "ce77a8ed98639611daaa1318eb2694e371a1072aceb24d49700f96d9885c30df",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "6ae143341e84b7735cfa107bcc4f14cca83f307e568fd6a7c0cd6da208b49109",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "6dc56fd0049ea7660ff7454f86c918e7f9f80f7682e94d8a28bfd08f1a1474f4",
+          "bytes": 133524,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "cbb56ea67778e65b98e59fd8326ae076f81c4cc4d97b17b65d297808781c758a",
+          "bytes": 113187,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-double-basin-open-console-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-double-basin-open-console-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "eeaea0882826f8c365c3a0f92ab386534e04e461f7a8a3a69463aba9c1655e28",
+      "git_blob_sha": "47196cb363a6849295072904a50cbf9be2bc17f7",
+      "bytes": 250740,
+      "actual_bounds_gltf_m": [
+        [
+          -0.7200000286102295,
+          0.0,
+          -0.30000001192092896
+        ],
+        [
+          0.7200000286102295,
+          1.0398770570755005,
+          0.30000001192092896
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1440.000057220459,
+        600.0000238418579,
+        1039.8770570755005
+      ],
+      "dimension_error_mm": [
+        5.7220458984375e-05,
+        2.384185791015625e-05,
+        5.7075500535574974e-05
+      ],
+      "triangles": 3692,
+      "uv": {
+        "triangles": 3692,
+        "valid_triangles": 3692,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.01277232404328,
+        "p95": 5.015322023424145,
+        "p95_p05": 1.000508640571732,
+        "median": 5.01418328634732
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed cast iron brackets",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.0666259378194809,
+              0.07227185368537903,
+              0.052860647439956665,
+              1
+            ],
+            "metallicFactor": 0.7200000286102295,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Dark walnut WC seat",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.0382043719291687,
+              0.021219009533524513,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "stone"
+          },
+          "name": "Honed limestone vanity top",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.6938717365264893,
+              0.637596845626831,
+              0.4910208582878113,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal",
+        "stone",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal",
+        "stone",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-double-basin-open-console-01-thumb.png",
+          "sha256": "0743424f59a6693b9e64282d7e35fa437f34fc5db7dea754706575e4048162da",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 69965,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            63,
+            489,
+            449
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            63,
+            489,
+            449
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-double-basin-open-console-01-top.png",
+          "sha256": "73b8b8d0fb48edbeea9158f6faecb8b492dd1b2d990be2bf65a908c25854dd01",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 90020,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            158,
+            489,
+            354
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            159,
+            489,
+            353
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 676,
+            "digest": "fd80d75f051cc3966d20bbf1bf786b95d8705f87ad180c7672f3600e2f901fe3"
+          },
+          "Bronzed cast iron brackets|metal": {
+            "points": 320,
+            "digest": "96163c3434912a5e0fad31a4f2f9244d33bbec329800ba889b6f59c644224986"
+          },
+          "Dark walnut WC seat|wood": {
+            "points": 24,
+            "digest": "8879e56dd97e92978fa91122b7218b66f55ad554bc0f7d6935a2b9268a128bb4"
+          },
+          "Honed limestone vanity top|stone": {
+            "points": 302,
+            "digest": "459752bebf6d4d48cd1d4d3eada6577fb346228bfbe04d858387020732951767"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 560,
+            "digest": "6a99d033f629d3747fb2455e645ff3f35b16a2dd7a94c124b7e025bff8ae0a59"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 1288,
+          "Bronzed cast iron brackets|metal": 608,
+          "Dark walnut WC seat|wood": 44,
+          "Honed limestone vanity top|stone": 640,
+          "Ivory fired porcelain|ceramic": 1112
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "5fede3bd8356648f624fd9638291e98176b4d372c4bb110dc3263efae980963b",
+          "Bronzed cast iron brackets|metal": "c9120b9a655f29def379d53b7caf0465feac835f404f83c58cd5c80ea412e68e",
+          "Dark walnut WC seat|wood": "1fa0ef07b72a310d8e38b006b8abf625ad1fe7b690d6b3b81f5b9a07cc87fcb5",
+          "Honed limestone vanity top|stone": "6b9eab789865c3efcfd9af8e25cde41d0acdfab17eb776f8eb32db6694f9ffc8",
+          "Ivory fired porcelain|ceramic": "1e9056b056c93c711305a5b2511f6fafe8af222ee0da0e2f2094e2c35d78af14"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "d90b85120a9e0858dc3e003e1af579fe8aa717aa16810cb25999295fef6fdca5",
+          "Bronzed cast iron brackets|metal": "5c6597d3ce5fbe32d0f66036f75fccaf4cf32c8d86030248a98d0af167e89f5e",
+          "Dark walnut WC seat|wood": "30a80f8836b3eb9f5ea68a3ce9fbc366bb4de298ebb02fd14dcfa44d1b51957c",
+          "Honed limestone vanity top|stone": "c45b5296cc49e4de81452d832fef07e329853a02396e2f41aa4417d74bff758a",
+          "Ivory fired porcelain|ceramic": "6d72b6659444b55e55e684700148113ac37ee19355fee218ed1846a7d8ca361a"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "0743424f59a6693b9e64282d7e35fa437f34fc5db7dea754706575e4048162da",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "73b8b8d0fb48edbeea9158f6faecb8b492dd1b2d990be2bf65a908c25854dd01",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "e18c210793b1666e9f292d4760cfb01abf9993f7c8818c7e3c1e99dbbc36fcf8",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "8c292b5950c08827a24ce2aa70e2800e736156492551c2b6fedb06260261ff01",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "1f399049b6e588d9cf298b70d40d5034dbb7db0147102d53a3e20757a035d67a",
+          "bytes": 227482,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "eaf892982088b5b0233be6aca07f6ab37ffb27ace71e062dc957f4d1abca4eee",
+          "bytes": 153934,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-portable-bowl-jug-washstand-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-portable-bowl-jug-washstand-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "4ad7d6a0cbe919910504df26233b0515fcc38ef789f1b187546f6492b7141f30",
+      "git_blob_sha": "9e436c06fb3f9e28475f9684e9d02cc2d94b67be",
+      "bytes": 159852,
+      "actual_bounds_gltf_m": [
+        [
+          -0.31200000643730164,
+          0.0,
+          -0.25877973437309265
+        ],
+        [
+          0.31200000643730164,
+          1.0470000505447388,
+          0.25877973437309265
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        624.0000128746033,
+        517.5594687461853,
+        1047.0000505447388
+      ],
+      "dimension_error_mm": [
+        1.2874603271484375e-05,
+        0.0004687461853336572,
+        5.054473876953125e-05
+      ],
+      "triangles": 2284,
+      "uv": {
+        "triangles": 2284,
+        "valid_triangles": 2284,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.9133777707753308,
+        "p95": 2.9142758594543987,
+        "p95_p05": 1.0003082637233238,
+        "median": 2.9138224876021175
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Dark walnut WC seat",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.0382043719291687,
+              0.021219009533524513,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-portable-bowl-jug-washstand-01-thumb.png",
+          "sha256": "fa18c5d3896d9f52fb4e23acefd8023e7631150349a4354ccdf83d20f269de3b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 70152,
+          "pixel_bbox_alpha_gt_0": [
+            100,
+            23,
+            413,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            100,
+            23,
+            412,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-portable-bowl-jug-washstand-01-top.png",
+          "sha256": "5b180f202af1c580b581fb92dc516a9949462ff7055191196ab18f9663b8dc82",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 160641,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            62,
+            489,
+            450
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            63,
+            489,
+            449
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 60,
+            "digest": "0c03647e40025ea4570de3544abf83e0c5c25aced8cb4d83a55a0d40a76d2f3f"
+          },
+          "Dark walnut WC seat|wood": {
+            "points": 384,
+            "digest": "f6b9ab1aa5080bef4822694a03c472b0f93217cb12e833eba8ee7c0cee08e68f"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 728,
+            "digest": "90523c038e86866e7101098a7f5ea7f511a8390cb033d849db8e9b478eaeab3c"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 108,
+          "Dark walnut WC seat|wood": 728,
+          "Ivory fired porcelain|ceramic": 1448
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "f13dd5eee9711542d054bb1868249a62a66b452382d975596256f78855b4bbef",
+          "Dark walnut WC seat|wood": "b08f1b04b311f9e0513de1d4a8061aa96308049d9115a5dd18dce31cb7fb3c4f",
+          "Ivory fired porcelain|ceramic": "929541d14a871014c6eaebe3e0d5668f7caecf3d3ed9fd2509ff460a6a8688de"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "9b9f08b6bfba263109fa1106b7d78e085dad1bd63215d3e44aeaec58553a6fba",
+          "Dark walnut WC seat|wood": "1416d6c55b9c80a4c50cbbb297916f983e3fa53b572e4e68354d09ce72e532f8",
+          "Ivory fired porcelain|ceramic": "d2d2ac2b22aff0fb7bf66a4117f6de0ed880704b43d199ed4daadf169dbebb87"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "fa18c5d3896d9f52fb4e23acefd8023e7631150349a4354ccdf83d20f269de3b",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "5b180f202af1c580b581fb92dc516a9949462ff7055191196ab18f9663b8dc82",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "795f8bf3b87ec60bd4450d229468f7be182cd1ee57df334d43058a85f802daa7",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "51812d9ad9eeff9d3acee2eab9a1f2079e2dbe2ddd9fd45162f23110b1e2a60e",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "509e51affb77feac6ebc8ef9acd1a2eee9fe0c6f63fa65bca24d9353f3c2d057",
+          "bytes": 186709,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "7447bd3f820b79635bd26054187774d51fba2c28a99af6a53e3fb13134885991",
+          "bytes": 136526,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-two-wall-corner-basin-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-two-wall-corner-basin-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "5eaf77db03fb593243c5e809a97db9e8ce68991b99283df75af62f4c450d92ee",
+      "git_blob_sha": "b2ff79d5a599002ba435e33875a22b19d4d2c8f8",
+      "bytes": 79984,
+      "actual_bounds_gltf_m": [
+        [
+          -0.2750000059604645,
+          0.0,
+          -0.2750000059604645
+        ],
+        [
+          0.2750000059604645,
+          0.5277917981147766,
+          0.2750000059604645
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        550.000011920929,
+        550.000011920929,
+        527.7917981147766
+      ],
+      "dimension_error_mm": [
+        1.1920928955078125e-05,
+        1.1920928955078125e-05,
+        -0.0002018852234186852
+      ],
+      "triangles": 1132,
+      "uv": {
+        "triangles": 1132,
+        "valid_triangles": 1132,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.4136491334745576,
+        "p95": 1.4142648381898426,
+        "p95_p05": 1.0004355428095313,
+        "median": 1.413936570069394
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed cast iron brackets",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.0666259378194809,
+              0.07227185368537903,
+              0.052860647439956665,
+              1
+            ],
+            "metallicFactor": 0.7200000286102295,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-two-wall-corner-basin-01-thumb.png",
+          "sha256": "87b56e81efeaf6f63bb0efb2335a45600fdb55c4675437f33432c3d691d5c876",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 92262,
+          "pixel_bbox_alpha_gt_0": [
+            43,
+            23,
+            469,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            43,
+            23,
+            468,
+            488
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-two-wall-corner-basin-01-top.png",
+          "sha256": "5c4ec41eca60cf52ae2e366bd1656f385edd6c69f7f4fe091044f8be594a6195",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 165375,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            23,
+            489,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            23,
+            489,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 318,
+            "digest": "194189211f2da33b4891a08a889f34623668db43ae0586ee94c8018c1882846f"
+          },
+          "Bronzed cast iron brackets|metal": {
+            "points": 128,
+            "digest": "c4b3a019dee7892ab01a437afcc7dced0f7dc319af218b83e7f0b2eb24b37933"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 154,
+            "digest": "aaa6ae436ca8659e16dc4b447dd1c4a54fa4822115fdd7034a62052325eb9f7d"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 596,
+          "Bronzed cast iron brackets|metal": 232,
+          "Ivory fired porcelain|ceramic": 304
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "994391fdc9573b058dc30992b909ac581a283ccab82ecfd7a8ecaca3809b388f",
+          "Bronzed cast iron brackets|metal": "7f8275eeb6ad39fe02c1a85064290b40d273da7f8c23ab1fbb328f1aab203d3f",
+          "Ivory fired porcelain|ceramic": "18a7f231d4b3ca2f70e4a36e868c2ba49c1cd7b82af14b72bd9b03e589bcacbf"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "401fb487e4ddc3801d87b8ea25da1b7820b7e0a7769cd0bb8fc283407e2f0946",
+          "Bronzed cast iron brackets|metal": "03ea89d2112f75bf52041e7a4b22803a916aa54aa5ae3853980634beb2b21d5a",
+          "Ivory fired porcelain|ceramic": "cbd928a63bc86b70a22180f9283a65a49d5733f7743320926656dd048f16939d"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "87b56e81efeaf6f63bb0efb2335a45600fdb55c4675437f33432c3d691d5c876",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "5c4ec41eca60cf52ae2e366bd1656f385edd6c69f7f4fe091044f8be594a6195",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "23dab5b8231384c61c291ee3acd0c223cebb01ec728ad2c02702c3c10b07bef8",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "519ba2e8ff6d501e6f9a1d8b701c6b9887426d30cfcb4d5c261227cf7478d0c8",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "a6162f08a862277e52c5d18c565f3b22ef17bb659769df7597a26d6d68fe839c",
+          "bytes": 142385,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "30334ca4936c6cff687f9e3c5c158960499026e3e1ba589a7b9e0313aa2a068f",
+          "bytes": 118694,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-freestanding-bath-bridge-filler-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-freestanding-bath-bridge-filler-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "c52a2e3d60abe5c654835b6f170594f42e5cf8abc3a972efa07881cde19120ef",
+      "git_blob_sha": "fd2e6705c27fa0bb54a003537e18e127d763fdff",
+      "bytes": 81784,
+      "actual_bounds_gltf_m": [
+        [
+          -0.17399999499320984,
+          0.0,
+          -0.2214999943971634
+        ],
+        [
+          0.17399999499320984,
+          1.037683129310608,
+          0.22150000929832458
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        347.9999899864197,
+        443.000003695488,
+        1037.683129310608
+      ],
+      "dimension_error_mm": [
+        -1.0013580322265625e-05,
+        3.6954879760742188e-06,
+        0.0001293106079174322
+      ],
+      "triangles": 1204,
+      "uv": {
+        "triangles": 1204,
+        "valid_triangles": 1204,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.0521043018159804,
+        "p95": 1.0524183971604304,
+        "p95_p05": 1.0002985401199367,
+        "median": 1.052264532088057
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-freestanding-bath-bridge-filler-01-thumb.png",
+          "sha256": "7f2372c2538195f5da16aefee050bb1ce8bc7e924fda7669efb51a021120754c",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 25677,
+          "pixel_bbox_alpha_gt_0": [
+            170,
+            23,
+            342,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            171,
+            24,
+            341,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-freestanding-bath-bridge-filler-01-top.png",
+          "sha256": "debd3e0d2e3d318632fc520bcd66282f9b1652e70730d4b54ad9ce63d53dd10b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 44174,
+          "pixel_bbox_alpha_gt_0": [
+            73,
+            23,
+            439,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            73,
+            23,
+            439,
+            488
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 536,
+            "digest": "a3d382cd769f71f53a101ef30d6d279a300364b92ae6fd83b0423f92f96d9a2b"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 96,
+            "digest": "72609c38ce6a9b70861e8406442d2c7c3d9b57a690246bcd7e110c07c5769871"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 1028,
+          "Ivory fired porcelain|ceramic": 176
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "308720c8e88f5f1737e04e022c73c623b4c1b9066587c44a2d7ea24fafc96693",
+          "Ivory fired porcelain|ceramic": "8302c24c96094edb9cac00e1c58f900c12f03db0077fd51c7dd49ce3020c0d2a"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "c9ef223bf31941b14beaaa821ad537ba76b42989d095aa05401f7b55dce939f5",
+          "Ivory fired porcelain|ceramic": "ccb0e45b84fb2722cca33a3239e8c9775479a70922e064013772e768d74646b5"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "7f2372c2538195f5da16aefee050bb1ce8bc7e924fda7669efb51a021120754c",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "debd3e0d2e3d318632fc520bcd66282f9b1652e70730d4b54ad9ce63d53dd10b",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "42e5a2b3e57197683dc2eacbcfde819ac3e688fb22da0779d4e17cdb9365b243",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "feac66b4f58e8966c43668388edc709523f820279f8fc5825184ec388f17c909",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "21c65772e17231da7e87c293db50006696347e55b9dcd0b0af19d80eed0ce2df",
+          "bytes": 137987,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "f8c48c0c5de5aad19a519f32b6e4a36b293859902b10d2920e8b12d308e7a82c",
+          "bytes": 112205,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-rail-hand-shower-hose-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rail-hand-shower-hose-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "3f107ca6fb6b37a7daee5569a1ba2cf8be646df7d37a9196cdcb23e821856ccd",
+      "git_blob_sha": "f47c7b07666251320ee77614bb0d33d097b6a31c",
+      "bytes": 75456,
+      "actual_bounds_gltf_m": [
+        [
+          -0.18899360299110413,
+          0.0,
+          -0.13139769434928894
+        ],
+        [
+          0.18899360299110413,
+          1.1767717599868774,
+          0.13139769434928894
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        377.98720598220825,
+        262.7953886985779,
+        1176.7717599868774
+      ],
+      "dimension_error_mm": [
+        0.000205982208228761,
+        0.0003886985778649432,
+        -0.00024001312249311013
+      ],
+      "triangles": 1128,
+      "uv": {
+        "triangles": 1128,
+        "valid_triangles": 1128,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 0.9348964523782898,
+        "p95": 0.9351548483300677,
+        "p95_p05": 1.000276389915825,
+        "median": 0.9350329844258729
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "rubber"
+          },
+          "name": "Dark flexible shower hose",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.045186202973127365,
+              0.03688944876194,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5299999713897705
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal",
+        "rubber"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal",
+        "rubber"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rail-hand-shower-hose-01-thumb.png",
+          "sha256": "7e5365c6a77e7743f4862c0f77368ea3e9f294c01fc2d7357c66830a5a74865e",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 14627,
+          "pixel_bbox_alpha_gt_0": [
+            200,
+            23,
+            312,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            200,
+            23,
+            312,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rail-hand-shower-hose-01-top.png",
+          "sha256": "3d74539b84d42e0912ce40c9138c362fd99f6b46f0dd0db210d27a51772261bd",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 51422,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            93,
+            489,
+            418
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            94,
+            488,
+            418
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 400,
+            "digest": "6ab7acff78f675509fe6191bc67f9a0d3d06e290240826e58ac55d706c863abb"
+          },
+          "Dark flexible shower hose|rubber": {
+            "points": 110,
+            "digest": "b0d975a6a3906bf887d2ef003090b9d825c0554f18f734bc58f4b379a121ab42"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 84,
+            "digest": "d47250a574064215568d4f9dc72f386c255d28d84f399418928e279245649b39"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 752,
+          "Dark flexible shower hose|rubber": 216,
+          "Ivory fired porcelain|ceramic": 160
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "ef55854d793e4b5bfae837b6c3f143af7de30eacdd44339625841ec16af95a6e",
+          "Dark flexible shower hose|rubber": "d5b25315de69935ed21dd615b2347012159ae020a5dd5a2e969aa6f5ee3c682a",
+          "Ivory fired porcelain|ceramic": "2dd2cfb854adacbff6f167f40dc0357e3821c98c7b8a0140adc0a19f47d5eb80"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "810ae3cc196cfc106be283636f4fbe2ed8ad45166fd472b9a23a94823a3b1b9f",
+          "Dark flexible shower hose|rubber": "7fbe652cc2f59fc08324eff25e78d81e3c82e3bf784d541a2e2d0106aa3058fb",
+          "Ivory fired porcelain|ceramic": "7cd905430fee69dfd13497fd8417ab56cbdf69b7fbbea549c2e63048c036de1d"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "7e5365c6a77e7743f4862c0f77368ea3e9f294c01fc2d7357c66830a5a74865e",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "3d74539b84d42e0912ce40c9138c362fd99f6b46f0dd0db210d27a51772261bd",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "315f9c4c3b62253f82cb66525bb36db8f6fabfa87e7831262a25ef685375ab71",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "25a55cd27930ae5949b0f185b99e0c04cfc0af51b90e346600bdc6ec3180da83",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "0e499241ed9e55911fb1b48b55d07e27b7ae033bd5d69d9a0ac7987790c9fdc3",
+          "bytes": 140118,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "b9d3d49615c2624a29a19c46e6db14a6e45b27d3f24cd7b146e22528cb63be3c",
+          "bytes": 115523,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-overhead-brass-standpipe-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-overhead-brass-standpipe-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "a045a1fcd34a2e053edaa309d8fe750a8d7a571097cf868a4b02ab247945563c",
+      "git_blob_sha": "b0b04e5ac3a5baaed5fc3f7cfffff4cfad7f322f",
+      "bytes": 90468,
+      "actual_bounds_gltf_m": [
+        [
+          -0.17399999499320984,
+          0.0,
+          -0.32249999046325684
+        ],
+        [
+          0.17399999499320984,
+          2.2609450817108154,
+          0.32249999046325684
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        347.9999899864197,
+        644.9999809265137,
+        2260.9450817108154
+      ],
+      "dimension_error_mm": [
+        -1.0013580322265625e-05,
+        -1.9073486328125e-05,
+        8.171081526597845e-05
+      ],
+      "triangles": 1380,
+      "uv": {
+        "triangles": 1380,
+        "valid_triangles": 1380,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.110705547305733,
+        "p95": 2.1114366047795277,
+        "p95_p05": 1.0003463569206648,
+        "median": 2.1111560542240735
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-overhead-brass-standpipe-01-thumb.png",
+          "sha256": "6881b1be26537efd0892f19b66ba6172d2fce8b39f35c6db83692aac647e002f",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 8221,
+          "pixel_bbox_alpha_gt_0": [
+            199,
+            23,
+            314,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            199,
+            23,
+            313,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-overhead-brass-standpipe-01-top.png",
+          "sha256": "53565f8e0c1a3e3b264101fe40c57429d22989daeb8599f668d2d1a2627de2b4",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 61156,
+          "pixel_bbox_alpha_gt_0": [
+            130,
+            23,
+            382,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            130,
+            23,
+            382,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 580,
+            "digest": "105eab69f772bd85290cc5af2278c32004161ebfeffc06b9602d4d8add3f242a"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 136,
+            "digest": "a6cb3e928dd6092b717e649a07be74da66a081fcc6969f7dc28bda1520b73de3"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 1120,
+          "Ivory fired porcelain|ceramic": 260
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "530ca578a0280504a4c4973f929198fcf73138506e2192d919b8ec73ddc88fa2",
+          "Ivory fired porcelain|ceramic": "adc149d96f2dfb9647548b1aa46b0f0fe34b67cb173c98ddb10e8ad3e30f1caf"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "322777232bbb28691ea409e610e51791158d75816a9e5736ce3fdc4046f01de9",
+          "Ivory fired porcelain|ceramic": "b3cb152a34c5d1107f1b7c5ca6773d7b7f9378710e6e0516b083acd53dac4243"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "6881b1be26537efd0892f19b66ba6172d2fce8b39f35c6db83692aac647e002f",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "53565f8e0c1a3e3b264101fe40c57429d22989daeb8599f668d2d1a2627de2b4",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "bf495ba844b9eda599eac859892d08b698d516c56f93e23fd80b778322ab3315",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "996210499863b20e910a5b0bdb1e534df4c7e0668ab6cdb113cb12dadc335c6c",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "5f8c7af33f70e21dbbc1384889a305c5d6ec7cff208eef83d2b785f3d6fd75b6",
+          "bytes": 146838,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "eb2db8b0aa01e1230db34405c3d223189f48209ba16a1ef778d58ecb722cf9b9",
+          "bytes": 118849,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-tankless-flushometer-wc-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tankless-flushometer-wc-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "66b4bde5035958b98b1d4feabe9da263a705bafc081d0348b7230468fe28233e",
+      "git_blob_sha": "8d14fc434c9822e31a997a8a5a1ae1aa1dbcd7ab",
+      "bytes": 146640,
+      "actual_bounds_gltf_m": [
+        [
+          -0.2160000056028366,
+          0.0,
+          -0.3982499837875366
+        ],
+        [
+          0.2160000056028366,
+          0.9819999933242798,
+          0.3982499837875366
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        432.0000112056732,
+        796.4999675750732,
+        981.9999933242798
+      ],
+      "dimension_error_mm": [
+        1.1205673217773438e-05,
+        -3.24249267578125e-05,
+        -6.67572021484375e-06
+      ],
+      "triangles": 2104,
+      "uv": {
+        "triangles": 2104,
+        "valid_triangles": 2104,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.2324944928971298,
+        "p95": 2.2333171483856025,
+        "p95_p05": 1.0003684916093143,
+        "median": 2.233006295531415
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Dark walnut WC seat",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.0382043719291687,
+              0.021219009533524513,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tankless-flushometer-wc-01-thumb.png",
+          "sha256": "d555ba2e7a58375040b8bc28852b76139c077887ce7974d1846b3067589e0a02",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 41762,
+          "pixel_bbox_alpha_gt_0": [
+            136,
+            23,
+            376,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            136,
+            23,
+            376,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tankless-flushometer-wc-01-top.png",
+          "sha256": "9338368c79449d7be579048ca7081911d2e5ed8fc9c79ec09827e4d02576a993",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 78661,
+          "pixel_bbox_alpha_gt_0": [
+            129,
+            23,
+            383,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            130,
+            23,
+            382,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 310,
+            "digest": "068b889a2bfd4b13decaec205c79a891222b4f03f7c2e22591376246e2d89518"
+          },
+          "Dark walnut WC seat|wood": {
+            "points": 288,
+            "digest": "641dff690632ec2ca0c799cdeb1c6b3508885ae4d6245f573ec2e3c25b0f3840"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 476,
+            "digest": "a809d14b10d47856624be796ec1392d136cd69f5235eace41e589b01416b775f"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 592,
+          "Dark walnut WC seat|wood": 568,
+          "Ivory fired porcelain|ceramic": 944
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "752ec85136fb27015048362b07365a1fbe28d08b072b88a7ee3689867ed33acc",
+          "Dark walnut WC seat|wood": "cb9a35265993b20c6b587de1fd204950323141fc5d391f9a4b34edbe50993e8e",
+          "Ivory fired porcelain|ceramic": "6749c203d6cb7bcc35d1b1d6291cec3ffabb3167b1544cc62eacd766a55e51f2"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "64257fe0f27da70498c88a1d54290753c6a57a764f117c891954c9577c1775c1",
+          "Dark walnut WC seat|wood": "c569f37c0f897648c5cff081a7ccb152556d33fdd7c78183882936bfce9bf910",
+          "Ivory fired porcelain|ceramic": "55ef100b2ebfe94ec38b7a7d51a813380e66088f67eec41f709d44178bf99745"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "d555ba2e7a58375040b8bc28852b76139c077887ce7974d1846b3067589e0a02",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "9338368c79449d7be579048ca7081911d2e5ed8fc9c79ec09827e4d02576a993",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "b7651d61793b8fb2dd84d46a218d4d4fb3770c6b1e2ca8ccf94ebc65dbf3788e",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "476522f2a4ed6b29dffebe019f1232b973ae34faf5e1ab826e8d52d4efbd39ce",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "fcf6293ef24659802abad5db49f5a409cea128593a86b4361dc45615cdd731c6",
+          "bytes": 180437,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "b9cb61556735e46c1ad8f633c4a5cf12e4936ae59a788e51afec5daf1c74f5cd",
+          "bytes": 138978,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-single-basin-mirrored-cabinet-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-single-basin-mirrored-cabinet-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "d10e9fb91489926fa4b397703adeddf269bcfb42aff7d3e1aeedacca9c6cf147",
+      "git_blob_sha": "1d1492783d88c844334d59226ebbf592a14ff202",
+      "bytes": 214700,
+      "actual_bounds_gltf_m": [
+        [
+          -0.4000000059604645,
+          0.0,
+          -0.3171573877334595
+        ],
+        [
+          0.4000000059604645,
+          1.6985000371932983,
+          0.3171573877334595
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        800.000011920929,
+        634.314775466919,
+        1698.5000371932983
+      ],
+      "dimension_error_mm": [
+        1.1920928955078125e-05,
+        -0.00022453308110925718,
+        3.719329833984375e-05
+      ],
+      "triangles": 3032,
+      "uv": {
+        "triangles": 3032,
+        "valid_triangles": 3032,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.167760492009872,
+        "p95": 5.1710088706941795,
+        "p95_p05": 1.0006285853783916,
+        "median": 5.1694796413210025
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Dark walnut WC seat",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.0382043719291687,
+              0.021219009533524513,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.33000001311302185
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "stone"
+          },
+          "name": "Honed limestone vanity top",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.6938717365264893,
+              0.637596845626831,
+              0.4910208582878113,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "glass"
+          },
+          "name": "Silver-backed mirror glass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5972017645835876,
+              0.7011018991470337,
+              0.6938717365264893,
+              1
+            ],
+            "roughnessFactor": 0.05999999865889549
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "stone",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "stone",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-single-basin-mirrored-cabinet-01-thumb.png",
+          "sha256": "2e09b69350ac8de8712904dda65aa9325e218cde9092770b72be93deb2efd534",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 77677,
+          "pixel_bbox_alpha_gt_0": [
+            131,
+            23,
+            381,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            132,
+            24,
+            380,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-single-basin-mirrored-cabinet-01-top.png",
+          "sha256": "56c8ac09ec643271a122fc2d6338f732464946c41f2deedc582626de1b6ec7aa",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 162997,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            71,
+            489,
+            441
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            71,
+            489,
+            441
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 536,
+            "digest": "2e86b7f36f7d9c49b9470d750f641242d88b715bd77eb6b1d6a79e1c0b83a5cf"
+          },
+          "Dark walnut WC seat|wood": {
+            "points": 600,
+            "digest": "171262252a10864d8164394d49a32f02fb85ad8b451e9ad93029a473e4312b3d"
+          },
+          "Honed limestone vanity top|stone": {
+            "points": 160,
+            "digest": "a04dc43a233e562631d340b38cdc4a59cae5ec40f3ced417ce34297a79e10f8d"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 280,
+            "digest": "a6d58028f79a982218e098b151c5d10f5dfb5caac67a75bce3f0bbfdceb9dd91"
+          },
+          "Silver-backed mirror glass|glass": {
+            "points": 24,
+            "digest": "ab03b078eece6d2f907cbf2a4891fe7c4c1d9ac2b08869967aa1cd0c926aced9"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 996,
+          "Dark walnut WC seat|wood": 1116,
+          "Honed limestone vanity top|stone": 320,
+          "Ivory fired porcelain|ceramic": 556,
+          "Silver-backed mirror glass|glass": 44
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "9e24302a8bbbe3f64d2edbbe586199684410b57457146279c62780ede1934117",
+          "Dark walnut WC seat|wood": "c85967ed39485336f0032ece8e53b32a58da01da8e9dbdc2ae5f803e01a2980f",
+          "Honed limestone vanity top|stone": "7b10a9ce4579e4b2986402ce6a51a783066b8fbdabe2d901fc28098df23390d4",
+          "Ivory fired porcelain|ceramic": "2d0594ae742b6d264b6014036cb7fa5a141e1178959eaa82bc75a41325d91975",
+          "Silver-backed mirror glass|glass": "0caf781820ffb73d27a725006578668df0814fe9ffcfa74c94c37fbae4b6822e"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "01d225c67e342b558939f68bb1e136375ea08f18a467b32d51280855192cd621",
+          "Dark walnut WC seat|wood": "bf1af25a0844f7a99cf36ab7e3cc488cb9a53c69b980e75a389c86a9c7a87426",
+          "Honed limestone vanity top|stone": "773d0696c7ab27fb711ca28c240a44e7acc40d8647830671b08f3025f169ff04",
+          "Ivory fired porcelain|ceramic": "603db4e404e4ddb173cfeafaffffd3acb5e6a17e0dca6398020b1ad8a17536d2",
+          "Silver-backed mirror glass|glass": "98488cb951ee9542c1fb99938c94f9e8c4d39fb255d0c55072ef7794a2f48ca9"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "2e09b69350ac8de8712904dda65aa9325e218cde9092770b72be93deb2efd534",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "56c8ac09ec643271a122fc2d6338f732464946c41f2deedc582626de1b6ec7aa",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "a99f3a22030842147e0f724e8397429ae48672b0ffd398ec7014fa7f7b347141",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "786554d4c00af357c2929ca085005ba43e67c6a4f3f3f25153db923e04a7ff11",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "194ae6d2a68776ad5253d0b96859f8b781bcd6c4cfa988bdc03d458222e1de81",
+          "bytes": 220164,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "673f6a1264e4e5ed94147e160e95c35ca7721a7b6616b7c6f730e78d22c16fee",
+          "bytes": 156056,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-framed-glass-shower-enclosure-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-framed-glass-shower-enclosure-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "a090a879cd3b93e202ae7f3a7e85ef9b7e2f7b20936b583c8d63fa3ee6e82a99",
+      "git_blob_sha": "251c973875c27e51f393b23aebae48e607f3e806",
+      "bytes": 84904,
+      "actual_bounds_gltf_m": [
+        [
+          -0.5,
+          0.0,
+          -0.5110000371932983
+        ],
+        [
+          0.5,
+          2.0144999027252197,
+          0.5110000371932983
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1000.0,
+        1022.0000743865967,
+        2014.4999027252197
+      ],
+      "dimension_error_mm": [
+        0.0,
+        7.43865966796875e-05,
+        -9.72747802734375e-05
+      ],
+      "triangles": 1148,
+      "uv": {
+        "triangles": 1148,
+        "valid_triangles": 1148,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.122762843590671,
+        "p95": 5.126565870573356,
+        "p95_p05": 1.0007423781070488,
+        "median": 5.124368050788562
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Ivory fired porcelain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.8549926280975342,
+              0.8148465752601624,
+              0.715693473815918,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23000000417232513
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged polished brass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.41788506507873535,
+              0.24228112399578094,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0.800000011920929,
+            "roughnessFactor": 0.2800000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed cast iron brackets",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.0666259378194809,
+              0.07227185368537903,
+              0.052860647439956665,
+              1
+            ],
+            "metallicFactor": 0.7200000286102295,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "alphaMode": "BLEND",
+          "extensions": {
+            "KHR_materials_transmission": {
+              "transmissionFactor": 0.9200000166893005
+            },
+            "KHR_materials_ior": {
+              "ior": 1.4500000476837158
+            }
+          },
+          "extras": {
+            "finishChannel": "glass"
+          },
+          "name": "Clear pale shower safety-glass representation",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5972017645835876,
+              0.7011018991470337,
+              0.6938717365264893,
+              0.11999999731779099
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.07000000029802322
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-framed-glass-shower-enclosure-01-thumb.png",
+          "sha256": "d88f865b80a2fc04ce95bfede695982a5d56699b4a8a2d8c2338eb5b397bf077",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 115592,
+          "pixel_bbox_alpha_gt_0": [
+            118,
+            23,
+            394,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            119,
+            23,
+            393,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-framed-glass-shower-enclosure-01-top.png",
+          "sha256": "cc842152ef8fa0ae2571c7480254333fa4c2e93381f2eab000dc0db3405c56e6",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 207769,
+          "pixel_bbox_alpha_gt_0": [
+            28,
+            23,
+            484,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            28,
+            23,
+            484,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged polished brass|metal": {
+            "points": 216,
+            "digest": "8e927c91c238d35c7b6023369caa0189df2d801891eb772b5c2280db7de51fb0"
+          },
+          "Bronzed cast iron brackets|metal": {
+            "points": 128,
+            "digest": "b97c595672bc9efc52fd3f2afeecbe284e8b2c5b75cfe50b8d2ba31c2fb1019f"
+          },
+          "Clear pale shower safety-glass representation|glass": {
+            "points": 96,
+            "digest": "7df806b6486049791a148206f85aa20357bea2c798d7b83471eb9143ebebaef5"
+          },
+          "Ivory fired porcelain|ceramic": {
+            "points": 168,
+            "digest": "df531d1e1ab92e49aefe0fc736116ec6504746afcbcdc62122202de22f072e22"
+          }
+        },
+        "triangle_counts": {
+          "Aged polished brass|metal": 400,
+          "Bronzed cast iron brackets|metal": 240,
+          "Clear pale shower safety-glass representation|glass": 176,
+          "Ivory fired porcelain|ceramic": 332
+        },
+        "triangle_surfaces": {
+          "Aged polished brass|metal": "ea99b089d8d2681241c766d2e7674b10e2856358f356353840ade47fd2856ce8",
+          "Bronzed cast iron brackets|metal": "bd2e3150d52f0cf3a5c260df0970deea19f3f55159f4f48916a68fb8a3e201d5",
+          "Clear pale shower safety-glass representation|glass": "3cbccdf1bc94202fed999e29aa756ec46f61ca75c2e1bf581527da711c77bf9a",
+          "Ivory fired porcelain|ceramic": "0da4f4039b6023d039ac12c0cf82110cba90276995dfed825fa31093e2d74a3a"
+        },
+        "uv_triangle_mapping": {
+          "Aged polished brass|metal": "0c40d3eaaf8efa4dab1f543018bef742a2f81956dc5b77ced9410030e3d8d8ba",
+          "Bronzed cast iron brackets|metal": "d84fa3c7de618b4a2f7999c9defd3708bcc69dc6a0ee1cb939e458347b6c376b",
+          "Clear pale shower safety-glass representation|glass": "e43dd3a1272d9fa11d94762a6e65f669b36f26a82fedded6999976c5285d547c",
+          "Ivory fired porcelain|ceramic": "b72e8cd7e0295b8e4370327d0f59ee59ae1a3c89df29973a8cace73e7b23ef57"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "d88f865b80a2fc04ce95bfede695982a5d56699b4a8a2d8c2338eb5b397bf077",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "cc842152ef8fa0ae2571c7480254333fa4c2e93381f2eab000dc0db3405c56e6",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "828baa0c414eb51e8b434743561e34213f723fe6b3a1c1dc8f3e3e2bb17bb78a",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "226d5667bb11eeab702da27c668a9bf4f8394b2e0468230373e0ba344e6daa60",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "4613189a4e86111c88afb1ae17f8ffb7d3469db54b0dfed1a26c4420fe654579",
+          "bytes": 140430,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "4616fc5de9fb7914afded875a0b33b070610dbf5f6736c9a05e2e77ea247d6ef",
+          "bytes": 115622,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    }
+  ],
+  "errors": 0,
+  "model_bytes": 1547416,
+  "triangles": 22098
+}

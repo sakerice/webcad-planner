@@ -1,0 +1,162 @@
+{
+  "set": "rpg-mansion",
+  "newConstructionCount": 1,
+  "widthVariantCount": 0,
+  "poseVariantCount": 0,
+  "accessoryOnlyCount": 0,
+  "items": [
+    {
+      "id": "rpg-mansion-fitted-six-panel-door-1200-01",
+      "name": "Six-panel timber door fitted to 1200mm rectangular bay",
+      "kind": "joinery-prop",
+      "group": "住設",
+      "category": "建築部材",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-fitted-six-panel-door-1200-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/fitted_door_closure/sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/fitted_door_closure/sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/fitted_door_closure/authoring_sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+      "validation": "tools/blender/rpg_mansion/fitted_door_closure/sources/rpg-mansion-fitted-six-panel-door-1200-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/fitted_door_closure/build.py",
+      "w": 1343.0,
+      "d": 220.0,
+      "h": 2384.0,
+      "defaultElevation": 12,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#735039"
+        },
+        {
+          "key": "trim",
+          "label": "trim",
+          "default": "#916b49"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#af8b4b"
+        }
+      ],
+      "triangleBudget": 15000,
+      "measuredTriangles": 12396,
+      "glbBytes": 867036,
+      "nativePartCount": 115,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "host": "rpg-mansion-rectangular-doorway-bay-01",
+        "leafWidthMm": 1192,
+        "leafHeightMm": 2384,
+        "leafBodyThicknessMm": 44,
+        "leafBoundsInstalledBlenderM": [
+          [
+            -0.596,
+            -0.14,
+            0.012
+          ],
+          [
+            0.596,
+            -0.096,
+            2.396
+          ]
+        ],
+        "finishedFloorMm": 0,
+        "sideGapsMm": [
+          4,
+          4
+        ],
+        "topGapMm": 4,
+        "bottomGapMm": 12,
+        "hingePivotInstalledBlenderM": [
+          -0.6100000143051147,
+          -0.18000000715255737,
+          0.0
+        ],
+        "constructionToAssetTranslationBlenderM": [
+          0.01850000023841858,
+          0.14000000059604645,
+          -0.012000000104308128
+        ],
+        "installationTransformBlenderM": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -0.01850000023841858
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -0.14000000059604645
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.012000000104308128
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "hostClearOpeningMm": [
+          1200,
+          2400
+        ],
+        "manualOpeningProof": {
+          "rotationDegrees": -90,
+          "axis": "Blender +Z through hinge pivot",
+          "stationaryGroups": [
+            "stationary-host"
+          ],
+          "movingGroups": [
+            "moving-leaf",
+            "moving-bolt"
+          ],
+          "boltRetractionBeforeSwingMm": 35
+        },
+        "wholeCatalogueModelHasNoOperableHierarchy": true
+      },
+      "placementNotes": "One specific 1200 × 2400 mm rectangular host fit. Static closed leaf plus host-mounted hinge/strike hardware in one catalogue mesh. Manual placement only. Whole-model rigid rotation does not open the leaf. No wall cutting, automatic host association, animation, collision, traversability, weather/fire/security or code certification.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural door geometry created for this project; accepted host and floor are project originals reused unchanged in proof scenes only."
+      },
+      "acceptanceStatus": "Candidate awaiting root visual and independent technical acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-fitted-six-panel-door-1200-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-fitted-six-panel-door-1200-01-top.png",
+      "front": "tools/blender/rpg_mansion/fitted_door_closure/evidence/rpg-mansion-fitted-six-panel-door-1200-01-front.png",
+      "rear": "tools/blender/rpg_mansion/fitted_door_closure/evidence/rpg-mansion-fitted-six-panel-door-1200-01-rear.png",
+      "left": "tools/blender/rpg_mansion/fitted_door_closure/evidence/rpg-mansion-fitted-six-panel-door-1200-01-left.png",
+      "right": "tools/blender/rpg_mansion/fitted_door_closure/evidence/rpg-mansion-fitted-six-panel-door-1200-01-right.png",
+      "hashes": {
+        "model": "96be7522c86ac346d375e87a16a8f4d9b3025ab655eca846da25f33ad9c403b7",
+        "sourceBlend": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+        "exportBlend": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+        "authoringBlend": "a298c2f2aeee199b8f04a64d1bfeb6a0589cc8c73cee5e9f0d42b69a80e1acd5",
+        "validation": "b80b9c1bd34691abb534a0739ee74dae18dcbd05979bdfe208841e6a4fec2289",
+        "thumb": "0ad576ad0635f0022410c5fdee8b0a26166978724ac58e179371c3d54334d2f6",
+        "top": "b7a50e590e54f7ea015745cdce37c48aa8a6d66c4ce8b82ccbe020b7fc726290",
+        "front": "413be50a7bc2b3aef68236d130c68250d4d9dd761c42b88324e02586eee5f806",
+        "rear": "57b64f625ed59a16239234f57972ff030e6602e86291c41387615e8f19e2ee80",
+        "left": "c0371398d4891103ce991cce6397ccb2fbee22c4486bd9c3c8d09d7b5a6e3d79",
+        "right": "1720d2043007eae191a7588e1fee6de6711e1e43c4fb38c4f6bc37c08bcf5636"
+      }
+    }
+  ],
+  "releaseStage": "Producer final candidate, independent certificate governs acceptance"
+}

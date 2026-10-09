@@ -1,0 +1,3346 @@
+{
+  "openingEdgeGuardStatus": "These three route proofs isolate stair and landing joins. Every non-access edge of the visible upper-floor opening still requires separate guard modules. The full-straight-guarded-opening proof demonstrates an actual guarded opening using the delivered kit.",
+  "openingEdgesRequiringGuards": [
+    {
+      "fromM": [
+        -0.72,
+        0.56,
+        3.0
+      ],
+      "toM": [
+        -0.72,
+        3.5600000000000005,
+        3.0
+      ]
+    },
+    {
+      "fromM": [
+        2.8800000000000003,
+        0.56,
+        3.0
+      ],
+      "toM": [
+        2.8800000000000003,
+        3.5600000000000005,
+        3.0
+      ]
+    },
+    {
+      "fromM": [
+        -0.72,
+        0.56,
+        3.0
+      ],
+      "toM": [
+        2.8800000000000003,
+        0.56,
+        3.0
+      ]
+    },
+    {
+      "fromM": [
+        -0.72,
+        3.5600000000000005,
+        3.0
+      ],
+      "toM": [
+        2.8800000000000003,
+        3.5600000000000005,
+        3.0
+      ]
+    }
+  ],
+  "intendedAccessGap": {
+    "centerBlenderM": [
+      2.879999876022339,
+      2.880000114440918,
+      3.0
+    ],
+    "directionFromFlight": [
+      1.0,
+      -4.371138828673793e-08,
+      0.0
+    ],
+    "nominalWidthM": 1.16,
+    "excludeOnlyThisGapFromEdgeGuardCoverage": true
+  },
+  "layout": "quarter",
+  "stage": "producer-candidate-not-independent-acceptance",
+  "units": "metres",
+  "coordinateSystem": "Blender Z up; glTF conversion x,z,-y",
+  "storeyRiseM": 3.0,
+  "riserCount": 18,
+  "riserM": 0.16666666666666666,
+  "goingM": 0.28,
+  "nominalClearWidthM": 1.0,
+  "minimumNewelCapClearWidthM": 0.96,
+  "headClearanceEnvelopeM": 2.1,
+  "actualOverheadRaycastMinimumM": 2.4266666431427,
+  "visibleFloorOpeningBlenderXYM": [
+    -0.72,
+    2.8800000000000003,
+    0.56,
+    3.5600000000000005
+  ],
+  "upperFloorTopM": 3.0,
+  "upperFloorUndersideM": 2.76,
+  "contextExclusion": "Visible upper floor ring, its supports, lower slab and head bearing ledges are delivered proof context, not catalogue asset IDs.",
+  "placements": [
+    {
+      "name": "Lower flight",
+      "id": "rpg-mansion-stair-flight-nine-riser-01",
+      "source": "models/rpg-mansion-stair-flight-nine-riser-01.glb",
+      "sha256": "d1f50da9939badc8263ecdaab7c4b23d03052dc7010584272902d7da1b4cfa68",
+      "constructionPositionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.1200000047683716
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Lower right guard",
+      "id": "rpg-mansion-stair-guard-nine-riser-01",
+      "source": "models/rpg-mansion-stair-guard-nine-riser-01.glb",
+      "sha256": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5",
+      "constructionPositionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.5400000214576721
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.1200000047683716
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1666666716337204
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Lower left guard",
+      "id": "rpg-mansion-stair-guard-nine-riser-01",
+      "source": "models/rpg-mansion-stair-guard-nine-riser-01.glb",
+      "sha256": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5",
+      "constructionPositionBlenderM": [
+        -1.08,
+        0,
+        0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.5400000214576721
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.1200000047683716
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1666666716337204
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Grounded quarter-turn landing",
+      "id": "rpg-mansion-stair-square-supported-landing-01",
+      "source": "models/rpg-mansion-stair-square-supported-landing-01.glb",
+      "sha256": "df9098e06af115568e321fa568feee64bca50d1cf19fdc44c90846bdef8e0349",
+      "constructionPositionBlenderM": [
+        0,
+        2.3000000000000003,
+        0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.880000114440918
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Quarter-turn outer guard",
+      "id": "rpg-mansion-stair-landing-guard-corner-01",
+      "source": "models/rpg-mansion-stair-landing-guard-corner-01.glb",
+      "sha256": "412149c79231aad3e0a790dd8b67ec35025190bc3f6172e46459d64b42120b6f",
+      "constructionPositionBlenderM": [
+        0,
+        2.3000000000000003,
+        1.5
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.010000020265579224
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.859999895095825
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Upper flight",
+      "id": "rpg-mansion-stair-flight-nine-riser-01",
+      "source": "models/rpg-mansion-stair-flight-nine-riser-01.glb",
+      "sha256": "d1f50da9939badc8263ecdaab7c4b23d03052dc7010584272902d7da1b4cfa68",
+      "constructionPositionBlenderM": [
+        0.58,
+        2.8800000000000003,
+        1.5
+      ],
+      "rotationZRadians": -1.5707963267948966,
+      "matrixFromAssetBlender": [
+        [
+          -4.371138828673793e-08,
+          1.0,
+          0.0,
+          1.7000000476837158
+        ],
+        [
+          -1.0,
+          -4.371138828673793e-08,
+          0.0,
+          2.880000114440918
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Upper right guard",
+      "id": "rpg-mansion-stair-guard-nine-riser-01",
+      "source": "models/rpg-mansion-stair-guard-nine-riser-01.glb",
+      "sha256": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5",
+      "constructionPositionBlenderM": [
+        0.58,
+        2.8800000000000003,
+        1.5
+      ],
+      "rotationZRadians": -1.5707963267948966,
+      "matrixFromAssetBlender": [
+        [
+          -4.371138828673793e-08,
+          1.0,
+          0.0,
+          1.6999999284744263
+        ],
+        [
+          -1.0,
+          -4.371138828673793e-08,
+          0.0,
+          2.3400001525878906
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.6666666269302368
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Upper left guard",
+      "id": "rpg-mansion-stair-guard-nine-riser-01",
+      "source": "models/rpg-mansion-stair-guard-nine-riser-01.glb",
+      "sha256": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5",
+      "constructionPositionBlenderM": [
+        0.5800000429153442,
+        3.9600000381469727,
+        1.5
+      ],
+      "rotationZRadians": -1.5707963267948966,
+      "matrixFromAssetBlender": [
+        [
+          -4.371138828673793e-08,
+          1.0,
+          0.0,
+          1.7000000476837158
+        ],
+        [
+          -1.0,
+          -4.371138828673793e-08,
+          0.0,
+          3.4200000762939453
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.6666666269302368
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "supportInterfaces": [
+    {
+      "label": "Lower flight foot to host",
+      "part": "Lower flight / Foot bearing plate",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        -0.5400000214576721,
+        0.20999999344348907,
+        0.0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Lower flight foot to stringer",
+      "part": "Lower flight / Left continuous housed stringer",
+      "host": "Lower flight / Foot bearing plate",
+      "pointWorldBlenderM": [
+        -0.5400000214576721,
+        0.23999999463558197,
+        0.00800000037997961
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.025,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Lower flight head shoe to host",
+      "part": "Lower flight / Head bearing plate",
+      "host": "Grounded quarter-turn landing / Header receiver ledge",
+      "pointWorldBlenderM": [
+        -0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Lower flight notch to head shoe",
+      "part": "Lower flight / Left continuous housed stringer",
+      "host": "Lower flight / Head bearing plate",
+      "pointWorldBlenderM": [
+        -0.5400000214576721,
+        2.2750000953674316,
+        1.3200000524520874
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.0028,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Lower flight foot to host",
+      "part": "Lower flight / Foot bearing plate.001",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        0.5400000214576721,
+        0.20999999344348907,
+        0.0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Lower flight foot to stringer",
+      "part": "Lower flight / Right continuous housed stringer",
+      "host": "Lower flight / Foot bearing plate.001",
+      "pointWorldBlenderM": [
+        0.5400000214576721,
+        0.23999999463558197,
+        0.00800000037997961
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.025,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Lower flight head shoe to host",
+      "part": "Lower flight / Head bearing plate.001",
+      "host": "Grounded quarter-turn landing / Header receiver ledge",
+      "pointWorldBlenderM": [
+        0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Lower flight notch to head shoe",
+      "part": "Lower flight / Right continuous housed stringer",
+      "host": "Lower flight / Head bearing plate.001",
+      "pointWorldBlenderM": [
+        0.5400000214576721,
+        2.2750000953674316,
+        1.3200000524520874
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.0028,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight foot to host",
+      "part": "Upper flight / Foot bearing plate",
+      "host": "Grounded quarter-turn landing",
+      "pointWorldBlenderM": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.5
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight foot to stringer",
+      "part": "Upper flight / Left continuous housed stringer",
+      "host": "Upper flight / Foot bearing plate",
+      "pointWorldBlenderM": [
+        0.8199999928474426,
+        3.4200000762939453,
+        1.5080000162124634
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.025,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight head shoe to host",
+      "part": "Upper flight / Head bearing plate",
+      "host": "Visible upper-floor stair bearing ledge",
+      "pointWorldBlenderM": [
+        2.8550000190734863,
+        3.4200000762939453,
+        2.809999942779541
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight notch to head shoe",
+      "part": "Upper flight / Left continuous housed stringer",
+      "host": "Upper flight / Head bearing plate",
+      "pointWorldBlenderM": [
+        2.8550000190734863,
+        3.4200000762939453,
+        2.820000171661377
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.0028,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight foot to host",
+      "part": "Upper flight / Foot bearing plate.001",
+      "host": "Grounded quarter-turn landing",
+      "pointWorldBlenderM": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.5
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight foot to stringer",
+      "part": "Upper flight / Right continuous housed stringer",
+      "host": "Upper flight / Foot bearing plate.001",
+      "pointWorldBlenderM": [
+        0.8199999332427979,
+        2.3400001525878906,
+        1.5080000162124634
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.025,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight head shoe to host",
+      "part": "Upper flight / Head bearing plate.001",
+      "host": "Visible upper-floor stair bearing ledge.001",
+      "pointWorldBlenderM": [
+        2.8550000190734863,
+        2.3399999141693115,
+        2.809999942779541
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Upper flight notch to head shoe",
+      "part": "Upper flight / Right continuous housed stringer",
+      "host": "Upper flight / Head bearing plate.001",
+      "pointWorldBlenderM": [
+        2.8550000190734863,
+        2.3399999141693115,
+        2.820000171661377
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.0028,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing plinth to ground",
+      "part": "Grounded quarter-turn landing / Leg plinth shoe",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        2.390000104904175,
+        0.0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.015,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing leg to plinth",
+      "part": "Grounded quarter-turn landing / Grounded square timber leg",
+      "host": "Grounded quarter-turn landing / Leg plinth shoe",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        2.390000104904175,
+        0.07999999821186066
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing cap to leg",
+      "part": "Grounded quarter-turn landing / Leg cap block",
+      "host": "Grounded quarter-turn landing / Grounded square timber leg",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        2.390000104904175,
+        1.2300000190734863
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing frame to cap",
+      "part": "Grounded quarter-turn landing / Landing frame union",
+      "host": "Grounded quarter-turn landing / Leg cap block",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        2.390000104904175,
+        1.2899999618530273
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.005,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing plinth to ground",
+      "part": "Grounded quarter-turn landing / Leg plinth shoe.001",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        3.369999885559082,
+        0.0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.015,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing leg to plinth",
+      "part": "Grounded quarter-turn landing / Grounded square timber leg.001",
+      "host": "Grounded quarter-turn landing / Leg plinth shoe.001",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        3.369999885559082,
+        0.07999999821186066
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing cap to leg",
+      "part": "Grounded quarter-turn landing / Leg cap block.001",
+      "host": "Grounded quarter-turn landing / Grounded square timber leg.001",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        3.369999885559082,
+        1.2300000190734863
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing frame to cap",
+      "part": "Grounded quarter-turn landing / Landing frame union",
+      "host": "Grounded quarter-turn landing / Leg cap block.001",
+      "pointWorldBlenderM": [
+        -0.49000000953674316,
+        3.369999885559082,
+        1.2899999618530273
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.005,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing plinth to ground",
+      "part": "Grounded quarter-turn landing / Leg plinth shoe.002",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        2.390000104904175,
+        0.0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.015,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing leg to plinth",
+      "part": "Grounded quarter-turn landing / Grounded square timber leg.002",
+      "host": "Grounded quarter-turn landing / Leg plinth shoe.002",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        2.390000104904175,
+        0.07999999821186066
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing cap to leg",
+      "part": "Grounded quarter-turn landing / Leg cap block.002",
+      "host": "Grounded quarter-turn landing / Grounded square timber leg.002",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        2.390000104904175,
+        1.2300000190734863
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing frame to cap",
+      "part": "Grounded quarter-turn landing / Landing frame union",
+      "host": "Grounded quarter-turn landing / Leg cap block.002",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        2.390000104904175,
+        1.2899999618530273
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.005,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing plinth to ground",
+      "part": "Grounded quarter-turn landing / Leg plinth shoe.003",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        3.369999885559082,
+        0.0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.015,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing leg to plinth",
+      "part": "Grounded quarter-turn landing / Grounded square timber leg.003",
+      "host": "Grounded quarter-turn landing / Leg plinth shoe.003",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        3.369999885559082,
+        0.07999999821186066
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing cap to leg",
+      "part": "Grounded quarter-turn landing / Leg cap block.003",
+      "host": "Grounded quarter-turn landing / Grounded square timber leg.003",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        3.369999885559082,
+        1.2300000190734863
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.01,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    },
+    {
+      "label": "Grounded quarter-turn landing frame to cap",
+      "part": "Grounded quarter-turn landing / Landing frame union",
+      "host": "Grounded quarter-turn landing / Leg cap block.003",
+      "pointWorldBlenderM": [
+        0.49000000953674316,
+        3.369999885559082,
+        1.2899999618530273
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.005,
+      "planeToleranceM": 0.0001,
+      "claim": "Geometric support only; no structural capacity claim"
+    }
+  ],
+  "contacts": [
+    {
+      "name": "Lower flight head shoe -0.54",
+      "upper": "Lower flight",
+      "lower": "Grounded quarter-turn landing",
+      "pointM": [
+        -0.54,
+        2.2750000000000004,
+        1.31
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower flight head shoe 0.54",
+      "upper": "Lower flight",
+      "lower": "Grounded quarter-turn landing",
+      "pointM": [
+        0.54,
+        2.2750000000000004,
+        1.31
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Upper foot bearing -0.54",
+      "upper": "Upper flight",
+      "lower": "Grounded quarter-turn landing",
+      "pointM": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.5
+      ],
+      "upperHit": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.5
+      ],
+      "lowerHit": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Upper foot bearing 0.54",
+      "upper": "Upper flight",
+      "lower": "Grounded quarter-turn landing",
+      "pointM": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.5
+      ],
+      "upperHit": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.5
+      ],
+      "lowerHit": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower guard shoe right tread1",
+      "upper": "Lower right guard",
+      "lower": "Lower flight",
+      "pointM": [
+        0.54,
+        0.1,
+        0.16666666666666666
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower guard shoe right tread4",
+      "upper": "Lower right guard",
+      "lower": "Lower flight",
+      "pointM": [
+        0.54,
+        0.9400000000000001,
+        0.6666666666666666
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower guard shoe right tread8",
+      "upper": "Lower right guard",
+      "lower": "Lower flight",
+      "pointM": [
+        0.54,
+        2.06,
+        1.3333333333333333
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower guard shoe left tread1",
+      "upper": "Lower left guard",
+      "lower": "Lower flight",
+      "pointM": [
+        -0.54,
+        0.1,
+        0.16666666666666666
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower guard shoe left tread4",
+      "upper": "Lower left guard",
+      "lower": "Lower flight",
+      "pointM": [
+        -0.54,
+        0.9400000000000001,
+        0.6666666666666666
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower guard shoe left tread8",
+      "upper": "Lower left guard",
+      "lower": "Lower flight",
+      "pointM": [
+        -0.54,
+        2.06,
+        1.3333333333333333
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "gapM": 0.0,
+      "pass": true
+    }
+  ],
+  "triangleProbes": [
+    {
+      "name": "Walking tread 1 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.02800000086426735,
+        0.23666667938232422
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.02800000086426735,
+        0.1666666716337204
+      ],
+      "distanceM": 0.07000000774860382,
+      "expectedM": [
+        0.0,
+        0.02800000086426735,
+        0.1666666716337204
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 1 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.14000000059604645,
+        0.23666667938232422
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.14000000059604645,
+        0.1666666865348816
+      ],
+      "distanceM": 0.07000000029802322,
+      "expectedM": [
+        0.0,
+        0.14000000059604645,
+        0.1666666716337204
+      ],
+      "errorM": 1.4901161193847656e-08,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 1 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.25200000405311584,
+        0.23666667938232422
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.25200000405311584,
+        0.1666666865348816
+      ],
+      "distanceM": 0.07000000029802322,
+      "expectedM": [
+        0.0,
+        0.25200000405311584,
+        0.1666666716337204
+      ],
+      "errorM": 1.4901161193847656e-08,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.30799999833106995,
+        0.4033333361148834
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.30799999833106995,
+        0.3333333432674408
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.30799999833106995,
+        0.3333333432674408
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.41999998688697815,
+        0.4033333361148834
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.41999998688697815,
+        0.3333333432674408
+      ],
+      "distanceM": 0.07000000029802322,
+      "expectedM": [
+        0.0,
+        0.41999998688697815,
+        0.3333333432674408
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.5320000052452087,
+        0.4033333361148834
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.5320000052452087,
+        0.3333333432674408
+      ],
+      "distanceM": 0.07000000029802322,
+      "expectedM": [
+        0.0,
+        0.5320000052452087,
+        0.3333333432674408
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.5879999995231628,
+        0.5699999928474426
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.5879999995231628,
+        0.5
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.5879999995231628,
+        0.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.699999988079071,
+        0.5699999928474426
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.699999988079071,
+        0.5
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.699999988079071,
+        0.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.8119999766349792,
+        0.5699999928474426
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.8119999766349792,
+        0.5
+      ],
+      "distanceM": 0.06999998539686203,
+      "expectedM": [
+        0.0,
+        0.8119999766349792,
+        0.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.8679999709129333,
+        0.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.8679999709129333,
+        0.6666666865348816
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.8679999709129333,
+        0.6666666865348816
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        0.9800000190734863,
+        0.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.9800000190734863,
+        0.6666666865348816
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.9800000190734863,
+        0.6666666865348816
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.0920000076293945,
+        0.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.0920000076293945,
+        0.6666666865348816
+      ],
+      "distanceM": 0.06999998539686203,
+      "expectedM": [
+        0.0,
+        1.0920000076293945,
+        0.6666666865348816
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.1480000019073486,
+        0.903333306312561
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.1480000019073486,
+        0.8333333134651184
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        1.1480000019073486,
+        0.8333333134651184
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.2599999904632568,
+        0.903333306312561
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.2599999904632568,
+        0.8333333134651184
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        1.2599999904632568,
+        0.8333333134651184
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.371999979019165,
+        0.903333306312561
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.371999979019165,
+        0.8333333134651184
+      ],
+      "distanceM": 0.06999998539686203,
+      "expectedM": [
+        0.0,
+        1.371999979019165,
+        0.8333333134651184
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.4279999732971191,
+        1.0700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.4279999732971191,
+        1.0
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.4279999732971191,
+        1.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.5399999618530273,
+        1.0700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.5399999618530273,
+        1.0
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        1.5399999618530273,
+        1.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.6519999504089355,
+        1.0700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.6519999504089355,
+        1.0
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        1.6519999504089355,
+        1.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.7079999446868896,
+        1.2366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.7079999446868896,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.7079999446868896,
+        1.1666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.8200000524520874,
+        1.2366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.8200000524520874,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.8200000524520874,
+        1.1666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.9320000410079956,
+        1.2366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.9320000410079956,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        1.9320000410079956,
+        1.1666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.1",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        1.9880000352859497,
+        1.4033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.9880000352859497,
+        1.3333333730697632
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.9880000352859497,
+        1.3333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.5",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        2.0999999046325684,
+        1.4033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.0999999046325684,
+        1.3333333730697632
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        2.0999999046325684,
+        1.3333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.9",
+      "target": "Lower flight",
+      "originM": [
+        0.0,
+        2.2119998931884766,
+        1.4033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.2119998931884766,
+        1.3333333730697632
+      ],
+      "distanceM": 0.070000059902668,
+      "expectedM": [
+        0.0,
+        2.2119998931884766,
+        1.3333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 1 0.1",
+      "target": "Upper flight",
+      "originM": [
+        0.6079999804496765,
+        2.880000114440918,
+        1.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.6079999804496765,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "distanceM": 0.070000059902668,
+      "expectedM": [
+        0.6079999804496765,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 1 0.5",
+      "target": "Upper flight",
+      "originM": [
+        0.7199999690055847,
+        2.880000114440918,
+        1.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.7199999690055847,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.7199999690055847,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 1 0.9",
+      "target": "Upper flight",
+      "originM": [
+        0.8320000171661377,
+        2.880000114440918,
+        1.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.8320000171661377,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.8320000171661377,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.1",
+      "target": "Upper flight",
+      "originM": [
+        0.8880000114440918,
+        2.880000114440918,
+        1.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.8880000114440918,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "distanceM": 0.070000059902668,
+      "expectedM": [
+        0.8880000114440918,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.5",
+      "target": "Upper flight",
+      "originM": [
+        1.0,
+        2.880000114440918,
+        1.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.0,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        1.0,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.9",
+      "target": "Upper flight",
+      "originM": [
+        1.1119999885559082,
+        2.880000114440918,
+        1.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.1119999885559082,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        1.1119999885559082,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.1",
+      "target": "Upper flight",
+      "originM": [
+        1.1679999828338623,
+        2.880000114440918,
+        2.069999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.1679999828338623,
+        2.880000114440918,
+        2.0
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        1.1679999828338623,
+        2.880000114440918,
+        2.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.5",
+      "target": "Upper flight",
+      "originM": [
+        1.2799999713897705,
+        2.880000114440918,
+        2.069999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.2799999713897705,
+        2.880000114440918,
+        2.0
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        1.2799999713897705,
+        2.880000114440918,
+        2.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.9",
+      "target": "Upper flight",
+      "originM": [
+        1.3919999599456787,
+        2.880000114440918,
+        2.069999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.3919999599456787,
+        2.880000114440918,
+        2.0
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        1.3919999599456787,
+        2.880000114440918,
+        2.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.1",
+      "target": "Upper flight",
+      "originM": [
+        1.4479999542236328,
+        2.880000114440918,
+        2.236666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.4479999542236328,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        1.4479999542236328,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.5",
+      "target": "Upper flight",
+      "originM": [
+        1.559999942779541,
+        2.880000114440918,
+        2.236666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.559999942779541,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        1.559999942779541,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.9",
+      "target": "Upper flight",
+      "originM": [
+        1.6719999313354492,
+        2.880000114440918,
+        2.236666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.6719999313354492,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "distanceM": 0.06999994069337845,
+      "expectedM": [
+        1.6719999313354492,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.1",
+      "target": "Upper flight",
+      "originM": [
+        1.7279999256134033,
+        2.880000114440918,
+        2.4033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.7279999256134033,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        1.7279999256134033,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.5",
+      "target": "Upper flight",
+      "originM": [
+        1.8399999141693115,
+        2.880000114440918,
+        2.4033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.8399999141693115,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "distanceM": 0.06999992579221725,
+      "expectedM": [
+        1.8399999141693115,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.9",
+      "target": "Upper flight",
+      "originM": [
+        1.9519999027252197,
+        2.880000114440918,
+        2.4033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        1.9519999027252197,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        1.9519999027252197,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.1",
+      "target": "Upper flight",
+      "originM": [
+        2.007999897003174,
+        2.880000114440918,
+        2.569999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.007999897003174,
+        2.880000114440918,
+        2.5
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.007999897003174,
+        2.880000114440918,
+        2.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.5",
+      "target": "Upper flight",
+      "originM": [
+        2.119999885559082,
+        2.880000114440918,
+        2.569999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.119999885559082,
+        2.880000114440918,
+        2.5
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.119999885559082,
+        2.880000114440918,
+        2.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.9",
+      "target": "Upper flight",
+      "originM": [
+        2.2319998741149902,
+        2.880000114440918,
+        2.569999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.2319998741149902,
+        2.880000114440918,
+        2.5
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.2319998741149902,
+        2.880000114440918,
+        2.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.1",
+      "target": "Upper flight",
+      "originM": [
+        2.2879998683929443,
+        2.880000114440918,
+        2.736666440963745
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.2879998683929443,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.2879998683929443,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.5",
+      "target": "Upper flight",
+      "originM": [
+        2.4000000953674316,
+        2.880000114440918,
+        2.736666440963745
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.4000000953674316,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.4000000953674316,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.9",
+      "target": "Upper flight",
+      "originM": [
+        2.51200008392334,
+        2.880000114440918,
+        2.736666440963745
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.51200008392334,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.51200008392334,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.1",
+      "target": "Upper flight",
+      "originM": [
+        2.568000078201294,
+        2.880000114440918,
+        2.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.568000078201294,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.568000078201294,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.5",
+      "target": "Upper flight",
+      "originM": [
+        2.679999828338623,
+        2.880000114440918,
+        2.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.679999828338623,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.679999828338623,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.9",
+      "target": "Upper flight",
+      "originM": [
+        2.7919998168945312,
+        2.880000114440918,
+        2.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        2.7919998168945312,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        2.7919998168945312,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Lower flight head shoe -0.54 upper underside",
+      "target": "Lower flight",
+      "originM": [
+        -0.54,
+        2.2750000000000004,
+        1.3070000000000002
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "distanceM": 0.002999902004376054
+    },
+    {
+      "name": "Lower flight head shoe -0.54 lower topside",
+      "target": "Grounded quarter-turn landing",
+      "originM": [
+        -0.54,
+        2.2750000000000004,
+        1.313
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Lower flight head shoe 0.54 upper underside",
+      "target": "Lower flight",
+      "originM": [
+        0.54,
+        2.2750000000000004,
+        1.3070000000000002
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "distanceM": 0.00299990177154541
+    },
+    {
+      "name": "Lower flight head shoe 0.54 lower topside",
+      "target": "Grounded quarter-turn landing",
+      "originM": [
+        0.54,
+        2.2750000000000004,
+        1.313
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.2750000953674316,
+        1.309999942779541
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Upper foot bearing -0.54 upper underside",
+      "target": "Upper flight",
+      "originM": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.5
+      ],
+      "distanceM": 0.0030000214464962482
+    },
+    {
+      "name": "Upper foot bearing -0.54 lower topside",
+      "target": "Grounded quarter-turn landing",
+      "originM": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.550000011920929,
+        3.4200000762939453,
+        1.5
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Upper foot bearing 0.54 upper underside",
+      "target": "Upper flight",
+      "originM": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.5
+      ],
+      "distanceM": 0.0030000214464962482
+    },
+    {
+      "name": "Upper foot bearing 0.54 lower topside",
+      "target": "Grounded quarter-turn landing",
+      "originM": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5499999523162842,
+        2.3400001525878906,
+        1.5
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Lower guard shoe right tread1 upper underside",
+      "target": "Lower right guard",
+      "originM": [
+        0.54,
+        0.1,
+        0.16366666666666665
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.0030000063125044107
+    },
+    {
+      "name": "Lower guard shoe right tread1 lower topside",
+      "target": "Lower flight",
+      "originM": [
+        0.54,
+        0.1,
+        0.16966666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.0029999909456819296
+    },
+    {
+      "name": "Lower guard shoe right tread4 upper underside",
+      "target": "Lower right guard",
+      "originM": [
+        0.54,
+        0.9400000000000001,
+        0.6636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Lower guard shoe right tread4 lower topside",
+      "target": "Lower flight",
+      "originM": [
+        0.54,
+        0.9400000000000001,
+        0.6696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.002999961609020829
+    },
+    {
+      "name": "Lower guard shoe right tread8 upper underside",
+      "target": "Lower right guard",
+      "originM": [
+        0.54,
+        2.06,
+        1.3303333333333334
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Lower guard shoe right tread8 lower topside",
+      "target": "Lower flight",
+      "originM": [
+        0.54,
+        2.06,
+        1.3363333333333332
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.0029999015387147665
+    },
+    {
+      "name": "Lower guard shoe left tread1 upper underside",
+      "target": "Lower left guard",
+      "originM": [
+        -0.54,
+        0.1,
+        0.16366666666666665
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.003000006079673767
+    },
+    {
+      "name": "Lower guard shoe left tread1 lower topside",
+      "target": "Lower flight",
+      "originM": [
+        -0.54,
+        0.1,
+        0.16966666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.002999991411343217
+    },
+    {
+      "name": "Lower guard shoe left tread4 upper underside",
+      "target": "Lower left guard",
+      "originM": [
+        -0.54,
+        0.9400000000000001,
+        0.6636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Lower guard shoe left tread4 lower topside",
+      "target": "Lower flight",
+      "originM": [
+        -0.54,
+        0.9400000000000001,
+        0.6696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.0029999613761901855
+    },
+    {
+      "name": "Lower guard shoe left tread8 upper underside",
+      "target": "Lower left guard",
+      "originM": [
+        -0.54,
+        2.06,
+        1.3303333333333334
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Lower guard shoe left tread8 lower topside",
+      "target": "Lower flight",
+      "originM": [
+        -0.54,
+        2.06,
+        1.3363333333333332
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.00299990177154541
+    }
+  ],
+  "headClearanceSamples": [
+    {
+      "walkingPointM": [
+        0.0,
+        0.02800000086426735,
+        0.1666666716337204
+      ],
+      "overhead": [
+        2.5933331508636472,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.14000000059604645,
+        0.1666666716337204
+      ],
+      "overhead": [
+        2.5933333892822263,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.25200000405311584,
+        0.1666666716337204
+      ],
+      "overhead": [
+        2.5933333892822263,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.30799999833106995,
+        0.3333333432674408
+      ],
+      "overhead": [
+        2.4266666431427,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.41999998688697815,
+        0.3333333432674408
+      ],
+      "overhead": [
+        2.4266666431427,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.5320000052452087,
+        0.3333333432674408
+      ],
+      "overhead": [
+        2.4266666431427,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.5879999995231628,
+        0.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.699999988079071,
+        0.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.8119999766349792,
+        0.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.8679999709129333,
+        0.6666666865348816
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.9800000190734863,
+        0.6666666865348816
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.0920000076293945,
+        0.6666666865348816
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.1480000019073486,
+        0.8333333134651184
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.2599999904632568,
+        0.8333333134651184
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.371999979019165,
+        0.8333333134651184
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.4279999732971191,
+        1.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.5399999618530273,
+        1.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.6519999504089355,
+        1.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.7079999446868896,
+        1.1666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.8200000524520874,
+        1.1666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.9320000410079956,
+        1.1666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.9880000352859497,
+        1.3333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.0999999046325684,
+        1.3333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.2119998931884766,
+        1.3333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.6079999804496765,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.7199999690055847,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.8320000171661377,
+        2.880000114440918,
+        1.6666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.8880000114440918,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.0,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.1119999885559082,
+        2.880000114440918,
+        1.8333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.1679999828338623,
+        2.880000114440918,
+        2.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.2799999713897705,
+        2.880000114440918,
+        2.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.3919999599456787,
+        2.880000114440918,
+        2.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.4479999542236328,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.559999942779541,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.6719999313354492,
+        2.880000114440918,
+        2.1666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.7279999256134033,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.8399999141693115,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        1.9519999027252197,
+        2.880000114440918,
+        2.3333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.007999897003174,
+        2.880000114440918,
+        2.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.119999885559082,
+        2.880000114440918,
+        2.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.2319998741149902,
+        2.880000114440918,
+        2.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.2879998683929443,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.4000000953674316,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.51200008392334,
+        2.880000114440918,
+        2.6666665077209473
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.568000078201294,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.679999828338623,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        2.7919998168945312,
+        2.880000114440918,
+        2.8333334922790527
+      ],
+      "overhead": null,
+      "pass": true
+    }
+  ],
+  "intendedJoinery": "60 mm head tongue meets the landing front edge. Head shoes bear on the projecting receiver ledge. Newel feet seat into their own flight tread. Upper floor tongue meets the visible floor face, with head shoes supported by visible metal ledges.",
+  "limits": "Under-stair passage is not claimed. Manual static RPG assembly; no native floor-cut, stair-port, routing, collision, load or legal/code certification."
+}

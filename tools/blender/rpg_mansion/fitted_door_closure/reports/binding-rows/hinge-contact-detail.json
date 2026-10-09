@@ -1,0 +1,27 @@
+{
+  "source": "proofs/door-closed-installed.blend",
+  "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+  "image": "evidence/hinge-contact-detail.png",
+  "imageSha256": "b846ba11baa4070b440c93d3d36b7f612903209d15b5bea52750a44a69a68e48",
+  "recipe": {
+    "function": "build.render",
+    "delta": [
+      -1.1,
+      -4,
+      0.5
+    ],
+    "resolution": 900,
+    "target": [
+      -0.61,
+      -0.17,
+      1.19
+    ],
+    "orthoScale": 0.32,
+    "engine": "CYCLES",
+    "samples": 32,
+    "denoise": false,
+    "transparent": true,
+    "viewTransform": "AgX",
+    "finishOverride": null
+  }
+}

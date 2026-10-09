@@ -1,0 +1,45 @@
+{
+  "authoring": "Original project-authored native Blender geometry",
+  "thirdPartyGeometry": false,
+  "thirdPartyTextures": false,
+  "externalDownloads": false,
+  "paidGeneration": false,
+  "license": "Original project-authored assets for this project; no separate public reuse license granted",
+  "reconstructionNotice": "Two new core constructions: supported terrace and gate leaf. One fitted strike receiver counts zero core. Five accepted input products and all explicitly marked QA hosts are excluded from new counts.",
+  "sources": {
+    "audit_source_contacts.py": "6f17aa564e81c51b15cf5dcc6c01839bff088069727b5ade1b1eab4fc3623e32",
+    "build.py": "239a8c3769ad1f3fef98fffd239ea9db4a18478493580a21ccec5222ec079d40",
+    "build_installation_proofs.py": "a88238d113d47f3c1da5265bc614f3bb1286acd0658a9dff4821086a63dbe29f",
+    "common.py": "a0e70dac87abc21b3961d106a98959b0a212c0013b09ee872cf6d3336a7a2160",
+    "finalize_delivery.py": "f74a54ef7eeaeb2142e2b972a5b148daeacf8829a03ead536cd4c7061b70b53d",
+    "helpers/exterior_build.py": "224add9eeeacc0c35da86cfa1fb3fa3a42ba001102fc3e82324b143a0f4ee1e1",
+    "helpers/model_kit.py": "7614800d979239e08aa8c14c237bedb53685acce92c4ed9931ddfc3ea9bb432f",
+    "helpers/native_utils.py": "08616cea07ceac0a989ba33db0754b3ce45aff0954b2000b794b6a63cc41621a",
+    "helpers/png_metadata.py": "dfa11faf1382666a9a29eadb7bf72500b7b97c21085637ebb034a2ae907edada",
+    "helpers/shape_kit.py": "260e124675d9ba3f00dfc861c03e058d46463fecc7290dc42aff3224a856b28e",
+    "make_review_sheets.py": "05cc66175c7716d65eb0fa6db3396c197605a9d24c2add7b86a08a2e0a1d7384",
+    "render_details.py": "d0721822619ad6063b1980cf155c7f1492132a1bb78cb2f983ed578c10adca5f",
+    "terrace_gate_forms.py": "a833bd2b58ecd57775782e5dad12e3fc1f36eb0fa136f9741427473bdd2fea00",
+    "validate_product_files.py": "adff56781e826ba1ec0c8b70cd27aec30600b142d3eacdd1fc2d1ff663f84538"
+  },
+  "assets": [
+    {
+      "id": "rpg-mansion-garden-supported-oak-terrace-01",
+      "glbSha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6",
+      "sourceSha256": "2a631ea206766619c32eab6ec8b08c1a544bfd9eb5238a7e4e9267becfd57759",
+      "authoringSha256": "c1c11181bb5f7833c66999d3f96a9051169750962c51c217b62cf3e4e44014fc"
+    },
+    {
+      "id": "rpg-mansion-garden-braced-oak-gate-leaf-01",
+      "glbSha256": "6f24e6b1b3adc5aef8d21e03d348cf3c2f40675b9e8e954886a40eeef50d539f",
+      "sourceSha256": "16ac7c824d0049f05b4b73e9a9735ca2b38aec7cfeb1ef0e95e2cdc7dde7d816",
+      "authoringSha256": "6ea86ad1c5c16e340710acd8d2c400780367f715ae1bb6076e61f4ed0b669ec9"
+    },
+    {
+      "id": "rpg-mansion-garden-gate-strike-receiver-01",
+      "glbSha256": "45b0b65925be3e379d8a95d517807f2993901dc0943118bd920e43cb9aa23a1b",
+      "sourceSha256": "5b5dd8c2d1b410275d3790da1a63e911974fb440160b5dd6df9b56fa736ea93c",
+      "authoringSha256": "3999a86f0755baf41962159fa37951ca607622d03a36c09c098257e5b37d9a00"
+    }
+  ]
+}

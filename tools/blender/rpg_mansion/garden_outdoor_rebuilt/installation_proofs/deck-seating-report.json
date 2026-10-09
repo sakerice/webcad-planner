@@ -1,0 +1,122 @@
+{
+  "case": "deck-seating",
+  "source": "deck-seating.blend",
+  "sourceSha256": "b2f680ba4055a9660cb5f24e391a4af7a78fe2b41f16daff808fa1c73e3be0fa",
+  "products": [
+    {
+      "label": "Deck step",
+      "asset": "rpg-mansion-garden-two-riser-deck-step-01",
+      "model": "models/rpg-mansion-garden-two-riser-deck-step-01.glb",
+      "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3",
+      "positionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Deck step",
+      "pointM": [
+        -0.43,
+        -0.26,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Deck step",
+      "pointM": [
+        -0.43,
+        0.25,
+        0
+      ],
+      "distanceM": 2.9802322387695312e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Deck step",
+      "pointM": [
+        0,
+        -0.26,
+        0
+      ],
+      "distanceM": 1.862645149230957e-09,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Deck step",
+      "pointM": [
+        0,
+        0.25,
+        0
+      ],
+      "distanceM": 3.725290298461914e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Deck step",
+      "pointM": [
+        0.43,
+        -0.26,
+        0
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Deck step",
+      "pointM": [
+        0.43,
+        0.25,
+        0
+      ],
+      "distanceM": 2.9802322387695312e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "fixturesCount": 1,
+  "manualCaveat": "Static manual placement and geometric contacts only; no automatic snapping, structural engineering, load certification or fluid simulation."
+}

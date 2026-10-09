@@ -1,0 +1,104 @@
+{
+  "model": "rpg-mansion-banker-desk-lamp-01",
+  "dimensions_mm": [
+    467.99999475479126,
+    173.99999499320984,
+    419.99998688697815
+  ],
+  "bounds_m": [
+    [
+      -0.23399999737739563,
+      -0.08699999749660492,
+      0.0
+    ],
+    [
+      0.23399999737739563,
+      0.08699999749660492,
+      0.41999998688697815
+    ]
+  ],
+  "triangles": 1856,
+  "uv": {
+    "meters_per_uv": 1.135458607627291,
+    "min": 1.1322725356121122,
+    "max": 1.1386668717991066,
+    "p05": 1.1347889686801804,
+    "p95": 1.1360958963175007,
+    "total_triangles": 1856,
+    "valid_triangles": 1856,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Antique brass structure": "metal",
+    "Green cast glass shade": "glass",
+    "Opal bulb glass static appearance": "glass",
+    "Porcelain socket insulator": "ceramic",
+    "Bronzed iron structure": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 122568,
+  "datums": {
+    "installation": {
+      "mount": "desk",
+      "supportPlaneGltfY": 0,
+      "defaultElevationMm": 740,
+      "note": "Place bottom on a 740mm desk plane. Static fixture; no configured runtime illumination."
+    },
+    "shade": {
+      "construction": "continuous cast glass closed volume with open underside",
+      "minimumWallThicknessMm": 6,
+      "openingWidthMm": 404,
+      "openingDepthMm": 162
+    },
+    "bulb": {
+      "type": "tubular mesh bulb",
+      "materialEmissionStrength": 0.3,
+      "runtimeLightObjects": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.23399999737739563,
+        -0.08699999749660492,
+        0.0
+      ],
+      [
+        0.23399999737739563,
+        0.08699999749660492,
+        0.41999998688697815
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0006482489163677959,
+    0.00023693740221612342,
+    5.8008648901856454e-05,
+    0.0008048944680230837,
+    6.937075318328804e-05,
+    6.429076374085223e-06,
+    5.800866345377169e-05,
+    6.4290787994044284e-06,
+    5.235108889678486e-05,
+    2.1539993326769036e-06,
+    0.00010861489514960945,
+    4.273181512341276e-07,
+    2.7241065481575785e-05,
+    1.4100464568400636e-05,
+    3.791992459885782e-06,
+    2.719249292700473e-05,
+    1.41004744023121e-05,
+    3.7919967231421956e-06
+  ],
+  "source_sha256": "03c84ce38254d5ace4b54d71ef2a00c3fb7af71e02fbaa4f10d6cedca9576b6f",
+  "glb_sha256": "129ef274caa6507d88e47d1d2996e84ba3eaa0223c53efca880aac3ce5858d7a"
+}

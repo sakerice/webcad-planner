@@ -1,0 +1,40 @@
+{
+  "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-framed-glass-shower-enclosure-01.glb",
+  "modelSha256": "a090a879cd3b93e202ae7f3a7e85ef9b7e2f7b20936b583c8d63fa3ee6e82a99",
+  "actualGlbGlassMaterials": [
+    {
+      "alphaMode": "BLEND",
+      "extensions": {
+        "KHR_materials_transmission": {
+          "transmissionFactor": 0.9200000166893005
+        },
+        "KHR_materials_ior": {
+          "ior": 1.4500000476837158
+        }
+      },
+      "extras": {
+        "finishChannel": "glass"
+      },
+      "name": "Clear pale shower safety-glass representation",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.5972017645835876,
+          0.7011018991470337,
+          0.6938717365264893,
+          0.11999999731779099
+        ],
+        "metallicFactor": 0,
+        "roughnessFactor": 0.07000000029802322
+      }
+    }
+  ],
+  "assemblySourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/qa-exported-enclosure-glass-marker.blend",
+  "assemblySourceSha256": "61183cae5d2bac99f098cb8c3f025a9f2d7515e62094de4bcb92ef5171f5fa7a",
+  "qaMarkerExcludedFromModelCount": true,
+  "images": {
+    "actualExport": "evidence/qa-enclosure-glass-actual-export.png",
+    "control": "evidence/qa-enclosure-glass-no-glass-control.png"
+  },
+  "note": "Actual imported GLB shader and geometry with four opaque contrasting marker blocks behind the enclosure. No-glass control removes only glass faces. Frames retain exact bounds/camera fit.",
+  "errors": []
+}

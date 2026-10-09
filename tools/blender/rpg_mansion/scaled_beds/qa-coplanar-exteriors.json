@@ -1,0 +1,602 @@
+{
+  "method": "Find positive-area co-oriented coplanar surface overlap from decoded GLB triangles.\n\nCoincident coplanar outward faces can z-fight even with valid winding/normals.\nTriangle pairs merely sharing edges are allowed. Bottom-plane overlaps are listed\nseparately; visibility is a normal-direction ray observation, not complete CSG.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-sleigh-double-bed-01",
+      "modelSha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-iron-scroll-single-bed-01",
+      "modelSha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-upholstered-divan-bed-01",
+      "modelSha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-low-platform-double-bed-01",
+      "modelSha256": "d4f9e9b6c509977b0ec1d94cb61155de7d105bac284eb01d194611b50075c1c8",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-sleigh-single-capacity-variant-01",
+      "modelSha256": "9e644fe89695ece9d78e6b09ec9cd1617b5ac7ed614950299abe7e91c656ea72",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-spindle-single-bed-01",
+      "modelSha256": "f4f26350930d69b6d1c227c33e5530a1190e9d8e9dc286a6e3a8c2301e942328",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-arched-wide-guest-bed-01",
+      "modelSha256": "7fd11c310c07036945e6618d7fa847115201ecb5803704daf0de46b740da796d",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-narrow-servants-bed-01",
+      "modelSha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41",
+      "coplanar_overlap_pairs": 6,
+      "total_pairwise_area_m2": 0.000615998682022223,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": [
+        {
+          "triangles": [
+            2350,
+            2262
+          ],
+          "overlap_area_m2": 3.1370227703053644e-05,
+          "intersection_center_m": [
+            0.4124999940395355,
+            0.5353333155314127,
+            0.9689012374243476
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            2351,
+            2262
+          ],
+          "overlap_area_m2": 0.00025814867925871843,
+          "intersection_center_m": [
+            0.4124999940395355,
+            0.5339499733410885,
+            0.983986905807458
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            2351,
+            2263
+          ],
+          "overlap_area_m2": 1.848043404933941e-05,
+          "intersection_center_m": [
+            0.4124999940395355,
+            0.5305833057500604,
+            0.9934102747978807
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            2354,
+            2266
+          ],
+          "overlap_area_m2": 3.1370227703053644e-05,
+          "intersection_center_m": [
+            -0.4124999940395355,
+            0.5353333155314127,
+            0.9930987749734185
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            2355,
+            2266
+          ],
+          "overlap_area_m2": 0.0002581482173242833,
+          "intersection_center_m": [
+            -0.4124999940395355,
+            0.5339499927125786,
+            0.9780131185112371
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            2355,
+            2267
+          ],
+          "overlap_area_m2": 1.848089598377456e-05,
+          "intersection_center_m": [
+            -0.4124999940395355,
+            0.5305833380358772,
+            0.9685897574681004
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-open-tester-four-poster-bed-01",
+      "modelSha256": "4c969668378555393b80b248a00ff32ca3f89566a82ac4bdd25b4335fc10209a",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-half-tester-single-bed-01",
+      "modelSha256": "588716313d6ec3736eb82904795a319008a5685ddc3fae1c67ddd2278aa4c005",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-paired-twin-beds-01",
+      "modelSha256": "651fe654f613bf8516e262fe0dae6ed9c00c742a8fce2fd157e5ce10ae4834fb",
+      "coplanar_overlap_pairs": 12,
+      "total_pairwise_area_m2": 0.0006719979553224675,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": [
+        {
+          "triangles": [
+            4478,
+            4390
+          ],
+          "overlap_area_m2": 9.333274029021954e-06,
+          "intersection_center_m": [
+            -0.2775000035762787,
+            0.5369999806086222,
+            1.0080370029794843
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4479,
+            4390
+          ],
+          "overlap_area_m2": 0.00015633955616051187,
+          "intersection_center_m": [
+            -0.2775000035762787,
+            0.5359499532730221,
+            1.024083745072907
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4479,
+            4391
+          ],
+          "overlap_area_m2": 2.326658641083057e-06,
+          "intersection_center_m": [
+            -0.2775000035762787,
+            0.5339166056366162,
+            1.0344358953028345
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4482,
+            4394
+          ],
+          "overlap_area_m2": 9.333274029021954e-06,
+          "intersection_center_m": [
+            -1.1425000429153442,
+            0.5369999806086222,
+            1.0339629331243365
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4483,
+            4394
+          ],
+          "overlap_area_m2": 0.0001563392283425169,
+          "intersection_center_m": [
+            -1.1425000429153442,
+            0.5359499920159301,
+            1.0179162148727718
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4483,
+            4395
+          ],
+          "overlap_area_m2": 2.3269864590780287e-06,
+          "intersection_center_m": [
+            -1.1425000429153442,
+            0.5339166702081297,
+            1.0075640805374162
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4742,
+            4654
+          ],
+          "overlap_area_m2": 9.333274029021954e-06,
+          "intersection_center_m": [
+            1.1425000429153442,
+            0.5369999806086222,
+            1.0080370029794843
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4743,
+            4654
+          ],
+          "overlap_area_m2": 0.00015633955616051187,
+          "intersection_center_m": [
+            1.1425000429153442,
+            0.5359499532730221,
+            1.024083745072907
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4743,
+            4655
+          ],
+          "overlap_area_m2": 2.326658641083057e-06,
+          "intersection_center_m": [
+            1.1425000429153442,
+            0.5339166056366162,
+            1.0344358953028345
+          ],
+          "outward_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4746,
+            4658
+          ],
+          "overlap_area_m2": 9.333274029021954e-06,
+          "intersection_center_m": [
+            0.2775000035762787,
+            0.5369999806086222,
+            1.0339629331243365
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4747,
+            4658
+          ],
+          "overlap_area_m2": 0.0001563392283425169,
+          "intersection_center_m": [
+            0.2775000035762787,
+            0.5359499920159301,
+            1.0179162148727718
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        },
+        {
+          "triangles": [
+            4747,
+            4659
+          ],
+          "overlap_area_m2": 2.3269864590780287e-06,
+          "intersection_center_m": [
+            0.2775000035762787,
+            0.5339166702081297,
+            1.0075640805374162
+          ],
+          "outward_normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Polished walnut mouldings"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-daybed-deployed-trundle-variant-01",
+      "modelSha256": "f67cc2842c17405219ecec0ba58d7cd52019e6199c13ef1a23eb96e26c673d35",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-daybed-stowed-trundle-variant-01",
+      "modelSha256": "b558fb2b25352330e5244fa800d2d82f07aa97e084239835ad0c75d71f1cc5b3",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-footlocker-single-bed-01",
+      "modelSha256": "e1a2e2df87eb58ea3511a84273c6d3241accdebd1edc2baaf0b08eb227e9e6be",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-rope-sprung-single-bed-01",
+      "modelSha256": "ccef3648d1031e08a771bcfb3e2004745a548994340c6e13fbcc2741c06b7e76",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-adult-servants-bunk-bed-01",
+      "modelSha256": "b60d6af3b8969115285ab0fe47b7253ec98a53a379e0b27fd2eb5cc137598858",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-alcove-enclosed-single-bed-01",
+      "modelSha256": "77c4ba056fa05a25fdfc33ba8206c841080b369c4ec914df4a7cb9e028494faf",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-drawer-double-bed-01",
+      "modelSha256": "47be09bd2d626e0b5e337812a180b9935043ecf437e529b6c4d657c7de571440",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    }
+  ],
+  "errors": []
+}

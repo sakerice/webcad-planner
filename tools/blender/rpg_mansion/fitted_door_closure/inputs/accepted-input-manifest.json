@@ -1,0 +1,496 @@
+{
+  "rectangular-doorway-bay": {
+    "descriptor": {
+      "id": "rpg-mansion-rectangular-doorway-bay-01",
+      "name": "1800mm open rectangular doorway bay",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-rear.png",
+      "w": 1800,
+      "d": 288,
+      "h": 3000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 280,
+      "glbBytes": 22584,
+      "nativePartCount": 15,
+      "finishChannels": [
+        {
+          "key": "plaster",
+          "label": "plaster",
+          "default": "#d8cfb7"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#70503b"
+        }
+      ],
+      "moduleContract": {
+        "role": "Actual 1200 x 2400mm clear through-opening within 1800mm grid bay",
+        "nominalWidthMm": 1800,
+        "wallHeightMm": 3000,
+        "wallThicknessMm": 240,
+        "clearOpeningMm": [
+          1200,
+          2400
+        ],
+        "connections": [
+          {
+            "label": "left",
+            "point": [
+              -0.9,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.9,
+              0.01900000125169754,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.9,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.9,
+              0.0,
+              -0.01900000125169754
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "right",
+            "point": [
+              0.9,
+              0,
+              0
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              0.9,
+              0.01900000125169754,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.9,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.9,
+              0.0,
+              -0.01900000125169754
+            ],
+            "normalGltf": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          0.01900000125169754,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 0,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "assetBottomMm": 0,
+          "groundDatumMm": 0,
+          "explanation": "Place at ground level; no source-origin or scale change required."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          -0.01900000125169754
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "measuredEnvelopeMm": {
+        "w": 1800.0,
+        "d": 288.0,
+        "h": 3000.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 1800,
+        "d": 288,
+        "h": 3000
+      },
+      "dimensionToleranceMm": 0.1,
+      "hashes": {
+        "model": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+        "sourceBlend": "7b9191be26cc883b44e951171cdd9c492b97ae4b923b25edc383d15d26efeb8d",
+        "exportBlend": "7b9191be26cc883b44e951171cdd9c492b97ae4b923b25edc383d15d26efeb8d",
+        "authoringBlend": "2b9c3e06ff42e0378bbe144dd4aa63175d21723a16a6f75e49921bd82ad7c9df",
+        "thumb": "3a469cfdd79ac303d6a028867a2af1b3240cfafc31498ca9537499b6763b7e3b",
+        "top": "78dc91d118f374ecdbcc7fbdcaa85ddd380e6d2b2f7d4ab1901d7013c9c39b45",
+        "front": "d75e9b15be136fcc0743f919a72716d823c98b215eb322db6d5e10d910e83eb1",
+        "rear": "a323a1469faace48eb04d75753b0b37ec608c1b3b5cd78706f3ff678f3b5b5fc"
+      }
+    },
+    "file": "inputs/rpg-mansion-rectangular-doorway-bay-01.glb",
+    "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+    "sourceSnapshot": "mansion-integration-20261008T0712/repo",
+    "alsoVerifiedUnchangedSnapshot": "mansion-integration-20261008T0737/repo",
+    "alsoVerifiedUnchangedSha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc"
+  },
+  "herringbone-parquet-tile": {
+    "descriptor": {
+      "id": "rpg-mansion-herringbone-parquet-tile-01",
+      "name": "1200mm herringbone parquet floor tile",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-herringbone-parquet-tile-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-herringbone-parquet-tile-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-herringbone-parquet-tile-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-rear.png",
+      "w": 1200,
+      "d": 1200,
+      "h": 75,
+      "defaultElevation": -75,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture_expansion/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 684,
+      "glbBytes": 49476,
+      "nativePartCount": 57,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#b88a50"
+        }
+      ],
+      "moduleContract": {
+        "role": "True clipped herringbone boards on a continuous support substrate; repeating solid floor with0.8mm half-joints",
+        "nominalFootprintMm": [
+          1200,
+          1200
+        ],
+        "substrateThicknessMm": 60,
+        "wearLayerMm": 15,
+        "installationElevationMm": -75,
+        "finishedFloorDatumMm": 0,
+        "connections": [
+          {
+            "label": "west",
+            "point": [
+              -0.6,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.6,
+              0.0,
+              -0.0
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "east",
+            "point": [
+              0.6,
+              0,
+              0
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              0.6,
+              0.0,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.6,
+              0.0,
+              -0.0
+            ],
+            "normalGltf": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "front",
+            "point": [
+              0,
+              -0.6,
+              0
+            ],
+            "normal": [
+              0,
+              -1,
+              0
+            ],
+            "assetPointM": [
+              0.0,
+              -0.6,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          {
+            "label": "rear",
+            "point": [
+              0,
+              0.6,
+              0
+            ],
+            "normal": [
+              0,
+              1,
+              0
+            ],
+            "assetPointM": [
+              0.0,
+              0.6,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              -0.6
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              -0.6
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              -1.0
+            ]
+          },
+          {
+            "label": "bottom",
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              -0.0
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          },
+          {
+            "label": "top",
+            "point": [
+              0,
+              0,
+              0.075
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "assetPointM": [
+              0.0,
+              0.0,
+              0.075
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.075,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.075,
+              -0.0
+            ],
+            "normalGltf": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / glTF Y-axis rotations in90-degree steps; no mirror or scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": -75,
+        "wallTopDatumMm": 3000,
+        "constructionToAssetTranslationGltfM": [
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+        "placementExample": {
+          "assetBottomMm": -75,
+          "finishedFloorMm": 0,
+          "explanation": "Floor substrate extends75mm below wall ground datum."
+        }
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Root visually accepted; sealed for independent certification",
+      "measuredEnvelopeMm": {
+        "w": 1200.0,
+        "d": 1200.0,
+        "h": 75.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 1200,
+        "d": 1200,
+        "h": 75
+      },
+      "dimensionToleranceMm": 0.1,
+      "independentConstructionCount": 1,
+      "hashes": {
+        "model": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01",
+        "sourceBlend": "f1b5af06c25f35013d6cefa577fc2f7e118597b4ad374a63fd82f549a1e9854f",
+        "exportBlend": "f1b5af06c25f35013d6cefa577fc2f7e118597b4ad374a63fd82f549a1e9854f",
+        "authoringBlend": "afd8aa5c4ce82284acb0feea73860c3dedf8c1c72cffd1f6dc770a9d0d0743f9",
+        "thumb": "1aad2923cebcfc540c8a7cf93de85cd99990df3107bfb7570405c536c2404ea7",
+        "top": "09c6713b8c03530be6bc994c8ec791c2cdc5d11c53604b67459ab5dc701ad3da",
+        "front": "ce8cef70711bbd5a9404c97d52140563f86fe44a01bfb531ff20e0089c630c82",
+        "rear": "69149fcf47747c2ad54c1d66b76ef7c6748ff7b03795b1f388ff3f5982c61adf"
+      },
+      "rootVisualAcceptance": {
+        "status": "accepted",
+        "date": "2026-10-08",
+        "scope": "Original geometry/style and isolated/assembled views; final window material alpha0.10 and roughness0.08 explicitly authorized"
+      }
+    },
+    "file": "inputs/rpg-mansion-herringbone-parquet-tile-01.glb",
+    "sha256": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01",
+    "sourceSnapshot": "mansion-integration-20261008T0712/repo",
+    "alsoVerifiedUnchangedSnapshot": "mansion-integration-20261008T0737/repo",
+    "alsoVerifiedUnchangedSha256": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01"
+  }
+}

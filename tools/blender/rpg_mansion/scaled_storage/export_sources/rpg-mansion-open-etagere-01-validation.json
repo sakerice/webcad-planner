@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-open-etagere-01",
+  "dimensions_mm": [
+    800.000011920929,
+    319.9999928474426,
+    1740.0000095367432
+  ],
+  "bounds_m": [
+    [
+      -0.4000000059604645,
+      -0.1599999964237213,
+      0.0
+    ],
+    [
+      0.4000000059604645,
+      0.1599999964237213,
+      1.7400000095367432
+    ]
+  ],
+  "triangles": 1492,
+  "uv": {
+    "meters_per_uv": 3.951026046048193,
+    "min": 3.394606137522143,
+    "max": 4.999549196852083,
+    "p05": 3.568143371962688,
+    "p95": 4.846355032589743,
+    "total_triangles": 1492,
+    "valid_triangles": 1492,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.005": "wood",
+    "Mansion walnut mouldings.005": "wood",
+    "Mansion walnut veneered fields.005": "wood",
+    "Mansion patinated brass.005": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 65500,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "027b78d418f2c6a76f879746b9aad0d43e427c491b53aacf02f6045ba1b26b52",
+  "sourceSha256": "5919e7a727adeb174de79906123dd1db55a1168d764366577c304dc3fa8d3a23",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "9c29b079cfe872cea88369276ea1b740f19b1350be88ec49a8e5ed72e61aaebe",
+    "authoredDataSignature": "bc6a9121b73a387021a61df0fc1dea3011a0c7e441096ea8230260d9966fbcb8",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・寝具の追加構造2種",
+  "assetIdCount": 2,
+  "uniqueConstructionFamilies": 2,
+  "items": [
+    {
+      "id": "rpg-mansion-campaign-x-trestle-cot-01",
+      "name": "交差脚と帆布支持の野営寝台",
+      "packId": "rpg-mansion",
+      "kind": "bed",
+      "group": "家具",
+      "category": "ベッド",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-campaign-x-trestle-cot-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-campaign-x-trestle-cot-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-campaign-x-trestle-cot-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-campaign-x-trestle-cot-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-campaign-x-trestle-cot-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_beds_additions/sources/rpg-mansion-campaign-x-trestle-cot-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_beds_additions/sources/rpg-mansion-campaign-x-trestle-cot-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_beds_additions/authoring_sources/rpg-mansion-campaign-x-trestle-cot-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_beds_additions/sources/rpg-mansion-campaign-x-trestle-cot-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_beds_additions/build.py",
+      "w": 880,
+      "d": 2180,
+      "h": 680,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "A static deployed campaign cot with crossed wooden trestles, a taut canvas load deck, brass pivot axles and a longitudinal stabilizer",
+      "dimensionBasis": "Intended period-adapted design; declared standard dimensions are demand references only; legacy model geometry missing and unverified",
+      "footprintSemanticEquivalenceVerified": false,
+      "nativeFunctionEquivalencePromised": false,
+      "features": {
+        "mattressTopM": 0.573,
+        "mattressSupportM": 0.408,
+        "sleepingCapacity": 1,
+        "mattressDimensionsM": [
+          0.748,
+          1.9260000000000002,
+          0.165
+        ],
+        "topology": "static-crossed-X-trestle-campaign-cot/taut-canvas-load-deck/longitudinal-tension-rails/brass-pivots/central-stabilizer/four-ground-pads",
+        "mechanism": "Static deployed prop; folding motion is not promised"
+      },
+      "finishChannels": [
+        {
+          "key": "bedding",
+          "label": "寝具",
+          "default": "#ded5bd"
+        },
+        {
+          "key": "cover",
+          "label": "掛け布",
+          "default": "#355c57"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#af8e4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "2e21f4c40b9ae7f16539cd60523695adf070dc9d1d5809ca5b440e9a3b1d997e",
+      "sourceSha256": "389d6189a8a0dd34dab4fb143e56d6d16c8747109ffa9f0d5e51e8a44f31daa5",
+      "authoringSha256": "e63b9eaf26138864cefe35a26106bf56aeb3161ef81617494e1237c178739753",
+      "previewSha256": {
+        "thumb": "c5eac268dd183e8fa6c897bf742d736db087ab2292b04cdf1d510abab9db0b85",
+        "top": "be7a35b4b9a5e8cafbe662ea9e8c7aa848468799aa6ee1defc5c665b8b61b011",
+        "front": "bd3947493740a2a180f521b1348c25e91755646a06ea95fd763a756c558abd0a",
+        "rear": "37e8c76464db9e0c42c22c16cb9309191a699d7a5a52d620384bc0c13aa10fb0"
+      },
+      "measuredMattresses": [
+        {
+          "name": "Linen mattress supported by wooden slats",
+          "boundsBlenderM": [
+            [
+              -0.37400001287460327,
+              -0.9629999995231628,
+              0.4050000011920929
+            ],
+            [
+              0.37400001287460327,
+              0.9629999995231628,
+              0.5730000138282776
+            ]
+          ],
+          "actualDimensionsWDTM": [
+            0.7480000257492065,
+            1.9259999990463257,
+            0.1680000126361847
+          ],
+          "mattressTopM": 0.5730000138282776,
+          "supportTopM": 0.40799999237060547,
+          "supportCount": 1,
+          "supportJoinDepthM": 0.0029999911785125732,
+          "nominalThicknessAboveSupportM": 0.16500002145767212
+        }
+      ],
+      "mattressDimensionBasis": "Physical width/depth; third features value is nominal thickness above support. Full bounds and seated join are in measuredMattresses.",
+      "constructionFamily": "rpg-mansion-campaign-x-trestle-cot-01",
+      "staticProp": true
+    },
+    {
+      "id": "rpg-mansion-barrel-vault-enclosed-bed-01",
+      "name": "積層アーチ梁と樽形屋根の囲い寝台",
+      "packId": "rpg-mansion",
+      "kind": "bed",
+      "group": "家具",
+      "category": "ベッド",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-barrel-vault-enclosed-bed-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-barrel-vault-enclosed-bed-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-barrel-vault-enclosed-bed-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-barrel-vault-enclosed-bed-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-barrel-vault-enclosed-bed-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_beds_additions/sources/rpg-mansion-barrel-vault-enclosed-bed-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_beds_additions/sources/rpg-mansion-barrel-vault-enclosed-bed-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_beds_additions/authoring_sources/rpg-mansion-barrel-vault-enclosed-bed-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_beds_additions/sources/rpg-mansion-barrel-vault-enclosed-bed-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_beds_additions/build.py",
+      "w": 1400,
+      "d": 2240,
+      "h": 1980,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Stylized RPG enclosed berth with three laminated semicircular load ribs, a curved timber roof, a closed arched head and an open arched foot entrance. No ordinary standard-bed equivalence is claimed.",
+      "dimensionBasis": "Original stylized RPG furniture with measured authored dimensions. No ordinary standard-bed equivalence is claimed.",
+      "footprintSemanticEquivalenceVerified": false,
+      "nativeFunctionEquivalencePromised": false,
+      "features": {
+        "mattressTopM": 0.58,
+        "mattressSupportM": 0.415,
+        "sleepingCapacity": 1,
+        "mattressDimensionsM": [
+          1.12,
+          1.992,
+          0.165
+        ],
+        "topology": "three-load-bearing-laminated-semicircular-ribs/continuous-curved-barrel-roof/closed-arched-head/open-arch-foot-entry/raised-four-pedestal-plinth/internal-slat-berth"
+      },
+      "finishChannels": [
+        {
+          "key": "bedding",
+          "label": "寝具",
+          "default": "#ded5bd"
+        },
+        {
+          "key": "cover",
+          "label": "掛け布",
+          "default": "#355c57"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#af8e4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "d43af33a8971ee0845daed61a34a6799bb18e1814ff67224851820c40ef9abb6",
+      "sourceSha256": "12c0137fe1b8793304d6f01d50732fe2e0f4c6238e83d2a6e92f2b8adf74362d",
+      "authoringSha256": "ff9d67fb007b9d3b935c739e61167890b1fac2a403e83184565c1f91e37684ae",
+      "previewSha256": {
+        "thumb": "b717295def3278ddbbb97aea709640bfae55db62baa9db1cd8e32e1dd1dff92b",
+        "top": "1d39ca38e5dd4b34e7f591bf608ea1038459c5820beea7d1a27494289b51e7d1",
+        "front": "64be147a4d7b2124c3cb65c274416446ce98b47e1253e780bb470b79bedfdffa",
+        "rear": "a17232f1dea7c9529d730ade7c5637d82d7990b8b63b5cf55b780412edef54e2"
+      },
+      "measuredMattresses": [
+        {
+          "name": "Linen mattress supported by wooden slats",
+          "boundsBlenderM": [
+            [
+              -0.5600000023841858,
+              -0.9959999918937683,
+              0.41200000047683716
+            ],
+            [
+              0.5600000023841858,
+              0.9959999918937683,
+              0.5799999833106995
+            ]
+          ],
+          "actualDimensionsWDTM": [
+            1.1200000047683716,
+            1.9919999837875366,
+            0.1679999828338623
+          ],
+          "mattressTopM": 0.5799999833106995,
+          "supportTopM": 0.41499999165534973,
+          "supportCount": 12,
+          "supportJoinDepthM": 0.0029999911785125732,
+          "nominalThicknessAboveSupportM": 0.16499999165534973
+        }
+      ],
+      "mattressDimensionBasis": "Physical width/depth; third features value is nominal thickness above support. Full bounds and seated join are in measuredMattresses.",
+      "constructionFamily": "rpg-mansion-barrel-vault-enclosed-bed-01",
+      "staticProp": true,
+      "stylizedRpgFurniture": true,
+      "standardBedEquivalenceVerified": false
+    }
+  ]
+}

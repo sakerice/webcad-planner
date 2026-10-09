@@ -1,0 +1,220 @@
+{
+  "id": "rpg-mansion-butler-sink-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-butler-sink-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-butler-sink-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-butler-sink-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 24,
+  "validation": {
+    "model": "rpg-mansion-butler-sink-01",
+    "dimensions_mm": [
+      1100.000023841858,
+      649.9999761581421,
+      1139.9999856948853
+    ],
+    "bounds_m": [
+      [
+        -0.550000011920929,
+        -0.32499998807907104,
+        0.0
+      ],
+      [
+        0.550000011920929,
+        0.32499998807907104,
+        1.1399999856948853
+      ]
+    ],
+    "triangles": 3384,
+    "uv": {
+      "meters_per_uv": 3.909243214129696,
+      "min": 3.387227316370237,
+      "max": 5.283427324532571,
+      "p05": 3.6337408019662583,
+      "p95": 4.642050779871871,
+      "total_triangles": 3384,
+      "valid_triangles": 3384,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Walnut": "wood",
+      "RPG Walnut edge": "wood",
+      "RPG Antique brass": "metal",
+      "RPG ceramic": "ceramic"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 119340
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "d03163075903cdcf8491c5e05dfdc6f23565d8dbc6ef3d5a1c8bab099376bfe9",
+    "bytes": 119340,
+    "triangles": 3384,
+    "bounds_gltf_m": [
+      [
+        -0.550000011920929,
+        0.0,
+        -0.32499998807907104
+      ],
+      [
+        0.550000011920929,
+        1.1399999856948853,
+        0.32499998807907104
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1100.000023841858,
+      649.9999761581421,
+      1139.9999856948853
+    ],
+    "geometry_material_sha256_1e7": "cf2511733faae912f799d1c018b7bd73956a5d88be4539c7304b24eabc725f5c",
+    "geometry_material_uv_sha256_1e7": "a0d4eb223ba3a1ba8823433c5d47110459a53561e608b46646ec74263134c1e2",
+    "finish_channels": [
+      "ceramic",
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 2160
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 788
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 280
+      },
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 156
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "e82de8a6b4f34e10e954df78346bffd8698ea1a45ee40598959f8d4501ead8fc",
+    "bytes": 119544,
+    "triangles": 3384,
+    "bounds_gltf_m": [
+      [
+        -0.550000011920929,
+        0.0,
+        -0.32499998807907104
+      ],
+      [
+        0.550000011920929,
+        1.1399999856948853,
+        0.32499998807907104
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1100.000023841858,
+      649.9999761581421,
+      1139.9999856948853
+    ],
+    "geometry_material_sha256_1e7": "cf2511733faae912f799d1c018b7bd73956a5d88be4539c7304b24eabc725f5c",
+    "geometry_material_uv_sha256_1e7": "a0d4eb223ba3a1ba8823433c5d47110459a53561e608b46646ec74263134c1e2",
+    "finish_channels": [
+      "ceramic",
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 2160
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 788
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 280
+      },
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 156
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 7.14,
+  "source_sha256": "fe264e64970787d2fe18a0e320eec31b8e65604c61f2d30563fa264d0f7763de",
+  "front_sha256": "ae5245458c0ef4250fe07d45fe0371acc9a86dc60b3dbb1af6f67f3ea77ddc46",
+  "rear_sha256": "e12b669fee7ea0fe976274b911d608221c44432ab7998bdf0d6678e2facd9899",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:21.822011+00:00",
+    "source_sha256_before": "b8e83ac010e5d2dea51d3ea99d72a29322a268c206d65845bbbc5c451df9217d",
+    "source_sha256_after": "22703799ee4acf03c96d029d3b007e1cba6caa80d2b03a2698461eca98770c56",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "4195f208cc38bd50858f743e57fc5511cebb0b09ee473c5447277126ff3b520a",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:28.986074+00:00",
+    "source_sha256_before": "22703799ee4acf03c96d029d3b007e1cba6caa80d2b03a2698461eca98770c56",
+    "source_sha256_after": "fe264e64970787d2fe18a0e320eec31b8e65604c61f2d30563fa264d0f7763de",
+    "mesh_geometry_uv_material_digest_preserved": "e0b89512e57f7a638457548eaf38aeeef541191aa1e26ea5797ddf764c77b249",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-butler-sink-01-rear.png",
+        "render_filepath": "//rpg-mansion-butler-sink-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "fe264e64970787d2fe18a0e320eec31b8e65604c61f2d30563fa264d0f7763de",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

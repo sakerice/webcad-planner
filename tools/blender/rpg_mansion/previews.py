@@ -9,9 +9,11 @@ from exterior_build import render_top,render_thumb
 sys.path.insert(0,str(HERE))
 from render_config import configure
 from png_metadata import strip_metadata
+from catalogue_metadata import source_fields
 configure()
 manifest=json.loads((ROOT/'assets/models/packs/rpg-mansion/manifest.json').read_text())
 for item in manifest['items']:
+    item=source_fields(item)
     if '--only' in sys.argv and item['id'] not in ['rpg-mansion-'+s+'-01' for s in sys.argv[sys.argv.index('--only')+1].split(',')]:continue
     bpy.ops.wm.open_mainfile(filepath=str(ROOT/item['sourceBlend']))
     obj=next(o for o in bpy.context.scene.objects if o.type=='MESH')

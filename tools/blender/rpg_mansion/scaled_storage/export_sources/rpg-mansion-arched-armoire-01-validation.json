@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-arched-armoire-01",
+  "dimensions_mm": [
+    1128.999948501587,
+    773.0000019073486,
+    2213.0000591278076
+  ],
+  "bounds_m": [
+    [
+      -0.5644999742507935,
+      -0.3865000009536743,
+      0.0
+    ],
+    [
+      0.5644999742507935,
+      0.3865000009536743,
+      2.2130000591278076
+    ]
+  ],
+  "triangles": 2648,
+  "uv": {
+    "meters_per_uv": 9.040197078280684,
+    "min": 7.412525080203784,
+    "max": 10.920040795825228,
+    "p05": 7.88211604071641,
+    "p95": 10.679959474596778,
+    "total_triangles": 2648,
+    "valid_triangles": 2648,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood": "wood",
+    "Mansion walnut mouldings": "wood",
+    "Mansion patinated brass": "metal",
+    "Mansion walnut veneered fields": "wood"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 118692,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "0a0f5d0410f1aabdd90932619bf34897a71301fdee97847489bdad65046b228e",
+  "sourceSha256": "e2d26c7f0213e0ad87df5be6a8d4ec135f273a08d63b2e9326119e3969538e9b",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "445c27c9ff427bad68d1544b2a53c0d04fed9588539e06f8110eeb3f39f66a3a",
+    "authoredDataSignature": "5d4a44cf1e5190459feae7eb74428723307411d34dd331d248a82df16e0f162e",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

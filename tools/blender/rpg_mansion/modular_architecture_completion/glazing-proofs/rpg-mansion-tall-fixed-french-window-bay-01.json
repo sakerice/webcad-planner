@@ -1,0 +1,51 @@
+{
+  "id": "rpg-mansion-tall-fixed-french-window-bay-01",
+  "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+  "modelSha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642",
+  "source": "tools/blender/rpg_mansion/modular_architecture_completion/glazing-proofs/rpg-mansion-tall-fixed-french-window-bay-01-optical-proof.blend",
+  "sourceSha256": "9dd20f64751ceeeff3778fd8fdf091f25517ff5a597267281ab8b26a5134cb85",
+  "glassPartitionNames": [
+    "rpg-mansion-tall-fixed-french-window-bay-01.003"
+  ],
+  "roisPixels": [
+    [
+      173,
+      224,
+      211,
+      288
+    ],
+    [
+      301,
+      224,
+      339,
+      288
+    ]
+  ],
+  "camera": {
+    "nativeCentre": [
+      -0.23,
+      -4,
+      1.25
+    ],
+    "orthoScale": 0.8,
+    "resolution": [
+      512,
+      512
+    ],
+    "samples": 64
+  },
+  "proofFixtures": [
+    "white marker",
+    "black marker"
+  ],
+  "views": {
+    "actual-glass": {
+      "path": "tools/blender/rpg_mansion/modular_architecture_completion/glazing-proofs/rpg-mansion-tall-fixed-french-window-bay-01-actual-glass.png",
+      "sha256": "459da78ad693625726fba4087612b9ba7e8936249019cf96f2a65079c86e6162"
+    },
+    "clear-control": {
+      "path": "tools/blender/rpg_mansion/modular_architecture_completion/glazing-proofs/rpg-mansion-tall-fixed-french-window-bay-01-clear-control.png",
+      "sha256": "c860d3e10db8bd70126258df80610186598f66ee24e06e846167c9f4eb6f8439"
+    }
+  }
+}

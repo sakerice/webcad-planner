@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "scope": "PR81 asset-only non-browser regression verification preserving the latest base commits",
+  "pinned_ref": "d372aedbcc92f8ab508e746b658c82ea4e0a40c8",
+  "completed_at_utc": "2026-10-07T19:38:38.744399+00:00",
+  "source_integrity": {
+    "status": "passed",
+    "app_and_build_source_files_checked": 54,
+    "pinned_test_files_checked": 113,
+    "mismatches": [],
+    "compat_fixtures": [
+      {
+        "path": "tools/tests/fixtures/compat/legacy-quirks.json",
+        "git_blob_sha": "89a91a52e82a98a699cb0aaaf90ea368c8f86781",
+        "status": "matches_latest_base_exact_bytes",
+        "source": "connected GitHub read-only blob fetch"
+      },
+      {
+        "path": "tools/tests/fixtures/compat/saved-2f.json",
+        "git_blob_sha": "2599793699984c975c795ac93a67386beaa441f7",
+        "status": "matches_latest_base_exact_bytes",
+        "source": "connected GitHub read-only blob fetch"
+      },
+      {
+        "path": "tools/tests/fixtures/compat/saved-3f.json",
+        "git_blob_sha": "5c21c8cdc9e06ea49701fd700e232322475f09e0",
+        "status": "matches_latest_base_exact_bytes",
+        "source": "connected GitHub read-only blob fetch"
+      }
+    ],
+    "preserved_latest_base_files": [
+      {
+        "path": "assets/js/app-constants.js",
+        "git_blob_sha": "59ef25a63c0630ed69b6d9ce70b76f66eab842db",
+        "status": "matches_latest_base_exact_bytes"
+      },
+      {
+        "path": "assets/js/asset-sets.js",
+        "git_blob_sha": "9e18e601aee6c0856d0b7e1ee4c9b306ceb98f5d",
+        "status": "matches_latest_base_exact_bytes"
+      },
+      {
+        "path": "assets/models/asset-sets.json",
+        "git_blob_sha": "e102aae927118f751eb387974f51137633b3447c",
+        "status": "matches_latest_base_exact_bytes"
+      },
+      {
+        "path": "assets/ui-refinement.css",
+        "git_blob_sha": "a72f2c7bf3232c7a61a688b7e2cfc79023980e4d",
+        "status": "matches_latest_base_exact_bytes"
+      },
+      {
+        "path": "docs/asset-sets.md",
+        "git_blob_sha": "84d87f1cbcba43903b33835a632a9b39794c1850",
+        "status": "matches_latest_base_exact_bytes"
+      },
+      {
+        "path": "tools/tests/asset-sets.test.cjs",
+        "git_blob_sha": "e3f144f553ce4fa56e6c6904081663d4acf9cb46",
+        "status": "matches_latest_base_exact_bytes"
+      }
+    ]
+  },
+  "test_suite": {
+    "status": "failed",
+    "exit_code": 1,
+    "runner": "node --test --test-reporter=tap",
+    "selection": "Only latest-base-tree *.test.cjs, excluding the two browser-launching files below",
+    "selected_test_file_count": 111,
+    "result_counts": {
+      "tests": 1296,
+      "pass": 1289,
+      "fail": 7,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "duration_ms": 78017.26374,
+    "failures": [
+      {
+        "test": "貼った先のモデルが実在する",
+        "source": "tools/tests/finish-channels.test.cjs:43:1",
+        "reason": "Missing pre-existing catalogue binary or editable source in this partial asset checkout"
+      },
+      {
+        "test": "every catalogue entry references existing 3D, thumbnail and plan assets",
+        "source": "tools/tests/model-quality.test.cjs:58:1",
+        "reason": "Missing pre-existing catalogue binary or editable source in this partial asset checkout"
+      },
+      {
+        "test": "precision car keeps its source attribution and native +Z front",
+        "source": "tools/tests/model-quality.test.cjs:66:1",
+        "reason": "Missing pre-existing catalogue binary or editable source in this partial asset checkout"
+      },
+      {
+        "test": "UV展開を通した品は、UVが1つも潰れていない",
+        "source": "tools/tests/model-uv.test.cjs:79:1",
+        "reason": "Missing pre-existing catalogue binary or editable source in this partial asset checkout"
+      },
+      {
+        "test": "UVの無い品は1点も無い",
+        "source": "tools/tests/model-uv.test.cjs:91:1",
+        "reason": "Missing pre-existing catalogue binary or editable source in this partial asset checkout"
+      },
+      {
+        "test": "古いビルダーの品も、UVの潰れがこれ以上増えていない",
+        "source": "tools/tests/model-uv.test.cjs:103:1",
+        "reason": "Missing pre-existing catalogue binary or editable source in this partial asset checkout"
+      },
+      {
+        "test": "original collection has independent IDs, editable sources and canonical front metadata",
+        "source": "tools/tests/original-models.test.cjs:12:1",
+        "reason": "Missing pre-existing catalogue binary or editable source in this partial asset checkout"
+      }
+    ]
+  },
+  "not_run": [
+    {
+      "file": "tools/tests/browser-smoke.test.cjs",
+      "status": "not_run",
+      "reason": "Browser-launching test; browser routes were denied"
+    },
+    {
+      "file": "tools/tests/catalogue-browser.test.cjs",
+      "status": "not_run",
+      "reason": "Browser-launching test; browser routes were denied"
+    }
+  ],
+  "check_html_js": {
+    "status": "passed",
+    "exit_code": 0,
+    "command": "node tools/check-html-js.cjs index.html",
+    "checked_inline_javascript_blocks": 4,
+    "non_javascript_blocks_ignored": 1
+  },
+  "safe_build": {
+    "status": "passed",
+    "exit_code": 0,
+    "command": "SKIP_DEPLOY=1 bash build.sh",
+    "output": "dist/",
+    "approximate_output_size_mib": 110,
+    "default_plan_schema_checks": "passed for both shipped plans",
+    "cloudflare_asset_size_check": "passed",
+    "deployment_performed": false
+  },
+  "workspace_limitations": {
+    "missing_pre_existing_finish_model_count": 675,
+    "missing_pre_existing_original_editable_source_count": 88,
+    "missing_file_examples": [
+      {
+        "path": "assets/models/furniture_mega/glb/BathTub01.glb",
+        "pinned_git_blob_sha": "47a06ed5b32b1c3e8336be02492c4f1475882e4a"
+      },
+      {
+        "path": "assets/models/refined/precision_car_v1.glb",
+        "pinned_git_blob_sha": "6ebeee0abc102989fbeda52f3df248ec279058ff"
+      },
+      {
+        "path": "assets/models/original/original-toilet.glb",
+        "pinned_git_blob_sha": "a89853db01929178a74ec4ba9b045d8819ad28b6"
+      },
+      {
+        "path": "assets/models/original/original-kitchen-island.glb",
+        "pinned_git_blob_sha": "cfd19ce614ab858e7423f91857b66b68e3d68645"
+      },
+      {
+        "path": "tools/blender/work/original/original-kitchen-island.blend",
+        "pinned_git_blob_sha": "6448390b09731de98fcdea34ca023c6a23374f05"
+      }
+    ],
+    "impact": "Seven asset-presence/UV/source-attribution tests failed because the referenced base assets are absent locally; their model quality cannot be assessed by this run. Build success does not establish a complete catalogue checkout or browser/runtime acceptance."
+  },
+  "safety": {
+    "browser_launched": false,
+    "external_api_note": "Worker/API tests use injected mocks, missing bindings, or input-rejection paths; no live API probe was selected",
+    "packages_installed": false,
+    "production_assets_modified": false,
+    "staged_or_pushed": false,
+    "live_external_api_calls_performed": false,
+    "network_access_during_latest_rerun": false
+  },
+  "previous_verification": {
+    "pinned_ref": "58523db9a119d051df7dfbfaa79ef9c903fa2264",
+    "completed_at_utc": "2026-10-07T19:28:04.092119+00:00",
+    "result_counts": {
+      "tests": 1296,
+      "pass": 1289,
+      "fail": 7,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "asset_set_acceptance": {
+    "status": "passed",
+    "source": "tools/tests/asset-sets.test.cjs",
+    "registered_mansion_item_count": 57,
+    "new_prop_kinds": [
+      {
+        "id": "rpg-mansion-upright-piano-01",
+        "kind": "decor"
+      },
+      {
+        "id": "rpg-mansion-floor-globe-01",
+        "kind": "decor"
+      }
+    ],
+    "coverage": "Manifest shape, unique IDs, files, dimensions, original provenance, finish-channel definitions and standard kind vocabulary"
+  }
+}

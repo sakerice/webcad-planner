@@ -1,0 +1,480 @@
+{
+  "created_utc": "2026-10-07T19:36:51.124075+00:00",
+  "scope": "Original native procedural source-only correction; no GLB import and no relaxed geometry tolerance",
+  "diagnosis": "Capturing original parts before dependency-graph evaluation retained a stale final-rod transform. Independent normalization of the captured parts then distorted 11 secondary authoring scenes.",
+  "corrected_method": "Evaluate the graph before capture; transient native part/vertex IDs carry separately editable original components through Blender join and the original builder normalization. Remove IDs before saving. Validated export meshes stay unchanged.",
+  "models": [
+    {
+      "id": "rpg-mansion-butler-sink-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-butler-sink-01.blend",
+      "native_parts": 24,
+      "source_sha256_before_authoring_repair": "b8e83ac010e5d2dea51d3ea99d72a29322a268c206d65845bbbc5c451df9217d",
+      "source_sha256_final_portable": "fe264e64970787d2fe18a0e320eec31b8e65604c61f2d30563fa264d0f7763de",
+      "same_material_symmetric_nearest_distance_before_m": 0.5457648431436137,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "4195f208cc38bd50858f743e57fc5511cebb0b09ee473c5447277126ff3b520a",
+      "validated_mesh_digest_after": "4195f208cc38bd50858f743e57fc5511cebb0b09ee473c5447277126ff3b520a"
+    },
+    {
+      "id": "rpg-mansion-bathtub-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-bathtub-01.blend",
+      "native_parts": 13,
+      "source_sha256_before_authoring_repair": "0ad322a82ef874054955e20ac8279617ee3806c7e332ff35acca3d83f7e65d42",
+      "source_sha256_final_portable": "ab578259f4f11cd6bf0bfab1ecbb623d0778a94efd4bd0d690509ac585758e38",
+      "same_material_symmetric_nearest_distance_before_m": 0.5590140903713221,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "e7d4f9a80e68d5211353bdf40d2a58670405b3141f5ec50c5abebc64925879c6",
+      "validated_mesh_digest_after": "e7d4f9a80e68d5211353bdf40d2a58670405b3141f5ec50c5abebc64925879c6"
+    },
+    {
+      "id": "rpg-mansion-washstand-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-washstand-01.blend",
+      "native_parts": 10,
+      "source_sha256_before_authoring_repair": "e52d4df9be7f4902567300b53f3f32301ad7176ba1d64dd8bd07a5a60edf0c7b",
+      "source_sha256_final_portable": "94a5a985de24aff18c9f44922f93b138a5f3c8c18c9c8d69332d211c397cfff6",
+      "same_material_symmetric_nearest_distance_before_m": 0.8757833250230319,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "0533474ee85baa2d17598b7bd3c4613e8a230335a9ba2a9ec999bc51a191a240",
+      "validated_mesh_digest_after": "0533474ee85baa2d17598b7bd3c4613e8a230335a9ba2a9ec999bc51a191a240"
+    },
+    {
+      "id": "rpg-mansion-sconce-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-sconce-01.blend",
+      "native_parts": 4,
+      "source_sha256_before_authoring_repair": "9560cc4d5aef568c4d2d403497f7b44627fe669f8214d1b5e4f3ba9052635258",
+      "source_sha256_final_portable": "d8f16fd43754dafc6671f6a36c5d11bcc54c0a32f2615893b05bd2c7774a68c1",
+      "same_material_symmetric_nearest_distance_before_m": 0.10243478454129944,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "5741fa03bdcd99b8ecec38770b4cab5d8749ed6ff96e97e4077db9e089ea8ec9",
+      "validated_mesh_digest_after": "5741fa03bdcd99b8ecec38770b4cab5d8749ed6ff96e97e4077db9e089ea8ec9"
+    },
+    {
+      "id": "rpg-mansion-chandelier-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-chandelier-01.blend",
+      "native_parts": 25,
+      "source_sha256_before_authoring_repair": "f6c32fcc87a82bd12be86f52400f7d8eaea6e37f68234b66a8474072f554f395",
+      "source_sha256_final_portable": "723ec5d964736af361b778c51697a8592117267d66744316080cea5daced0cd8",
+      "same_material_symmetric_nearest_distance_before_m": 0.07116568833589554,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "d762f417b25eff70b2f8df5cd73104867fca2c35629803db1dd99f78f92bb04d",
+      "validated_mesh_digest_after": "d762f417b25eff70b2f8df5cd73104867fca2c35629803db1dd99f78f92bb04d"
+    },
+    {
+      "id": "rpg-mansion-coat-stand-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-coat-stand-01.blend",
+      "native_parts": 13,
+      "source_sha256_before_authoring_repair": "fdead4e5f1b8c346108810b855fa7d7ca4163a9ee876a893d1988ec1eb133a3c",
+      "source_sha256_final_portable": "50678b3efaea2744b2b905c42519108c2b761fb8f847d5f06ba0a5c48e650ef6",
+      "same_material_symmetric_nearest_distance_before_m": 0.2622582818662108,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "e91ae83e801d195ba8c3d87cede5afcea3d16be54ea6d038c479e7d7d96cf2e3",
+      "validated_mesh_digest_after": "e91ae83e801d195ba8c3d87cede5afcea3d16be54ea6d038c479e7d7d96cf2e3"
+    },
+    {
+      "id": "rpg-mansion-umbrella-stand-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-umbrella-stand-01.blend",
+      "native_parts": 7,
+      "source_sha256_before_authoring_repair": "55b7eb52e1771f1bb94230c7f5f719c0a585659f07f6b17ca6b3171478c86df3",
+      "source_sha256_final_portable": "b38d0ba8f92fe72f664466ec5dc65bd01d9cc0a9082ce0e204a9b667ce7aeeac",
+      "same_material_symmetric_nearest_distance_before_m": 0.7433105305062853,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "b824987382e2efb7db992b597d5a12b66afcf0c2dfaa0a24c1b04955dc2f8ef5",
+      "validated_mesh_digest_after": "b824987382e2efb7db992b597d5a12b66afcf0c2dfaa0a24c1b04955dc2f8ef5"
+    },
+    {
+      "id": "rpg-mansion-planter-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-planter-01.blend",
+      "native_parts": 20,
+      "source_sha256_before_authoring_repair": "7757df1677d5751266ecf367322b45065c1d97e582d345bc18209011718c1ce6",
+      "source_sha256_final_portable": "72ed61141c3fb2de9eb61b74de449334ead4a3918e3eae6d99064d5c235ee143",
+      "same_material_symmetric_nearest_distance_before_m": 0.3987689521811851,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "8efef265a8da113930dbe8392887a9ad0036f76f9a32e11997efc2e5f6d129a7",
+      "validated_mesh_digest_after": "8efef265a8da113930dbe8392887a9ad0036f76f9a32e11997efc2e5f6d129a7"
+    },
+    {
+      "id": "rpg-mansion-fireplace-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-fireplace-01.blend",
+      "native_parts": 18,
+      "source_sha256_before_authoring_repair": "5697725d791f6f77a4cef283d4add977aa8bee7434a8743a21b7ed0f587927a6",
+      "source_sha256_final_portable": "bc2ea554748eadc504cb0a2279fa261b999cc9746c63f2f187252ac095ccac91",
+      "same_material_symmetric_nearest_distance_before_m": 0.24255135560313903,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "4da0dedcf37e766d0ef78f094b5dec9838dfacd6e94422a464e3a98e7ca8e1cf",
+      "validated_mesh_digest_after": "4da0dedcf37e766d0ef78f094b5dec9838dfacd6e94422a464e3a98e7ca8e1cf"
+    },
+    {
+      "id": "rpg-mansion-radiator-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-radiator-01.blend",
+      "native_parts": 16,
+      "source_sha256_before_authoring_repair": "38c911b42c319fd763afb0a92e140790e08d96b26c3e9232efb4a393f6ae3fad",
+      "source_sha256_final_portable": "4baef2aae0cec04f07eb1dbad94f3e4ee5c637e3710a5bef879a39da6873e1d0",
+      "same_material_symmetric_nearest_distance_before_m": 0.7701126986190304,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "5756794fd6d1ab35da0cd6e6adae45d4ec9bd3638dc88982c42b8e63fbe1fc93",
+      "validated_mesh_digest_after": "5756794fd6d1ab35da0cd6e6adae45d4ec9bd3638dc88982c42b8e63fbe1fc93"
+    },
+    {
+      "id": "rpg-mansion-armour-01",
+      "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-armour-01.blend",
+      "native_parts": 21,
+      "source_sha256_before_authoring_repair": "8fc8b73d3fb19aed03d2c02125232f3a289f776357b6a18348130a25bd174e2d",
+      "source_sha256_final_portable": "2b6e9429352a18f6ef933ee82b66ad41cfa627488c35cd2ba0691997115103be",
+      "same_material_symmetric_nearest_distance_before_m": 0.8901148221218149,
+      "same_material_symmetric_nearest_distance_after_m": 0.0,
+      "triangle_surface_multisets_match_after": true,
+      "validated_mesh_digest_before": "d0f040e86769fd5f2c3bd699497db3200dca4acb8127f6a40c6cdefd56804679",
+      "validated_mesh_digest_after": "d0f040e86769fd5f2c3bd699497db3200dca4acb8127f6a40c6cdefd56804679"
+    }
+  ],
+  "portability": {
+    "sources_corrected": 48,
+    "workspace_path_strings_remaining": 0,
+    "geometry_uv_material_digests_preserved": 48,
+    "final_source_sha256": {
+      "rpg-mansion-armour-01": "2b6e9429352a18f6ef933ee82b66ad41cfa627488c35cd2ba0691997115103be",
+      "rpg-mansion-bathtub-01": "ab578259f4f11cd6bf0bfab1ecbb623d0778a94efd4bd0d690509ac585758e38",
+      "rpg-mansion-bench-01": "e6083c998462dadac5aff2d435928e0d3b824519004fe2891020d7a5febcf97d",
+      "rpg-mansion-bookcase-01": "77cff92a63ffb4645f265365a3b93aa0e0815497be7c180a0d1fa1b333abf64e",
+      "rpg-mansion-butler-sink-01": "fe264e64970787d2fe18a0e320eec31b8e65604c61f2d30563fa264d0f7763de",
+      "rpg-mansion-candlestick-01": "7072f91efd399d3b74fa59a07eca1304d122cbe5e8e7e2fbc28d7c8044c97f1b",
+      "rpg-mansion-canopy-bed-01": "4d7662f8aa8f72f2cc1bcae838b12a30def66ab48c0fa7fe09fd5c096c5ffa13",
+      "rpg-mansion-chair-01": "c02a14afbba4bc9f1e8a68f27d46f31f3eef558f215d19b23ae773223ea551fe",
+      "rpg-mansion-chaise-01": "a54dc2fbe65fc97e7f1fe55401e4367ddc3fb7607c23913725b78a74bfa50abd",
+      "rpg-mansion-chandelier-01": "723ec5d964736af361b778c51697a8592117267d66744316080cea5daced0cd8",
+      "rpg-mansion-chest-01": "fdb113d1f86c8d004752fd2b7b98c7eec08f9d010422d84583727cb095304961",
+      "rpg-mansion-clue-stain-01": "ef6fb36546e12b595c0344d86731ceb2bafba85d459c24a21c9262b1d492cebd",
+      "rpg-mansion-coat-stand-01": "50678b3efaea2744b2b905c42519108c2b761fb8f847d5f06ba0a5c48e650ef6",
+      "rpg-mansion-coffee-table-01": "ae3b696bf23f5ad61ac0bfd01e55dafbd96e220cb28f9408ad89dabdcc61abc2",
+      "rpg-mansion-console-01": "80ce044a1f21e5ec59e11a0c6983666fd65d051867530cff2472fa87dc9b7fe8",
+      "rpg-mansion-curtain-01": "51e4b538e64487ff5adfe46d2ac7d213b3f162e1cf1888b5017c9a15eebf1423",
+      "rpg-mansion-desk-01": "b1927b33bbdb3b5fca5a10d18de5386fdf07304db6545902889367bc341aac83",
+      "rpg-mansion-dining-table-01": "f573b62e04b662f6d91eb38bdda1cf69e85999d5a5e8036ff2e062b34f4e4767",
+      "rpg-mansion-dresser-01": "bb18ea268855adfcbeba67894d31046145a14076a9dc9b3f38361af970df8cb5",
+      "rpg-mansion-fallen-chair-01": "9b6859f1ed7e1c298c12218c458478ac7d77c576eb7f97621f7a792ff2c869d5",
+      "rpg-mansion-fireplace-01": "bc2ea554748eadc504cb0a2279fa261b999cc9746c63f2f187252ac095ccac91",
+      "rpg-mansion-floor-lamp-01": "163b62271e322a3e77340a17bd1174f99c069986aa2b2dd19a16b8f7812a73c9",
+      "rpg-mansion-frame-01": "19550cd0775a74e9877b7a23a445577fd46dd4e45078583aa05f5908b04a33e1",
+      "rpg-mansion-glass-shards-01": "265a03209b9250a3606eace0a6c2eeca638e5ced237b7a6c3fac87668a6bc2aa",
+      "rpg-mansion-icebox-01": "407b8a859afe2b802c2447bfa6e4fd979e17edfe07764df0fcaae3fac8c60ba1",
+      "rpg-mansion-key-01": "d9a4df8372d58b6c574566b455db01ec01e50eb6df085866ae22dbedfb7173f8",
+      "rpg-mansion-kitchen-hutch-01": "7355f2c0d7c9a3bfc7ca4626c983035588a22c75e59785fdc33132eac3e9402b",
+      "rpg-mansion-letter-01": "1e9b728243dc055670af185e625aab6d65ebb9776ece9af10d0fd3fa9c920832",
+      "rpg-mansion-linen-cabinet-01": "059d74ab908ca25a89d5a842e713c50fe63374f894841ac4063d010f03c2439c",
+      "rpg-mansion-mantel-clock-01": "320f703dc5e4a31b7d4f2a601b4bf5f2dc14ee98342db876c7a8b5977b078baf",
+      "rpg-mansion-mirror-01": "1000e7a082eb4e43fd65c22f5779846cc75b96615317f6a00dd2d96f97eaadfe",
+      "rpg-mansion-nightstand-01": "70a6746d8bbbcd572ce1e55fc3bd63cbc66e04ce576ddd39619a2b1f5165e615",
+      "rpg-mansion-planter-01": "72ed61141c3fb2de9eb61b74de449334ead4a3918e3eae6d99064d5c235ee143",
+      "rpg-mansion-radiator-01": "4baef2aae0cec04f07eb1dbad94f3e4ee5c637e3710a5bef879a39da6873e1d0",
+      "rpg-mansion-range-01": "ead684aaa8d730d5a5d22db2cf0a4722af86e66f5913611eeccd5a8ae8ab94be",
+      "rpg-mansion-round-table-01": "7c787b5de7186b71ff0308a0d6af1e05e7afed2e5b7daab49b720d451831bb34",
+      "rpg-mansion-rug-01": "bf8552bb4b35e0f6e70a655fbfd0ee122ee8dfe03f3cc479e3f44a6f061b137f",
+      "rpg-mansion-sconce-01": "d8f16fd43754dafc6671f6a36c5d11bcc54c0a32f2615893b05bd2c7774a68c1",
+      "rpg-mansion-secretary-01": "68a4ed52614f23130ab04629bce35c264b2a003c42179ea0ac262a14ac124030",
+      "rpg-mansion-side-table-01": "604604ca4aba3a82d080b65bc77a7563b5d22547c14c97aa918808cdb4eb2e4f",
+      "rpg-mansion-single-bed-01": "41c08aa77155a4846e7b9fb743bbb886fc833607749bda3823ba197e1e411ebe",
+      "rpg-mansion-stool-01": "9fe4dfdbbd0c45c05b0d46246d68d6b6efe4081aba65e009ebc56328266c56fb",
+      "rpg-mansion-table-lamp-01": "ed245a44be94134b14664129665be89bfc5138ce75548365be7bb6f767f7b37d",
+      "rpg-mansion-toilet-01": "560f25ec53f0f17a0280a0ad00ac9b6068acca260f0df85e5bb181f01a94ecda",
+      "rpg-mansion-umbrella-stand-01": "b38d0ba8f92fe72f664466ec5dc65bd01d9cc0a9082ce0e204a9b667ce7aeeac",
+      "rpg-mansion-wardrobe-01": "3e21e831cb6e0aea23e8fc43774517c898b6520d883f72b63ca505689dddfe1d",
+      "rpg-mansion-washstand-01": "94a5a985de24aff18c9f44922f93b138a5f3c8c18c9c8d69332d211c397cfff6",
+      "rpg-mansion-worktable-01": "03556b3870b8bd5b9080d2dd1a3fd47aaaeaf776a87a2f1e556f0c908e1e9f1c"
+    }
+  },
+  "preservation": {
+    "public_model_png_validation_files_preserved": 285,
+    "public_file_hash_inventory_sha256": "1df241f58e18cd8f627ed500d8b897a996bb70a2afca303c1922d1316bb3814a",
+    "kitchen_native_sources_byte_preserved": 5,
+    "other_nonrecovered_native_sources_byte_preserved": 9,
+    "validated_export_meshes_preserved": 11,
+    "qa_render_pixels_changed": 0
+  },
+  "final_independent_qa": {
+    "manifest_sha256": "30d4a77f563682243cb09c26e10dc87d583246d69fe7064ade73f0a9fd304ec2",
+    "source_reopens": 57,
+    "source_pass": 57,
+    "source_fail": 0,
+    "authoring_parts_equivalence_checks": 48,
+    "actual_glb_pass": 57,
+    "public_pngs_checked": 114,
+    "error_count": 0
+  },
+  "current_builder_reverification": {
+    "scope": "Current-base original procedural builder output independently matches reopened validated source material point support, triangle counts and actual triangle surfaces for all 48 recovered models. Historical builder hashes are retained as creation provenance.",
+    "passed_models": 48,
+    "builders": {
+      "tools/blender/rpg_mansion/expansion/build.py": {
+        "historical_original_builder_sha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+        "verified_current_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "tools/blender/rpg_mansion/build.py": {
+        "historical_original_builder_sha256": "1980db41d3219826c4970076a618e7af57725828144e7d8746aa4b74994ddffb",
+        "verified_current_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      }
+    },
+    "models": {
+      "rpg-mansion-armour-01": {
+        "source_sha256": "2b6e9429352a18f6ef933ee82b66ad41cfa627488c35cd2ba0691997115103be",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-bathtub-01": {
+        "source_sha256": "ab578259f4f11cd6bf0bfab1ecbb623d0778a94efd4bd0d690509ac585758e38",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-bench-01": {
+        "source_sha256": "e6083c998462dadac5aff2d435928e0d3b824519004fe2891020d7a5febcf97d",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-bookcase-01": {
+        "source_sha256": "77cff92a63ffb4645f265365a3b93aa0e0815497be7c180a0d1fa1b333abf64e",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-butler-sink-01": {
+        "source_sha256": "fe264e64970787d2fe18a0e320eec31b8e65604c61f2d30563fa264d0f7763de",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-candlestick-01": {
+        "source_sha256": "7072f91efd399d3b74fa59a07eca1304d122cbe5e8e7e2fbc28d7c8044c97f1b",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-canopy-bed-01": {
+        "source_sha256": "4d7662f8aa8f72f2cc1bcae838b12a30def66ab48c0fa7fe09fd5c096c5ffa13",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-chair-01": {
+        "source_sha256": "c02a14afbba4bc9f1e8a68f27d46f31f3eef558f215d19b23ae773223ea551fe",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-chaise-01": {
+        "source_sha256": "a54dc2fbe65fc97e7f1fe55401e4367ddc3fb7607c23913725b78a74bfa50abd",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-chandelier-01": {
+        "source_sha256": "723ec5d964736af361b778c51697a8592117267d66744316080cea5daced0cd8",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-chest-01": {
+        "source_sha256": "fdb113d1f86c8d004752fd2b7b98c7eec08f9d010422d84583727cb095304961",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-clue-stain-01": {
+        "source_sha256": "ef6fb36546e12b595c0344d86731ceb2bafba85d459c24a21c9262b1d492cebd",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-coat-stand-01": {
+        "source_sha256": "50678b3efaea2744b2b905c42519108c2b761fb8f847d5f06ba0a5c48e650ef6",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-coffee-table-01": {
+        "source_sha256": "ae3b696bf23f5ad61ac0bfd01e55dafbd96e220cb28f9408ad89dabdcc61abc2",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-console-01": {
+        "source_sha256": "80ce044a1f21e5ec59e11a0c6983666fd65d051867530cff2472fa87dc9b7fe8",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-curtain-01": {
+        "source_sha256": "51e4b538e64487ff5adfe46d2ac7d213b3f162e1cf1888b5017c9a15eebf1423",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-desk-01": {
+        "source_sha256": "b1927b33bbdb3b5fca5a10d18de5386fdf07304db6545902889367bc341aac83",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-dining-table-01": {
+        "source_sha256": "f573b62e04b662f6d91eb38bdda1cf69e85999d5a5e8036ff2e062b34f4e4767",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-dresser-01": {
+        "source_sha256": "bb18ea268855adfcbeba67894d31046145a14076a9dc9b3f38361af970df8cb5",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-fallen-chair-01": {
+        "source_sha256": "9b6859f1ed7e1c298c12218c458478ac7d77c576eb7f97621f7a792ff2c869d5",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-fireplace-01": {
+        "source_sha256": "bc2ea554748eadc504cb0a2279fa261b999cc9746c63f2f187252ac095ccac91",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-floor-lamp-01": {
+        "source_sha256": "163b62271e322a3e77340a17bd1174f99c069986aa2b2dd19a16b8f7812a73c9",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-frame-01": {
+        "source_sha256": "19550cd0775a74e9877b7a23a445577fd46dd4e45078583aa05f5908b04a33e1",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-glass-shards-01": {
+        "source_sha256": "265a03209b9250a3606eace0a6c2eeca638e5ced237b7a6c3fac87668a6bc2aa",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-icebox-01": {
+        "source_sha256": "407b8a859afe2b802c2447bfa6e4fd979e17edfe07764df0fcaae3fac8c60ba1",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-key-01": {
+        "source_sha256": "d9a4df8372d58b6c574566b455db01ec01e50eb6df085866ae22dbedfb7173f8",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-kitchen-hutch-01": {
+        "source_sha256": "7355f2c0d7c9a3bfc7ca4626c983035588a22c75e59785fdc33132eac3e9402b",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-letter-01": {
+        "source_sha256": "1e9b728243dc055670af185e625aab6d65ebb9776ece9af10d0fd3fa9c920832",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-linen-cabinet-01": {
+        "source_sha256": "059d74ab908ca25a89d5a842e713c50fe63374f894841ac4063d010f03c2439c",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-mantel-clock-01": {
+        "source_sha256": "320f703dc5e4a31b7d4f2a601b4bf5f2dc14ee98342db876c7a8b5977b078baf",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-mirror-01": {
+        "source_sha256": "1000e7a082eb4e43fd65c22f5779846cc75b96615317f6a00dd2d96f97eaadfe",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-nightstand-01": {
+        "source_sha256": "70a6746d8bbbcd572ce1e55fc3bd63cbc66e04ce576ddd39619a2b1f5165e615",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-planter-01": {
+        "source_sha256": "72ed61141c3fb2de9eb61b74de449334ead4a3918e3eae6d99064d5c235ee143",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-radiator-01": {
+        "source_sha256": "4baef2aae0cec04f07eb1dbad94f3e4ee5c637e3710a5bef879a39da6873e1d0",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-range-01": {
+        "source_sha256": "ead684aaa8d730d5a5d22db2cf0a4722af86e66f5913611eeccd5a8ae8ab94be",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-round-table-01": {
+        "source_sha256": "7c787b5de7186b71ff0308a0d6af1e05e7afed2e5b7daab49b720d451831bb34",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-rug-01": {
+        "source_sha256": "bf8552bb4b35e0f6e70a655fbfd0ee122ee8dfe03f3cc479e3f44a6f061b137f",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-sconce-01": {
+        "source_sha256": "d8f16fd43754dafc6671f6a36c5d11bcc54c0a32f2615893b05bd2c7774a68c1",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-secretary-01": {
+        "source_sha256": "68a4ed52614f23130ab04629bce35c264b2a003c42179ea0ac262a14ac124030",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-side-table-01": {
+        "source_sha256": "604604ca4aba3a82d080b65bc77a7563b5d22547c14c97aa918808cdb4eb2e4f",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "current_original_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      },
+      "rpg-mansion-single-bed-01": {
+        "source_sha256": "41c08aa77155a4846e7b9fb743bbb886fc833607749bda3823ba197e1e411ebe",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-stool-01": {
+        "source_sha256": "9fe4dfdbbd0c45c05b0d46246d68d6b6efe4081aba65e009ebc56328266c56fb",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-table-lamp-01": {
+        "source_sha256": "ed245a44be94134b14664129665be89bfc5138ce75548365be7bb6f767f7b37d",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-toilet-01": {
+        "source_sha256": "560f25ec53f0f17a0280a0ad00ac9b6068acca260f0df85e5bb181f01a94ecda",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-umbrella-stand-01": {
+        "source_sha256": "b38d0ba8f92fe72f664466ec5dc65bd01d9cc0a9082ce0e204a9b667ce7aeeac",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-wardrobe-01": {
+        "source_sha256": "3e21e831cb6e0aea23e8fc43774517c898b6520d883f72b63ca505689dddfe1d",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-washstand-01": {
+        "source_sha256": "94a5a985de24aff18c9f44922f93b138a5f3c8c18c9c8d69332d211c397cfff6",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "rpg-mansion-worktable-01": {
+        "source_sha256": "03556b3870b8bd5b9080d2dd1a3fd47aaaeaf776a87a2f1e556f0c908e1e9f1c",
+        "builder": "tools/blender/rpg_mansion/expansion/build.py",
+        "current_original_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      }
+    },
+    "reproduce": "Run repair_authoring_parts.py as a read-only dry run with --only covering the 48 metadata-map slugs"
+  },
+  "reproducible_repair_script_test": {
+    "dry_run_models": 48,
+    "exact_point_support_pass": 48,
+    "triangle_count_pass": 48,
+    "regenerated_triangle_surface_pass": 48,
+    "public_files_preserved": 285,
+    "other_native_sources_preserved": 9,
+    "script_sha256": "2803d322b186c394f91521d08c2487a650c4d59d0a0ae36e0a714e8a4328f59f",
+    "future_recovery_builder_sha256": "5daa9f57bad44d209a4b0e7361281ca1e85e3467b380d305ffbeb64910b79e1e"
+  }
+}

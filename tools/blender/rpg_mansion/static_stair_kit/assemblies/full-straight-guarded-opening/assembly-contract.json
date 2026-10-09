@@ -1,0 +1,5044 @@
+{
+  "exactGuardedEdges": [
+    {
+      "edge": "west",
+      "openingEdge": [
+        -0.64,
+        0.56,
+        -0.64,
+        4.82
+      ],
+      "railCenterline": [
+        -0.7,
+        0.5,
+        -0.7,
+        4.82
+      ],
+      "instances": [
+        "Opening edge receiver newel",
+        "Opening edge receiver newel.001",
+        "Opening edge receiver newel.002",
+        "Opening edge receiver newel.003",
+        "Opening edge standard guard",
+        "Opening edge standard guard.001",
+        "Opening edge standard guard.002"
+      ]
+    },
+    {
+      "edge": "east",
+      "openingEdge": [
+        0.64,
+        0.56,
+        0.64,
+        4.82
+      ],
+      "railCenterline": [
+        0.7,
+        0.5,
+        0.7,
+        4.82
+      ],
+      "instances": [
+        "Opening edge receiver newel.004",
+        "Opening edge receiver newel.005",
+        "Opening edge receiver newel.006",
+        "Opening edge receiver newel.007",
+        "Opening edge standard guard.003",
+        "Opening edge standard guard.004",
+        "Opening edge standard guard.005"
+      ]
+    },
+    {
+      "edge": "front",
+      "openingEdge": [
+        -0.64,
+        0.56,
+        0.64,
+        0.56
+      ],
+      "railCenterline": [
+        -0.7,
+        0.5,
+        0.7,
+        0.5
+      ],
+      "instances": [
+        "Opening edge receiver newel",
+        "Opening edge receiver newel.004",
+        "Opening front cross guard"
+      ]
+    }
+  ],
+  "intendedAccessGap": {
+    "planeY": 4.82,
+    "centerX": 0,
+    "clearWidthBetweenReceiverArmsM": 1.18,
+    "minimumBetweenRakedNewelCapsM": 0.96
+  },
+  "guardContactContract": {
+    "floorMountPlaneM": 3.0,
+    "horizontalHandrailCenterM": 3.95,
+    "horizontalLowerRailCenterM": 3.11,
+    "receiverExtensionsM": 0.11,
+    "sideNewelPitchM": 1.44,
+    "sideRailEndpointsRelativeToLowerNewelM": [
+      0.11,
+      1.33
+    ],
+    "frontPanelRailXEndsM": [
+      -0.61,
+      0.61
+    ],
+    "frontCornerReceiverXInsideEndsM": [
+      -0.59,
+      0.59
+    ],
+    "frontRailTenonEngagementM": 0.02,
+    "headJoin": "At each side the receiver X arm overlaps the full-flight terminal cap by10 mm in X and28 mm in Y. Both are at the3000 mm upper finished-floor datum."
+  },
+  "layout": "full-straight-guarded-opening",
+  "stage": "producer-candidate-not-independent-acceptance",
+  "units": "metres",
+  "coordinateSystem": "Blender Z up; glTF conversion x,z,-y",
+  "storeyRiseM": 3.0,
+  "riserCount": 18,
+  "riserM": 0.16666666666666666,
+  "goingM": 0.28,
+  "nominalClearWidthM": 1.0,
+  "minimumNewelCapClearWidthM": 0.96,
+  "headClearanceEnvelopeM": 2.1,
+  "actualOverheadRaycastMinimumM": 2.426666404724121,
+  "visibleFloorOpeningBlenderXYM": [
+    -0.64,
+    0.64,
+    0.56,
+    4.82
+  ],
+  "upperFloorTopM": 3.0,
+  "upperFloorUndersideM": 2.76,
+  "openingEdgeGuardCoverage": {
+    "west": "Three unchanged standard landing guard GLBs with four shared receiver newels",
+    "east": "Three unchanged standard landing guard GLBs with four shared receiver newels",
+    "front": "One standard landing guard rotated\u221290 degrees; both ends engage the corner receiver newels",
+    "head": "Deliberate stair egress between the raked newels; receiver arms connect the side termination to the raked caps",
+    "manualPlacement": "Opening edge guards are separate catalogue modules. The floor context never creates or places them automatically."
+  },
+  "placements": [
+    {
+      "name": "Full-storey eighteen-riser flight",
+      "id": "rpg-mansion-stair-flight-eighteen-riser-01",
+      "source": "models/rpg-mansion-stair-flight-eighteen-riser-01.glb",
+      "sha256": "0c45505b42fa60f15e974f85dd729874f5d3942c9589bfd15f4b064d5f2f687d",
+      "constructionPositionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.380000114440918
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Full-storey right raked guard",
+      "id": "rpg-mansion-stair-guard-eighteen-riser-01",
+      "source": "models/rpg-mansion-stair-guard-eighteen-riser-01.glb",
+      "sha256": "6767927850f85ca8c36265abf890796db6452a6356dafa2199a3ecedbdd8f5e0",
+      "constructionPositionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.5400000214576721
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.380000114440918
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1666666716337204
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Full-storey left raked guard",
+      "id": "rpg-mansion-stair-guard-eighteen-riser-01",
+      "source": "models/rpg-mansion-stair-guard-eighteen-riser-01.glb",
+      "sha256": "6767927850f85ca8c36265abf890796db6452a6356dafa2199a3ecedbdd8f5e0",
+      "constructionPositionBlenderM": [
+        -1.08,
+        0,
+        0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.5400000214576721
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.380000114440918
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1666666716337204
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        -0.7,
+        0.5,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel.001",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        -0.7,
+        1.94,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.940000057220459
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel.002",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        -0.7,
+        3.38,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.380000114440918
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel.003",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        -0.7,
+        4.82,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.820000171661377
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge standard guard",
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "source": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "constructionPositionBlenderM": [
+        -0.7,
+        0.67,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.2200000286102295
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge standard guard.001",
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "source": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "constructionPositionBlenderM": [
+        -0.7,
+        2.11,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.6599998474121094
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge standard guard.002",
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "source": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "constructionPositionBlenderM": [
+        -0.7,
+        3.55,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.099999904632568
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel.004",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        0.7,
+        0.5,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel.005",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        0.7,
+        1.94,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.940000057220459
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel.006",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        0.7,
+        3.38,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.380000114440918
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge receiver newel.007",
+      "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+      "source": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "constructionPositionBlenderM": [
+        0.7,
+        4.82,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.820000171661377
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge standard guard.003",
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "source": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "constructionPositionBlenderM": [
+        0.7,
+        0.67,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.2200000286102295
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge standard guard.004",
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "source": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "constructionPositionBlenderM": [
+        0.7,
+        2.11,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.6599998474121094
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening edge standard guard.005",
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "source": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "constructionPositionBlenderM": [
+        0.7,
+        3.55,
+        3.0
+      ],
+      "rotationZRadians": 0,
+      "matrixFromAssetBlender": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.699999988079071
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.099999904632568
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "Opening front cross guard",
+      "id": "rpg-mansion-stair-landing-guard-straight-01",
+      "source": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "constructionPositionBlenderM": [
+        -0.55,
+        0.5,
+        3.0
+      ],
+      "rotationZRadians": -1.5707963267948966,
+      "matrixFromAssetBlender": [
+        [
+          -4.371138828673793e-08,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -1.0,
+          -4.371138828673793e-08,
+          0.0,
+          0.4999999701976776
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "supportInterfaces": [
+    {
+      "label": "Full flight foot to ground",
+      "part": "Full-storey eighteen-riser flight / Foot bearing plate",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        -0.54,
+        0.21,
+        0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.035,
+      "planeToleranceM": 0.0001
+    },
+    {
+      "label": "Full flight stringer to foot",
+      "part": "Full-storey eighteen-riser flight / Left continuous housed stringer",
+      "host": "Foot bearing plate",
+      "pointWorldBlenderM": [
+        -0.54,
+        0.24,
+        0.008
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.025,
+      "planeToleranceM": 0.0001
+    },
+    {
+      "label": "Full flight shoe to upper ledge",
+      "part": "Full-storey eighteen-riser flight / Head bearing plate",
+      "host": "Visible upper-floor stair bearing ledge",
+      "pointWorldBlenderM": [
+        -0.54,
+        4.795000000000001,
+        2.81
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001
+    },
+    {
+      "label": "Full flight notch to head shoe",
+      "part": "Full-storey eighteen-riser flight / Left continuous housed stringer",
+      "host": "Head bearing plate",
+      "pointWorldBlenderM": [
+        -0.54,
+        4.795000000000001,
+        2.82
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.0028,
+      "planeToleranceM": 0.0001
+    },
+    {
+      "label": "Full flight foot to ground",
+      "part": "Full-storey eighteen-riser flight / Foot bearing plate.001",
+      "host": "Visible ground bearing slab",
+      "pointWorldBlenderM": [
+        0.54,
+        0.21,
+        0
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.035,
+      "planeToleranceM": 0.0001
+    },
+    {
+      "label": "Full flight stringer to foot",
+      "part": "Full-storey eighteen-riser flight / Right continuous housed stringer",
+      "host": "Foot bearing plate.001",
+      "pointWorldBlenderM": [
+        0.54,
+        0.24,
+        0.008
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.025,
+      "planeToleranceM": 0.0001
+    },
+    {
+      "label": "Full flight shoe to upper ledge",
+      "part": "Full-storey eighteen-riser flight / Head bearing plate.001",
+      "host": "Visible upper-floor stair bearing ledge.001",
+      "pointWorldBlenderM": [
+        0.54,
+        4.795000000000001,
+        2.81
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.003,
+      "planeToleranceM": 0.0001
+    },
+    {
+      "label": "Full flight notch to head shoe",
+      "part": "Full-storey eighteen-riser flight / Right continuous housed stringer",
+      "host": "Head bearing plate.001",
+      "pointWorldBlenderM": [
+        0.54,
+        4.795000000000001,
+        2.82
+      ],
+      "normalWorldBlender": [
+        0,
+        0,
+        1
+      ],
+      "minimumPositiveAreaM2": 0.0028,
+      "planeToleranceM": 0.0001
+    }
+  ],
+  "contacts": [
+    {
+      "name": "Full flight head shoe -0.54",
+      "upper": "Full-storey eighteen-riser flight",
+      "lower": "Visible upper-floor stair bearing ledge",
+      "pointM": [
+        -0.54,
+        4.795000000000001,
+        2.81
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread1",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        0.1,
+        0.16666666666666666
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread2",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        0.38,
+        0.3333333333333333
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread3",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        0.66,
+        0.5
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread4",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        0.9400000000000001,
+        0.6666666666666666
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread5",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        1.2200000000000002,
+        0.8333333333333333
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread6",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        1.5000000000000002,
+        1.0
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread7",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        1.7800000000000002,
+        1.1666666666666665
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread8",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        2.06,
+        1.3333333333333333
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread9",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        2.3400000000000003,
+        1.5
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread10",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        2.6200000000000006,
+        1.6666666666666665
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread11",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        2.9000000000000004,
+        1.8333333333333333
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread12",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        3.18,
+        2.0
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread13",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        3.4600000000000004,
+        2.1666666666666665
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread14",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        3.7400000000000007,
+        2.333333333333333
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread15",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        4.0200000000000005,
+        2.5
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread16",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        4.3,
+        2.6666666666666665
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe -0.54 tread17",
+      "upper": "Full-storey left raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        -0.54,
+        4.58,
+        2.833333333333333
+      ],
+      "upperHit": [
+        -0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "lowerHit": [
+        -0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full flight head shoe 0.54",
+      "upper": "Full-storey eighteen-riser flight",
+      "lower": "Visible upper-floor stair bearing ledge.001",
+      "pointM": [
+        0.54,
+        4.795000000000001,
+        2.81
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread1",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        0.1,
+        0.16666666666666666
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread2",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        0.38,
+        0.3333333333333333
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread3",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        0.66,
+        0.5
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread4",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        0.9400000000000001,
+        0.6666666666666666
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread5",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        1.2200000000000002,
+        0.8333333333333333
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread6",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        1.5000000000000002,
+        1.0
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread7",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        1.7800000000000002,
+        1.1666666666666665
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread8",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        2.06,
+        1.3333333333333333
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread9",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        2.3400000000000003,
+        1.5
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread10",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        2.6200000000000006,
+        1.6666666666666665
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread11",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        2.9000000000000004,
+        1.8333333333333333
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread12",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        3.18,
+        2.0
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread13",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        3.4600000000000004,
+        2.1666666666666665
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread14",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        3.7400000000000007,
+        2.333333333333333
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread15",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        4.0200000000000005,
+        2.5
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread16",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        4.3,
+        2.6666666666666665
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "gapM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full guard shoe 0.54 tread17",
+      "upper": "Full-storey right raked guard",
+      "lower": "Full-storey eighteen-riser flight",
+      "pointM": [
+        0.54,
+        4.58,
+        2.833333333333333
+      ],
+      "upperHit": [
+        0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "lowerHit": [
+        0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "gapM": 0.0,
+      "pass": true
+    }
+  ],
+  "triangleProbes": [
+    {
+      "name": "Walking tread 1 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.02800000086426735,
+        0.23666667938232422
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.02800000086426735,
+        0.1666666716337204
+      ],
+      "distanceM": 0.07000000774860382,
+      "expectedM": [
+        0.0,
+        0.02800000086426735,
+        0.1666666716337204
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 1 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.14000000059604645,
+        0.23666667938232422
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.14000000059604645,
+        0.1666666865348816
+      ],
+      "distanceM": 0.07000000029802322,
+      "expectedM": [
+        0.0,
+        0.14000000059604645,
+        0.1666666716337204
+      ],
+      "errorM": 1.4901161193847656e-08,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 1 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.25200000405311584,
+        0.23666667938232422
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.25200000405311584,
+        0.1666666865348816
+      ],
+      "distanceM": 0.07000000029802322,
+      "expectedM": [
+        0.0,
+        0.25200000405311584,
+        0.1666666716337204
+      ],
+      "errorM": 1.4901161193847656e-08,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.30799999833106995,
+        0.4033333361148834
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.30799999833106995,
+        0.3333333432674408
+      ],
+      "distanceM": 0.06999998539686203,
+      "expectedM": [
+        0.0,
+        0.30799999833106995,
+        0.3333333432674408
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.41999998688697815,
+        0.4033333361148834
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.41999998688697815,
+        0.3333333432674408
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.41999998688697815,
+        0.3333333432674408
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 2 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.5320000052452087,
+        0.4033333361148834
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.5320000052452087,
+        0.3333333432674408
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.5320000052452087,
+        0.3333333432674408
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.5879999995231628,
+        0.5699999928474426
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.5879999995231628,
+        0.5
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.5879999995231628,
+        0.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.699999988079071,
+        0.5699999928474426
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.699999988079071,
+        0.5
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.699999988079071,
+        0.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 3 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.8119999766349792,
+        0.5699999928474426
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.8119999766349792,
+        0.5
+      ],
+      "distanceM": 0.06999998539686203,
+      "expectedM": [
+        0.0,
+        0.8119999766349792,
+        0.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.8679999709129333,
+        0.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.8679999709129333,
+        0.6666666865348816
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.8679999709129333,
+        0.6666666865348816
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        0.9800000190734863,
+        0.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        0.9800000190734863,
+        0.6666666865348816
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        0.9800000190734863,
+        0.6666666865348816
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 4 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.0920000076293945,
+        0.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.0920000076293945,
+        0.6666666865348816
+      ],
+      "distanceM": 0.06999998539686203,
+      "expectedM": [
+        0.0,
+        1.0920000076293945,
+        0.6666666865348816
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.1480000019073486,
+        0.903333306312561
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.1480000019073486,
+        0.8333333134651184
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        1.1480000019073486,
+        0.8333333134651184
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.2599999904632568,
+        0.903333306312561
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.2599999904632568,
+        0.8333333134651184
+      ],
+      "distanceM": 0.06999999284744263,
+      "expectedM": [
+        0.0,
+        1.2599999904632568,
+        0.8333333134651184
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 5 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.371999979019165,
+        0.903333306312561
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.371999979019165,
+        0.8333333134651184
+      ],
+      "distanceM": 0.06999998539686203,
+      "expectedM": [
+        0.0,
+        1.371999979019165,
+        0.8333333134651184
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.4279999732971191,
+        1.0700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.4279999732971191,
+        1.0
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.4279999732971191,
+        1.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.5399999618530273,
+        1.0700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.5399999618530273,
+        1.0
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        1.5399999618530273,
+        1.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 6 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.6519999504089355,
+        1.0700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.6519999504089355,
+        1.0
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        1.6519999504089355,
+        1.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.7079999446868896,
+        1.2366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.7079999446868896,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.7079999446868896,
+        1.1666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.8200000524520874,
+        1.2366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.8200000524520874,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.8200000524520874,
+        1.1666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 7 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.9320000410079956,
+        1.2366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.9320000410079956,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        1.9320000410079956,
+        1.1666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        1.9880000352859497,
+        1.4033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        1.9880000352859497,
+        1.3333333730697632
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        1.9880000352859497,
+        1.3333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.0999999046325684,
+        1.4033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.0999999046325684,
+        1.3333333730697632
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        2.0999999046325684,
+        1.3333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 8 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.2119998931884766,
+        1.4033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.2119998931884766,
+        1.3333333730697632
+      ],
+      "distanceM": 0.070000059902668,
+      "expectedM": [
+        0.0,
+        2.2119998931884766,
+        1.3333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 9 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.2679998874664307,
+        1.5700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.2679998874664307,
+        1.5
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        2.2679998874664307,
+        1.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 9 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.380000114440918,
+        1.5700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.380000114440918,
+        1.5
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        2.380000114440918,
+        1.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 9 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.492000102996826,
+        1.5700000524520874
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.492000102996826,
+        1.5
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        2.492000102996826,
+        1.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 10 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.5480000972747803,
+        1.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.5480000972747803,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        2.5480000972747803,
+        1.6666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 10 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.6600000858306885,
+        1.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.6600000858306885,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        2.6600000858306885,
+        1.6666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 10 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.7720000743865967,
+        1.7366666793823242
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.7720000743865967,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        2.7720000743865967,
+        1.6666666269302368
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 11 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.828000068664551,
+        1.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.828000068664551,
+        1.8333333730697632
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        2.828000068664551,
+        1.8333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 11 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        2.940000057220459,
+        1.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        2.940000057220459,
+        1.8333333730697632
+      ],
+      "distanceM": 0.0700000450015068,
+      "expectedM": [
+        0.0,
+        2.940000057220459,
+        1.8333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 11 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.052000045776367,
+        1.9033334255218506
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.052000045776367,
+        1.8333333730697632
+      ],
+      "distanceM": 0.0700000524520874,
+      "expectedM": [
+        0.0,
+        3.052000045776367,
+        1.8333333730697632
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 12 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.1080000400543213,
+        2.069999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.1080000400543213,
+        2.0
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        3.1080000400543213,
+        2.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 12 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.2200000286102295,
+        2.069999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.2200000286102295,
+        2.0
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        3.2200000286102295,
+        2.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 12 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.3320000171661377,
+        2.069999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.3320000171661377,
+        2.0
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        3.3320000171661377,
+        2.0
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 13 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.388000011444092,
+        2.236666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.388000011444092,
+        2.1666667461395264
+      ],
+      "distanceM": 0.06999994069337845,
+      "expectedM": [
+        0.0,
+        3.388000011444092,
+        2.1666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 13 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.5,
+        2.236666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.5,
+        2.1666667461395264
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        3.5,
+        2.1666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 13 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.611999988555908,
+        2.236666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.611999988555908,
+        2.1666667461395264
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        3.611999988555908,
+        2.1666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 14 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.6679999828338623,
+        2.4033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.6679999828338623,
+        2.3333332538604736
+      ],
+      "distanceM": 0.06999994069337845,
+      "expectedM": [
+        0.0,
+        3.6679999828338623,
+        2.3333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 14 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.7799999713897705,
+        2.4033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.7799999713897705,
+        2.3333332538604736
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        3.7799999713897705,
+        2.3333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 14 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.8919999599456787,
+        2.4033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.8919999599456787,
+        2.3333332538604736
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        3.8919999599456787,
+        2.3333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 15 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        3.947999954223633,
+        2.569999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        3.947999954223633,
+        2.5
+      ],
+      "distanceM": 0.06999992579221725,
+      "expectedM": [
+        0.0,
+        3.947999954223633,
+        2.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 15 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.059999942779541,
+        2.569999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.059999942779541,
+        2.5
+      ],
+      "distanceM": 0.06999992579221725,
+      "expectedM": [
+        0.0,
+        4.059999942779541,
+        2.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 15 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.171999931335449,
+        2.569999933242798
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.171999931335449,
+        2.5
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        4.171999931335449,
+        2.5
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 16 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.228000164031982,
+        2.736666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.228000164031982,
+        2.6666667461395264
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        4.228000164031982,
+        2.6666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 16 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.340000152587891,
+        2.736666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.340000152587891,
+        2.6666667461395264
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        4.340000152587891,
+        2.6666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 16 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.452000141143799,
+        2.736666679382324
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.452000141143799,
+        2.6666667461395264
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        4.452000141143799,
+        2.6666667461395264
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 17 0.1",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.507999897003174,
+        2.9033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.507999897003174,
+        2.8333332538604736
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        4.507999897003174,
+        2.8333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 17 0.5",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.619999885559082,
+        2.9033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.619999885559082,
+        2.8333332538604736
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        4.619999885559082,
+        2.8333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Walking tread 17 0.9",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.0,
+        4.73199987411499,
+        2.9033331871032715
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.0,
+        4.73199987411499,
+        2.8333332538604736
+      ],
+      "distanceM": 0.06999993324279785,
+      "expectedM": [
+        0.0,
+        4.73199987411499,
+        2.8333332538604736
+      ],
+      "errorM": 0.0,
+      "pass": true
+    },
+    {
+      "name": "Full flight head shoe -0.54 upper underside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        4.795000000000001,
+        2.807
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full flight head shoe -0.54 lower topside",
+      "target": "Visible upper-floor stair bearing ledge",
+      "originM": [
+        -0.54,
+        4.795000000000001,
+        2.813
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe -0.54 tread1 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        0.1,
+        0.16366666666666665
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.003000006079673767
+    },
+    {
+      "name": "Full guard shoe -0.54 tread1 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        0.1,
+        0.16966666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.002999991411343217
+    },
+    {
+      "name": "Full guard shoe -0.54 tread2 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        0.38,
+        0.3303333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread2 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        0.38,
+        0.3363333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "distanceM": 0.0029999909456819296
+    },
+    {
+      "name": "Full guard shoe -0.54 tread3 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        0.66,
+        0.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "distanceM": 0.0029999911785125732
+    },
+    {
+      "name": "Full guard shoe -0.54 tread3 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        0.66,
+        0.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe -0.54 tread4 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        0.9400000000000001,
+        0.6636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe -0.54 tread4 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        0.9400000000000001,
+        0.6696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.0029999613761901855
+    },
+    {
+      "name": "Full guard shoe -0.54 tread5 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        1.2200000000000002,
+        0.8303333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "distanceM": 0.0029999613761901855
+    },
+    {
+      "name": "Full guard shoe -0.54 tread5 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        1.2200000000000002,
+        0.8363333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread6 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        1.5000000000000002,
+        0.997
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe -0.54 tread6 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        1.5000000000000002,
+        1.003
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread7 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        1.7800000000000002,
+        1.1636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "distanceM": 0.00299990177154541
+    },
+    {
+      "name": "Full guard shoe -0.54 tread7 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        1.7800000000000002,
+        1.1696666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe -0.54 tread8 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        2.06,
+        1.3303333333333334
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread8 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        2.06,
+        1.3363333333333332
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.00299990177154541
+    },
+    {
+      "name": "Full guard shoe -0.54 tread9 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        2.3400000000000003,
+        1.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread9 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        2.3400000000000003,
+        1.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread10 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        2.6200000000000006,
+        1.6636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0029999015387147665
+    },
+    {
+      "name": "Full guard shoe -0.54 tread10 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        2.6200000000000006,
+        1.6696666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread11 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        2.9000000000000004,
+        1.8303333333333334
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread11 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        2.9000000000000004,
+        1.8363333333333332
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "distanceM": 0.002999901305884123
+    },
+    {
+      "name": "Full guard shoe -0.54 tread12 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        3.18,
+        1.997
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread12 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        3.18,
+        2.003
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread13 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        3.4600000000000004,
+        2.1636666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread13 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        3.4600000000000004,
+        2.1696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe -0.54 tread14 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        3.7400000000000007,
+        2.330333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe -0.54 tread14 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        3.7400000000000007,
+        2.336333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe -0.54 tread15 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        4.0200000000000005,
+        2.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe -0.54 tread15 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        4.0200000000000005,
+        2.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe -0.54 tread16 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        4.3,
+        2.6636666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe -0.54 tread16 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        4.3,
+        2.6696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe -0.54 tread17 upper underside",
+      "target": "Full-storey left raked guard",
+      "originM": [
+        -0.54,
+        4.58,
+        2.830333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe -0.54 tread17 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        -0.54,
+        4.58,
+        2.836333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        -0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full flight head shoe 0.54 upper underside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        4.795000000000001,
+        2.807
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full flight head shoe 0.54 lower topside",
+      "target": "Visible upper-floor stair bearing ledge.001",
+      "originM": [
+        0.54,
+        4.795000000000001,
+        2.813
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.795000076293945,
+        2.809999942779541
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread1 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        0.1,
+        0.16366666666666665
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.0030000065453350544
+    },
+    {
+      "name": "Full guard shoe 0.54 tread1 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        0.1,
+        0.16966666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.10000000149011612,
+        0.1666666716337204
+      ],
+      "distanceM": 0.0029999909456819296
+    },
+    {
+      "name": "Full guard shoe 0.54 tread2 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        0.38,
+        0.3303333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread2 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        0.38,
+        0.3363333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.3799999952316284,
+        0.3333333432674408
+      ],
+      "distanceM": 0.0029999909456819296
+    },
+    {
+      "name": "Full guard shoe 0.54 tread3 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        0.66,
+        0.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "distanceM": 0.0029999911785125732
+    },
+    {
+      "name": "Full guard shoe 0.54 tread3 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        0.66,
+        0.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.6600000262260437,
+        0.5
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe 0.54 tread4 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        0.9400000000000001,
+        0.6636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe 0.54 tread4 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        0.9400000000000001,
+        0.6696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        0.9399999976158142,
+        0.6666666865348816
+      ],
+      "distanceM": 0.002999961609020829
+    },
+    {
+      "name": "Full guard shoe 0.54 tread5 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        1.2200000000000002,
+        0.8303333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "distanceM": 0.002999961143359542
+    },
+    {
+      "name": "Full guard shoe 0.54 tread5 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        1.2200000000000002,
+        0.8363333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        1.2200000286102295,
+        0.8333333134651184
+      ],
+      "distanceM": 0.0030000205151736736
+    },
+    {
+      "name": "Full guard shoe 0.54 tread6 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        1.5000000000000002,
+        0.997
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread6 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        1.5000000000000002,
+        1.003
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        1.5,
+        1.0
+      ],
+      "distanceM": 0.0030000205151736736
+    },
+    {
+      "name": "Full guard shoe 0.54 tread7 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        1.7800000000000002,
+        1.1636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "distanceM": 0.002999901305884123
+    },
+    {
+      "name": "Full guard shoe 0.54 tread7 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        1.7800000000000002,
+        1.1696666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        1.7799999713897705,
+        1.1666666269302368
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread8 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        2.06,
+        1.3303333333333334
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe 0.54 tread8 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        2.06,
+        1.3363333333333332
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.059999942779541,
+        1.3333333730697632
+      ],
+      "distanceM": 0.0029999015387147665
+    },
+    {
+      "name": "Full guard shoe 0.54 tread9 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        2.3400000000000003,
+        1.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe 0.54 tread9 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        2.3400000000000003,
+        1.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.3399999141693115,
+        1.5
+      ],
+      "distanceM": 0.0030000205151736736
+    },
+    {
+      "name": "Full guard shoe 0.54 tread10 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        2.6200000000000006,
+        1.6636666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0029999015387147665
+    },
+    {
+      "name": "Full guard shoe 0.54 tread10 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        2.6200000000000006,
+        1.6696666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.619999885559082,
+        1.6666666269302368
+      ],
+      "distanceM": 0.0030000205151736736
+    },
+    {
+      "name": "Full guard shoe 0.54 tread11 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        2.9000000000000004,
+        1.8303333333333334
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe 0.54 tread11 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        2.9000000000000004,
+        1.8363333333333332
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        2.9000000953674316,
+        1.8333333730697632
+      ],
+      "distanceM": 0.0029999015387147665
+    },
+    {
+      "name": "Full guard shoe 0.54 tread12 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        3.18,
+        1.997
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe 0.54 tread12 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        3.18,
+        2.003
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        3.180000066757202,
+        2.0
+      ],
+      "distanceM": 0.0030000205151736736
+    },
+    {
+      "name": "Full guard shoe 0.54 tread13 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        3.4600000000000004,
+        2.1636666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "distanceM": 0.003000020980834961
+    },
+    {
+      "name": "Full guard shoe 0.54 tread13 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        3.4600000000000004,
+        2.1696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        3.4600000381469727,
+        2.1666667461395264
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe 0.54 tread14 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        3.7400000000000007,
+        2.330333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread14 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        3.7400000000000007,
+        2.336333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        3.740000009536743,
+        2.3333332538604736
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe 0.54 tread15 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        4.0200000000000005,
+        2.497
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread15 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        4.0200000000000005,
+        2.503
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.019999980926514,
+        2.5
+      ],
+      "distanceM": 0.0030000212136656046
+    },
+    {
+      "name": "Full guard shoe 0.54 tread16 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        4.3,
+        2.6636666666666664
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread16 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        4.3,
+        2.6696666666666666
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.300000190734863,
+        2.6666667461395264
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread17 upper underside",
+      "target": "Full-storey right raked guard",
+      "originM": [
+        0.54,
+        4.58,
+        2.830333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "distanceM": 0.0030000207480043173
+    },
+    {
+      "name": "Full guard shoe 0.54 tread17 lower topside",
+      "target": "Full-storey eighteen-riser flight",
+      "originM": [
+        0.54,
+        4.58,
+        2.836333333333333
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hitM": [
+        0.5400000214576721,
+        4.579999923706055,
+        2.8333332538604736
+      ],
+      "distanceM": 0.0030000207480043173
+    }
+  ],
+  "headClearanceSamples": [
+    {
+      "walkingPointM": [
+        0.0,
+        0.02800000086426735,
+        0.1666666716337204
+      ],
+      "overhead": [
+        2.5933333892822263,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.14000000059604645,
+        0.1666666716337204
+      ],
+      "overhead": [
+        2.5933333892822263,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.25200000405311584,
+        0.1666666716337204
+      ],
+      "overhead": [
+        2.5933336277008054,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.30799999833106995,
+        0.3333333432674408
+      ],
+      "overhead": [
+        2.4266666431427,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.41999998688697815,
+        0.3333333432674408
+      ],
+      "overhead": [
+        2.426666404724121,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.5320000052452087,
+        0.3333333432674408
+      ],
+      "overhead": [
+        2.426666404724121,
+        "Upper floor low end"
+      ],
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.5879999995231628,
+        0.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.699999988079071,
+        0.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.8119999766349792,
+        0.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.8679999709129333,
+        0.6666666865348816
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        0.9800000190734863,
+        0.6666666865348816
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.0920000076293945,
+        0.6666666865348816
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.1480000019073486,
+        0.8333333134651184
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.2599999904632568,
+        0.8333333134651184
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.371999979019165,
+        0.8333333134651184
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.4279999732971191,
+        1.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.5399999618530273,
+        1.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.6519999504089355,
+        1.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.7079999446868896,
+        1.1666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.8200000524520874,
+        1.1666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.9320000410079956,
+        1.1666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        1.9880000352859497,
+        1.3333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.0999999046325684,
+        1.3333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.2119998931884766,
+        1.3333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.2679998874664307,
+        1.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.380000114440918,
+        1.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.492000102996826,
+        1.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.5480000972747803,
+        1.6666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.6600000858306885,
+        1.6666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.7720000743865967,
+        1.6666666269302368
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.828000068664551,
+        1.8333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        2.940000057220459,
+        1.8333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.052000045776367,
+        1.8333333730697632
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.1080000400543213,
+        2.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.2200000286102295,
+        2.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.3320000171661377,
+        2.0
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.388000011444092,
+        2.1666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.5,
+        2.1666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.611999988555908,
+        2.1666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.6679999828338623,
+        2.3333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.7799999713897705,
+        2.3333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.8919999599456787,
+        2.3333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        3.947999954223633,
+        2.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.059999942779541,
+        2.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.171999931335449,
+        2.5
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.228000164031982,
+        2.6666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.340000152587891,
+        2.6666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.452000141143799,
+        2.6666667461395264
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.507999897003174,
+        2.8333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.619999885559082,
+        2.8333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    },
+    {
+      "walkingPointM": [
+        0.0,
+        4.73199987411499,
+        2.8333332538604736
+      ],
+      "overhead": null,
+      "pass": true
+    }
+  ],
+  "contextExclusion": "Actual floor ring, support columns, ground slab and stair head ledges are delivered proof context only; guard modules and newels are actual unchanged catalogue GLBs.",
+  "limits": "Project sample measurements, not code/load certification. Under-stair passage is not claimed. No native cut or route semantics."
+}

@@ -1,0 +1,2304 @@
+{
+  "name": "turret-canopy",
+  "assemblySourceSha256": "50112acaead6c98ec59e091468b585ef7382b0392c47647c12a2f0d499c48e28",
+  "instanceCount": 14,
+  "actualGlbContacts": [
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.003"
+      ],
+      "atM": [
+        -0.6000000238418579,
+        -1.2000000476837158,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.001"
+      ],
+      "atM": [
+        -1.2000000476837158,
+        -0.6000000238418579,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.001"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.004"
+      ],
+      "atM": [
+        -0.6000000238418579,
+        0.0,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.001"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.002"
+      ],
+      "atM": [
+        -1.2000000476837158,
+        0.6000000238418579,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.002"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.005"
+      ],
+      "atM": [
+        -0.6000000238418579,
+        1.2000000476837158,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.003"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.006"
+      ],
+      "atM": [
+        0.6000000238418579,
+        -1.2000000476837158,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.003"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.004"
+      ],
+      "atM": [
+        0.0,
+        -0.6000000238418579,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.004"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.007"
+      ],
+      "atM": [
+        0.6000000238418579,
+        0.0,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.004"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.005"
+      ],
+      "atM": [
+        0.0,
+        0.6000000238418579,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.005"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.008"
+      ],
+      "atM": [
+        0.6000000238418579,
+        1.2000000476837158,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.006"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.007"
+      ],
+      "atM": [
+        1.2000000476837158,
+        -0.6000000238418579,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.007"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.008"
+      ],
+      "atM": [
+        1.2000000476837158,
+        0.6000000238418579,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "column abacus to annular-sector bearing",
+      "a": [
+        "tuscan-support-column",
+        "tuscan-support-column.001",
+        "tuscan-support-column.002",
+        "tuscan-support-column.003"
+      ],
+      "b": [
+        "standing-seam-conical-turret-roof"
+      ],
+      "atM": [
+        -1.2,
+        -1.2,
+        3.0
+      ],
+      "gapMm": 9.685754776000977e-05,
+      "passTest": true
+    },
+    {
+      "test": "column abacus to annular-sector bearing",
+      "a": [
+        "tuscan-support-column",
+        "tuscan-support-column.001",
+        "tuscan-support-column.002",
+        "tuscan-support-column.003"
+      ],
+      "b": [
+        "standing-seam-conical-turret-roof"
+      ],
+      "atM": [
+        -1.2,
+        1.2,
+        3.0
+      ],
+      "gapMm": 9.685754776000977e-05,
+      "passTest": true
+    },
+    {
+      "test": "column abacus to annular-sector bearing",
+      "a": [
+        "tuscan-support-column",
+        "tuscan-support-column.001",
+        "tuscan-support-column.002",
+        "tuscan-support-column.003"
+      ],
+      "b": [
+        "standing-seam-conical-turret-roof"
+      ],
+      "atM": [
+        1.2,
+        -1.2,
+        3.0
+      ],
+      "gapMm": 9.685754776000977e-05,
+      "passTest": true
+    },
+    {
+      "test": "column abacus to annular-sector bearing",
+      "a": [
+        "tuscan-support-column",
+        "tuscan-support-column.001",
+        "tuscan-support-column.002",
+        "tuscan-support-column.003"
+      ],
+      "b": [
+        "standing-seam-conical-turret-roof"
+      ],
+      "atM": [
+        1.2,
+        1.2,
+        3.0
+      ],
+      "gapMm": 9.685754776000977e-05,
+      "passTest": true
+    }
+  ],
+  "cavitySamples": [
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.8,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.8,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.8,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.8,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.8,
+        3.5276317980485277
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.4,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.4,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.4,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.4,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        -0.4,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.0,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.0,
+        3.2075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.0,
+        3.395
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.0,
+        3.5825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.0,
+        3.77
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.3999999999999999,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.3999999999999999,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.3999999999999999,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.3999999999999999,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.3999999999999999,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.7999999999999998,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.7999999999999998,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.7999999999999998,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.7999999999999998,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -1.2,
+        0.7999999999999998,
+        3.5276317980485277
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -1.2,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -1.2,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -1.2,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -1.2,
+        3.5276317980485277
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.8,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.8,
+        3.2246572921235086
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.8,
+        3.4293145842470167
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.8,
+        3.6339718763705253
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.8,
+        3.838629168494034
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.4,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.4,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.4,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.4,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        -0.4,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.0,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.0,
+        3.3074999999999997
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.0,
+        3.5949999999999998
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.0,
+        3.8824999999999994
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.0,
+        4.169999999999999
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.3999999999999999,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.3999999999999999,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.3999999999999999,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.3999999999999999,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.3999999999999999,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.7999999999999998,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.7999999999999998,
+        3.2246572921235086
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.7999999999999998,
+        3.4293145842470167
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.7999999999999998,
+        3.6339718763705253
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        0.7999999999999998,
+        3.838629168494034
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        1.2,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        1.2,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        1.2,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.8,
+        1.2,
+        3.5276317980485277
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -1.2,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -1.2,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -1.2,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -1.2,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.8,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.8,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.8,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.8,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.8,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.4,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.4,
+        3.366078646061754
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.4,
+        3.712157292123508
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.4,
+        4.058235938185263
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        -0.4,
+        4.404314584247016
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.0,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.0,
+        3.4074999999999998
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.0,
+        3.795
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.0,
+        4.182499999999999
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.0,
+        4.569999999999999
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.3999999999999999,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.3999999999999999,
+        3.366078646061754
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.3999999999999999,
+        3.712157292123508
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.3999999999999999,
+        4.058235938185263
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.3999999999999999,
+        4.404314584247016
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.7999999999999998,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.7999999999999998,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.7999999999999998,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.7999999999999998,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        0.7999999999999998,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        1.2,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        1.2,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        1.2,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        -0.4,
+        1.2,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -1.2,
+        3.2075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -1.2,
+        3.395
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -1.2,
+        3.5825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -1.2,
+        3.77
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.8,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.8,
+        3.3075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.8,
+        3.5949999999999998
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.8,
+        3.8825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.8,
+        4.17
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.4,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.4,
+        3.4074999999999998
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.4,
+        3.795
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.4,
+        4.182499999999999
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        -0.4,
+        4.569999999999999
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.0,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.0,
+        3.5075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.0,
+        3.995
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.0,
+        4.4825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.0,
+        4.97
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.3999999999999999,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.3999999999999999,
+        3.4074999999999998
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.3999999999999999,
+        3.795
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.3999999999999999,
+        4.182499999999999
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.3999999999999999,
+        4.569999999999999
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.7999999999999998,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.7999999999999998,
+        3.3075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.7999999999999998,
+        3.5949999999999998
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.7999999999999998,
+        3.8825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        0.7999999999999998,
+        4.17
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        1.2,
+        3.2075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        1.2,
+        3.395
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        1.2,
+        3.5825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.0,
+        1.2,
+        3.77
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -1.2,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -1.2,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -1.2,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -1.2,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.8,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.8,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.8,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.8,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.8,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.4,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.4,
+        3.366078646061754
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.4,
+        3.712157292123508
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.4,
+        4.058235938185263
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        -0.4,
+        4.404314584247016
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.0,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.0,
+        3.4075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.0,
+        3.795
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.0,
+        4.1825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.0,
+        4.57
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.3999999999999999,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.3999999999999999,
+        3.366078646061754
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.3999999999999999,
+        3.712157292123508
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.3999999999999999,
+        4.058235938185263
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.3999999999999999,
+        4.404314584247016
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.7999999999999998,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.7999999999999998,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.7999999999999998,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.7999999999999998,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        0.7999999999999998,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        1.2,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        1.2,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        1.2,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.3999999999999999,
+        1.2,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -1.2,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -1.2,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -1.2,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -1.2,
+        3.5276317980485277
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.8,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.8,
+        3.2246572921235086
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.8,
+        3.4293145842470167
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.8,
+        3.6339718763705253
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.8,
+        3.838629168494034
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.4,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.4,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.4,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.4,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        -0.4,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.0,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.0,
+        3.3075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.0,
+        3.5949999999999998
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.0,
+        3.8825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.0,
+        4.17
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.3999999999999999,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.3999999999999999,
+        3.282894549584104
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.3999999999999999,
+        3.545789099168208
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.3999999999999999,
+        3.808683648752312
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.3999999999999999,
+        4.071578198336416
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.7999999999999998,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.7999999999999998,
+        3.2246572921235086
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.7999999999999998,
+        3.429314584247017
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.7999999999999998,
+        3.6339718763705258
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        0.7999999999999998,
+        3.8386291684940343
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        1.2,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        1.2,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        1.2,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        1.2,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        0.7999999999999998,
+        1.2,
+        3.5276317980485277
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.8,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.8,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.8,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.8,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.8,
+        3.5276317980485277
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.4,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.4,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.4,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.4,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        -0.4,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.0,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.0,
+        3.2075
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.0,
+        3.395
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.0,
+        3.5825
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.0,
+        3.77
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.3999999999999999,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.3999999999999999,
+        3.189859918206518
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.3999999999999999,
+        3.3597198364130363
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.3999999999999999,
+        3.5295797546195544
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.3999999999999999,
+        3.6994396728260726
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.7999999999999998,
+        3.02
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.7999999999999998,
+        3.1469079495121317
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.7999999999999998,
+        3.273815899024264
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.7999999999999998,
+        3.400723848536396
+      ],
+      "passTest": true
+    },
+    {
+      "test": "hollow roof interior",
+      "atM": [
+        1.2,
+        0.7999999999999998,
+        3.5276317980485277
+      ],
+      "passTest": true
+    }
+  ],
+  "clearanceSamples": [],
+  "errors": []
+}

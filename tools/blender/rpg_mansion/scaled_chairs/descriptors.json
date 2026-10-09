@@ -1,0 +1,2669 @@
+{
+  "set": "rpg-mansion",
+  "items": [
+    {
+      "id": "rpg-mansion-ladder-side-01",
+      "name": "梯子背サイドチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-ladder-side-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-ladder-side-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-ladder-side-01-top.png",
+      "w": 450,
+      "d": 520,
+      "h": 980,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-ladder-side-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-ladder-side-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-ladder-side-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-ladder-side-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-ladder-side-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-ladder-side-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "3 curved ladder cross rails; four legs",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1952,
+      "glbBytes": 133016,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "ladder-side",
+        "id": "rpg-mansion-ladder-side-01",
+        "name": "梯子背サイドチェア",
+        "w": 450,
+        "d": 520,
+        "h": 980,
+        "seatTopMm": 460,
+        "geometrySignature": "3 curved ladder cross rails; four legs",
+        "status": "prototype",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 450,
+            "d": 520,
+            "h": 810,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame"
+            ]
+          },
+          {
+            "w": 451,
+            "d": 524,
+            "h": 787,
+            "standard_ids": [
+              "fmp-Chair27"
+            ]
+          },
+          {
+            "w": 442,
+            "d": 510,
+            "h": 788,
+            "standard_ids": [
+              "fmp-Chair28"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "b782ab4a68ad35ec2b7f5f70fae8a6331eeccadf5cf197d08867a4af489f81fd",
+        "sourceBlend": "dfe78ca47a5acf02b0abdec7db9ab0adc42f190e52c3269f542ed74f103f62fa",
+        "authoringBlend": "0110509eb2b0332a963c846996db693b43c52d9cd183db3ea70979bdacbf9b4a",
+        "exportBlend": "dfe78ca47a5acf02b0abdec7db9ab0adc42f190e52c3269f542ed74f103f62fa",
+        "validation": "7988b5a14376168995e14e064264a8dade09bac7829a89884f54e9aa0513185d",
+        "thumb": "cf447928a01e01dd901e005b4e9d904113fcd60dbdb3a162d861f7699d119017",
+        "top": "aab1b89b935d458d7663ee61d97a5e156d4160bd8f6f8ceba68751433ce1f61e",
+        "front": "f6bae0a68458460976e12165c220cc468b9453dabaa278081b6e030a49344875",
+        "rear": "c3cbeecbef5c344231f14582b7b8e26048114633393d7456c0aea8a10fffd62c"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-caned-bergere-01",
+      "name": "籐背ベルジェール・アームチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-caned-bergere-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-caned-bergere-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-caned-bergere-01-top.png",
+      "w": 646,
+      "d": 615,
+      "h": 912,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-caned-bergere-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-caned-bergere-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-caned-bergere-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-caned-bergere-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-caned-bergere-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-caned-bergere-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "caned enclosing back; swept arms; upholstered seat",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 2780,
+      "glbBytes": 190704,
+      "finishChannels": [
+        {
+          "key": "cane",
+          "label": "籐編み",
+          "default": "#aa8b55"
+        },
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "caned-bergere",
+        "id": "rpg-mansion-caned-bergere-01",
+        "name": "籐背ベルジェール・アームチェア",
+        "w": 646,
+        "d": 615,
+        "h": 912,
+        "seatTopMm": 460,
+        "geometrySignature": "caned enclosing back; swept arms; upholstered seat",
+        "status": "prototype",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair33"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 646,
+            "d": 615,
+            "h": 912,
+            "standard_ids": [
+              "fmp-Chair33"
+            ]
+          },
+          {
+            "w": 646,
+            "d": 633,
+            "h": 1064,
+            "standard_ids": [
+              "fmp-Chair34",
+              "fmp-Chair35"
+            ]
+          },
+          {
+            "w": 643,
+            "d": 636,
+            "h": 647,
+            "standard_ids": [
+              "fmp-Chair11"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "077d9507813ef6b52c528ca11a97a97fd3533b8d11eb014a2b5a3f20a4992d9f",
+        "sourceBlend": "c6e0d5a404e2370755ddb285fb0f7201d907744d5daef508eff82a8b6fc869cd",
+        "authoringBlend": "00b7d5fd93c3d40783fa9f728b8f7769f7909f62c079e596c352f709c3771b42",
+        "exportBlend": "c6e0d5a404e2370755ddb285fb0f7201d907744d5daef508eff82a8b6fc869cd",
+        "validation": "4960c2b403e2ac9d468f21e099e76bd19e5adc54df765773fbb88897bc213a55",
+        "thumb": "24c5bac1e401727e646b482aa772ab876f3805c7e739ddf18b898c11d7b633ac",
+        "top": "978121c24cbc7a680dd60345884b078379094aa70c1424e7e553fe9e00bab578",
+        "front": "fffbbbff595dc6f58e3b70526c0efddb2a711f43e1564ac37cf62edf8efa7a36",
+        "rear": "9d83eaffe67ce62d491cb4823c5d6f038035462ee37397d173620f29e62a339e"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-curved-rocker-01",
+      "name": "曲木ロッキングチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-curved-rocker-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-curved-rocker-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-curved-rocker-01-top.png",
+      "w": 616,
+      "d": 865,
+      "h": 1050,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-curved-rocker-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-curved-rocker-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-curved-rocker-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-curved-rocker-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-curved-rocker-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-curved-rocker-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "continuous curved rocking rails; spindle back; fixed arms",
+      "seatTopMm": 460.00000834465027,
+      "triangleBudget": 4000,
+      "measuredTriangles": 2576,
+      "glbBytes": 171360,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "curved-rocker",
+        "id": "rpg-mansion-curved-rocker-01",
+        "name": "曲木ロッキングチェア",
+        "w": 616,
+        "d": 865,
+        "h": 1050,
+        "seatTopMm": 460,
+        "geometrySignature": "continuous curved rocking rails; spindle back; fixed arms",
+        "status": "prototype",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 679,
+            "d": 803,
+            "h": 941,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-54418_Brown"
+            ]
+          },
+          {
+            "w": 470,
+            "d": 865,
+            "h": 802,
+            "standard_ids": [
+              "fmp-Chair47"
+            ]
+          },
+          {
+            "w": 581,
+            "d": 718,
+            "h": 635,
+            "standard_ids": [
+              "fmp-Chair13"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "24ffe61309a8b91fe6d294d9f4f66dc40f1e821d5e804d8e4a73d0bf95cf97e7",
+        "sourceBlend": "0d2e7831ce7b4b0ef391bb04cbfbec593333a62153b5f56de2a75613ffa6a7b1",
+        "authoringBlend": "2112e1e20260c174970c6eefd64ee01e6e62d8d975ff4f6318ca1c7057f79435",
+        "exportBlend": "0d2e7831ce7b4b0ef391bb04cbfbec593333a62153b5f56de2a75613ffa6a7b1",
+        "validation": "6edcd3a10ca8e5becb183de4eccd40f06e3037972850d2dabf25e9544df1d0e6",
+        "thumb": "bcf39ce1ed9e0ade169c9cc7bd9bb0bac2d14912d65698c8284dc995c2b1dfb3",
+        "top": "b1daa08ca46172fd713bab38ff1255cec4fbaa9b659b5e9d4eda141be566b2aa",
+        "front": "25b53eac40345f99fed00c239b4593dc6fe110988887938ff648c77eb819b461",
+        "rear": "842434130988b911d3cd8a77e0e4ca5b751a983268a2507a4a18038fdd096c07"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-lyre-side-01",
+      "name": "竪琴背サイドチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-lyre-side-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-lyre-side-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-lyre-side-01-top.png",
+      "w": 451,
+      "d": 524,
+      "h": 940,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-lyre-side-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-lyre-side-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-lyre-side-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-lyre-side-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-lyre-side-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-lyre-side-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "open lyre splat; tapered legs",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 2052,
+      "glbBytes": 140380,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "lyre-side",
+        "id": "rpg-mansion-lyre-side-01",
+        "name": "竪琴背サイドチェア",
+        "w": 451,
+        "d": 524,
+        "h": 940,
+        "seatTopMm": 460,
+        "geometrySignature": "open lyre splat; tapered legs",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair27"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 451,
+            "d": 524,
+            "h": 787,
+            "standard_ids": [
+              "fmp-Chair27"
+            ]
+          },
+          {
+            "w": 450,
+            "d": 520,
+            "h": 810,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame"
+            ]
+          },
+          {
+            "w": 437,
+            "d": 532,
+            "h": 846,
+            "standard_ids": [
+              "fmp-Chair09"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "8c004f06a348aa3958b865d32b0dff35d0d25581c2b65516f4ddba8243750fac",
+        "sourceBlend": "997d1f86dfdfe9bb62478cce6dc3acc9bc073af57738dfda50c6d4238ce1b41f",
+        "authoringBlend": "92fc78142d8d9951a747a4603f6047462755bb92ed2aef878ad4ecb7b814bc17",
+        "exportBlend": "997d1f86dfdfe9bb62478cce6dc3acc9bc073af57738dfda50c6d4238ce1b41f",
+        "validation": "b5482c92ae9bd22eefdf004dd95eee3229c0cae03b76eeced9dc13f473de4e14",
+        "thumb": "d4a6d903ec940fad12bc279617585f3d648dc25b06aaff53ff2bb03fe058e9d4",
+        "top": "fb291669f6b42563ff783d1e11981ebc5c49df63101e0b751d7bdc9ab14558cf",
+        "front": "b6d79665a957fcdc23a1f5fa55d57ac80a5f1ee1df9e3e862da9457d8cd3c229",
+        "rear": "1d1b7dc48680f9d6a56ac4d1e214d24f3b1577fa8e8a14eb4a958df6eaac70dd"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-balloon-side-01",
+      "name": "バルーン背チェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-balloon-side-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-balloon-side-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-balloon-side-01-top.png",
+      "w": 487,
+      "d": 548,
+      "h": 980,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-balloon-side-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-balloon-side-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-balloon-side-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-balloon-side-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-balloon-side-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-balloon-side-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "continuous oval back frame; upholstered back insert",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 2200,
+      "glbBytes": 149644,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "balloon-side",
+        "id": "rpg-mansion-balloon-side-01",
+        "name": "バルーン背チェア",
+        "w": 487,
+        "d": 548,
+        "h": 980,
+        "seatTopMm": 460,
+        "geometrySignature": "continuous oval back frame; upholstered back insert",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair30"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 487,
+            "d": 548,
+            "h": 826,
+            "standard_ids": [
+              "fmp-Chair30"
+            ]
+          },
+          {
+            "w": 494,
+            "d": 518,
+            "h": 794,
+            "standard_ids": [
+              "fmp-Chair10"
+            ]
+          },
+          {
+            "w": 451,
+            "d": 524,
+            "h": 787,
+            "standard_ids": [
+              "fmp-Chair27"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "abdc27006ea114fa30d4ebb30fa3624c474e22a588de508845db96b39ba1dab3",
+        "sourceBlend": "d5eddd42e21f9bc43d002fa880af701ed1cae978104aa02c00d526b662a81f91",
+        "authoringBlend": "a8ac27c895e21130674724fe0a9eb79c7965213ef76878265c009e90a795c692",
+        "exportBlend": "d5eddd42e21f9bc43d002fa880af701ed1cae978104aa02c00d526b662a81f91",
+        "validation": "c75b36087cbc700504a9f279bba77fa0795279829ddce1070a574faab78880b0",
+        "thumb": "024e36ee3c96f08b1401ed14f26fbd07c111eda74bfe8bc45d9a819c024a5a13",
+        "top": "439d1a762251492a5e98c8bed6f80f7e21d17cd7c914743b0e8a817064ba5e0c",
+        "front": "d707d37ca6a3458acbd9181c126732ce184a2fad11e92c1907af8caf03cd5ee8",
+        "rear": "332434e695bfb0bc51979b8605e9f4c8eee863ae218fed4596003e1d565d51ed"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-windsor-bow-01",
+      "name": "ボウバック・ウィンザーチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-windsor-bow-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-windsor-bow-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-windsor-bow-01-top.png",
+      "w": 494,
+      "d": 518,
+      "h": 1000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-windsor-bow-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-windsor-bow-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-windsor-bow-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-windsor-bow-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-windsor-bow-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-windsor-bow-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "bent bow; radial spindles; broad wood seat",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "wood"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 2248,
+      "glbBytes": 151204,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "windsor-bow",
+        "id": "rpg-mansion-windsor-bow-01",
+        "name": "ボウバック・ウィンザーチェア",
+        "w": 494,
+        "d": 518,
+        "h": 1000,
+        "seatTopMm": 460,
+        "geometrySignature": "bent bow; radial spindles; broad wood seat",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair10"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 494,
+            "d": 518,
+            "h": 794,
+            "standard_ids": [
+              "fmp-Chair10"
+            ]
+          },
+          {
+            "w": 487,
+            "d": 548,
+            "h": 826,
+            "standard_ids": [
+              "fmp-Chair30"
+            ]
+          },
+          {
+            "w": 450,
+            "d": 520,
+            "h": 810,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "6ea0e783cb2ab60e1869ddddb03242e882c5cd057602114ac1faa487cec00160",
+        "sourceBlend": "4d06bbdcf12b3c8fdc8523d570d1cad3a3c520b1af6c28764b5534b249bc5be1",
+        "authoringBlend": "ed0b852047c18ce64471c1bbdcb62935eb9c83f742f97d0981adefc1f64fe6d7",
+        "exportBlend": "4d06bbdcf12b3c8fdc8523d570d1cad3a3c520b1af6c28764b5534b249bc5be1",
+        "validation": "f37b32c16028735b3ffdafca5549fcec0446101d52289e4c3cd5d1bc3fcbead1",
+        "thumb": "898bcd4767b10f4f97771125c62ad9c03d9b3b02a5107485ecf70bfc2b6fe8d9",
+        "top": "b8cb6648e2b67639e2f871e9ec659d2a7ab90f6ab7ac76bc472fbea9de052334",
+        "front": "7bb54db9357ef393a0bdd7c7f36114488dced96060eed37c0887792e9f6f4bc0",
+        "rear": "017d3a334916efb8a9655cb0580f485a97b6e8eea9ff479099435bc2ac02a1c6"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-slipper-01",
+      "name": "スリッパーチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slipper-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slipper-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slipper-01-top.png",
+      "w": 581,
+      "d": 718,
+      "h": 820,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-slipper-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-slipper-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-slipper-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-slipper-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-slipper-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-slipper-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "armless low upholstered back; wide cushion; short turned legs",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1116,
+      "glbBytes": 77560,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "slipper",
+        "id": "rpg-mansion-slipper-01",
+        "name": "スリッパーチェア",
+        "w": 581,
+        "d": 718,
+        "h": 820,
+        "seatTopMm": 460,
+        "geometrySignature": "armless low upholstered back; wide cushion; short turned legs",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair13"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 581,
+            "d": 718,
+            "h": 635,
+            "standard_ids": [
+              "fmp-Chair13"
+            ]
+          },
+          {
+            "w": 574,
+            "d": 667,
+            "h": 726,
+            "standard_ids": [
+              "fmp-Chair44"
+            ]
+          },
+          {
+            "w": 656,
+            "d": 676,
+            "h": 649,
+            "standard_ids": [
+              "fmp-Chair12"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "28ea329348e823851bcac67c0ab269913fce3ff495316001db6089d2c9977704",
+        "sourceBlend": "2f7248402de333fede27779375d6e7b9a94cfd071daf45862b2fc04ca846c98a",
+        "authoringBlend": "eec9aac3c14988fd4f46d0a6b5be1dbe677af283d7b6e4e8bbcd3db1de8aeb3d",
+        "exportBlend": "2f7248402de333fede27779375d6e7b9a94cfd071daf45862b2fc04ca846c98a",
+        "validation": "8b96d0ad501b9643de5612dc34e7f498f7c5fb4a05d37a52c1cde4b37e580e98",
+        "thumb": "7267441dc04d2cf9b00ccf8afc5a38ba52589d05943655f1b33f295cea4b4590",
+        "top": "f2483390cb0d10e012d662540b02b428a3db7d035a106c18883c4dad05982721",
+        "front": "efb576672774b60752bb954cb303168e3b1c6195a28bca006747ef2156ae647e",
+        "rear": "f31622c24096abbbd6f2c4a1457abc94c5d4f357a6db280be00e640e10f22f6e"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-corner-01",
+      "name": "コーナーチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-corner-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-corner-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-corner-01-top.png",
+      "w": 617,
+      "d": 587,
+      "h": 902,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-corner-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-corner-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-corner-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-corner-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-corner-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-corner-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "two orthogonal back rails; open front and left sides",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1480,
+      "glbBytes": 100472,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "corner",
+        "id": "rpg-mansion-corner-01",
+        "name": "コーナーチェア",
+        "w": 617,
+        "d": 587,
+        "h": 902,
+        "seatTopMm": 460,
+        "geometrySignature": "two orthogonal back rails; open front and left sides",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair32"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 617,
+            "d": 587,
+            "h": 902,
+            "standard_ids": [
+              "fmp-Chair32"
+            ]
+          },
+          {
+            "w": 616,
+            "d": 586,
+            "h": 916,
+            "standard_ids": [
+              "fmp-Chair31"
+            ]
+          },
+          {
+            "w": 579,
+            "d": 601,
+            "h": 818,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "ef34e6652752c8727a84683154722f1bd51c161a452f771545a6f2c2be8527a6",
+        "sourceBlend": "e503b5ba4fa25df597ec5975dfd2959ef06f03e078bac8264e2c5420fb32b154",
+        "authoringBlend": "f4222e5fa98e7c59306d5d745576a81b5db34e56cc23105b4ee26c2573345ee0",
+        "exportBlend": "e503b5ba4fa25df597ec5975dfd2959ef06f03e078bac8264e2c5420fb32b154",
+        "validation": "a216101d9751bef1a45612cb5b6df36c89db77ada1fd754effd499eb347551ef",
+        "thumb": "4fc9fa1a5ac16477893e6816db9611b481f2d2526b0103f7979f8413a7772e18",
+        "top": "bee4538dfdd9b5917425d9451c9bdcd09bc05c05c79a63cc98b49a0dfa15d0bb",
+        "front": "c0a4c4b9249ed10068bc985a81ed5fdcc5edf63005858cb4c9853a076359d20a",
+        "rear": "a20225c22ab899642d19096c2e28f379125c90cb2ce0c2ac9a6e9b9868fac022"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-smoking-01",
+      "name": "スモーキングチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-smoking-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-smoking-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-smoking-01-top.png",
+      "w": 563,
+      "d": 504,
+      "h": 890,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-smoking-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-smoking-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-smoking-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-smoking-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-smoking-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-smoking-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "broad upper elbow pad for backward use; narrow splat",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "leather"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1840,
+      "glbBytes": 124924,
+      "finishChannels": [
+        {
+          "key": "leather",
+          "label": "革",
+          "default": "#694432"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "smoking",
+        "id": "rpg-mansion-smoking-01",
+        "name": "スモーキングチェア",
+        "w": 563,
+        "d": 504,
+        "h": 890,
+        "seatTopMm": 460,
+        "geometrySignature": "broad upper elbow pad for backward use; narrow splat",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair26"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 563,
+            "d": 504,
+            "h": 816,
+            "standard_ids": [
+              "fmp-Chair26"
+            ]
+          },
+          {
+            "w": 587,
+            "d": 486,
+            "h": 797,
+            "standard_ids": [
+              "fmp-Chair45"
+            ]
+          },
+          {
+            "w": 494,
+            "d": 518,
+            "h": 794,
+            "standard_ids": [
+              "fmp-Chair10"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "93f704cd3b426049371be9c35182a3c5e51d3c3314ce302a34c38e21a5504d0d",
+        "sourceBlend": "ff06eb903f60b324d9f4490d813cc97d0bd5054534f330be51a861c6f0c8bc22",
+        "authoringBlend": "388b083b9cb99f8d37f9118e09380e4da8af63d81ab7d2a0c0b4ad246a562947",
+        "exportBlend": "ff06eb903f60b324d9f4490d813cc97d0bd5054534f330be51a861c6f0c8bc22",
+        "validation": "1638fe368eb5c3137e679b0580981f0e98e5eb744e437d72207f3607ae66f02a",
+        "thumb": "af7ecfad78e420b95e8a5bb66caca98c2f31337970f8aa8e8fdb66aa4b9571b6",
+        "top": "c001b198e6c244295ad557e316b88ca387b08834d363017322f0d94100a4c029",
+        "front": "8ec479e53d395aae4313154f66e684a76ec75c682dec60bfb38b87c47ded5952",
+        "rear": "75370dd30b4d89e9c19ec48ac6ac80c8033a43cdd3c9cdef4abd4828f7214d42"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-campaign-fold-01",
+      "name": "キャンペーン・フォールディングチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-campaign-fold-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-campaign-fold-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-campaign-fold-01-top.png",
+      "w": 579,
+      "d": 601,
+      "h": 818,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-campaign-fold-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-campaign-fold-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-campaign-fold-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-campaign-fold-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-campaign-fold-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-campaign-fold-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "fixed crossed folding-style side frames; brass pins; leather sling",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "leather"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1344,
+      "glbBytes": 92004,
+      "finishChannels": [
+        {
+          "key": "leather",
+          "label": "革",
+          "default": "#694432"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "campaign-fold",
+        "id": "rpg-mansion-campaign-fold-01",
+        "name": "キャンペーン・フォールディングチェア",
+        "w": 579,
+        "d": 601,
+        "h": 818,
+        "seatTopMm": 460,
+        "geometrySignature": "fixed crossed folding-style side frames; brass pins; leather sling",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 579,
+            "d": 601,
+            "h": 818,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut"
+            ]
+          },
+          {
+            "w": 616,
+            "d": 586,
+            "h": 916,
+            "standard_ids": [
+              "fmp-Chair31"
+            ]
+          },
+          {
+            "w": 617,
+            "d": 587,
+            "h": 902,
+            "standard_ids": [
+              "fmp-Chair32"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "a82f50e4ad818d78f1620fc58a4b47ce1ca7433e6523937bf5f74cc1ecc890f7",
+        "sourceBlend": "9f1310d5d004c4800cf574ea5b3bbecde99a1aac207f3d22faffd930d334d2b0",
+        "authoringBlend": "59906ceef167aeade337c1c370fef0e1e819ae5b2c6761b20790bd1b5b9e2c8f",
+        "exportBlend": "9f1310d5d004c4800cf574ea5b3bbecde99a1aac207f3d22faffd930d334d2b0",
+        "validation": "a5b1d02e514d960d5c57e9366bb75274bee1b77cc0c268399ae3c716e0fe6e4c",
+        "thumb": "5038685bacf714e6a9a0beac054e7980e4917f6e42152b80dd7fffe3843ffa28",
+        "top": "1e1be046ec33fce91fa3ca54ae76cfb1e0ed703b20f9e2184cf10e18cae013a2",
+        "front": "2b19caa2ea0473bb2c07c33debcb4717b260e51f2576647ab6181226b3924165",
+        "rear": "e2658cb4a5c94ab14d9467df9a3bc5a443e264e91e397f8cde80808379c4b410"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-x-back-01",
+      "name": "交差背チェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-x-back-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-x-back-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-x-back-01-top.png",
+      "w": 437,
+      "d": 532,
+      "h": 920,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-back-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-back-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-back-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-back-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-back-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-back-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "open X back; shaped crest",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1648,
+      "glbBytes": 112724,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "x-back",
+        "id": "rpg-mansion-x-back-01",
+        "name": "交差背チェア",
+        "w": 437,
+        "d": 532,
+        "h": 920,
+        "seatTopMm": 460,
+        "geometrySignature": "open X back; shaped crest",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair09"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 437,
+            "d": 532,
+            "h": 846,
+            "standard_ids": [
+              "fmp-Chair09"
+            ]
+          },
+          {
+            "w": 451,
+            "d": 524,
+            "h": 787,
+            "standard_ids": [
+              "fmp-Chair27"
+            ]
+          },
+          {
+            "w": 450,
+            "d": 520,
+            "h": 810,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "f90558359517bebb99029295ee321706b22f82dc372a2d51c80bb1500d59130b",
+        "sourceBlend": "f970bdcb5e6203f601259c583b3bdd0ed82bdf1fd850b27310a4c01c8586632e",
+        "authoringBlend": "07074a20e4ceb665b2b00586bbd375b65867456d4378deb5b6176f7160b7bd5d",
+        "exportBlend": "f970bdcb5e6203f601259c583b3bdd0ed82bdf1fd850b27310a4c01c8586632e",
+        "validation": "801554c3cdd2ada452c8c1ce0ce4ec912967525065a996205e5c4def43a6a868",
+        "thumb": "37fa2ad9c54031a39da63e59042d19b3d5fe6735c94628240e293d9b8d149923",
+        "top": "d28f90b5199f5c2d087f4a819a4518c578b3ac077d91d3d4b0a290d30d7861c2",
+        "front": "3d9171ef25868aba0e7259195de0ad9d696f688357b36e22989385a3aec60b32",
+        "rear": "3e9fcb91ba3816fe0a1cc0448a5c3989d8214321ed911a3547368694f71fa421"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-shield-back-01",
+      "name": "シールド背チェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-shield-back-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-shield-back-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-shield-back-01-top.png",
+      "w": 442,
+      "d": 510,
+      "h": 940,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-shield-back-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-shield-back-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-shield-back-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-shield-back-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-shield-back-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-shield-back-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "pierced shield splat; tapered legs",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1832,
+      "glbBytes": 124120,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "shield-back",
+        "id": "rpg-mansion-shield-back-01",
+        "name": "シールド背チェア",
+        "w": 442,
+        "d": 510,
+        "h": 940,
+        "seatTopMm": 460,
+        "geometrySignature": "pierced shield splat; tapered legs",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair28"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 442,
+            "d": 510,
+            "h": 788,
+            "standard_ids": [
+              "fmp-Chair28"
+            ]
+          },
+          {
+            "w": 431,
+            "d": 508,
+            "h": 744,
+            "standard_ids": [
+              "fmp-Chair18"
+            ]
+          },
+          {
+            "w": 450,
+            "d": 520,
+            "h": 810,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "250ce57d9ba9dab9b2e8ede0e7701a7dce8364057a8654f754fe8c3cfc237850",
+        "sourceBlend": "7163b32931ee7020a6949ffd8b730a71305fbb5b6476fa65e83a2918b831b82c",
+        "authoringBlend": "a4bf5d0c1e9c2e5699b7f20d51baa18a653f9028246b39e5bcec485eef08f3e1",
+        "exportBlend": "7163b32931ee7020a6949ffd8b730a71305fbb5b6476fa65e83a2918b831b82c",
+        "validation": "7df138bae56f44dea2215878c53c4ef5cdd57b88c2bd291043d2922c1af47cc5",
+        "thumb": "31274bd8afd544b1dd73bb08922d5d65e3b0cdb3d5dd85eb550ac94bee94d587",
+        "top": "859173f3cb7e67e2fb321400fda669d262c8a66803d8b34d168a363eab534de9",
+        "front": "69a68f76cf13ce1cf22ae1fd933c79dafa26e2181fa7fc1a8a1274ecdd1f8724",
+        "rear": "ae71d236e6fcf054ba7a849818317f29b33a0fa1b70ec51a722c893ece9c03f3"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-gothic-hall-01",
+      "name": "尖頭アーチ・ホールチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gothic-hall-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gothic-hall-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gothic-hall-01-top.png",
+      "w": 434,
+      "d": 489,
+      "h": 1120,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-gothic-hall-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-gothic-hall-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-gothic-hall-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-gothic-hall-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-gothic-hall-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-gothic-hall-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "pointed arch pierced back; tall turned posts",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "wood"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1992,
+      "glbBytes": 134332,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "gothic-hall",
+        "id": "rpg-mansion-gothic-hall-01",
+        "name": "尖頭アーチ・ホールチェア",
+        "w": 434,
+        "d": 489,
+        "h": 1120,
+        "seatTopMm": 460,
+        "geometrySignature": "pointed arch pierced back; tall turned posts",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 431,
+            "d": 508,
+            "h": 744,
+            "standard_ids": [
+              "fmp-Chair18"
+            ]
+          },
+          {
+            "w": 442,
+            "d": 510,
+            "h": 788,
+            "standard_ids": [
+              "fmp-Chair28"
+            ]
+          },
+          {
+            "w": 437,
+            "d": 532,
+            "h": 846,
+            "standard_ids": [
+              "fmp-Chair09"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "0bb925555a91484bed94f5e84513d4f06b22ba47169bf690cfdafae28223e339",
+        "sourceBlend": "48f151dd850d1af7b1ad603169cbf68de53622898814f6ac6479a047ed13cf40",
+        "authoringBlend": "fd5bf66620632da9664d7c5e668d7336b249dddb0da14b93130987c10118b1e0",
+        "exportBlend": "48f151dd850d1af7b1ad603169cbf68de53622898814f6ac6479a047ed13cf40",
+        "validation": "6c654fa6626ea75d34635a420cc822cd744c5e7802f465ddbc5e9f90699eb812",
+        "thumb": "bf93b951826c32e928e4b75e8af83609fc9f9d4d3a80c64d9f78183b38cf1286",
+        "top": "1c5b1b6f3bb28ad35b9a05ceb6d250b5f63637f65d235da4e468686db81688e1",
+        "front": "9a6788fe1b14b71d90f6aa2be653e6838e6f0d329aba666029e5f33fcabd6760",
+        "rear": "c6980a69db1bde0b386be6f4b14ea274cfef92f3b6b80ecfb3471db2130c41ce"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-barrel-arm-01",
+      "name": "バレルバック・アームチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-barrel-arm-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-barrel-arm-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-barrel-arm-01-top.png",
+      "w": 683,
+      "d": 663,
+      "h": 788,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-barrel-arm-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-barrel-arm-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-barrel-arm-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-barrel-arm-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-barrel-arm-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-barrel-arm-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "half-round bent back rail; radiating staves",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 2120,
+      "glbBytes": 143768,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "barrel-arm",
+        "id": "rpg-mansion-barrel-arm-01",
+        "name": "バレルバック・アームチェア",
+        "w": 683,
+        "d": 663,
+        "h": 788,
+        "seatTopMm": 460,
+        "geometrySignature": "half-round bent back rail; radiating staves",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair14"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 683,
+            "d": 663,
+            "h": 788,
+            "standard_ids": [
+              "fmp-Chair14"
+            ]
+          },
+          {
+            "w": 656,
+            "d": 676,
+            "h": 649,
+            "standard_ids": [
+              "fmp-Chair12"
+            ]
+          },
+          {
+            "w": 727,
+            "d": 650,
+            "h": 602,
+            "standard_ids": [
+              "fmp-Chair42"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "3e0fd8e4eea538fb9fa1b378df4b0203b5de7e90b6595ed2049f8aab062be17d",
+        "sourceBlend": "2523c4539a5e4c9b6fb743bc89e755a348716d3dd795454f260f608e2f82c98d",
+        "authoringBlend": "515cd73187ab0d9be3274bb453f5a4d7bbc24b3ef24b4d74d8c84bb2edf7f459",
+        "exportBlend": "2523c4539a5e4c9b6fb743bc89e755a348716d3dd795454f260f608e2f82c98d",
+        "validation": "756342f64b6987cb29869df72ca48ecdc6caabf2ba907e7ac919612591b0960b",
+        "thumb": "a32407b68a09c6e2a0832ee7eaea8c89fef0fbb35995c8f553e498702213413c",
+        "top": "f66614a7fd7e3ba7124d27c1bb2495ffc94c55c89756269e056afa75d6563493",
+        "front": "c616f7e4f28b0a42634c1fda46023fb552f2585aa3594caa89d696fc26900ae5",
+        "rear": "7bb6a13721497fa8aa26d479db5f1175b1546a3b0a1d895732887103e2ed8b6f"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-scoop-desk-01",
+      "name": "スクープ背デスクチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scoop-desk-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scoop-desk-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scoop-desk-01-top.png",
+      "w": 597,
+      "d": 548,
+      "h": 835,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-scoop-desk-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-scoop-desk-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-scoop-desk-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-scoop-desk-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-scoop-desk-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-scoop-desk-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "low curved desk back; four-legged spider-like fixed base",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "leather"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1764,
+      "glbBytes": 121248,
+      "finishChannels": [
+        {
+          "key": "leather",
+          "label": "革",
+          "default": "#694432"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "scoop-desk",
+        "id": "rpg-mansion-scoop-desk-01",
+        "name": "スクープ背デスクチェア",
+        "w": 597,
+        "d": 548,
+        "h": 835,
+        "seatTopMm": 460,
+        "geometrySignature": "low curved desk back; four-legged spider-like fixed base",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 616,
+            "d": 586,
+            "h": 916,
+            "standard_ids": [
+              "fmp-Chair31"
+            ]
+          },
+          {
+            "w": 617,
+            "d": 587,
+            "h": 902,
+            "standard_ids": [
+              "fmp-Chair32"
+            ]
+          },
+          {
+            "w": 579,
+            "d": 601,
+            "h": 818,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "4861397eaf6f7c803bf113ab5b292df1500b84738bef14159ecb0b289f46da60",
+        "sourceBlend": "c94716437f09ddf8a2dabc5f0d1d6b4c2ec9a6525b89bdb5c677e6b943f8b130",
+        "authoringBlend": "d181643bb0831ff29d046c4222db3dada32ccb29d12c39b8781328f08d3bac13",
+        "exportBlend": "c94716437f09ddf8a2dabc5f0d1d6b4c2ec9a6525b89bdb5c677e6b943f8b130",
+        "validation": "2254fd9639de2151b2e536d4ff54a6e31f539750874cd6a198a3d5a06eed583f",
+        "thumb": "1c600905ed15a4f75220c9ff6257fbabf7d2b9c80ce5f96744c0ee9d9cc0c8aa",
+        "top": "7edd3ee83918fd8fc13c9881a0dd4542fe972a222e6a3662a870d2c383972fa5",
+        "front": "662ef9530535fe4f23b79e6d472254ccc6752698e3ae7dd407cbe5812c28316d",
+        "rear": "f8c34a0e4b2293cd6206a886d9288569adca4d7d7080ed97d191b9aef929eb2d"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-prayer-01",
+      "name": "祈祷室ハイバック・チェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-prayer-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-prayer-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-prayer-01-top.png",
+      "w": 520,
+      "d": 580,
+      "h": 1080,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-prayer-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-prayer-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-prayer-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-prayer-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-prayer-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-prayer-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "high padded prayer-room crest; lower footrest; upright open frame",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "wood"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1960,
+      "glbBytes": 132304,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence. Low support is a footrest, not an accessible kneeling platform.",
+      "coverageTarget": {
+        "key": "prayer",
+        "id": "rpg-mansion-prayer-01",
+        "name": "祈祷室ハイバック・チェア",
+        "w": 520,
+        "d": 580,
+        "h": 1080,
+        "seatTopMm": 460,
+        "geometrySignature": "high padded prayer-room crest; lower footrest; upright open frame",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 532,
+            "d": 626,
+            "h": 869,
+            "standard_ids": [
+              "fmp-Chair46"
+            ]
+          },
+          {
+            "w": 487,
+            "d": 548,
+            "h": 826,
+            "standard_ids": [
+              "fmp-Chair30"
+            ]
+          },
+          {
+            "w": 579,
+            "d": 601,
+            "h": 818,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "cf73744470ed72a03898b4d6194f0b8a355575824ba9c0f1d73269d51876409d",
+        "sourceBlend": "5d6c7bb9cd5bee0fcf90d8ecdcca43df4b4447e4b77094fad4692b36c1f5c9d2",
+        "authoringBlend": "5a5da6c3fc4e8a49d87dfabd0cae7062e21447d5e2f00666c0af28dbfa316da8",
+        "exportBlend": "5d6c7bb9cd5bee0fcf90d8ecdcca43df4b4447e4b77094fad4692b36c1f5c9d2",
+        "validation": "3228c37bd00db7c4e59824c0775a6abe5a81496afe0448b8bc7eddeeacb979d8",
+        "thumb": "71600d62ee042b3af604d394c6ed1054726df92e78370667fd809f72cf690707",
+        "top": "d219aafba7c3720b2bfe424e3a88916e4eeca10e038c503dc152c45637e10e1b",
+        "front": "6212231cb931a7478c5e990baf4dd90f61602b52b46e101cbf61d075c110d8ff",
+        "rear": "2120d3d7ac93d257605f4e54b63fba0e8dfe8ac99b609c3cf0cdd2ce4cb83536"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-music-01",
+      "name": "演奏用ミュージックチェア",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-music-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-music-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-music-01-top.png",
+      "w": 430,
+      "d": 442,
+      "h": 775,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-music-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-music-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-music-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-music-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-music-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-music-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "slender low back; flat seat; cross-braced frame",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1588,
+      "glbBytes": 107768,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "music",
+        "id": "rpg-mansion-music-01",
+        "name": "演奏用ミュージックチェア",
+        "w": 430,
+        "d": 442,
+        "h": 775,
+        "seatTopMm": 460,
+        "geometrySignature": "slender low back; flat seat; cross-braced frame",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair29"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 430,
+            "d": 442,
+            "h": 775,
+            "standard_ids": [
+              "fmp-Chair29"
+            ]
+          },
+          {
+            "w": 438,
+            "d": 438,
+            "h": 669,
+            "standard_ids": [
+              "fmp-Chair23"
+            ]
+          },
+          {
+            "w": 406,
+            "d": 451,
+            "h": 669,
+            "standard_ids": [
+              "fmp-Chair36"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "d953655d442d43115e4d80c5353696c870900fbe7623ecfd27a200a76380af19",
+        "sourceBlend": "43d4058a58606e09ade691d0222f7b91cf505fed7609ec3fdc66b6701b77a2a3",
+        "authoringBlend": "1766d386952eb23beb37c057d7f5e5397d0111f069903c84746681beee6b994f",
+        "exportBlend": "43d4058a58606e09ade691d0222f7b91cf505fed7609ec3fdc66b6701b77a2a3",
+        "validation": "69618c4fec56f9f54b21bc6ae31fa47ee37211087482654c4dfa939ba8e3595a",
+        "thumb": "159f6327dad3769d18cfccd6e6750ade35c2e644d0e4fafc5dea6e7139812cb9",
+        "top": "aa01e100345fb4d9efd6fa3418d976f1df2449d1589c2d1708b57f89e5fc56a9",
+        "front": "f59b910d871559518a87db8f1c5a67b3f1abef9f8572aa9e3c54b40d6c9038d7",
+        "rear": "714e491f120d514f31b8e63d5bb88da8ca7f07827a556e5f74834b11bcc47e5a"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-cane-stool-01",
+      "name": "籐座四脚スツール",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-cane-stool-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-cane-stool-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-cane-stool-01-top.png",
+      "w": 438,
+      "d": 438,
+      "h": 460,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-cane-stool-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-cane-stool-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-cane-stool-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-cane-stool-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-cane-stool-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-cane-stool-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "woven seat; four turned legs; H stretcher",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "cane",
+        "wood"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1628,
+      "glbBytes": 108808,
+      "finishChannels": [
+        {
+          "key": "cane",
+          "label": "籐編み",
+          "default": "#aa8b55"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "cane-stool",
+        "id": "rpg-mansion-cane-stool-01",
+        "name": "籐座四脚スツール",
+        "w": 438,
+        "d": 438,
+        "h": 460,
+        "seatTopMm": 460,
+        "geometrySignature": "woven seat; four turned legs; H stretcher",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair23"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 438,
+            "d": 438,
+            "h": 669,
+            "standard_ids": [
+              "fmp-Chair23"
+            ]
+          },
+          {
+            "w": 430,
+            "d": 442,
+            "h": 775,
+            "standard_ids": [
+              "fmp-Chair29"
+            ]
+          },
+          {
+            "w": 451,
+            "d": 429,
+            "h": 692,
+            "standard_ids": [
+              "fmp-Chair08"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "09225ed9feb715ee363bf4d4852f782591336d48d5937b4fb6a57dd23ed1709e",
+        "sourceBlend": "2e8ff75214266d2b92e36719b71f13d5b73bf337ea32ce46d80a6bb955502ac4",
+        "authoringBlend": "facb5dbbfd9f5ab58dc6da7dd952e1a2f438fce007c9737e174a3351fec6343d",
+        "exportBlend": "2e8ff75214266d2b92e36719b71f13d5b73bf337ea32ce46d80a6bb955502ac4",
+        "validation": "f75fb89d7560aacb23a424aa75561ca14c348a4ad3b217d1e865cb69801e8328",
+        "thumb": "334657043b31ea50a4c03799daa1fecedfe31e80bccdffd0b15a24a6df9a543f",
+        "top": "9f2b404104e426a37ce3de1dcb7f8710327b2cf0d36458c544956c8690c93112",
+        "front": "c8cf3d5bf90ac95cdec3b218802ca7ec30d2a28ed1273a34895192b97690ac60",
+        "rear": "f98fedf3df515972a1a080607d88a14e7716ef3ba801cfc0836d0cf5f13d8057"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-x-stool-01",
+      "name": "X脚レザースツール",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-x-stool-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-x-stool-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-x-stool-01-top.png",
+      "w": 537,
+      "d": 432,
+      "h": 460,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-stool-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-stool-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-stool-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-stool-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-stool-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-x-stool-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "crossed side frames; fixed pins; leather top",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "leather"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 744,
+      "glbBytes": 53016,
+      "finishChannels": [
+        {
+          "key": "leather",
+          "label": "革",
+          "default": "#694432"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "x-stool",
+        "id": "rpg-mansion-x-stool-01",
+        "name": "X脚レザースツール",
+        "w": 537,
+        "d": 432,
+        "h": 460,
+        "seatTopMm": 460,
+        "geometrySignature": "crossed side frames; fixed pins; leather top",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "im0261-Chair-MEGA_PACK_Chair-chair-490755_frame_black"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 537,
+            "d": 432,
+            "h": 616,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-490755_frame_black"
+            ]
+          },
+          {
+            "w": 520,
+            "d": 430,
+            "h": 730,
+            "standard_ids": [
+              "im0261-Chair-MEGA_PACK_Chair-chair-230409_frame_walnut"
+            ]
+          },
+          {
+            "w": 597,
+            "d": 448,
+            "h": 755,
+            "standard_ids": [
+              "fmp-Chair06"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "5d16dae5f7eebd7db05ef44c9029579c959b4acf861b593ff41c2a34f24531e9",
+        "sourceBlend": "9d1b05a7d9bb6d9ccb51ed9e4a121bff77ec527018784eb0a10da662041a2c84",
+        "authoringBlend": "3d694c774c8702ee0348d6eae8ef20b8f3f1ca4ec55fc479fa2d929113094297",
+        "exportBlend": "9d1b05a7d9bb6d9ccb51ed9e4a121bff77ec527018784eb0a10da662041a2c84",
+        "validation": "1c98d7fdb461ef12093a88d9ae3cda20149a860a866bb696fede73ca6b6d0b11",
+        "thumb": "a02c71557bd4629feb01da815e54367edc4bab5e0c3e2b975fba90cd7165e2e1",
+        "top": "2e9dcdae901584145c443e06ebb7182e1583e6a784e15a3ecf32de88de0c065e",
+        "front": "d995fa26923bb8d88b2b6aa0cae07e54c4b573341d7140fcfd13fe33186958a1",
+        "rear": "9ff9b9cdfd15cb5bf18b8e641fb45f60f925072756ca04896db714ab35802e95"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-saddle-stool-01",
+      "name": "サドル座三脚スツール",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-saddle-stool-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-saddle-stool-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-saddle-stool-01-top.png",
+      "w": 451,
+      "d": 429,
+      "h": 460,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-saddle-stool-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-saddle-stool-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-saddle-stool-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-saddle-stool-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-saddle-stool-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-saddle-stool-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "concave saddle seat; tripod legs; triangular stretchers",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "wood"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 636,
+      "glbBytes": 45692,
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "saddle-stool",
+        "id": "rpg-mansion-saddle-stool-01",
+        "name": "サドル座三脚スツール",
+        "w": 451,
+        "d": 429,
+        "h": 460,
+        "seatTopMm": 460,
+        "geometrySignature": "concave saddle seat; tripod legs; triangular stretchers",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair08"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 451,
+            "d": 429,
+            "h": 692,
+            "standard_ids": [
+              "fmp-Chair08"
+            ]
+          },
+          {
+            "w": 438,
+            "d": 438,
+            "h": 669,
+            "standard_ids": [
+              "fmp-Chair23"
+            ]
+          },
+          {
+            "w": 430,
+            "d": 442,
+            "h": 775,
+            "standard_ids": [
+              "fmp-Chair29"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "cf2297d453dca9edf6642334881f30d14609731e60ce1555f749dea3d1886a10",
+        "sourceBlend": "97521e5ec8d19e70c10b40ee51190d58a1021c9001f260e8c3d51f6364ca24ce",
+        "authoringBlend": "c570927c8233c2c1cdfdaddb9c1ab065e43680af262038c5cee75387b93e625e",
+        "exportBlend": "97521e5ec8d19e70c10b40ee51190d58a1021c9001f260e8c3d51f6364ca24ce",
+        "validation": "c4db6f0c163bfe3c904cc77644c4226be54d5b5c325d94902e71aa412b26c1c1",
+        "thumb": "05acc3daf2b85e78a09b769aec8617e00a6d74ed5cd2a42aeed715459c11f731",
+        "top": "24a8ea7d15e4d0180d31f4cd291815a8c0c3b3cee7ef28841defadd51c2e4bab",
+        "front": "15702bb12ee55c85e01e847388c2f8f3c11b1d5cc079fde20f2071973ef248f0",
+        "rear": "bac78bcb9e6ec4585fa857f335a6b3d516c5138259897dea01155da4426b344a"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-piano-stool-01",
+      "name": "ピアノ用ペデスタルスツール",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-piano-stool-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-piano-stool-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-piano-stool-01-top.png",
+      "w": 520,
+      "d": 520,
+      "h": 460,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-piano-stool-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-piano-stool-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-piano-stool-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-piano-stool-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-piano-stool-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-piano-stool-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "round cushion; fixed spindle column; four splayed feet",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1136,
+      "glbBytes": 78700,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "piano-stool",
+        "id": "rpg-mansion-piano-stool-01",
+        "name": "ピアノ用ペデスタルスツール",
+        "w": 520,
+        "d": 520,
+        "h": 460,
+        "seatTopMm": 460,
+        "geometrySignature": "round cushion; fixed spindle column; four splayed feet",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 494,
+            "d": 518,
+            "h": 794,
+            "standard_ids": [
+              "fmp-Chair10"
+            ]
+          },
+          {
+            "w": 563,
+            "d": 504,
+            "h": 816,
+            "standard_ids": [
+              "fmp-Chair26"
+            ]
+          },
+          {
+            "w": 487,
+            "d": 548,
+            "h": 826,
+            "standard_ids": [
+              "fmp-Chair30"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "99d37458a206c25ccae45d7eb0b53e96cb28ecbd2f52d5abaa26b87cfc5e87f7",
+        "sourceBlend": "912b1f5bb2c8f8687fdc23c978c95531aaa749681448b09c25e13008fc8668f2",
+        "authoringBlend": "11b340259b3cbd74944c0016c1db2d92d4e10fb2fb551e8dd3b71383568a7e14",
+        "exportBlend": "912b1f5bb2c8f8687fdc23c978c95531aaa749681448b09c25e13008fc8668f2",
+        "validation": "d90199b9a6e808d979ac89a1f490daabee5ebf2dd3253717e47a059959253696",
+        "thumb": "a2feed818139c51a0f6a27fab322573f9d5f885254d1b986b77f8783c755a25c",
+        "top": "82414df139c090055ee3455f582e606512003cfc9157e455cd511c6e552f4b2a",
+        "front": "babd1cf4525446bee50b7e295abdcf4c057a7fe46b589739e5602f926e0c7f3d",
+        "rear": "3a1faba149b7630da9c60a48d2743275a90405bd26c11aad2d5493ff88629c09"
+      },
+      "capacity": 1
+    },
+    {
+      "id": "rpg-mansion-boot-bench-01",
+      "name": "ブーツ収納ホールベンチ",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-boot-bench-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-boot-bench-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-boot-bench-01-top.png",
+      "w": 1355,
+      "d": 495,
+      "h": 460,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-boot-bench-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-boot-bench-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-boot-bench-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-boot-bench-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-boot-bench-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-boot-bench-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "two-seat cushion; lower slatted shoe rack; six legs",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 2336,
+      "glbBytes": 157204,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "boot-bench",
+        "id": "rpg-mansion-boot-bench-01",
+        "name": "ブーツ収納ホールベンチ",
+        "w": 1355,
+        "d": 495,
+        "h": 460,
+        "seatTopMm": 460,
+        "geometrySignature": "two-seat cushion; lower slatted shoe rack; six legs",
+        "status": "planned-after-review",
+        "capacity": 2,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair40"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 1355,
+            "d": 495,
+            "h": 745,
+            "standard_ids": [
+              "fmp-Chair40"
+            ]
+          },
+          {
+            "w": 1355,
+            "d": 541,
+            "h": 814,
+            "standard_ids": [
+              "fmp-Chair39"
+            ]
+          },
+          {
+            "w": 809,
+            "d": 567,
+            "h": 813,
+            "standard_ids": [
+              "fmp-Chair20"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "aa6131c8e0229371eb69927c533871e3a8c1ce390216f5842fb4475114120de1",
+        "sourceBlend": "0256c932b91f668b85a256dcfed7f3f7be9534d7a7bbe0c926bd767f340b8a18",
+        "authoringBlend": "dfa1ee968c3854be08e444a2c6ce3e866b0924d76396a40103ca4c2b3cdec58c",
+        "exportBlend": "0256c932b91f668b85a256dcfed7f3f7be9534d7a7bbe0c926bd767f340b8a18",
+        "validation": "3eaba2d6a3f00336c763d01e16714aee5d8f08526e988aa6346aff8a51894675",
+        "thumb": "ccc32aab688236f7e5999bae5dacdf214c1816dce3ff9315ed50942ad3125790",
+        "top": "9d7b7fca9b8489ee1ad1287b8c87eaf0dd7ca228d41e0944dbb8b1721bc2ed9c",
+        "front": "96cff6da9347a22a1c1ab2214a6310409d918e10e0f997c5a5391aa390884e05",
+        "rear": "606e33785ca559a45acffa5de9a8cdc23f26b4ea034e1dd50c2bd19de24706ba"
+      },
+      "capacity": 2
+    },
+    {
+      "id": "rpg-mansion-hall-settle-01",
+      "name": "パネル背ホールセトル",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-hall-settle-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hall-settle-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hall-settle-01-top.png",
+      "w": 1355,
+      "d": 541,
+      "h": 1080,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-hall-settle-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-hall-settle-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-hall-settle-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-hall-settle-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-hall-settle-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-hall-settle-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "two-seat settle; paneled high back; enclosed side arms",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 3532,
+      "glbBytes": 233652,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "hall-settle",
+        "id": "rpg-mansion-hall-settle-01",
+        "name": "パネル背ホールセトル",
+        "w": 1355,
+        "d": 541,
+        "h": 1080,
+        "seatTopMm": 460,
+        "geometrySignature": "two-seat settle; paneled high back; enclosed side arms",
+        "status": "planned-after-review",
+        "capacity": 2,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair39"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 1355,
+            "d": 541,
+            "h": 814,
+            "standard_ids": [
+              "fmp-Chair39"
+            ]
+          },
+          {
+            "w": 1355,
+            "d": 495,
+            "h": 745,
+            "standard_ids": [
+              "fmp-Chair40"
+            ]
+          },
+          {
+            "w": 809,
+            "d": 567,
+            "h": 813,
+            "standard_ids": [
+              "fmp-Chair20"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "125b6239e601903cb4d22b6bbe4b16ed79a7943a7a960ba7286d70be2dbaf46a",
+        "sourceBlend": "7ecba65417b4398f3226d64c705e513b802aeccc0bd14539e52e47afb3e7dadc",
+        "authoringBlend": "73aeb55b26248499f4977d1191b69fba1de1e929fc82bcd60c75302c1f0a0e5c",
+        "exportBlend": "7ecba65417b4398f3226d64c705e513b802aeccc0bd14539e52e47afb3e7dadc",
+        "validation": "7a0c2e6bdf48e6fd2d09c71325c324d9cdf11bde316e4d0c02b1adb79f94a9ad",
+        "thumb": "3ff5d0e922717993c47e121ccd95458a90863d6e8fc6b31348961ba71580c8c7",
+        "top": "4980a658be91331acee0cf26ff67cec03bfaeae593f2220b17d89aaefe54ab35",
+        "front": "b59099eee31cf9198934e2610f6c8ac8b40c58d82497db5d1420dd3368a8581c",
+        "rear": "ba78fc1afa90850504602fc0fe67b7548afba2e3d7952ce3731d52c57958a5ea"
+      },
+      "capacity": 2
+    },
+    {
+      "id": "rpg-mansion-telephone-bench-01",
+      "name": "電話台一体ホールベンチ",
+      "group": "家具",
+      "category": "椅子",
+      "kind": "chair",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-telephone-bench-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-telephone-bench-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-telephone-bench-01-top.png",
+      "w": 809,
+      "d": 567,
+      "h": 813,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "previewVersion": 1,
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-telephone-bench-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-telephone-bench-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-telephone-bench-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-telephone-bench-01-validation.json",
+      "front": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-telephone-bench-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_chairs/work/rpg-mansion-telephone-bench-01-rear.png",
+      "builder": "tools/blender/rpg_mansion/scaled_chairs/build.py",
+      "geometrySignature": "one seat beside raised telephone shelf; asymmetric load frame",
+      "seatTopMm": 460.00000834465027,
+      "seatFinishChannels": [
+        "fabric"
+      ],
+      "triangleBudget": 4000,
+      "measuredTriangles": 1888,
+      "glbBytes": 128048,
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#294d4b"
+        },
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#b69b5d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#563b2d"
+        }
+      ],
+      "placementNotes": "Static original period-adapted manual alternative. Seat top 460 mm. No interactive rocking, folding or adjustment mechanism. Declared legacy footprint references are metadata-only and do not establish geometry, role or clearance equivalence.",
+      "coverageTarget": {
+        "key": "telephone-bench",
+        "id": "rpg-mansion-telephone-bench-01",
+        "name": "電話台一体ホールベンチ",
+        "w": 809,
+        "d": 567,
+        "h": 813,
+        "seatTopMm": 460,
+        "geometrySignature": "one seat beside raised telephone shelf; asymmetric load frame",
+        "status": "planned-after-review",
+        "capacity": 1,
+        "targetContract": "period-adapted-manual-alternative",
+        "exactFootprintMetadataMatches": [
+          "fmp-Chair20"
+        ],
+        "nearestChairDeclaredReferences": [
+          {
+            "w": 809,
+            "d": 567,
+            "h": 813,
+            "standard_ids": [
+              "fmp-Chair20"
+            ]
+          },
+          {
+            "w": 839,
+            "d": 621,
+            "h": 561,
+            "standard_ids": [
+              "fmp-Chair16"
+            ]
+          },
+          {
+            "w": 795,
+            "d": 697,
+            "h": 816,
+            "standard_ids": [
+              "fmp-Chair15"
+            ]
+          }
+        ],
+        "legacyGeometryAvailable": false,
+        "geometrySemanticEquivalenceVerified": false,
+        "mechanism": "static geometry only"
+      },
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender mesh authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "hashes": {
+        "model": "be31f2a91a669ebe7bcaeb77554e2ea169113287aebcc57d0bc7c3e0145a485d",
+        "sourceBlend": "6201b4b9e29bbafc6c4dbe553274df1700636ffd0619c432531f59d9c7f5283d",
+        "authoringBlend": "fb2e34c2a3434ed3ce572406ebbf463ff981202351152e98b34a1f9d8da384b3",
+        "exportBlend": "6201b4b9e29bbafc6c4dbe553274df1700636ffd0619c432531f59d9c7f5283d",
+        "validation": "0dd6fdba640ff0fb28f85e182ccb9ccd3cfba1c2f991b1034ffd27b8f747344b",
+        "thumb": "3bc03d63485048a5f80766f6e762f498059e2de47be24d24f619c44f3ded0877",
+        "top": "ece508ffd6c9fa4e2b37a9ec28c5ac74e7cd70665176517c1cb9d4a415d93189",
+        "front": "4656ae58dc02b1803e0960d48c3a13f83100054b20cce82710419ca9ad294985",
+        "rear": "65fa391a7a7d1ffd4aa2e0d9e1b27ab07ae756e4059fe32ed7e115bb0293f865"
+      },
+      "capacity": 1
+    }
+  ]
+}

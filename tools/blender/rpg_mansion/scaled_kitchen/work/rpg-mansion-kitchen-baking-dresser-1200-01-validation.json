@@ -1,0 +1,149 @@
+{
+  "model": "rpg-mansion-kitchen-baking-dresser-1200-01",
+  "dimensions_mm": [
+    1200.0000476837158,
+    649.9999761581421,
+    1899.999976158142
+  ],
+  "bounds_m": [
+    [
+      -0.6000000238418579,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.6000000238418579,
+      0.32499998807907104,
+      1.899999976158142
+    ]
+  ],
+  "triangles": 2872,
+  "uv": {
+    "meters_per_uv": 6.395450399423211,
+    "min": 5.727074718248021,
+    "max": 8.215409893290072,
+    "p05": 5.9395556307970585,
+    "p95": 7.869502662148529,
+    "total_triangles": 2872,
+    "valid_triangles": 2872,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone",
+    "Ivory glazed ceramic": "ceramic"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 122528,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "7cf2702951b6b232173580abcaac4d5f24248aa42c0ea13897f7fee68674fda5",
+  "source_sha256": "ead60a112db122a3a5f1799e6947b3a16ac3bc7a755af365b702a1c57922bd28",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.003",
+      "Curved brass drawer pull.004",
+      "Curved brass drawer pull.005"
+    ],
+    "corrected_polygons": 78,
+    "geometry_normals_material_signature": "3b3fd434d3ba8355e12cc03e2df8f1739464363e09a6ab39fc51ffa910b3c10e",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 6.395450399423211,
+      "min": 5.727074718248021,
+      "max": 8.215409893290072,
+      "p05": 5.9395556307970585,
+      "p95": 7.869502662148529,
+      "total_triangles": 2872,
+      "valid_triangles": 2872,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 183638,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    1200.0000476837158,
+    649.9999761581421,
+    1899.999976158142
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.6000000238418579,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.6000000238418579,
+      1.899999976158142,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 2872,
+    "valid_triangles": 2872,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 5.9395557393263925,
+    "p95": 7.869580106522247,
+    "p95_p05": 1.3249442301579848,
+    "median": 6.39545041750377
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "ceramic",
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-baking-dresser-1200-01.glb",
+      "sha256": "7cf2702951b6b232173580abcaac4d5f24248aa42c0ea13897f7fee68674fda5",
+      "bytes": 122528
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-baking-dresser-1200-01.blend",
+      "sha256": "ead60a112db122a3a5f1799e6947b3a16ac3bc7a755af365b702a1c57922bd28",
+      "bytes": 183638
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-baking-dresser-1200-01-thumb.png",
+      "sha256": "19fb51e398d3845079b44d173490a74967ee00938ce8e51ff699d540d47f77d7",
+      "bytes": 236555
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-baking-dresser-1200-01-top.png",
+      "sha256": "acd2e6da63088f15c9f53b765d99f850c68269525eae4f2c59e12bec5bcf25d1",
+      "bytes": 213773
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-front.png",
+      "sha256": "ef3574403694f3b3834fd643402ed1105363a70b49446b4a92d8c9a7a8af7ad1",
+      "bytes": 638442
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-rear.png",
+      "sha256": "eb63ec406eb99b147c9b3ad20f93dd1ab4487aaec53e96d17753eec120b57673",
+      "bytes": 558058
+    }
+  }
+}

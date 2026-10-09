@@ -1,0 +1,967 @@
+{
+  "method": "Find positive-area co-oriented coplanar surface overlap from decoded GLB triangles.\n\nCoincident coplanar outward faces can z-fight even with valid winding/normals.\nTriangle pairs merely sharing edges are allowed. Bottom-plane overlaps are listed\nseparately; visibility is a normal-direction ray observation, not complete CSG.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-copper-bateau-cradle-bath-01",
+      "model_sha256": "7ec1383a76a98330baa975e3345162bc5e1640027cc062c51dc5124741314ad1",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-paneled-built-in-bath-01",
+      "model_sha256": "e9afc159b2fd2b45769613c3a3f154288a2716a4decf31a4e4cb260666a2460d",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-quadrant-corner-bath-01",
+      "model_sha256": "b8fe2301cf84bb5c0c0548b3cec70a2214ebfe095997b9ed0bd491889327fede",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-deep-seated-hip-bath-01",
+      "model_sha256": "c3f756ccd10567cca7ebb7bded521b5dd58e2ea614d936e7742dc23f8e0e3cc9",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-double-basin-open-console-01",
+      "model_sha256": "eeaea0882826f8c365c3a0f92ab386534e04e461f7a8a3a69463aba9c1655e28",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-portable-bowl-jug-washstand-01",
+      "model_sha256": "4ad7d6a0cbe919910504df26233b0515fcc38ef789f1b187546f6492b7141f30",
+      "coplanar_overlap_pairs": 20,
+      "total_pairwise_area_m2": 0.0007800007176399573,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": [
+        {
+          "triangles": [
+            644,
+            600
+          ],
+          "overlap_area_m2": 9.266754385902146e-05,
+          "intersection_center_m": [
+            -0.264393228866498,
+            0.7245000004768372,
+            -0.200853653561406
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            644,
+            601
+          ],
+          "overlap_area_m2": 1.0220997909773932e-06,
+          "intersection_center_m": [
+            -0.26338637194768344,
+            0.7245000004768372,
+            -0.19437828701248785
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            645,
+            556
+          ],
+          "overlap_area_m2": 9.749999284736077e-05,
+          "intersection_center_m": [
+            -0.2642500102519989,
+            0.7245000004768372,
+            0.16322025656700134
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            645,
+            600
+          ],
+          "overlap_area_m2": 3.6319923767853812e-06,
+          "intersection_center_m": [
+            -0.2606909719809431,
+            0.7245000004768372,
+            -0.19881833151664316
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            645,
+            601
+          ],
+          "overlap_area_m2": 1.7835682058348068e-07,
+          "intersection_center_m": [
+            -0.2607897842059713,
+            0.7245000004768372,
+            -0.19443367835645362
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            688,
+            556
+          ],
+          "overlap_area_m2": 1.7835693462073254e-07,
+          "intersection_center_m": [
+            0.21678975463962302,
+            0.7245000004768372,
+            0.1568741989810728
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            688,
+            557
+          ],
+          "overlap_area_m2": 3.6319922627411905e-06,
+          "intersection_center_m": [
+            0.21669094241377995,
+            0.7245000004768372,
+            0.16125885217447586
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            688,
+            601
+          ],
+          "overlap_area_m2": 9.750018656262682e-05,
+          "intersection_center_m": [
+            0.2202499881386757,
+            0.7245000004768372,
+            -0.2007797360420227
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            689,
+            556
+          ],
+          "overlap_area_m2": 1.0221027434871577e-06,
+          "intersection_center_m": [
+            0.2193863473475741,
+            0.7245000004768372,
+            0.15681880760974662
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            689,
+            557
+          ],
+          "overlap_area_m2": 9.266773462177427e-05,
+          "intersection_center_m": [
+            0.22039320675073032,
+            0.7245000004768372,
+            0.16329417414059472
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            682,
+            594
+          ],
+          "overlap_area_m2": 1.7835657025941365e-07,
+          "intersection_center_m": [
+            -0.26078978421071075,
+            0.6395000219345093,
+            0.15687419866275362
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            682,
+            595
+          ],
+          "overlap_area_m2": 3.631992627105979e-06,
+          "intersection_center_m": [
+            -0.26069097198726227,
+            0.6395000219345093,
+            0.16125885175005028
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            682,
+            639
+          ],
+          "overlap_area_m2": 9.749999284736077e-05,
+          "intersection_center_m": [
+            -0.2642500102519989,
+            0.6395000219345093,
+            -0.2007797360420227
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            683,
+            594
+          ],
+          "overlap_area_m2": 1.022098337664229e-06,
+          "intersection_center_m": [
+            -0.2633863719540026,
+            0.6395000219345093,
+            0.15681880739732942
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            683,
+            595
+          ],
+          "overlap_area_m2": 9.266754531233115e-05,
+          "intersection_center_m": [
+            -0.2643932288712374,
+            0.6395000219345093,
+            0.16329417398128182
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            726,
+            638
+          ],
+          "overlap_area_m2": 9.266773316845417e-05,
+          "intersection_center_m": [
+            0.22039320674599094,
+            0.6395000219345093,
+            -0.20085365372071912
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            726,
+            639
+          ],
+          "overlap_area_m2": 1.0221041968107303e-06,
+          "intersection_center_m": [
+            0.2193863473412547,
+            0.6395000219345093,
+            -0.19437828722490536
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            727,
+            594
+          ],
+          "overlap_area_m2": 9.750018656262682e-05,
+          "intersection_center_m": [
+            0.2202499881386757,
+            0.6395000219345093,
+            0.16322025656700134
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            727,
+            638
+          ],
+          "overlap_area_m2": 3.631992012420593e-06,
+          "intersection_center_m": [
+            0.21669094240746078,
+            0.6395000219345093,
+            -0.19881833194106932
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            727,
+            639
+          ],
+          "overlap_area_m2": 1.7835718494479957e-07,
+          "intersection_center_m": [
+            0.21678975463488365,
+            0.6395000219345093,
+            -0.19443367867477324
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-two-wall-corner-basin-01",
+      "model_sha256": "5eaf77db03fb593243c5e809a97db9e8ce68991b99283df75af62f4c450d92ee",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-freestanding-bath-bridge-filler-01",
+      "model_sha256": "c52a2e3d60abe5c654835b6f170594f42e5cf8abc3a972efa07881cde19120ef",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-rail-hand-shower-hose-01",
+      "model_sha256": "3f107ca6fb6b37a7daee5569a1ba2cf8be646df7d37a9196cdcb23e821856ccd",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-overhead-brass-standpipe-01",
+      "model_sha256": "a045a1fcd34a2e053edaa309d8fe750a8d7a571097cf868a4b02ab247945563c",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-tankless-flushometer-wc-01",
+      "model_sha256": "66b4bde5035958b98b1d4feabe9da263a705bafc081d0348b7230468fe28233e",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-single-basin-mirrored-cabinet-01",
+      "model_sha256": "d10e9fb91489926fa4b397703adeddf269bcfb42aff7d3e1aeedacca9c6cf147",
+      "coplanar_overlap_pairs": 16,
+      "total_pairwise_area_m2": 0.004762985062132685,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": [
+        {
+          "triangles": [
+            504,
+            416
+          ],
+          "overlap_area_m2": 0.00020495117725131268,
+          "intersection_center_m": [
+            -0.341259511690441,
+            0.8100000023841858,
+            -0.26422846371706527
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            504,
+            417
+          ],
+          "overlap_area_m2": 9.180654767626528e-06,
+          "intersection_center_m": [
+            -0.3353460164614561,
+            0.8100000023841858,
+            -0.2613559119541422
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            504,
+            460
+          ],
+          "overlap_area_m2": 1.866718942047929e-06,
+          "intersection_center_m": [
+            0.33899924048698793,
+            0.8100000023841858,
+            -0.27305363164986357
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            505,
+            416
+          ],
+          "overlap_area_m2": 1.5559653419525143e-06,
+          "intersection_center_m": [
+            -0.3396975757989978,
+            0.8100000023841858,
+            -0.25525218320921
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            505,
+            417
+          ],
+          "overlap_area_m2": 3.1146878701204805e-07,
+          "intersection_center_m": [
+            -0.3355231853063177,
+            0.8100000023841858,
+            -0.2553062999724578
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            505,
+            460
+          ],
+          "overlap_area_m2": 0.00021413254720585584,
+          "intersection_center_m": [
+            0.3421995454366019,
+            0.8100000023841858,
+            -0.26589514342931025
+          ],
+          "outward_normal": [
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1036,
+            949
+          ],
+          "overlap_area_m2": 0.0010979955096281913,
+          "intersection_center_m": [
+            -0.32874999940395355,
+            1.0595000386238098,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1036,
+            992
+          ],
+          "overlap_area_m2": 3.494250447932945e-06,
+          "intersection_center_m": [
+            0.31440249357479255,
+            1.0765312541343064,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1036,
+            993
+          ],
+          "overlap_area_m2": 2.692807228293903e-05,
+          "intersection_center_m": [
+            0.3248699741079733,
+            1.0768733131810897,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1037,
+            992
+          ],
+          "overlap_area_m2": 2.986589445158616e-05,
+          "intersection_center_m": [
+            0.31408553684612867,
+            1.0642083789000631,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1037,
+            993
+          ],
+          "overlap_area_m2": 0.0010377072924457331,
+          "intersection_center_m": [
+            0.32918913934276073,
+            1.059030034238463,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1080,
+            948
+          ],
+          "overlap_area_m2": 0.0010089401463188596,
+          "intersection_center_m": [
+            -0.3291762262917896,
+            1.6654708704458823,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1080,
+            949
+          ],
+          "overlap_area_m2": 2.813528624057149e-05,
+          "intersection_center_m": [
+            -0.3140683194448339,
+            1.6604594619053623,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1081,
+            948
+          ],
+          "overlap_area_m2": 2.7024939303121887e-05,
+          "intersection_center_m": [
+            -0.32483559728118533,
+            1.6481278367979195,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1081,
+            949
+          ],
+          "overlap_area_m2": 3.397383427694578e-06,
+          "intersection_center_m": [
+            -0.31437671095470154,
+            1.6484696143104152,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        },
+        {
+          "triangles": [
+            1081,
+            992
+          ],
+          "overlap_area_m2": 0.0010674977552902476,
+          "intersection_center_m": [
+            0.32874999940395355,
+            1.6650000214576721,
+            -0.27415740489959717
+          ],
+          "outward_normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Dark walnut WC seat",
+            "Dark walnut WC seat"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-framed-glass-shower-enclosure-01",
+      "model_sha256": "cda61136b551421b0648cc8b262b9522929c63b7031d929e244671d6615c6be0",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    }
+  ],
+  "errors": 0,
+  "bottom_floor_contacts_excluded_from_visibility_gate": true
+}

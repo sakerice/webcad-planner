@@ -1,0 +1,127 @@
+{
+  "method": "Actual normalized geometry fingerprints against the three baseline fixtures.",
+  "comparisonIsExactReplacementClaim": false,
+  "items": [
+    {
+      "id": "rpg-mansion-bracketed-wall-basin-01",
+      "baselineId": "rpg-mansion-washstand-01",
+      "actualPrototype": {
+        "sha256": "7a5afa913fa6966a342fda77661aeee4604e22f9fe3bf28d2e116b3ca5faad89",
+        "triangles": 1896,
+        "measuredGltfBoundsM": [
+          [
+            -0.3400000035762787,
+            0.0,
+            -0.2724999785423279
+          ],
+          [
+            0.3400000035762787,
+            0.5634910464286804,
+            0.2724999785423279
+          ]
+        ],
+        "unitEnvelopeGeometrySignature": "134f60868525e1d2aa080f98d83780615b14c7fbd128992c59a0741d18091fac"
+      },
+      "actualBaseline": {
+        "sha256": "f05be3bffc31f7e5d16d5479dacdd904e74f17624c4c51da4635af3fe7ba4996",
+        "triangles": 1496,
+        "measuredGltfBoundsM": [
+          [
+            -0.3400000035762787,
+            0.0,
+            -0.2849999964237213
+          ],
+          [
+            0.3400000035762787,
+            1.1399999856948853,
+            0.2849999964237213
+          ]
+        ],
+        "unitEnvelopeGeometrySignature": "0d67ab0ca24ea60561924dc3a58bc5710f2300c2dc3bfccbfecacd0624f43990"
+      },
+      "unitEnvelopeGeometryDifferent": true,
+      "constructionDifference": "A floor-free wall basin on two real triangular brackets, exposed trap and mixer mounted in broad solid back deck."
+    },
+    {
+      "id": "rpg-mansion-high-cistern-chain-wc-01",
+      "baselineId": "rpg-mansion-toilet-01",
+      "actualPrototype": {
+        "sha256": "ce1989ca36269f141f4cbf4d48f8be0332e4cfd7ca237460c8fb1ef14fdf8f84",
+        "triangles": 5336,
+        "measuredGltfBoundsM": [
+          [
+            -0.35199999809265137,
+            0.0,
+            -0.3999999761581421
+          ],
+          [
+            0.35199999809265137,
+            2.130000114440918,
+            0.3999999761581421
+          ]
+        ],
+        "unitEnvelopeGeometrySignature": "42b4532b47bda297ba236d8894b027715363a104fd62298f211a148d69aff90b"
+      },
+      "actualBaseline": {
+        "sha256": "9d444b79bd0b67248ba88f9e762e41356478dffd42b2f03d770a51bb003297bb",
+        "triangles": 996,
+        "measuredGltfBoundsM": [
+          [
+            -0.23000000417232513,
+            0.0,
+            -0.3449999988079071
+          ],
+          [
+            0.23000000417232513,
+            0.8899999856948853,
+            0.3449999988079071
+          ]
+        ],
+        "unitEnvelopeGeometrySignature": "b2f9047a79df04f28f0156d7a348f0cd93158289748c9280f5f26da82dbd180d"
+      },
+      "unitEnvelopeGeometryDifferent": true,
+      "constructionDifference": "Floor-supported hollow WC with open walnut seat and raised lid; separately bracketed high tank, external flush pipe and visible interlinked pull chain."
+    },
+    {
+      "id": "rpg-mansion-high-backed-slipper-bath-01",
+      "baselineId": "rpg-mansion-bathtub-01",
+      "actualPrototype": {
+        "sha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014",
+        "triangles": 1748,
+        "measuredGltfBoundsM": [
+          [
+            -0.8899999856948853,
+            0.0,
+            -0.4099999964237213
+          ],
+          [
+            0.8899999856948853,
+            0.8619999885559082,
+            0.4099999964237213
+          ]
+        ],
+        "unitEnvelopeGeometrySignature": "083f8228761281e78d049f02774fe6926044d9fb1bf79a716bf6a0740c2e3a0e"
+      },
+      "actualBaseline": {
+        "sha256": "fafe0bfe0c7ce4a9cfdc14a75b556879bce2f39738472bd80a5b9646fb655876",
+        "triangles": 1772,
+        "measuredGltfBoundsM": [
+          [
+            -0.8600000143051147,
+            0.0,
+            -0.4000000059604645
+          ],
+          [
+            0.8600000143051147,
+            1.090000033378601,
+            0.4000000059604645
+          ]
+        ],
+        "unitEnvelopeGeometrySignature": "86a1122dd916f8b6e59e22f23562f95922a3dbc5e69683ba23fce7d4842cccad"
+      },
+      "unitEnvelopeGeometryDifferent": true,
+      "constructionDifference": "Asymmetric high-backed freestanding single bath with continuous hollow shell, actual low/high rim and cast feet; supply fixture omitted."
+    }
+  ],
+  "errors": 0
+}

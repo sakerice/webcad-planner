@@ -1,0 +1,94 @@
+{
+  "method": "Bind current GLBs to native reexports without numeric rounding or tolerance.",
+  "comparison": "Decoded numeric equality, no rounding or tolerance; source reexport checks include indices and every attribute, historical shading checks use winding-preserving triangle-corner rotation.",
+  "items": [
+    {
+      "id": "rpg-mansion-bracketed-wall-basin-01",
+      "model_sha256": "7a5afa913fa6966a342fda77661aeee4604e22f9fe3bf28d2e116b3ca5faad89",
+      "source_sha256": "0931a9211c841e79bb92ea860ecf1143eea5b16b68d31420ccf6ffb1a4c17934",
+      "reexport_sha256": "09546fbf36c5dff48714d0d24dcbbfaf9d049cec2ea33f7a5e71c2dff3cb7e06",
+      "exact_index_attribute_arrays_equal": true,
+      "primitive_attributes": [
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        },
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        },
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        }
+      ],
+      "exact_world_geometry_uv_material_equal": true,
+      "full_pbr_equal": true,
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-high-cistern-chain-wc-01",
+      "model_sha256": "ce1989ca36269f141f4cbf4d48f8be0332e4cfd7ca237460c8fb1ef14fdf8f84",
+      "source_sha256": "7eacc9243ae70f897e4762137421c53919881951d74d64a21afb2da240c68195",
+      "reexport_sha256": "831783a1135cf0245059398dedd11a01313f486c9769cf4066688e1b7a89530c",
+      "exact_index_attribute_arrays_equal": true,
+      "primitive_attributes": [
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        },
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        },
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        },
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        }
+      ],
+      "exact_world_geometry_uv_material_equal": true,
+      "full_pbr_equal": true,
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-high-backed-slipper-bath-01",
+      "model_sha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014",
+      "source_sha256": "5c87a94336f78e7c2588e1739440e9520e7e8c3ecd74f54709482556dd3e4ff6",
+      "reexport_sha256": "090b9c5633b604edc72bf23e5dbc86cecc422f472e8eae1494fda75d3539ebc5",
+      "exact_index_attribute_arrays_equal": true,
+      "primitive_attributes": [
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        },
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        },
+        {
+          "POSITION": true,
+          "NORMAL": true,
+          "TEXCOORD_0": true
+        }
+      ],
+      "exact_world_geometry_uv_material_equal": true,
+      "full_pbr_equal": true,
+      "errors": []
+    }
+  ],
+  "shading_only_invariants": [],
+  "errors": 0
+}

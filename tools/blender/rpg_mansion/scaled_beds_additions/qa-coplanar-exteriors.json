@@ -1,0 +1,395 @@
+{
+  "method": "Find positive-area co-oriented coplanar surface overlap from decoded GLB triangles.\n\nCoincident coplanar outward faces can z-fight even with valid winding/normals.\nTriangle pairs merely sharing edges are allowed. Bottom-plane overlaps are listed\nseparately; visibility is a normal-direction ray observation, not complete CSG.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-campaign-x-trestle-cot-01",
+      "modelSha256": "2e21f4c40b9ae7f16539cd60523695adf070dc9d1d5809ca5b440e9a3b1d997e",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-barrel-vault-enclosed-bed-01",
+      "modelSha256": "d43af33a8971ee0845daed61a34a6799bb18e1814ff67224851820c40ef9abb6",
+      "coplanar_overlap_pairs": 16,
+      "total_pairwise_area_m2": 0.006386011131052416,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": [
+        {
+          "triangles": [
+            1572,
+            1192
+          ],
+          "overlap_area_m2": 1.4343847873909965e-06,
+          "intersection_center_m": [
+            -0.6879317196113502,
+            1.2799999713897705,
+            1.0496666431427002
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1572,
+            1193
+          ],
+          "overlap_area_m2": 0.0004325676722891636,
+          "intersection_center_m": [
+            -0.6724487864898618,
+            1.2799999713897705,
+            1.0519999861717224
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1606,
+            1226
+          ],
+          "overlap_area_m2": 1.4343847873909965e-06,
+          "intersection_center_m": [
+            0.6570683089988794,
+            1.2799999713897705,
+            1.0496666431427002
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1606,
+            1227
+          ],
+          "overlap_area_m2": 0.0004325676722891636,
+          "intersection_center_m": [
+            0.6725512421203677,
+            1.2799999713897705,
+            1.0519999861717224
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1792,
+            1192
+          ],
+          "overlap_area_m2": 0.0008138450769280929,
+          "intersection_center_m": [
+            -0.6801324350284126,
+            1.2799999713897705,
+            -0.011549238758548318
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1792,
+            1193
+          ],
+          "overlap_area_m2": 0.0005121334298043689,
+          "intersection_center_m": [
+            -0.6646324259685066,
+            1.2799999713897705,
+            -0.020631274189313095
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1793,
+            1192
+          ],
+          "overlap_area_m2": 0.00034865564875848597,
+          "intersection_center_m": [
+            -0.6804068686235345,
+            1.2799999713897705,
+            0.0259507627315678
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1793,
+            1193
+          ],
+          "overlap_area_m2": 0.0006503672958822065,
+          "intersection_center_m": [
+            -0.6649068595636285,
+            1.2799999713897705,
+            0.01686872730080302
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1826,
+            1226
+          ],
+          "overlap_area_m2": 0.0006503672958822065,
+          "intersection_center_m": [
+            0.6649068595636285,
+            1.2799999713897705,
+            -0.01686872730080303
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1826,
+            1227
+          ],
+          "overlap_area_m2": 0.00034865564875848597,
+          "intersection_center_m": [
+            0.6804068686235345,
+            1.2799999713897705,
+            -0.025950762731567795
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1827,
+            1226
+          ],
+          "overlap_area_m2": 0.0005121334298043689,
+          "intersection_center_m": [
+            0.6646324259685066,
+            1.2799999713897705,
+            0.020631274189313088
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            1827,
+            1227
+          ],
+          "overlap_area_m2": 0.0008138450769280929,
+          "intersection_center_m": [
+            0.6801324350284126,
+            1.2799999713897705,
+            0.011549238758548325
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            2013,
+            1192
+          ],
+          "overlap_area_m2": 0.0004325676722891636,
+          "intersection_center_m": [
+            -0.6725512421203677,
+            1.2799999713897705,
+            -1.0519999861717224
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            2013,
+            1193
+          ],
+          "overlap_area_m2": 1.4343847873354854e-06,
+          "intersection_center_m": [
+            -0.6570683089988794,
+            1.2799999713897705,
+            -1.0496666431427002
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            2047,
+            1226
+          ],
+          "overlap_area_m2": 0.0004325676722891636,
+          "intersection_center_m": [
+            0.6724487864898618,
+            1.2799999713897705,
+            -1.0519999861717224
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        },
+        {
+          "triangles": [
+            2047,
+            1227
+          ],
+          "overlap_area_m2": 1.4343847873354854e-06,
+          "intersection_center_m": [
+            0.6879317196113502,
+            1.2799999713897705,
+            -1.0496666431426995
+          ],
+          "outward_normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "bottom_plane": false,
+          "normal_ray_unobstructed": false,
+          "materials": [
+            "Polished walnut mouldings",
+            "Walnut structural heartwood"
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,21 @@
+{
+  "status": "Five original static constructions; pending final root/independent certificate",
+  "productCount": 5,
+  "widthVariantCount": 0,
+  "poseVariantCount": 0,
+  "accessoryOnlyCount": 0,
+  "excludedFixtureCount": 2,
+  "sourceAxes": "Blender metres, +Z up, -Y product front; glTF +Y up, +Z product front",
+  "mountContract": "Each product has physical plates whose rear face is native construction Y=0. Installation proof removes bottom-centre translation, rotates180 degrees about Z, and translates to the host interior plaster plane Y=+0.12m. Only rigid transforms are permitted.",
+  "staticOnly": true,
+  "noNativeOpeningOrClothPhysicsOrAutomaticFollowing": true,
+  "items": [
+    {"id":"rpg-mansion-short-paired-curtain-01","kind":"curtain","construction":"Two2mm closed folded cloth panels, fourteen rings/hangers, continuous1220mm finial span rod, two wall brackets and screws","requiredContactChain":["wall plate > projecting arm > upturned seat > rod","rod > each hanging ring > heading hook > cloth","rod > both finials","cloth > sewn heading and hem"],"finishChannels":{"fabric":"panels","trim":"sewn hems and headings","metal":"rod, rings, hooks, plates, arms and screws"},"triangleBudget":12000},
+    {"id":"rpg-mansion-full-height-traverse-drape-01","kind":"curtain","construction":"Single2mm folded full-height drape, twelve track carriers/hooks,1240mm traverse rail, three wall brackets and attached draw wand","requiredContactChain":["wall plates > arms > rail > captive carriers > hooks > cloth","rail > draw-wand hook > draw wand","cloth > sewn heading and hem"],"finishChannels":{"fabric":"drape","trim":"sewn hems and heading","metal":"track and mount hardware","wood":"draw wand"},"triangleBudget":12000},
+    {"id":"rpg-mansion-roman-batten-shade-01","kind":"roller-screen","construction":"2mm continuous pocketed cloth, nine physical rear battens, two rear lift tapes/cords, head and bottom rails","requiredContactChain":["wall plates > inset stand-offs > headrail > fabric head attachment > cloth","cloth > all rear battens > lift tapes","lift cords > headrail and bottom rail","cloth > bottom weight rail"],"finishChannels":{"fabric":"linen and head attachment","wood":"headrail, battens and weight rail","cord":"lift tapes and cords","metal":"wall support hardware"},"triangleBudget":6000},
+    {"id":"rpg-mansion-timber-venetian-blind-01","kind":"roller-screen","construction":"Forty-five3.8mm timber slats at57-degree static tilt, four vertical ladder tapes with ninety rungs, weight rail and wand pivot","requiredContactChain":["wall plates > inset stand-offs > headrail > rear ladder tapes","ladder tapes > rungs > slats and bottom rail","headrail > tilt-wand pivot > wand"],"finishChannels":{"wood":"headrail, slats, weight rail and wand","cord":"ladder tapes and rungs","metal":"mount hardware and pivot"},"triangleBudget":6000},
+    {"id":"rpg-mansion-narrow-roller-screen-01","kind":"roller-screen","construction":"2mm sheet tangent to cloth-wrapped roller, continuous through axle with buried ends, two support cheeks, weighted hem and pull tab","requiredContactChain":["wall plates > inset cheeks > axle > wrapped roller > cloth sheet","sheet > weighted hem > pull tab","continuous axle > end caps"],"finishChannels":{"fabric":"wrapped roller and cloth sheet","metal":"wall plates, cheeks and axle","wood":"weighted hem","cord":"pull tab"},"triangleBudget":6000}
+  ],
+  "fitBasis": "Width is compared to actual structural window aperture, with frame-clear glazing width separately reported. Source project rule: curtains window+100–400mm and within300mm; screens window+0–100mm and within200mm. These are placement checks, not engineering standards.",
+  "reuse": "Accepted2150mm paired curtain remains byte-identical and only appears in an excluded1900mm QA-aperture reuse scene. No duplicate product is generated."
+}

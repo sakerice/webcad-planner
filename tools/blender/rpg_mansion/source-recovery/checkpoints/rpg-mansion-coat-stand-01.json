@@ -1,0 +1,196 @@
+{
+  "id": "rpg-mansion-coat-stand-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-coat-stand-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-coat-stand-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-coat-stand-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 13,
+  "validation": {
+    "model": "rpg-mansion-coat-stand-01",
+    "dimensions_mm": [
+      610.0000143051147,
+      610.0000143051147,
+      1779.9999713897705
+    ],
+    "bounds_m": [
+      [
+        -0.3050000071525574,
+        -0.3050000071525574,
+        0.0
+      ],
+      [
+        0.3050000071525574,
+        0.3050000071525574,
+        1.7799999713897705
+      ]
+    ],
+    "triangles": 1580,
+    "uv": {
+      "meters_per_uv": 1.8641380837773862,
+      "min": 1.5188988662879783,
+      "max": 2.388595052169843,
+      "p05": 1.652368568028555,
+      "p95": 2.099784686332615,
+      "total_triangles": 1580,
+      "valid_triangles": 1580,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Walnut": "wood",
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 59064
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "e78353b336e52a8cfa4e1fcd94e45f2921ea30076c5382823297b405e0cb02c8",
+    "bytes": 59064,
+    "triangles": 1580,
+    "bounds_gltf_m": [
+      [
+        -0.3050000071525574,
+        0.0,
+        -0.3050000071525574
+      ],
+      [
+        0.3050000071525574,
+        1.7799999713897705,
+        0.3050000071525574
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      610.0000143051147,
+      610.0000143051147,
+      1779.9999713897705
+    ],
+    "geometry_material_sha256_1e7": "5bb06af831bd929a9957f310f62547966097ca462cdc7d8088857c35ff10d310",
+    "geometry_material_uv_sha256_1e7": "dc47e217935835a88575d9fead844bf8f6034fa3c80b271b6dd9b293fc3dd750",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 552
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 1028
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "d921a16df15b35c583db408042d2ec2024403e33ca8f1dc0000ba054e7250acc",
+    "bytes": 59268,
+    "triangles": 1580,
+    "bounds_gltf_m": [
+      [
+        -0.3050000071525574,
+        0.0,
+        -0.3050000071525574
+      ],
+      [
+        0.3050000071525574,
+        1.7799999713897705,
+        0.3050000071525574
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      610.0000143051147,
+      610.0000143051147,
+      1779.9999713897705
+    ],
+    "geometry_material_sha256_1e7": "5bb06af831bd929a9957f310f62547966097ca462cdc7d8088857c35ff10d310",
+    "geometry_material_uv_sha256_1e7": "dc47e217935835a88575d9fead844bf8f6034fa3c80b271b6dd9b293fc3dd750",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 552
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 1028
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 2.68,
+  "source_sha256": "50678b3efaea2744b2b905c42519108c2b761fb8f847d5f06ba0a5c48e650ef6",
+  "front_sha256": "d6ce9b68b92e67076b3d34db1e35380c9d9d9a0dd18de4802586b6251456173a",
+  "rear_sha256": "3a65933c9a2143b6568ea51cdde6a4aa13cbcece4955043004e32851b40e0ce0",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:22.978874+00:00",
+    "source_sha256_before": "fdead4e5f1b8c346108810b855fa7d7ca4163a9ee876a893d1988ec1eb133a3c",
+    "source_sha256_after": "35a4ce944ef832e2b32926cd6bdd0731434e77eb6e25d1a38e67ee02e46491d8",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "e91ae83e801d195ba8c3d87cede5afcea3d16be54ea6d038c479e7d7d96cf2e3",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:29.551278+00:00",
+    "source_sha256_before": "35a4ce944ef832e2b32926cd6bdd0731434e77eb6e25d1a38e67ee02e46491d8",
+    "source_sha256_after": "50678b3efaea2744b2b905c42519108c2b761fb8f847d5f06ba0a5c48e650ef6",
+    "mesh_geometry_uv_material_digest_preserved": "95bf5ec4556ffb68015c34b1dbb7085330e22f615edc592f58a4fd882b86a576",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-coat-stand-01-rear.png",
+        "render_filepath": "//rpg-mansion-coat-stand-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "50678b3efaea2744b2b905c42519108c2b761fb8f847d5f06ba0a5c48e650ef6",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

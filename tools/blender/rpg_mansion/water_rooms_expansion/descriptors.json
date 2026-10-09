@@ -1,0 +1,1507 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・水回り拡張",
+  "prototypeOnly": false,
+  "items": [
+    {
+      "id": "rpg-mansion-copper-bateau-cradle-bath-01",
+      "name": "銅製バトー浴槽・木製クレードル",
+      "kind": "bathtub",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-copper-bateau-cradle-bath-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-copper-bateau-cradle-bath-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-copper-bateau-cradle-bath-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-copper-bateau-cradle-bath-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-copper-bateau-cradle-bath-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-copper-bateau-cradle-bath-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-copper-bateau-cradle-bath-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-copper-bateau-cradle-bath-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 1800.0,
+      "d": 760.0,
+      "h": 726.0,
+      "authoredNominalDimensionsMm": [
+        1800.0,
+        760.0,
+        726.0
+      ],
+      "actualMeasuredDimensionsMm": [
+        1800.0,
+        760.0,
+        726.0
+      ],
+      "geometrySignature": "copper-bateau-symmetrical-high-ends-timber-cradle",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Long copper bateau with two high ends, an actual hollow hull and load-bearing timber cradle skids.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "faucetHeightMm": null,
+        "fixtureNote": "Bath only; a separate supply fixture is required.",
+        "capacityNote": "One bathing occupant. Static design, not ergonomic or plumbing certification.",
+        "rimHeightMm": {
+          "lowSideCrest": 616,
+          "endCrests": 726
+        },
+        "internalFloorHeightMm": 166,
+        "clearBowlMm": {
+          "rimLength": 1710,
+          "rimWidth": 668,
+          "floorLength": 1290,
+          "floorWidth": 375,
+          "lowSideDepth": 450
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.8999999761581421,
+            -0.3799999952316284,
+            0.0
+          ],
+          [
+            0.8999999761581421,
+            0.3799999952316284,
+            0.7260000109672546
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533728"
+        }
+      ],
+      "sha256": "7ec1383a76a98330baa975e3345162bc5e1640027cc062c51dc5124741314ad1",
+      "sourceSha256": "23c474f664b27e268eed6a3e40d6145fce3b5732dbf6b2146815833d3fb5a94f",
+      "authoringSha256": "23f846924e7e1b57d6c97ec25058692c7d78cc02a50ba30158974a990b4179ce",
+      "previewSha256": {
+        "thumb": "4c4b429e95078e687177309aa6c13fe3757745cff06c46a9d2ac46f1292fa1f3",
+        "top": "f5669f860bc102fb25aecdab802802a23a8caef5843227f410266c4515ae7eb0",
+        "front": "a5c501d3121fde91a652192463dc5fde8fe8303cf68418de7eccefa1b19f8f89",
+        "rear": "4152499a95b3054f560bc98498145f05432efda892981051f9f894cee2f74e96"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-copper-bateau-cradle-bath-01-installation.png",
+          "sha256": "b638689ce2c6aa30e844354d1a47782e0490daafa4e3d5f066038fbd45ae0072",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-copper-bateau-cradle-bath-01-section.png",
+          "sha256": "a8a80fbfc9e739723d41b26a0cc9bfdbaf9b2b402e3bff00e46a6282c1a47694",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 10,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "bath"
+    },
+    {
+      "id": "rpg-mansion-paneled-built-in-bath-01",
+      "name": "木パネル囲い・埋込型浴槽",
+      "kind": "bathtub",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-built-in-bath-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-built-in-bath-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-built-in-bath-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-paneled-built-in-bath-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-paneled-built-in-bath-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-paneled-built-in-bath-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-paneled-built-in-bath-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-paneled-built-in-bath-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 1806.0,
+      "d": 839.0,
+      "h": 610.0,
+      "authoredNominalDimensionsMm": [
+        1806.0,
+        839.0,
+        610.0
+      ],
+      "actualMeasuredDimensionsMm": [
+        1806.0,
+        839.0,
+        610.0
+      ],
+      "geometrySignature": "rectangular-paneled-apron-built-in-hollow-bath",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Rectangular built-in bath with continuous inset bowl, plinth, framed recessed apron panels and distinct rectangular installation footprint.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "faucetHeightMm": null,
+        "fixtureNote": "Bath only; a separate supply fixture is required.",
+        "capacityNote": "One bathing occupant. Static design, not ergonomic or plumbing certification.",
+        "rimHeightMm": 610,
+        "internalFloorHeightMm": 145,
+        "clearBowlMm": {
+          "rimLength": 1600,
+          "rimWidth": 610,
+          "floorLength": 1285,
+          "floorWidth": 380,
+          "depth": 465
+        },
+        "installationAccessNote": "Static paneled freestanding representation of a built-in unit; panels are native parts, not working access doors.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.902999997138977,
+            -0.4194999933242798,
+            0.0
+          ],
+          [
+            0.902999997138977,
+            0.4194999933242798,
+            0.6100000143051147
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533728"
+        }
+      ],
+      "sha256": "e9afc159b2fd2b45769613c3a3f154288a2716a4decf31a4e4cb260666a2460d",
+      "sourceSha256": "e094b81cb1f1aeadba8d53ebdc60ae0626fa19488700c6ca52288f4ea125f6af",
+      "authoringSha256": "fdd55e64ded5d85bbcd877bfe53d41764e282e251ff231137f9818c56c7151de",
+      "previewSha256": {
+        "thumb": "61088f4eda18fba391d18a5616f2afffdec03c0e71d5ff76c5037218cf61cc6e",
+        "top": "341f5d50b9b464c0af285696f0823fa31dcf736372c507d98e94031be15711c0",
+        "front": "a1bb41b1044fafe0942a6ea5f9170fdd4ece2104a3a14aee81d285d7c44531c0",
+        "rear": "90c544204c1090e92a085f64fa8d299fb8a256c31ceb68952133fcab3a0f2e77"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-paneled-built-in-bath-01-installation.png",
+          "sha256": "8ee1055dd67e41ba9a1852f511a2340354d4aec50f0e95810c18ca269777394d",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-paneled-built-in-bath-01-section.png",
+          "sha256": "4aa338103cbf9477f9f98e2df80864aeda61cdbeebad27f59eae0fcb5843020e",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 27,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "bath"
+    },
+    {
+      "id": "rpg-mansion-quadrant-corner-bath-01",
+      "name": "四分円前縁・コーナー浴槽",
+      "kind": "bathtub",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-quadrant-corner-bath-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-quadrant-corner-bath-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-quadrant-corner-bath-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-quadrant-corner-bath-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-quadrant-corner-bath-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-quadrant-corner-bath-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-quadrant-corner-bath-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-quadrant-corner-bath-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 1300.0,
+      "d": 1300.0,
+      "h": 610.0,
+      "authoredNominalDimensionsMm": [
+        1300.0,
+        1300.0,
+        610.0
+      ],
+      "actualMeasuredDimensionsMm": [
+        1300.0,
+        1300.0,
+        610.0
+      ],
+      "geometrySignature": "perpendicular-back-walls-quarter-circle-front-cavity",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "True corner footprint: two perpendicular rear edges, a convex quadrant front and matching non-oval bathing cavity.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "faucetHeightMm": null,
+        "fixtureNote": "Bath only; a separate supply fixture is required.",
+        "capacityNote": "One bathing occupant. Static design, not ergonomic or plumbing certification.",
+        "rimHeightMm": 610,
+        "internalFloorHeightMm": 140,
+        "clearBowlMm": {
+          "maximumOpeningWidth": 1098.5,
+          "maximumOpeningDepth": 1098.5,
+          "depth": 470
+        },
+        "footprintNote": "Real quarter-circle front with two perpendicular straight back edges; not a rotated oval.",
+        "installationCorner": {
+          "originalBlenderWallPlanes": {
+            "x": 0.65,
+            "y": 0.65
+          },
+          "cornerAssemblyClearanceMm": 0
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.6499999761581421,
+            -0.6499999761581421,
+            0.0
+          ],
+          [
+            0.6499999761581421,
+            0.6499999761581421,
+            0.6100000143051147
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        }
+      ],
+      "sha256": "b8fe2301cf84bb5c0c0548b3cec70a2214ebfe095997b9ed0bd491889327fede",
+      "sourceSha256": "a472a49fc93b244d91e8063a118d185113fd8aa491580614b4c5c39304b21353",
+      "authoringSha256": "94c90c239ad01c07ca80605da7d73d258cacc4ea46bc4909880f351df6358150",
+      "previewSha256": {
+        "thumb": "160992f17fe35084a563ca6af09a36ed126fca8a383316af254e1872c25c6c12",
+        "top": "e07fe8a15d0712eec7c2f03c0c355e82e25a332d45d375a67dab3228a0ff4d71",
+        "front": "a2c6e4c1849a3ab2abae41810b47b75da4c56ce02cc20592898cae6c0d7ca95a",
+        "rear": "5e35a0051d1d75cc195e12e513088fd786fc09c1e4b84bf54c5d8c747917cc0a"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-quadrant-corner-bath-01-installation.png",
+          "sha256": "c41324c9e09e620e039a5c34989fcedf271422cb53586ad81305e016d520a930",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-quadrant-corner-bath-01-section.png",
+          "sha256": "98fccc48515da6cb69a1f78d25b9d209c419ebb6e73e611369d88a95b7aab193",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 4,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "bath"
+    },
+    {
+      "id": "rpg-mansion-deep-seated-hip-bath-01",
+      "name": "内部腰掛け付・深型ヒップバス",
+      "kind": "bathtub",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-deep-seated-hip-bath-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-deep-seated-hip-bath-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-deep-seated-hip-bath-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-deep-seated-hip-bath-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-deep-seated-hip-bath-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-deep-seated-hip-bath-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-deep-seated-hip-bath-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-deep-seated-hip-bath-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 1180.0,
+      "d": 780.0,
+      "h": 860.0,
+      "authoredNominalDimensionsMm": [
+        1180.0,
+        780.0,
+        860.0
+      ],
+      "actualMeasuredDimensionsMm": [
+        1180.0,
+        780.0,
+        860.0
+      ],
+      "geometrySignature": "deep-hip-bath-internal-raised-seat",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Deep compact bath with a substantial internal raised bench, separate low footwell and attached side grab rails.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "faucetHeightMm": null,
+        "fixtureNote": "Bath only; a separate supply fixture is required.",
+        "capacityNote": "One seated bathing occupant; static raised seat, not accessibility or ergonomic certification.",
+        "rimHeightMm": 860,
+        "internalFloorHeightMm": 150,
+        "internalSeatHeightMm": 438,
+        "seatAboveInternalFloorMm": 288,
+        "clearBowlMm": {
+          "rimLength": 1040,
+          "rimWidth": 640,
+          "floorLength": 880,
+          "floorWidth": 450,
+          "depth": 710,
+          "internalBenchFrontClearWidth": 514,
+          "internalBenchDepth": 364
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.5899999737739563,
+            -0.38999998569488525,
+            0.0
+          ],
+          [
+            0.5899999737739563,
+            0.38999998569488525,
+            0.8600000143051147
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        }
+      ],
+      "sha256": "c3f756ccd10567cca7ebb7bded521b5dd58e2ea614d936e7742dc23f8e0e3cc9",
+      "sourceSha256": "6dc56fd0049ea7660ff7454f86c918e7f9f80f7682e94d8a28bfd08f1a1474f4",
+      "authoringSha256": "cbb56ea67778e65b98e59fd8326ae076f81c4cc4d97b17b65d297808781c758a",
+      "previewSha256": {
+        "thumb": "176c5c6cc7a349e70298fa570aebc36f1435faa57939131f3b2a0653f841571b",
+        "top": "3ff5165bba1bd79209bff39b8da66148d785129134d1a2c47675f21c5e7a07ce",
+        "front": "ce77a8ed98639611daaa1318eb2694e371a1072aceb24d49700f96d9885c30df",
+        "rear": "6ae143341e84b7735cfa107bcc4f14cca83f307e568fd6a7c0cd6da208b49109"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-deep-seated-hip-bath-01-installation.png",
+          "sha256": "3e5e97d6628e7d618570de04740a1274a4eb499812a2bad17d8e0a2a226ecd2a",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-deep-seated-hip-bath-01-section.png",
+          "sha256": "028e7dd80acf2b8412c8dbf99a0a2c510d3f663fe5ebc3c414024fe359ab2c24",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 5,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "bath"
+    },
+    {
+      "id": "rpg-mansion-double-basin-open-console-01",
+      "name": "二槽・金属脚洗面コンソール",
+      "kind": "vanity",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-double-basin-open-console-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-double-basin-open-console-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-double-basin-open-console-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-double-basin-open-console-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-double-basin-open-console-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-double-basin-open-console-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-double-basin-open-console-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-double-basin-open-console-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 1440.0,
+      "d": 600.0,
+      "h": 1039.877,
+      "authoredNominalDimensionsMm": [
+        1440.0,
+        600.0,
+        1039.877
+      ],
+      "actualMeasuredDimensionsMm": [
+        1440.0,
+        600.0,
+        1039.877
+      ],
+      "geometrySignature": "two-real-basins-open-metal-console",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Two separately hollow basins in two cut-stone slabs on an exposed metal console with lower towel shelf and two independent traps.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "capacityNote": "Static handwashing furniture; no working plumbing or ergonomic certification.",
+        "rimHeightMm": 839,
+        "faucetHeightMm": 1040,
+        "clearBowlMm": {
+          "perBasinRimWidth": 460,
+          "perBasinRimDepth": 340,
+          "depth": 118
+        },
+        "basinCount": 2,
+        "capacityGroup": "double-basin layout; counted for open-console construction and two actual separate basins, not a recolour",
+        "plumbingNote": "Static paired exposed traps. Rear outlets require a separate service connection.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.7200000286102295,
+            -0.30000001192092896,
+            0.0
+          ],
+          [
+            0.7200000286102295,
+            0.30000001192092896,
+            1.0398770570755005
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533728"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#d9d1ba"
+        }
+      ],
+      "sha256": "eeaea0882826f8c365c3a0f92ab386534e04e461f7a8a3a69463aba9c1655e28",
+      "sourceSha256": "1f399049b6e588d9cf298b70d40d5034dbb7db0147102d53a3e20757a035d67a",
+      "authoringSha256": "eaf892982088b5b0233be6aca07f6ab37ffb27ace71e062dc957f4d1abca4eee",
+      "previewSha256": {
+        "thumb": "0743424f59a6693b9e64282d7e35fa437f34fc5db7dea754706575e4048162da",
+        "top": "73b8b8d0fb48edbeea9158f6faecb8b492dd1b2d990be2bf65a908c25854dd01",
+        "front": "e18c210793b1666e9f292d4760cfb01abf9993f7c8818c7e3c1e99dbbc36fcf8",
+        "rear": "8c292b5950c08827a24ce2aa70e2800e736156492551c2b6fedb06260261ff01"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-double-basin-open-console-01-installation.png",
+          "sha256": "6acd270f17abc03c9834d500df82ce481bb82f2cab4583f753b3ce0001225cb6",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-double-basin-open-console-01-section.png",
+          "sha256": "12df09a65cd08ecbddf1fbc2afb5e62a020d63cc9e7f06e8c9f18f90e007ebb8",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 29,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "washstand",
+      "capacityGroup": "Two-basin layout on a genuinely open metal console; not a recolour/resize of the single cabinet"
+    },
+    {
+      "id": "rpg-mansion-portable-bowl-jug-washstand-01",
+      "name": "洗面鉢と水差し・可搬ウォッシュスタンド",
+      "kind": "vanity",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-portable-bowl-jug-washstand-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-portable-bowl-jug-washstand-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-portable-bowl-jug-washstand-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-portable-bowl-jug-washstand-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-portable-bowl-jug-washstand-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-portable-bowl-jug-washstand-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-portable-bowl-jug-washstand-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-portable-bowl-jug-washstand-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 624.0,
+      "d": 517.559,
+      "h": 1047.0,
+      "authoredNominalDimensionsMm": [
+        624.0,
+        517.559,
+        1047.0
+      ],
+      "actualMeasuredDimensionsMm": [
+        624.0,
+        517.559,
+        1047.0
+      ],
+      "geometrySignature": "portable-bowl-hollow-jug-timber-washstand",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Portable ceramic bowl and actually hollow water jug on turned timber table; no fixed plumbing.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "capacityNote": "Static handwashing furniture; no working plumbing or ergonomic certification.",
+        "rimHeightMm": 894,
+        "faucetHeightMm": null,
+        "clearBowlMm": {
+          "rimWidth": 361,
+          "rimDepth": 281,
+          "depth": 120
+        },
+        "basinCount": 1,
+        "fixtureNote": "Portable washing bowl and hollow water jug; no fixed faucet, drain or working plumbing.",
+        "bottomCenterTranslationBlenderM": [
+          -0.022000014781951904,
+          0.018779747188091278,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.28999999165534973,
+            -0.2775594890117645,
+            0.0
+          ],
+          [
+            0.33400002121925354,
+            0.23999999463558197,
+            1.0470000505447388
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533728"
+        }
+      ],
+      "sha256": "4ad7d6a0cbe919910504df26233b0515fcc38ef789f1b187546f6492b7141f30",
+      "sourceSha256": "509e51affb77feac6ebc8ef9acd1a2eee9fe0c6f63fa65bca24d9353f3c2d057",
+      "authoringSha256": "7447bd3f820b79635bd26054187774d51fba2c28a99af6a53e3fb13134885991",
+      "previewSha256": {
+        "thumb": "fa18c5d3896d9f52fb4e23acefd8023e7631150349a4354ccdf83d20f269de3b",
+        "top": "5b180f202af1c580b581fb92dc516a9949462ff7055191196ab18f9663b8dc82",
+        "front": "795f8bf3b87ec60bd4450d229468f7be182cd1ee57df334d43058a85f802daa7",
+        "rear": "51812d9ad9eeff9d3acee2eab9a1f2079e2dbe2ddd9fd45162f23110b1e2a60e"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-portable-bowl-jug-washstand-01-installation.png",
+          "sha256": "fba41262b32cfe4953a14b5847dbe2e142cbaea2d8bacbd354ecca3fb3872a80",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-portable-bowl-jug-washstand-01-section.png",
+          "sha256": "89032a91fc0b3ce91eacf9b2096acfe23e8967e08a803fc844da0abe393a6b1a",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 16,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "washstand"
+    },
+    {
+      "id": "rpg-mansion-two-wall-corner-basin-01",
+      "name": "二面壁支持・コーナー洗面器",
+      "kind": "vanity",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-two-wall-corner-basin-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-two-wall-corner-basin-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-two-wall-corner-basin-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-two-wall-corner-basin-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-two-wall-corner-basin-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-two-wall-corner-basin-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-two-wall-corner-basin-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-two-wall-corner-basin-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 550.0,
+      "d": 550.0,
+      "h": 527.792,
+      "authoredNominalDimensionsMm": [
+        550.0,
+        550.0,
+        527.792
+      ],
+      "actualMeasuredDimensionsMm": [
+        550.0,
+        550.0,
+        527.792
+      ],
+      "geometrySignature": "quarter-front-two-wall-bracket-basin",
+      "triangleBudget": 6000,
+      "defaultElevation": 600,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "two-perpendicular-wall-brackets",
+      "semanticCoverage": "A real quadrant-front corner bowl on perpendicular wall brackets, with diagonal corner tap and exposed waste tail.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "rimHeightMm": 920,
+        "defaultElevationMm": 600,
+        "faucetHeightMm": 1128,
+        "clearBowlMm": {
+          "maximumOpeningWidth": 394.2,
+          "maximumOpeningDepth": 394.2,
+          "depth": 116
+        },
+        "basinCount": 1,
+        "capacityNote": "One static corner hand basin.",
+        "installation": {
+          "mount": "two-perpendicular-wall-brackets",
+          "defaultElevationMm": 600,
+          "wallContactPlaneBlenderY": 0.28,
+          "secondWallContactPlaneBlenderX": 0.28,
+          "note": "Two perpendicular wall bearing plates and separate triangulated arms. Waste pipe is not structural.",
+          "wallContactPlaneGltfZ": -0.2750000047683716
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.004999995231628418,
+          -0.004999995231628418,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.27000001072883606,
+            -0.27000001072883606,
+            0.0
+          ],
+          [
+            0.2800000011920929,
+            0.2800000011920929,
+            0.5277917981147766
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        }
+      ],
+      "sha256": "5eaf77db03fb593243c5e809a97db9e8ce68991b99283df75af62f4c450d92ee",
+      "sourceSha256": "a6162f08a862277e52c5d18c565f3b22ef17bb659769df7597a26d6d68fe839c",
+      "authoringSha256": "30334ca4936c6cff687f9e3c5c158960499026e3e1ba589a7b9e0313aa2a068f",
+      "previewSha256": {
+        "thumb": "87b56e81efeaf6f63bb0efb2335a45600fdb55c4675437f33432c3d691d5c876",
+        "top": "5c4ec41eca60cf52ae2e366bd1656f385edd6c69f7f4fe091044f8be594a6195",
+        "front": "23dab5b8231384c61c291ee3acd0c223cebb01ec728ad2c02702c3c10b07bef8",
+        "rear": "519ba2e8ff6d501e6f9a1d8b701c6b9887426d30cfcb4d5c261227cf7478d0c8"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-two-wall-corner-basin-01-installation.png",
+          "sha256": "27f83d5cac7299b9ac62cd216ca5b709201ca3313d09e9bf44464e8df9e074a8",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-two-wall-corner-basin-01-section.png",
+          "sha256": "806736dc2ae244d995e6efbcbcd75ec7c56f84cbb2bea14d9a52a2e9614875b9",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 17,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "washstand"
+    },
+    {
+      "id": "rpg-mansion-freestanding-bath-bridge-filler-01",
+      "name": "床立て・ブリッジ型浴槽用水栓",
+      "kind": "bath-fixture",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-freestanding-bath-bridge-filler-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-freestanding-bath-bridge-filler-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-freestanding-bath-bridge-filler-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-freestanding-bath-bridge-filler-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-freestanding-bath-bridge-filler-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-freestanding-bath-bridge-filler-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-freestanding-bath-bridge-filler-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-freestanding-bath-bridge-filler-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 348.0,
+      "d": 443.0,
+      "h": 1037.683,
+      "authoredNominalDimensionsMm": [
+        348.0,
+        443.0,
+        1037.683
+      ],
+      "actualMeasuredDimensionsMm": [
+        348.0,
+        443.0,
+        1037.683
+      ],
+      "geometrySignature": "dual-floor-columns-long-reach-arched-bath-filler",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Independent twin-column floor filler with actual grounded mounting feet, cross valves and long-reach spout; paired installation with slipper bath is proved separately.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+        "faucetHeightMm": 1038,
+        "spoutOutletOriginalBlenderM": [
+          0,
+          -0.36,
+          0.85
+        ],
+        "supplyMountCentersOriginalBlenderM": [
+          [
+            -0.115,
+            0,
+            0
+          ],
+          [
+            0.115,
+            0,
+            0
+          ]
+        ],
+        "pairingNote": "Separate floor filler; place with the approved slipper bath using measured supply-base datum, not visual envelope center. Paired installation evidence is supplied separately.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.16249999403953552,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.17399999499320984,
+            -0.3840000033378601,
+            0.0
+          ],
+          [
+            0.17399999499320984,
+            0.05900000035762787,
+            1.037683129310608
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        }
+      ],
+      "sha256": "c52a2e3d60abe5c654835b6f170594f42e5cf8abc3a972efa07881cde19120ef",
+      "sourceSha256": "21c65772e17231da7e87c293db50006696347e55b9dcd0b0af19d80eed0ce2df",
+      "authoringSha256": "f8c48c0c5de5aad19a519f32b6e4a36b293859902b10d2920e8b12d308e7a82c",
+      "previewSha256": {
+        "thumb": "7f2372c2538195f5da16aefee050bb1ce8bc7e924fda7669efb51a021120754c",
+        "top": "debd3e0d2e3d318632fc520bcd66282f9b1652e70730d4b54ad9ce63d53dd10b",
+        "front": "42e5a2b3e57197683dc2eacbcfde819ac3e688fb22da0779d4e17cdb9365b243",
+        "rear": "feac66b4f58e8966c43668388edc709523f820279f8fc5825184ec388f17c909"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-freestanding-bath-bridge-filler-01-installation.png",
+          "sha256": "02a6fecab0e359b3e60e4f40fd3063bf5c7d3432daf3eced715076bc61b09111",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-freestanding-bath-bridge-filler-01-section.png",
+          "sha256": "4bb74a96fe40daf0a5d55dcf18ed616bfdd78a80b2177d0d1b50cda065af3e40",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 15,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "bath-fixture"
+    },
+    {
+      "id": "rpg-mansion-rail-hand-shower-hose-01",
+      "name": "昇降レール・ハンドシャワー",
+      "kind": "shower-system",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rail-hand-shower-hose-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rail-hand-shower-hose-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rail-hand-shower-hose-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-rail-hand-shower-hose-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-rail-hand-shower-hose-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-rail-hand-shower-hose-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-rail-hand-shower-hose-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-rail-hand-shower-hose-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 377.987,
+      "d": 262.795,
+      "h": 1176.772,
+      "authoredNominalDimensionsMm": [
+        377.987,
+        262.795,
+        1176.772
+      ],
+      "actualMeasuredDimensionsMm": [
+        377.987,
+        262.795,
+        1176.772
+      ],
+      "geometrySignature": "wall-mounted-slide-rail-handset-continuous-flex-hose",
+      "triangleBudget": 6000,
+      "defaultElevation": 850,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "wall-plates",
+      "semanticCoverage": "Wall-supported hand shower with actual handset holder, two rail plates, service outlet and one continuous flexible hose.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "defaultElevationMm": 850,
+        "capacityNote": "One static rail-mounted handset with real continuous hose and sliding holder. No water simulation.",
+        "installation": {
+          "mount": "wall-plates",
+          "wallContactPlaneBlenderY": 0.075,
+          "defaultElevationMm": 850,
+          "originalLocalAnchorHeightsM": [
+            0.375,
+            1.17,
+            0.515
+          ],
+          "wallContactPlaneGltfZ": -0.1313976913690567
+        },
+        "faucetHeightMm": null,
+        "showerHeadOriginalBlenderM": [
+          0.1,
+          -0.172,
+          1.139
+        ],
+        "bottomCenterTranslationBlenderM": [
+          0.0030064061284065247,
+          0.0563976913690567,
+          -0.03522823750972748
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.19200000166893005,
+            -0.18779538571834564,
+            0.03522823750972748
+          ],
+          [
+            0.185987189412117,
+            0.07500000298023224,
+            1.2120000123977661
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "rubber",
+          "label": "ホース",
+          "default": "#393c36"
+        }
+      ],
+      "sha256": "3f107ca6fb6b37a7daee5569a1ba2cf8be646df7d37a9196cdcb23e821856ccd",
+      "sourceSha256": "0e499241ed9e55911fb1b48b55d07e27b7ae033bd5d69d9a0ac7987790c9fdc3",
+      "authoringSha256": "b9d3d49615c2624a29a19c46e6db14a6e45b27d3f24cd7b146e22528cb63be3c",
+      "previewSha256": {
+        "thumb": "7e5365c6a77e7743f4862c0f77368ea3e9f294c01fc2d7357c66830a5a74865e",
+        "top": "3d74539b84d42e0912ce40c9138c362fd99f6b46f0dd0db210d27a51772261bd",
+        "front": "315f9c4c3b62253f82cb66525bb36db8f6fabfa87e7831262a25ef685375ab71",
+        "rear": "25a55cd27930ae5949b0f185b99e0c04cfc0af51b90e346600bdc6ec3180da83"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-rail-hand-shower-hose-01-installation.png",
+          "sha256": "2879880beb33fc9da01d21fa3db1ed93fcf0b0402924a5f7febb178bc83561b5",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-rail-hand-shower-hose-01-section.png",
+          "sha256": "1b4bc8d15099fccc36862fdfe28e15695c73c284ab29b30d10545eecf17a3eeb",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 15,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "shower-component"
+    },
+    {
+      "id": "rpg-mansion-overhead-brass-standpipe-01",
+      "name": "真鍮スタンドパイプ・オーバーヘッドシャワー",
+      "kind": "shower-system",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-overhead-brass-standpipe-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-overhead-brass-standpipe-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-overhead-brass-standpipe-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-overhead-brass-standpipe-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-overhead-brass-standpipe-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-overhead-brass-standpipe-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-overhead-brass-standpipe-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-overhead-brass-standpipe-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 348.0,
+      "d": 645.0,
+      "h": 2260.945,
+      "authoredNominalDimensionsMm": [
+        348.0,
+        645.0,
+        2260.945
+      ],
+      "actualMeasuredDimensionsMm": [
+        348.0,
+        645.0,
+        2260.945
+      ],
+      "geometrySignature": "floor-flange-wall-braced-overhead-domed-rose",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor-flange-and-wall-braces",
+      "semanticCoverage": "Tall overhead exposed brass shower with floor flange, two wall braces, mixer valves and domed downward-facing rose.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor-flange-and-wall-braces",
+          "floorPlaneY": 0,
+          "wallContactPlaneBlenderY": 0.085,
+          "originalLocalAnchorHeightsM": [
+            0.81,
+            1.69
+          ],
+          "wallContactPlaneGltfZ": -0.3224999970197678
+        },
+        "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+        "faucetHeightMm": 1119,
+        "showerHeadHeightMm": 2132,
+        "showerHeadOriginalBlenderM": [
+          0,
+          -0.4,
+          2.132
+        ],
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.23749999701976776,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.17399999499320984,
+            -0.5600000023841858,
+            0.0
+          ],
+          [
+            0.17399999499320984,
+            0.08500000089406967,
+            2.2609450817108154
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        }
+      ],
+      "sha256": "a045a1fcd34a2e053edaa309d8fe750a8d7a571097cf868a4b02ab247945563c",
+      "sourceSha256": "5f8c7af33f70e21dbbc1384889a305c5d6ec7cff208eef83d2b785f3d6fd75b6",
+      "authoringSha256": "eb2db8b0aa01e1230db34405c3d223189f48209ba16a1ef778d58ecb722cf9b9",
+      "previewSha256": {
+        "thumb": "6881b1be26537efd0892f19b66ba6172d2fce8b39f35c6db83692aac647e002f",
+        "top": "53565f8e0c1a3e3b264101fe40c57429d22989daeb8599f668d2d1a2627de2b4",
+        "front": "bf495ba844b9eda599eac859892d08b698d516c56f93e23fd80b778322ab3315",
+        "rear": "996210499863b20e910a5b0bdb1e534df4c7e0668ab6cdb113cb12dadc335c6c"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-overhead-brass-standpipe-01-installation.png",
+          "sha256": "f9d2400eae9ff966eb757c6635a6dbefc344e096f5ffa3364b5e328a056b6f8b",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-overhead-brass-standpipe-01-section.png",
+          "sha256": "b13d0be2fadb0458448bf1610323b8a40e1ac3210a4a798c9de7a088ac47718a",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 13,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "shower-component"
+    },
+    {
+      "id": "rpg-mansion-tankless-flushometer-wc-01",
+      "name": "露出洗浄弁・タンクレス便器",
+      "kind": "toilet",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tankless-flushometer-wc-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tankless-flushometer-wc-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tankless-flushometer-wc-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-tankless-flushometer-wc-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-tankless-flushometer-wc-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-tankless-flushometer-wc-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-tankless-flushometer-wc-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-tankless-flushometer-wc-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 432.0,
+      "d": 796.5,
+      "h": 982.0,
+      "authoredNominalDimensionsMm": [
+        432.0,
+        796.5,
+        982.0
+      ],
+      "actualMeasuredDimensionsMm": [
+        432.0,
+        796.5,
+        982.0
+      ],
+      "geometrySignature": "tankless-direct-wall-flushometer-bowl",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor-with-wall-service-inlet",
+      "semanticCoverage": "Different tankless installation: broad-foot hollow WC, open dark seat, exposed pressure-valve body, direct wall inlet and bowl-feed pipe.",
+      "dimensionBasis": "Original intended design envelope. Legacy catalogue dimensions are demand references, not exact replacement or certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor-with-wall-service-inlet",
+          "floorPlaneY": 0,
+          "wallContactPlaneBlenderY": 0.424,
+          "serviceInletOriginalBlenderM": [
+            0,
+            0.424,
+            0.895
+          ],
+          "wallContactPlaneGltfZ": -0.39825000369548796
+        },
+        "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+        "seatHeightMm": 451,
+        "bowlRimHeightMm": 410,
+        "clearBowlMm": {
+          "rimWidth": 297,
+          "rimDepth": 442,
+          "depth": 150
+        },
+        "faucetHeightMm": null,
+        "mechanismNote": "No storage tank. Static exposed flushometer valve and direct bowl feed; no working flushing mechanism.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.025749996304512024,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.2160000056028366,
+            -0.3725000023841858,
+            0.0
+          ],
+          [
+            0.2160000056028366,
+            0.42399999499320984,
+            0.9819999933242798
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533728"
+        }
+      ],
+      "sha256": "66b4bde5035958b98b1d4feabe9da263a705bafc081d0348b7230468fe28233e",
+      "sourceSha256": "fcf6293ef24659802abad5db49f5a409cea128593a86b4361dc45615cdd731c6",
+      "authoringSha256": "b9cb61556735e46c1ad8f633c4a5cf12e4936ae59a788e51afec5daf1c74f5cd",
+      "previewSha256": {
+        "thumb": "d555ba2e7a58375040b8bc28852b76139c077887ce7974d1846b3067589e0a02",
+        "top": "9338368c79449d7be579048ca7081911d2e5ed8fc9c79ec09827e4d02576a993",
+        "front": "b7651d61793b8fb2dd84d46a218d4d4fb3770c6b1e2ca8ccf94ebc65dbf3788e",
+        "rear": "476522f2a4ed6b29dffebe019f1232b973ae34faf5e1ab826e8d52d4efbd39ce"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-tankless-flushometer-wc-01-installation.png",
+          "sha256": "8afd7064114906ea80b6cecb866527d712a8cc8cb41946cffe026116e01c09db",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-tankless-flushometer-wc-01-section.png",
+          "sha256": "787cc6c0540612ea1ff9829534651669af3162b94ecf22334f09d1293037bb74",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 12,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "toilet"
+    },
+    {
+      "id": "rpg-mansion-single-basin-mirrored-cabinet-01",
+      "name": "鏡付・一槽洗面キャビネット",
+      "kind": "vanity",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-single-basin-mirrored-cabinet-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-single-basin-mirrored-cabinet-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-single-basin-mirrored-cabinet-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-single-basin-mirrored-cabinet-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-single-basin-mirrored-cabinet-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-single-basin-mirrored-cabinet-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-single-basin-mirrored-cabinet-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-single-basin-mirrored-cabinet-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 800.0,
+      "d": 634.315,
+      "h": 1698.5,
+      "authoredNominalDimensionsMm": [
+        800.0,
+        634.315,
+        1698.5
+      ],
+      "actualMeasuredDimensionsMm": [
+        800.0,
+        634.315,
+        1698.5
+      ],
+      "geometrySignature": "closed-two-door-cabinet-mirror-real-cutout-top",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Single-basin walnut cabinet, two panel doors, actual cutout stone top and supported mirror; a different storage construction from a pedestal or bracket basin.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "capacityNote": "Static handwashing furniture; no working plumbing or ergonomic certification.",
+        "rimHeightMm": 859,
+        "faucetHeightMm": 1060,
+        "clearBowlMm": {
+          "rimWidth": 510,
+          "rimDepth": 370,
+          "depth": 118,
+          "floorWidth": 300,
+          "floorDepth": 161
+        },
+        "basinCount": 1,
+        "storageNote": "Two closed static panel doors and a real top aperture; no animated doors or plumbing.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.01715739071369171,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.4000000059604645,
+            -0.3343147933483124,
+            0.0
+          ],
+          [
+            0.4000000059604645,
+            0.30000001192092896,
+            1.6985000371932983
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533728"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#d9d1ba"
+        },
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#cbdad9"
+        }
+      ],
+      "sha256": "d10e9fb91489926fa4b397703adeddf269bcfb42aff7d3e1aeedacca9c6cf147",
+      "sourceSha256": "194ae6d2a68776ad5253d0b96859f8b781bcd6c4cfa988bdc03d458222e1de81",
+      "authoringSha256": "673f6a1264e4e5ed94147e160e95c35ca7721a7b6616b7c6f730e78d22c16fee",
+      "previewSha256": {
+        "thumb": "2e09b69350ac8de8712904dda65aa9325e218cde9092770b72be93deb2efd534",
+        "top": "56c8ac09ec643271a122fc2d6338f732464946c41f2deedc582626de1b6ec7aa",
+        "front": "a99f3a22030842147e0f724e8397429ae48672b0ffd398ec7014fa7f7b347141",
+        "rear": "786554d4c00af357c2929ca085005ba43e67c6a4f3f3f25153db923e04a7ff11"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-single-basin-mirrored-cabinet-01-installation.png",
+          "sha256": "606b8ad0ecb5188abc253cc3edc50ccf3c3d8726f96dfd3126c429d54affefc1",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-single-basin-mirrored-cabinet-01-section.png",
+          "sha256": "f9c1c16ae44296e48cce3d35e7af5b23add9fd9ce4bc8511d7c80173d7fa0b72",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 43,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "washstand"
+    },
+    {
+      "id": "rpg-mansion-framed-glass-shower-enclosure-01",
+      "name": "ガラス框・中空トレー付シャワーブース",
+      "kind": "shower-system",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-framed-glass-shower-enclosure-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-framed-glass-shower-enclosure-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-framed-glass-shower-enclosure-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-framed-glass-shower-enclosure-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-framed-glass-shower-enclosure-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-framed-glass-shower-enclosure-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms_expansion/authoring_sources/rpg-mansion-framed-glass-shower-enclosure-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-framed-glass-shower-enclosure-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms_expansion/build.py",
+      "w": 1000.0,
+      "d": 1022.0,
+      "h": 2014.5,
+      "authoredNominalDimensionsMm": [
+        1000.0,
+        1022.0,
+        2014.5
+      ],
+      "actualMeasuredDimensionsMm": [
+        1000.0,
+        1022.0,
+        2014.5
+      ],
+      "geometrySignature": "hollow-tray-four-sided-frame-glass-door-enclosure",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Real hollow shower tray and drain with four-sided metal frame, separate closed transparent glass door, hinges and mounted pull; fixtures remain static.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+        "rimHeightMm": 124,
+        "internalFloorHeightMm": 35,
+        "clearBowlMm": {
+          "trayOpeningWidth": 903,
+          "trayOpeningDepth": 903,
+          "trayDepth": 89
+        },
+        "fixtureNote": "Framed static transparent enclosure with closed glass door and hollow tray. Water supply fixture is a separate asset; the door is not animated.",
+        "glassNominalThicknessMm": {
+          "fixed": 6,
+          "door": 7
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.011000007390975952,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.5,
+            -0.5220000147819519,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            2.0144999027252197
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#cbdad9"
+        }
+      ],
+      "sha256": "a090a879cd3b93e202ae7f3a7e85ef9b7e2f7b20936b583c8d63fa3ee6e82a99",
+      "sourceSha256": "4613189a4e86111c88afb1ae17f8ffb7d3469db54b0dfed1a26c4420fe654579",
+      "authoringSha256": "4616fc5de9fb7914afded875a0b33b070610dbf5f6736c9a05e2e77ea247d6ef",
+      "previewSha256": {
+        "thumb": "d88f865b80a2fc04ce95bfede695982a5d56699b4a8a2d8c2338eb5b397bf077",
+        "top": "cc842152ef8fa0ae2571c7480254333fa4c2e93381f2eab000dc0db3405c56e6",
+        "front": "828baa0c414eb51e8b434743561e34213f723fe6b3a1c1dc8f3e3e2bb17bb78a",
+        "rear": "226d5667bb11eeab702da27c668a9bf4f8394b2e0468230373e0ba344e6daa60"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-framed-glass-shower-enclosure-01-installation.png",
+          "sha256": "486e67142376952a3837033fa752520a114babff50ef22ac7be450bac4455bc8",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms_expansion/evidence/rpg-mansion-framed-glass-shower-enclosure-01-section.png",
+          "sha256": "5861f94105c517d7157c7b754e4376118c874dddf5a0f583de09e0dccac78c09",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 19,
+      "status": "candidate-awaiting-independent-and-root-review",
+      "constructionGroup": "shower-component"
+    }
+  ]
+}

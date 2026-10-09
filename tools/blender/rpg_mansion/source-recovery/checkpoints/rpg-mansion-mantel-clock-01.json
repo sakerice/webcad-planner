@@ -1,0 +1,220 @@
+{
+  "id": "rpg-mansion-mantel-clock-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-mantel-clock-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/build.py",
+  "originalBuilderSha256": "1980db41d3219826c4970076a618e7af57725828144e7d8746aa4b74994ddffb",
+  "front": "tools/blender/rpg_mansion/work/rpg-mansion-mantel-clock-01-front.png",
+  "rear": "tools/blender/rpg_mansion/work/rpg-mansion-mantel-clock-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 19,
+  "validation": {
+    "model": "rpg-mansion-mantel-clock-01",
+    "dimensions_mm": [
+      360.00001430511475,
+      204.99999821186066,
+      430.0000071525574
+    ],
+    "bounds_m": [
+      [
+        -0.18000000715255737,
+        -0.10249999910593033,
+        0.0
+      ],
+      [
+        0.18000000715255737,
+        0.10249999910593033,
+        0.4300000071525574
+      ]
+    ],
+    "triangles": 1284,
+    "uv": {
+      "meters_per_uv": 1.06467215253554,
+      "min": 0.9376360130184482,
+      "max": 1.3754625198574515,
+      "p05": 0.9967338531427737,
+      "p95": 1.188062640653345,
+      "total_triangles": 1284,
+      "valid_triangles": 1284,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Walnut edge": "wood",
+      "RPG Walnut": "wood",
+      "RPG Antique brass": "metal",
+      "RPG Parchment": null,
+      "RPG Ink": null
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 51276
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "f5bd98c3941f594c3e227fb5264b745c9d91a6edbb160c1452e5831d6c19d1b9",
+    "bytes": 51276,
+    "triangles": 1284,
+    "bounds_gltf_m": [
+      [
+        -0.18000000715255737,
+        0.0,
+        -0.10249999910593033
+      ],
+      [
+        0.18000000715255737,
+        0.4300000071525574,
+        0.10249999910593033
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      360.00001430511475,
+      204.99999821186066,
+      430.0000071525574
+    ],
+    "geometry_material_sha256_1e7": "814fb50f4f274de75030f62114c5c8731ee68742ea5cda4a6f4f48a491a7072d",
+    "geometry_material_uv_sha256_1e7": "7241af51e12d0e4967bb0a9d522c46a6e28116c7cddafb88e85db8c479d161d0",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 648
+      },
+      {
+        "material": "RPG Ink",
+        "channel": null,
+        "triangles": 168
+      },
+      {
+        "material": "RPG Parchment",
+        "channel": null,
+        "triangles": 380
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 44
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 44
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "95747d5301e5acd372805fdfd289d9bed0939e7acade6741834c06437989f221",
+    "bytes": 51468,
+    "triangles": 1284,
+    "bounds_gltf_m": [
+      [
+        -0.18000000715255737,
+        0.0,
+        -0.10249999910593033
+      ],
+      [
+        0.18000000715255737,
+        0.4300000071525574,
+        0.10249999910593033
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      360.00001430511475,
+      204.99999821186066,
+      430.0000071525574
+    ],
+    "geometry_material_sha256_1e7": "814fb50f4f274de75030f62114c5c8731ee68742ea5cda4a6f4f48a491a7072d",
+    "geometry_material_uv_sha256_1e7": "7241af51e12d0e4967bb0a9d522c46a6e28116c7cddafb88e85db8c479d161d0",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 648
+      },
+      {
+        "material": "RPG Ink",
+        "channel": null,
+        "triangles": 168
+      },
+      {
+        "material": "RPG Parchment",
+        "channel": null,
+        "triangles": 380
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 44
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 44
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 6.67,
+  "source_sha256": "320f703dc5e4a31b7d4f2a601b4bf5f2dc14ee98342db876c7a8b5977b078baf",
+  "front_sha256": "f106cf5dc1bf86cba91ffa6499d7c693fd9ff1c0f3a8a64c180d775c194402fd",
+  "rear_sha256": "11af85fcab6b0881806a0e27855c481eff9c0e3ad34e89e3c3bfa74f6159628d",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.707156+00:00",
+    "source_sha256_before": "0d665f4feae8ba10413c8e587fd67b2a77ec258a475a0a60fef5200cc50a5e0d",
+    "source_sha256_after": "320f703dc5e4a31b7d4f2a601b4bf5f2dc14ee98342db876c7a8b5977b078baf",
+    "mesh_geometry_uv_material_digest_preserved": "7c22cddddc9120eb3f860fdf08b7ef00ada4131e5c47681aa7758e85dd60015b",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-mantel-clock-01-rear.png",
+        "render_filepath": "//rpg-mansion-mantel-clock-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "320f703dc5e4a31b7d4f2a601b4bf5f2dc14ee98342db876c7a8b5977b078baf",
+    "originalBuilderSha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

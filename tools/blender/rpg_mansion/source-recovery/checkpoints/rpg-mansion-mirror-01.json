@@ -1,0 +1,198 @@
+{
+  "id": "rpg-mansion-mirror-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-mirror-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-mirror-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-mirror-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 6,
+  "validation": {
+    "model": "rpg-mansion-mirror-01",
+    "dimensions_mm": [
+      750.0,
+      100.00000149011612,
+      1519.9999809265137
+    ],
+    "bounds_m": [
+      [
+        -0.375,
+        -0.05000000074505806,
+        0.0
+      ],
+      [
+        0.375,
+        0.05000000074505806,
+        1.5199999809265137
+      ]
+    ],
+    "triangles": 232,
+    "uv": {
+      "meters_per_uv": 3.04204351128712,
+      "min": 2.41232202861657,
+      "max": 3.654420320660744,
+      "p05": 2.428613223166504,
+      "p95": 3.5184673471213315,
+      "total_triangles": 232,
+      "valid_triangles": 232,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Walnut": "wood",
+      "RPG mirror": null,
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 13368
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "7cf117041564f0d258a0c9339957624be39ab69704668c70e1c19c3248fae40d",
+    "bytes": 13368,
+    "triangles": 232,
+    "bounds_gltf_m": [
+      [
+        -0.375,
+        0.0,
+        -0.05000000074505806
+      ],
+      [
+        0.375,
+        1.5199999809265137,
+        0.05000000074505806
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      750.0,
+      100.00000149011612,
+      1519.9999809265137
+    ],
+    "geometry_material_sha256_1e7": "d0763b87a6c054eecc975db53a60e9b313141c4602ef507090e41031ac2bcd3a",
+    "geometry_material_uv_sha256_1e7": "4b12b1f87d3385db0ff7d484ba223c35839ac641f3517f1d68d795236e15a4ee",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 176
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 44
+      },
+      {
+        "material": "RPG mirror",
+        "channel": null,
+        "triangles": 12
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "459c251acacc6a9910dd4f01c29b843a03cf494db9daaa65c0cbe26bb9c2d028",
+    "bytes": 13572,
+    "triangles": 232,
+    "bounds_gltf_m": [
+      [
+        -0.375,
+        0.0,
+        -0.05000000074505806
+      ],
+      [
+        0.375,
+        1.5199999809265137,
+        0.05000000074505806
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      750.0,
+      100.00000149011612,
+      1519.9999809265137
+    ],
+    "geometry_material_sha256_1e7": "d0763b87a6c054eecc975db53a60e9b313141c4602ef507090e41031ac2bcd3a",
+    "geometry_material_uv_sha256_1e7": "4b12b1f87d3385db0ff7d484ba223c35839ac641f3517f1d68d795236e15a4ee",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 176
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 44
+      },
+      {
+        "material": "RPG mirror",
+        "channel": null,
+        "triangles": 12
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 4.6,
+  "source_sha256": "1000e7a082eb4e43fd65c22f5779846cc75b96615317f6a00dd2d96f97eaadfe",
+  "front_sha256": "2373f93aeef9964f0c198c99c007eca788dda23c5e63bebf6e56714362c5c5e5",
+  "rear_sha256": "dea1cc80e73a2cf6695a27d5abb6e387980cfac9ec863169b41d8b1f561a48fa",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.728822+00:00",
+    "source_sha256_before": "8231f27441401855e4e6bd763694d8fed08cdc7c60d92d06b2f27a9703c64b2b",
+    "source_sha256_after": "1000e7a082eb4e43fd65c22f5779846cc75b96615317f6a00dd2d96f97eaadfe",
+    "mesh_geometry_uv_material_digest_preserved": "09cc7951633e3e1fb93227fe121027a4df57d15acb610cc9e801ff720e655099",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-mirror-01-rear.png",
+        "render_filepath": "//rpg-mansion-mirror-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "1000e7a082eb4e43fd65c22f5779846cc75b96615317f6a00dd2d96f97eaadfe",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

@@ -269,9 +269,13 @@ def build_model(fn,size):
 def main():
  from render_config import configure
  configure();manifest_path=old.PACK/'manifest.json';manifest=json.loads(manifest_path.read_text());items={i['id']:i for i in manifest['items']}
+ from catalogue_metadata import is_normalized, production_item, write_catalogue
+ normalized=is_normalized(manifest)
  only=sys.argv[sys.argv.index('--only')+1].split(',') if '--only' in sys.argv else None
  for slug,name,size,fn,category,elev in SPECS:
   if only and slug not in only:continue
+  if normalized and slug in {'sofa','wing-chair'}:
+   print('PRESERVED_POLISHED_SEATING '+slug+'; use polish/seating.py',flush=True);continue
   stem='rpg-mansion-'+slug+'-01';kit.clear_scene();obj=build_model(fn,size);channels={m.get('finishChannel') for m in obj.data.materials if m.get('finishChannel')}
   obj=kit.run([(stem,size,lambda fn=fn,size=size:build_model(fn,size),channels,6000)])[0]
   from png_metadata import strip_metadata
@@ -285,7 +289,11 @@ def main():
   report=kit.WORK_DIR/(stem+'-validation.json');r=json.loads(report.read_text());r['glb_bytes']=path.stat().st_size;r['glb_sha256']=hashlib.sha256(path.read_bytes()).hexdigest();report.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n')
   items[stem]=dict(id=stem,name=name,packId='rpg-mansion',group='家具',category=category,sourceFolder='BlenderRpgMansion',model=rel(path),thumb=rel(kit.PREVIEW_DIR/(stem+'-thumb.png')),top=rel(kit.PREVIEW_DIR/(stem+'-top.png')),rear=rel(kit.WORK_DIR/(stem+'-rear.png')),sourceBlend=rel(kit.WORK_DIR/(stem+'.blend')),validation=rel(report),w=size[0],d=size[1],h=size[2],defaultElevation=elev,provenance='original',builder=rel(HERE/'build.py'),finishChannels=desc,placementHint='wall' if slug in ['sconce','mirror'] else 'ceiling' if slug=='chandelier' else 'surface' if elev else 'floor',previewVersion=1)
   # Resume-safe: only successful outputs become catalogue candidates.
-  manifest.update(version='0.2.0',status='integrated-review',items=list(items.values()))
-  manifest['provenance']['license']='Original project-authored assets for this repository; no third-party material. No separate public reuse license is granted by this manifest.'
-  manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n');print('EXPANSION_COMPLETE '+stem,flush=True)
+  if normalized:
+   items[stem]=production_item(items[stem]);manifest['items']=list(items.values());write_catalogue(manifest_path,manifest)
+  else:
+   manifest.update(version='0.2.0',status='integrated-review',items=list(items.values()))
+   manifest['provenance']['license']='Original project-authored assets for this repository; no third-party material. No separate public reuse license is granted by this manifest.'
+   manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+  print('EXPANSION_COMPLETE '+stem,flush=True)
 if __name__=='__main__':main()

@@ -1,0 +1,122 @@
+{
+  "reason": "Specific root and independent QA findings on the first frozen candidate",
+  "changes": [
+    "Two hood bracket upper endpoints moved inboard/downward to remain8.2565mm inside cheek exteriors while retaining inner-shell/wall-plate contacts.",
+    "Hood flue starts exactly at2.140m canopy top; no10mm overlapping wall seam.",
+    "Two washstand side rail ends are recessed10mm into legs.",
+    "Two lifting loops use smooth planar arcs with endpoints physically seated in tub wall.",
+    "Four drying-leg lower caps are horizontal at the original ground datum; rod/pivot positions and outer bounds are unchanged.",
+    "Runner long border strips butt into full-width end strips without coplanar top overlap."
+  ],
+  "newProducts": 0,
+  "newVariants": 0,
+  "partChanges": [
+    {
+      "id": "rpg-mansion-period-range-canopy-01",
+      "authoringPartCount": 23,
+      "changedParts": [
+        "Hollow upright flue",
+        "Diagonal canopy bearing bracket",
+        "Diagonal canopy bearing bracket.001"
+      ],
+      "unchangedPartCount": 20
+    },
+    {
+      "id": "rpg-mansion-manual-wash-tub-board-01",
+      "authoringPartCount": 38,
+      "changedParts": [
+        "Stand lower side rail",
+        "Stand lower side rail.001",
+        "Tub side lifting loop",
+        "Tub side lifting loop.001"
+      ],
+      "unchangedPartCount": 34
+    },
+    {
+      "id": "rpg-mansion-hinged-timber-drying-frame-01",
+      "authoringPartCount": 32,
+      "changedParts": [
+        "Drying frame hinged timber leg",
+        "Drying frame hinged timber leg.001",
+        "Drying frame hinged timber leg.002",
+        "Drying frame hinged timber leg.003"
+      ],
+      "unchangedPartCount": 28
+    },
+    {
+      "id": "rpg-mansion-narrow-hall-runner-01",
+      "authoringPartCount": 22,
+      "changedParts": [
+        "Outer woven border",
+        "Outer woven border.001",
+        "End woven border",
+        "End woven border.001",
+        "Inner sage border",
+        "Inner sage border.001",
+        "Inner sage end border",
+        "Inner sage end border.001"
+      ],
+      "unchangedPartCount": 14
+    }
+  ],
+  "nativeMeasuredChecks": [
+    {
+      "id": "rpg-mansion-period-range-canopy-01",
+      "modelSha256": "f978a061d0dafc3c547a2620c2c2cf8bb0f006ab4de7ea62656b486877888e0a",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "allWallPlatesContactWall": true,
+        "bracketsInsideCheekExterior": true,
+        "bracketUpperEndsMeetInnerShell": true,
+        "bracketsMeetWallPlates": true,
+        "actualFlueCentreIsOpen": true,
+        "rangeClearanceAtLeast700mm": true
+      }
+    },
+    {
+      "id": "rpg-mansion-manual-wash-tub-board-01",
+      "modelSha256": "1f54d3d6e7a0fc05522c467445b7a767a543efc393b47a27cf22267637527195",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "lowerStretcherSupportedByBothSideRails": true,
+        "lowerSideRailsJoinFourLegs": true,
+        "bothLiftingLoopsSeatedInTubWall": true,
+        "boardFeetTouchBasin": true,
+        "tubSupportedByBearers": true,
+        "boardCleatsTouchActualRim": true,
+        "boardCleatsIntersectStiles": true,
+        "cavityOpenToMeasuredFloor": true
+      }
+    },
+    {
+      "id": "rpg-mansion-hinged-timber-drying-frame-01",
+      "modelSha256": "22726a3e9d37cd3868850c0bad20da3b707c23d5c11eccb08965621b05cc616a",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "fourLegsGrounded": true,
+        "fourPositiveAreaFlatFootBearings": true,
+        "everyRodHasTwoLegSupports": true,
+        "eachPivotJoinsTwoLegs": true
+      }
+    },
+    {
+      "id": "rpg-mansion-narrow-hall-runner-01",
+      "modelSha256": "2d70abca8105aec18d2e4cef833b7df34dea3976dfd0e33cd83caabc866b2024",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "floorContact": true,
+        "walkingPlaneBelow10mm": true,
+        "narrowHallFit": true
+      }
+    }
+  ],
+  "independentPreflight": "Reviewer independently passed native topology/normals/exposed-overlap graph, source re-export, actual GLB positive-area supports/cavity checks and packed UVs against the same stable geometry. Final image/package/certificate binding remains pending."
+}

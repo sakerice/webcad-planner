@@ -1,0 +1,1501 @@
+{
+  "set": "rpg-mansion",
+  "family": "modular-architecture-prototype",
+  "items": [
+    {
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "name": "1200mm raised-panel wall bay",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-wall-bay-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-wall-bay-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-rear.png",
+      "w": 1200,
+      "d": 280,
+      "h": 3000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 280,
+      "glbBytes": 23024,
+      "nativePartCount": 13,
+      "finishChannels": [
+        {
+          "key": "plaster",
+          "label": "plaster",
+          "default": "#d8cfb7"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#70503b"
+        }
+      ],
+      "moduleContract": {
+        "role": "Full-height straight panelled wall on primary grid",
+        "nominalWidthMm": 1200,
+        "wallHeightMm": 3000,
+        "wallThicknessMm": 240,
+        "connections": [
+          {
+            "label": "left",
+            "point": [
+              -0.6,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.6,
+              0.019999999552965164,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.6,
+              0.0,
+              -0.019999999552965164
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "right",
+            "point": [
+              0.6,
+              0,
+              0
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              0.6,
+              0.019999999552965164,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.6,
+              0.0,
+              -0.019999999552965164
+            ],
+            "normalGltf": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          0.019999999552965164,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 0,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "assetBottomMm": 0,
+          "groundDatumMm": 0,
+          "explanation": "Place at ground level; no source-origin or scale change required."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          -0.019999999552965164
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "measuredEnvelopeMm": {
+        "w": 1200.0,
+        "d": 280.0,
+        "h": 3000.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 1200,
+        "d": 280,
+        "h": 3000
+      },
+      "dimensionToleranceMm": 0.1,
+      "hashes": {
+        "model": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+        "sourceBlend": "4bac86df9dea39ff4db7b667ffa7aa1d66a02e5c4f4d5bd7a2dd7742c8b7e6f1",
+        "exportBlend": "4bac86df9dea39ff4db7b667ffa7aa1d66a02e5c4f4d5bd7a2dd7742c8b7e6f1",
+        "authoringBlend": "d5481dc40fb64053d91d5255c1d7fb46df0499e6d9c8cc123fb9552144c336ee",
+        "thumb": "cfdb90592185db3806ca87f9e0a4fc50bdd73f2a2cc88519b60b81504dabe230",
+        "top": "e00090aa1eeeaffce8b2207afb1e185af5ebe28c60de45252d1b8c408bb6e3fb",
+        "front": "4b6ef53bfd3384aa6b3bf30e1f081e0dbf48a7067b020df87cccdbd5fb31de2e",
+        "rear": "231023277faf24c2c9d79f98396c970e5fe12332aac2e8d980cd6eb28ba78ae2"
+      }
+    },
+    {
+      "id": "rpg-mansion-rectangular-doorway-bay-01",
+      "name": "1800mm open rectangular doorway bay",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-rear.png",
+      "w": 1800,
+      "d": 288,
+      "h": 3000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 280,
+      "glbBytes": 22584,
+      "nativePartCount": 15,
+      "finishChannels": [
+        {
+          "key": "plaster",
+          "label": "plaster",
+          "default": "#d8cfb7"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#70503b"
+        }
+      ],
+      "moduleContract": {
+        "role": "Actual 1200 x 2400mm clear through-opening within 1800mm grid bay",
+        "nominalWidthMm": 1800,
+        "wallHeightMm": 3000,
+        "wallThicknessMm": 240,
+        "clearOpeningMm": [
+          1200,
+          2400
+        ],
+        "connections": [
+          {
+            "label": "left",
+            "point": [
+              -0.9,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.9,
+              0.01900000125169754,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.9,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.9,
+              0.0,
+              -0.01900000125169754
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "right",
+            "point": [
+              0.9,
+              0,
+              0
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              0.9,
+              0.01900000125169754,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.9,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.9,
+              0.0,
+              -0.01900000125169754
+            ],
+            "normalGltf": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          0.01900000125169754,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 0,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "assetBottomMm": 0,
+          "groundDatumMm": 0,
+          "explanation": "Place at ground level; no source-origin or scale change required."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          -0.01900000125169754
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "measuredEnvelopeMm": {
+        "w": 1800.0,
+        "d": 288.0,
+        "h": 3000.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 1800,
+        "d": 288,
+        "h": 3000
+      },
+      "dimensionToleranceMm": 0.1,
+      "hashes": {
+        "model": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+        "sourceBlend": "7b9191be26cc883b44e951171cdd9c492b97ae4b923b25edc383d15d26efeb8d",
+        "exportBlend": "7b9191be26cc883b44e951171cdd9c492b97ae4b923b25edc383d15d26efeb8d",
+        "authoringBlend": "2b9c3e06ff42e0378bbe144dd4aa63175d21723a16a6f75e49921bd82ad7c9df",
+        "thumb": "3a469cfdd79ac303d6a028867a2af1b3240cfafc31498ca9537499b6763b7e3b",
+        "top": "78dc91d118f374ecdbcc7fbdcaa85ddd380e6d2b2f7d4ab1901d7013c9c39b45",
+        "front": "d75e9b15be136fcc0743f919a72716d823c98b215eb322db6d5e10d910e83eb1",
+        "rear": "a323a1469faace48eb04d75753b0b37ec608c1b3b5cd78706f3ff678f3b5b5fc"
+      }
+    },
+    {
+      "id": "rpg-mansion-paneled-return-corner-01",
+      "name": "600mm-grid paneled return corner",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-return-corner-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-return-corner-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-return-corner-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-rear.png",
+      "w": 720,
+      "d": 720,
+      "h": 3000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 326,
+      "glbBytes": 26020,
+      "nativePartCount": 13,
+      "finishChannels": [
+        {
+          "key": "plaster",
+          "label": "plaster",
+          "default": "#d8cfb7"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#70503b"
+        }
+      ],
+      "moduleContract": {
+        "role": "Continuous concave panelled return with two 600mm datum arms and mitred trims",
+        "wallHeightMm": 3000,
+        "wallThicknessMm": 240,
+        "connections": [
+          {
+            "label": "west",
+            "point": [
+              -0.6,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.3599999904632568,
+              0.24000000953674316,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.3599999904632568,
+              0.0,
+              -0.24000000953674316
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "south",
+            "point": [
+              0,
+              -0.6,
+              0
+            ],
+            "normal": [
+              0,
+              -1,
+              0
+            ],
+            "assetPointM": [
+              0.24000000953674316,
+              -0.3599999904632568,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "assetPointGltfM": [
+              0.24000000953674316,
+              0.0,
+              0.3599999904632568
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          0.24000000953674316,
+          0.24000000953674316,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 0,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "assetBottomMm": 0,
+          "groundDatumMm": 0,
+          "explanation": "Place at ground level; no source-origin or scale change required."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.24000000953674316,
+          0.0,
+          -0.24000000953674316
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "measuredEnvelopeMm": {
+        "w": 720.0,
+        "d": 720.0,
+        "h": 3000.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 720,
+        "d": 720,
+        "h": 3000
+      },
+      "dimensionToleranceMm": 0.1,
+      "hashes": {
+        "model": "eeaca0f153284cba991460371c05c622e9062e6cbf62127ce38e8da4712bc4b2",
+        "sourceBlend": "58355ce6cec1a9d63b68065ad8fa3008f46f642342e834d7b09ad7bf2e926b4a",
+        "exportBlend": "58355ce6cec1a9d63b68065ad8fa3008f46f642342e834d7b09ad7bf2e926b4a",
+        "authoringBlend": "599c98a509454dda8b8f9336e84a96f777b82ef03a58020154d0d541651de723",
+        "thumb": "82ea61b2f51889692ed149c6b90ffa922b41c95bef3fd9662a582e0f806f932b",
+        "top": "3f3e77944494b83e4e5d4cfe55620e3adbb417dc1a07387782cc660cee259307",
+        "front": "df48c8768d491955ae61a7e7934931b2d603ef43bcf570e9246334e9db50fb32",
+        "rear": "8107804713b6e829e8a958922afb2fb2604f94e48df41213c5b047b857f2b6a7"
+      }
+    },
+    {
+      "id": "rpg-mansion-slate-gable-span-01",
+      "name": "3600mm-bearing hollow slate gable span",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slate-gable-span-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slate-gable-span-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slate-gable-span-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-rear.png",
+      "w": 4200,
+      "d": 1200,
+      "h": 1548,
+      "defaultElevation": 2900,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 1672,
+      "glbBytes": 120552,
+      "nativePartCount": 66,
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#71694f"
+        },
+        {
+          "key": "roof",
+          "label": "roof",
+          "default": "#414c58"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#70503b"
+        }
+      ],
+      "moduleContract": {
+        "role": "1200mm-repeat hollow roof shell with 3600mm paired bearing centres, 180mm eave beyond wall outer face",
+        "nominalRunMm": 1200,
+        "bearingCentreSpanMm": 3600,
+        "bearingSeatHeightMm": 100,
+        "bearingSeatWidthMm": 240,
+        "wallExteriorSpanMm": 3840,
+        "eaveBeyondWallMm": 180,
+        "slateNominalWidthMm": 300,
+        "slateCourseStaggerMm": 150,
+        "slateLapMm": 10,
+        "repeatBoundaryHalfTiles": "Alternate courses clip a tile at each run end; the two halves meet without a gap or bevel across a repeat seam",
+        "pitchSlope": 0.7,
+        "pitchDegrees": 34.99202019855866,
+        "roofInstallationElevationMm": 2900,
+        "connections": [
+          {
+            "label": "front-repeat",
+            "point": [
+              0,
+              -0.6,
+              0
+            ],
+            "normal": [
+              0,
+              -1,
+              0
+            ],
+            "assetPointM": [
+              0.0,
+              -0.6,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          {
+            "label": "rear-repeat",
+            "point": [
+              0,
+              0.6,
+              0
+            ],
+            "normal": [
+              0,
+              1,
+              0
+            ],
+            "assetPointM": [
+              0.0,
+              0.6,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              -0.6
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              -0.6
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              -1.0
+            ]
+          },
+          {
+            "label": "west-bearing",
+            "point": [
+              -1.8,
+              0,
+              0.1
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              -1.8,
+              0.0,
+              0.1
+            ],
+            "constructionPointGltfM": [
+              -1.8,
+              0.1,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -1.8,
+              0.1,
+              0.0
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          },
+          {
+            "label": "east-bearing",
+            "point": [
+              1.8,
+              0,
+              0.1
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              1.8,
+              0.0,
+              0.1
+            ],
+            "constructionPointGltfM": [
+              1.8,
+              0.1,
+              0.0
+            ],
+            "assetPointGltfM": [
+              1.8,
+              0.1,
+              0.0
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 2900,
+        "wallTopDatumMm": 3000,
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "placementExample": {
+          "bareWallTopMm": 3000,
+          "assetBottomMm": 2900,
+          "bearingSeatLocalHeightMm": 100,
+          "resultingBearingMm": 3000,
+          "onCorniceTopMm": 3240,
+          "onCorniceAssetBottomMm": 3140,
+          "stackAdjustmentMm": 240,
+          "explanation": "Raise the roof by 240 mm when its bearing sits on a 240 mm cornice; the hollow shell eave remains 100 mm below its bearing seat."
+        }
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "measuredEnvelopeMm": {
+        "w": 4199.9998,
+        "d": 1200.0,
+        "h": 1548.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 4200,
+        "d": 1200,
+        "h": 1548
+      },
+      "dimensionToleranceMm": 0.1,
+      "hashes": {
+        "model": "ab98e580b7c4c7739301a052ffb00646ad05fd3bed040263ab33db3b195756ae",
+        "sourceBlend": "0d7dcecf976303f4abceae5ee0224f85a87466124633f393441f4e877dabe516",
+        "exportBlend": "0d7dcecf976303f4abceae5ee0224f85a87466124633f393441f4e877dabe516",
+        "authoringBlend": "d12ab41017a66905ce82348107544900d7dfb18d13f7fe27eb54a90392afdc5f",
+        "thumb": "484fdab7b93306fed5ec678bed6f7668c943970880af466d56715dcc81d9d7c5",
+        "top": "74d216dca1ffc29ca3d2f93614baed7b3eacce3a7ba5d69b7e834eb65f2409ec",
+        "front": "ddc18af52b00108adc7d409e09ca984c4aeac41a77125cfa4d8c4fc1c5611fc2",
+        "rear": "423c79852817adc3209eb70c3e07fb3ea32f8398a9d131be063df1b753832488"
+      }
+    },
+    {
+      "id": "rpg-mansion-gable-end-closure-01",
+      "name": "3360mm between-bearing gable end closure",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gable-end-closure-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gable-end-closure-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gable-end-closure-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-rear.png",
+      "w": 3360,
+      "d": 273,
+      "h": 1370,
+      "defaultElevation": 3000,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 48,
+      "glbBytes": 7088,
+      "nativePartCount": 4,
+      "finishChannels": [
+        {
+          "key": "plaster",
+          "label": "plaster",
+          "default": "#d8cfb7"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#70503b"
+        }
+      ],
+      "moduleContract": {
+        "role": "Measured pitched end wall between roof bearing seats; the seats close the outer shoulders of the 3840mm exterior-wall envelope",
+        "nominalWallExteriorSpanMm": 3840,
+        "betweenBearingClosureWidthMm": 3360,
+        "pitchSlope": 0.7,
+        "installationElevationMm": 3000,
+        "connections": [
+          {
+            "label": "wall-top",
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              0.0,
+              0.016499999910593033,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              -0.016499999910593033
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          },
+          {
+            "label": "ridge-underside",
+            "point": [
+              0,
+              0,
+              1.37
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "assetPointM": [
+              0.0,
+              0.016499999910593033,
+              1.37
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              1.37,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              1.37,
+              -0.016499999910593033
+            ],
+            "normalGltf": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          0.016499999910593033,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 3000,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "bareWallTopMm": 3000,
+          "assetBottomMm": 3000,
+          "onCorniceTopMm": 3240,
+          "onCorniceAssetBottomMm": 3240,
+          "stackAdjustmentMm": 240,
+          "explanation": "Raise the fitted gable by the same 240 mm as the roof when stacking both on the cornice."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          -0.016499999910593033
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "measuredEnvelopeMm": {
+        "w": 3359.9999,
+        "d": 273.0,
+        "h": 1370.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 3360,
+        "d": 273,
+        "h": 1370
+      },
+      "dimensionToleranceMm": 0.1,
+      "hashes": {
+        "model": "7b4078f59fd9b5b093f8c7ca54bedf227d96e0bb7a2dbbfb49bed74993516713",
+        "sourceBlend": "968f6f816cc68ee26c5903e2195b5fdf5f5d227b31ea063425d362b41afec0bf",
+        "exportBlend": "968f6f816cc68ee26c5903e2195b5fdf5f5d227b31ea063425d362b41afec0bf",
+        "authoringBlend": "c5bb4c13cb7486021942dbc40a54834ba0b3dd0c69770074decc2c197b32de5a",
+        "thumb": "c246cdd99818101704bdfd9c8ad3bc6329eaf5ed30f0e733492124e6d00c951f",
+        "top": "95d5218021c9d83c6bd45735c996fc69b580101ab3598a243667f1fc6cdb7827",
+        "front": "b9e2a47f6b43f97af2172abb22367779bc2102dd31598b014aff9c163264fe8e",
+        "rear": "d8669f1cc56f7c5019b98ae751f326f5e1b963da4d2576102bcda2b0f5279115"
+      }
+    },
+    {
+      "id": "rpg-mansion-stone-cornice-straight-01",
+      "name": "1200mm profiled stone cornice",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-straight-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-straight-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-straight-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-rear.png",
+      "w": 1200,
+      "d": 420,
+      "h": 240,
+      "defaultElevation": 3000,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 40,
+      "glbBytes": 4152,
+      "nativePartCount": 1,
+      "finishChannels": [
+        {
+          "key": "stone",
+          "label": "stone",
+          "default": "#c4b590"
+        }
+      ],
+      "moduleContract": {
+        "role": "Level bearing cornice with profiled face and matched butt ends",
+        "nominalWidthMm": 1200,
+        "connections": [
+          {
+            "label": "left",
+            "point": [
+              -0.6,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.6,
+              0.09000000357627869,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.6,
+              0.0,
+              -0.09000000357627869
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "right",
+            "point": [
+              0.6,
+              0,
+              0
+            ],
+            "normal": [
+              1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              0.6,
+              0.09000000357627869,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.6,
+              0.0,
+              -0.09000000357627869
+            ],
+            "normalGltf": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "bearing",
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              0.0,
+              0.09000000357627869,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              -0.09000000357627869
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          0.09000000357627869,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 3000,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "bareWallOrColumnTopMm": 3000,
+          "assetBottomMm": 3000,
+          "assetTopMm": 3240,
+          "explanation": "Bottom plane bears on the 3000 mm wall or column datum. Matched roof and gable then rise by 240 mm if installed above this cornice."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          -0.09000000357627869
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "hashes": {
+        "model": "d4351039b2b44e9a8663d12607b2302ceca071442709ce67f7337ab6424fd3fb",
+        "sourceBlend": "45fedb6f68609628f6edfd08a7a1762a225b5c426892d51d1079643d5bdf40d1",
+        "exportBlend": "45fedb6f68609628f6edfd08a7a1762a225b5c426892d51d1079643d5bdf40d1",
+        "authoringBlend": "2ca1eb3e1da0d5d9dbdbcc1c9af2c9360bfbb01cf789aa258a745b041ca336c2",
+        "thumb": "3b6849edffe8fec1f84f00a6f69ae94bc79a8d1cb0c83c4ad8cad5a3f857c38e",
+        "top": "672cea8389d8ac2d12e2e2bf0c03d14da2bdfa9783ff4d171b85d08a5be78825",
+        "front": "9cd69f42784a1ed20c4684968dcd6ba780c23634971f05aa117dd4366f071dbe",
+        "rear": "4f19fc0ff37adcc3c38aee5dd86fa0cc450adc7a3c857d6771654db89e348c90"
+      },
+      "measuredEnvelopeMm": {
+        "w": 1200.0,
+        "d": 420.0,
+        "h": 240.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 1200,
+        "d": 420,
+        "h": 240
+      },
+      "dimensionToleranceMm": 0.1
+    },
+    {
+      "id": "rpg-mansion-stone-cornice-corner-01",
+      "name": "600mm-grid mitred stone cornice corner",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-corner-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-corner-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-corner-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-rear.png",
+      "w": 720,
+      "d": 720,
+      "h": 240,
+      "defaultElevation": 3000,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 62,
+      "glbBytes": 5744,
+      "nativePartCount": 1,
+      "finishChannels": [
+        {
+          "key": "stone",
+          "label": "stone",
+          "default": "#c4b590"
+        }
+      ],
+      "moduleContract": {
+        "role": "One continuous 90-degree cornice return with true matching mitred profiles",
+        "connections": [
+          {
+            "label": "west",
+            "point": [
+              -0.6,
+              0,
+              0
+            ],
+            "normal": [
+              -1,
+              0,
+              0
+            ],
+            "assetPointM": [
+              -0.3599999904632568,
+              0.24000000953674316,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              -0.6,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              -0.3599999904632568,
+              0.0,
+              -0.24000000953674316
+            ],
+            "normalGltf": [
+              -1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "label": "south",
+            "point": [
+              0,
+              -0.6,
+              0
+            ],
+            "normal": [
+              0,
+              -1,
+              0
+            ],
+            "assetPointM": [
+              0.24000000953674316,
+              -0.3599999904632568,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "assetPointGltfM": [
+              0.24000000953674316,
+              0.0,
+              0.3599999904632568
+            ],
+            "normalGltf": [
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          {
+            "label": "bearing",
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              0.24000000953674316,
+              0.24000000953674316,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.24000000953674316,
+              0.0,
+              -0.24000000953674316
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          0.24000000953674316,
+          0.24000000953674316,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 3000,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "bareWallOrColumnTopMm": 3000,
+          "assetBottomMm": 3000,
+          "assetTopMm": 3240,
+          "explanation": "Bottom plane bears on the 3000 mm wall or column datum. Matched roof and gable then rise by 240 mm if installed above this cornice."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.24000000953674316,
+          0.0,
+          -0.24000000953674316
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "hashes": {
+        "model": "5c082dce1194992cb26a2797667c7d494afbb43416382493c67c33c60238ea4f",
+        "sourceBlend": "557c75aae080a1e47e5e18201f012d27a6cff1abf264d64d1b808e5b77be717f",
+        "exportBlend": "557c75aae080a1e47e5e18201f012d27a6cff1abf264d64d1b808e5b77be717f",
+        "authoringBlend": "342dc01d4a80975afae84376f6246bbcc2345e25bff94884aab3886b2a03aeda",
+        "thumb": "70682795dc17e81212f0e9050318cb54d140da29db23e5066cae55c8e2a9ba56",
+        "top": "e67efae2ca57ca6c69fa08670f829928fdac0b55915f2e2c11ad6be07e6234f0",
+        "front": "f3ea834c77c64c3da026e49137537be6f4f6932c107b625cd055d396113b8d71",
+        "rear": "a53ab81946f01fee9b8b056109d3cc074dc036c0d380378dad3ba3384ebb78fb"
+      },
+      "measuredEnvelopeMm": {
+        "w": 720.0,
+        "d": 720.0,
+        "h": 240.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 720,
+        "d": 720,
+        "h": 240
+      },
+      "dimensionToleranceMm": 0.1
+    },
+    {
+      "id": "rpg-mansion-tuscan-support-column-01",
+      "name": "3000mm Tuscan support column",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u5efa\u7bc9\u90e8\u6750",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tuscan-support-column-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tuscan-support-column-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tuscan-support-column-01-top.png",
+      "front": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-front.png",
+      "rear": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-rear.png",
+      "w": 600,
+      "d": 600,
+      "h": 3000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-authoring.blend",
+      "validation": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "triangleBudget": 6000,
+      "measuredTriangles": 1940,
+      "glbBytes": 134776,
+      "nativePartCount": 3,
+      "finishChannels": [
+        {
+          "key": "stone",
+          "label": "stone",
+          "default": "#c4b590"
+        }
+      ],
+      "moduleContract": {
+        "role": "Grounded entasis shaft, turned base and capital, square 600mm bearing plates",
+        "columnHeightMm": 3000,
+        "capitalBearingMm": [
+          600,
+          600
+        ],
+        "connections": [
+          {
+            "label": "ground",
+            "point": [
+              0,
+              0,
+              0
+            ],
+            "normal": [
+              0,
+              0,
+              -1
+            ],
+            "assetPointM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "normalGltf": [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          },
+          {
+            "label": "capital",
+            "point": [
+              0,
+              0,
+              3
+            ],
+            "normal": [
+              0,
+              0,
+              1
+            ],
+            "assetPointM": [
+              0.0,
+              0.0,
+              3.0
+            ],
+            "constructionPointGltfM": [
+              0.0,
+              3.0,
+              0.0
+            ],
+            "assetPointGltfM": [
+              0.0,
+              3.0,
+              0.0
+            ],
+            "normalGltf": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          }
+        ],
+        "constructionToAssetTranslationM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "units": "metres",
+        "connectionFrame": "Blender XYZ / Z up",
+        "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / exported glTF Y-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+        "gridMm": [
+          1200,
+          600
+        ],
+        "defaultAssetBottomElevationMm": 0,
+        "wallTopDatumMm": 3000,
+        "placementExample": {
+          "assetBottomMm": 0,
+          "groundDatumMm": 0,
+          "explanation": "Place at ground level; no source-origin or scale change required."
+        },
+        "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use the exported bottom-centre origin",
+        "axisConversion": "glTF(x,y,z) = (Blender.x, Blender.z, -Blender.y)",
+        "constructionToAssetTranslationGltfM": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "placementNotes": "Static modular architecture for manual rigid placement. Opening holes are geometry, not native wall cutters. Roofs are hollow static shells, not parametric or automatic roofs. No collision, stairs, light mechanism, or structural engineering certification implied.",
+      "rights": {
+        "status": "original",
+        "creator": "OpenAI assistant using native Blender authoring",
+        "sources": [],
+        "externalGeometry": false,
+        "externalImages": false,
+        "licenseBasis": "Original procedural geometry created for this project"
+      },
+      "acceptanceStatus": "Prototype pending coordinator visual review and independent QA",
+      "hashes": {
+        "model": "3e91566d0b06e62314142670e9d3fce2bdda2a52132d9e5ce8140b75435c824e",
+        "sourceBlend": "4d492526eff50d25c7d5f8a46d71d70c2c046c3ac1aa336b13ef439fb4afff45",
+        "exportBlend": "4d492526eff50d25c7d5f8a46d71d70c2c046c3ac1aa336b13ef439fb4afff45",
+        "authoringBlend": "5d4cc24391404f6029cacf6a08853aa54bfa1da16a04cade5866dbcb149cb838",
+        "thumb": "ba81aad45cfd25a1bfdcd6f802f959e5d3d6c566a2d19b1e25fc0f30d49cc75d",
+        "top": "5449997545502621177f3f373e6b0b777255cd1f6d51887baf4c24cb13472f8d",
+        "front": "bf5a2a95b558630898a4658cd0a1e91ea26a0937ec6a1b7c765a6fa374b926f7",
+        "rear": "28c120db5dfed53957882db8fc9811ff259bbbcaf1ef9b48662555109caf3843"
+      },
+      "measuredEnvelopeMm": {
+        "w": 600.0,
+        "d": 600.0,
+        "h": 3000.0
+      },
+      "nominalEnvelopeMm": {
+        "w": 600,
+        "d": 600,
+        "h": 3000
+      },
+      "dimensionToleranceMm": 0.1
+    }
+  ]
+}

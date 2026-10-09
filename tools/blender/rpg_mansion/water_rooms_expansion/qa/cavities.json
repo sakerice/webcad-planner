@@ -1,0 +1,322 @@
+{
+  "method": "Reopened native actual cavity-floor and internal-seat rays for every open vessel.",
+  "items": [
+    {
+      "id": "rpg-mansion-copper-bateau-cradle-bath-01",
+      "sourceSha256": "23c474f664b27e268eed6a3e40d6145fce3b5732dbf6b2146815833d3fb5a94f",
+      "checks": [
+        {
+          "part": "Bateau continuous copper hull and open cavity",
+          "actualRayOriginM": [
+            0.0,
+            0.0,
+            0.6099900007247925
+          ],
+          "actualFirstDownwardHitM": [
+            0.0,
+            0.0,
+            0.16599997878074646
+          ],
+          "expectedHeightM": 0.166,
+          "errorM": 2.1219253548698802e-08,
+          "actualClearDepthM": 0.443990021944046,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-paneled-built-in-bath-01",
+      "sourceSha256": "e094b81cb1f1aeadba8d53ebdc60ae0626fa19488700c6ca52288f4ea125f6af",
+      "checks": [
+        {
+          "part": "Built-in porcelain bath shell and continuous inset rim",
+          "actualRayOriginM": [
+            0.0,
+            0.0,
+            0.6099900007247925
+          ],
+          "actualFirstDownwardHitM": [
+            0.0,
+            0.0,
+            0.14499995112419128
+          ],
+          "expectedHeightM": 0.145,
+          "errorM": 4.8875808705828305e-08,
+          "actualClearDepthM": 0.4649900496006012,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-quadrant-corner-bath-01",
+      "sourceSha256": "a472a49fc93b244d91e8063a118d185113fd8aa491580614b4c5c39304b21353",
+      "checks": [
+        {
+          "part": "True quadrant corner bath continuous shell and cavity",
+          "actualRayOriginM": [
+            0.12999999523162842,
+            0.12999999523162842,
+            0.6099900007247925
+          ],
+          "actualFirstDownwardHitM": [
+            0.12999999523162842,
+            0.12999999523162842,
+            0.13999998569488525
+          ],
+          "expectedHeightM": 0.14,
+          "errorM": 1.4305114759416426e-08,
+          "actualClearDepthM": 0.4699900150299072,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-deep-seated-hip-bath-01",
+      "sourceSha256": "6dc56fd0049ea7660ff7454f86c918e7f9f80f7682e94d8a28bfd08f1a1474f4",
+      "checks": [
+        {
+          "part": "Deep hip bath continuous high-sided hollow shell",
+          "actualRayOriginM": [
+            0.23999999463558197,
+            0.0,
+            0.8599900007247925
+          ],
+          "actualFirstDownwardHitM": [
+            0.23999999463558197,
+            0.0,
+            0.14999991655349731
+          ],
+          "expectedHeightM": 0.15,
+          "errorM": 8.344650267999576e-08,
+          "actualClearDepthM": 0.7099900841712952,
+          "pass": true
+        },
+        {
+          "part": "Hip bath internal raised sitting bench",
+          "actualRayOriginM": [
+            -0.2849999964237213,
+            0.0,
+            0.8599900007247925
+          ],
+          "actualFirstDownwardHitM": [
+            -0.2849999964237213,
+            0.0,
+            0.43800002336502075
+          ],
+          "expectedHeightM": 0.438,
+          "errorM": 2.3365020751509036e-08,
+          "actualClearDepthM": 0.42198997735977173,
+          "pass": true
+        },
+        {
+          "part": "Hip bath internal raised sitting bench",
+          "outerHullActualVertexCount": 200,
+          "actualBenchVertexCount": 75,
+          "benchVerticesOutsideActualOuterHull": [],
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-double-basin-open-console-01",
+      "sourceSha256": "1f399049b6e588d9cf298b70d40d5034dbb7db0147102d53a3e20757a035d67a",
+      "checks": [
+        {
+          "part": "Console hollow basin -1",
+          "actualRayOriginM": [
+            -0.36000001430511475,
+            -0.04500000178813934,
+            0.8389899730682373
+          ],
+          "actualFirstDownwardHitM": [
+            -0.36000001430511475,
+            -0.04500000178813934,
+            0.7210000157356262
+          ],
+          "expectedHeightM": 0.721,
+          "errorM": 1.57356262464603e-08,
+          "actualClearDepthM": 0.11798996478319168,
+          "pass": true
+        },
+        {
+          "part": "Console hollow basin 1",
+          "actualRayOriginM": [
+            0.36000001430511475,
+            -0.04500000178813934,
+            0.8389899730682373
+          ],
+          "actualFirstDownwardHitM": [
+            0.36000001430511475,
+            -0.04500000178813934,
+            0.7210000157356262
+          ],
+          "expectedHeightM": 0.721,
+          "errorM": 1.57356262464603e-08,
+          "actualClearDepthM": 0.11798996478319168,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-portable-bowl-jug-washstand-01",
+      "sourceSha256": "509e51affb77feac6ebc8ef9acd1a2eee9fe0c6f63fa65bca24d9353f3c2d057",
+      "checks": [
+        {
+          "part": "Portable washstand loose hollow washing bowl",
+          "actualRayOriginM": [
+            -0.08500001579523087,
+            -0.006220253184437752,
+            0.8939899802207947
+          ],
+          "actualFirstDownwardHitM": [
+            -0.08500001579523087,
+            -0.006220253184437752,
+            0.7739999890327454
+          ],
+          "expectedHeightM": 0.774,
+          "errorM": 1.0967254659988157e-08,
+          "actualClearDepthM": 0.11998999118804932,
+          "pass": true
+        },
+        {
+          "part": "Portable ceramic water jug hollow body",
+          "actualRayOriginM": [
+            0.1759999841451645,
+            0.14677974581718445,
+            1.0469900369644165
+          ],
+          "actualFirstDownwardHitM": [
+            0.1759999841451645,
+            0.14677974581718445,
+            0.7680000066757202
+          ],
+          "expectedHeightM": 0.768,
+          "errorM": 6.6757201988565384e-09,
+          "actualClearDepthM": 0.2789900302886963,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-two-wall-corner-basin-01",
+      "sourceSha256": "a6162f08a862277e52c5d18c565f3b22ef17bb659769df7597a26d6d68fe839c",
+      "checks": [
+        {
+          "part": "Corner basin quarter-front hollow shell",
+          "actualRayOriginM": [
+            0.052000004798173904,
+            0.052000004798173904,
+            0.31998997926712036
+          ],
+          "actualFirstDownwardHitM": [
+            0.052000004798173904,
+            0.052000004798173904,
+            0.20399999618530273
+          ],
+          "expectedHeightM": 0.204,
+          "errorM": 3.814697252524368e-09,
+          "actualClearDepthM": 0.11598997563123703,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-freestanding-bath-bridge-filler-01",
+      "sourceSha256": "21c65772e17231da7e87c293db50006696347e55b9dcd0b0af19d80eed0ce2df",
+      "checks": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-rail-hand-shower-hose-01",
+      "sourceSha256": "0e499241ed9e55911fb1b48b55d07e27b7ae033bd5d69d9a0ac7987790c9fdc3",
+      "checks": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-overhead-brass-standpipe-01",
+      "sourceSha256": "5f8c7af33f70e21dbbc1384889a305c5d6ec7cff208eef83d2b785f3d6fd75b6",
+      "checks": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-tankless-flushometer-wc-01",
+      "sourceSha256": "fcf6293ef24659802abad5db49f5a409cea128593a86b4361dc45615cdd731c6",
+      "checks": [
+        {
+          "part": "Flushometer WC continuous hollow bowl and broad foot",
+          "actualRayOriginM": [
+            0.0,
+            -0.10574999451637268,
+            0.40998998284339905
+          ],
+          "actualFirstDownwardHitM": [
+            0.0,
+            -0.10574999451637268,
+            0.25999999046325684
+          ],
+          "expectedHeightM": 0.26,
+          "errorM": 9.536743172944284e-09,
+          "actualClearDepthM": 0.14998997747898102,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-single-basin-mirrored-cabinet-01",
+      "sourceSha256": "194ae6d2a68776ad5253d0b96859f8b781bcd6c4cfa988bdc03d458222e1de81",
+      "checks": [
+        {
+          "part": "Single cabinet basin continuous hollow shell",
+          "actualRayOriginM": [
+            0.0,
+            -0.022842608392238617,
+            0.8589900135993958
+          ],
+          "actualFirstDownwardHitM": [
+            0.0,
+            -0.022842608392238617,
+            0.7409999966621399
+          ],
+          "expectedHeightM": 0.741,
+          "errorM": 3.3378600994282692e-09,
+          "actualClearDepthM": 0.11799001693725586,
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-framed-glass-shower-enclosure-01",
+      "sourceSha256": "4613189a4e86111c88afb1ae17f8ffb7d3469db54b0dfed1a26c4420fe654579",
+      "checks": [
+        {
+          "part": "Enclosure genuinely hollow shower tray",
+          "actualRayOriginM": [
+            0.0,
+            0.011000007390975952,
+            0.123989999294281
+          ],
+          "actualFirstDownwardHitM": [
+            0.0,
+            0.011000007390975952,
+            0.034999996423721313
+          ],
+          "expectedHeightM": 0.035,
+          "errorM": 3.5762786898541066e-09,
+          "actualClearDepthM": 0.08899000287055969,
+          "pass": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": 0
+}

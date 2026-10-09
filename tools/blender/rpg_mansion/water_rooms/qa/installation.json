@@ -1,0 +1,396 @@
+{
+  "method": "Geometric cavity rays and local intended-bearing probes on reopened sources.",
+  "items": [
+    {
+      "id": "rpg-mansion-bracketed-wall-basin-01",
+      "source_sha256": "0931a9211c841e79bb92ea860ecf1143eea5b16b68d31420ccf6ffb1a4c17934",
+      "intended_bearing_probes": [
+        {
+          "label": "Basin underside bearing -1",
+          "original_blender_point_m": [
+            -0.185,
+            -0.02,
+            0.178
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.1850000023841858,
+            -0.0325000025331974,
+            0.17800000309944153
+          ],
+          "inside_or_on_expected_parts": {
+            "Wall basin continuous shell with broad rear tap deck": true,
+            "Bracket top horizontal bearing -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Basin diagonal rear anchor -1",
+          "original_blender_point_m": [
+            -0.185,
+            0.268,
+            0.045
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.1850000023841858,
+            0.25550001859664917,
+            0.04500000178813934
+          ],
+          "inside_or_on_expected_parts": {
+            "Triangulated lower wall brace -1": true,
+            "Wall bearing plate -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Basin diagonal front endpoint -1",
+          "original_blender_point_m": [
+            -0.185,
+            -0.12,
+            0.157
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.1850000023841858,
+            -0.13249999284744263,
+            0.15700000524520874
+          ],
+          "inside_or_on_expected_parts": {
+            "Triangulated lower wall brace -1": true,
+            "Bracket top horizontal bearing -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Basin underside bearing 1",
+          "original_blender_point_m": [
+            0.185,
+            -0.02,
+            0.178
+          ],
+          "actual_bottom_centered_point_m": [
+            0.1850000023841858,
+            -0.0325000025331974,
+            0.17800000309944153
+          ],
+          "inside_or_on_expected_parts": {
+            "Wall basin continuous shell with broad rear tap deck": true,
+            "Bracket top horizontal bearing 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Basin diagonal rear anchor 1",
+          "original_blender_point_m": [
+            0.185,
+            0.268,
+            0.045
+          ],
+          "actual_bottom_centered_point_m": [
+            0.1850000023841858,
+            0.25550001859664917,
+            0.04500000178813934
+          ],
+          "inside_or_on_expected_parts": {
+            "Triangulated lower wall brace 1": true,
+            "Wall bearing plate 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Basin diagonal front endpoint 1",
+          "original_blender_point_m": [
+            0.185,
+            -0.12,
+            0.157
+          ],
+          "actual_bottom_centered_point_m": [
+            0.1850000023841858,
+            -0.13249999284744263,
+            0.15700000524520874
+          ],
+          "inside_or_on_expected_parts": {
+            "Triangulated lower wall brace 1": true,
+            "Bracket top horizontal bearing 1": true
+          },
+          "pass": true
+        }
+      ],
+      "actual_cavity_ray": {
+        "rim_probe_m": [
+          0.0,
+          -0.06750000268220901,
+          0.33899998664855957
+        ],
+        "first_downward_hit_m": [
+          0.0,
+          -0.06750000268220901,
+          0.20000001788139343
+        ],
+        "expected_internal_floor_height_m": 0.2,
+        "open_depth_m": 0.13899996876716614,
+        "floor_error_m": 1.7881393421514957e-08
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-high-cistern-chain-wc-01",
+      "source_sha256": "7eacc9243ae70f897e4762137421c53919881951d74d64a21afb2da240c68195",
+      "intended_bearing_probes": [
+        {
+          "label": "Tank bearing arm into tank floor -1",
+          "original_blender_point_m": [
+            -0.2,
+            0.25,
+            1.742
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.24400000274181366,
+            0.20000000298023224,
+            1.7419999837875366
+          ],
+          "inside_or_on_expected_parts": {
+            "High porcelain cistern closed hollow tank body": true,
+            "High tank horizontal load-bearing arm -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Tank diagonal rear plate -1",
+          "original_blender_point_m": [
+            -0.2,
+            0.43,
+            1.63
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.24400000274181366,
+            0.3799999952316284,
+            1.6299999952316284
+          ],
+          "inside_or_on_expected_parts": {
+            "High tank triangulated bracket -1": true,
+            "High tank wall bearing plate -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Tank diagonal front endpoint -1",
+          "original_blender_point_m": [
+            -0.2,
+            0.21,
+            1.732
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.24400000274181366,
+            0.1599999964237213,
+            1.7319999933242798
+          ],
+          "inside_or_on_expected_parts": {
+            "High tank triangulated bracket -1": true,
+            "High tank horizontal load-bearing arm -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Tank bearing arm into tank floor 1",
+          "original_blender_point_m": [
+            0.2,
+            0.25,
+            1.742
+          ],
+          "actual_bottom_centered_point_m": [
+            0.15600000321865082,
+            0.20000000298023224,
+            1.7419999837875366
+          ],
+          "inside_or_on_expected_parts": {
+            "High porcelain cistern closed hollow tank body": true,
+            "High tank horizontal load-bearing arm 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Tank diagonal rear plate 1",
+          "original_blender_point_m": [
+            0.2,
+            0.43,
+            1.63
+          ],
+          "actual_bottom_centered_point_m": [
+            0.15600000321865082,
+            0.3799999952316284,
+            1.6299999952316284
+          ],
+          "inside_or_on_expected_parts": {
+            "High tank triangulated bracket 1": true,
+            "High tank wall bearing plate 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Tank diagonal front endpoint 1",
+          "original_blender_point_m": [
+            0.2,
+            0.21,
+            1.732
+          ],
+          "actual_bottom_centered_point_m": [
+            0.15600000321865082,
+            0.1599999964237213,
+            1.7319999933242798
+          ],
+          "inside_or_on_expected_parts": {
+            "High tank triangulated bracket 1": true,
+            "High tank horizontal load-bearing arm 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "WC seat load pad -0.135",
+          "original_blender_point_m": [
+            -0.14500000000000002,
+            -0.06,
+            0.4195
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.1889999955892563,
+            -0.10999999940395355,
+            0.4194999933242798
+          ],
+          "inside_or_on_expected_parts": {
+            "WC integrated porcelain foot and actually hollow bowl": true,
+            "Seat load pad -0.135": true
+          },
+          "pass": true
+        },
+        {
+          "label": "WC seat load pad 0.135",
+          "original_blender_point_m": [
+            0.14500000000000002,
+            -0.06,
+            0.4195
+          ],
+          "actual_bottom_centered_point_m": [
+            0.10099999606609344,
+            -0.10999999940395355,
+            0.4194999933242798
+          ],
+          "inside_or_on_expected_parts": {
+            "WC integrated porcelain foot and actually hollow bowl": true,
+            "Seat load pad 0.135": true
+          },
+          "pass": true
+        }
+      ],
+      "actual_cavity_ray": {
+        "rim_probe_m": [
+          -0.04399999976158142,
+          -0.11999999731779099,
+          0.4189999997615814
+        ],
+        "first_downward_hit_m": [
+          -0.04399999976158142,
+          -0.11999999731779099,
+          0.27000001072883606
+        ],
+        "expected_internal_floor_height_m": 0.27,
+        "open_depth_m": 0.14899998903274536,
+        "floor_error_m": 1.0728836041806744e-08
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-high-backed-slipper-bath-01",
+      "source_sha256": "5c87a94336f78e7c2588e1739440e9520e7e8c3ecd74f54709482556dd3e4ff6",
+      "intended_bearing_probes": [
+        {
+          "label": "Bath casting head into shell -1 -1",
+          "original_blender_point_m": [
+            -0.48,
+            -0.13,
+            0.195
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.47999998927116394,
+            -0.12999999523162842,
+            0.19499999284744263
+          ],
+          "inside_or_on_expected_parts": {
+            "Slipper bath continuous porcelain shell with hollow bathing cavity": true,
+            "Load-bearing cast slipper foot -1 -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Bath casting head into shell -1 1",
+          "original_blender_point_m": [
+            -0.48,
+            0.13,
+            0.195
+          ],
+          "actual_bottom_centered_point_m": [
+            -0.47999998927116394,
+            0.12999999523162842,
+            0.19499999284744263
+          ],
+          "inside_or_on_expected_parts": {
+            "Slipper bath continuous porcelain shell with hollow bathing cavity": true,
+            "Load-bearing cast slipper foot -1 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Bath casting head into shell 1 -1",
+          "original_blender_point_m": [
+            0.48,
+            -0.13,
+            0.195
+          ],
+          "actual_bottom_centered_point_m": [
+            0.47999998927116394,
+            -0.12999999523162842,
+            0.19499999284744263
+          ],
+          "inside_or_on_expected_parts": {
+            "Slipper bath continuous porcelain shell with hollow bathing cavity": true,
+            "Load-bearing cast slipper foot 1 -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Bath casting head into shell 1 1",
+          "original_blender_point_m": [
+            0.48,
+            0.13,
+            0.195
+          ],
+          "actual_bottom_centered_point_m": [
+            0.47999998927116394,
+            0.12999999523162842,
+            0.19499999284744263
+          ],
+          "inside_or_on_expected_parts": {
+            "Slipper bath continuous porcelain shell with hollow bathing cavity": true,
+            "Load-bearing cast slipper foot 1 1": true
+          },
+          "pass": true
+        }
+      ],
+      "actual_cavity_ray": {
+        "rim_probe_m": [
+          0.0,
+          0.0,
+          0.6209999918937683
+        ],
+        "first_downward_hit_m": [
+          0.0,
+          0.0,
+          0.22499999403953552
+        ],
+        "expected_internal_floor_height_m": 0.225,
+        "open_depth_m": 0.3959999978542328,
+        "floor_error_m": 5.960464483090178e-09
+      },
+      "errors": []
+    }
+  ],
+  "errors": 0
+}

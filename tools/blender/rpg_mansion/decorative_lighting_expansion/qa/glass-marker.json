@@ -1,0 +1,93 @@
+{
+  "items": [
+    {
+      "id": "rpg-mansion-guarded-carry-lantern-01",
+      "modelSha256": "62d6a940fdbfef3c4bd290df72bb4651493f19bc72d7a18e9714280e40c9c3a9",
+      "proofSource": "tools/blender/rpg_mansion/decorative_lighting_expansion/proofs/qa-exported-glass-rpg-mansion-guarded-carry-lantern-01.blend",
+      "proofSourceSha256": "a9e4297119fc116bf50aa31f326cb35360da93837e8eab2cb527cb8cf2622ca1",
+      "regions": {
+        "blue": [
+          194,
+          251,
+          212,
+          297
+        ],
+        "red": [
+          300,
+          251,
+          318,
+          297
+        ],
+        "light": [
+          194,
+          338,
+          212,
+          385
+        ],
+        "dark": [
+          300,
+          338,
+          318,
+          385
+        ]
+      },
+      "images": {
+        "actual-export": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/evidence/qa-glass-rpg-mansion-guarded-carry-lantern-01-actual-export.png",
+          "sha256": "a94b90f3a87c2e5e6e894bfafc791307ff9727f952b703461df444333954f5ee"
+        },
+        "no-glass-control": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/evidence/qa-glass-rpg-mansion-guarded-carry-lantern-01-no-glass-control.png",
+          "sha256": "fab655be0ed334538b329c684e438c7a5631d18d6a58ee9d103437114f433e38"
+        }
+      },
+      "removedOnlyMaterialPrefix": "Clear lightly tinted glass",
+      "qaFixturesExcludedFromModelCount": true
+    },
+    {
+      "id": "rpg-mansion-hexagonal-post-lantern-01",
+      "modelSha256": "de292f25f5328cf9cd1591d560614f69ccda80c45c700d59a9d5e2d0688186b8",
+      "proofSource": "tools/blender/rpg_mansion/decorative_lighting_expansion/proofs/qa-exported-glass-rpg-mansion-hexagonal-post-lantern-01.blend",
+      "proofSourceSha256": "3cceb4bc113571659416c0924de180b258e4a9a5df75802c813ff408dce9b82a",
+      "regions": {
+        "blue": [
+          238,
+          112,
+          244,
+          125
+        ],
+        "red": [
+          268,
+          112,
+          274,
+          125
+        ],
+        "light": [
+          238,
+          143,
+          244,
+          156
+        ],
+        "dark": [
+          268,
+          143,
+          274,
+          156
+        ]
+      },
+      "images": {
+        "actual-export": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/evidence/qa-glass-rpg-mansion-hexagonal-post-lantern-01-actual-export.png",
+          "sha256": "fc80c40da6aa100e0e1059a16049114df46304f11af90e01ef2218d7410ac63e"
+        },
+        "no-glass-control": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/evidence/qa-glass-rpg-mansion-hexagonal-post-lantern-01-no-glass-control.png",
+          "sha256": "29de1785356076a5b5b0bc70663b530821fd4b1872221686c4883c32edd88e44"
+        }
+      },
+      "removedOnlyMaterialPrefix": "Clear lightly tinted glass",
+      "qaFixturesExcludedFromModelCount": true
+    }
+  ],
+  "errors": []
+}

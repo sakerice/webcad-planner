@@ -1,0 +1,30 @@
+{
+  "references": [
+    {
+      "reference": "rpg-recovery-20261008/collections/architecture17/tools/blender/rpg_mansion/modular_architecture/descriptors.json",
+      "sha256": "a98eb1d513f83e47412dd5317bb6c2e4249b1b95899e707f98a0764d7daf0ea8",
+      "access": "read-only; no dependency bytes copied or modified"
+    },
+    {
+      "reference": "rpg-recovery-20261008/collections/architecture17/tools/blender/rpg_mansion/modular_architecture_expansion/descriptors.json",
+      "sha256": "0ce5bb50e32157b8c10ae57990627f5b89bde8418c647713b315ed25625b6507",
+      "access": "read-only; no dependency bytes copied or modified"
+    },
+    {
+      "reference": "rpg-recovery-20261008/new-production/architecture18/tools/blender/rpg_mansion/modular_architecture_completion/descriptors.json",
+      "sha256": "ae061907dc3e28c4a515dc775ee1c3cf57f6989fb4819bafce7da23e1646b2f7",
+      "access": "read-only; no dependency bytes copied or modified"
+    }
+  ],
+  "compatibilityScope": "Read-only dimensional datum compatibility, not a new assembly/certification of legacy modules. All delivered stair geometry is new and self-contained.",
+  "sharedFinishedFloorM": 0,
+  "sharedWallTopDatumM": 3,
+  "existingFloorTile": {
+    "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+    "thicknessMm": 75,
+    "defaultElevationMm": -75,
+    "lowerLevelBottomMm": -75,
+    "upperLevelBottomFor3000mmFinishedFloorMm": 2925
+  },
+  "guardInterchangeability": "Existing1100 mm stone newel and1000 mm wrought-iron panel are not claimed as direct raked-timber substitutes. The new timber receivers and raked modules have their own measured interfaces."
+}

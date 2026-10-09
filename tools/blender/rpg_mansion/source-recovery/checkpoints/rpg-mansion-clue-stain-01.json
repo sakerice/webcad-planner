@@ -1,0 +1,170 @@
+{
+  "id": "rpg-mansion-clue-stain-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-clue-stain-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/build.py",
+  "originalBuilderSha256": "1980db41d3219826c4970076a618e7af57725828144e7d8746aa4b74994ddffb",
+  "front": "tools/blender/rpg_mansion/work/rpg-mansion-clue-stain-01-front.png",
+  "rear": "tools/blender/rpg_mansion/work/rpg-mansion-clue-stain-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 3,
+  "validation": {
+    "model": "rpg-mansion-clue-stain-01",
+    "dimensions_mm": [
+      589.9999737739563,
+      330.00001311302185,
+      1.0000000474974513
+    ],
+    "bounds_m": [
+      [
+        -0.29499998688697815,
+        -0.16500000655651093,
+        0.0
+      ],
+      [
+        0.29499998688697815,
+        0.16500000655651093,
+        0.0010000000474974513
+      ]
+    ],
+    "triangles": 276,
+    "uv": {
+      "meters_per_uv": 0.5960663977827254,
+      "min": 0.5405536957328964,
+      "max": 0.7049000990270292,
+      "p05": 0.5615049366280175,
+      "p95": 0.6319804023784181,
+      "total_triangles": 276,
+      "valid_triangles": 276,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Seal": null
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 14284
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "cb9b8540f12121b914666bdde0d20b75262df447272b11bcf118d231282e40ed",
+    "bytes": 14284,
+    "triangles": 276,
+    "bounds_gltf_m": [
+      [
+        -0.29499998688697815,
+        0.0,
+        -0.16500000655651093
+      ],
+      [
+        0.29499998688697815,
+        0.0010000000474974513,
+        0.16500000655651093
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      589.9999737739563,
+      330.00001311302185,
+      1.0000000474974513
+    ],
+    "geometry_material_sha256_1e7": "cce7523886e55e197d03210090c3ca14f74af7b9380b0bd30f7ed6b6e5f79bf3",
+    "geometry_material_uv_sha256_1e7": "7ac2c98d0a829ac9676814f059c1f5bf0193deae7189aa65abb5fa41ecbd9be1",
+    "finish_channels": [],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Seal",
+        "channel": null,
+        "triangles": 276
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "b39c8f9e52124e9eafa40f9c03e2aecd6b9bb29b4cbce7f3247546246d9ffb23",
+    "bytes": 14476,
+    "triangles": 276,
+    "bounds_gltf_m": [
+      [
+        -0.29499998688697815,
+        0.0,
+        -0.16500000655651093
+      ],
+      [
+        0.29499998688697815,
+        0.0010000000474974513,
+        0.16500000655651093
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      589.9999737739563,
+      330.00001311302185,
+      1.0000000474974513
+    ],
+    "geometry_material_sha256_1e7": "cce7523886e55e197d03210090c3ca14f74af7b9380b0bd30f7ed6b6e5f79bf3",
+    "geometry_material_uv_sha256_1e7": "7ac2c98d0a829ac9676814f059c1f5bf0193deae7189aa65abb5fa41ecbd9be1",
+    "finish_channels": [],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Seal",
+        "channel": null,
+        "triangles": 276
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 3.77,
+  "source_sha256": "ef6fb36546e12b595c0344d86731ceb2bafba85d459c24a21c9262b1d492cebd",
+  "front_sha256": "b26846c6165f398065e822c9d7499ff6c6b0f07895399ee19d75c055d7b611d4",
+  "rear_sha256": "5446a6e465105227d75fd9df83a0ba892f2e5bf330e16f48a8060eb5320013b9",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:29.484435+00:00",
+    "source_sha256_before": "96fe8d609e4f44cc3f61782177ec87bd81f086d7c3c29c4a1b5f88453959c6e3",
+    "source_sha256_after": "ef6fb36546e12b595c0344d86731ceb2bafba85d459c24a21c9262b1d492cebd",
+    "mesh_geometry_uv_material_digest_preserved": "7d5a963d28189b89a707b5e649ebcb92fa7171d417759c6eb31189c35523f3ae",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-clue-stain-01-rear.png",
+        "render_filepath": "//rpg-mansion-clue-stain-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "ef6fb36546e12b595c0344d86731ceb2bafba85d459c24a21c9262b1d492cebd",
+    "originalBuilderSha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

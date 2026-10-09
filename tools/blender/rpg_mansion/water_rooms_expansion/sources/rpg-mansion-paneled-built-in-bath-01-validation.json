@@ -1,0 +1,111 @@
+{
+  "model": "rpg-mansion-paneled-built-in-bath-01",
+  "dimensions_mm": [
+    1805.999994277954,
+    838.9999866485596,
+    610.0000143051147
+  ],
+  "bounds_m": [
+    [
+      -0.902999997138977,
+      -0.4194999933242798,
+      0.0
+    ],
+    [
+      0.902999997138977,
+      0.4194999933242798,
+      0.6100000143051147
+    ]
+  ],
+  "triangles": 1956,
+  "uv": {
+    "meters_per_uv": 6.317703791888101,
+    "min": 6.313919639635328,
+    "max": 6.322993677067549,
+    "p05": 6.315466666552319,
+    "p95": 6.319803668512588,
+    "total_triangles": 1956,
+    "valid_triangles": 1956,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Ivory fired porcelain": "ceramic",
+    "Dark walnut WC seat": "wood",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 145280,
+  "datums": {
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "faucetHeightMm": null,
+    "fixtureNote": "Bath only; a separate supply fixture is required.",
+    "capacityNote": "One bathing occupant. Static design, not ergonomic or plumbing certification.",
+    "rimHeightMm": 610,
+    "internalFloorHeightMm": 145,
+    "clearBowlMm": {
+      "rimLength": 1600,
+      "rimWidth": 610,
+      "floorLength": 1285,
+      "floorWidth": 380,
+      "depth": 465
+    },
+    "installationAccessNote": "Static paneled freestanding representation of a built-in unit; panels are native parts, not working access doors.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.902999997138977,
+        -0.4194999933242798,
+        0.0
+      ],
+      [
+        0.902999997138977,
+        0.4194999933242798,
+        0.6100000143051147
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.003970337799425276,
+    0.39075078431839455,
+    0.0037689111304644034,
+    0.003768894734093919,
+    0.000636975060236485,
+    0.0006369716390205821,
+    0.0006369678249029678,
+    0.0006369632465066388,
+    0.003970335930110498,
+    0.003970335120053882,
+    0.003970334729577491,
+    0.11924206453385826,
+    0.0013483895139264255,
+    0.003768910191865871,
+    0.001348390675654324,
+    0.0037689073263512296,
+    0.005025248877548921,
+    0.0006369561985290298,
+    0.001348387505762124,
+    0.0006369675641811533,
+    0.0013483954874876263,
+    0.0006369726482565362,
+    0.005025255542326096,
+    0.0006369718248606658,
+    9.557617128545344e-06,
+    0.003970334113546413,
+    0.003970336435789551
+  ],
+  "source_sha256": "e094b81cb1f1aeadba8d53ebdc60ae0626fa19488700c6ca52288f4ea125f6af",
+  "glb_sha256": "e9afc159b2fd2b45769613c3a3f154288a2716a4decf31a4e4cb260666a2460d"
+}

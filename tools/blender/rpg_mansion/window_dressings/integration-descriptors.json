@@ -1,0 +1,686 @@
+{
+  "set": "rpg-mansion",
+  "newConstructionCount": 5,
+  "widthVariantCount": 0,
+  "poseVariantCount": 0,
+  "accessoryOnlyCount": 0,
+  "items": [
+    {
+      "id": "rpg-mansion-short-paired-curtain-01",
+      "name": "Short paired rod curtain",
+      "kind": "curtain",
+      "group": "\u5bb6\u5177",
+      "category": "\u7a93\u307e\u308f\u308a",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-short-paired-curtain-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-short-paired-curtain-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/window_dressings/authoring_sources/rpg-mansion-short-paired-curtain-01.blend",
+      "validation": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-short-paired-curtain-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/window_dressings/build.py",
+      "w": 1220.0,
+      "d": 197.8,
+      "h": 2065.098,
+      "defaultElevation": 644.902,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "fabric",
+          "default": "#783e49"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#ab874c"
+        },
+        {
+          "key": "trim",
+          "label": "trim",
+          "default": "#a78b5c"
+        }
+      ],
+      "triangleBudget": 12000,
+      "triangles": 9924,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "constructionFamily": "short-paired-rod-curtain",
+        "countingClass": "new-construction",
+        "coreConstructionCount": 1,
+        "variantOf": null,
+        "staticDisplayState": "closed/deployed",
+        "host": "raised-sill",
+        "installation": {
+          "mount": "interior-wall",
+          "wallContactPlaneBlenderY": 0.0,
+          "attachmentAboveApertureMm": 90,
+          "defaultBottomElevationMm": 644.902,
+          "originalFloorDatumM": 0,
+          "proofRotationBlenderZDegrees": 180,
+          "proofWallPlaneY": 0.12,
+          "nominalClothBaselineMm": 650,
+          "wallContactPlaneCanonicalBlenderY": 0.09890000522136688
+        },
+        "fit": {
+          "apertureWidthMm": 920,
+          "coverWidthMm": 1220,
+          "sourceRule": "curtain: within300, width+100..400",
+          "widthSurplusMm": 300,
+          "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+          "fabricCoverageWidthMm": 1144,
+          "fabricCoverageRangeMm": [
+            647.5,
+            2646
+          ],
+          "bottomBelowApertureMm": 150,
+          "topAboveApertureMm": 46,
+          "measuredHardwareEnvelopeHeightRangeMm": [
+            644.902,
+            2710.0
+          ]
+        },
+        "constructionDetails": "Two closed pleated panels, fourteen rod rings, sewn hems, continuous rod, finials and two screwed wall brackets. Cloth span1144mm; overlapped centre. No drawn-open asset counted.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.09890000522136688,
+          -0.6449019312858582
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.6100000143051147,
+            -0.19780001044273376,
+            0.6449019312858582
+          ],
+          [
+            0.6100000143051147,
+            0.0,
+            2.7100000381469727
+          ]
+        ],
+        "defaultElevationMm": 644.902
+      },
+      "placementNotes": "Static displayed closed/deployed state. Manually place on the room side; no native opening, cloth physics or automatic following. Existing source fit checks only, not engineering compliance.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-short-paired-curtain-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-short-paired-curtain-01-top.png",
+      "front": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-short-paired-curtain-01-front.png",
+      "rear": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-short-paired-curtain-01-rear.png",
+      "left": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-short-paired-curtain-01-left.png",
+      "right": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-short-paired-curtain-01-right.png",
+      "hashes": {
+        "model": "49f88f98a4e42faff80f21bea4a2b03df3f78fec9114331b3f7069cb0763e26c",
+        "sourceBlend": "92daba32a8c462b57d953beb60940b36cb82a0628b4f72226e2db994c7d2117d",
+        "authoringBlend": "317993c1bee5703f2b432e3491fac5e2f2ecedf89cc6b418bff7b883a8357fa3",
+        "validation": "fb27fecc66f36e40da0059a79324e13557ce65ca75ba9819adacba14e03f0080",
+        "builder": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+        "thumb": "8abfa9b571e0ab48406cc7952981f8b56029dc49eec20b54958d9a8c99fa6096",
+        "top": "b476c8bd9e7af9a6069a90f65b4d2cc0dabb86945d380962b36be7e2fec2633e",
+        "front": "f58f33241dc2cae12cd4e3280a1c6bf5c3bb009e2613269b4c49e93eb2a6d901",
+        "rear": "5727e19d1c44536ae537007f2613591d02674a05ce9036b7ac0d709b9a253c38",
+        "left": "c4405cd5d4ebea18f4f212814d51b9030b135cbac9f76c52a21816747aaff8f8",
+        "right": "2d81156adea8d50e5faac5c9eb76490e62fe6b973386575eb53208e7fcc57fd1"
+      },
+      "glbBytes": 682208,
+      "triangleBudgetRationale": "Thick pleated fabric with modeled sewn hems and native attachment hardware;12000 cap preserves meaningful folds/rings.",
+      "rights": {
+        "status": "original",
+        "creator": "Original native Blender procedural construction for this project",
+        "externalGeometry": false,
+        "externalImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "dimensionBasis": "Measured final exported envelope, not a nominal product name or a legacy substitution.",
+      "finishIsolationEvidence": "Exported material primitives carry separate finishChannel values; numeric and visual checks are in reports and evidence."
+    },
+    {
+      "id": "rpg-mansion-full-height-traverse-drape-01",
+      "name": "Full-height single traverse drape",
+      "kind": "curtain",
+      "group": "\u5bb6\u5177",
+      "category": "\u7a93\u307e\u308f\u308a",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-full-height-traverse-drape-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-full-height-traverse-drape-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/window_dressings/authoring_sources/rpg-mansion-full-height-traverse-drape-01.blend",
+      "validation": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-full-height-traverse-drape-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/window_dressings/build.py",
+      "w": 1240.0,
+      "d": 184.7,
+      "h": 2779.098,
+      "defaultElevation": 74.902,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "fabric",
+          "default": "#45645d"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#ab874c"
+        },
+        {
+          "key": "trim",
+          "label": "trim",
+          "default": "#a78b5c"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#896344"
+        }
+      ],
+      "triangleBudget": 12000,
+      "triangles": 7216,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "constructionFamily": "full-height-traverse-drape",
+        "countingClass": "new-construction",
+        "coreConstructionCount": 1,
+        "variantOf": null,
+        "staticDisplayState": "closed/deployed",
+        "host": "french",
+        "installation": {
+          "mount": "interior-wall",
+          "wallContactPlaneBlenderY": 0.0,
+          "attachmentAboveApertureMm": 76,
+          "defaultBottomElevationMm": 74.902,
+          "originalFloorDatumM": 0,
+          "proofRotationBlenderZDegrees": 180,
+          "proofWallPlaneY": 0.12,
+          "nominalClothBaselineMm": 80,
+          "wallContactPlaneCanonicalBlenderY": 0.09234999865293503
+        },
+        "fit": {
+          "apertureWidthMm": 1040,
+          "coverWidthMm": 1240,
+          "sourceRule": "curtain: within300, width+100..400",
+          "widthSurplusMm": 200,
+          "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+          "fabricCoverageWidthMm": 1210,
+          "fabricCoverageRangeMm": [
+            77.5,
+            2795
+          ],
+          "floorGapMm": 77.5,
+          "topAboveApertureMm": 45,
+          "measuredHardwareEnvelopeHeightRangeMm": [
+            74.902,
+            2854.0
+          ]
+        },
+        "constructionDetails": "Single full-height11-fold track-hung cloth panel, twelve captive carriers, three screwed wall arms and attached rigid draw wand. Different support construction from paired ring curtain; no automatic opening.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.09234999865293503,
+          -0.07490192353725433
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.6200000047683716,
+            -0.18469999730587006,
+            0.07490192353725433
+          ],
+          [
+            0.6200000047683716,
+            0.0,
+            2.8540000915527344
+          ]
+        ],
+        "defaultElevationMm": 74.902
+      },
+      "placementNotes": "Static displayed closed/deployed state. Manually place on the room side; no native opening, cloth physics or automatic following. Existing source fit checks only, not engineering compliance.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-full-height-traverse-drape-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-full-height-traverse-drape-01-top.png",
+      "front": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-full-height-traverse-drape-01-front.png",
+      "rear": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-full-height-traverse-drape-01-rear.png",
+      "left": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-full-height-traverse-drape-01-left.png",
+      "right": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-full-height-traverse-drape-01-right.png",
+      "hashes": {
+        "model": "74f314e1349f536e059eed1b4ce47073053709889290b8b1ae32f1d7ea480f2d",
+        "sourceBlend": "ee100e13a4a274f031c296ad6e3937d718297168d8eec0cd8969cc62a717002d",
+        "authoringBlend": "1d848d6222913cad8a1c22e1c21c438eac652e149797e619d5f0e9849b61fafa",
+        "validation": "79387723ad7db23b455c11b2992553f68d0f0b5950deb9facf6233363c80b133",
+        "builder": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+        "thumb": "93e747619511e8828143ce18c8d09250958c2a7e3aacb4b07b891a7d49075569",
+        "top": "65d1fe6c0216bf8ba242d6cc0a23ac3a067401b160aac6da2362371b6dd3333f",
+        "front": "d743f5168cd79b5ac452eca1bb60f2e544d684707872fd1452d00b29f04ba8f4",
+        "rear": "2f50b46178647f78db74d53234895d00772ba23cfb58770874e579cfb66393d4",
+        "left": "ce95f96771bbba23cf6dcccbe7e0f1be9d9830e34015465e282cb77bb5b4a883",
+        "right": "bd27bf49f7eb2cb4de3fb13f15d6d305c123fd5f590112e94049737e8d38d34d"
+      },
+      "glbBytes": 503840,
+      "triangleBudgetRationale": "Thick pleated fabric with modeled sewn hems and native attachment hardware;12000 cap preserves meaningful folds/rings.",
+      "rights": {
+        "status": "original",
+        "creator": "Original native Blender procedural construction for this project",
+        "externalGeometry": false,
+        "externalImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "dimensionBasis": "Measured final exported envelope, not a nominal product name or a legacy substitution.",
+      "finishIsolationEvidence": "Exported material primitives carry separate finishChannel values; numeric and visual checks are in reports and evidence."
+    },
+    {
+      "id": "rpg-mansion-roman-batten-shade-01",
+      "name": "Roman batten linen shade",
+      "kind": "roller-screen",
+      "group": "\u5bb6\u5177",
+      "category": "\u7a93\u307e\u308f\u308a",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-roman-batten-shade-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-roman-batten-shade-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/window_dressings/authoring_sources/rpg-mansion-roman-batten-shade-01.blend",
+      "validation": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-roman-batten-shade-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/window_dressings/build.py",
+      "w": 1000.0,
+      "d": 149.923,
+      "h": 1928.0,
+      "defaultElevation": 750.0,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "cord",
+          "label": "cord",
+          "default": "#e0d3b2"
+        },
+        {
+          "key": "fabric",
+          "label": "fabric",
+          "default": "#c0ae88"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#ab874c"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#896344"
+        }
+      ],
+      "triangleBudget": 6000,
+      "triangles": 1164,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "constructionFamily": "roman-batten-shade",
+        "countingClass": "new-construction",
+        "coreConstructionCount": 1,
+        "variantOf": null,
+        "staticDisplayState": "closed/deployed",
+        "host": "raised-sill",
+        "installation": {
+          "mount": "interior-wall",
+          "wallContactPlaneBlenderY": 0.0,
+          "attachmentAboveApertureMm": 42,
+          "defaultBottomElevationMm": 750.0,
+          "originalFloorDatumM": 0,
+          "proofRotationBlenderZDegrees": 180,
+          "proofWallPlaneY": 0.12,
+          "nominalClothBaselineMm": 750,
+          "wallContactPlaneCanonicalBlenderY": 0.07496162503957748
+        },
+        "fit": {
+          "apertureWidthMm": 920,
+          "coverWidthMm": 1000,
+          "sourceRule": "screen: within200, width+0..100",
+          "widthSurplusMm": 80,
+          "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+          "fabricCoverageWidthMm": 970,
+          "fabricCoverageRangeMm": [
+            765,
+            2610
+          ],
+          "bottomBelowApertureMm": 35,
+          "topAboveApertureMm": 10,
+          "measuredHardwareEnvelopeHeightRangeMm": [
+            750.0,
+            2678.0
+          ]
+        },
+        "constructionDetails": "Continuous linen folded over nine physical battens, two rear lift tapes/cords, fabric head attachment, weighted hem and screwed headrail brackets. Fully lowered static state.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.07496162503957748,
+          -0.75
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.5,
+            -0.14992325007915497,
+            0.75
+          ],
+          [
+            0.5,
+            0.0,
+            2.677999973297119
+          ]
+        ],
+        "defaultElevationMm": 750.0
+      },
+      "placementNotes": "Static displayed closed/deployed state. Manually place on the room side; no native opening, cloth physics or automatic following. Existing source fit checks only, not engineering compliance.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-roman-batten-shade-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-roman-batten-shade-01-top.png",
+      "front": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-roman-batten-shade-01-front.png",
+      "rear": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-roman-batten-shade-01-rear.png",
+      "left": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-roman-batten-shade-01-left.png",
+      "right": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-roman-batten-shade-01-right.png",
+      "hashes": {
+        "model": "85a651b48070f0f65fb97134289b4a3b529ca81a484f4fe7f2f1f7bc2b5fc7ac",
+        "sourceBlend": "096d5fd5aa527bcf64ed41516302ba83808dc06c9d37e5e3be07c86f20da745f",
+        "authoringBlend": "c3ff57d8d63df0d19ce108dc6658651209d5a611c4c9c7ede08e5a655c2b4248",
+        "validation": "4646169a4670a4cb4841a7ef9493903cc5ba546fe95abcff54b6d0a06e8ab860",
+        "builder": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+        "thumb": "ed6c1c49c1384f60abc4464a15f470f79858b909360977bc067b7c6acdca9109",
+        "top": "f9bca8799934df6538e134c79aac14b9ecec5a3a7592283342b570e65b797a3b",
+        "front": "bdfd4906d6cc393d38929c8e5173c5082b73541318e0419aebbf00573806779a",
+        "rear": "6527d198c3de2bc640960ed434f49b1b970e50bad6ca40314449647403f3bc57",
+        "left": "b46783c771186b723c1867445e658c2abce6af2eca8f9343e588a06039b697cc",
+        "right": "021bc53abd957e0fb49e683d152c4fa6414f133b2e103dbd10562a5392dabdde"
+      },
+      "glbBytes": 84024,
+      "triangleBudgetRationale": "Screen hardware and repeated slats fit the standard6000-triangle envelope.",
+      "rights": {
+        "status": "original",
+        "creator": "Original native Blender procedural construction for this project",
+        "externalGeometry": false,
+        "externalImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "dimensionBasis": "Measured final exported envelope, not a nominal product name or a legacy substitution.",
+      "finishIsolationEvidence": "Exported material primitives carry separate finishChannel values; numeric and visual checks are in reports and evidence."
+    },
+    {
+      "id": "rpg-mansion-timber-venetian-blind-01",
+      "name": "Timber slatted Venetian blind",
+      "kind": "roller-screen",
+      "group": "\u5bb6\u5177",
+      "category": "\u7a93\u307e\u308f\u308a",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-timber-venetian-blind-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-timber-venetian-blind-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/window_dressings/authoring_sources/rpg-mansion-timber-venetian-blind-01.blend",
+      "validation": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-timber-venetian-blind-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/window_dressings/build.py",
+      "w": 1000.0,
+      "d": 163.0,
+      "h": 1964.5,
+      "defaultElevation": 729.5,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "cord",
+          "label": "cord",
+          "default": "#e0d3b2"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#ab874c"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#896344"
+        }
+      ],
+      "triangleBudget": 6000,
+      "triangles": 4308,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "constructionFamily": "slatted-venetian-blind",
+        "countingClass": "new-construction",
+        "coreConstructionCount": 1,
+        "variantOf": null,
+        "staticDisplayState": "closed/deployed",
+        "host": "raised-sill",
+        "installation": {
+          "mount": "interior-wall",
+          "wallContactPlaneBlenderY": 0.0,
+          "attachmentAboveApertureMm": 58,
+          "defaultBottomElevationMm": 729.5,
+          "originalFloorDatumM": 0,
+          "proofRotationBlenderZDegrees": 180,
+          "proofWallPlaneY": 0.12,
+          "nominalClothBaselineMm": 729.5000000000001,
+          "wallContactPlaneCanonicalBlenderY": 0.08149999380111694
+        },
+        "fit": {
+          "apertureWidthMm": 920,
+          "coverWidthMm": 1000,
+          "sourceRule": "screen: within200, width+0..100",
+          "widthSurplusMm": 80,
+          "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+          "slatCount": 45,
+          "slatPitchMm": 41.5,
+          "slatProjectionHeightMm": 44.84182729827373,
+          "slatCoverageWidthMm": 977,
+          "slatCoverageRangeMm": [
+            753.0000000000001,
+            2626.0000000000005
+          ],
+          "measuredHardwareEnvelopeHeightRangeMm": [
+            729.5,
+            2694.0
+          ]
+        },
+        "constructionDetails": "Forty-five overlapping tilted timber slats, two front/back ladder tapes with rungs, bottom weight bar, tilt wand and two physical screwed headrail supports. Fixed privacy tilt only.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.08149999380111694,
+          -0.7294999957084656
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.5,
+            -0.1629999876022339,
+            0.7294999957084656
+          ],
+          [
+            0.5,
+            0.0,
+            2.694000005722046
+          ]
+        ],
+        "defaultElevationMm": 729.5
+      },
+      "placementNotes": "Static displayed closed/deployed state. Manually place on the room side; no native opening, cloth physics or automatic following. Existing source fit checks only, not engineering compliance.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-timber-venetian-blind-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-timber-venetian-blind-01-top.png",
+      "front": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-timber-venetian-blind-01-front.png",
+      "rear": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-timber-venetian-blind-01-rear.png",
+      "left": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-timber-venetian-blind-01-left.png",
+      "right": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-timber-venetian-blind-01-right.png",
+      "hashes": {
+        "model": "04ecfee8b60b4b16ef18412ba424b1714e9db5a2dac53f0e7704dd32971e439d",
+        "sourceBlend": "5578cd4d70a05f00eea30d376829d95809c0889eed2c5f754b0aec55a6510af9",
+        "authoringBlend": "56baa20a326bb4b81ca9ceddaac55bf7fd77075de5563de06c3c340f979e3e7e",
+        "validation": "77aa6398ab2e1bf2e85d844f1a927db513a685297e18c352f8b4ad5ef81b33a6",
+        "builder": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+        "thumb": "de4a931367b6530c3ec09862683fa8323f4fce5d7240c1cb228e8118de5c1e2d",
+        "top": "d19a342bb7902033873049d081c5a139e096431a5f5e58533791eef875f3bad0",
+        "front": "d812e47a6e8c3d528e33c2c77b190a026102f4c8865926d0714fd6ab80dd411a",
+        "rear": "b74201aebf6b4ad848f1ff961911de62317f7fb4373e0ee89eae3ef46cd905c1",
+        "left": "895e3edf3b3425183895dfd897d6174d12bf37394350efadab4d0456eeb3786e",
+        "right": "b8bbc1d9b820b9c6dc8bc5b23d96416717dae447c66143a0ab2941ac5a9fe214"
+      },
+      "glbBytes": 305972,
+      "triangleBudgetRationale": "Screen hardware and repeated slats fit the standard6000-triangle envelope.",
+      "rights": {
+        "status": "original",
+        "creator": "Original native Blender procedural construction for this project",
+        "externalGeometry": false,
+        "externalImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "dimensionBasis": "Measured final exported envelope, not a nominal product name or a legacy substitution.",
+      "finishIsolationEvidence": "Exported material primitives carry separate finishChannel values; numeric and visual checks are in reports and evidence."
+    },
+    {
+      "id": "rpg-mansion-narrow-roller-screen-01",
+      "name": "Narrow linen roller screen",
+      "kind": "roller-screen",
+      "group": "\u5bb6\u5177",
+      "category": "\u7a93\u307e\u308f\u308a",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-narrow-roller-screen-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-narrow-roller-screen-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/window_dressings/authoring_sources/rpg-mansion-narrow-roller-screen-01.blend",
+      "validation": "tools/blender/rpg_mansion/window_dressings/sources/rpg-mansion-narrow-roller-screen-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/window_dressings/build.py",
+      "w": 700.0,
+      "d": 146.808,
+      "h": 1258.374,
+      "defaultElevation": 1033.626,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "cord",
+          "label": "cord",
+          "default": "#e0d3b2"
+        },
+        {
+          "key": "fabric",
+          "label": "fabric",
+          "default": "#c0ae88"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#ab874c"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#896344"
+        }
+      ],
+      "triangleBudget": 6000,
+      "triangles": 708,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "constructionFamily": "roller-fabric-screen",
+        "countingClass": "new-construction",
+        "coreConstructionCount": 1,
+        "variantOf": null,
+        "staticDisplayState": "closed/deployed",
+        "host": "narrow-qa-fixture",
+        "installation": {
+          "mount": "interior-wall",
+          "wallContactPlaneBlenderY": 0.0,
+          "attachmentAboveApertureMm": 60,
+          "defaultBottomElevationMm": 1033.626,
+          "originalFloorDatumM": 0,
+          "proofRotationBlenderZDegrees": 180,
+          "proofWallPlaneY": 0.12,
+          "nominalClothBaselineMm": 1027,
+          "wallContactPlaneCanonicalBlenderY": 0.07340381294488907
+        },
+        "fit": {
+          "apertureWidthMm": 640,
+          "coverWidthMm": 700,
+          "sourceRule": "screen: within200, width+0..100",
+          "widthSurplusMm": 60,
+          "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+          "fabricCoverageWidthMm": 662,
+          "fabricCoverageRangeMm": [
+            1070,
+            2260
+          ],
+          "fixtureApertureMm": {
+            "width": 640,
+            "bottom": 1100,
+            "top": 2200
+          },
+          "topAboveApertureMm": 60,
+          "measuredHardwareEnvelopeHeightRangeMm": [
+            1033.626,
+            2292.0
+          ]
+        },
+        "constructionDetails": "Cloth-wrapped roller and continuous tangent drop, axle ends, two wall-supported cheeks, weighted hem and sewn pull tab. Narrow utility-window QA fixture is excluded from products.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.07340381294488907,
+          -1.0336263179779053
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.3499999940395355,
+            -0.14680762588977814,
+            1.0336263179779053
+          ],
+          [
+            0.3499999940395355,
+            0.0,
+            2.2920000553131104
+          ]
+        ],
+        "defaultElevationMm": 1033.626
+      },
+      "placementNotes": "Static displayed closed/deployed state. Manually place on the room side; no native opening, cloth physics or automatic following. Existing source fit checks only, not engineering compliance.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-narrow-roller-screen-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-narrow-roller-screen-01-top.png",
+      "front": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-narrow-roller-screen-01-front.png",
+      "rear": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-narrow-roller-screen-01-rear.png",
+      "left": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-narrow-roller-screen-01-left.png",
+      "right": "tools/blender/rpg_mansion/window_dressings/evidence/rpg-mansion-narrow-roller-screen-01-right.png",
+      "hashes": {
+        "model": "15301d05f90f89e67e1e8cca437a9fd4f1d7155c137ba17b4747973ba62fdad5",
+        "sourceBlend": "3d9c792701abee3fe8c51e9a22dec90e391615bd8abde0286ee4e3293ae69cca",
+        "authoringBlend": "7c5f91fb08b5ab08bde20caad4bab300d6fb9b209f755198fe086f97e68959e4",
+        "validation": "a3b2cca219ca12a963db9a8be1ff0500a6b814340337c1b9bd691e23512e03a1",
+        "builder": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+        "thumb": "a55150003c7a0b3aa2c7426c182bb77f24dd0e929e6b48625b2c14af5f604035",
+        "top": "3c6c00af09d399e554df0ea189f5e1688a829150d3dba97715f49d64b5ff7980",
+        "front": "66a7a43697b483f9350e37b9ecc3d71add6ecc1e6202500cc27127fc9e401b81",
+        "rear": "d4091bf8b5b57d8bb745488ce9fa88bce65d52f41f4592da9f7649e1606f2a3b",
+        "left": "001252e0de3b2643fa3a66ed6d64356982c5aa83a5a86ca6633653bb40dfef0b",
+        "right": "371767eb7bd32680b915535663bc7c0a0f7615940d832a2452aa05d31101ea2e"
+      },
+      "glbBytes": 51120,
+      "triangleBudgetRationale": "Screen hardware and repeated slats fit the standard6000-triangle envelope.",
+      "rights": {
+        "status": "original",
+        "creator": "Original native Blender procedural construction for this project",
+        "externalGeometry": false,
+        "externalImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "dimensionBasis": "Measured final exported envelope, not a nominal product name or a legacy substitution.",
+      "finishIsolationEvidence": "Exported material primitives carry separate finishChannel values; numeric and visual checks are in reports and evidence."
+    }
+  ],
+  "name": "\u6d0b\u9928\u30fb\u7a93\u307e\u308f\u308a",
+  "sourceDescriptorSha256": "37d4531dbf47033a30f4606c9b46ffedf1efc25a71b4ae845d3ace554c91972d"
+}

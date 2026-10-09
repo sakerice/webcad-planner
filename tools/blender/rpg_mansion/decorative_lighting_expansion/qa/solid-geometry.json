@@ -1,0 +1,1393 @@
+{
+  "method": "Actual GLB surfaces bound to native solids; local exposed overlap and roof-tip gates.\n\nExposure uses sampled outward solid-angle union membership at 50 micrometres,\nnot a long visibility ray. This is geometric inspection, not load certification.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-counterbalanced-task-lamp-01",
+      "modelSha256": "576d165602944e45e67b32ba6ed02cd83957effe345fe8405038e9e5b1ed8254",
+      "sourceSha256": "822f89e5cfe7fe7e96b821c049de57583cd08ba806fda72c128455550b211035",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Task lamp weighted oval base",
+          "triangles": 284,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0013096775651797975
+        },
+        {
+          "part": "Task pivot foot",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00018473653605795284
+        },
+        {
+          "part": "Task lower pivot",
+          "triangles": 76,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 9.967653524920996e-05
+        },
+        {
+          "part": "Task elbow pivot",
+          "triangles": 76,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 9.96765331247138e-05
+        },
+        {
+          "part": "Task head pivot",
+          "triangles": 76,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 9.967651795422772e-05
+        },
+        {
+          "part": "Task lower twin bar -1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.0967266958214197e-05
+        },
+        {
+          "part": "Task upper twin bar -1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.323171004309803e-05
+        },
+        {
+          "part": "Task lower twin bar 1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.09672669582149e-05
+        },
+        {
+          "part": "Task upper twin bar 1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.323171004309698e-05
+        },
+        {
+          "part": "Task counterweight lever",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.2656834591221143e-05
+        },
+        {
+          "part": "Task rear counterweight",
+          "triangles": 92,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0002872271221787532
+        },
+        {
+          "part": "Task adjustable head stem",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 9.544500407760883e-05
+        },
+        {
+          "part": "Task adjustable head porcelain",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.876711841318864e-05
+        },
+        {
+          "part": "Task adjustable head retaining collar",
+          "triangles": 124,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.3088891983622916e-05
+        },
+        {
+          "part": "Task adjustable head open reflector",
+          "triangles": 576,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0003275103161876509
+        },
+        {
+          "part": "Task adjustable head opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00016137020143892477
+        }
+      ],
+      "localCoplanarOverlaps": [
+        {
+          "parts": [
+            "Task upper twin bar -1",
+            "Task lower twin bar -1"
+          ],
+          "triangles": [
+            331,
+            286
+          ],
+          "overlapAreaM2": 3.8080619812037864e-05,
+          "samples": 7,
+          "outsideUnionSamples": []
+        },
+        {
+          "parts": [
+            "Task upper twin bar -1",
+            "Task lower twin bar -1"
+          ],
+          "triangles": [
+            331,
+            287
+          ],
+          "overlapAreaM2": 1.1402715507577432e-06,
+          "samples": 5,
+          "outsideUnionSamples": []
+        },
+        {
+          "parts": [
+            "Task upper twin bar -1",
+            "Task lower twin bar -1"
+          ],
+          "triangles": [
+            334,
+            290
+          ],
+          "overlapAreaM2": 9.175910459721659e-07,
+          "samples": 5,
+          "outsideUnionSamples": []
+        },
+        {
+          "parts": [
+            "Task upper twin bar -1",
+            "Task lower twin bar -1"
+          ],
+          "triangles": [
+            335,
+            290
+          ],
+          "overlapAreaM2": 3.830330031683038e-05,
+          "samples": 7,
+          "outsideUnionSamples": []
+        },
+        {
+          "parts": [
+            "Task upper twin bar 1",
+            "Task lower twin bar 1"
+          ],
+          "triangles": [
+            419,
+            374
+          ],
+          "overlapAreaM2": 3.8080619812037864e-05,
+          "samples": 7,
+          "outsideUnionSamples": []
+        },
+        {
+          "parts": [
+            "Task upper twin bar 1",
+            "Task lower twin bar 1"
+          ],
+          "triangles": [
+            419,
+            375
+          ],
+          "overlapAreaM2": 1.1402715507577432e-06,
+          "samples": 5,
+          "outsideUnionSamples": []
+        },
+        {
+          "parts": [
+            "Task upper twin bar 1",
+            "Task lower twin bar 1"
+          ],
+          "triangles": [
+            422,
+            378
+          ],
+          "overlapAreaM2": 9.175910459721659e-07,
+          "samples": 5,
+          "outsideUnionSamples": []
+        },
+        {
+          "parts": [
+            "Task upper twin bar 1",
+            "Task lower twin bar 1"
+          ],
+          "triangles": [
+            423,
+            378
+          ],
+          "overlapAreaM2": 3.830330031683038e-05,
+          "samples": 7,
+          "outsideUnionSamples": []
+        }
+      ],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-guarded-carry-lantern-01",
+      "modelSha256": "62d6a940fdbfef3c4bd290df72bb4651493f19bc72d7a18e9714280e40c9c3a9",
+      "sourceSha256": "c85b55f5ca5b14e4c8b470e64f3e9839562f115a86076a8d37f3f31321f45707",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Portable lantern stepped foot",
+          "triangles": 252,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.001392597398439387
+        },
+        {
+          "part": "Portable lantern closed cylindrical glass",
+          "triangles": 320,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0004301070292154364
+        },
+        {
+          "part": "Portable lantern hollow ventilator roof",
+          "triangles": 512,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0006172277723385794
+        },
+        {
+          "part": "Portable glass upper retaining ring",
+          "triangles": 512,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.4302633928581545e-05
+        },
+        {
+          "part": "Portable glass upper retainer stay 0",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.197243956195848e-07
+        },
+        {
+          "part": "Portable glass upper retainer stay 1",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.197243956195805e-07
+        },
+        {
+          "part": "Portable glass upper retainer stay 2",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.197243956195898e-07
+        },
+        {
+          "part": "Portable glass upper retainer stay 3",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.197243956195922e-07
+        },
+        {
+          "part": "Portable lantern guard upright 0",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.8248962869656594e-05
+        },
+        {
+          "part": "Portable lantern guard upright 1",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.824896286965658e-05
+        },
+        {
+          "part": "Portable lantern guard upright 2",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.824896286965658e-05
+        },
+        {
+          "part": "Portable lantern guard upright 3",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.8248962869656594e-05
+        },
+        {
+          "part": "Portable lantern guard hoop 0.1",
+          "triangles": 640,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.583953696338813e-05
+        },
+        {
+          "part": "Portable lantern guard hoop 0.23",
+          "triangles": 640,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.583953696338787e-05
+        },
+        {
+          "part": "Portable handle mounting ear -1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.5678670748035887e-05
+        },
+        {
+          "part": "Portable handle mounting ear 1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.5678670748035897e-05
+        },
+        {
+          "part": "Portable carrying bow",
+          "triangles": 416,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.336761860522052e-05
+        },
+        {
+          "part": "Portable interior pedestal",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00012466981729522517
+        },
+        {
+          "part": "Portable porcelain socket",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 5.11289255656117e-05
+        },
+        {
+          "part": "Portable opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0002862503365929822
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-tripod-drum-floor-lamp-01",
+      "modelSha256": "b25c9d833f5535380e22def7029fe5621ed1e0d9bc1f214e4ac5aa79c1f5050b",
+      "sourceSha256": "663b99baf9b6298af562ff5666dd8fa47afca1e67766ff4468fe78ab3aa81480",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Tripod upper metal hub",
+          "triangles": 188,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0010421045702219678
+        },
+        {
+          "part": "Spreading walnut tripod leg 0",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0018218962923785165
+        },
+        {
+          "part": "Tripod floor shoe 0",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.047532853377778e-05
+        },
+        {
+          "part": "Spreading walnut tripod leg 1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0018218964083989923
+        },
+        {
+          "part": "Tripod floor shoe 1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.047532853377776e-05
+        },
+        {
+          "part": "Spreading walnut tripod leg 2",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0018218958269526516
+        },
+        {
+          "part": "Tripod floor shoe 2",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.047534048202695e-05
+        },
+        {
+          "part": "Tripod socket pedestal",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00010160468959777802
+        },
+        {
+          "part": "Tripod porcelain socket",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.770351986114358e-05
+        },
+        {
+          "part": "Tripod opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00032523427911427893
+        },
+        {
+          "part": "Tripod pleated fabric shell",
+          "triangles": 512,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.003992432701960101
+        },
+        {
+          "part": "Tripod lower rim",
+          "triangles": 768,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.506007558218446e-05
+        },
+        {
+          "part": "Tripod upper rim",
+          "triangles": 768,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.506007558219625e-05
+        },
+        {
+          "part": "Tripod lower shade spoke 0",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.4282455027348786e-05
+        },
+        {
+          "part": "Tripod lower shade spoke 1",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.4282464845528895e-05
+        },
+        {
+          "part": "Tripod lower shade spoke 2",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.4282466207875085e-05
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-arched-reading-floor-lamp-01",
+      "modelSha256": "2bc515fd531dac6621ec365a430ca0f1f9dab72243372f506f8905702cf0a413",
+      "sourceSha256": "63a302bd492f87dc5206e65224640e87fe5265bee5f578a4210ebf71ac84d2ea",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Arched lamp limestone counterweight",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.015293377494577702
+        },
+        {
+          "part": "Arched lamp base collar",
+          "triangles": 140,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00020594539961699002
+        },
+        {
+          "part": "Continuous arched reading support",
+          "triangles": 316,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.002157974353487855
+        },
+        {
+          "part": "Arched reading head stem",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00029256308844025514
+        },
+        {
+          "part": "Arched reading head porcelain",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00018013595664605748
+        },
+        {
+          "part": "Arched reading head retaining collar",
+          "triangles": 124,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 7.077313800305483e-05
+        },
+        {
+          "part": "Arched reading head open reflector",
+          "triangles": 576,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.001003905233082238
+        },
+        {
+          "part": "Arched reading head opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0004946405896076051
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-bowl-torchiere-floor-lamp-01",
+      "modelSha256": "caf9af9d4b67de4ebf59c4f1219d64fad22a99ee8eb7a35fb30ed0bed1715bb4",
+      "sourceSha256": "3b1b787a688435769d3526ff78ba4c70b15670ae5718d3c4bbba76679a3b6887",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Torchiere weighted pedestal foot",
+          "triangles": 356,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0036497634006399313
+        },
+        {
+          "part": "Torchiere tapered standard",
+          "triangles": 188,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0027844799693917256
+        },
+        {
+          "part": "Torchiere standard collar 0.14",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.0542582375155205e-05
+        },
+        {
+          "part": "Torchiere standard collar 1.4",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.054243201595652e-05
+        },
+        {
+          "part": "Torchiere upward open bowl",
+          "triangles": 832,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.002373481374105831
+        },
+        {
+          "part": "Torchiere internal socket mount",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00011690552002272404
+        },
+        {
+          "part": "Torchiere porcelain socket",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.306726372882849e-05
+        },
+        {
+          "part": "Torchiere upward opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0001882142762070531
+        },
+        {
+          "part": "Torchiere bowl brace 0",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.6788903225538987e-05
+        },
+        {
+          "part": "Torchiere bowl brace 1",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.6788882442396565e-05
+        },
+        {
+          "part": "Torchiere bowl brace 2",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.6788892554723366e-05
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-hexagonal-post-lantern-01",
+      "modelSha256": "de292f25f5328cf9cd1591d560614f69ccda80c45c700d59a9d5e2d0688186b8",
+      "sourceSha256": "3cb8909acfda92547988e455ea1c650ab6c2e19be0cb69323e38420e93402916",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Hexagonal lantern post plinth",
+          "triangles": 56,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.005202171549301359
+        },
+        {
+          "part": "Hexagonal lantern tapered post",
+          "triangles": 124,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.004850805510271702
+        },
+        {
+          "part": "Hexagonal lantern lower tray",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0027458217857766836
+        },
+        {
+          "part": "Hexagonal frame upright 0",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.0623108889498776e-05
+        },
+        {
+          "part": "Hexagonal frame upright 1",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.062306406035337e-05
+        },
+        {
+          "part": "Hexagonal frame upright 2",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.062306406035337e-05
+        },
+        {
+          "part": "Hexagonal frame upright 3",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.0623108889498735e-05
+        },
+        {
+          "part": "Hexagonal frame upright 4",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.062306406035339e-05
+        },
+        {
+          "part": "Hexagonal frame upright 5",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.062306406035339e-05
+        },
+        {
+          "part": "Hexagonal continuous upper frame",
+          "triangles": 48,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00047272691185658956
+        },
+        {
+          "part": "Hexagonal hollow pyramidal roof",
+          "triangles": 72,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.001681152816060353
+        },
+        {
+          "part": "Hexagonal clear pane 0",
+          "triangles": 12,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00013467004073996523
+        },
+        {
+          "part": "Hexagonal clear pane 1",
+          "triangles": 12,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00013466995714961808
+        },
+        {
+          "part": "Hexagonal clear pane 2",
+          "triangles": 12,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00013467004073996466
+        },
+        {
+          "part": "Hexagonal clear pane 3",
+          "triangles": 12,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00013467011586307544
+        },
+        {
+          "part": "Hexagonal clear pane 4",
+          "triangles": 12,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0001346701243779226
+        },
+        {
+          "part": "Hexagonal clear pane 5",
+          "triangles": 12,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00013467011586307658
+        },
+        {
+          "part": "Hexagonal roof finial",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0002284612956643979
+        },
+        {
+          "part": "Hexagonal interior lamp pedestal",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00020528625191477677
+        },
+        {
+          "part": "Hexagonal porcelain socket",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 9.482710976972652e-05
+        },
+        {
+          "part": "Hexagonal opal lamp bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0005737946596847225
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-twin-articulated-wall-reading-lamp-01",
+      "modelSha256": "74a49099b26c197318043a8755442f589988d2643280df7abd95078595c3d52e",
+      "sourceSha256": "5d1a8a2fee890e9ed11638edb4e0a02a85f96a78736ef807fc5a3fbc5609d458",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Twin reading wall mounting plate",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0014469170344819603
+        },
+        {
+          "part": "Twin wall fixing screw -0.065 0.457",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.2959999088165252e-06
+        },
+        {
+          "part": "Twin wall fixing screw -0.065 0.693",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.295999908817868e-06
+        },
+        {
+          "part": "Twin wall fixing screw 0.065 0.457",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.2959999088165296e-06
+        },
+        {
+          "part": "Twin wall fixing screw 0.065 0.693",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.2959999088178432e-06
+        },
+        {
+          "part": "Twin -1 wall pivot",
+          "triangles": 68,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.849769565435926e-05
+        },
+        {
+          "part": "Twin -1 elbow pivot",
+          "triangles": 68,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.849769941704745e-05
+        },
+        {
+          "part": "Twin -1 head pivot",
+          "triangles": 68,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.849771402247388e-05
+        },
+        {
+          "part": "Twin -1 first articulated arm",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00011506950191209715
+        },
+        {
+          "part": "Twin -1 second articulated arm",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00010715432319207637
+        },
+        {
+          "part": "Twin -1 wall standoff",
+          "triangles": 60,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.083021792447816e-05
+        },
+        {
+          "part": "Twin -1 reading head stem",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 7.586306140424744e-05
+        },
+        {
+          "part": "Twin -1 reading head porcelain",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 4.671018892095483e-05
+        },
+        {
+          "part": "Twin -1 reading head retaining collar",
+          "triangles": 124,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.8351824738894153e-05
+        },
+        {
+          "part": "Twin -1 reading head open reflector",
+          "triangles": 576,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00026031695684954086
+        },
+        {
+          "part": "Twin -1 reading head opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00012826272071209797
+        },
+        {
+          "part": "Twin 1 wall pivot",
+          "triangles": 68,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.849769565435923e-05
+        },
+        {
+          "part": "Twin 1 elbow pivot",
+          "triangles": 68,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.84976994170476e-05
+        },
+        {
+          "part": "Twin 1 head pivot",
+          "triangles": 68,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.849771402247388e-05
+        },
+        {
+          "part": "Twin 1 first articulated arm",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00011506950709366055
+        },
+        {
+          "part": "Twin 1 second articulated arm",
+          "triangles": 44,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00010715432170274051
+        },
+        {
+          "part": "Twin 1 wall standoff",
+          "triangles": 60,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.0830217924478107e-05
+        },
+        {
+          "part": "Twin 1 reading head stem",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 7.586306140424771e-05
+        },
+        {
+          "part": "Twin 1 reading head porcelain",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 4.671018892095494e-05
+        },
+        {
+          "part": "Twin 1 reading head retaining collar",
+          "triangles": 124,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.835182473889416e-05
+        },
+        {
+          "part": "Twin 1 reading head open reflector",
+          "triangles": 576,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00026031695684954753
+        },
+        {
+          "part": "Twin 1 reading head opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00012826272071209786
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-caged-workshop-pendant-01",
+      "modelSha256": "63d0d8c05b8d5ba8a0c5c5549c0ce4478bd55d988991c8bbe1cb0d6a60b731e1",
+      "sourceSha256": "a8b6849094dd12bd3256f639d05bed32857f952ec6f118a4fd6dc4f067144eb1",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Cage pendant ceiling canopy",
+          "triangles": 252,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0013722482832489457
+        },
+        {
+          "part": "Cage pendant suspension rod",
+          "triangles": 60,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.852843932401426e-05
+        },
+        {
+          "part": "Cage protected head stem",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00030546849039806784
+        },
+        {
+          "part": "Cage protected head porcelain",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00018808215738975605
+        },
+        {
+          "part": "Cage protected head retaining collar",
+          "triangles": 124,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 7.389503036148424e-05
+        },
+        {
+          "part": "Cage protected head open reflector",
+          "triangles": 576,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.001048187574745262
+        },
+        {
+          "part": "Cage protected head opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0005164599103120885
+        },
+        {
+          "part": "Cage upper guard clamp",
+          "triangles": 188,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0002536840790722578
+        },
+        {
+          "part": "Cage lower perimeter",
+          "triangles": 640,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.858184409193612e-05
+        },
+        {
+          "part": "Cage bowed guard 0",
+          "triangles": 92,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.6091795443608914e-05
+        },
+        {
+          "part": "Cage underside radial guard 0",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.205855516214755e-06
+        },
+        {
+          "part": "Cage bowed guard 1",
+          "triangles": 92,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.627004382685169e-05
+        },
+        {
+          "part": "Cage underside radial guard 1",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.205858077933935e-06
+        },
+        {
+          "part": "Cage bowed guard 2",
+          "triangles": 92,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.5841536161461364e-05
+        },
+        {
+          "part": "Cage underside radial guard 2",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.205858615393177e-06
+        },
+        {
+          "part": "Cage bowed guard 3",
+          "triangles": 92,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.609179544360891e-05
+        },
+        {
+          "part": "Cage underside radial guard 3",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.205855516214754e-06
+        },
+        {
+          "part": "Cage bowed guard 4",
+          "triangles": 92,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.627004382685169e-05
+        },
+        {
+          "part": "Cage underside radial guard 4",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.205858077933935e-06
+        },
+        {
+          "part": "Cage bowed guard 5",
+          "triangles": 92,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 3.584153616146136e-05
+        },
+        {
+          "part": "Cage underside radial guard 5",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.205858615393177e-06
+        },
+        {
+          "part": "Cage underside central boss",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.6383869573917414e-05
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-pleated-drum-pendant-01",
+      "modelSha256": "a47c33ebb57c5e993cd68dc41550618bced4dca8df4f8920a2383d1bdc29ceae",
+      "sourceSha256": "a44330e826c3ba34a51718604d1a35b20ec9ea589c651902a79982e5442d1919",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Drum pendant ceiling canopy",
+          "triangles": 188,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0013247745459363687
+        },
+        {
+          "part": "Drum central suspension rod",
+          "triangles": 60,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 6.612769603405034e-05
+        },
+        {
+          "part": "Drum three-stay joining boss",
+          "triangles": 140,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00023521682172792228
+        },
+        {
+          "part": "Suspended drum pleated fabric shell",
+          "triangles": 512,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.002604118512932805
+        },
+        {
+          "part": "Suspended drum lower rim",
+          "triangles": 768,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.732811083127867e-05
+        },
+        {
+          "part": "Suspended drum upper rim",
+          "triangles": 768,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.732807503738532e-05
+        },
+        {
+          "part": "Drum sloping suspension stay 0",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.8393935827472085e-05
+        },
+        {
+          "part": "Drum sloping suspension stay 1",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.839393539951574e-05
+        },
+        {
+          "part": "Drum sloping suspension stay 2",
+          "triangles": 36,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 2.8393942544962625e-05
+        },
+        {
+          "part": "Drum interior socket stem",
+          "triangles": 104,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00017005104859127182
+        },
+        {
+          "part": "Drum porcelain socket",
+          "triangles": 116,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 4.8889578890462766e-05
+        },
+        {
+          "part": "Drum opal bulb",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00025051315235741553
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-three-branch-table-candelabrum-01",
+      "modelSha256": "6db6e41c72024e072fd429640753816ba4b9ed067439b14f06da57a2886f4e05",
+      "sourceSha256": "3c0cd7f05636d123a93edf9484392a1b53fbdebd86ab4365a7b36b7923f32e7c",
+      "nativeTriangleBindingBijective": true,
+      "actualPartTopology": [
+        {
+          "part": "Candelabrum oval weighted base",
+          "triangles": 252,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.0011448441220741868
+        },
+        {
+          "part": "Candelabrum turned central standard",
+          "triangles": 380,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00046135737950861667
+        },
+        {
+          "part": "Candelabrum swept branch -1",
+          "triangles": 140,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 7.623981630699509e-05
+        },
+        {
+          "part": "Candelabrum swept branch 1",
+          "triangles": 140,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 7.62398163069951e-05
+        },
+        {
+          "part": "Candelabrum candle cup 0",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.269892972300465e-05
+        },
+        {
+          "part": "Candelabrum wax candle 0",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00011856657428210875
+        },
+        {
+          "part": "Candelabrum wick 0",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.083744501237449e-07
+        },
+        {
+          "part": "Candelabrum candle cup 1",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.269890220647834e-05
+        },
+        {
+          "part": "Candelabrum wax candle 1",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00011856656284099978
+        },
+        {
+          "part": "Candelabrum wick 1",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.0837413863696124e-07
+        },
+        {
+          "part": "Candelabrum candle cup 2",
+          "triangles": 332,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 8.269892972300457e-05
+        },
+        {
+          "part": "Candelabrum wax candle 2",
+          "triangles": 156,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 0.00011856657431455951
+        },
+        {
+          "part": "Candelabrum wick 2",
+          "triangles": 28,
+          "nonmanifoldEdges": 0,
+          "inconsistentEdges": 0,
+          "signedVolumeM3": 1.0837445012372754e-07
+        }
+      ],
+      "localCoplanarOverlaps": [],
+      "exposedOverlapPairs": 0,
+      "roofHangerTipInspection": [],
+      "errors": []
+    }
+  ],
+  "errors": 0
+}

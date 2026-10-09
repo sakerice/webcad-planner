@@ -1,0 +1,336 @@
+{
+  "method": "Decode actual GLB vertices, apply node transforms, measure extrema; nominal integer envelopes do not change mesh scale",
+  "items": [
+    {
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "modelSha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+      "actualGltfBoundsMetres": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.14000000059604645
+        ],
+        [
+          0.6000000238418579,
+          3.0,
+          0.14000000059604645
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        1200.0000476837158,
+        280.0000011920929,
+        3000.0
+      ],
+      "nominalEnvelopeWdhMm": [
+        1200,
+        280,
+        3000
+      ],
+      "differenceMm": [
+        4.76837158203125e-05,
+        1.1920928955078125e-06,
+        0.0
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 0,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "assetBottomMm": 0,
+        "groundDatumMm": 0,
+        "explanation": "Place at ground level; no source-origin or scale change required."
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-rectangular-doorway-bay-01",
+      "modelSha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+      "actualGltfBoundsMetres": [
+        [
+          -0.8999999761581421,
+          0.0,
+          -0.14399999380111694
+        ],
+        [
+          0.8999999761581421,
+          3.0,
+          0.14399999380111694
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        1799.9999523162842,
+        287.9999876022339,
+        3000.0
+      ],
+      "nominalEnvelopeWdhMm": [
+        1800,
+        288,
+        3000
+      ],
+      "differenceMm": [
+        -4.76837158203125e-05,
+        -1.239776611328125e-05,
+        0.0
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 0,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "assetBottomMm": 0,
+        "groundDatumMm": 0,
+        "explanation": "Place at ground level; no source-origin or scale change required."
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-paneled-return-corner-01",
+      "modelSha256": "eeaca0f153284cba991460371c05c622e9062e6cbf62127ce38e8da4712bc4b2",
+      "actualGltfBoundsMetres": [
+        [
+          -0.36000001430511475,
+          0.0,
+          -0.36000001430511475
+        ],
+        [
+          0.36000001430511475,
+          3.0,
+          0.36000001430511475
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        720.0000286102295,
+        720.0000286102295,
+        3000.0
+      ],
+      "nominalEnvelopeWdhMm": [
+        720,
+        720,
+        3000
+      ],
+      "differenceMm": [
+        2.86102294921875e-05,
+        2.86102294921875e-05,
+        0.0
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 0,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "assetBottomMm": 0,
+        "groundDatumMm": 0,
+        "explanation": "Place at ground level; no source-origin or scale change required."
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-slate-gable-span-01",
+      "modelSha256": "ab98e580b7c4c7739301a052ffb00646ad05fd3bed040263ab33db3b195756ae",
+      "actualGltfBoundsMetres": [
+        [
+          -2.0999999046325684,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          2.0999999046325684,
+          1.5479999780654907,
+          0.6000000238418579
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        4199.999809265137,
+        1200.0000476837158,
+        1547.9999780654907
+      ],
+      "nominalEnvelopeWdhMm": [
+        4200,
+        1200,
+        1548
+      ],
+      "differenceMm": [
+        -0.00019073486328125,
+        4.76837158203125e-05,
+        -2.193450927734375e-05
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 2900,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "bareWallTopMm": 3000,
+        "assetBottomMm": 2900,
+        "bearingSeatLocalHeightMm": 100,
+        "resultingBearingMm": 3000,
+        "onCorniceTopMm": 3240,
+        "onCorniceAssetBottomMm": 3140,
+        "stackAdjustmentMm": 240,
+        "explanation": "Raise the roof by 240 mm when its bearing sits on a 240 mm cornice; the hollow shell eave remains 100 mm below its bearing seat."
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-gable-end-closure-01",
+      "modelSha256": "7b4078f59fd9b5b093f8c7ca54bedf227d96e0bb7a2dbbfb49bed74993516713",
+      "actualGltfBoundsMetres": [
+        [
+          -1.6799999475479126,
+          0.0,
+          -0.13650000095367432
+        ],
+        [
+          1.6799999475479126,
+          1.3700000047683716,
+          0.13650000095367432
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        3359.999895095825,
+        273.00000190734863,
+        1370.0000047683716
+      ],
+      "nominalEnvelopeWdhMm": [
+        3360,
+        273,
+        1370
+      ],
+      "differenceMm": [
+        -0.0001049041748046875,
+        1.9073486328125e-06,
+        4.76837158203125e-06
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 3000,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "bareWallTopMm": 3000,
+        "assetBottomMm": 3000,
+        "onCorniceTopMm": 3240,
+        "onCorniceAssetBottomMm": 3240,
+        "stackAdjustmentMm": 240,
+        "explanation": "Raise the fitted gable by the same 240 mm as the roof when stacking both on the cornice."
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-stone-cornice-straight-01",
+      "modelSha256": "d4351039b2b44e9a8663d12607b2302ceca071442709ce67f7337ab6424fd3fb",
+      "actualGltfBoundsMetres": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.21000000834465027
+        ],
+        [
+          0.6000000238418579,
+          0.23999999463558197,
+          0.21000000834465027
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        1200.0000476837158,
+        420.00001668930054,
+        239.99999463558197
+      ],
+      "nominalEnvelopeWdhMm": [
+        1200,
+        420,
+        240
+      ],
+      "differenceMm": [
+        4.76837158203125e-05,
+        1.6689300537109375e-05,
+        -5.364418029785156e-06
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 3000,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "bareWallOrColumnTopMm": 3000,
+        "assetBottomMm": 3000,
+        "assetTopMm": 3240,
+        "explanation": "Bottom plane bears on the 3000 mm wall or column datum. Matched roof and gable then rise by 240 mm if installed above this cornice."
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-stone-cornice-corner-01",
+      "modelSha256": "5c082dce1194992cb26a2797667c7d494afbb43416382493c67c33c60238ea4f",
+      "actualGltfBoundsMetres": [
+        [
+          -0.36000001430511475,
+          0.0,
+          -0.36000001430511475
+        ],
+        [
+          0.36000001430511475,
+          0.23999999463558197,
+          0.36000001430511475
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        720.0000286102295,
+        720.0000286102295,
+        239.99999463558197
+      ],
+      "nominalEnvelopeWdhMm": [
+        720,
+        720,
+        240
+      ],
+      "differenceMm": [
+        2.86102294921875e-05,
+        2.86102294921875e-05,
+        -5.364418029785156e-06
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 3000,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "bareWallOrColumnTopMm": 3000,
+        "assetBottomMm": 3000,
+        "assetTopMm": 3240,
+        "explanation": "Bottom plane bears on the 3000 mm wall or column datum. Matched roof and gable then rise by 240 mm if installed above this cornice."
+      },
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-tuscan-support-column-01",
+      "modelSha256": "3e91566d0b06e62314142670e9d3fce2bdda2a52132d9e5ce8140b75435c824e",
+      "actualGltfBoundsMetres": [
+        [
+          -0.30000001192092896,
+          0.0,
+          -0.30000001192092896
+        ],
+        [
+          0.30000001192092896,
+          3.0,
+          0.30000001192092896
+        ]
+      ],
+      "actualEnvelopeWdhMm": [
+        600.0000238418579,
+        600.0000238418579,
+        3000.0
+      ],
+      "nominalEnvelopeWdhMm": [
+        600,
+        600,
+        3000
+      ],
+      "differenceMm": [
+        2.384185791015625e-05,
+        2.384185791015625e-05,
+        0.0
+      ],
+      "toleranceMm": 0.1,
+      "defaultElevationMm": 0,
+      "gltfConnectionConversionChecked": true,
+      "placementExample": {
+        "assetBottomMm": 0,
+        "groundDatumMm": 0,
+        "explanation": "Place at ground level; no source-origin or scale change required."
+      },
+      "errors": []
+    }
+  ],
+  "errors": []
+}

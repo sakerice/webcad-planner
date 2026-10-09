@@ -1,0 +1,2296 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・庭と外構",
+  "assetSet": "rpg-mansion",
+  "sourceDescriptorSha256": "1f23775eb3d7048d92805a6e6f45729c564794fe18ad18c578ee9c378040ae17",
+  "items": [
+    {
+      "id": "rpg-mansion-garden-multistem-deciduous-tree-01",
+      "name": "Multi-stem deciduous tree",
+      "kind": "tree",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-multistem-deciduous-tree-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-multistem-deciduous-tree-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-multistem-deciduous-tree-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-multistem-deciduous-tree-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-multistem-deciduous-tree-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 2162.075,
+      "d": 2116.958,
+      "h": 2709.854,
+      "actualMeasuredDimensionsMm": [
+        2162.075,
+        2116.958,
+        2709.854
+      ],
+      "triangleBudget": 30000,
+      "triangles": 26840,
+      "glbBytes": 2590644,
+      "sha256": "065f03a8984a7555344120fd72974f1ac1945ea56c8ee96e2e514ff7a229389c",
+      "sourceSha256": "0d8531f97bc0cbaeb6946f6627db98d116ccea974d3f16cdb8d049c253db239d",
+      "authoringSha256": "d56cd21f4f388ac64d7653c6106592157cd6c93546f3b64344fa2a77bbbd2f17",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "plantStructure": {
+          "speciesIntent": "Four-stem deciduous garden specimen with layered open crown",
+          "scaffoldBoughs": 12,
+          "secondarySprigs": 144,
+          "leafCount": 1872,
+          "attachmentPolicy": "Every branch starts inside its parent; every leaf root lies on its supporting sprig centerline.",
+          "triangleBudget": 30000
+        },
+        "installation": {
+          "mount": "ground",
+          "rootPlaneBlenderZ": 0,
+          "note": "Static ornamental planting model; soil excavation, root viability and load capacity are not simulated."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.12452512979507446,
+          -0.03844374418258667,
+          0.004566708113998175
+        ],
+        "originalBoundsM": [
+          [
+            -0.9565120935440063,
+            -1.0200352668762207,
+            -0.004566708113998175
+          ],
+          [
+            1.2055623531341553,
+            1.096922755241394,
+            2.705287218093872
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#537341"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-multistem-deciduous-tree-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-multistem-deciduous-tree-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-multistem-deciduous-tree-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-multistem-deciduous-tree-01-rear.png",
+      "materialCount": 4,
+      "materialPrimitiveCount": 4,
+      "materialNames": [
+        "Branch bark",
+        "Garden leaf green",
+        "Fresh growing leaf",
+        "Shaded leaf"
+      ],
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 4376,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 8640,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Fresh growing leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.15592646598815918,
+            0.24228112399578094,
+            0.07036009430885315,
+            1
+          ],
+          "baseColorHex": "#6e874b",
+          "triangles": 6912,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Shaded leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.09989872574806213,
+            0.045186202973127365,
+            1
+          ],
+          "baseColorHex": "#3b593c",
+          "triangles": 6912,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "8669d89ae7e9a9708b3c6827dd82f7a6082213fe966a835640731f3af072a18e",
+        "top": "7b40c6a1fdc7b5d927d5b75c75bfa521bce1267848f9ec68f33a99ccc7be321a",
+        "front": "3b31e0edf85510db1ec717e5a67f7e3a0fc581b3cdb84cafdac0bf6682c252e8",
+        "rear": "be1b6133333ad93ded274b967b783df98e1d95dcf633f39610ef69a338e83b7a"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "multistem-deciduous-tree",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-broad-canopy-tree-01",
+      "name": "Broad canopy tree",
+      "kind": "tree",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-broad-canopy-tree-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-broad-canopy-tree-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-broad-canopy-tree-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-broad-canopy-tree-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-broad-canopy-tree-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 2463.21,
+      "d": 2260.698,
+      "h": 3044.912,
+      "actualMeasuredDimensionsMm": [
+        2463.21,
+        2260.698,
+        3044.912
+      ],
+      "triangleBudget": 30000,
+      "triangles": 26840,
+      "glbBytes": 2590648,
+      "sha256": "d3291fe979e8cb09e9690f0e8e6c108742677154a417feee62404347dd79d1b9",
+      "sourceSha256": "edde9ab46b6f6a2984f93ebe3eb7be6dd877650a744cf1a8c7d0c5b274339803",
+      "authoringSha256": "7f0038ee9f2a87c365cfe67f669968e2a8457e4e26e2cb37f248076a84bcda0b",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "plantStructure": {
+          "speciesIntent": "Layered broadleaf specimen with asymmetric rounded crown",
+          "scaffoldBoughs": 12,
+          "secondarySprigs": 144,
+          "leafCount": 1872,
+          "attachmentPolicy": "Every branch starts inside its parent; every leaf root lies on its supporting sprig centerline.",
+          "triangleBudget": 30000
+        },
+        "installation": {
+          "mount": "ground",
+          "rootPlaneBlenderZ": 0,
+          "note": "Static ornamental planting model; soil excavation, root viability and load capacity are not simulated."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.04259288311004639,
+          -0.066650390625,
+          0.002609058516100049
+        ],
+        "originalBoundsM": [
+          [
+            -1.189012050628662,
+            -1.063698410987854,
+            -0.002609058516100049
+          ],
+          [
+            1.2741978168487549,
+            1.196999192237854,
+            3.0423028469085693
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#537341"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-broad-canopy-tree-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-broad-canopy-tree-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-broad-canopy-tree-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-broad-canopy-tree-01-rear.png",
+      "materialCount": 4,
+      "materialPrimitiveCount": 4,
+      "materialNames": [
+        "Branch bark",
+        "Garden leaf green",
+        "Fresh growing leaf",
+        "Shaded leaf"
+      ],
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 4376,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 8640,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Fresh growing leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.15592646598815918,
+            0.24228112399578094,
+            0.07036009430885315,
+            1
+          ],
+          "baseColorHex": "#6e874b",
+          "triangles": 6912,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Shaded leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.09989872574806213,
+            0.045186202973127365,
+            1
+          ],
+          "baseColorHex": "#3b593c",
+          "triangles": 6912,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "f40f4a25203294be9f13c8ac898772f207e60c55439d46975481236cb966cce6",
+        "top": "7b87474e11b40921cdcb603ec0605d5512454e4039baa92aa351d92831a2ddd7",
+        "front": "201330f43e5f90d5fd6abb013dc6ce0a26438fd585d15c0071354ca3c0ef4437",
+        "rear": "1e4e32c6a123ddf3a7796e636dba59036c79e96936c9f4450df134873f43069e"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "broad-canopy-tree",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-low-shrub-border-01",
+      "name": "Low shrub border",
+      "kind": "shrub",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-low-shrub-border-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-low-shrub-border-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-low-shrub-border-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-low-shrub-border-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-low-shrub-border-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 1970.035,
+      "d": 831.872,
+      "h": 699.176,
+      "actualMeasuredDimensionsMm": [
+        1970.035,
+        831.872,
+        699.176
+      ],
+      "triangleBudget": 18000,
+      "triangles": 17160,
+      "glbBytes": 1660380,
+      "sha256": "dab15b2d8be23cd3ddef798e8f13aa98a11878da6c16e800368c54bd75614eef",
+      "sourceSha256": "e0e7509438223b16ed759be6df353798752bfe07ee04402e98dea8bef9409a4b",
+      "authoringSha256": "ebcc41837577b1625ec6df53f51282301ab9cf7ead3333937940f5b6dc252a64",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "plantStructure": {
+          "speciesIntent": "Continuous low clipped broadleaf border with overlapping crowns and five planted roots",
+          "secondarySprigs": 100,
+          "leafCount": 1200,
+          "triangleBudget": 18000
+        },
+        "installation": {
+          "mount": "ground",
+          "rootPlaneBlenderZ": 0,
+          "note": "Crown envelopes overlap into a connected low shrub mass; five internal stems are retained as editable support."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.011810928583145142,
+          -0.030191496014595032,
+          0.0018270059954375029
+        ],
+        "originalBoundsM": [
+          [
+            -0.9732065796852112,
+            -0.3857444226741791,
+            -0.0018270059954375029
+          ],
+          [
+            0.9968284368515015,
+            0.44612741470336914,
+            0.6973490118980408
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#537341"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-low-shrub-border-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-low-shrub-border-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-low-shrub-border-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-low-shrub-border-01-rear.png",
+      "materialCount": 4,
+      "materialPrimitiveCount": 4,
+      "materialNames": [
+        "Branch bark",
+        "Garden leaf green",
+        "Fresh growing leaf",
+        "Shaded leaf"
+      ],
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 2760,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 4800,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Fresh growing leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.15592646598815918,
+            0.24228112399578094,
+            0.07036009430885315,
+            1
+          ],
+          "baseColorHex": "#6e874b",
+          "triangles": 4800,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Shaded leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.09989872574806213,
+            0.045186202973127365,
+            1
+          ],
+          "baseColorHex": "#3b593c",
+          "triangles": 4800,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "8ba9c59c362c7aa2baac467a776fb41eff249a2281ea123d20efe095cded1a81",
+        "top": "9943e9580b951f4244e7ba9df726007695620c106559b67642e92f8f44711cae",
+        "front": "7ec6894edf7f042f284459b6bc4e7d46086aff7a770da55e71c9f11932d5461a",
+        "rear": "8aad66cf4f7e3ec74b9eb76768f2ca12f992ac8899acb7bdbe2d78c8564cbffa"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "low-shrub-border",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-lattice-fence-bay-01",
+      "name": "Lattice fence bay",
+      "kind": "fence",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-lattice-fence-bay-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-lattice-fence-bay-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-lattice-fence-bay-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-lattice-fence-bay-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-lattice-fence-bay-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 1820.0,
+      "d": 104.0,
+      "h": 1405.0,
+      "actualMeasuredDimensionsMm": [
+        1820.0,
+        104.0,
+        1405.0
+      ],
+      "triangleBudget": 6000,
+      "triangles": 384,
+      "glbBytes": 29300,
+      "sha256": "b6070ce8b36f6609135b0e2093115feeaa53564207fcba56c9de1d461e444ede",
+      "sourceSha256": "831ec8f4624b04bcb0792d5d6182c7b13f73941e77731574752e84083ace0d4f",
+      "authoringSha256": "6929b1571ced22ea7fe1e531193a90ab7773e1567bb82778eb18f30a3bcd3873",
+      "countingClass": "historical-reconstruction",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 0,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": true,
+      "freshQARequired": true,
+      "installationDatums": {
+        "installation": {
+          "mount": "ground",
+          "modulePitchM": 1.82,
+          "joinBoundaryX": [
+            -0.91,
+            0.91
+          ],
+          "postDepthM": 0.104,
+          "apexHeightM": 1.405,
+          "note": "Half-posts pair at straight joints. Outer free ends need terminal half-post accessories; right-angle joints need the 103 mm corner adapter. Static hand assembly, no automatic snapping."
+        },
+        "construction": "Two crossed diagonal strip layers clipped into continuous top/bottom rails and side stiles.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.9100000262260437,
+            -0.052000001072883606,
+            0.0
+          ],
+          [
+            0.9100000262260437,
+            0.052000001072883606,
+            1.4049999713897705
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#826044"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-lattice-fence-bay-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-lattice-fence-bay-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-lattice-fence-bay-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-lattice-fence-bay-01-rear.png",
+      "materialCount": 1,
+      "materialPrimitiveCount": 1,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Oiled garden oak",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.22322796285152435,
+            0.11697066575288773,
+            0.05780543014407158,
+            1
+          ],
+          "baseColorHex": "#826044",
+          "triangles": 384,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "29b0a705e70373a06a71054e378f0d5ebf3086b4cf539cacfd28b60a9682462d",
+        "top": "c015327b97836a274c9555c8583c05b8c8e078ceccf1f7232f5e28bee6cd0fc3",
+        "front": "fd3b8222b40af584bde33ca9351d6b64a6856d80db80f1f90fa89f274e8091e2",
+        "rear": "513371530a53c52960a6e378bf3a67cf7496ef7ccd58f49cf460a0c9749da052"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "lattice-fence-bay",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-fence-terminal-half-post-01",
+      "name": "Fence terminal half post",
+      "kind": "fence-accessory",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-fence-terminal-half-post-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-fence-terminal-half-post-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-fence-terminal-half-post-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-fence-terminal-half-post-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-fence-terminal-half-post-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 52.0,
+      "d": 104.0,
+      "h": 1405.0,
+      "actualMeasuredDimensionsMm": [
+        52.0,
+        104.0,
+        1405.0
+      ],
+      "triangleBudget": 6000,
+      "triangles": 12,
+      "glbBytes": 3028,
+      "sha256": "8f5b206e00809f5372cad00c9a38bf3a5a76c52ecd1553768b2bb3c12cd31776",
+      "sourceSha256": "cfc1e9d969fbee43b5539144fc452fdce9bfa4f18cc31d160cac6b114d38ca10",
+      "authoringSha256": "bd97d34e78b38e71b07a9c27e956ccd4a5018ec4db21a08141f3e49eaa51dff1",
+      "countingClass": "zero-core-accessory",
+      "coreConstructionCount": 0,
+      "novelCoreCount": 0,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "installation": {
+          "mount": "fence-accessory",
+          "joinWidthM": 0.052,
+          "oppositeEndRotationDegrees": 180,
+          "note": "Usable mating half post closes a fence free end. Accessory; zero new core constructions."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.026000000536441803,
+            -0.052000001072883606,
+            0.0
+          ],
+          [
+            0.026000000536441803,
+            0.052000001072883606,
+            1.4049999713897705
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#826044"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-fence-terminal-half-post-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-fence-terminal-half-post-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-fence-terminal-half-post-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-fence-terminal-half-post-01-rear.png",
+      "materialCount": 1,
+      "materialPrimitiveCount": 1,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Oiled garden oak",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.22322796285152435,
+            0.11697066575288773,
+            0.05780543014407158,
+            1
+          ],
+          "baseColorHex": "#826044",
+          "triangles": 12,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "1feeaa1646e7f8d56efa98cd298c3424d830fe7688781c9f86d8687ecb2fcf39",
+        "top": "fbe2cb229f773af8537fcce634d48e64062903627abfdb3a304118becaca26a8",
+        "front": "2da5c5a2b6339ecf131f1f91df99809d2dd47d69448629d6dd6d383a7f98f01d",
+        "rear": "fef02e7d8634004f6f53db98c2dcde58246a44f208b763a64fd4c46d0db21c42"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "fence-accessory",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "fence-terminal-half-post",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-fence-corner-adapter-01",
+      "name": "Fence corner adapter",
+      "kind": "fence-accessory",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-fence-corner-adapter-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-fence-corner-adapter-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-fence-corner-adapter-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-fence-corner-adapter-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-fence-corner-adapter-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 103.0,
+      "d": 104.0,
+      "h": 1405.0,
+      "actualMeasuredDimensionsMm": [
+        103.0,
+        104.0,
+        1405.0
+      ],
+      "triangleBudget": 6000,
+      "triangles": 12,
+      "glbBytes": 3060,
+      "sha256": "6462dfa5bbb68c35a7e03a1864b6b9ed48dacfc2415676888db3d73a8fdf8b3c",
+      "sourceSha256": "500b9e1f9c86873c89ae5ad0a930039c2bb37bbdb31cd48549afb2929e86e09b",
+      "authoringSha256": "c9ec0fd193b87f2599d72ea95b0933e159ebe93a9f92d6d8842a816d20afa8d6",
+      "countingClass": "zero-core-accessory",
+      "coreConstructionCount": 0,
+      "novelCoreCount": 0,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "installation": {
+          "mount": "fence-accessory",
+          "widthM": 0.103,
+          "depthM": 0.104,
+          "heightM": 1.405,
+          "note": "103 mm connector fills a paired right angle joint, with 1 mm outer face recess. Accessory; zero new core constructions."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.051500000059604645,
+            -0.052000001072883606,
+            0.0
+          ],
+          [
+            0.051500000059604645,
+            0.052000001072883606,
+            1.4049999713897705
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#424b43"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-fence-corner-adapter-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-fence-corner-adapter-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-fence-corner-adapter-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-fence-corner-adapter-01-rear.png",
+      "materialCount": 1,
+      "materialPrimitiveCount": 1,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 12,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "4bb3c3ec67f00f8d896f41913276bc4e21b5108a39e5f96615af6d93bdaf7cf3",
+        "top": "8407d500a906bbb9683fcf69cc943fabf6a862fcdcd8b685e4dee4b6a70843d6",
+        "front": "a5eb5564888e427894a6a118ce3f68d58fc064fe439cbe507cbe8be3ce1c4e78",
+        "rear": "23d8daf57cff4dee61ad78c77abc3c1e8d82edcecf16ecfe3b9e97a9542f84e9"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "fence-accessory",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "fence-corner-adapter",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-two-riser-deck-step-01",
+      "name": "Two riser deck step",
+      "kind": "deck-step",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-two-riser-deck-step-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-two-riser-deck-step-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-two-riser-deck-step-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-two-riser-deck-step-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-two-riser-deck-step-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 1100.0,
+      "d": 665.0,
+      "h": 320.6,
+      "actualMeasuredDimensionsMm": [
+        1100.0,
+        665.0,
+        320.6
+      ],
+      "triangleBudget": 6000,
+      "triangles": 1156,
+      "glbBytes": 81232,
+      "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3",
+      "sourceSha256": "5200de6411390ddd5062421da2eef0178b8eb90e555d794aef5bbc83e262db2d",
+      "authoringSha256": "454a33a8e2f848bbeddcabbaae27ab59723694edf70891c943f04e24c9d18afe",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "installation": {
+          "mount": "ground",
+          "treadTopHeightsMm": [
+            160,
+            320
+          ],
+          "treadBearingSeatMm": 1,
+          "note": "Three continuous stepped stringers and physical risers/ties. Static design; no building-code, load or slip certification."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.550000011920929,
+            -0.33250001072883606,
+            0.0
+          ],
+          [
+            0.550000011920929,
+            0.33250001072883606,
+            0.3206000030040741
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#424b43"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#826044"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-two-riser-deck-step-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-two-riser-deck-step-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-two-riser-deck-step-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-two-riser-deck-step-01-rear.png",
+      "materialCount": 2,
+      "materialPrimitiveCount": 2,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Oiled garden oak",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.22322796285152435,
+            0.11697066575288773,
+            0.05780543014407158,
+            1
+          ],
+          "baseColorHex": "#826044",
+          "triangles": 436,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 720,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "c18c9d710e9708f503c74ffd33c8cb77d8cd94d8e6afdf784d69c542142d45c3",
+        "top": "f0f01c3c0943a33704b27de973e464b5675a6a9daafd177d1f4e835e6238c0f5",
+        "front": "04734816e5165170d97afc713c799903aac0e604913f04facfb1c8b6c2c27ed8",
+        "rear": "d2d1249a1083a0dff7a30d49503a8640512f0efc2b7730d022687e62799f60ba"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "two-riser-deck-step",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-brick-gate-pier-01",
+      "name": "Brick gate pier",
+      "kind": "gate-pier",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-brick-gate-pier-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-brick-gate-pier-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-brick-gate-pier-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-brick-gate-pier-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-brick-gate-pier-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 665.0,
+      "d": 600.0,
+      "h": 1480.0,
+      "actualMeasuredDimensionsMm": [
+        665.0,
+        600.0,
+        1480.0
+      ],
+      "triangleBudget": 6000,
+      "triangles": 2412,
+      "glbBytes": 173848,
+      "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94",
+      "sourceSha256": "3bbc39c63ccd526746d7230525a6439e6e3969e91528b6b136c1599b3e9ac206",
+      "authoringSha256": "03143f534b9c709e0e623b87f3017ed9025456d1b09cad5428aef50fff855ee5",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "installation": {
+          "mount": "ground",
+          "gatePinCentersBlenderX": -0.333,
+          "gatePinLevelsM": [
+            0.35,
+            1.15
+          ],
+          "gatePinRadiusM": 0.011,
+          "receiverOuterFaceX": 0.321,
+          "foundationHalfWidthM": 0.3,
+          "note": "Two actual male hinges and standoff receiver plates. Installation proof uses a separate excluded gate collar fixture; a functioning gate is not included."
+        },
+        "bottomCenterTranslationBlenderM": [
+          0.011500000953674316,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.3440000116825104,
+            -0.30000001192092896,
+            0.0
+          ],
+          [
+            0.32100000977516174,
+            0.30000001192092896,
+            1.4800000190734863
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "masonry",
+          "label": "煉瓦",
+          "default": "#a87559"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#424b43"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#b8b39d"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-brick-gate-pier-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-brick-gate-pier-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-brick-gate-pier-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-brick-gate-pier-01-rear.png",
+      "materialCount": 4,
+      "materialPrimitiveCount": 4,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Warm carved limestone",
+          "finishChannel": "stone",
+          "baseColorFactor": [
+            0.4793201684951782,
+            0.4507857859134674,
+            0.33716362714767456,
+            1
+          ],
+          "baseColorHex": "#b8b39d",
+          "triangles": 116,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Handmade warm brick",
+          "finishChannel": "masonry",
+          "baseColorFactor": [
+            0.3915724754333496,
+            0.177888423204422,
+            0.09989872574806213,
+            1
+          ],
+          "baseColorHex": "#a87559",
+          "triangles": 1920,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 296,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Weathered brass",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.4019777774810791,
+            0.21952620148658752,
+            0.05951123684644699,
+            1
+          ],
+          "baseColorHex": "#aa8145",
+          "triangles": 80,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "fad37c850db2fc677457a13b204d4484552ed0d655d42e117da23fadabafe123",
+        "top": "3fbeedfaabc363e9ee48193e86b7a144e3204e12391d791d0d6f010e4bd1cd63",
+        "front": "0b083db3c7beb4ad00520b2c0740c268d0a7408fc58c8d411d51adaa3971bd1e",
+        "rear": "ebe9dba259431071e3af8cae542926122ba051c9dc85443fa3a51d149526bf0d"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "brick-gate-pier",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-fan-palm-planter-01",
+      "name": "Fan palm planter",
+      "kind": "plant",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-fan-palm-planter-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-fan-palm-planter-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-fan-palm-planter-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-fan-palm-planter-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-fan-palm-planter-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 1221.368,
+      "d": 1210.414,
+      "h": 1756.446,
+      "actualMeasuredDimensionsMm": [
+        1221.368,
+        1210.414,
+        1756.446
+      ],
+      "triangleBudget": 6000,
+      "triangles": 2008,
+      "glbBytes": 175504,
+      "sha256": "0e27bbc361fd5ae1e87ec6f4440b398329ea6a04a3be5de71cd7fc0cd962db4a",
+      "sourceSha256": "03318b7209b774496fee7f98dd9998b46d3da9f5042c0211cf7c9bfc11f4f62c",
+      "authoringSha256": "1a68f3eb140486cc930b1620fe6021b902dc0cd4d895a855f434024e4ba19053",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "cavity": {
+          "rimHeightM": 0.4,
+          "internalFloorM": 0.045,
+          "openingRadiusM": 0.195,
+          "filledWithSoil": true
+        },
+        "plantStructure": {
+          "fanCount": 10,
+          "segmentsPerFan": 13
+        },
+        "installation": {
+          "mount": "floor",
+          "note": "Static ornamental palm in hollow planter."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.004239588975906372,
+          0.007361948490142822,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.6064442992210388,
+            -0.6125689744949341,
+            0.0
+          ],
+          [
+            0.6149234771728516,
+            0.5978450775146484,
+            1.756446361541748
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "鉢",
+          "default": "#95634a"
+        },
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#3b593c"
+        },
+        {
+          "key": "soil",
+          "label": "土",
+          "default": "#3b3527"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-fan-palm-planter-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-fan-palm-planter-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-fan-palm-planter-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-fan-palm-planter-01-rear.png",
+      "materialCount": 5,
+      "materialPrimitiveCount": 5,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Terracotta planter",
+          "finishChannel": "ceramic",
+          "baseColorFactor": [
+            0.30054378509521484,
+            0.12477181851863861,
+            0.06847816705703735,
+            1
+          ],
+          "baseColorHex": "#95634a",
+          "triangles": 500,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Planting soil",
+          "finishChannel": "soil",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.03560131415724754,
+            0.020288562402129173,
+            1
+          ],
+          "baseColorHex": "#3b3527",
+          "triangles": 92,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 376,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Shaded leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.09989872574806213,
+            0.045186202973127365,
+            1
+          ],
+          "baseColorHex": "#3b593c",
+          "triangles": 520,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 4,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 520,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "9f0bf372e480db5654ae320b391d96c93d0604d3b38d465da0f64c3bf9963b93",
+        "top": "2dd38d8d5ebc5eed28e8bae58fb9b884d502d03617e2b6a6147049af18c38adb",
+        "front": "1be9b54295b35e49b9fc280b7ef1f422fd2b14e089649ee502e8627610746071",
+        "rear": "5cb6266a408903092380d463f3acb4fadc2aa550a685a866db37ffb6df899bf1"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "floor",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "fan-palm-planter",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-wall-window-flower-box-01",
+      "name": "Wall window flower box",
+      "kind": "plant",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-wall-window-flower-box-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-wall-window-flower-box-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-wall-window-flower-box-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-wall-window-flower-box-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-wall-window-flower-box-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 1100.0,
+      "d": 351.0,
+      "h": 504.347,
+      "actualMeasuredDimensionsMm": [
+        1100.0,
+        351.0,
+        504.347
+      ],
+      "triangleBudget": 6000,
+      "triangles": 2458,
+      "glbBytes": 223452,
+      "sha256": "f223a9a7d0259f4e4ddc485ea2499d538f58f2538a9c4aa7b1506659c1e950fb",
+      "sourceSha256": "3d03489708633bf0000541fa6fe9b5fc55b0dfe71a1791a2c4f48bddfa718d73",
+      "authoringSha256": "efcae2b4f31c732d398666c492347b0462b8f54567fc85dae71588810a98264b",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "defaultElevationMm": 900,
+        "cavity": {
+          "rimHeightM": 0.235,
+          "internalFloorM": 0.04,
+          "filledWithSoil": true
+        },
+        "installation": {
+          "mount": "wall",
+          "wallContactPlaneBlenderY": 0.19,
+          "defaultElevationMm": 900,
+          "anchorCentersX": [
+            -0.36,
+            0.36
+          ],
+          "note": "Two physical wall plates and diagonal braces; substrate anchors and structural suitability are manual.",
+          "wallContactPlaneGltfZ": -0.17449992388486862
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.015500076115131378,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.550000011920929,
+            -0.1599999964237213,
+            0.0
+          ],
+          [
+            0.550000011920929,
+            0.19100014865398407,
+            0.5043472051620483
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "鉢",
+          "default": "#95634a"
+        },
+        {
+          "key": "flower",
+          "label": "花",
+          "default": "#b7737c"
+        },
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#537341"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#aa8145"
+        },
+        {
+          "key": "soil",
+          "label": "土",
+          "default": "#3b3527"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-wall-window-flower-box-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-wall-window-flower-box-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-wall-window-flower-box-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-wall-window-flower-box-01-rear.png",
+      "materialCount": 10,
+      "materialPrimitiveCount": 10,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Terracotta planter",
+          "finishChannel": "ceramic",
+          "baseColorFactor": [
+            0.30054378509521484,
+            0.12477181851863861,
+            0.06847816705703735,
+            1
+          ],
+          "baseColorHex": "#95634a",
+          "triangles": 116,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Planting soil",
+          "finishChannel": "soil",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.03560131415724754,
+            0.020288562402129173,
+            1
+          ],
+          "baseColorHex": "#3b3527",
+          "triangles": 44,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 152,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Weathered brass",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.4019777774810791,
+            0.21952620148658752,
+            0.05951123684644699,
+            1
+          ],
+          "baseColorHex": "#aa8145",
+          "triangles": 508,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 4,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 234,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 5,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 324,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 6,
+          "name": "Fresh growing leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.15592646598815918,
+            0.24228112399578094,
+            0.07036009430885315,
+            1
+          ],
+          "baseColorHex": "#6e874b",
+          "triangles": 324,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 7,
+          "name": "Shaded leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.09989872574806213,
+            0.045186202973127365,
+            1
+          ],
+          "baseColorHex": "#3b593c",
+          "triangles": 324,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 8,
+          "name": "Ivory garden flower",
+          "finishChannel": "flower",
+          "baseColorFactor": [
+            0.8549926280975342,
+            0.7758222222328186,
+            0.5394794940948486,
+            1
+          ],
+          "baseColorHex": "#eee4c2",
+          "triangles": 144,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 9,
+          "name": "Muted rose flower",
+          "finishChannel": "flower",
+          "baseColorFactor": [
+            0.47353148460388184,
+            0.17144110798835754,
+            0.2015562504529953,
+            1
+          ],
+          "baseColorHex": "#b7737c",
+          "triangles": 288,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "58b7066e1bbf706babce601c7e4b44e0201d0b3e8829d04990993f0afb8d9e76",
+        "top": "43878c3ba4ff8008b83317b33dc4f549d56e7bd3af1655646e70c53f341c13ea",
+        "front": "cab6fd7453ff5ee18113cbe29de56ead5af75909c09b580f7cb6f3bbd665a870",
+        "rear": "5e7e0f9c1297a7182064ded6b452a48248b8999466bfc6e5d60d6bd39a6b2a80"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 900,
+      "placementHint": "wall",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "wall-window-flower-box",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-tabletop-fern-01",
+      "name": "Tabletop fern",
+      "kind": "plant",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-tabletop-fern-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-tabletop-fern-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-tabletop-fern-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-tabletop-fern-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-tabletop-fern-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 304.817,
+      "d": 314.104,
+      "h": 287.118,
+      "actualMeasuredDimensionsMm": [
+        304.817,
+        314.104,
+        287.118
+      ],
+      "triangleBudget": 6000,
+      "triangles": 2704,
+      "glbBytes": 240500,
+      "sha256": "091bbcde9d0a663bc845cde21870cb2275b9128ae1df59ffcdb869feeaac07ae",
+      "sourceSha256": "7e44427c20629a69fbbfbbcd1728794bb11d379cf62ba56d9ae12bbf5abf9ff3",
+      "authoringSha256": "114375e698277dc9149fe7d4a5eb39a9964c58932e254e3b73cdcd5baee2c09c",
+      "countingClass": "historical-reconstruction",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 0,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": true,
+      "freshQARequired": true,
+      "installationDatums": {
+        "plantStructure": {
+          "fronds": 10,
+          "pinnules": 190
+        },
+        "cavity": {
+          "rimHeightM": 0.132,
+          "internalFloorM": 0.018,
+          "openingRadiusM": 0.0568,
+          "filledWithSoil": true
+        },
+        "installation": {
+          "mount": "tabletop",
+          "note": "Static potted fern; bottom at placement surface."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0009224936366081238,
+          0.012302234768867493,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.15148597955703735,
+            -0.16935425996780396,
+            0.0
+          ],
+          [
+            0.1533309668302536,
+            0.14474979043006897,
+            0.28711768984794617
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "鉢",
+          "default": "#95634a"
+        },
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#6e874b"
+        },
+        {
+          "key": "soil",
+          "label": "土",
+          "default": "#3b3527"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-tabletop-fern-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-tabletop-fern-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-tabletop-fern-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-tabletop-fern-01-rear.png",
+      "materialCount": 5,
+      "materialPrimitiveCount": 5,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Terracotta planter",
+          "finishChannel": "ceramic",
+          "baseColorFactor": [
+            0.30054378509521484,
+            0.12477181851863861,
+            0.06847816705703735,
+            1
+          ],
+          "baseColorHex": "#95634a",
+          "triangles": 428,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Planting soil",
+          "finishChannel": "soil",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.03560131415724754,
+            0.020288562402129173,
+            1
+          ],
+          "baseColorHex": "#3b3527",
+          "triangles": 140,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 616,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Fresh growing leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.15592646598815918,
+            0.24228112399578094,
+            0.07036009430885315,
+            1
+          ],
+          "baseColorHex": "#6e874b",
+          "triangles": 760,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 4,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 760,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "4ce0c2dce208dca1c2c66f86663b82e69552af8f46f497cfda1ccb5b1610c743",
+        "top": "360a8b26fdf3511a9abdf3de4b33ce8f084b83951d6eb1828dcd0013abcaf315",
+        "front": "d008048b3464a6cd339c782462adf142426202927a30d5a1b8fcbe535b1d40ae",
+        "rear": "a813092e4828019bdde75b89c562d2d6cedc19d3f0e89557082c35236d6f3b1f"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "tabletop",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "tabletop-fern",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-columnar-conifer-01",
+      "name": "Columnar conifer",
+      "kind": "tree",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-columnar-conifer-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-columnar-conifer-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-columnar-conifer-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-columnar-conifer-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-columnar-conifer-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 1176.343,
+      "d": 1096.896,
+      "h": 2221.547,
+      "actualMeasuredDimensionsMm": [
+        1176.343,
+        1096.896,
+        2221.547
+      ],
+      "triangleBudget": 30000,
+      "triangles": 29834,
+      "glbBytes": 2813696,
+      "sha256": "cede4f7c96da934df3f86693b07db6f42133730c0ece6aa147bfb5212f8ceff7",
+      "sourceSha256": "4273e94cff8c41d39b711d02da6b2234f2467b4f5cd75b79aa3b812beee5768e",
+      "authoringSha256": "097fddae648e73e5e56a1e04543acc0d211070a686d2ed8f597d0713375d67e1",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "plantStructure": {
+          "speciesIntent": "Dense narrow evergreen with rising leader, fine clustered needle sprays and ten overlapping branch tiers",
+          "scaffoldBoughs": 60,
+          "secondarySprigs": 181,
+          "leafCount": 5785,
+          "triangleBudget": 30000
+        },
+        "installation": {
+          "mount": "ground",
+          "rootPlaneBlenderZ": 0,
+          "note": "Static ornamental evergreen; no wind animation or horticultural certification."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.004675716161727905,
+          -0.002072274684906006,
+          0.0011769540142267942
+        ],
+        "originalBoundsM": [
+          [
+            -0.5834958553314209,
+            -0.5463755130767822,
+            -0.0011769540142267942
+          ],
+          [
+            0.5928472876548767,
+            0.5505200624465942,
+            2.220370292663574
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#3b593c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-columnar-conifer-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-columnar-conifer-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-columnar-conifer-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-columnar-conifer-01-rear.png",
+      "materialCount": 3,
+      "materialPrimitiveCount": 3,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 1988,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Shaded leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.09989872574806213,
+            0.045186202973127365,
+            1
+          ],
+          "baseColorHex": "#3b593c",
+          "triangles": 19894,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 7952,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "422fada6d19a7d8ed58a32c560cc6fbad27138b502ede27abe7586fd55f7f7e4",
+        "top": "48f1073e7e26fc7d1881fbb01541eb911692641c67472ce4d35164eb73febd34",
+        "front": "fab79fc06086576869035c7f34a57da616e970016e3ff4624e15670cc1407208",
+        "rear": "d1d4f11b305d8016e5cb12013c3e1710ed0b73959f816ae2465318b89365720c"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "columnar-conifer",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-standpipe-drain-basin-01",
+      "name": "Standpipe and hollow drain basin",
+      "kind": "garden-water",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-standpipe-drain-basin-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-standpipe-drain-basin-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-standpipe-drain-basin-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-standpipe-drain-basin-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-standpipe-drain-basin-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 640.0,
+      "d": 785.0,
+      "h": 990.0,
+      "actualMeasuredDimensionsMm": [
+        640.0,
+        785.0,
+        990.0
+      ],
+      "triangleBudget": 6000,
+      "triangles": 1208,
+      "glbBytes": 83840,
+      "sha256": "54334c39c913db7b6fdafb6dca4f2636c31a76b75b1db97fe29837d3bfe3b97d",
+      "sourceSha256": "aefc5e0de5b9499ef6154ef16c9c047cbab20d2289030352fd1988cdb8d422fa",
+      "authoringSha256": "650117f1e409e65aeb725795a921c37e88b8eb0742474322909761c67793d1c5",
+      "countingClass": "historical-reconstruction",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 0,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": true,
+      "freshQARequired": true,
+      "installationDatums": {
+        "cavity": {
+          "rimHeightM": 0.271,
+          "internalFloorM": 0.086,
+          "samplePointsBlenderXY": [
+            [
+              0,
+              -0.13
+            ],
+            [
+              -0.12,
+              -0.2
+            ],
+            [
+              0.12,
+              -0.2
+            ]
+          ],
+          "tapOutletM": [
+            0,
+            -0.002,
+            0.718
+          ],
+          "tapOutletDirection": [
+            0,
+            -0.790415,
+            -0.612571
+          ],
+          "note": "Actual open hollow basin; outlet projects downward into the basin. Static plumbing, no fluid simulation."
+        },
+        "installation": {
+          "mount": "ground",
+          "note": "Common stone foundation carries hollow basin and separate cast standpipe."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.032499998807907104,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.3199999928474426,
+            -0.42500001192092896,
+            0.0
+          ],
+          [
+            0.3199999928474426,
+            0.36000001430511475,
+            0.9900000095367432
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#424b43"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#b8b39d"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-standpipe-drain-basin-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-standpipe-drain-basin-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-standpipe-drain-basin-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-standpipe-drain-basin-01-rear.png",
+      "materialCount": 3,
+      "materialPrimitiveCount": 3,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Warm carved limestone",
+          "finishChannel": "stone",
+          "baseColorFactor": [
+            0.4793201684951782,
+            0.4507857859134674,
+            0.33716362714767456,
+            1
+          ],
+          "baseColorHex": "#b8b39d",
+          "triangles": 264,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 712,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Weathered brass",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.4019777774810791,
+            0.21952620148658752,
+            0.05951123684644699,
+            1
+          ],
+          "baseColorHex": "#aa8145",
+          "triangles": 232,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "ecefaa3bc185ed353f27881a5da224191c2073e12f7dccda0e7ea28d64453ef2",
+        "top": "30d1b4bb8eb966e80be37c421a39a724fec59ade0cd65438769f18b4dcdadc2a",
+        "front": "410e7a2609bd3777a8a812dfdf9d0facb287f8d2ac5bb14ce72ecd6814b65627",
+        "rear": "54270ee561c47b4b993f94f165b164813b26afd80ef1d845802c121dc3089aae"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "standpipe-drain-basin",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-horizontal-board-fence-01",
+      "name": "Horizontal board fence",
+      "kind": "fence",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-horizontal-board-fence-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-horizontal-board-fence-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-horizontal-board-fence-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-horizontal-board-fence-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-horizontal-board-fence-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 1820.0,
+      "d": 104.0,
+      "h": 1405.0,
+      "actualMeasuredDimensionsMm": [
+        1820.0,
+        104.0,
+        1405.0
+      ],
+      "triangleBudget": 6000,
+      "triangles": 348,
+      "glbBytes": 28312,
+      "sha256": "6d699c28f84f2479f1f5405bc633417a892a5c3879a27c1b4b37ac1ec6180e1f",
+      "sourceSha256": "5f1b22ee9f41948684cebba20f83236da0bb63b5cd2543c5c52c1d86a43692cc",
+      "authoringSha256": "46a634cc1f175940f2a58d181ad280f25a676761183c1392534ae5a4a29ea8c9",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "installation": {
+          "mount": "ground",
+          "modulePitchM": 1.82,
+          "joinBoundaryX": [
+            -0.91,
+            0.91
+          ],
+          "postDepthM": 0.104,
+          "apexHeightM": 1.405,
+          "note": "Half-posts pair at straight joints. Outer free ends need terminal half-post accessories; right-angle joints need the 103 mm corner adapter. Static hand assembly, no automatic snapping."
+        },
+        "construction": "Six broad solid boards carried on three vertical battens and two rear rails.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.9100000262260437,
+            -0.052000001072883606,
+            0.0
+          ],
+          [
+            0.9100000262260437,
+            0.052000001072883606,
+            1.4049999713897705
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#826044"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-horizontal-board-fence-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-horizontal-board-fence-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-horizontal-board-fence-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-horizontal-board-fence-01-rear.png",
+      "materialCount": 1,
+      "materialPrimitiveCount": 1,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Oiled garden oak",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.22322796285152435,
+            0.11697066575288773,
+            0.05780543014407158,
+            1
+          ],
+          "baseColorHex": "#826044",
+          "triangles": 348,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "d8c62e573164efcd24b52b0193ad966121f3f6afb5116ee998f14c5a46980750",
+        "top": "a6432d740bd4df195580e9018de7f93cfbe3f44005587823edcfd5314e245fc2",
+        "front": "90560d2578aa0fe17f0079439a1f2b748f3159013170ecd9be588725c8f6721d",
+        "rear": "beaded8d93f806bc354a222f5b05c747f886903f6459c1510c5e5d37f471787d"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "horizontal-board-fence",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-climbing-trellis-planter-01",
+      "name": "Climbing trellis planter",
+      "kind": "plant",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-climbing-trellis-planter-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-climbing-trellis-planter-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/authoring_sources/rpg-mansion-garden-climbing-trellis-planter-01.blend",
+      "validation": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/sources/rpg-mansion-garden-climbing-trellis-planter-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/reports/rpg-mansion-garden-climbing-trellis-planter-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/build.py",
+      "w": 850.942,
+      "d": 396.682,
+      "h": 1750.5,
+      "actualMeasuredDimensionsMm": [
+        850.942,
+        396.682,
+        1750.5
+      ],
+      "triangleBudget": 6000,
+      "triangles": 4354,
+      "glbBytes": 391724,
+      "sha256": "2a8d9dd2217704e2e73dfe843a3fdaef056b49bf8fd358eb660c770597784654",
+      "sourceSha256": "11b424edfc597fc67057c9208626e4f9ac08fb47320a8ae8be6a2972002759f2",
+      "authoringSha256": "314c24e439f48bd06c35a71e7391978eef1edcead53bf4daf00acfc7710f4a8a",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "cavity": {
+          "rimHeightM": 0.34,
+          "internalFloorM": 0.045,
+          "filledWithSoil": true
+        },
+        "installation": {
+          "mount": "floor",
+          "note": "Static planted trellis with four physical vine-support rails. No structural wall fixing represented."
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.000783383846282959,
+          -0.0058411359786987305,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -0.4246877133846283,
+            -0.19249999523162842,
+            0.0
+          ],
+          [
+            0.4262544810771942,
+            0.20418226718902588,
+            1.750499963760376
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "foliage",
+          "label": "葉",
+          "default": "#537341"
+        },
+        {
+          "key": "soil",
+          "label": "土",
+          "default": "#3b3527"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#675041"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-climbing-trellis-planter-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-climbing-trellis-planter-01-top.png",
+      "front": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-climbing-trellis-planter-01-front.png",
+      "rear": "tools/blender/rpg_mansion/garden_outdoor_rebuilt/evidence/rpg-mansion-garden-climbing-trellis-planter-01-rear.png",
+      "materialCount": 6,
+      "materialPrimitiveCount": 6,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Oiled garden oak",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.22322796285152435,
+            0.11697066575288773,
+            0.05780543014407158,
+            1
+          ],
+          "baseColorHex": "#826044",
+          "triangles": 512,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Planting soil",
+          "finishChannel": "soil",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.03560131415724754,
+            0.020288562402129173,
+            1
+          ],
+          "baseColorHex": "#3b3527",
+          "triangles": 44,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Branch bark",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.13563333451747894,
+            0.0802198201417923,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#675041",
+          "triangles": 1278,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 3,
+          "name": "Garden leaf green",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.08650045841932297,
+            0.17144110798835754,
+            0.052860647439956665,
+            1
+          ],
+          "baseColorHex": "#537341",
+          "triangles": 1080,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 4,
+          "name": "Fresh growing leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.15592646598815918,
+            0.24228112399578094,
+            0.07036009430885315,
+            1
+          ],
+          "baseColorHex": "#6e874b",
+          "triangles": 720,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 5,
+          "name": "Shaded leaf",
+          "finishChannel": "foliage",
+          "baseColorFactor": [
+            0.04373503103852272,
+            0.09989872574806213,
+            0.045186202973127365,
+            1
+          ],
+          "baseColorHex": "#3b593c",
+          "triangles": 720,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "fab95ac616ccd5756a871fd82f7c42ee6ca4afc687108ffe83f8cec646c18aa4",
+        "top": "af7d110c2e86e9d6f939db76d5cff7186b1c11de1442f07d3acb421f460ee194",
+        "front": "9db16bae5f756ff21550993f93e7b95da5f5815080cd62578d7b2ec33c20e2fa",
+        "rear": "42db03bddd269b3cc1d5abe3db36e32de2356441c111ad921553b842c84215d7"
+      },
+      "group": "外構",
+      "category": "庭・植栽",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "floor",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "climbing-trellis-planter",
+      "status": "candidate-awaiting-independent-acceptance"
+    }
+  ]
+}

@@ -1,0 +1,2332 @@
+{
+  "gate": "fast actual-byte checkpoint; not family acceptance",
+  "scriptSha256": "b8ead09ecc6abc49f2c7025d62ec889e190359f160b477215c23aa322a61e254",
+  "manifest": {
+    "path": "descriptors.json",
+    "sha256": "37d4531dbf47033a30f4606c9b46ffedf1efc25a71b4ae845d3ace554c91972d"
+  },
+  "items": [
+    {
+      "id": "rpg-mansion-short-paired-curtain-01",
+      "errors": [],
+      "pending": [],
+      "files": {
+        "model": {
+          "path": "models/rpg-mansion-short-paired-curtain-01.glb",
+          "sha256": "49f88f98a4e42faff80f21bea4a2b03df3f78fec9114331b3f7069cb0763e26c",
+          "bytes": 682208
+        },
+        "sourceBlend": {
+          "path": "sources/rpg-mansion-short-paired-curtain-01.blend",
+          "sha256": "92daba32a8c462b57d953beb60940b36cb82a0628b4f72226e2db994c7d2117d",
+          "bytes": 381683
+        },
+        "authoringBlend": {
+          "path": "authoring_sources/rpg-mansion-short-paired-curtain-01.blend",
+          "sha256": "317993c1bee5703f2b432e3491fac5e2f2ecedf89cc6b418bff7b883a8357fa3",
+          "bytes": 174990
+        },
+        "validation": {
+          "path": "sources/rpg-mansion-short-paired-curtain-01-validation.json",
+          "sha256": "fb27fecc66f36e40da0059a79324e13557ce65ca75ba9819adacba14e03f0080",
+          "bytes": 4053
+        },
+        "builder": {
+          "path": "build.py",
+          "sha256": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+          "bytes": 9301
+        },
+        "thumb": {
+          "path": "previews/rpg-mansion-short-paired-curtain-01-thumb.png",
+          "sha256": "8abfa9b571e0ab48406cc7952981f8b56029dc49eec20b54958d9a8c99fa6096",
+          "bytes": 290485
+        },
+        "top": {
+          "path": "previews/rpg-mansion-short-paired-curtain-01-top.png",
+          "sha256": "b476c8bd9e7af9a6069a90f65b4d2cc0dabb86945d380962b36be7e2fec2633e",
+          "bytes": 139173
+        },
+        "front": {
+          "path": "evidence/rpg-mansion-short-paired-curtain-01-front.png",
+          "sha256": "f58f33241dc2cae12cd4e3280a1c6bf5c3bb009e2613269b4c49e93eb2a6d901",
+          "bytes": 322642
+        },
+        "rear": {
+          "path": "evidence/rpg-mansion-short-paired-curtain-01-rear.png",
+          "sha256": "5727e19d1c44536ae537007f2613591d02674a05ce9036b7ac0d709b9a253c38",
+          "bytes": 307494
+        }
+      },
+      "actualDimensionsMm": [
+        1220.0000286102295,
+        197.80001044273376,
+        2065.0980472564697
+      ],
+      "declaredDimensionsMm": [
+        1220.0,
+        197.8,
+        2065.098
+      ],
+      "actualBoundsGltfM": [
+        [
+          -0.6100000143051147,
+          0.0,
+          -0.09890000522136688
+        ],
+        [
+          0.6100000143051147,
+          2.0650980472564697,
+          0.09890000522136688
+        ]
+      ],
+      "triangles": 9924,
+      "triangleBudget": 12000,
+      "uv": {
+        "triangles": 9924,
+        "valid_triangles": 9924,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 9.755668727027794,
+        "p95": 9.79110968442439,
+        "p95_p05": 1.003632857817159,
+        "median": 9.774511928794965
+      },
+      "cornerNormals": [
+        {
+          "mesh": 0,
+          "primitive": 0,
+          "cornerCount": 14556,
+          "minimumCornerNormalDot": 0.6262695314060698,
+          "opposedCorners": 0,
+          "maximumUnitError": 8.728503697597034e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 1,
+          "cornerCount": 8208,
+          "minimumCornerNormalDot": 0.9999357677513195,
+          "opposedCorners": 0,
+          "maximumUnitError": 5.841304073772591e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 2,
+          "cornerCount": 7008,
+          "minimumCornerNormalDot": 0.6064664676177802,
+          "opposedCorners": 0,
+          "maximumUnitError": 8.83659954098448e-08
+        }
+      ],
+      "usedMaterials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass hardware",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.40724021196365356,
+              0.24228112399578094,
+              0.07227185368537903,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "fabric"
+          },
+          "name": "Wine woven curtain",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18782077729701996,
+              0.04817182570695877,
+              0.0666259378194809,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8299999833106995
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "trim"
+          },
+          "name": "Sewn warm trim",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.38642942905426025,
+              0.2581828534603119,
+              0.10702310502529144,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.75
+          }
+        }
+      ],
+      "finishChannels": [
+        "fabric",
+        "metal",
+        "trim"
+      ],
+      "geometryRotationReflectionSignature": "93e3d24b6620b2237e2f66da89c31fc55dd14d9746d0bf4dcc1157fdc825d3ae",
+      "normalizedShapeSignature": "42f251faf18d698a013fa6bcad4cf61668a063754f82bc584f25bdf77ba4f3ff",
+      "sourceBlendPrivacy": {
+        "sha256": "92daba32a8c462b57d953beb60940b36cb82a0628b4f72226e2db994c7d2117d",
+        "compression": "zstd",
+        "decompressedBytes": 1853300,
+        "privateStringOccurrences": 0
+      },
+      "authoringBlendPrivacy": {
+        "sha256": "317993c1bee5703f2b432e3491fac5e2f2ecedf89cc6b418bff7b883a8357fa3",
+        "compression": "zstd",
+        "decompressedBytes": 1183848,
+        "privateStringOccurrences": 0
+      },
+      "thumbPng": {
+        "path": "previews/rpg-mansion-short-paired-curtain-01-thumb.png",
+        "sha256": "8abfa9b571e0ab48406cc7952981f8b56029dc49eec20b54958d9a8c99fa6096",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 88436,
+        "pixel_bbox_alpha_gt_0": [
+          138,
+          30,
+          374,
+          482
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          138,
+          30,
+          374,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "topPng": {
+        "path": "previews/rpg-mansion-short-paired-curtain-01-top.png",
+        "sha256": "b476c8bd9e7af9a6069a90f65b4d2cc0dabb86945d380962b36be7e2fec2633e",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 7510,
+        "pixel_bbox_alpha_gt_0": [
+          29,
+          218,
+          483,
+          294
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          30,
+          219,
+          482,
+          293
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "frontPng": {
+        "path": "evidence/rpg-mansion-short-paired-curtain-01-front.png",
+        "sha256": "f58f33241dc2cae12cd4e3280a1c6bf5c3bb009e2613269b4c49e93eb2a6d901",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 112502,
+        "pixel_bbox_alpha_gt_0": [
+          122,
+          30,
+          390,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          122,
+          30,
+          390,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "rearPng": {
+        "path": "evidence/rpg-mansion-short-paired-curtain-01-rear.png",
+        "sha256": "5727e19d1c44536ae537007f2613591d02674a05ce9036b7ac0d709b9a253c38",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 112509,
+        "pixel_bbox_alpha_gt_0": [
+          122,
+          30,
+          390,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          122,
+          30,
+          390,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "unchangedDuringInspection": true
+    },
+    {
+      "id": "rpg-mansion-full-height-traverse-drape-01",
+      "errors": [],
+      "pending": [],
+      "files": {
+        "model": {
+          "path": "models/rpg-mansion-full-height-traverse-drape-01.glb",
+          "sha256": "74f314e1349f536e059eed1b4ce47073053709889290b8b1ae32f1d7ea480f2d",
+          "bytes": 503840
+        },
+        "sourceBlend": {
+          "path": "sources/rpg-mansion-full-height-traverse-drape-01.blend",
+          "sha256": "ee100e13a4a274f031c296ad6e3937d718297168d8eec0cd8969cc62a717002d",
+          "bytes": 349131
+        },
+        "authoringBlend": {
+          "path": "authoring_sources/rpg-mansion-full-height-traverse-drape-01.blend",
+          "sha256": "1d848d6222913cad8a1c22e1c21c438eac652e149797e619d5f0e9849b61fafa",
+          "bytes": 208358
+        },
+        "validation": {
+          "path": "sources/rpg-mansion-full-height-traverse-drape-01-validation.json",
+          "sha256": "79387723ad7db23b455c11b2992553f68d0f0b5950deb9facf6233363c80b133",
+          "bytes": 3990
+        },
+        "builder": {
+          "path": "build.py",
+          "sha256": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+          "bytes": 9301
+        },
+        "thumb": {
+          "path": "previews/rpg-mansion-full-height-traverse-drape-01-thumb.png",
+          "sha256": "93e747619511e8828143ce18c8d09250958c2a7e3aacb4b07b891a7d49075569",
+          "bytes": 258903
+        },
+        "top": {
+          "path": "previews/rpg-mansion-full-height-traverse-drape-01-top.png",
+          "sha256": "65d1fe6c0216bf8ba242d6cc0a23ac3a067401b160aac6da2362371b6dd3333f",
+          "bytes": 142598
+        },
+        "front": {
+          "path": "evidence/rpg-mansion-full-height-traverse-drape-01-front.png",
+          "sha256": "d743f5168cd79b5ac452eca1bb60f2e544d684707872fd1452d00b29f04ba8f4",
+          "bytes": 277187
+        },
+        "rear": {
+          "path": "evidence/rpg-mansion-full-height-traverse-drape-01-rear.png",
+          "sha256": "2f50b46178647f78db74d53234895d00772ba23cfb58770874e579cfb66393d4",
+          "bytes": 265740
+        }
+      },
+      "actualDimensionsMm": [
+        1240.0000095367432,
+        184.69999730587006,
+        2779.0982723236084
+      ],
+      "declaredDimensionsMm": [
+        1240.0,
+        184.7,
+        2779.098
+      ],
+      "actualBoundsGltfM": [
+        [
+          -0.6200000047683716,
+          0.0,
+          -0.09234999865293503
+        ],
+        [
+          0.6200000047683716,
+          2.7790982723236084,
+          0.09234999865293503
+        ]
+      ],
+      "triangles": 7216,
+      "triangleBudget": 12000,
+      "uv": {
+        "triangles": 7216,
+        "valid_triangles": 7216,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 10.885712468980921,
+        "p95": 10.927033582990301,
+        "p95_p05": 1.0037959034952582,
+        "median": 10.908571781594812
+      },
+      "cornerNormals": [
+        {
+          "mesh": 0,
+          "primitive": 0,
+          "cornerCount": 5556,
+          "minimumCornerNormalDot": 0.6262695314060698,
+          "opposedCorners": 0,
+          "maximumUnitError": 9.67153199749049e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 1,
+          "cornerCount": 9600,
+          "minimumCornerNormalDot": 0.9999588243801651,
+          "opposedCorners": 0,
+          "maximumUnitError": 1.22963408788479e-07
+        },
+        {
+          "mesh": 0,
+          "primitive": 2,
+          "cornerCount": 6384,
+          "minimumCornerNormalDot": 0.6067922221672324,
+          "opposedCorners": 0,
+          "maximumUnitError": 8.404292328734186e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 3,
+          "cornerCount": 108,
+          "minimumCornerNormalDot": 0.6436004257432815,
+          "opposedCorners": 0,
+          "maximumUnitError": 4.066078584941124e-08
+        }
+      ],
+      "usedMaterials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass hardware",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.40724021196365356,
+              0.24228112399578094,
+              0.07227185368537903,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "fabric"
+          },
+          "name": "Deep teal drape",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.05951123684644699,
+              0.12743768095970154,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.800000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "trim"
+          },
+          "name": "Sewn warm trim",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.38642942905426025,
+              0.2581828534603119,
+              0.10702310502529144,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.75
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Oiled blind timber",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.25015828013420105,
+              0.12477181851863861,
+              0.05780543014407158,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.550000011920929
+          }
+        }
+      ],
+      "finishChannels": [
+        "fabric",
+        "metal",
+        "trim",
+        "wood"
+      ],
+      "geometryRotationReflectionSignature": "0bb626c073e52a67d87bf4b95870cfc986257bcfc3b5af626d7cae864a8dc783",
+      "normalizedShapeSignature": "1b05745a31e0f042e69df756c930868a02b5b44a1f247e04bae2fad271548cf4",
+      "sourceBlendPrivacy": {
+        "sha256": "ee100e13a4a274f031c296ad6e3937d718297168d8eec0cd8969cc62a717002d",
+        "compression": "zstd",
+        "decompressedBytes": 1564580,
+        "privateStringOccurrences": 0
+      },
+      "authoringBlendPrivacy": {
+        "sha256": "1d848d6222913cad8a1c22e1c21c438eac652e149797e619d5f0e9849b61fafa",
+        "compression": "zstd",
+        "decompressedBytes": 1059436,
+        "privateStringOccurrences": 0
+      },
+      "thumbPng": {
+        "path": "previews/rpg-mansion-full-height-traverse-drape-01-thumb.png",
+        "sha256": "93e747619511e8828143ce18c8d09250958c2a7e3aacb4b07b891a7d49075569",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 73704,
+        "pixel_bbox_alpha_gt_0": [
+          167,
+          30,
+          345,
+          482
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          167,
+          30,
+          345,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "topPng": {
+        "path": "previews/rpg-mansion-full-height-traverse-drape-01-top.png",
+        "sha256": "65d1fe6c0216bf8ba242d6cc0a23ac3a067401b160aac6da2362371b6dd3333f",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 10638,
+        "pixel_bbox_alpha_gt_0": [
+          29,
+          221,
+          483,
+          290
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          30,
+          222,
+          482,
+          290
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "frontPng": {
+        "path": "evidence/rpg-mansion-full-height-traverse-drape-01-front.png",
+        "sha256": "d743f5168cd79b5ac452eca1bb60f2e544d684707872fd1452d00b29f04ba8f4",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 89287,
+        "pixel_bbox_alpha_gt_0": [
+          154,
+          29,
+          358,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          155,
+          30,
+          357,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "rearPng": {
+        "path": "evidence/rpg-mansion-full-height-traverse-drape-01-rear.png",
+        "sha256": "2f50b46178647f78db74d53234895d00772ba23cfb58770874e579cfb66393d4",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 89290,
+        "pixel_bbox_alpha_gt_0": [
+          154,
+          29,
+          358,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          155,
+          30,
+          357,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "unchangedDuringInspection": true
+    },
+    {
+      "id": "rpg-mansion-roman-batten-shade-01",
+      "errors": [],
+      "pending": [],
+      "files": {
+        "model": {
+          "path": "models/rpg-mansion-roman-batten-shade-01.glb",
+          "sha256": "85a651b48070f0f65fb97134289b4a3b529ca81a484f4fe7f2f1f7bc2b5fc7ac",
+          "bytes": 84024
+        },
+        "sourceBlend": {
+          "path": "sources/rpg-mansion-roman-batten-shade-01.blend",
+          "sha256": "096d5fd5aa527bcf64ed41516302ba83808dc06c9d37e5e3be07c86f20da745f",
+          "bytes": 136490
+        },
+        "authoringBlend": {
+          "path": "authoring_sources/rpg-mansion-roman-batten-shade-01.blend",
+          "sha256": "c3ff57d8d63df0d19ce108dc6658651209d5a611c4c9c7ede08e5a655c2b4248",
+          "bytes": 109013
+        },
+        "validation": {
+          "path": "sources/rpg-mansion-roman-batten-shade-01-validation.json",
+          "sha256": "4646169a4670a4cb4841a7ef9493903cc5ba546fe95abcff54b6d0a06e8ab860",
+          "bytes": 3358
+        },
+        "builder": {
+          "path": "build.py",
+          "sha256": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+          "bytes": 9301
+        },
+        "thumb": {
+          "path": "previews/rpg-mansion-roman-batten-shade-01-thumb.png",
+          "sha256": "ed6c1c49c1384f60abc4464a15f470f79858b909360977bc067b7c6acdca9109",
+          "bytes": 254176
+        },
+        "top": {
+          "path": "previews/rpg-mansion-roman-batten-shade-01-top.png",
+          "sha256": "f9bca8799934df6538e134c79aac14b9ecec5a3a7592283342b570e65b797a3b",
+          "bytes": 144292
+        },
+        "front": {
+          "path": "evidence/rpg-mansion-roman-batten-shade-01-front.png",
+          "sha256": "bdfd4906d6cc393d38929c8e5173c5082b73541318e0419aebbf00573806779a",
+          "bytes": 265528
+        },
+        "rear": {
+          "path": "evidence/rpg-mansion-roman-batten-shade-01-rear.png",
+          "sha256": "6527d198c3de2bc640960ed434f49b1b970e50bad6ca40314449647403f3bc57",
+          "bytes": 287683
+        }
+      },
+      "actualDimensionsMm": [
+        1000.0,
+        149.92325007915497,
+        1927.9999732971191
+      ],
+      "declaredDimensionsMm": [
+        1000.0,
+        149.923,
+        1928.0
+      ],
+      "actualBoundsGltfM": [
+        [
+          -0.5,
+          0.0,
+          -0.07496162503957748
+        ],
+        [
+          0.5,
+          1.9279999732971191,
+          0.07496162503957748
+        ]
+      ],
+      "triangles": 1164,
+      "triangleBudget": 6000,
+      "uv": {
+        "triangles": 1164,
+        "valid_triangles": 1164,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.51331949550524,
+        "p95": 3.516980202558658,
+        "p95_p05": 1.001041951083043,
+        "median": 3.5156937080692923
+      },
+      "cornerNormals": [
+        {
+          "mesh": 0,
+          "primitive": 0,
+          "cornerCount": 1236,
+          "minimumCornerNormalDot": 0.6154786923264525,
+          "opposedCorners": 0,
+          "maximumUnitError": 1.0229565150510211e-07
+        },
+        {
+          "mesh": 0,
+          "primitive": 1,
+          "cornerCount": 960,
+          "minimumCornerNormalDot": 0.6262724559626868,
+          "opposedCorners": 0,
+          "maximumUnitError": 8.728503697597034e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 2,
+          "cornerCount": 1104,
+          "minimumCornerNormalDot": 0.6073156181375451,
+          "opposedCorners": 0,
+          "maximumUnitError": 7.058211903832046e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 3,
+          "cornerCount": 192,
+          "minimumCornerNormalDot": 0.610000729560852,
+          "opposedCorners": 0,
+          "maximumUnitError": 3.5458392888543244e-08
+        }
+      ],
+      "usedMaterials": [
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Oiled blind timber",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.25015828013420105,
+              0.12477181851863861,
+              0.05780543014407158,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.550000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass hardware",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.40724021196365356,
+              0.24228112399578094,
+              0.07227185368537903,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "fabric"
+          },
+          "name": "Oatmeal woven linen",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5271151065826416,
+              0.423267662525177,
+              0.2462013214826584,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8999999761581421
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "cord"
+          },
+          "name": "Cotton support tape",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.7454041838645935,
+              0.6514056324958801,
+              0.44520118832588196,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8799999952316284
+          }
+        }
+      ],
+      "finishChannels": [
+        "cord",
+        "fabric",
+        "metal",
+        "wood"
+      ],
+      "geometryRotationReflectionSignature": "012e5a633dfd6a24f1ea470b732bd19b04aa44e7d9927a5e2893f466327acfc9",
+      "normalizedShapeSignature": "35629038c640a78c8954cf860145bca45a22f7adf2508c41b3883c0ffff30ff5",
+      "sourceBlendPrivacy": {
+        "sha256": "096d5fd5aa527bcf64ed41516302ba83808dc06c9d37e5e3be07c86f20da745f",
+        "compression": "zstd",
+        "decompressedBytes": 790036,
+        "privateStringOccurrences": 0
+      },
+      "authoringBlendPrivacy": {
+        "sha256": "c3ff57d8d63df0d19ce108dc6658651209d5a611c4c9c7ede08e5a655c2b4248",
+        "compression": "zstd",
+        "decompressedBytes": 671916,
+        "privateStringOccurrences": 0
+      },
+      "thumbPng": {
+        "path": "previews/rpg-mansion-roman-batten-shade-01-thumb.png",
+        "sha256": "ed6c1c49c1384f60abc4464a15f470f79858b909360977bc067b7c6acdca9109",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 83933,
+        "pixel_bbox_alpha_gt_0": [
+          151,
+          30,
+          361,
+          482
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          151,
+          30,
+          361,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "topPng": {
+        "path": "previews/rpg-mansion-roman-batten-shade-01-top.png",
+        "sha256": "f9bca8799934df6538e134c79aac14b9ecec5a3a7592283342b570e65b797a3b",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 20823,
+        "pixel_bbox_alpha_gt_0": [
+          29,
+          221,
+          483,
+          291
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          30,
+          221,
+          482,
+          291
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "frontPng": {
+        "path": "evidence/rpg-mansion-roman-batten-shade-01-front.png",
+        "sha256": "bdfd4906d6cc393d38929c8e5173c5082b73541318e0419aebbf00573806779a",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 102580,
+        "pixel_bbox_alpha_gt_0": [
+          138,
+          29,
+          374,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          138,
+          30,
+          374,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "rearPng": {
+        "path": "evidence/rpg-mansion-roman-batten-shade-01-rear.png",
+        "sha256": "6527d198c3de2bc640960ed434f49b1b970e50bad6ca40314449647403f3bc57",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 102580,
+        "pixel_bbox_alpha_gt_0": [
+          138,
+          29,
+          374,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          138,
+          30,
+          374,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "unchangedDuringInspection": true
+    },
+    {
+      "id": "rpg-mansion-timber-venetian-blind-01",
+      "errors": [],
+      "pending": [],
+      "files": {
+        "model": {
+          "path": "models/rpg-mansion-timber-venetian-blind-01.glb",
+          "sha256": "04ecfee8b60b4b16ef18412ba424b1714e9db5a2dac53f0e7704dd32971e439d",
+          "bytes": 305972
+        },
+        "sourceBlend": {
+          "path": "sources/rpg-mansion-timber-venetian-blind-01.blend",
+          "sha256": "5578cd4d70a05f00eea30d376829d95809c0889eed2c5f754b0aec55a6510af9",
+          "bytes": 223181
+        },
+        "authoringBlend": {
+          "path": "authoring_sources/rpg-mansion-timber-venetian-blind-01.blend",
+          "sha256": "56baa20a326bb4b81ca9ceddaac55bf7fd77075de5563de06c3c340f979e3e7e",
+          "bytes": 135257
+        },
+        "validation": {
+          "path": "sources/rpg-mansion-timber-venetian-blind-01-validation.json",
+          "sha256": "77aa6398ab2e1bf2e85d844f1a927db513a685297e18c352f8b4ad5ef81b33a6",
+          "bytes": 6933
+        },
+        "builder": {
+          "path": "build.py",
+          "sha256": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+          "bytes": 9301
+        },
+        "thumb": {
+          "path": "previews/rpg-mansion-timber-venetian-blind-01-thumb.png",
+          "sha256": "de4a931367b6530c3ec09862683fa8323f4fce5d7240c1cb228e8118de5c1e2d",
+          "bytes": 323020
+        },
+        "top": {
+          "path": "previews/rpg-mansion-timber-venetian-blind-01-top.png",
+          "sha256": "d19a342bb7902033873049d081c5a139e096431a5f5e58533791eef875f3bad0",
+          "bytes": 143723
+        },
+        "front": {
+          "path": "evidence/rpg-mansion-timber-venetian-blind-01-front.png",
+          "sha256": "d812e47a6e8c3d528e33c2c77b190a026102f4c8865926d0714fd6ab80dd411a",
+          "bytes": 347430
+        },
+        "rear": {
+          "path": "evidence/rpg-mansion-timber-venetian-blind-01-rear.png",
+          "sha256": "b74201aebf6b4ad848f1ff961911de62317f7fb4373e0ee89eae3ef46cd905c1",
+          "bytes": 334072
+        }
+      },
+      "actualDimensionsMm": [
+        1000.0,
+        162.9999876022339,
+        1964.4999504089355
+      ],
+      "declaredDimensionsMm": [
+        1000.0,
+        163.0,
+        1964.5
+      ],
+      "actualBoundsGltfM": [
+        [
+          -0.5,
+          0.0,
+          -0.08149999380111694
+        ],
+        [
+          0.5,
+          1.9644999504089355,
+          0.08149999380111694
+        ]
+      ],
+      "triangles": 4308,
+      "triangleBudget": 6000,
+      "uv": {
+        "triangles": 4308,
+        "valid_triangles": 4308,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.281201267766921,
+        "p95": 5.296643520119199,
+        "p95_p05": 1.0029240037577298,
+        "median": 5.290993001163611
+      },
+      "cornerNormals": [
+        {
+          "mesh": 0,
+          "primitive": 0,
+          "cornerCount": 6312,
+          "minimumCornerNormalDot": 0.5892869015896324,
+          "opposedCorners": 0,
+          "maximumUnitError": 9.13547328895703e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 1,
+          "cornerCount": 1068,
+          "minimumCornerNormalDot": 0.6262724559626868,
+          "opposedCorners": 0,
+          "maximumUnitError": 8.728503697597034e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 2,
+          "cornerCount": 5544,
+          "minimumCornerNormalDot": 0.610000729560852,
+          "opposedCorners": 0,
+          "maximumUnitError": 3.5458392888543244e-08
+        }
+      ],
+      "usedMaterials": [
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Oiled blind timber",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.25015828013420105,
+              0.12477181851863861,
+              0.05780543014407158,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.550000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass hardware",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.40724021196365356,
+              0.24228112399578094,
+              0.07227185368537903,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "cord"
+          },
+          "name": "Cotton support tape",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.7454041838645935,
+              0.6514056324958801,
+              0.44520118832588196,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8799999952316284
+          }
+        }
+      ],
+      "finishChannels": [
+        "cord",
+        "metal",
+        "wood"
+      ],
+      "geometryRotationReflectionSignature": "281cc09a8ccc59cf6a331e0f0e79f0367f0d2857244e6a49cc499758b5fd3bc7",
+      "normalizedShapeSignature": "00edb077368486875c8ce61eeafd06bc94b3ac5d40d485393667809e89825ed1",
+      "sourceBlendPrivacy": {
+        "sha256": "5578cd4d70a05f00eea30d376829d95809c0889eed2c5f754b0aec55a6510af9",
+        "compression": "zstd",
+        "decompressedBytes": 1739556,
+        "privateStringOccurrences": 0
+      },
+      "authoringBlendPrivacy": {
+        "sha256": "56baa20a326bb4b81ca9ceddaac55bf7fd77075de5563de06c3c340f979e3e7e",
+        "compression": "zstd",
+        "decompressedBytes": 1412624,
+        "privateStringOccurrences": 0
+      },
+      "thumbPng": {
+        "path": "previews/rpg-mansion-timber-venetian-blind-01-thumb.png",
+        "sha256": "de4a931367b6530c3ec09862683fa8323f4fce5d7240c1cb228e8118de5c1e2d",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 83418,
+        "pixel_bbox_alpha_gt_0": [
+          152,
+          30,
+          360,
+          482
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          153,
+          30,
+          359,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "topPng": {
+        "path": "previews/rpg-mansion-timber-venetian-blind-01-top.png",
+        "sha256": "d19a342bb7902033873049d081c5a139e096431a5f5e58533791eef875f3bad0",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 19152,
+        "pixel_bbox_alpha_gt_0": [
+          29,
+          218,
+          483,
+          293
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          30,
+          218,
+          482,
+          293
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "frontPng": {
+        "path": "evidence/rpg-mansion-timber-venetian-blind-01-front.png",
+        "sha256": "d812e47a6e8c3d528e33c2c77b190a026102f4c8865926d0714fd6ab80dd411a",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 101440,
+        "pixel_bbox_alpha_gt_0": [
+          140,
+          29,
+          372,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          141,
+          30,
+          371,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "rearPng": {
+        "path": "evidence/rpg-mansion-timber-venetian-blind-01-rear.png",
+        "sha256": "b74201aebf6b4ad848f1ff961911de62317f7fb4373e0ee89eae3ef46cd905c1",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 101440,
+        "pixel_bbox_alpha_gt_0": [
+          140,
+          29,
+          372,
+          483
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          141,
+          30,
+          371,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 29
+      },
+      "unchangedDuringInspection": true
+    },
+    {
+      "id": "rpg-mansion-narrow-roller-screen-01",
+      "errors": [],
+      "pending": [],
+      "files": {
+        "model": {
+          "path": "models/rpg-mansion-narrow-roller-screen-01.glb",
+          "sha256": "15301d05f90f89e67e1e8cca437a9fd4f1d7155c137ba17b4747973ba62fdad5",
+          "bytes": 51120
+        },
+        "sourceBlend": {
+          "path": "sources/rpg-mansion-narrow-roller-screen-01.blend",
+          "sha256": "3d9c792701abee3fe8c51e9a22dec90e391615bd8abde0286ee4e3293ae69cca",
+          "bytes": 119622
+        },
+        "authoringBlend": {
+          "path": "authoring_sources/rpg-mansion-narrow-roller-screen-01.blend",
+          "sha256": "7c5f91fb08b5ab08bde20caad4bab300d6fb9b209f755198fe086f97e68959e4",
+          "bytes": 103293
+        },
+        "validation": {
+          "path": "sources/rpg-mansion-narrow-roller-screen-01-validation.json",
+          "sha256": "a3b2cca219ca12a963db9a8be1ff0500a6b814340337c1b9bd691e23512e03a1",
+          "bytes": 3285
+        },
+        "builder": {
+          "path": "build.py",
+          "sha256": "8f5192ae1d592ef7fe1cc47a70dc0d35c4200a71184eb8a56e5447153a4515fb",
+          "bytes": 9301
+        },
+        "thumb": {
+          "path": "previews/rpg-mansion-narrow-roller-screen-01-thumb.png",
+          "sha256": "a55150003c7a0b3aa2c7426c182bb77f24dd0e929e6b48625b2c14af5f604035",
+          "bytes": 245192
+        },
+        "top": {
+          "path": "previews/rpg-mansion-narrow-roller-screen-01-top.png",
+          "sha256": "3c6c00af09d399e554df0ea189f5e1688a829150d3dba97715f49d64b5ff7980",
+          "bytes": 146076
+        },
+        "front": {
+          "path": "evidence/rpg-mansion-narrow-roller-screen-01-front.png",
+          "sha256": "66a7a43697b483f9350e37b9ecc3d71add6ecc1e6202500cc27127fc9e401b81",
+          "bytes": 260685
+        },
+        "rear": {
+          "path": "evidence/rpg-mansion-narrow-roller-screen-01-rear.png",
+          "sha256": "d4091bf8b5b57d8bb745488ce9fa88bce65d52f41f4592da9f7649e1606f2a3b",
+          "bytes": 251066
+        }
+      },
+      "actualDimensionsMm": [
+        699.999988079071,
+        146.80762588977814,
+        1258.373737335205
+      ],
+      "declaredDimensionsMm": [
+        700.0,
+        146.808,
+        1258.374
+      ],
+      "actualBoundsGltfM": [
+        [
+          -0.3499999940395355,
+          0.0,
+          -0.07340381294488907
+        ],
+        [
+          0.3499999940395355,
+          1.258373737335205,
+          0.07340381294488907
+        ]
+      ],
+      "triangles": 708,
+      "triangleBudget": 6000,
+      "uv": {
+        "triangles": 708,
+        "valid_triangles": 708,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.5948663566130168,
+        "p95": 1.5965659844824565,
+        "p95_p05": 1.0010656867030847,
+        "median": 1.595589881945128
+      },
+      "cornerNormals": [
+        {
+          "mesh": 0,
+          "primitive": 0,
+          "cornerCount": 1452,
+          "minimumCornerNormalDot": 0.6178554020032326,
+          "opposedCorners": 0,
+          "maximumUnitError": 8.728503697597034e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 1,
+          "cornerCount": 408,
+          "minimumCornerNormalDot": 0.577841143066822,
+          "opposedCorners": 0,
+          "maximumUnitError": 8.754013580691833e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 2,
+          "cornerCount": 180,
+          "minimumCornerNormalDot": 0.6657012701034546,
+          "opposedCorners": 0,
+          "maximumUnitError": 2.5624002808477542e-08
+        },
+        {
+          "mesh": 0,
+          "primitive": 3,
+          "cornerCount": 84,
+          "minimumCornerNormalDot": 0.6302323547504307,
+          "opposedCorners": 0,
+          "maximumUnitError": 5.236654221363324e-08
+        }
+      ],
+      "usedMaterials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass hardware",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.40724021196365356,
+              0.24228112399578094,
+              0.07227185368537903,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "fabric"
+          },
+          "name": "Oatmeal woven linen",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5271151065826416,
+              0.423267662525177,
+              0.2462013214826584,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8999999761581421
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Oiled blind timber",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.25015828013420105,
+              0.12477181851863861,
+              0.05780543014407158,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.550000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "cord"
+          },
+          "name": "Cotton support tape",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.7454041838645935,
+              0.6514056324958801,
+              0.44520118832588196,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8799999952316284
+          }
+        }
+      ],
+      "finishChannels": [
+        "cord",
+        "fabric",
+        "metal",
+        "wood"
+      ],
+      "geometryRotationReflectionSignature": "19027ad799a3592056c784c97eab8fa6d4f1d20dca126b4fc2502383f59d6aa9",
+      "normalizedShapeSignature": "7e0817de7de26c775676b74af87704a73e586c8bb00b4f302791a2769679ad89",
+      "sourceBlendPrivacy": {
+        "sha256": "3d9c792701abee3fe8c51e9a22dec90e391615bd8abde0286ee4e3293ae69cca",
+        "compression": "zstd",
+        "decompressedBytes": 686632,
+        "privateStringOccurrences": 0
+      },
+      "authoringBlendPrivacy": {
+        "sha256": "7c5f91fb08b5ab08bde20caad4bab300d6fb9b209f755198fe086f97e68959e4",
+        "compression": "zstd",
+        "decompressedBytes": 599600,
+        "privateStringOccurrences": 0
+      },
+      "thumbPng": {
+        "path": "previews/rpg-mansion-narrow-roller-screen-01-thumb.png",
+        "sha256": "a55150003c7a0b3aa2c7426c182bb77f24dd0e929e6b48625b2c14af5f604035",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 87271,
+        "pixel_bbox_alpha_gt_0": [
+          138,
+          30,
+          374,
+          482
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          138,
+          30,
+          374,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "topPng": {
+        "path": "previews/rpg-mansion-narrow-roller-screen-01-top.png",
+        "sha256": "3c6c00af09d399e554df0ea189f5e1688a829150d3dba97715f49d64b5ff7980",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 18281,
+        "pixel_bbox_alpha_gt_0": [
+          30,
+          207,
+          482,
+          304
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          30,
+          208,
+          482,
+          304
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "frontPng": {
+        "path": "evidence/rpg-mansion-narrow-roller-screen-01-front.png",
+        "sha256": "66a7a43697b483f9350e37b9ecc3d71add6ecc1e6202500cc27127fc9e401b81",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 105250,
+        "pixel_bbox_alpha_gt_0": [
+          130,
+          30,
+          382,
+          482
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          130,
+          30,
+          382,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "rearPng": {
+        "path": "evidence/rpg-mansion-narrow-roller-screen-01-rear.png",
+        "sha256": "d4091bf8b5b57d8bb745488ce9fa88bce65d52f41f4592da9f7649e1606f2a3b",
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "alpha_min": 0,
+        "alpha_max": 255,
+        "nonempty_pixels": 105250,
+        "pixel_bbox_alpha_gt_0": [
+          130,
+          30,
+          382,
+          482
+        ],
+        "pixel_bbox_alpha_gt_16": [
+          130,
+          30,
+          382,
+          482
+        ],
+        "edge_nontransparent_pixels": 0,
+        "chunks": [
+          "IHDR",
+          "oFFs",
+          "pHYs",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IDAT",
+          "IEND"
+        ],
+        "metadata_keys": [
+          "dpi"
+        ],
+        "minimumAlphaMarginPixels": 30
+      },
+      "unchangedDuringInspection": true
+    }
+  ],
+  "errorCount": 0,
+  "pendingCount": 0,
+  "independentAcceptance": false
+}

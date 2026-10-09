@@ -1,0 +1,3740 @@
+{
+  "descriptor_sha256": "ecef081759fd7b58091652c6d905965102368632a2b861fdaf4680766899571f",
+  "items": [
+    {
+      "id": "rpg-mansion-counterbalanced-task-lamp-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-counterbalanced-task-lamp-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "576d165602944e45e67b32ba6ed02cd83957effe345fe8405038e9e5b1ed8254",
+      "git_blob_sha": "ad8aabd3c518d7e615dd4dd48fe3c959392d1837",
+      "bytes": 161016,
+      "actual_bounds_gltf_m": [
+        [
+          -0.12250000238418579,
+          0.0,
+          -0.29121899604797363
+        ],
+        [
+          0.12250000238418579,
+          0.6039999723434448,
+          0.29121899604797363
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        245.00000476837158,
+        582.4379920959473,
+        603.9999723434448
+      ],
+      "dimension_error_mm": [
+        4.76837158203125e-06,
+        -7.904052722551569e-06,
+        -2.765655517578125e-05
+      ],
+      "triangles": 2284,
+      "uv": {
+        "triangles": 2284,
+        "valid_triangles": 2284,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.2473268205367507,
+        "p95": 1.248141392095365,
+        "p95_p05": 1.0006530538309628,
+        "median": 1.247748093165447
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "shade"
+          },
+          "name": "Ivory enamel spun metal shades",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5840784311294556,
+              0.5088813304901123,
+              0.3277781009674072,
+              1
+            ],
+            "metallicFactor": 0.25,
+            "roughnessFactor": 0.28999999165534973
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-counterbalanced-task-lamp-01-thumb.png",
+          "sha256": "3d5abd13d2867b7298695f805da23c0b08e9ccfdf0d18d63fa941cb9fd49a635",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 46345,
+          "pixel_bbox_alpha_gt_0": [
+            99,
+            23,
+            413,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            100,
+            23,
+            412,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-counterbalanced-task-lamp-01-top.png",
+          "sha256": "9288dc483af763e1fea5e5442fde9bf610f28011386a43ad9ff4c0c9a6f17d46",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 56689,
+          "pixel_bbox_alpha_gt_0": [
+            158,
+            23,
+            355,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            158,
+            23,
+            354,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 368,
+            "digest": "70829ba469589ea68d812f8b301626023d0e2326ad61d302cc7fa51013021b70"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 288,
+            "digest": "103c228c442fdce74d6331929a256089dbb5feaa2b7464d3a1c6bbcaa57b4319"
+          },
+          "Ivory enamel spun metal shades|shade": {
+            "points": 288,
+            "digest": "2cf4f4b5ff66caa0a8daa42f6072370ba5fc9a725daa0da0e5d9e8e08b6f3e9b"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "ec43d9ffe392c8c7a8dfee3d5d0f366785504ab91ebce638280e4fa2a7102c9a"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "110026eba4faea92aaf2fd96dd630e5d17dcfe84fe1aac5a3cdff6785792cfad"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 708,
+          "Bronzed iron structure|metal": 552,
+          "Ivory enamel spun metal shades|shade": 576,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "04ee789a4532de0769daa26aa0c03cc0a6115073e5626cc59a72a617924e9f75",
+          "Bronzed iron structure|metal": "3970ca6c930986ce436cdabba93a94115b6d444c3729e387db4b131bd543bed1",
+          "Ivory enamel spun metal shades|shade": "7b19b5552c549743d49969711ace464a6a842e3504fc806c8f12c37eb50bdb42",
+          "Opal bulb glass static appearance|glass": "1f5276d4bf55f0cacc24d07a55f78e12c4d0826113e8f5268017ffe71153c4d5",
+          "Porcelain socket insulator|ceramic": "5f79b2ac5fb599fa96d2570426a2da29c602aafcba562d69ba7d8aa91966550d"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "60e7bbfc1547166c804743bf6da5ae13036e2fa91750a438c84712b50db8f765",
+          "Bronzed iron structure|metal": "71b7a22acf53d1743174294e3ef879c8eb7cdd90a5d32cec6dd210bbe9f67a82",
+          "Ivory enamel spun metal shades|shade": "77be5096d6104d0bbba089a46bd09d980717a51dd0778d7d510d072ac7935afb",
+          "Opal bulb glass static appearance|glass": "5bfcfbb4c55311491b9d4f3f392d5ad172faa4526d6da46ef07c7e4e7bc745bc",
+          "Porcelain socket insulator|ceramic": "57e7786a0d57fd5ee1f086175e3bb7479cb2be8b086e8fea75ace78ba07bd2cc"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "3d5abd13d2867b7298695f805da23c0b08e9ccfdf0d18d63fa941cb9fd49a635",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "9288dc483af763e1fea5e5442fde9bf610f28011386a43ad9ff4c0c9a6f17d46",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "1965c5dee2209cc160fadea7b8ee0f9862864a8f189c7c677df49b0e366b522e",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "48279929f40271d825662fd4d99c668edae62ce00e17eb72a31954b34f457fba",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "277f459b6e2fffd90d078dfc783376fedb9e26d453c00d74b3ca3a16e7c67686",
+          "bytes": 191566,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "822f89e5cfe7fe7e96b821c049de57583cd08ba806fda72c128455550b211035",
+          "bytes": 143719,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-guarded-carry-lantern-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-guarded-carry-lantern-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "62d6a940fdbfef3c4bd290df72bb4651493f19bc72d7a18e9714280e40c9c3a9",
+      "git_blob_sha": "f9999a587b772c89b5c6231833a7f20062ea7cf7",
+      "bytes": 301288,
+      "actual_bounds_gltf_m": [
+        [
+          -0.11699578911066055,
+          0.0,
+          -0.11100000143051147
+        ],
+        [
+          0.11699578911066055,
+          0.47699999809265137,
+          0.11100000143051147
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        233.9915782213211,
+        222.00000286102295,
+        476.99999809265137
+      ],
+      "dimension_error_mm": [
+        -0.0004217786788842659,
+        2.86102294921875e-06,
+        -1.9073486328125e-06
+      ],
+      "triangles": 4240,
+      "uv": {
+        "triangles": 4240,
+        "valid_triangles": 4240,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.9152360210962671,
+        "p95": 1.917191617599614,
+        "p95_p05": 1.0010210733725797,
+        "median": 1.9161893844420406
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "alphaMode": "BLEND",
+          "extensions": {
+            "KHR_materials_transmission": {
+              "transmissionFactor": 0.9200000166893005
+            },
+            "KHR_materials_ior": {
+              "ior": 1.4500000476837158
+            }
+          },
+          "extras": {
+            "finishChannel": "glass",
+            "glassAppearance": "Closed 3mm panels, nonzero green tint, alpha 0.10 and transmission 0.92 using standard glTF PBR extension; actual GLB contrast tested"
+          },
+          "name": "Clear lightly tinted glass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5394794940948486,
+              0.7304607629776001,
+              0.6444796919822693,
+              0.10000000149011612
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.10000000149011612
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-guarded-carry-lantern-01-thumb.png",
+          "sha256": "4504d11b4e493d6cf508729ac95b5ab93ce97d4fdeb5c321572289b203f8c7a1",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 74711,
+          "pixel_bbox_alpha_gt_0": [
+            149,
+            23,
+            363,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            149,
+            23,
+            363,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-guarded-carry-lantern-01-top.png",
+          "sha256": "a070c030d5521475a69efa254e5dea6c5f602751176386ba815376a53773fb62",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 153145,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            35,
+            489,
+            477
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            24,
+            35,
+            489,
+            477
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 1168,
+            "digest": "38a168f240d13b39ca197fc146880fa1dbe34cff68f153718a9ee50c63cf2ac8"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 594,
+            "digest": "57efad52a51a6999aee93caa66e321a36379ed3c084c4bad00d9d154d5b76367"
+          },
+          "Clear lightly tinted glass|glass": {
+            "points": 160,
+            "digest": "e460cc0110f819ff19f6246d296a0ec8f247d2e8ec140f36cf8e2c1b02011b63"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "d9e14dec7a86543d38f9481c95e909fe2c2ba4a4b90c5fa98a24a22efdb2516a"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "b39c28b2d7016d26a4200fec136d8d8485ea1533a21ea8ba19ee5f5a9856dc25"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 2292,
+          "Bronzed iron structure|metal": 1180,
+          "Clear lightly tinted glass|glass": 320,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "3480b81a8a92ac2acbe653d8f65ecb8984f849935b8d69f8db29545216da082f",
+          "Bronzed iron structure|metal": "b3f6c40d0fd121618bd6adcab3b2e5808af0fe7bdc6db1d19fba816bf3f15dbc",
+          "Clear lightly tinted glass|glass": "347fb44bbb257fc410eb5eb5f1185fb0c1cded93f6305cabb5590ab6ad460493",
+          "Opal bulb glass static appearance|glass": "a30e94ede2c1cafe637db471bff2cb6b38203fb4bc900fcb7f92b279a156e27f",
+          "Porcelain socket insulator|ceramic": "73d4e17c3b554dfe8013345c17a8df5f5982dbcd061ba5c67083313402d40a47"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "9b414aab26980073ff6ec70916fe4c3133099016e60092e62957843815017f41",
+          "Bronzed iron structure|metal": "2b54615e3108ed165abfb3d085f8f5f571b840e243e9fef91fa5f48bebbde81d",
+          "Clear lightly tinted glass|glass": "6ac3be5a8380c1575f823354179745a213212f19cdf889928b0f3f6c02cf3e76",
+          "Opal bulb glass static appearance|glass": "c2c3649a34d2df594db38b66b2bfcc4cede6fdc9176aaf4dc7c8f7d2ad1bf310",
+          "Porcelain socket insulator|ceramic": "648449b94259ee19b24b75f3452b0e1ed228d2ae1e8dbbd40182bb74663570d5"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "4504d11b4e493d6cf508729ac95b5ab93ce97d4fdeb5c321572289b203f8c7a1",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "a070c030d5521475a69efa254e5dea6c5f602751176386ba815376a53773fb62",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "5ce9d9e702dd39429b71660bf2ceb69e8e5f5de4e39ad323dd4f6c15ec246be0",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "6f859778e89b2b8f2aed792d6beae8624a17243de87486f391c8c512f97f75ad",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "07c9e7d8b09a319d8e1c2d7fa175172608bfb919ef2238705699bb823001bb1c",
+          "bytes": 255075,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "c85b55f5ca5b14e4c8b470e64f3e9839562f115a86076a8d37f3f31321f45707",
+          "bytes": 167443,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-tripod-drum-floor-lamp-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tripod-drum-floor-lamp-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "b25c9d833f5535380e22def7029fe5621ed1e0d9bc1f214e4ac5aa79c1f5050b",
+      "git_blob_sha": "472707ea8de4e0bae4df581bd1f9366a493d3a06",
+      "bytes": 228680,
+      "actual_bounds_gltf_m": [
+        [
+          -0.3132883906364441,
+          0.0,
+          -0.33025604486465454
+        ],
+        [
+          0.3132883906364441,
+          1.659999966621399,
+          0.33025604486465454
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        626.5767812728882,
+        660.5120897293091,
+        1659.999966621399
+      ],
+      "dimension_error_mm": [
+        -0.00021872711181458726,
+        8.972930913841992e-05,
+        -3.337860107421875e-05
+      ],
+      "triangles": 3148,
+      "uv": {
+        "triangles": 3148,
+        "valid_triangles": 3148,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.0111684349382397,
+        "p95": 3.0156313158108747,
+        "p95_p05": 1.00148210934362,
+        "median": 3.014039817818686
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Oiled walnut tripod timber",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.11697066575288773,
+              0.05780543014407158,
+              0.024157632142305374,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "shade"
+          },
+          "name": "Warm woven shade fabric",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5583403706550598,
+              0.46207699179649353,
+              0.2622506618499756,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.7799999713897705
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tripod-drum-floor-lamp-01-thumb.png",
+          "sha256": "e5ca920ef1b5d68fb63a42d1c08c527a1a179fa14617738264c6b3f032e044ab",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 32620,
+          "pixel_bbox_alpha_gt_0": [
+            166,
+            23,
+            345,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            167,
+            23,
+            345,
+            488
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tripod-drum-floor-lamp-01-top.png",
+          "sha256": "9785393208598dafe0b018aa53ea6d0b7ee38983f530072a366c3940a935c882",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 42702,
+          "pixel_bbox_alpha_gt_0": [
+            35,
+            23,
+            477,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            35,
+            24,
+            477,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 972,
+            "digest": "b33c05dd6f71a9cffadf21fbea965847ebddbb2fd21169e91e229119be57a0ab"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 72,
+            "digest": "999e0ffae931fd5c6c68f6ecd58453eba93cc3961fff8b0b42d7b6cb634b49e3"
+          },
+          "Oiled walnut tripod timber|wood": {
+            "points": 72,
+            "digest": "a6173646f9963e0b6e2ba5e9f912541eaa9cb4a521acacb0fed0c3aa87128c99"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "686c8c45339ae135ca4d4d7eebad484242b75f8c30f453ec985d4e7e83f5c66f"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "e7268127c2dfc9be0451a43990852e22769e6528483e63128aec4ab5daa91d35"
+          },
+          "Warm woven shade fabric|shade": {
+            "points": 256,
+            "digest": "23b95e33dfc5b8c00ffe0736fb5a74772dac7d14d1d6088b39e2d86342c4ddf7"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 1924,
+          "Bronzed iron structure|metal": 132,
+          "Oiled walnut tripod timber|wood": 132,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116,
+          "Warm woven shade fabric|shade": 512
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "f21fe9fe2c96bd9a6268756d0df3affff063eb604157c04f2785cc40d293b48d",
+          "Bronzed iron structure|metal": "e758b4b95499017299879fccee2bac32d694229cb158249a860aa34aae75fb1f",
+          "Oiled walnut tripod timber|wood": "98130ddc3d6c440f1b8389ce95d719704940f4f71e26792ea693f7cff1a8bace",
+          "Opal bulb glass static appearance|glass": "5266d6517b7bbae44e190701b18c009f69aa8e8bb320d0ea6cb3196b6288d736",
+          "Porcelain socket insulator|ceramic": "4a96f3236da8f0f0e5bb169102510ac6bdc2b7f3c407e588cbf8ce070e32e725",
+          "Warm woven shade fabric|shade": "30a20d31831cd8ee23b43ef6c1930b1c7f7d8e3578a9724c5f0a5453d7087098"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "d3bc912122c836e10b8a958fd889415d41886998391f08799e7cce2b8a160d20",
+          "Bronzed iron structure|metal": "e6f370e86035f6b2e1b5f4202de0f1b998d14a275da620c530dda5223b19d2da",
+          "Oiled walnut tripod timber|wood": "3967b6fc61e2e3c5f636d46656758dc9be4469c178fcc054863d3ae8892ea18f",
+          "Opal bulb glass static appearance|glass": "ebfa133150fe13863affffcf4a3957da896d77197ac86b71102dd39636fb67ca",
+          "Porcelain socket insulator|ceramic": "8cdf61ff6405f1b2a6d333ea947d9e5a5961fcfed6b1ef26b928087e3a4446f8",
+          "Warm woven shade fabric|shade": "0e39a796e4960c1c31f67bee524689a55f71f7fa602f96dc53e678b90393c0e9"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "e5ca920ef1b5d68fb63a42d1c08c527a1a179fa14617738264c6b3f032e044ab",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "9785393208598dafe0b018aa53ea6d0b7ee38983f530072a366c3940a935c882",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "3276d27f3ce696d20aa9dfc1189826176fe9b9ff43d2cb37439de0698fd36721",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "c1b9549e7eb9a81a2151a8048af12640073adcd5ed9f9d44645c677c44c63a89",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "6e8bd90e85eb9c38c942f65a1f062526f06fc82677f315eb6c07b0549b54b570",
+          "bytes": 213406,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "663b99baf9b6298af562ff5666dd8fa47afca1e67766ff4468fe78ab3aa81480",
+          "bytes": 146144,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-arched-reading-floor-lamp-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-reading-floor-lamp-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "2bc515fd531dac6621ec365a430ca0f1f9dab72243372f506f8905702cf0a413",
+      "git_blob_sha": "2503ac81077d80cb6b7af03f7449041378a1e180",
+      "bytes": 131360,
+      "actual_bounds_gltf_m": [
+        [
+          -0.6357618570327759,
+          0.0,
+          -0.18000000715255737
+        ],
+        [
+          0.6357618570327759,
+          1.8519999980926514,
+          0.18000000715255737
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1271.5237140655518,
+        360.00001430511475,
+        1851.9999980926514
+      ],
+      "dimension_error_mm": [
+        -0.00028593444812941016,
+        1.430511474609375e-05,
+        -1.9073486328125e-06
+      ],
+      "triangles": 1804,
+      "uv": {
+        "triangles": 1804,
+        "valid_triangles": 1804,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.8737235807694508,
+        "p95": 1.8744462786542242,
+        "p95_p05": 1.000385701440805,
+        "median": 1.8741453257077938
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "stone"
+          },
+          "name": "Honed dark limestone counterweight",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.10224173218011856,
+              0.08650045841932297,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5799999833106995
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "shade"
+          },
+          "name": "Ivory enamel spun metal shades",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5840784311294556,
+              0.5088813304901123,
+              0.3277781009674072,
+              1
+            ],
+            "metallicFactor": 0.25,
+            "roughnessFactor": 0.28999999165534973
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade",
+        "stone"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade",
+        "stone"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-reading-floor-lamp-01-thumb.png",
+          "sha256": "07191e21a118c630dd36a94ee5b6f31eb60b9008d0cf6ef080efa3967434c0c8",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 17233,
+          "pixel_bbox_alpha_gt_0": [
+            100,
+            23,
+            412,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            100,
+            23,
+            412,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-reading-floor-lamp-01-top.png",
+          "sha256": "9af2978e53bed585a796b96d59a23100a2644d67d0a11ddf1857340518bb8e9a",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 38927,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            189,
+            489,
+            323
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            190,
+            489,
+            322
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 216,
+            "digest": "c4a4d9b4cb061829175945ced3083b6732f6ebe7cee24dbc269e455638b7e13d"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 160,
+            "digest": "a2e13c82e1d42e3f39e399b0d8e2ddf608dd21147fb6996267ebc3e1811edc06"
+          },
+          "Honed dark limestone counterweight|stone": {
+            "points": 24,
+            "digest": "8adab0cbbfcabcaeebd0e34c3878cb5bd59290f9a02d8340650883de078ce75b"
+          },
+          "Ivory enamel spun metal shades|shade": {
+            "points": 288,
+            "digest": "b7cc8dd168f8297a4ddbdc0ee653c81fed90686b20cb4cc2fb8bf459f2f8b1e8"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "f0a5d77138d4b053314d0473326e5f4e3818809c95994e3858091b6317136675"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "2fc55f5932a81004cc4387fb4c1d75cd2beab65afbd5346e080b41324539fde6"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 420,
+          "Bronzed iron structure|metal": 316,
+          "Honed dark limestone counterweight|stone": 44,
+          "Ivory enamel spun metal shades|shade": 576,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "4269e19701a3a42b8570e837bdfae4dd02bece15376b3502055915d68a50c166",
+          "Bronzed iron structure|metal": "79fa525093dc211833eb119a4f9677c601ee4a8873d95b22468a9f8c3491ca00",
+          "Honed dark limestone counterweight|stone": "cdaa9527bcecb15367562dbfbe56221ddfb433bb5c0185706c18fc136fd21977",
+          "Ivory enamel spun metal shades|shade": "abc16dcbf08da194735c958e4f67f86845d2459f9b8e22df9577b2b7321591ce",
+          "Opal bulb glass static appearance|glass": "66c6c4552e1e009c4b5d1f052e9fe06a6c8924a00db16f043b16d7b0b3ad2efd",
+          "Porcelain socket insulator|ceramic": "4cf2f5157dda768d120b18776ea41793aefe20451cf478ed915445bf2f589fc9"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "cd3ea82baef65b6aac917a8666755bf20b41ff04957664a40bff37246d82b120",
+          "Bronzed iron structure|metal": "246263275a74eb952c92a9468ec4399a0a610b1b674af43dbcfb06f462f5df65",
+          "Honed dark limestone counterweight|stone": "85d9fe63e76c267e386dcc1028e1c10897bd1740b76f09a427cfd546bec61d5d",
+          "Ivory enamel spun metal shades|shade": "eec9cffe6e3d2d681989b4d93c16e6a1328fd04d67883a9552fccd4ad2677142",
+          "Opal bulb glass static appearance|glass": "643ce68d1a777936dac1a7b5e6297d7d8dec51c62829e6981317972d6654c0f7",
+          "Porcelain socket insulator|ceramic": "7a8cc32233c6af12dc9ecf47cc6dbcb380c9d17a72bff6f2672bd9fa136a4f03"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "07191e21a118c630dd36a94ee5b6f31eb60b9008d0cf6ef080efa3967434c0c8",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "9af2978e53bed585a796b96d59a23100a2644d67d0a11ddf1857340518bb8e9a",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "31b7a85044150fa0070649ebd2b661b013003824974fe1240885c989e25d0700",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "19c5544abf972b47f656c5baa4f7317a17a755ff1c165775d4c64d41e23a8c75",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "0f5b1a00c3b13ef1b33bf7ae40c4d885677d144253a52c060e580b35f2795a86",
+          "bytes": 175670,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "63a302bd492f87dc5206e65224640e87fe5265bee5f578a4210ebf71ac84d2ea",
+          "bytes": 135652,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-bowl-torchiere-floor-lamp-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bowl-torchiere-floor-lamp-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "caf9af9d4b67de4ebf59c4f1219d64fad22a99ee8eb7a35fb30ed0bed1715bb4",
+      "git_blob_sha": "b7db380237795511d9ef36704fe5b6586becc46e",
+      "bytes": 160020,
+      "actual_bounds_gltf_m": [
+        [
+          -0.24199999868869781,
+          0.0,
+          -0.24199999868869781
+        ],
+        [
+          0.24199999868869781,
+          1.746999979019165,
+          0.24199999868869781
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        483.99999737739563,
+        483.99999737739563,
+        1746.999979019165
+      ],
+      "dimension_error_mm": [
+        -2.6226043701171875e-06,
+        -2.6226043701171875e-06,
+        -2.09808349609375e-05
+      ],
+      "triangles": 2280,
+      "uv": {
+        "triangles": 2280,
+        "valid_triangles": 2280,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.0185061736112013,
+        "p95": 2.0198704888384067,
+        "p95_p05": 1.0006759034205799,
+        "median": 2.0192577622333934
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "shade"
+          },
+          "name": "Ivory enamel spun metal shades",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5840784311294556,
+              0.5088813304901123,
+              0.3277781009674072,
+              1
+            ],
+            "metallicFactor": 0.25,
+            "roughnessFactor": 0.28999999165534973
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bowl-torchiere-floor-lamp-01-thumb.png",
+          "sha256": "7156fa31247649e8bc057e01324cc53f22424adf2c98c15be537367526469462",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 13670,
+          "pixel_bbox_alpha_gt_0": [
+            192,
+            23,
+            320,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            193,
+            23,
+            319,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bowl-torchiere-floor-lamp-01-top.png",
+          "sha256": "a4cc8442bcda66decb26f0995e993a92acb8df6369fdfc6a4bfd3634be772222",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 169332,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            23,
+            489,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            23,
+            489,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 216,
+            "digest": "012cf3a238ee0f5b47e996eed0c744e31ba336b03296bbeaf3d07e8d0890e4fc"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 300,
+            "digest": "5436e632e39bbb922a2aa299a292f37bcf387f7be5e68616988efb04f2e62f17"
+          },
+          "Ivory enamel spun metal shades|shade": {
+            "points": 416,
+            "digest": "3dee7b4f96c5ec47bbf4c34270f64a8da3025d172b8cea1b253ef801848913eb"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "837ffa39fce58112ac616eb29f5881ed4cb63a8f1307fe042b271a7aa96206e1"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "78021ef249895203431d363795b76fc874654f7c6b5bb88e0bd6d76d65742e10"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 412,
+          "Bronzed iron structure|metal": 588,
+          "Ivory enamel spun metal shades|shade": 832,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "9d77e900001ba001201db2c881152fcf7a8174739adabeb390a34b89ef5308e9",
+          "Bronzed iron structure|metal": "0223ffd13d281539eaadadd9051fb54072bc7c9843ba3e6e33d7fecc75cd16f2",
+          "Ivory enamel spun metal shades|shade": "a89c1faeb29c54cecf30fcf147b58ca9dd16b2578201763eeec5983412cbc2af",
+          "Opal bulb glass static appearance|glass": "3d94c2b74d946b1d6327bbd6a67fa0388ef7933df604f47c1d601f7a91faba3d",
+          "Porcelain socket insulator|ceramic": "fea4f0786bbdc1ece2034ca99eb00d4941163ea4ce7b201acd635628833d5c50"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "892cf00d7eab03f36f908db6c24e98143b9e7f58365c4bb70a07d388bd596ed3",
+          "Bronzed iron structure|metal": "cf7bb8778e4eaabb8dfbabc05791721875b25f8d819279f3b4249ddbf396b5f7",
+          "Ivory enamel spun metal shades|shade": "89ba30395a6ac4b38ecd1cf110fd905fa40636022915cf7d6fb70e3f266b4ea6",
+          "Opal bulb glass static appearance|glass": "9062bcc7757660b3a97f778d535fa70968460dc8d9b597feca32bf4da3f1b7cb",
+          "Porcelain socket insulator|ceramic": "96053138aeb2fc6c5b0c3a8ffc9792b1b1a8c78179bc9d1d3b275440b13d882a"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "7156fa31247649e8bc057e01324cc53f22424adf2c98c15be537367526469462",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "a4cc8442bcda66decb26f0995e993a92acb8df6369fdfc6a4bfd3634be772222",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "7868c4d7f4cbf7a5246cacad15846dae3d4d61ab5d217fa1c78220d2ec81412d",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "e33f720fb8a957ce171850db85af01824a2c9d4b40ca89e9b69102d34c845c41",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "9ba55ac0c832d648ca2fe8e92fa49b534cfdcf00bbb09173db737676f241a266",
+          "bytes": 187654,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "3b1b787a688435769d3526ff78ba4c70b15670ae5718d3c4bbba76679a3b6887",
+          "bytes": 139937,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-hexagonal-post-lantern-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-hexagonal-post-lantern-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "de292f25f5328cf9cd1591d560614f69ccda80c45c700d59a9d5e2d0688186b8",
+      "git_blob_sha": "4473275d0fbf547e1a72673be416648e36c162a1",
+      "bytes": 107860,
+      "actual_bounds_gltf_m": [
+        [
+          -0.18000000715255737,
+          0.0,
+          -0.15588457882404327
+        ],
+        [
+          0.18000000715255737,
+          1.6779999732971191,
+          0.15588457882404327
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        360.00001430511475,
+        311.76915764808655,
+        1677.9999732971191
+      ],
+      "dimension_error_mm": [
+        1.430511474609375e-05,
+        0.0001576480865423946,
+        -2.6702880859375e-05
+      ],
+      "triangles": 1400,
+      "uv": {
+        "triangles": 1400,
+        "valid_triangles": 1400,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.9985349997164688,
+        "p95": 1.999960037549647,
+        "p95_p05": 1.0007130412193834,
+        "median": 1.9994038206259876
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "alphaMode": "BLEND",
+          "extensions": {
+            "KHR_materials_transmission": {
+              "transmissionFactor": 0.9200000166893005
+            },
+            "KHR_materials_ior": {
+              "ior": 1.4500000476837158
+            }
+          },
+          "extras": {
+            "finishChannel": "glass",
+            "glassAppearance": "Closed 3mm panels, nonzero green tint, alpha 0.10 and transmission 0.92 using standard glTF PBR extension; actual GLB contrast tested"
+          },
+          "name": "Clear lightly tinted glass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5394794940948486,
+              0.7304607629776001,
+              0.6444796919822693,
+              0.10000000149011612
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.10000000149011612
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hexagonal-post-lantern-01-thumb.png",
+          "sha256": "d233a3153669d3374c4d828379ca6fdf4a2ada669016c26f1e9f81e295721d49",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 20662,
+          "pixel_bbox_alpha_gt_0": [
+            211,
+            23,
+            302,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            211,
+            23,
+            301,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hexagonal-post-lantern-01-top.png",
+          "sha256": "94a5906da039b86a2e02847413f1c12c92828ce4dbffdccd531ae6f20146a750",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 141180,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            54,
+            489,
+            458
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            24,
+            54,
+            488,
+            458
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 204,
+            "digest": "fc80f8591fedb2c6209cbd25141455948171d77393a1cf517fdce66ffde22aef"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 258,
+            "digest": "d538604345e3aa89fdfdc0ed2757bcf1d82f5a06a798d14df42108986ce77209"
+          },
+          "Clear lightly tinted glass|glass": {
+            "points": 48,
+            "digest": "9beed96287542717984da86726253aec1a575443c547730d45e67369344d659b"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "e69a7f4eb40f5ea11844b8cf7ce1dda722d815dde9408ee672bc0e1b1bebac3d"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "f79645488330e748dce6c01acc98cb2f1697155bb4f3f670e44de4df5e74c099"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 396,
+          "Bronzed iron structure|metal": 484,
+          "Clear lightly tinted glass|glass": 72,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "bf1dac378c48342e204901690eb002d616a61b53e78915513bdc1d0c43e2d341",
+          "Bronzed iron structure|metal": "fdca001285218d0a1fcfe5698b3a44e14b139ae2c77e3a2c9b5672c47c4c6bb7",
+          "Clear lightly tinted glass|glass": "cd0af2245183e25a1877c0e9c8b0a4a39fc88c63ddd4b6013f627557669852af",
+          "Opal bulb glass static appearance|glass": "4f06bb524202616433074dd393ddb2b0d89d58e4af683327dece18d0f693d22e",
+          "Porcelain socket insulator|ceramic": "460f57914ebe699a8f53f070e4317c2d48a2f4fc44f3c66c45389fe54acf5b38"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "6ec4710aefbe6fa8ff841a3d4bb4ca218e8f501b1af7902a4f2222bc4299e60e",
+          "Bronzed iron structure|metal": "5fa376255aec8f4b83da1d5c7971ff9e0ece5de292d0c61fc24f74185b84bce8",
+          "Clear lightly tinted glass|glass": "161864277d8c2cc7703cae3c4f9a4da70b261c17f34ae87a669bfdc0579ef4ac",
+          "Opal bulb glass static appearance|glass": "8a0a788e2a13483cfffffa640c3d84249e9aff22287c023b10d02382bf04859e",
+          "Porcelain socket insulator|ceramic": "fb71ffa6c44b2297608940c5d4d616e4a9b55d7e48f36efc0896cc552c4e80ba"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "d233a3153669d3374c4d828379ca6fdf4a2ada669016c26f1e9f81e295721d49",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "94a5906da039b86a2e02847413f1c12c92828ce4dbffdccd531ae6f20146a750",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "0ca640b149d39e19c80c54e5088ac103e7c8c2aa303131a0cc0a9bd8ea446c1c",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "17997e8ea3b35378a02401f92fbbdf2af1f825156d550765b9b4a4d90438f6fb",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "6dc91b3077020341118d9fecc9b0f0e494c40ed2a5e1a65067fd328c17e5ea8d",
+          "bytes": 156004,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "3cb8909acfda92547988e455ea1c650ab6c2e19be0cb69323e38420e93402916",
+          "bytes": 123277,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-twin-articulated-wall-reading-lamp-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-twin-articulated-wall-reading-lamp-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "74a49099b26c197318043a8755442f589988d2643280df7abd95078595c3d52e",
+      "git_blob_sha": "83296b5bf88f7be12304720c44e60bf1ee1ccadf",
+      "bytes": 243648,
+      "actual_bounds_gltf_m": [
+        [
+          -0.42263999581336975,
+          0.0,
+          -0.2880551218986511
+        ],
+        [
+          0.42263999581336975,
+          0.5756794214248657,
+          0.2880551218986511
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        845.2799916267395,
+        576.1102437973022,
+        575.6794214248657
+      ],
+      "dimension_error_mm": [
+        -8.373260470762034e-06,
+        0.00024379730223245133,
+        0.0004214248657490316
+      ],
+      "triangles": 3532,
+      "uv": {
+        "triangles": 3532,
+        "valid_triangles": 3532,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.746891349784613,
+        "p95": 1.748660960820813,
+        "p95_p05": 1.0010130057810511,
+        "median": 1.7478613284605213
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "shade"
+          },
+          "name": "Ivory enamel spun metal shades",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5840784311294556,
+              0.5088813304901123,
+              0.3277781009674072,
+              1
+            ],
+            "metallicFactor": 0.25,
+            "roughnessFactor": 0.28999999165534973
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-twin-articulated-wall-reading-lamp-01-thumb.png",
+          "sha256": "c8016bb3294352a7d51861d0d38b3ebafb1133a758e83188f396050bff1688a5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 47965,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            34,
+            489,
+            479
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            34,
+            488,
+            478
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-twin-articulated-wall-reading-lamp-01-top.png",
+          "sha256": "7e0fd9d3112e907d0a7ae88f54230b38a3df2fac245c672f3e16cc1de6a7608d",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 31451,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            96,
+            489,
+            415
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            97,
+            488,
+            415
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 664,
+            "digest": "350e2e120f76b498f70b3ae2c958fac73c624214af728f438de5ec06a1ec6b42"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 120,
+            "digest": "008988f47d38cda5da982122d30f41cece1f40142e7c20ce5cd4aa9c19b9e45f"
+          },
+          "Ivory enamel spun metal shades|shade": {
+            "points": 576,
+            "digest": "c7e90d6a8b447e61e61aded709022ed3df3b95ae5b3687665e6c5f60a754e24e"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 336,
+            "digest": "4b10d1745a6033a55becfd210058e7b4780b73d0d89ae5857ead6c0cb90ee4f9"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 120,
+            "digest": "0f3a5864256d0abc4ab8a1afbafcaa35fc4cfd3b258e08be677f65744feeb8c6"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 1264,
+          "Bronzed iron structure|metal": 220,
+          "Ivory enamel spun metal shades|shade": 1152,
+          "Opal bulb glass static appearance|glass": 664,
+          "Porcelain socket insulator|ceramic": 232
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "1251aef6aa0c9f884432d82fc6adf793a5d65c77ed3c6377279bca4d4cbe2948",
+          "Bronzed iron structure|metal": "a9be1964f2ebf1b68c9628fb8cf5eb92c80045239f857cc392f533bfd00de09f",
+          "Ivory enamel spun metal shades|shade": "f38fc1a0ffd4ddec98acadb6199502d02afc52fa3707591085b0020ec867ffa5",
+          "Opal bulb glass static appearance|glass": "c039acea55887e52910f372eb0b109c4ed75e6c308843060868cfd404eecef65",
+          "Porcelain socket insulator|ceramic": "ff36f4b34f81d1ff3a387c7bb81342aafebb454692f54eb57ed6980aa7c9e99f"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "2997db9cc37628074ec3b825ca9449a2aa9cfcbbd02d14abf96d087df9a372da",
+          "Bronzed iron structure|metal": "5c05ec833174268d4dfc63a452319afb6cb2dfebd6959e0f5918958c6fb5bada",
+          "Ivory enamel spun metal shades|shade": "ffac4f73d8b1d3b8a99bd62f5dc82dddc9bc98567f7918183a5e0284e6ba7253",
+          "Opal bulb glass static appearance|glass": "f28c603ebf433f206c9a9d249a95f342d93e1279a42bff76f511b0e4fae165d9",
+          "Porcelain socket insulator|ceramic": "1553ccdbafb25fcda95135682fc53ef0a0037059bd95b47e7659c00dc54bf234"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "c8016bb3294352a7d51861d0d38b3ebafb1133a758e83188f396050bff1688a5",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "7e0fd9d3112e907d0a7ae88f54230b38a3df2fac245c672f3e16cc1de6a7608d",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "f3156f7e44e2bcea8f70211e7eeba7f0db60b8c2ce379b7846488253984a0754",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "ac28346244c3b90031ad900eb66f41c04bf1ee2372b26a53dfa1ceec662e753e",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "1a7c5da2770db29dcb0d200723b3e243f3dc4a2f7036997b974ecaf84fc70b35",
+          "bytes": 227779,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "5d1a8a2fee890e9ed11638edb4e0a02a85f96a78736ef807fc5a3fbc5609d458",
+          "bytes": 156405,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-caged-workshop-pendant-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-caged-workshop-pendant-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "63d0d8c05b8d5ba8a0c5c5549c0ce4478bd55d988991c8bbe1cb0d6a60b731e1",
+      "git_blob_sha": "8ec004ee7899ca4f437653ec13f84f74f9ff5323",
+      "bytes": 232288,
+      "actual_bounds_gltf_m": [
+        [
+          -0.2194995880126953,
+          0.0,
+          -0.19082912802696228
+        ],
+        [
+          0.2194995880126953,
+          0.7400000095367432,
+          0.19082912802696228
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        438.9991760253906,
+        381.65825605392456,
+        740.0000095367432
+      ],
+      "dimension_error_mm": [
+        0.00017602539060135314,
+        0.00025605392454508547,
+        9.5367431640625e-06
+      ],
+      "triangles": 3280,
+      "uv": {
+        "triangles": 3280,
+        "valid_triangles": 3280,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.97259151913147,
+        "p95": 1.9741436663096419,
+        "p95_p05": 1.0007868568647478,
+        "median": 1.9733394802106974
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "shade"
+          },
+          "name": "Ivory enamel spun metal shades",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5840784311294556,
+              0.5088813304901123,
+              0.3277781009674072,
+              1
+            ],
+            "metallicFactor": 0.25,
+            "roughnessFactor": 0.28999999165534973
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-caged-workshop-pendant-01-thumb.png",
+          "sha256": "8967143055aed1054cb30bc579c12aff0f557532f7eaed8a5884b6a84bfa5b0e",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 44331,
+          "pixel_bbox_alpha_gt_0": [
+            138,
+            23,
+            374,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            139,
+            23,
+            373,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-caged-workshop-pendant-01-top.png",
+          "sha256": "925cf77da02e4de1c5810379e7d3f9c7aa3b3bd39dcc61a1d5ca6ff0d3559aa7",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 115778,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            53,
+            489,
+            458
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            24,
+            54,
+            489,
+            458
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 236,
+            "digest": "932ce34312d1c2fd35ca367215a953d68e37cdd0bafd9f841aa8ccf73c61533b"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 928,
+            "digest": "53f02ca8dd29f2e67ba0103a228879594034df0ce86e64a9abce0b1a1336af68"
+          },
+          "Ivory enamel spun metal shades|shade": {
+            "points": 288,
+            "digest": "7b1b407fc3463f9048d9f6198f009ccd7a629d40c9732de2f0cb4ebca29e9437"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "bc60cda9e82736ed0a158af3e3ed140fbfbb41d18ff693a527430a9bfb2b6d52"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "59a0d453a0fed41f5f35e40e3d28d64d00c2ce3cba9ea2d564a71aaf6e1cca22"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 456,
+          "Bronzed iron structure|metal": 1800,
+          "Ivory enamel spun metal shades|shade": 576,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "040351e9d67bb72ca4ab0c2f7bf1ee8f671cdf6afaf09778eb9e7844cfc2a9a4",
+          "Bronzed iron structure|metal": "47dd4c11db6543020142aa590650c02e027d844a75bf82db3d41a1f5b11c2d69",
+          "Ivory enamel spun metal shades|shade": "103ceba11a084ebd49284f68c3656778c2260d2351d616cfc8b523b38cdcde11",
+          "Opal bulb glass static appearance|glass": "80376bd65a90c1507c3620afa8061129d32bb80ac4b0a3a52f3f2415c7377e0d",
+          "Porcelain socket insulator|ceramic": "50c927819d82c7f30352aa359897b6f43db67263e2504deb6c5362a8a1128de3"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "76510fb3b775d04a8d609a67b0a418e304cf6b5cbe6e5a158b6ef86730710d1f",
+          "Bronzed iron structure|metal": "abd5e4f815bcd84f5c9dc38e7cbd459d8a40f1dcdd27ae9f01e6edbeb84ecb3b",
+          "Ivory enamel spun metal shades|shade": "c534d21ac5dd15aa8e199123cd8976cb7d71c74f03682d28ac49a0d0276bdca2",
+          "Opal bulb glass static appearance|glass": "9435f411622b88eb79e793d675c65393a30ec6535172419c39dd19000f9a24f5",
+          "Porcelain socket insulator|ceramic": "e77228317cb14b37870f251231c6686f4c40812c38ca75f27347bfe4f97fc67f"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "8967143055aed1054cb30bc579c12aff0f557532f7eaed8a5884b6a84bfa5b0e",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "925cf77da02e4de1c5810379e7d3f9c7aa3b3bd39dcc61a1d5ca6ff0d3559aa7",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "e1ee44bab0a579787ccef015601a169304be82c6a1c10857ec163873528f6074",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "558ff938b8997450abd86352a9b4d9afe4950e7f98c04186d4579583002d96e1",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "5fbb3dbff57cb44477ee7bf70c4c3b57689814f497cf7536e263cfe46824ea37",
+          "bytes": 228223,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "a8b6849094dd12bd3256f639d05bed32857f952ec6f118a4fd6dc4f067144eb1",
+          "bytes": 162561,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-pleated-drum-pendant-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-pleated-drum-pendant-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "a47c33ebb57c5e993cd68dc41550618bced4dca8df4f8920a2383d1bdc29ceae",
+      "git_blob_sha": "181512cdea9bb94fac276c4c220f28158a3f419b",
+      "bytes": 218912,
+      "actual_bounds_gltf_m": [
+        [
+          -0.3154735565185547,
+          0.0,
+          -0.3154735565185547
+        ],
+        [
+          0.3154735565185547,
+          0.7400000095367432,
+          0.3154735565185547
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        630.9471130371094,
+        630.9471130371094,
+        740.0000095367432
+      ],
+      "dimension_error_mm": [
+        0.00011303710937227152,
+        0.00011303710937227152,
+        9.5367431640625e-06
+      ],
+      "triangles": 3096,
+      "uv": {
+        "triangles": 3096,
+        "valid_triangles": 3096,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.3390548549379235,
+        "p95": 2.3411948227497748,
+        "p95_p05": 1.0009148856886934,
+        "median": 2.3403803007890973
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Bronzed iron structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.040915198624134064,
+              0.03560131415724754,
+              0.027320891618728638,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3400000035762787
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "shade"
+          },
+          "name": "Warm woven shade fabric",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5583403706550598,
+              0.46207699179649353,
+              0.2622506618499756,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.7799999713897705
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "ceramic"
+          },
+          "name": "Porcelain socket insulator",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.637596845626831,
+              0.5711248517036438,
+              0.423267662525177,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "emissiveFactor": [
+            0.30000001192092896,
+            0.21300000202655767,
+            0.1020000051259995
+          ],
+          "extras": {
+            "finishChannel": "glass",
+            "appearanceOnly": "Modest material emission; no native PointLight or SpotLight"
+          },
+          "name": "Opal bulb glass static appearance",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              1,
+              0.8713670969009399,
+              0.5840784311294556,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.23999999463558197
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "manifest_finish_channels": [
+        "ceramic",
+        "glass",
+        "metal",
+        "shade"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-pleated-drum-pendant-01-thumb.png",
+          "sha256": "1705a7636cdbf01a54b7b98f6bfe214d7b3bd7eebed1d52afca8a4c3f0f69303",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 88878,
+          "pixel_bbox_alpha_gt_0": [
+            77,
+            23,
+            435,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            77,
+            23,
+            435,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-pleated-drum-pendant-01-top.png",
+          "sha256": "6fc93c7d3c6a93239eb08f24768e3c937c5f83f6f704ef028a6a9642e20740d5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 35829,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            23,
+            489,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            24,
+            23,
+            488,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 1010,
+            "digest": "0cc73a666a02619bab61fc9d93de2968eaa13198243e212442085ad501995c07"
+          },
+          "Bronzed iron structure|metal": {
+            "points": 72,
+            "digest": "ec5579556343401e5e527a5ee1b258b5d717ec0405cc8780f9182af163342e2e"
+          },
+          "Opal bulb glass static appearance|glass": {
+            "points": 168,
+            "digest": "93b2b0fe22c3109dff49212a3125fb072a3515a272c134376ca5273b918135dc"
+          },
+          "Porcelain socket insulator|ceramic": {
+            "points": 60,
+            "digest": "e710b105a254f617f27f00de225d5c33499e0633401a46285c65a369136dac2e"
+          },
+          "Warm woven shade fabric|shade": {
+            "points": 256,
+            "digest": "9f331bc42a24887e07629ec5c482cfa58ef78a610d4dba022811c3cd05b8e6bc"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 1996,
+          "Bronzed iron structure|metal": 140,
+          "Opal bulb glass static appearance|glass": 332,
+          "Porcelain socket insulator|ceramic": 116,
+          "Warm woven shade fabric|shade": 512
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "d09a0821f952c3ff05181d7bf999f08be5165d48056ee72d00ccf1c960bffd8c",
+          "Bronzed iron structure|metal": "b63f9d623dd45609907d0a5ded381bcbd672215f96527107f39e152f8371c5de",
+          "Opal bulb glass static appearance|glass": "3afd6eaa319b4f3b2bdb495e42e60eb685a9e495bb5e16abb004e206ec87acb3",
+          "Porcelain socket insulator|ceramic": "a0e335dd2bfce6c33acfba65d5ca60d1056d9e82a44911a7af4c2e3f2182ea65",
+          "Warm woven shade fabric|shade": "519e52b7c3f3b26905f2cbae4a0b720819e769aed0d4268dafb75016a30d4fbb"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "77a8cd8e2a43b076e127a9b48ed73185a51e4cb63d13d0b5517166aaebbe6e70",
+          "Bronzed iron structure|metal": "ac1a08fba4511bccd70f6306062f31be2b1b940230f4f7d272461635cd7da0b6",
+          "Opal bulb glass static appearance|glass": "7667226078b1c5460aaf475fbc530439652e34e348c8ff52e4a612933fed1a8d",
+          "Porcelain socket insulator|ceramic": "f6f74301f9c4fb669c801c7ebd8797dba77d97dae1bbdc9140f8d134e10b414f",
+          "Warm woven shade fabric|shade": "8fbf3119e59be4213d8142c723934a632aa1415cc55289bc2f8c0de1f498fe14"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "1705a7636cdbf01a54b7b98f6bfe214d7b3bd7eebed1d52afca8a4c3f0f69303",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "6fc93c7d3c6a93239eb08f24768e3c937c5f83f6f704ef028a6a9642e20740d5",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "0ecdec0722c692f3ed5227a518cff0e5e674de3f74e3072490fc8686c4f86e9b",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "2ea14a810e230b334dcd00b315734c2b244b7e3e1e00a1c77f5c6dc3c09fecda",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "769fcc312bf422a83bc62fce69e94e84117761b9fe43f8ec36757adfa56c2a9c",
+          "bytes": 217364,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "a44330e826c3ba34a51718604d1a35b20ec9ea589c651902a79982e5442d1919",
+          "bytes": 154147,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    },
+    {
+      "id": "rpg-mansion-three-branch-table-candelabrum-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-three-branch-table-candelabrum-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "6db6e41c72024e072fd429640753816ba4b9ed067439b14f06da57a2886f4e05",
+      "git_blob_sha": "6feaf3a69d024d76d5a36a8d19f98a7485a2271d",
+      "bytes": 174792,
+      "actual_bounds_gltf_m": [
+        [
+          -0.25,
+          0.0,
+          -0.09099999815225601
+        ],
+        [
+          0.25,
+          0.5810880661010742,
+          0.09099999815225601
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        500.0,
+        181.99999630451202,
+        581.0880661010742
+      ],
+      "dimension_error_mm": [
+        0.0,
+        -3.6954879760742188e-06,
+        6.61010742533108e-05
+      ],
+      "triangles": 2460,
+      "uv": {
+        "triangles": 2460,
+        "valid_triangles": 2460,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.0819019023609195,
+        "p95": 1.0829989459172038,
+        "p95_p05": 1.0010139954037334,
+        "median": 1.0824566440632095
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass structure",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.3049873113632202,
+              0.16202937066555023,
+              0.045186202973127365,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.30000001192092896
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wax"
+          },
+          "name": "Ivory candle wax",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.7991027235984802,
+              0.7083757519721985,
+              0.5271151065826416,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.550000011920929
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wax"
+          },
+          "name": "Dark cotton wick",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.017641954123973846,
+              0.014443843625485897,
+              0.009721217676997185,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8999999761581421
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wax"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wax"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original project-authored native Blender geometry; no imported geometry or images",
+        "source": "tools/blender/rpg_mansion/decorative_lighting_expansion/build.py",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-three-branch-table-candelabrum-01-thumb.png",
+          "sha256": "812e53a37db7a9142df3319454537c82afec6e1316134ac5003ea123e73a398d",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 37167,
+          "pixel_bbox_alpha_gt_0": [
+            82,
+            23,
+            430,
+            489
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            83,
+            23,
+            429,
+            489
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-three-branch-table-candelabrum-01-top.png",
+          "sha256": "57a0a06997821debfd00a919c5f44019621eb8185bd3b36b729b7501ffaf849c",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 39325,
+          "pixel_bbox_alpha_gt_0": [
+            23,
+            171,
+            489,
+            341
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            23,
+            171,
+            489,
+            341
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass structure|metal": {
+            "points": 966,
+            "digest": "40a75b2e8713025f0ad90f102bb7b6d0359271612616a9eeb754e66350b7108b"
+          },
+          "Dark cotton wick|wax": {
+            "points": 48,
+            "digest": "44e3b2eeb66685340319b391886802d8d9f61d2ec9e0b940a83e7608a7c1180a"
+          },
+          "Ivory candle wax|wax": {
+            "points": 240,
+            "digest": "cdc27a27e40374aece7347c33fac02f37e94e5b9300dcbcb07a12ed87ffbf6cc"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass structure|metal": 1908,
+          "Dark cotton wick|wax": 84,
+          "Ivory candle wax|wax": 468
+        },
+        "triangle_surfaces": {
+          "Antique brass structure|metal": "f90111ef11cf431fa09f4fa060b0514d78154cbdda2ddc29f49c203a595e30ea",
+          "Dark cotton wick|wax": "616cf01cd6497fe642515057ecb9ed52b0ba0895e2d534afad1ffdf476616f7c",
+          "Ivory candle wax|wax": "a1bc216fe324544b6c7ddc761c9a68478f9f502091f42c591b0b786d9128a711"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass structure|metal": "511a6e15fc7b5d214d16103b3b811069c17487d128bbb0b3465ad12ab79dd488",
+          "Dark cotton wick|wax": "cac5fd7be88e1bcc87f7b29a390727e01e78dfdc2905e29b9e4518f7910a5045",
+          "Ivory candle wax|wax": "49b293306fec8c4322fea305758b5d6e5825f35557721603d900215a7ffceac4"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "packed_uv_overlap": {
+        "significant_overlap_pairs": 0,
+        "total_overlap_area": 0,
+        "worst_fraction": 0,
+        "examples": []
+      },
+      "triangle_budget": 6000,
+      "all_view_margins": {
+        "thumb": {
+          "sha256": "812e53a37db7a9142df3319454537c82afec6e1316134ac5003ea123e73a398d",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "top": {
+          "sha256": "57a0a06997821debfd00a919c5f44019621eb8185bd3b36b729b7501ffaf849c",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "front": {
+          "sha256": "dc9d356d1a0b13b79f48005cae229c332f3db9ed5035ed9eed3562af644604f6",
+          "minimum_alpha_margin_pixels": 23
+        },
+        "rear": {
+          "sha256": "02a8996bb73dac9720ddf94aaf2c0e131212ee76634ddce161c70b988ed7cbf6",
+          "minimum_alpha_margin_pixels": 23
+        }
+      },
+      "source_privacy": {
+        "sourceBlend": {
+          "sha256": "f6426649255c6b9681e32d62104d50d199608fd3a5f0030561713c05b3b411cf",
+          "bytes": 193535,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        },
+        "authoringBlend": {
+          "sha256": "3c0cd7f05636d123a93edf9484392a1b53fbdebd86ab4365a7b36b7923f32e7c",
+          "bytes": 136316,
+          "encoding": "zstd",
+          "private_absolute_path_occurrences": 0
+        }
+      },
+      "source_reexport_matches_geometry_material_uv": true,
+      "source_reexport_matches_full_materials": true
+    }
+  ],
+  "errors": 0,
+  "model_bytes": 1959864,
+  "triangles": 27524
+}

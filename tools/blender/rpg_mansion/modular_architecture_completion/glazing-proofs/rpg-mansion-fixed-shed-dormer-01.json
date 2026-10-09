@@ -1,0 +1,51 @@
+{
+  "id": "rpg-mansion-fixed-shed-dormer-01",
+  "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-fixed-shed-dormer-01.glb",
+  "modelSha256": "fcd108a52d02d34719e11af6c5bbb0b1c0fdebadbb9bcb3c962e947ca4fba80c",
+  "source": "tools/blender/rpg_mansion/modular_architecture_completion/glazing-proofs/rpg-mansion-fixed-shed-dormer-01-optical-proof.blend",
+  "sourceSha256": "ad479b738e8c5755826750bebcf37d2e441ebb14d410ef45c573acf863310b85",
+  "glassPartitionNames": [
+    "rpg-mansion-fixed-shed-dormer-01.004"
+  ],
+  "roisPixels": [
+    [
+      169,
+      217,
+      201,
+      295
+    ],
+    [
+      311,
+      217,
+      343,
+      295
+    ]
+  ],
+  "camera": {
+    "nativeCentre": [
+      -0.2,
+      -4,
+      0.85
+    ],
+    "orthoScale": 0.65,
+    "resolution": [
+      512,
+      512
+    ],
+    "samples": 64
+  },
+  "proofFixtures": [
+    "white marker",
+    "black marker"
+  ],
+  "views": {
+    "actual-glass": {
+      "path": "tools/blender/rpg_mansion/modular_architecture_completion/glazing-proofs/rpg-mansion-fixed-shed-dormer-01-actual-glass.png",
+      "sha256": "b0e1bee99b95b32b59cd111553eb25d08e3c40c7f2bfcab7d0bcc3cc1b57b67d"
+    },
+    "clear-control": {
+      "path": "tools/blender/rpg_mansion/modular_architecture_completion/glazing-proofs/rpg-mansion-fixed-shed-dormer-01-clear-control.png",
+      "sha256": "f91ed0b50ba23c2326568cf74b42ac0813bc4486e3cf7f2cbc214915ea808728"
+    }
+  }
+}

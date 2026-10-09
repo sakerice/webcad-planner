@@ -1,0 +1,125 @@
+{
+  "schema": "period-service-bounded-closure-v1",
+  "status": "Candidate source/scene evidence; independent certification and installed app gate pending",
+  "assetCount": 4,
+  "newConstructionCount": 3,
+  "functionalFootprintVariantCount": 1,
+  "newGeometryComplete": true,
+  "roles": [
+    {
+      "kind": "range-hood",
+      "addedIds": [
+        "rpg-mansion-period-range-canopy-01"
+      ],
+      "closure": "Period canopy visual role only",
+      "proof": "kitchen-scullery-installed",
+      "modernFunctionalityClosed": false
+    },
+    {
+      "kind": "laundry",
+      "addedIds": [
+        "rpg-mansion-manual-wash-tub-board-01",
+        "rpg-mansion-hinged-timber-drying-frame-01"
+      ],
+      "closure": "Manual washing and manual drying static visual roles",
+      "proof": "manual-laundry-installed",
+      "poweredWasherAndPanClosed": false
+    },
+    {
+      "kind": "rug",
+      "addedIds": [
+        "rpg-mansion-narrow-hall-runner-01"
+      ],
+      "closure": "Narrow1250mm hall fit; functional-footprint variant with zero new core construction count",
+      "proof": "narrow-hall-installed"
+    },
+    {
+      "kind": "bedding",
+      "addedIds": [],
+      "closure": "Embedded editable native mattress/pillow/cover parts verified in all22 existing beds; reused unchanged in sleeping scene",
+      "proof": "existing-bedroom-bedding-reuse",
+      "standaloneBeddingKindProvided": false
+    },
+    {
+      "kind": "cooking-appliance",
+      "addedIds": [],
+      "closure": "Two existing ranges visibly include static oven-door/body geometry; no duplicate oven",
+      "internalOvenCavityCertified": false,
+      "mechanicalOperationCertified": false
+    }
+  ],
+  "sourceAudit": {
+    "file": "reports/existing-oven-bedding-audit.json",
+    "sha256": "1d732a5a2ff760dad2d39bedbe27c92a6a27ecdf3379efb4b2f14d42f2c62354",
+    "bedCount": 22,
+    "rangeCount": 2
+  },
+  "actualProofScenes": [
+    {
+      "id": "kitchen-scullery-installed",
+      "scene": "proofs/kitchen-scullery-installed.blend",
+      "sha256": "ab5d7bb7087b13718324f3f77b4a30c82308c7a39f82c4c41d8577c0c10888ef",
+      "checks": {
+        "hobClearanceAtLeast700mm": true,
+        "workingAisleAtLeast1000mm": true,
+        "rangeFitsUnderCanopy": true,
+        "rangeBackDoesNotPenetrateWall": true
+      }
+    },
+    {
+      "id": "manual-laundry-installed",
+      "scene": "proofs/manual-laundry-installed.blend",
+      "sha256": "fbc67775645f79bfa7734b4df73ff8edff8e2c9a039aba5d2f20bafd4e0b6d0c",
+      "checks": {
+        "clearFrontWorkingAisleAtLeast1000mm": true,
+        "partsRestOnFloor": true,
+        "distinctFloorFootprints": true,
+        "interEquipmentAccessAtLeast750mm": true,
+        "rackInsideRoom": true,
+        "noDrainerFrameOverlap": true
+      }
+    },
+    {
+      "id": "narrow-hall-installed",
+      "scene": "proofs/narrow-hall-installed.blend",
+      "sha256": "43e295128d03949407a8bf95556131d3bd184f9a32e7b613d4037500100bf7b9",
+      "checks": {
+        "existingRugCannotFit": true,
+        "runnerFits": true,
+        "runnerRestingOnFloor": true,
+        "walkingPlaneBelow10mm": true,
+        "consoleClearanceAtLeast900mm": true,
+        "hallClearWidthAtLeast750mm": true
+      }
+    },
+    {
+      "id": "existing-bedroom-bedding-reuse",
+      "scene": "proofs/existing-bedroom-bedding-reuse.blend",
+      "sha256": "4ef765f78f4cb4e6be1d5baec55b6d7733b6a02f5352138eb45a4d866a19245b",
+      "checks": {
+        "sideClearancesAtLeast750mm": true,
+        "footClearanceAtLeast900mm": true
+      }
+    }
+  ],
+  "explicitUnfilledModernOptionalRoles": [
+    "TV/AV",
+    "Powered refrigerator",
+    "Microwave/dishwasher/small cooking appliance",
+    "Powered washing machine/pan",
+    "AC/fan/purifier/vacuum",
+    "Outdoor compressor/boiler/meter",
+    "Child-specific furniture/toys",
+    "Pet bed/bowl/cage"
+  ],
+  "nativeSemantics": {
+    "automaticMounting": false,
+    "physicalCooking": false,
+    "ventilation": false,
+    "washing": false,
+    "clothSimulation": false,
+    "foldingMechanism": false,
+    "walkabilityOrCollision": false
+  },
+  "stoppingRule": "Stop new production after these bounded service/softgoods roles pass QA and are installed for review. Reopen only for a specific geometry, fit or QA failure, or a later explicit modern/optional scope decision."
+}

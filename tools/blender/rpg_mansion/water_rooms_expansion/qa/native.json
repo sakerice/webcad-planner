@@ -1,0 +1,3198 @@
+{
+  "items": [
+    {
+      "id": "rpg-mansion-copper-bateau-cradle-bath-01",
+      "source_sha256": "23c474f664b27e268eed6a3e40d6145fce3b5732dbf6b2146815833d3fb5a94f",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.09712600762820027,
+        0.011408523670584451,
+        0.01140852312306864,
+        0.007930623202507073,
+        0.0002017921033257153,
+        0.00020179135268942144,
+        0.00793062321463367,
+        0.00020179192506475374,
+        0.00020179018004758595,
+        9.557616673797988e-06
+      ],
+      "positive_native_part_volumes_m3": {
+        "Bateau continuous copper hull and open cavity": [
+          0.09712600762820027
+        ],
+        "Longitudinal timber cradle skid -1": [
+          0.011408523670584451
+        ],
+        "Longitudinal timber cradle skid 1": [
+          0.01140852312306864
+        ],
+        "Cradle transverse bath bearer -1": [
+          0.007930623202507073
+        ],
+        "Copper cradle retaining band -1 -1": [
+          0.0002017921033257153
+        ],
+        "Copper cradle retaining band -1 1": [
+          0.00020179135268942144
+        ],
+        "Cradle transverse bath bearer 1": [
+          0.00793062321463367
+        ],
+        "Copper cradle retaining band 1 -1": [
+          0.00020179192506475374
+        ],
+        "Copper cradle retaining band 1 1": [
+          0.00020179018004758595
+        ],
+        "Bateau internal brass drain": [
+          9.557616673797988e-06
+        ]
+      },
+      "actual_support": {
+        "native_parts": 10,
+        "groups": [
+          {
+            "parts": [
+              "Bateau continuous copper hull and open cavity",
+              "Bateau internal brass drain",
+              "Copper cradle retaining band 1 1",
+              "Copper cradle retaining band 1 -1",
+              "Cradle transverse bath bearer 1",
+              "Longitudinal timber cradle skid 1",
+              "Longitudinal timber cradle skid -1",
+              "Copper cradle retaining band -1 1",
+              "Copper cradle retaining band -1 -1",
+              "Cradle transverse bath bearer -1"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Cradle transverse bath bearer -1",
+            "Bateau continuous copper hull and open cavity"
+          ],
+          [
+            "Cradle transverse bath bearer -1",
+            "Longitudinal timber cradle skid -1"
+          ],
+          [
+            "Cradle transverse bath bearer -1",
+            "Longitudinal timber cradle skid 1"
+          ],
+          [
+            "Copper cradle retaining band -1 -1",
+            "Bateau continuous copper hull and open cavity"
+          ],
+          [
+            "Copper cradle retaining band -1 -1",
+            "Cradle transverse bath bearer -1"
+          ],
+          [
+            "Copper cradle retaining band -1 1",
+            "Bateau continuous copper hull and open cavity"
+          ],
+          [
+            "Copper cradle retaining band -1 1",
+            "Cradle transverse bath bearer -1"
+          ],
+          [
+            "Cradle transverse bath bearer 1",
+            "Bateau continuous copper hull and open cavity"
+          ],
+          [
+            "Cradle transverse bath bearer 1",
+            "Longitudinal timber cradle skid -1"
+          ],
+          [
+            "Cradle transverse bath bearer 1",
+            "Longitudinal timber cradle skid 1"
+          ],
+          [
+            "Copper cradle retaining band 1 -1",
+            "Bateau continuous copper hull and open cavity"
+          ],
+          [
+            "Copper cradle retaining band 1 -1",
+            "Cradle transverse bath bearer 1"
+          ],
+          [
+            "Copper cradle retaining band 1 1",
+            "Bateau continuous copper hull and open cavity"
+          ],
+          [
+            "Copper cradle retaining band 1 1",
+            "Cradle transverse bath bearer 1"
+          ],
+          [
+            "Bateau internal brass drain",
+            "Bateau continuous copper hull and open cavity"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 3.8146282311527573,
+        "min": 3.812298706658296,
+        "max": 3.81769074016729,
+        "p05": 3.8140376102250473,
+        "p95": 3.815085940699487,
+        "total_triangles": 1304,
+        "valid_triangles": 1304,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "23f846924e7e1b57d6c97ec25058692c7d78cc02a50ba30158974a990b4179ce",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-paneled-built-in-bath-01",
+      "source_sha256": "e094b81cb1f1aeadba8d53ebdc60ae0626fa19488700c6ca52288f4ea125f6af",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.000636975060236485,
+        0.0006369675641811533,
+        0.0006369726482565362,
+        0.0006369716390205821,
+        0.0006369718248606658,
+        0.0006369678249029678,
+        0.003970334113546413,
+        0.0006369632465066388,
+        0.003970336435789551,
+        0.003970335930110498,
+        0.003970337799425276,
+        0.003970335120053882,
+        0.39075078431839455,
+        0.003970334729577491,
+        0.0013483895139264255,
+        0.001348390675654324,
+        0.005025248877548921,
+        0.001348387505762124,
+        0.0013483954874876263,
+        0.005025255542326096,
+        9.557617128545344e-06,
+        0.11924206453385826,
+        0.003768910191865871,
+        0.0037689073263512296,
+        0.0037689111304644034,
+        0.0006369561985290298,
+        0.003768894734093919
+      ],
+      "positive_native_part_volumes_m3": {
+        "Built-in porcelain bath shell and continuous inset rim": [
+          0.39075078431839455
+        ],
+        "Built-in structural base plinth": [
+          0.11924206453385826
+        ],
+        "Long apron framed rail -1 0.10": [
+          0.003768910191865871
+        ],
+        "Long apron framed rail -1 0.51": [
+          0.0037689073263512296
+        ],
+        "Long apron vertical stile -1 -0.87": [
+          0.0006369561985290298
+        ],
+        "Long apron vertical stile -1 -0.29": [
+          0.0006369675641811533
+        ],
+        "Long apron vertical stile -1 0.29": [
+          0.0006369726482565362
+        ],
+        "Long apron vertical stile -1 0.87": [
+          0.0006369718248606658
+        ],
+        "Recessed long apron panel -1 -0.58": [
+          0.003970334113546413
+        ],
+        "Recessed long apron panel -1 0.00": [
+          0.003970336435789551
+        ],
+        "Recessed long apron panel -1 0.58": [
+          0.003970337799425276
+        ],
+        "Long apron framed rail 1 0.10": [
+          0.0037689111304644034
+        ],
+        "Long apron framed rail 1 0.51": [
+          0.003768894734093919
+        ],
+        "Long apron vertical stile 1 -0.87": [
+          0.000636975060236485
+        ],
+        "Long apron vertical stile 1 -0.29": [
+          0.0006369716390205821
+        ],
+        "Long apron vertical stile 1 0.29": [
+          0.0006369678249029678
+        ],
+        "Long apron vertical stile 1 0.87": [
+          0.0006369632465066388
+        ],
+        "Recessed long apron panel 1 -0.58": [
+          0.003970335930110498
+        ],
+        "Recessed long apron panel 1 0.00": [
+          0.003970335120053882
+        ],
+        "Recessed long apron panel 1 0.58": [
+          0.003970334729577491
+        ],
+        "End apron rail -1 0.10": [
+          0.0013483895139264255
+        ],
+        "End apron rail -1 0.51": [
+          0.001348390675654324
+        ],
+        "Recessed end apron panel -1": [
+          0.005025248877548921
+        ],
+        "End apron rail 1 0.10": [
+          0.001348387505762124
+        ],
+        "End apron rail 1 0.51": [
+          0.0013483954874876263
+        ],
+        "Recessed end apron panel 1": [
+          0.005025255542326096
+        ],
+        "Built-in bath drain": [
+          9.557617128545344e-06
+        ]
+      },
+      "actual_support": {
+        "native_parts": 27,
+        "groups": [
+          {
+            "parts": [
+              "Built-in porcelain bath shell and continuous inset rim",
+              "Built-in bath drain",
+              "End apron rail 1 0.51",
+              "Long apron vertical stile -1 0.87",
+              "End apron rail 1 0.10",
+              "Long apron framed rail 1 0.10",
+              "Long apron vertical stile 1 -0.87",
+              "Recessed end apron panel 1",
+              "Long apron vertical stile 1 0.87",
+              "Recessed end apron panel -1",
+              "End apron rail -1 0.51",
+              "End apron rail -1 0.10",
+              "Recessed long apron panel 1 0.58",
+              "Recessed long apron panel 1 0.00",
+              "Recessed long apron panel 1 -0.58",
+              "Long apron vertical stile 1 0.29",
+              "Long apron vertical stile 1 -0.29",
+              "Long apron framed rail 1 0.51",
+              "Recessed long apron panel -1 0.58",
+              "Recessed long apron panel -1 0.00",
+              "Recessed long apron panel -1 -0.58",
+              "Long apron vertical stile -1 0.29",
+              "Long apron vertical stile -1 -0.29",
+              "Long apron vertical stile -1 -0.87",
+              "Long apron framed rail -1 0.51",
+              "Long apron framed rail -1 0.10",
+              "Built-in structural base plinth"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Built-in structural base plinth",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron framed rail -1 0.10",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron framed rail -1 0.51",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron vertical stile -1 -0.87",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron vertical stile -1 -0.87",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "Long apron vertical stile -1 -0.87",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "Long apron vertical stile -1 -0.29",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron vertical stile -1 -0.29",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "Long apron vertical stile -1 -0.29",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "Long apron vertical stile -1 0.29",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron vertical stile -1 0.29",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "Long apron vertical stile -1 0.29",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "Long apron vertical stile -1 0.87",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "Long apron vertical stile -1 0.87",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "Recessed long apron panel -1 -0.58",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Recessed long apron panel -1 -0.58",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "Recessed long apron panel -1 -0.58",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "Recessed long apron panel -1 0.00",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Recessed long apron panel -1 0.00",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "Recessed long apron panel -1 0.00",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "Recessed long apron panel -1 0.58",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Recessed long apron panel -1 0.58",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "Recessed long apron panel -1 0.58",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "Long apron framed rail 1 0.51",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron vertical stile 1 -0.87",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "Long apron vertical stile 1 -0.87",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "Long apron vertical stile 1 -0.29",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron vertical stile 1 -0.29",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "Long apron vertical stile 1 -0.29",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "Long apron vertical stile 1 0.29",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Long apron vertical stile 1 0.29",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "Long apron vertical stile 1 0.29",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "Long apron vertical stile 1 0.87",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "Long apron vertical stile 1 0.87",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "Recessed long apron panel 1 -0.58",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Recessed long apron panel 1 -0.58",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "Recessed long apron panel 1 -0.58",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "Recessed long apron panel 1 0.00",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Recessed long apron panel 1 0.00",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "Recessed long apron panel 1 0.00",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "Recessed long apron panel 1 0.58",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Recessed long apron panel 1 0.58",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "Recessed long apron panel 1 0.58",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "End apron rail -1 0.10",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "End apron rail -1 0.10",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "End apron rail -1 0.10",
+            "Long apron vertical stile -1 -0.87"
+          ],
+          [
+            "End apron rail -1 0.10",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "End apron rail -1 0.10",
+            "Long apron vertical stile 1 -0.87"
+          ],
+          [
+            "End apron rail -1 0.51",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "End apron rail -1 0.51",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "End apron rail -1 0.51",
+            "Long apron vertical stile -1 -0.87"
+          ],
+          [
+            "End apron rail -1 0.51",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "End apron rail -1 0.51",
+            "Long apron vertical stile 1 -0.87"
+          ],
+          [
+            "Recessed end apron panel -1",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "Recessed end apron panel -1",
+            "End apron rail -1 0.10"
+          ],
+          [
+            "Recessed end apron panel -1",
+            "End apron rail -1 0.51"
+          ],
+          [
+            "End apron rail 1 0.10",
+            "Long apron framed rail -1 0.10"
+          ],
+          [
+            "End apron rail 1 0.10",
+            "Long apron vertical stile -1 0.87"
+          ],
+          [
+            "End apron rail 1 0.10",
+            "Long apron framed rail 1 0.10"
+          ],
+          [
+            "End apron rail 1 0.10",
+            "Long apron vertical stile 1 0.87"
+          ],
+          [
+            "End apron rail 1 0.51",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ],
+          [
+            "End apron rail 1 0.51",
+            "Long apron framed rail -1 0.51"
+          ],
+          [
+            "End apron rail 1 0.51",
+            "Long apron vertical stile -1 0.87"
+          ],
+          [
+            "End apron rail 1 0.51",
+            "Long apron framed rail 1 0.51"
+          ],
+          [
+            "End apron rail 1 0.51",
+            "Long apron vertical stile 1 0.87"
+          ],
+          [
+            "Recessed end apron panel 1",
+            "End apron rail 1 0.10"
+          ],
+          [
+            "Recessed end apron panel 1",
+            "End apron rail 1 0.51"
+          ],
+          [
+            "Built-in bath drain",
+            "Built-in porcelain bath shell and continuous inset rim"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 6.317703791888101,
+        "min": 6.313919639635328,
+        "max": 6.322993677067549,
+        "p05": 6.315466666552319,
+        "p95": 6.319803668512588,
+        "total_triangles": 1956,
+        "valid_triangles": 1956,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "fdd55e64ded5d85bbcd877bfe53d41764e282e251ff231137f9818c56c7151de",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-quadrant-corner-bath-01",
+      "source_sha256": "a472a49fc93b244d91e8063a118d185113fd8aa491580614b4c5c39304b21353",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.39487624499209534,
+        1.0370644474733126e-05,
+        0.0001267298672852727,
+        0.00012672053223165375
+      ],
+      "positive_native_part_volumes_m3": {
+        "True quadrant corner bath continuous shell and cavity": [
+          0.39487624499209534
+        ],
+        "Corner bath drain": [
+          1.0370644474733126e-05
+        ],
+        "Corner bath attached rim grip rear": [
+          0.0001267298672852727
+        ],
+        "Corner bath attached rim grip right": [
+          0.00012672053223165375
+        ]
+      },
+      "actual_support": {
+        "native_parts": 4,
+        "groups": [
+          {
+            "parts": [
+              "True quadrant corner bath continuous shell and cavity",
+              "Corner bath attached rim grip right",
+              "Corner bath attached rim grip rear",
+              "Corner bath drain"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Corner bath drain",
+            "True quadrant corner bath continuous shell and cavity"
+          ],
+          [
+            "Corner bath attached rim grip rear",
+            "True quadrant corner bath continuous shell and cavity"
+          ],
+          [
+            "Corner bath attached rim grip right",
+            "True quadrant corner bath continuous shell and cavity"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 3.0471078446610296,
+        "min": 3.04527619630445,
+        "max": 3.0482946394153783,
+        "p05": 3.046702760921177,
+        "p95": 3.047719753796282,
+        "total_triangles": 628,
+        "valid_triangles": 628,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "94c90c239ad01c07ca80605da7d73d258cacc4ea46bc4909880f351df6358150",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-deep-seated-hip-bath-01",
+      "source_sha256": "6dc56fd0049ea7660ff7454f86c918e7f9f80f7682e94d8a28bfd08f1a1474f4",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.2041975077427196,
+        0.035343946028964034,
+        8.031089654044385e-06,
+        0.00010683641570115777,
+        0.00010682856009225364
+      ],
+      "positive_native_part_volumes_m3": {
+        "Deep hip bath continuous high-sided hollow shell": [
+          0.2041975077427196
+        ],
+        "Hip bath internal raised sitting bench": [
+          0.035343946028964034
+        ],
+        "Hip bath floor drain": [
+          8.031089654044385e-06
+        ],
+        "Hip bath rim supported grab rail -1": [
+          0.00010683641570115777
+        ],
+        "Hip bath rim supported grab rail 1": [
+          0.00010682856009225364
+        ]
+      },
+      "actual_support": {
+        "native_parts": 5,
+        "groups": [
+          {
+            "parts": [
+              "Deep hip bath continuous high-sided hollow shell",
+              "Hip bath rim supported grab rail 1",
+              "Hip bath rim supported grab rail -1",
+              "Hip bath floor drain",
+              "Hip bath internal raised sitting bench"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Hip bath internal raised sitting bench",
+            "Deep hip bath continuous high-sided hollow shell"
+          ],
+          [
+            "Hip bath floor drain",
+            "Deep hip bath continuous high-sided hollow shell"
+          ],
+          [
+            "Hip bath rim supported grab rail -1",
+            "Deep hip bath continuous high-sided hollow shell"
+          ],
+          [
+            "Hip bath rim supported grab rail 1",
+            "Deep hip bath continuous high-sided hollow shell"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 3.3411062115222405,
+        "min": 3.336374620726772,
+        "max": 3.3442090550295744,
+        "p05": 3.3406953334109426,
+        "p95": 3.341336094478963,
+        "total_triangles": 1106,
+        "valid_triangles": 1106,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "cbb56ea67778e65b98e59fd8326ae076f81c4cc4d97b17b65d297808781c758a",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-double-basin-open-console-01",
+      "source_sha256": "1f399049b6e588d9cf298b70d40d5034dbb7db0147102d53a3e20757a035d67a",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.006814900743052021,
+        6.63846195910386e-06,
+        5.336738710563317e-05,
+        3.534063580445945e-06,
+        5.336201381093512e-05,
+        3.5349057725397866e-06,
+        4.349825273190313e-05,
+        0.00016362788070978238,
+        0.00042526384500736947,
+        0.007788326348115031,
+        0.0068148572748896186,
+        6.6371334194551995e-06,
+        5.3357890768287085e-05,
+        0.001193668940383456,
+        3.536718092315519e-06,
+        5.33538962675569e-05,
+        0.0011936653313568968,
+        3.5387589984263015e-06,
+        4.349763063752711e-05,
+        0.00016362855282636699,
+        0.0011936631582708892,
+        0.0011936667672974486,
+        0.00042525530049412435,
+        0.0018918224183532097,
+        0.0018918420149323842,
+        0.0006685383947721375,
+        0.0006685511179966853,
+        0.028245916473679245,
+        0.007788325647197781
+      ],
+      "positive_native_part_volumes_m3": {
+        "Console metal load-bearing leg -1 -1": [
+          0.001193668940383456
+        ],
+        "Console metal load-bearing leg -1 1": [
+          0.0011936653313568968
+        ],
+        "Console metal load-bearing leg 1 -1": [
+          0.0011936631582708892
+        ],
+        "Console metal load-bearing leg 1 1": [
+          0.0011936667672974486
+        ],
+        "Console upper long bearer -1": [
+          0.0018918224183532097
+        ],
+        "Console upper long bearer 1": [
+          0.0018918420149323842
+        ],
+        "Console upper end bearer -1": [
+          0.0006685383947721375
+        ],
+        "Console upper end bearer 1": [
+          0.0006685511179966853
+        ],
+        "Console lower walnut towel shelf": [
+          0.028245916473679245
+        ],
+        "Separate cut-stone basin slab -1": [
+          0.007788325647197781
+        ],
+        "Console hollow basin -1": [
+          0.006814900743052021
+        ],
+        "Console hollow basin -1 inset drain": [
+          6.63846195910386e-06
+        ],
+        "Console mixer -1 deck valve -1": [
+          5.336738710563317e-05
+        ],
+        "Console mixer -1 cross handle -1": [
+          3.534063580445945e-06
+        ],
+        "Console mixer -1 deck valve 1": [
+          5.336201381093512e-05
+        ],
+        "Console mixer -1 cross handle 1": [
+          3.5349057725397866e-06
+        ],
+        "Console mixer -1 mixer bridge": [
+          4.349825273190313e-05
+        ],
+        "Console mixer -1 arched spout": [
+          0.00016362788070978238
+        ],
+        "Exposed console P-trap -1": [
+          0.00042526384500736947
+        ],
+        "Separate cut-stone basin slab 1": [
+          0.007788326348115031
+        ],
+        "Console hollow basin 1": [
+          0.0068148572748896186
+        ],
+        "Console hollow basin 1 inset drain": [
+          6.6371334194551995e-06
+        ],
+        "Console mixer 1 deck valve -1": [
+          5.3357890768287085e-05
+        ],
+        "Console mixer 1 cross handle -1": [
+          3.536718092315519e-06
+        ],
+        "Console mixer 1 deck valve 1": [
+          5.33538962675569e-05
+        ],
+        "Console mixer 1 cross handle 1": [
+          3.5387589984263015e-06
+        ],
+        "Console mixer 1 mixer bridge": [
+          4.349763063752711e-05
+        ],
+        "Console mixer 1 arched spout": [
+          0.00016362855282636699
+        ],
+        "Exposed console P-trap 1": [
+          0.00042525530049412435
+        ]
+      },
+      "actual_support": {
+        "native_parts": 29,
+        "groups": [
+          {
+            "parts": [
+              "Console metal load-bearing leg -1 -1",
+              "Console upper end bearer -1",
+              "Console upper long bearer 1",
+              "Console upper end bearer 1",
+              "Console metal load-bearing leg 1 -1",
+              "Console metal load-bearing leg 1 1",
+              "Separate cut-stone basin slab 1",
+              "Console hollow basin 1",
+              "Exposed console P-trap 1",
+              "Console mixer 1 arched spout",
+              "Console mixer 1 mixer bridge",
+              "Console mixer 1 deck valve 1",
+              "Console mixer 1 cross handle 1",
+              "Console mixer 1 deck valve -1",
+              "Console mixer 1 cross handle -1",
+              "Console hollow basin 1 inset drain",
+              "Console metal load-bearing leg -1 1",
+              "Console upper long bearer -1",
+              "Console hollow basin -1",
+              "Exposed console P-trap -1",
+              "Console mixer -1 arched spout",
+              "Console mixer -1 mixer bridge",
+              "Console mixer -1 deck valve 1",
+              "Console mixer -1 cross handle 1",
+              "Console mixer -1 deck valve -1",
+              "Console mixer -1 cross handle -1",
+              "Console hollow basin -1 inset drain",
+              "Separate cut-stone basin slab -1",
+              "Console lower walnut towel shelf"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Console upper long bearer -1",
+            "Console metal load-bearing leg -1 -1"
+          ],
+          [
+            "Console upper long bearer -1",
+            "Console metal load-bearing leg 1 -1"
+          ],
+          [
+            "Console upper long bearer 1",
+            "Console metal load-bearing leg -1 1"
+          ],
+          [
+            "Console upper long bearer 1",
+            "Console metal load-bearing leg 1 1"
+          ],
+          [
+            "Console upper end bearer -1",
+            "Console metal load-bearing leg -1 -1"
+          ],
+          [
+            "Console upper end bearer -1",
+            "Console metal load-bearing leg -1 1"
+          ],
+          [
+            "Console upper end bearer -1",
+            "Console upper long bearer -1"
+          ],
+          [
+            "Console upper end bearer -1",
+            "Console upper long bearer 1"
+          ],
+          [
+            "Console upper end bearer 1",
+            "Console metal load-bearing leg 1 -1"
+          ],
+          [
+            "Console upper end bearer 1",
+            "Console metal load-bearing leg 1 1"
+          ],
+          [
+            "Console upper end bearer 1",
+            "Console upper long bearer -1"
+          ],
+          [
+            "Console upper end bearer 1",
+            "Console upper long bearer 1"
+          ],
+          [
+            "Console lower walnut towel shelf",
+            "Console metal load-bearing leg -1 -1"
+          ],
+          [
+            "Console lower walnut towel shelf",
+            "Console metal load-bearing leg -1 1"
+          ],
+          [
+            "Console lower walnut towel shelf",
+            "Console metal load-bearing leg 1 -1"
+          ],
+          [
+            "Console lower walnut towel shelf",
+            "Console metal load-bearing leg 1 1"
+          ],
+          [
+            "Separate cut-stone basin slab -1",
+            "Console metal load-bearing leg -1 -1"
+          ],
+          [
+            "Separate cut-stone basin slab -1",
+            "Console metal load-bearing leg -1 1"
+          ],
+          [
+            "Separate cut-stone basin slab -1",
+            "Console upper long bearer -1"
+          ],
+          [
+            "Separate cut-stone basin slab -1",
+            "Console upper long bearer 1"
+          ],
+          [
+            "Separate cut-stone basin slab -1",
+            "Console upper end bearer -1"
+          ],
+          [
+            "Console hollow basin -1",
+            "Console upper long bearer -1"
+          ],
+          [
+            "Console hollow basin -1",
+            "Separate cut-stone basin slab -1"
+          ],
+          [
+            "Console hollow basin -1 inset drain",
+            "Console hollow basin -1"
+          ],
+          [
+            "Console mixer -1 deck valve -1",
+            "Console hollow basin -1"
+          ],
+          [
+            "Console mixer -1 cross handle -1",
+            "Console mixer -1 deck valve -1"
+          ],
+          [
+            "Console mixer -1 deck valve 1",
+            "Console hollow basin -1"
+          ],
+          [
+            "Console mixer -1 cross handle 1",
+            "Console mixer -1 deck valve 1"
+          ],
+          [
+            "Console mixer -1 mixer bridge",
+            "Console mixer -1 deck valve -1"
+          ],
+          [
+            "Console mixer -1 mixer bridge",
+            "Console mixer -1 deck valve 1"
+          ],
+          [
+            "Console mixer -1 arched spout",
+            "Console hollow basin -1"
+          ],
+          [
+            "Console mixer -1 arched spout",
+            "Console mixer -1 mixer bridge"
+          ],
+          [
+            "Exposed console P-trap -1",
+            "Console hollow basin -1"
+          ],
+          [
+            "Separate cut-stone basin slab 1",
+            "Console metal load-bearing leg 1 -1"
+          ],
+          [
+            "Separate cut-stone basin slab 1",
+            "Console metal load-bearing leg 1 1"
+          ],
+          [
+            "Separate cut-stone basin slab 1",
+            "Console upper long bearer -1"
+          ],
+          [
+            "Separate cut-stone basin slab 1",
+            "Console upper long bearer 1"
+          ],
+          [
+            "Separate cut-stone basin slab 1",
+            "Console upper end bearer 1"
+          ],
+          [
+            "Separate cut-stone basin slab 1",
+            "Separate cut-stone basin slab -1"
+          ],
+          [
+            "Console hollow basin 1",
+            "Console upper long bearer -1"
+          ],
+          [
+            "Console hollow basin 1",
+            "Separate cut-stone basin slab 1"
+          ],
+          [
+            "Console hollow basin 1 inset drain",
+            "Console hollow basin 1"
+          ],
+          [
+            "Console mixer 1 deck valve -1",
+            "Console hollow basin 1"
+          ],
+          [
+            "Console mixer 1 cross handle -1",
+            "Console mixer 1 deck valve -1"
+          ],
+          [
+            "Console mixer 1 deck valve 1",
+            "Console hollow basin 1"
+          ],
+          [
+            "Console mixer 1 cross handle 1",
+            "Console mixer 1 deck valve 1"
+          ],
+          [
+            "Console mixer 1 mixer bridge",
+            "Console mixer 1 deck valve -1"
+          ],
+          [
+            "Console mixer 1 mixer bridge",
+            "Console mixer 1 deck valve 1"
+          ],
+          [
+            "Console mixer 1 arched spout",
+            "Console hollow basin 1"
+          ],
+          [
+            "Console mixer 1 arched spout",
+            "Console mixer 1 mixer bridge"
+          ],
+          [
+            "Exposed console P-trap 1",
+            "Console hollow basin 1"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 5.014185143267479,
+        "min": 5.00364922772979,
+        "max": 5.023912034541437,
+        "p05": 5.012750465558564,
+        "p95": 5.015329070522632,
+        "total_triangles": 3692,
+        "valid_triangles": 3692,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "eaf892982088b5b0233be6aca07f6ab37ffb27ace71e062dc957f4d1abca4eee",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-portable-bowl-jug-washstand-01",
+      "source_sha256": "509e51affb77feac6ebc8ef9acd1a2eee9fe0c6f63fa65bca24d9353f3c2d057",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.001157391550880978,
+        0.0013015721699503047,
+        0.0011573893307380938,
+        0.009968266958215575,
+        0.006417909460499989,
+        0.0012131931289331985,
+        0.0012131923091753078,
+        0.000802624463782801,
+        0.0008026243508538754,
+        0.00016978267315910975,
+        0.00438706878018517,
+        9.998660849911794e-05,
+        2.52752312614272e-05,
+        2.5273799716766614e-05,
+        0.00115738980197951,
+        0.0011573869266309582
+      ],
+      "positive_native_part_volumes_m3": {
+        "Portable washstand turned leg -1 -1": [
+          0.00115738980197951
+        ],
+        "Portable washstand turned leg -1 1": [
+          0.0011573869266309582
+        ],
+        "Portable washstand turned leg 1 -1": [
+          0.001157391550880978
+        ],
+        "Portable washstand turned leg 1 1": [
+          0.0011573893307380938
+        ],
+        "Portable washstand top": [
+          0.009968266958215575
+        ],
+        "Portable washstand lower shelf": [
+          0.006417909460499989
+        ],
+        "Portable washstand long apron -1": [
+          0.0012131931289331985
+        ],
+        "Portable washstand long apron 1": [
+          0.0012131923091753078
+        ],
+        "Portable washstand short apron -1": [
+          0.000802624463782801
+        ],
+        "Portable washstand short apron 1": [
+          0.0008026243508538754
+        ],
+        "Portable washstand loose hollow washing bowl": [
+          0.00438706878018517
+        ],
+        "Portable ceramic water jug hollow body": [
+          0.0013015721699503047
+        ],
+        "Water jug attached loop handle": [
+          0.00016978267315910975
+        ],
+        "Portable washstand front towel rail": [
+          9.998660849911794e-05
+        ],
+        "Towel rail supported mount -0.21": [
+          2.52752312614272e-05
+        ],
+        "Towel rail supported mount 0.21": [
+          2.5273799716766614e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 16,
+        "groups": [
+          {
+            "parts": [
+              "Portable washstand turned leg -1 -1",
+              "Towel rail supported mount -0.21",
+              "Portable washstand front towel rail",
+              "Towel rail supported mount 0.21",
+              "Portable washstand turned leg 1 -1",
+              "Portable washstand short apron 1",
+              "Portable washstand long apron 1",
+              "Portable washstand turned leg -1 1",
+              "Portable washstand turned leg 1 1",
+              "Portable washstand short apron -1",
+              "Portable washstand long apron -1",
+              "Portable washstand lower shelf",
+              "Portable washstand top",
+              "Portable ceramic water jug hollow body",
+              "Water jug attached loop handle",
+              "Portable washstand loose hollow washing bowl"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Portable washstand top",
+            "Portable washstand turned leg -1 -1"
+          ],
+          [
+            "Portable washstand top",
+            "Portable washstand turned leg -1 1"
+          ],
+          [
+            "Portable washstand top",
+            "Portable washstand turned leg 1 -1"
+          ],
+          [
+            "Portable washstand top",
+            "Portable washstand turned leg 1 1"
+          ],
+          [
+            "Portable washstand lower shelf",
+            "Portable washstand turned leg -1 -1"
+          ],
+          [
+            "Portable washstand lower shelf",
+            "Portable washstand turned leg -1 1"
+          ],
+          [
+            "Portable washstand lower shelf",
+            "Portable washstand turned leg 1 -1"
+          ],
+          [
+            "Portable washstand lower shelf",
+            "Portable washstand turned leg 1 1"
+          ],
+          [
+            "Portable washstand long apron -1",
+            "Portable washstand turned leg -1 -1"
+          ],
+          [
+            "Portable washstand long apron -1",
+            "Portable washstand turned leg 1 -1"
+          ],
+          [
+            "Portable washstand long apron -1",
+            "Portable washstand top"
+          ],
+          [
+            "Portable washstand long apron 1",
+            "Portable washstand turned leg -1 1"
+          ],
+          [
+            "Portable washstand long apron 1",
+            "Portable washstand turned leg 1 1"
+          ],
+          [
+            "Portable washstand long apron 1",
+            "Portable washstand top"
+          ],
+          [
+            "Portable washstand short apron -1",
+            "Portable washstand turned leg -1 -1"
+          ],
+          [
+            "Portable washstand short apron -1",
+            "Portable washstand turned leg -1 1"
+          ],
+          [
+            "Portable washstand short apron -1",
+            "Portable washstand top"
+          ],
+          [
+            "Portable washstand short apron -1",
+            "Portable washstand long apron -1"
+          ],
+          [
+            "Portable washstand short apron -1",
+            "Portable washstand long apron 1"
+          ],
+          [
+            "Portable washstand short apron 1",
+            "Portable washstand turned leg 1 -1"
+          ],
+          [
+            "Portable washstand short apron 1",
+            "Portable washstand turned leg 1 1"
+          ],
+          [
+            "Portable washstand short apron 1",
+            "Portable washstand top"
+          ],
+          [
+            "Portable washstand short apron 1",
+            "Portable washstand long apron -1"
+          ],
+          [
+            "Portable washstand short apron 1",
+            "Portable washstand long apron 1"
+          ],
+          [
+            "Portable washstand loose hollow washing bowl",
+            "Portable washstand top"
+          ],
+          [
+            "Portable ceramic water jug hollow body",
+            "Portable washstand top"
+          ],
+          [
+            "Portable ceramic water jug hollow body",
+            "Portable washstand loose hollow washing bowl"
+          ],
+          [
+            "Water jug attached loop handle",
+            "Portable ceramic water jug hollow body"
+          ],
+          [
+            "Towel rail supported mount -0.21",
+            "Portable washstand turned leg -1 -1"
+          ],
+          [
+            "Towel rail supported mount -0.21",
+            "Portable washstand long apron -1"
+          ],
+          [
+            "Towel rail supported mount -0.21",
+            "Portable washstand front towel rail"
+          ],
+          [
+            "Towel rail supported mount 0.21",
+            "Portable washstand turned leg 1 -1"
+          ],
+          [
+            "Towel rail supported mount 0.21",
+            "Portable washstand long apron -1"
+          ],
+          [
+            "Towel rail supported mount 0.21",
+            "Portable washstand front towel rail"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 2.9138225037481202,
+        "min": 2.9077318280803253,
+        "max": 2.9171618312716245,
+        "p05": 2.913378499222912,
+        "p95": 2.9142706501193505,
+        "total_triangles": 2284,
+        "valid_triangles": 2284,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "7447bd3f820b79635bd26054187774d51fba2c28a99af6a53e3fb13134885991",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-two-wall-corner-basin-01",
+      "source_sha256": "a6162f08a862277e52c5d18c565f3b22ef17bb659769df7597a26d6d68fe839c",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.00027480520589051594,
+        0.000160753031650529,
+        0.00016075290030433584,
+        1.247298371254147e-06,
+        1.5244756544537568e-06,
+        1.2471470351253322e-06,
+        1.5243441945737382e-06,
+        6.637255585436229e-06,
+        0.00026995806161996444,
+        4.3769753271286994e-05,
+        6.84218988074766e-05,
+        0.00021783500549569604,
+        6.373854754807932e-06,
+        0.014670579744461065,
+        0.0002403393428759652,
+        0.00024033942287360333,
+        0.0002748050942500413
+      ],
+      "positive_native_part_volumes_m3": {
+        "Corner basin quarter-front hollow shell": [
+          0.014670579744461065
+        ],
+        "Corner basin rear wall bearing plate": [
+          0.0002403393428759652
+        ],
+        "Corner basin side wall bearing plate": [
+          0.00024033942287360333
+        ],
+        "Corner basin rear bearing arm": [
+          0.0002748050942500413
+        ],
+        "Corner basin side bearing arm": [
+          0.00027480520589051594
+        ],
+        "Corner basin rear triangulated brace": [
+          0.000160753031650529
+        ],
+        "Corner basin side triangulated brace": [
+          0.00016075290030433584
+        ],
+        "Rear corner anchor 0.04": [
+          1.247298371254147e-06
+        ],
+        "Side corner anchor 0.04": [
+          1.5244756544537568e-06
+        ],
+        "Rear corner anchor 0.23": [
+          1.2471470351253322e-06
+        ],
+        "Side corner anchor 0.23": [
+          1.5243441945737382e-06
+        ],
+        "Corner basin drain": [
+          6.637255585436229e-06
+        ],
+        "Corner basin waste tail": [
+          0.00026995806161996444
+        ],
+        "Corner basin rear service escutcheon": [
+          4.3769753271286994e-05
+        ],
+        "Corner mixer tap deck foot": [
+          6.84218988074766e-05
+        ],
+        "Corner mixer curved spout": [
+          0.00021783500549569604
+        ],
+        "Corner mixer lever": [
+          6.373854754807932e-06
+        ]
+      },
+      "actual_support": {
+        "native_parts": 17,
+        "groups": [
+          {
+            "parts": [
+              "Corner basin quarter-front hollow shell",
+              "Corner mixer tap deck foot",
+              "Corner mixer curved spout",
+              "Corner mixer lever",
+              "Corner basin waste tail",
+              "Corner basin rear service escutcheon",
+              "Corner basin drain",
+              "Corner basin side bearing arm",
+              "Corner basin side triangulated brace",
+              "Side corner anchor 0.04",
+              "Corner basin side wall bearing plate",
+              "Side corner anchor 0.23",
+              "Corner basin rear bearing arm",
+              "Corner basin rear triangulated brace",
+              "Rear corner anchor 0.04",
+              "Corner basin rear wall bearing plate",
+              "Rear corner anchor 0.23"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [
+              "Corner basin rear wall bearing plate"
+            ],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Corner basin rear bearing arm",
+            "Corner basin quarter-front hollow shell"
+          ],
+          [
+            "Corner basin rear bearing arm",
+            "Corner basin rear wall bearing plate"
+          ],
+          [
+            "Corner basin side bearing arm",
+            "Corner basin quarter-front hollow shell"
+          ],
+          [
+            "Corner basin side bearing arm",
+            "Corner basin side wall bearing plate"
+          ],
+          [
+            "Corner basin rear triangulated brace",
+            "Corner basin rear wall bearing plate"
+          ],
+          [
+            "Corner basin rear triangulated brace",
+            "Corner basin rear bearing arm"
+          ],
+          [
+            "Corner basin side triangulated brace",
+            "Corner basin side wall bearing plate"
+          ],
+          [
+            "Corner basin side triangulated brace",
+            "Corner basin side bearing arm"
+          ],
+          [
+            "Rear corner anchor 0.04",
+            "Corner basin rear wall bearing plate"
+          ],
+          [
+            "Rear corner anchor 0.04",
+            "Corner basin rear triangulated brace"
+          ],
+          [
+            "Side corner anchor 0.04",
+            "Corner basin side wall bearing plate"
+          ],
+          [
+            "Side corner anchor 0.04",
+            "Corner basin side triangulated brace"
+          ],
+          [
+            "Rear corner anchor 0.23",
+            "Corner basin rear wall bearing plate"
+          ],
+          [
+            "Side corner anchor 0.23",
+            "Corner basin side wall bearing plate"
+          ],
+          [
+            "Corner basin drain",
+            "Corner basin quarter-front hollow shell"
+          ],
+          [
+            "Corner basin waste tail",
+            "Corner basin quarter-front hollow shell"
+          ],
+          [
+            "Corner basin waste tail",
+            "Corner basin drain"
+          ],
+          [
+            "Corner basin rear service escutcheon",
+            "Corner basin waste tail"
+          ],
+          [
+            "Corner mixer tap deck foot",
+            "Corner basin quarter-front hollow shell"
+          ],
+          [
+            "Corner mixer curved spout",
+            "Corner mixer tap deck foot"
+          ],
+          [
+            "Corner mixer lever",
+            "Corner mixer curved spout"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.413936614650058,
+        "min": 1.4121040909315699,
+        "max": 1.4157534255094633,
+        "p05": 1.413649273107502,
+        "p95": 1.4142647995046842,
+        "total_triangles": 1132,
+        "valid_triangles": 1132,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "30334ca4936c6cff687f9e3c5c158960499026e3e1ba589a7b9e0313aa2a068f",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-freestanding-bath-bridge-filler-01",
+      "source_sha256": "21c65772e17231da7e87c293db50006696347e55b9dcd0b0af19d80eed0ce2df",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.0015146713661427687,
+        0.00031066115540549316,
+        7.739100510661954e-06,
+        6.1087772943816755e-06,
+        3.6942994180814534e-06,
+        3.694902602546792e-06,
+        0.0015146709695272875,
+        0.0003106611413083253,
+        7.738275295802547e-06,
+        6.1095036774835e-06,
+        3.6965830455907675e-06,
+        3.697194946046995e-06,
+        0.0003080590377066983,
+        0.0005533832363718478,
+        3.8794829227602655e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Filler grounded floor mounting foot -1": [
+          0.0015146713661427687
+        ],
+        "Filler valve body -1": [
+          0.00031066115540549316
+        ],
+        "Filler cross handle bar -1": [
+          7.739100510661954e-06
+        ],
+        "Filler cross handle spindle -1": [
+          6.1087772943816755e-06
+        ],
+        "Filler porcelain handle tip -1 -0.038": [
+          3.6942994180814534e-06
+        ],
+        "Filler porcelain handle tip -1 0.038": [
+          3.694902602546792e-06
+        ],
+        "Filler grounded floor mounting foot 1": [
+          0.0015146709695272875
+        ],
+        "Filler valve body 1": [
+          0.0003106611413083253
+        ],
+        "Filler cross handle bar 1": [
+          7.738275295802547e-06
+        ],
+        "Filler cross handle spindle 1": [
+          6.1095036774835e-06
+        ],
+        "Filler porcelain handle tip 1 -0.038": [
+          3.6965830455907675e-06
+        ],
+        "Filler porcelain handle tip 1 0.038": [
+          3.697194946046995e-06
+        ],
+        "Filler bridge mixer": [
+          0.0003080590377066983
+        ],
+        "Long-reach bath filler gooseneck": [
+          0.0005533832363718478
+        ],
+        "Bath filler downward outlet lip": [
+          3.8794829227602655e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 15,
+        "groups": [
+          {
+            "parts": [
+              "Filler grounded floor mounting foot -1",
+              "Filler valve body -1",
+              "Filler bridge mixer",
+              "Filler valve body 1",
+              "Filler grounded floor mounting foot 1",
+              "Filler cross handle spindle 1",
+              "Filler cross handle bar 1",
+              "Filler porcelain handle tip 1 0.038",
+              "Filler porcelain handle tip 1 -0.038",
+              "Long-reach bath filler gooseneck",
+              "Bath filler downward outlet lip",
+              "Filler cross handle spindle -1",
+              "Filler cross handle bar -1",
+              "Filler porcelain handle tip -1 0.038",
+              "Filler porcelain handle tip -1 -0.038"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Filler valve body -1",
+            "Filler grounded floor mounting foot -1"
+          ],
+          [
+            "Filler cross handle bar -1",
+            "Filler valve body -1"
+          ],
+          [
+            "Filler cross handle spindle -1",
+            "Filler valve body -1"
+          ],
+          [
+            "Filler cross handle spindle -1",
+            "Filler cross handle bar -1"
+          ],
+          [
+            "Filler porcelain handle tip -1 -0.038",
+            "Filler cross handle bar -1"
+          ],
+          [
+            "Filler porcelain handle tip -1 0.038",
+            "Filler cross handle bar -1"
+          ],
+          [
+            "Filler valve body 1",
+            "Filler grounded floor mounting foot 1"
+          ],
+          [
+            "Filler cross handle bar 1",
+            "Filler valve body 1"
+          ],
+          [
+            "Filler cross handle spindle 1",
+            "Filler valve body 1"
+          ],
+          [
+            "Filler cross handle spindle 1",
+            "Filler cross handle bar 1"
+          ],
+          [
+            "Filler porcelain handle tip 1 -0.038",
+            "Filler cross handle bar 1"
+          ],
+          [
+            "Filler porcelain handle tip 1 0.038",
+            "Filler cross handle bar 1"
+          ],
+          [
+            "Filler bridge mixer",
+            "Filler valve body -1"
+          ],
+          [
+            "Filler bridge mixer",
+            "Filler valve body 1"
+          ],
+          [
+            "Long-reach bath filler gooseneck",
+            "Filler bridge mixer"
+          ],
+          [
+            "Bath filler downward outlet lip",
+            "Long-reach bath filler gooseneck"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.052264500531477,
+        "min": 1.051670589561663,
+        "max": 1.0531637575957478,
+        "p05": 1.0521040588756838,
+        "p95": 1.052418419096565,
+        "total_triangles": 1204,
+        "valid_triangles": 1204,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "f8c48c0c5de5aad19a519f32b6e4a36b293859902b10d2920e8b12d308e7a82c",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-rail-hand-shower-hose-01",
+      "source_sha256": "0e499241ed9e55911fb1b48b55d07e27b7ae033bd5d69d9a0ac7987790c9fdc3",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        8.193839399458133e-05,
+        3.581968845386048e-05,
+        3.582025897230778e-05,
+        0.0004360200096774255,
+        9.720773759151295e-05,
+        3.6865907716787654e-05,
+        9.720768605347985e-05,
+        3.6865854449767214e-05,
+        0.000428449400557129,
+        0.00022572606917492521,
+        0.00010996478840752388,
+        0.0003293545891930686,
+        8.375068728128095e-05,
+        0.0004233435759365041,
+        9.720757407194469e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Hand-shower sliding rail": [
+          0.0004360200096774255
+        ],
+        "Rail wall mounting plate 0.375": [
+          9.720773759151295e-05
+        ],
+        "Rail wall support arm 0.375": [
+          3.6865907716787654e-05
+        ],
+        "Rail wall mounting plate 1.17": [
+          9.720768605347985e-05
+        ],
+        "Rail wall support arm 1.17": [
+          3.6865854449767214e-05
+        ],
+        "Hand-shower sliding support clamp": [
+          0.000428449400557129
+        ],
+        "Handset ergonomic handle": [
+          0.00022572606917492521
+        ],
+        "Handset upper brass neck": [
+          0.00010996478840752388
+        ],
+        "Handset rounded shower rose body": [
+          0.0003293545891930686
+        ],
+        "Handset inset spray face": [
+          8.375068728128095e-05
+        ],
+        "Flexible hand-shower hose": [
+          0.0004233435759365041
+        ],
+        "Hand-shower water outlet wall plate": [
+          9.720757407194469e-05
+        ],
+        "Hand-shower outlet elbow": [
+          8.193839399458133e-05
+        ],
+        "Hose union 0.10": [
+          3.581968845386048e-05
+        ],
+        "Hose union -0.15": [
+          3.582025897230778e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 15,
+        "groups": [
+          {
+            "parts": [
+              "Hand-shower sliding rail",
+              "Hand-shower sliding support clamp",
+              "Handset ergonomic handle",
+              "Handset upper brass neck",
+              "Handset rounded shower rose body",
+              "Handset inset spray face",
+              "Flexible hand-shower hose",
+              "Hose union -0.15",
+              "Hand-shower water outlet wall plate",
+              "Hand-shower outlet elbow",
+              "Hose union 0.10",
+              "Rail wall support arm 1.17",
+              "Rail wall mounting plate 1.17",
+              "Rail wall support arm 0.375",
+              "Rail wall mounting plate 0.375"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [
+              "Hand-shower water outlet wall plate",
+              "Rail wall mounting plate 1.17",
+              "Rail wall mounting plate 0.375"
+            ],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Rail wall support arm 0.375",
+            "Hand-shower sliding rail"
+          ],
+          [
+            "Rail wall support arm 0.375",
+            "Rail wall mounting plate 0.375"
+          ],
+          [
+            "Rail wall support arm 1.17",
+            "Hand-shower sliding rail"
+          ],
+          [
+            "Rail wall support arm 1.17",
+            "Rail wall mounting plate 1.17"
+          ],
+          [
+            "Hand-shower sliding support clamp",
+            "Hand-shower sliding rail"
+          ],
+          [
+            "Handset ergonomic handle",
+            "Hand-shower sliding support clamp"
+          ],
+          [
+            "Handset upper brass neck",
+            "Handset ergonomic handle"
+          ],
+          [
+            "Handset rounded shower rose body",
+            "Handset upper brass neck"
+          ],
+          [
+            "Handset inset spray face",
+            "Handset rounded shower rose body"
+          ],
+          [
+            "Flexible hand-shower hose",
+            "Handset ergonomic handle"
+          ],
+          [
+            "Hand-shower outlet elbow",
+            "Flexible hand-shower hose"
+          ],
+          [
+            "Hand-shower outlet elbow",
+            "Hand-shower water outlet wall plate"
+          ],
+          [
+            "Hose union 0.10",
+            "Hand-shower sliding support clamp"
+          ],
+          [
+            "Hose union 0.10",
+            "Handset ergonomic handle"
+          ],
+          [
+            "Hose union 0.10",
+            "Flexible hand-shower hose"
+          ],
+          [
+            "Hose union -0.15",
+            "Flexible hand-shower hose"
+          ],
+          [
+            "Hose union -0.15",
+            "Hand-shower water outlet wall plate"
+          ],
+          [
+            "Hose union -0.15",
+            "Hand-shower outlet elbow"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 0.935033046538693,
+        "min": 0.9344930796793963,
+        "max": 0.935748016241528,
+        "p05": 0.9348964843944733,
+        "p95": 0.9351548323555191,
+        "total_triangles": 1128,
+        "valid_triangles": 1128,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "b9d3d49615c2624a29a19c46e6db14a6e45b27d3f24cd7b146e22528cb63be3c",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-overhead-brass-standpipe-01",
+      "source_sha256": "5f8c7af33f70e21dbbc1384889a305c5d6ec7cff208eef83d2b785f3d6fd75b6",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.003481707836975545,
+        0.00010189115740407337,
+        4.6451900099479325e-05,
+        0.00010189298003145572,
+        4.645140173427838e-05,
+        0.0005948059248718587,
+        0.00015872347770103562,
+        1.847766225182568e-05,
+        0.0001587222213856876,
+        1.847805621461399e-05,
+        0.0035538393943473543,
+        0.0008366899589115454,
+        0.0003931159558684764
+      ],
+      "positive_native_part_volumes_m3": {
+        "Shower standpipe grounded floor flange": [
+          0.0003931159558684764
+        ],
+        "Continuous overhead shower brass standpipe": [
+          0.003481707836975545
+        ],
+        "Standpipe wall bearing plate 0.81": [
+          0.00010189115740407337
+        ],
+        "Standpipe attached wall brace 0.81": [
+          4.6451900099479325e-05
+        ],
+        "Standpipe wall bearing plate 1.69": [
+          0.00010189298003145572
+        ],
+        "Standpipe attached wall brace 1.69": [
+          4.645140173427838e-05
+        ],
+        "Overhead shower cross mixer bar": [
+          0.0005948059248718587
+        ],
+        "Overhead shower mixer valve -1": [
+          0.00015872347770103562
+        ],
+        "Overhead shower ceramic lever -1": [
+          1.847766225182568e-05
+        ],
+        "Overhead shower mixer valve 1": [
+          0.0001587222213856876
+        ],
+        "Overhead shower ceramic lever 1": [
+          1.847805621461399e-05
+        ],
+        "Overhead domed brass shower rose": [
+          0.0035538393943473543
+        ],
+        "Overhead inset porcelain spray plate": [
+          0.0008366899589115454
+        ]
+      },
+      "actual_support": {
+        "native_parts": 13,
+        "groups": [
+          {
+            "parts": [
+              "Shower standpipe grounded floor flange",
+              "Continuous overhead shower brass standpipe",
+              "Overhead shower cross mixer bar",
+              "Overhead shower mixer valve -1",
+              "Overhead shower ceramic lever -1",
+              "Overhead shower mixer valve 1",
+              "Overhead shower ceramic lever 1",
+              "Standpipe attached wall brace 1.69",
+              "Standpipe wall bearing plate 1.69",
+              "Standpipe attached wall brace 0.81",
+              "Standpipe wall bearing plate 0.81",
+              "Overhead domed brass shower rose",
+              "Overhead inset porcelain spray plate"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [
+              "Standpipe wall bearing plate 1.69",
+              "Standpipe wall bearing plate 0.81"
+            ],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Continuous overhead shower brass standpipe",
+            "Shower standpipe grounded floor flange"
+          ],
+          [
+            "Standpipe attached wall brace 0.81",
+            "Continuous overhead shower brass standpipe"
+          ],
+          [
+            "Standpipe attached wall brace 0.81",
+            "Standpipe wall bearing plate 0.81"
+          ],
+          [
+            "Standpipe attached wall brace 1.69",
+            "Continuous overhead shower brass standpipe"
+          ],
+          [
+            "Standpipe attached wall brace 1.69",
+            "Standpipe wall bearing plate 1.69"
+          ],
+          [
+            "Overhead shower cross mixer bar",
+            "Continuous overhead shower brass standpipe"
+          ],
+          [
+            "Overhead shower mixer valve -1",
+            "Overhead shower cross mixer bar"
+          ],
+          [
+            "Overhead shower ceramic lever -1",
+            "Overhead shower mixer valve -1"
+          ],
+          [
+            "Overhead shower mixer valve 1",
+            "Overhead shower cross mixer bar"
+          ],
+          [
+            "Overhead shower ceramic lever 1",
+            "Overhead shower mixer valve 1"
+          ],
+          [
+            "Overhead domed brass shower rose",
+            "Continuous overhead shower brass standpipe"
+          ],
+          [
+            "Overhead inset porcelain spray plate",
+            "Overhead domed brass shower rose"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 2.1111562693967976,
+        "min": 2.104585411404267,
+        "max": 2.1161760817035487,
+        "p05": 2.110705417960341,
+        "p95": 2.11143656626428,
+        "total_triangles": 1380,
+        "valid_triangles": 1380,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "eb2db8b0aa01e1230db34405c3d223189f48209ba16a1ef778d58ecb722cf9b9",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-tankless-flushometer-wc-01",
+      "source_sha256": "fcf6293ef24659802abad5db49f5a409cea128593a86b4361dc45615cdd731c6",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.0034112564428217715,
+        1.599693071815031e-05,
+        8.875012544725297e-05,
+        8.875018753921417e-05,
+        0.02519020825073189,
+        3.944307400161051e-05,
+        3.944213297775906e-05,
+        0.0008603771546352353,
+        0.0010478347505037768,
+        0.0003346097940569356,
+        0.00023282407164515456,
+        2.9640816251230734e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Flushometer WC continuous hollow bowl and broad foot": [
+          0.02519020825073189
+        ],
+        "Flushometer WC open dark seat ring": [
+          0.0034112564428217715
+        ],
+        "Flushometer WC seat load pad -1": [
+          3.944307400161051e-05
+        ],
+        "Flushometer WC seat load pad 1": [
+          3.944213297775906e-05
+        ],
+        "Flushometer vertical bowl feed": [
+          0.0008603771546352353
+        ],
+        "Flushometer pressure valve body": [
+          0.0010478347505037768
+        ],
+        "Flushometer wall inlet": [
+          0.0003346097940569356
+        ],
+        "Flushometer wall service escutcheon": [
+          0.00023282407164515456
+        ],
+        "Flushometer actual operating lever representation": [
+          2.9640816251230734e-05
+        ],
+        "Flushometer decorative ceramic lever tip": [
+          1.599693071815031e-05
+        ],
+        "Flushometer union nut 0.51": [
+          8.875012544725297e-05
+        ],
+        "Flushometer union nut 0.78": [
+          8.875018753921417e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 12,
+        "groups": [
+          {
+            "parts": [
+              "Flushometer WC continuous hollow bowl and broad foot",
+              "Flushometer vertical bowl feed",
+              "Flushometer union nut 0.78",
+              "Flushometer union nut 0.51",
+              "Flushometer wall inlet",
+              "Flushometer wall service escutcheon",
+              "Flushometer pressure valve body",
+              "Flushometer actual operating lever representation",
+              "Flushometer decorative ceramic lever tip",
+              "Flushometer WC open dark seat ring",
+              "Flushometer WC seat load pad 1",
+              "Flushometer WC seat load pad -1"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [
+              "Flushometer wall service escutcheon"
+            ],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Flushometer WC seat load pad -1",
+            "Flushometer WC continuous hollow bowl and broad foot"
+          ],
+          [
+            "Flushometer WC seat load pad -1",
+            "Flushometer WC open dark seat ring"
+          ],
+          [
+            "Flushometer WC seat load pad 1",
+            "Flushometer WC continuous hollow bowl and broad foot"
+          ],
+          [
+            "Flushometer WC seat load pad 1",
+            "Flushometer WC open dark seat ring"
+          ],
+          [
+            "Flushometer vertical bowl feed",
+            "Flushometer WC continuous hollow bowl and broad foot"
+          ],
+          [
+            "Flushometer vertical bowl feed",
+            "Flushometer WC open dark seat ring"
+          ],
+          [
+            "Flushometer pressure valve body",
+            "Flushometer vertical bowl feed"
+          ],
+          [
+            "Flushometer wall inlet",
+            "Flushometer vertical bowl feed"
+          ],
+          [
+            "Flushometer wall inlet",
+            "Flushometer pressure valve body"
+          ],
+          [
+            "Flushometer wall service escutcheon",
+            "Flushometer wall inlet"
+          ],
+          [
+            "Flushometer actual operating lever representation",
+            "Flushometer pressure valve body"
+          ],
+          [
+            "Flushometer decorative ceramic lever tip",
+            "Flushometer actual operating lever representation"
+          ],
+          [
+            "Flushometer union nut 0.51",
+            "Flushometer vertical bowl feed"
+          ],
+          [
+            "Flushometer union nut 0.78",
+            "Flushometer vertical bowl feed"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 2.233006386133421,
+        "min": 2.2306332464145577,
+        "max": 2.2370762296185873,
+        "p05": 2.232502141415862,
+        "p95": 2.233320160955871,
+        "total_triangles": 2104,
+        "valid_triangles": 2104,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "b9cb61556735e46c1ad8f633c4a5cf12e4936ae59a788e51afec5daf1c74f5cd",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-single-basin-mirrored-cabinet-01",
+      "source_sha256": "194ae6d2a68776ad5253d0b96859f8b781bcd6c4cfa988bdc03d458222e1de81",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        9.21528408071026e-06,
+        0.00012278924380855943,
+        9.217348027353483e-06,
+        0.008357644080206228,
+        0.007590499386727363,
+        6.6372642966901625e-06,
+        5.336117586314989e-05,
+        3.5356326103889537e-06,
+        5.3360546492816275e-05,
+        3.5350914610413963e-06,
+        4.3495623989050124e-05,
+        0.0004105257601736412,
+        0.00041052616112817003,
+        0.0004105262295108029,
+        0.00016362703979429702,
+        0.00041052567394217476,
+        0.0014290061092954904,
+        0.017239762869091162,
+        0.0014289872645652695,
+        0.013594793119409582,
+        0.012524271602160296,
+        0.013594795928535554,
+        0.0034861513680273996,
+        0.011465997667376847,
+        0.001064798246564654,
+        0.0016302379081025722,
+        0.0010647785141676043,
+        0.0016302369282736133,
+        0.0015397692526069788,
+        0.005866191853480511,
+        0.0015397708145125466,
+        0.0015372528914667785,
+        5.72806796602284e-06,
+        6.5743957596472065e-06,
+        0.005866192685668163,
+        0.0015372559460047348,
+        5.727331275314405e-06,
+        6.576665782631607e-06,
+        0.00012278904311339525,
+        9.21808047375331e-06,
+        0.00012278927655036867,
+        9.216731996275483e-06,
+        0.00012278976949649706
+      ],
+      "positive_native_part_volumes_m3": {
+        "Single vanity turned foot -1 -1": [
+          0.0004105257601736412
+        ],
+        "Single vanity turned foot -1 1": [
+          0.00041052616112817003
+        ],
+        "Single vanity turned foot 1 -1": [
+          0.0004105262295108029
+        ],
+        "Single vanity turned foot 1 1": [
+          0.00041052567394217476
+        ],
+        "Vanity cabinet bottom load-bearing shelf": [
+          0.017239762869091162
+        ],
+        "Vanity cabinet side -1": [
+          0.013594793119409582
+        ],
+        "Vanity cabinet side 1": [
+          0.013594795928535554
+        ],
+        "Vanity cabinet rear panel": [
+          0.011465997667376847
+        ],
+        "Vanity front carcass rail 0.16": [
+          0.0016302379081025722
+        ],
+        "Vanity front carcass rail 0.777": [
+          0.0016302369282736133
+        ],
+        "Raised-panel vanity door -1": [
+          0.005866191853480511
+        ],
+        "Door applied inset central field -1": [
+          0.0015372528914667785
+        ],
+        "Vanity door handle mount -1": [
+          5.72806796602284e-06
+        ],
+        "Vanity door knob -1": [
+          6.5743957596472065e-06
+        ],
+        "Raised-panel vanity door 1": [
+          0.005866192685668163
+        ],
+        "Door applied inset central field 1": [
+          0.0015372559460047348
+        ],
+        "Vanity door handle mount 1": [
+          5.727331275314405e-06
+        ],
+        "Vanity door knob 1": [
+          6.576665782631607e-06
+        ],
+        "Mounted vanity door hinge leaf -1 0.32": [
+          0.00012278904311339525
+        ],
+        "Vanity door hinge pin -1 0.32": [
+          9.21808047375331e-06
+        ],
+        "Mounted vanity door hinge leaf -1 0.62": [
+          0.00012278927655036867
+        ],
+        "Vanity door hinge pin -1 0.62": [
+          9.216731996275483e-06
+        ],
+        "Mounted vanity door hinge leaf 1 0.32": [
+          0.00012278976949649706
+        ],
+        "Vanity door hinge pin 1 0.32": [
+          9.21528408071026e-06
+        ],
+        "Mounted vanity door hinge leaf 1 0.62": [
+          0.00012278924380855943
+        ],
+        "Vanity door hinge pin 1 0.62": [
+          9.217348027353483e-06
+        ],
+        "Limestone vanity top with actual basin aperture": [
+          0.008357644080206228
+        ],
+        "Single cabinet basin continuous hollow shell": [
+          0.007590499386727363
+        ],
+        "Single cabinet basin continuous hollow shell inset drain": [
+          6.6372642966901625e-06
+        ],
+        "Single vanity mixer deck valve -1": [
+          5.336117586314989e-05
+        ],
+        "Single vanity mixer cross handle -1": [
+          3.5356326103889537e-06
+        ],
+        "Single vanity mixer deck valve 1": [
+          5.3360546492816275e-05
+        ],
+        "Single vanity mixer cross handle 1": [
+          3.5350914610413963e-06
+        ],
+        "Single vanity mixer mixer bridge": [
+          4.3495623989050124e-05
+        ],
+        "Single vanity mixer arched spout": [
+          0.00016362703979429702
+        ],
+        "Mirror load-bearing upright -1": [
+          0.0014290061092954904
+        ],
+        "Mirror load-bearing upright 1": [
+          0.0014289872645652695
+        ],
+        "Mirror structural back board": [
+          0.012524271602160296
+        ],
+        "Silver-backed rectangular mirror glass": [
+          0.0034861513680273996
+        ],
+        "Mirror carved side frame -1": [
+          0.001064798246564654
+        ],
+        "Mirror carved side frame 1": [
+          0.0010647785141676043
+        ],
+        "Mirror horizontal frame 1.055": [
+          0.0015397692526069788
+        ],
+        "Mirror horizontal frame 1.67": [
+          0.0015397708145125466
+        ]
+      },
+      "actual_support": {
+        "native_parts": 43,
+        "groups": [
+          {
+            "parts": [
+              "Single vanity turned foot -1 -1",
+              "Vanity cabinet side -1",
+              "Limestone vanity top with actual basin aperture",
+              "Vanity cabinet side 1",
+              "Mounted vanity door hinge leaf 1 0.62",
+              "Vanity door hinge pin 1 0.62",
+              "Mounted vanity door hinge leaf 1 0.32",
+              "Vanity door hinge pin 1 0.32",
+              "Raised-panel vanity door 1",
+              "Door applied inset central field 1",
+              "Vanity door handle mount 1",
+              "Vanity door knob 1",
+              "Single vanity turned foot 1 1",
+              "Single vanity turned foot 1 -1",
+              "Mirror load-bearing upright 1",
+              "Mirror structural back board",
+              "Mirror horizontal frame 1.055",
+              "Mirror carved side frame -1",
+              "Mirror horizontal frame 1.67",
+              "Silver-backed rectangular mirror glass",
+              "Mirror carved side frame 1",
+              "Single cabinet basin continuous hollow shell",
+              "Single vanity mixer deck valve 1",
+              "Single vanity mixer mixer bridge",
+              "Single vanity mixer cross handle 1",
+              "Single vanity mixer deck valve -1",
+              "Single vanity mixer cross handle -1",
+              "Single cabinet basin continuous hollow shell inset drain",
+              "Single vanity mixer arched spout",
+              "Mounted vanity door hinge leaf -1 0.62",
+              "Vanity door hinge pin -1 0.62",
+              "Raised-panel vanity door -1",
+              "Vanity door handle mount -1",
+              "Vanity door knob -1",
+              "Door applied inset central field -1",
+              "Vanity door hinge pin -1 0.32",
+              "Mounted vanity door hinge leaf -1 0.32",
+              "Vanity front carcass rail 0.777",
+              "Vanity cabinet rear panel",
+              "Mirror load-bearing upright -1",
+              "Single vanity turned foot -1 1",
+              "Vanity cabinet bottom load-bearing shelf",
+              "Vanity front carcass rail 0.16"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Vanity cabinet bottom load-bearing shelf",
+            "Single vanity turned foot -1 -1"
+          ],
+          [
+            "Vanity cabinet bottom load-bearing shelf",
+            "Single vanity turned foot -1 1"
+          ],
+          [
+            "Vanity cabinet bottom load-bearing shelf",
+            "Single vanity turned foot 1 -1"
+          ],
+          [
+            "Vanity cabinet bottom load-bearing shelf",
+            "Single vanity turned foot 1 1"
+          ],
+          [
+            "Vanity cabinet side -1",
+            "Single vanity turned foot -1 -1"
+          ],
+          [
+            "Vanity cabinet side -1",
+            "Single vanity turned foot -1 1"
+          ],
+          [
+            "Vanity cabinet side -1",
+            "Vanity cabinet bottom load-bearing shelf"
+          ],
+          [
+            "Vanity cabinet side 1",
+            "Single vanity turned foot 1 -1"
+          ],
+          [
+            "Vanity cabinet side 1",
+            "Single vanity turned foot 1 1"
+          ],
+          [
+            "Vanity cabinet side 1",
+            "Vanity cabinet bottom load-bearing shelf"
+          ],
+          [
+            "Vanity cabinet rear panel",
+            "Single vanity turned foot -1 1"
+          ],
+          [
+            "Vanity cabinet rear panel",
+            "Single vanity turned foot 1 1"
+          ],
+          [
+            "Vanity cabinet rear panel",
+            "Vanity cabinet bottom load-bearing shelf"
+          ],
+          [
+            "Vanity cabinet rear panel",
+            "Vanity cabinet side -1"
+          ],
+          [
+            "Vanity cabinet rear panel",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Vanity front carcass rail 0.16",
+            "Single vanity turned foot -1 -1"
+          ],
+          [
+            "Vanity front carcass rail 0.16",
+            "Single vanity turned foot 1 -1"
+          ],
+          [
+            "Vanity front carcass rail 0.16",
+            "Vanity cabinet bottom load-bearing shelf"
+          ],
+          [
+            "Vanity front carcass rail 0.16",
+            "Vanity cabinet side -1"
+          ],
+          [
+            "Vanity front carcass rail 0.16",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Vanity front carcass rail 0.777",
+            "Vanity cabinet side -1"
+          ],
+          [
+            "Vanity front carcass rail 0.777",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Door applied inset central field -1",
+            "Raised-panel vanity door -1"
+          ],
+          [
+            "Vanity door handle mount -1",
+            "Raised-panel vanity door -1"
+          ],
+          [
+            "Vanity door handle mount -1",
+            "Door applied inset central field -1"
+          ],
+          [
+            "Vanity door knob -1",
+            "Vanity door handle mount -1"
+          ],
+          [
+            "Raised-panel vanity door 1",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Door applied inset central field 1",
+            "Raised-panel vanity door 1"
+          ],
+          [
+            "Vanity door handle mount 1",
+            "Raised-panel vanity door 1"
+          ],
+          [
+            "Vanity door handle mount 1",
+            "Door applied inset central field 1"
+          ],
+          [
+            "Vanity door knob 1",
+            "Vanity door handle mount 1"
+          ],
+          [
+            "Mounted vanity door hinge leaf -1 0.32",
+            "Vanity cabinet side -1"
+          ],
+          [
+            "Mounted vanity door hinge leaf -1 0.32",
+            "Raised-panel vanity door -1"
+          ],
+          [
+            "Vanity door hinge pin -1 0.32",
+            "Raised-panel vanity door -1"
+          ],
+          [
+            "Vanity door hinge pin -1 0.32",
+            "Mounted vanity door hinge leaf -1 0.32"
+          ],
+          [
+            "Mounted vanity door hinge leaf -1 0.62",
+            "Vanity cabinet side -1"
+          ],
+          [
+            "Mounted vanity door hinge leaf -1 0.62",
+            "Raised-panel vanity door -1"
+          ],
+          [
+            "Vanity door hinge pin -1 0.62",
+            "Raised-panel vanity door -1"
+          ],
+          [
+            "Vanity door hinge pin -1 0.62",
+            "Mounted vanity door hinge leaf -1 0.62"
+          ],
+          [
+            "Mounted vanity door hinge leaf 1 0.32",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Mounted vanity door hinge leaf 1 0.32",
+            "Raised-panel vanity door 1"
+          ],
+          [
+            "Vanity door hinge pin 1 0.32",
+            "Raised-panel vanity door 1"
+          ],
+          [
+            "Vanity door hinge pin 1 0.32",
+            "Mounted vanity door hinge leaf 1 0.32"
+          ],
+          [
+            "Mounted vanity door hinge leaf 1 0.62",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Mounted vanity door hinge leaf 1 0.62",
+            "Raised-panel vanity door 1"
+          ],
+          [
+            "Vanity door hinge pin 1 0.62",
+            "Raised-panel vanity door 1"
+          ],
+          [
+            "Vanity door hinge pin 1 0.62",
+            "Mounted vanity door hinge leaf 1 0.62"
+          ],
+          [
+            "Limestone vanity top with actual basin aperture",
+            "Vanity cabinet side -1"
+          ],
+          [
+            "Limestone vanity top with actual basin aperture",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Limestone vanity top with actual basin aperture",
+            "Vanity cabinet rear panel"
+          ],
+          [
+            "Single cabinet basin continuous hollow shell",
+            "Limestone vanity top with actual basin aperture"
+          ],
+          [
+            "Single cabinet basin continuous hollow shell inset drain",
+            "Single cabinet basin continuous hollow shell"
+          ],
+          [
+            "Single vanity mixer deck valve -1",
+            "Single cabinet basin continuous hollow shell"
+          ],
+          [
+            "Single vanity mixer cross handle -1",
+            "Single vanity mixer deck valve -1"
+          ],
+          [
+            "Single vanity mixer deck valve 1",
+            "Single cabinet basin continuous hollow shell"
+          ],
+          [
+            "Single vanity mixer cross handle 1",
+            "Single vanity mixer deck valve 1"
+          ],
+          [
+            "Single vanity mixer mixer bridge",
+            "Single vanity mixer deck valve -1"
+          ],
+          [
+            "Single vanity mixer mixer bridge",
+            "Single vanity mixer deck valve 1"
+          ],
+          [
+            "Single vanity mixer arched spout",
+            "Single cabinet basin continuous hollow shell"
+          ],
+          [
+            "Single vanity mixer arched spout",
+            "Single vanity mixer mixer bridge"
+          ],
+          [
+            "Mirror load-bearing upright -1",
+            "Vanity cabinet side -1"
+          ],
+          [
+            "Mirror load-bearing upright -1",
+            "Vanity cabinet rear panel"
+          ],
+          [
+            "Mirror load-bearing upright -1",
+            "Limestone vanity top with actual basin aperture"
+          ],
+          [
+            "Mirror load-bearing upright 1",
+            "Vanity cabinet side 1"
+          ],
+          [
+            "Mirror load-bearing upright 1",
+            "Vanity cabinet rear panel"
+          ],
+          [
+            "Mirror load-bearing upright 1",
+            "Limestone vanity top with actual basin aperture"
+          ],
+          [
+            "Mirror structural back board",
+            "Mirror load-bearing upright -1"
+          ],
+          [
+            "Mirror structural back board",
+            "Mirror load-bearing upright 1"
+          ],
+          [
+            "Mirror carved side frame -1",
+            "Mirror load-bearing upright -1"
+          ],
+          [
+            "Mirror carved side frame 1",
+            "Mirror load-bearing upright 1"
+          ],
+          [
+            "Mirror horizontal frame 1.055",
+            "Mirror load-bearing upright -1"
+          ],
+          [
+            "Mirror horizontal frame 1.055",
+            "Mirror load-bearing upright 1"
+          ],
+          [
+            "Mirror horizontal frame 1.055",
+            "Silver-backed rectangular mirror glass"
+          ],
+          [
+            "Mirror horizontal frame 1.055",
+            "Mirror carved side frame -1"
+          ],
+          [
+            "Mirror horizontal frame 1.055",
+            "Mirror carved side frame 1"
+          ],
+          [
+            "Mirror horizontal frame 1.67",
+            "Silver-backed rectangular mirror glass"
+          ],
+          [
+            "Mirror horizontal frame 1.67",
+            "Mirror carved side frame -1"
+          ],
+          [
+            "Mirror horizontal frame 1.67",
+            "Mirror carved side frame 1"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 5.169480317319836,
+        "min": 5.156002478838384,
+        "max": 5.1809603212879125,
+        "p05": 5.167780293462048,
+        "p95": 5.171008823448173,
+        "total_triangles": 3032,
+        "valid_triangles": 3032,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "673f6a1264e4e5ed94147e160e95c35ca7721a7b6616b7c6f730e78d22c16fee",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-framed-glass-shower-enclosure-01",
+      "source_sha256": "4613189a4e86111c88afb1ae17f8ffb7d3469db54b0dfed1a26c4420fe654579",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.011110485659628471,
+        7.286628442670918e-05,
+        4.115664523851591e-05,
+        7.287923957240611e-05,
+        4.115978178257743e-05,
+        7.775848886619012e-05,
+        2.1163309914603214e-05,
+        2.1162963093956922e-05,
+        0.05325146600171138,
+        1.9181918582707642e-05,
+        0.0016766442252749885,
+        0.0016766679376966445,
+        0.0016766409778483644,
+        0.0016766174376243725,
+        0.0037473868578672413,
+        0.0037473264771203186,
+        0.009925572765889465,
+        0.009925549398658964,
+        0.009903545051088286
+      ],
+      "positive_native_part_volumes_m3": {
+        "Enclosure genuinely hollow shower tray": [
+          0.05325146600171138
+        ],
+        "Enclosure inset shower drain": [
+          1.9181918582707642e-05
+        ],
+        "Shower enclosure vertical frame -1 -1": [
+          0.0016766442252749885
+        ],
+        "Shower enclosure vertical frame -1 1": [
+          0.0016766679376966445
+        ],
+        "Shower enclosure vertical frame 1 -1": [
+          0.0016766409778483644
+        ],
+        "Shower enclosure vertical frame 1 1": [
+          0.0016766174376243725
+        ],
+        "Enclosure continuous joined frame ring 0.14": [
+          0.0037473868578672413
+        ],
+        "Enclosure continuous joined frame ring 2.0": [
+          0.0037473264771203186
+        ],
+        "Enclosure fixed side glass -1": [
+          0.009925572765889465
+        ],
+        "Enclosure fixed side glass 1": [
+          0.009925549398658964
+        ],
+        "Enclosure fixed rear glass": [
+          0.009903545051088286
+        ],
+        "Enclosure closed front glass door": [
+          0.011110485659628471
+        ],
+        "Shower door brass hinge leaf 0.39": [
+          7.286628442670918e-05
+        ],
+        "Shower door vertical hinge barrel 0.39": [
+          4.115664523851591e-05
+        ],
+        "Shower door brass hinge leaf 1.68": [
+          7.287923957240611e-05
+        ],
+        "Shower door vertical hinge barrel 1.68": [
+          4.115978178257743e-05
+        ],
+        "Shower door mounted pull handle": [
+          7.775848886619012e-05
+        ],
+        "Shower door pull stand-off 1.025": [
+          2.1163309914603214e-05
+        ],
+        "Shower door pull stand-off 1.185": [
+          2.1162963093956922e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 19,
+        "groups": [
+          {
+            "parts": [
+              "Enclosure genuinely hollow shower tray",
+              "Shower enclosure vertical frame 1 1",
+              "Enclosure continuous joined frame ring 2.0",
+              "Enclosure fixed side glass -1",
+              "Enclosure continuous joined frame ring 0.14",
+              "Enclosure fixed rear glass",
+              "Enclosure fixed side glass 1",
+              "Shower enclosure vertical frame 1 -1",
+              "Shower enclosure vertical frame -1 1",
+              "Shower enclosure vertical frame -1 -1",
+              "Shower door vertical hinge barrel 1.68",
+              "Shower door brass hinge leaf 1.68",
+              "Enclosure closed front glass door",
+              "Shower door pull stand-off 1.185",
+              "Shower door mounted pull handle",
+              "Shower door pull stand-off 1.025",
+              "Shower door vertical hinge barrel 0.39",
+              "Shower door brass hinge leaf 0.39",
+              "Enclosure inset shower drain"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Enclosure inset shower drain",
+            "Enclosure genuinely hollow shower tray"
+          ],
+          [
+            "Shower enclosure vertical frame -1 -1",
+            "Enclosure genuinely hollow shower tray"
+          ],
+          [
+            "Shower enclosure vertical frame -1 1",
+            "Enclosure genuinely hollow shower tray"
+          ],
+          [
+            "Shower enclosure vertical frame 1 -1",
+            "Enclosure genuinely hollow shower tray"
+          ],
+          [
+            "Shower enclosure vertical frame 1 1",
+            "Enclosure genuinely hollow shower tray"
+          ],
+          [
+            "Enclosure continuous joined frame ring 0.14",
+            "Shower enclosure vertical frame -1 -1"
+          ],
+          [
+            "Enclosure continuous joined frame ring 0.14",
+            "Shower enclosure vertical frame -1 1"
+          ],
+          [
+            "Enclosure continuous joined frame ring 0.14",
+            "Shower enclosure vertical frame 1 -1"
+          ],
+          [
+            "Enclosure continuous joined frame ring 0.14",
+            "Shower enclosure vertical frame 1 1"
+          ],
+          [
+            "Enclosure continuous joined frame ring 2.0",
+            "Shower enclosure vertical frame -1 -1"
+          ],
+          [
+            "Enclosure continuous joined frame ring 2.0",
+            "Shower enclosure vertical frame -1 1"
+          ],
+          [
+            "Enclosure continuous joined frame ring 2.0",
+            "Shower enclosure vertical frame 1 -1"
+          ],
+          [
+            "Enclosure continuous joined frame ring 2.0",
+            "Shower enclosure vertical frame 1 1"
+          ],
+          [
+            "Enclosure fixed side glass -1",
+            "Shower enclosure vertical frame -1 -1"
+          ],
+          [
+            "Enclosure fixed side glass -1",
+            "Shower enclosure vertical frame -1 1"
+          ],
+          [
+            "Enclosure fixed side glass -1",
+            "Enclosure continuous joined frame ring 2.0"
+          ],
+          [
+            "Enclosure fixed side glass 1",
+            "Shower enclosure vertical frame 1 -1"
+          ],
+          [
+            "Enclosure fixed side glass 1",
+            "Shower enclosure vertical frame 1 1"
+          ],
+          [
+            "Enclosure fixed side glass 1",
+            "Enclosure continuous joined frame ring 2.0"
+          ],
+          [
+            "Enclosure fixed rear glass",
+            "Shower enclosure vertical frame -1 1"
+          ],
+          [
+            "Enclosure fixed rear glass",
+            "Shower enclosure vertical frame 1 1"
+          ],
+          [
+            "Enclosure fixed rear glass",
+            "Enclosure continuous joined frame ring 2.0"
+          ],
+          [
+            "Shower door brass hinge leaf 0.39",
+            "Shower enclosure vertical frame -1 -1"
+          ],
+          [
+            "Shower door brass hinge leaf 0.39",
+            "Enclosure closed front glass door"
+          ],
+          [
+            "Shower door vertical hinge barrel 0.39",
+            "Shower enclosure vertical frame -1 -1"
+          ],
+          [
+            "Shower door vertical hinge barrel 0.39",
+            "Shower door brass hinge leaf 0.39"
+          ],
+          [
+            "Shower door brass hinge leaf 1.68",
+            "Shower enclosure vertical frame -1 -1"
+          ],
+          [
+            "Shower door brass hinge leaf 1.68",
+            "Enclosure closed front glass door"
+          ],
+          [
+            "Shower door vertical hinge barrel 1.68",
+            "Shower enclosure vertical frame -1 -1"
+          ],
+          [
+            "Shower door vertical hinge barrel 1.68",
+            "Shower door brass hinge leaf 1.68"
+          ],
+          [
+            "Shower door pull stand-off 1.025",
+            "Enclosure closed front glass door"
+          ],
+          [
+            "Shower door pull stand-off 1.025",
+            "Shower door mounted pull handle"
+          ],
+          [
+            "Shower door pull stand-off 1.185",
+            "Enclosure closed front glass door"
+          ],
+          [
+            "Shower door pull stand-off 1.185",
+            "Shower door mounted pull handle"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 5.124368087359999,
+        "min": 5.117595464429864,
+        "max": 5.130104486378627,
+        "p05": 5.122762986627898,
+        "p95": 5.126566021016113,
+        "total_triangles": 1148,
+        "valid_triangles": 1148,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "4616fc5de9fb7914afded875a0b33b070610dbf5f6736c9a05e2e77ea247d6ef",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    }
+  ],
+  "errors": 0
+}

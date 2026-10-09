@@ -1,0 +1,619 @@
+{
+  "set": "rpg-mansion",
+  "newConstructionCount": 3,
+  "functionalFootprintVariantCount": 1,
+  "poseVariantCount": 0,
+  "accessoryOnlyCount": 0,
+  "items": [
+    {
+      "id": "rpg-mansion-period-range-canopy-01",
+      "name": "\u92f3\u9244\u30ec\u30f3\u30b8\u7528\u306e\u7159\u9664\u3051\u30d5\u30fc\u30c9",
+      "kind": "range-hood",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u30ec\u30f3\u30b8\u30d5\u30fc\u30c9",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-period-range-canopy-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-period-range-canopy-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-period-range-canopy-01.blend",
+      "validation": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-period-range-canopy-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/service_softgoods/build.py",
+      "w": 940.0,
+      "d": 778.0,
+      "h": 1210.0,
+      "defaultElevation": 1610.0,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "hardware",
+          "label": "hardware",
+          "default": "#b29455"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#35403e"
+        }
+      ],
+      "triangleBudget": 6000,
+      "triangles": 3872,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "role": "period-range-canopy",
+        "defaultElevationMm": 1610.0,
+        "hostId": "rpg-mansion-kitchen-cast-iron-range-750-01",
+        "hobTopMm": 863.5,
+        "canopyUndersideMm": 1610,
+        "minimumHobClearanceMm": 746.5,
+        "wallPlaneBlenderY": 0.36,
+        "openThroatMm": [
+          380,
+          305
+        ],
+        "staticLimit": "Open hollow canopy/flue and wall-bearing brackets. No heat, exhaust, ventilation or engineering capacity claim.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.028999999165534973,
+          -1.6100000143051147
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.4699999988079071,
+            -0.4180000126361847,
+            1.6100000143051147
+          ],
+          [
+            0.4699999988079071,
+            0.36000001430511475,
+            2.819999933242798
+          ]
+        ]
+      },
+      "placementNotes": "Open hollow canopy/flue and wall-bearing brackets. No heat, exhaust, ventilation or engineering capacity claim. Align to the accepted range with the canonical hood origin offset X0mm, Y1610mm up, Z29mm toward the room; rear plates then meet the wall35mm behind the range back.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-period-range-canopy-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-period-range-canopy-01-top.png",
+      "front": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-front.png",
+      "rear": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-rear.png",
+      "left": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-left.png",
+      "right": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-right.png",
+      "under": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-period-range-canopy-01-under.png",
+      "hashes": {
+        "model": "f978a061d0dafc3c547a2620c2c2cf8bb0f006ab4de7ea62656b486877888e0a",
+        "sourceBlend": "eed6e2de6f11435780d24a05fd2d0b668c17cfbfa5a898bfd4384e5afb3d80d1",
+        "authoringBlend": "0b830de8ba7eb10f9b5d7c15952e9faaca0815a15e6f8fb2ab78dd007a403346",
+        "validation": "6d81a868c4aa3ddeb1f88d14d1b34c7b4ca204b7ded604bfe628b160dde01e63",
+        "builder": "c3bc19f0a73e19a3635327249dd49912269803c8660c7a9523c9250bc8a7e32c",
+        "thumb": "bdba860b0366ee2fbfdf11ae56556543ef7a209dd430611e3f88db9c50338aa7",
+        "top": "95bb1f248fea0aabce52e7e598a29d65f6df404b0beb89658138493b2d8561e5",
+        "front": "65b79352d112c186b188cdfcd213328927cb9dcce4cb92983bdc9e2f62bc19b3",
+        "rear": "a118e658125c7419b2fd1dfd6f5bb9550cd438527aad125a8f84b9ff4bb50f8c",
+        "left": "81f1c5fc337e4e7dab1ae6e600bc5d607ddd75f2fd637d0989d1f9e1a9a09e0e",
+        "right": "994bb9d40a81afae745c45a61e30413a177ec321361e097716cbbd4b189f1cd4",
+        "under": "a7279c93432f1de6db5d13d6c39481e9a5ee21cf4a984b6de3e50338ea7ecc1c"
+      },
+      "installationPoseRelativeToAcceptedRangeGltfM": [
+        0.0,
+        1.6100000143051147,
+        0.028999999165534973
+      ],
+      "glbBytes": 269716,
+      "dimensionBasis": "Measured final exported envelope in millimetres; no assumed equivalence to legacy geometry.",
+      "rights": {
+        "status": "original",
+        "thirdPartyMeshes": false,
+        "thirdPartyImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "triangleBudgetRationale": "Explicit6000 maximum; repeated physical fasteners, hollow basin and tubular joinery preserve construction. The rug is below3000."
+    },
+    {
+      "id": "rpg-mansion-manual-wash-tub-board-01",
+      "name": "\u6728\u53f0\u3068\u6d17\u6fef\u677f\u4ed8\u304d\u624b\u6d17\u3044\u6876",
+      "kind": "laundry",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u6d17\u6fef",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-manual-wash-tub-board-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-manual-wash-tub-board-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-manual-wash-tub-board-01.blend",
+      "validation": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-manual-wash-tub-board-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/service_softgoods/build.py",
+      "w": 909.2,
+      "d": 582.999,
+      "h": 1174.936,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#9aa7a6"
+        },
+        {
+          "key": "washsurface",
+          "label": "washsurface",
+          "default": "#b0bbba"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#896443"
+        }
+      ],
+      "triangleBudget": 6000,
+      "triangles": 5032,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "role": "manual-wash-tub-and-board",
+        "defaultElevationMm": 0,
+        "tubCavityFloorMm": 525,
+        "tubRimTopMm": 870,
+        "tubClearOpeningMm": [
+          708,
+          498
+        ],
+        "boardTiltFromVerticalDegrees": 20,
+        "boardLowestCornerMm": 525,
+        "boardRimCleatUndersideMm": 870,
+        "boardLowerOriginM": [
+          0.0,
+          0.0560000017285347,
+          0.5304722785949707
+        ],
+        "boardAxisM": [
+          0.0,
+          0.3420201539993286,
+          0.9396926164627075
+        ],
+        "boardNormalM": [
+          0.0,
+          0.9396926164627075,
+          -0.3420201539993286
+        ],
+        "standBearerTopMm": 504,
+        "tubUndersideMm": 504,
+        "staticLimit": "Open empty basin, tilted zinc-ribbed timber washboard, timber stand and lifting loops. No water, washing motion or cloth simulation.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.014499738812446594,
+          -0.0
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.4545999765396118,
+            -0.2770000100135803,
+            0.0
+          ],
+          [
+            0.4545999765396118,
+            0.3059994876384735,
+            1.1749356985092163
+          ]
+        ]
+      },
+      "placementNotes": "Open empty basin, tilted zinc-ribbed timber washboard, timber stand and lifting loops. No water, washing motion or cloth simulation.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-manual-wash-tub-board-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-manual-wash-tub-board-01-top.png",
+      "front": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-front.png",
+      "rear": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-rear.png",
+      "left": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-left.png",
+      "right": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-right.png",
+      "under": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-manual-wash-tub-board-01-under.png",
+      "hashes": {
+        "model": "1f54d3d6e7a0fc05522c467445b7a767a543efc393b47a27cf22267637527195",
+        "sourceBlend": "37ef9cc9d49df3097cba9a949ef3bc430dd8d7f6c0e01c61121f2a8abb42d10e",
+        "authoringBlend": "dc0b96d5e06717a862d40f91604d0da916ba345155d88dcf56cead6e6b7d0a8d",
+        "validation": "5d441017767e8c05441ba895342b518be74e15d7299b6053f60c2adb2a8011bb",
+        "builder": "c3bc19f0a73e19a3635327249dd49912269803c8660c7a9523c9250bc8a7e32c",
+        "thumb": "498594fee89f25df76f65e70f17bcc8eff5aa9abd575cea4350246c6a2e10f89",
+        "top": "0be9c1cfefcbe8513255fdb8094e0783878de5cb35f8c044291751ec99c5eb18",
+        "front": "e1c25a5fb2da406cbe49d3bd9fa97bd08827e34f20f1b2da6737bc1723c3ce9a",
+        "rear": "d372f7541ce14de4626869e4910a0e0fbb8ac8e67b34b3227e8fa386971953d8",
+        "left": "01b14c7bebfd77232602f88c1be4a9e8e5b0ff2b165d750ee767bb10abfc93a5",
+        "right": "d9bc1ea8097a724ac49dff87f0f83ec8ceb6be48b40f58350d0cb965dfb76e0b",
+        "under": "7f7e3de213f95fa068140e81578326c697038cb1e7ce8f3287c8333fe841a847"
+      },
+      "glbBytes": 350904,
+      "dimensionBasis": "Measured final exported envelope in millimetres; no assumed equivalence to legacy geometry.",
+      "rights": {
+        "status": "original",
+        "thirdPartyMeshes": false,
+        "thirdPartyImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "triangleBudgetRationale": "Explicit6000 maximum; repeated physical fasteners, hollow basin and tubular joinery preserve construction. The rug is below3000."
+    },
+    {
+      "id": "rpg-mansion-hinged-timber-drying-frame-01",
+      "name": "\u6298\u308a\u7573\u307f\u5f0f\u6728\u88fd\u7269\u5e72\u3057\u306e\u5c55\u958b\u72b6\u614b",
+      "kind": "laundry",
+      "group": "\u4f4f\u8a2d",
+      "category": "\u6d17\u6fef",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-hinged-timber-drying-frame-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-hinged-timber-drying-frame-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-hinged-timber-drying-frame-01.blend",
+      "validation": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-hinged-timber-drying-frame-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/service_softgoods/build.py",
+      "w": 964.0,
+      "d": 827.91,
+      "h": 1204.98,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "hardware",
+          "label": "hardware",
+          "default": "#b29455"
+        },
+        {
+          "key": "metal",
+          "label": "metal",
+          "default": "#35403e"
+        },
+        {
+          "key": "wood",
+          "label": "wood",
+          "default": "#896443"
+        }
+      ],
+      "triangleBudget": 6000,
+      "triangles": 3488,
+      "staticProp": true,
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "independentConstructionCount": 1,
+      "variantOf": null,
+      "installationDatums": {
+        "role": "manual-laundry-drying-frame",
+        "defaultElevationMm": 0,
+        "legs": [
+          {
+            "x": -0.42800000000000005,
+            "fromM": [
+              -0.42800000309944153,
+              -0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              -0.42800000309944153,
+              0.0,
+              1.1799999475479126
+            ]
+          },
+          {
+            "x": -0.382,
+            "fromM": [
+              -0.38199999928474426,
+              0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              -0.38199999928474426,
+              0.0,
+              1.1799999475479126
+            ]
+          },
+          {
+            "x": 0.382,
+            "fromM": [
+              0.38199999928474426,
+              -0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              0.38199999928474426,
+              0.0,
+              1.1799999475479126
+            ]
+          },
+          {
+            "x": 0.42800000000000005,
+            "fromM": [
+              0.42800000309944153,
+              0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              0.42800000309944153,
+              0.0,
+              1.1799999475479126
+            ]
+          }
+        ],
+        "pivotsM": [
+          [
+            -0.405,
+            0,
+            1.18
+          ],
+          [
+            0.405,
+            0,
+            1.18
+          ]
+        ],
+        "rodEndpoints": [
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.30796267893660534,
+              0.265
+            ],
+            "toM": [
+              0.382,
+              -0.30796267893660534,
+              0.265
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.2305512951601909,
+              0.495
+            ],
+            "toM": [
+              0.382,
+              -0.2305512951601909,
+              0.495
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.15313991138377642,
+              0.725
+            ],
+            "toM": [
+              0.382,
+              -0.15313991138377642,
+              0.725
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.07572852760736197,
+              0.955
+            ],
+            "toM": [
+              0.382,
+              -0.07572852760736197,
+              0.955
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.30796267893660534,
+              0.265
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.30796267893660534,
+              0.265
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.2305512951601909,
+              0.495
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.2305512951601909,
+              0.495
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.15313991138377642,
+              0.725
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.15313991138377642,
+              0.725
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.07572852760736197,
+              0.955
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.07572852760736197,
+              0.955
+            ],
+            "radiusMm": 14
+          }
+        ],
+        "displayedState": "deployed A-frame",
+        "staticLimit": "Visible pins, washers and spread-limit links depict the deployed frame. No folding animation, hinge solver or cloth simulation. No load-bearing certification.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -2.023344859480858e-05
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.4819999933242798,
+            -0.4139551818370819,
+            2.023344859480858e-05
+          ],
+          [
+            0.4819999933242798,
+            0.4139551818370819,
+            1.2049999237060547
+          ]
+        ]
+      },
+      "placementNotes": "Visible pins, washers and spread-limit links depict the deployed frame. No folding animation, hinge solver or cloth simulation. No load-bearing certification.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hinged-timber-drying-frame-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-hinged-timber-drying-frame-01-top.png",
+      "front": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-front.png",
+      "rear": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-rear.png",
+      "left": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-left.png",
+      "right": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-right.png",
+      "under": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-hinged-timber-drying-frame-01-under.png",
+      "hashes": {
+        "model": "22726a3e9d37cd3868850c0bad20da3b707c23d5c11eccb08965621b05cc616a",
+        "sourceBlend": "3eb2330b80eb9ecb15d50637358e3a99b72ba1ed436a392ab2e5989ac334c676",
+        "authoringBlend": "4169a7799d9bc7845f90b53ec66b206f77a5d6628e0379215f455c2fe7ebfd7c",
+        "validation": "e950a0d324b6308dbed7cf321fa2753e7c87b62c2f92b4a8c944f8b48dae88dd",
+        "builder": "c3bc19f0a73e19a3635327249dd49912269803c8660c7a9523c9250bc8a7e32c",
+        "thumb": "6bab00a4805f70fa0a416f880e70d4f21f51f2e13841dfc84675bf5e3e84a3bf",
+        "top": "f987f1c5ba6f96d00af4aaeefdec1512d0446b4cc4fbb60d1f593f7ef7d4ea6f",
+        "front": "fce2d27ad4a8911d2ab1163a84d7b9fd5af1aa1c99b520ae8ab762306e9cf185",
+        "rear": "aca03963ccff4e8a924e91d77a76c30e11c3aa81042a9717de4897c6aea283b6",
+        "left": "f500219783938899bb53a5679193f4c0be440cbff5a13250828d1d9ce78b372f",
+        "right": "2787c367de3bafce2d646d420deea8060a802849be9b269d1b170de2c51091da",
+        "under": "4dad1225e7f6d7920d4302e2acc5c7cbc5fee9fe5e5ce1fb5baf982242a68631"
+      },
+      "glbBytes": 238456,
+      "dimensionBasis": "Measured final exported envelope in millimetres; no assumed equivalence to legacy geometry.",
+      "rights": {
+        "status": "original",
+        "thirdPartyMeshes": false,
+        "thirdPartyImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "triangleBudgetRationale": "Explicit6000 maximum; repeated physical fasteners, hollow basin and tubular joinery preserve construction. The rug is below3000."
+    },
+    {
+      "id": "rpg-mansion-narrow-hall-runner-01",
+      "name": "\u7d30\u3044\u5eca\u4e0b\u7528\u306e\u5e7e\u4f55\u6587\u69d8\u30e9\u30f3\u30ca\u30fc",
+      "kind": "rug",
+      "group": "\u5bb6\u5177",
+      "category": "\u6577\u7269",
+      "assetSet": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-narrow-hall-runner-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-narrow-hall-runner-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/service_softgoods/authoring_sources/rpg-mansion-narrow-hall-runner-01.blend",
+      "validation": "tools/blender/rpg_mansion/service_softgoods/sources/rpg-mansion-narrow-hall-runner-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/service_softgoods/build.py",
+      "w": 760.0,
+      "d": 3000.0,
+      "h": 7.6,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "finishChannels": [
+        {
+          "key": "border",
+          "label": "border",
+          "default": "#cab78b"
+        },
+        {
+          "key": "fabric",
+          "label": "fabric",
+          "default": "#632f3a"
+        },
+        {
+          "key": "pattern",
+          "label": "pattern",
+          "default": "#617464"
+        }
+      ],
+      "triangleBudget": 6000,
+      "triangles": 496,
+      "staticProp": true,
+      "countingClass": "functional-footprint-variant",
+      "coreConstructionCount": 0,
+      "independentConstructionCount": 0,
+      "variantOf": "rpg-mansion-rug-01",
+      "installationDatums": {
+        "role": "narrow-hall-runner",
+        "defaultElevationMm": 0,
+        "maximumWalkingPlaneMm": 7.6,
+        "demonstratedHallWidthMm": 1250,
+        "existingRugFootprintMm": [
+          1400,
+          2000
+        ],
+        "runnerFootprintMm": [
+          760,
+          3000
+        ],
+        "sideFloorMarginMm": 245,
+        "staticLimit": "Fixed low-relief woven surface. No cloth deformation, foot collision or slip resistance claim. Existing rectangular rug cannot fit this1250mm hall in either rotation.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.3799999952316284,
+            -1.5,
+            0.0
+          ],
+          [
+            0.3799999952316284,
+            1.5,
+            0.007600000128149986
+          ]
+        ]
+      },
+      "placementNotes": "Fixed low-relief woven surface. No cloth deformation, foot collision or slip resistance claim. Existing rectangular rug cannot fit this1250mm hall in either rotation.",
+      "status": "candidate-awaiting-root-and-independent-acceptance",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-narrow-hall-runner-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-narrow-hall-runner-01-top.png",
+      "front": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-front.png",
+      "rear": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-rear.png",
+      "left": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-left.png",
+      "right": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-right.png",
+      "under": "tools/blender/rpg_mansion/service_softgoods/evidence/rpg-mansion-narrow-hall-runner-01-under.png",
+      "hashes": {
+        "model": "2d70abca8105aec18d2e4cef833b7df34dea3976dfd0e33cd83caabc866b2024",
+        "sourceBlend": "96ddf653076fc7accc36ab1afa0a657c43297b1c56d4734a35034c129633b6f1",
+        "authoringBlend": "be7e0fcdcf99e10f3ec171a76bf14883d90b94ed20409b10aead2f8b8be3c4f6",
+        "validation": "9f1a2ff29fb98afac940e0e213cf316866f45e24b2978e5a430ef970cc847ea3",
+        "builder": "c3bc19f0a73e19a3635327249dd49912269803c8660c7a9523c9250bc8a7e32c",
+        "thumb": "d05c5472ab71976be67aa46e87ec5d58f9a715d72356254445e7a382ea25b266",
+        "top": "c1265ac114338aff33114d9e20187fca056873b82c525d767789058d9677db1b",
+        "front": "3105af07c55310e9c464f5ebb146e13fbc0a7968e07a815a51e9df90798a9d00",
+        "rear": "1c36905f35ae85e927fff7b496186d63d81e46b5a9f5a70b2ba8308295edda1c",
+        "left": "98876813b046b8598f480c8642cd6b909ebf25e920260cca268c123639fb6a73",
+        "right": "b708c282e6eda5a9d8de596ba1d48027ff577f2fd8570d9b89116746d72af138",
+        "under": "f331c5801cc44581e2393da05efe414f4b8087bc692ceb2b7cc2b916f76f2c03"
+      },
+      "glbBytes": 39188,
+      "dimensionBasis": "Measured final exported envelope in millimetres; no assumed equivalence to legacy geometry.",
+      "rights": {
+        "status": "original",
+        "thirdPartyMeshes": false,
+        "thirdPartyImages": false,
+        "paidGeneration": false,
+        "sources": []
+      },
+      "triangleBudgetRationale": "Explicit6000 maximum; repeated physical fasteners, hollow basin and tubular joinery preserve construction. The rug is below3000."
+    }
+  ],
+  "acceptanceStatus": "Producer candidate; root visual and independent acceptance required",
+  "name": "\u6d0b\u9928\u30fb\u5bb6\u4e8b\u9053\u5177\u3068\u5eca\u4e0b\u6577\u7269",
+  "sourceDescriptorSha256": "bfa010cd384a5c521adb55771e9645c0c0a5a3ea7d36f9bf5628f7d8fefd14f4"
+}

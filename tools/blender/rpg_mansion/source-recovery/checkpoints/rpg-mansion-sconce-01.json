@@ -1,0 +1,196 @@
+{
+  "id": "rpg-mansion-sconce-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-sconce-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-sconce-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-sconce-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 4,
+  "validation": {
+    "model": "rpg-mansion-sconce-01",
+    "dimensions_mm": [
+      209.99999344348907,
+      349.9999940395355,
+      500.0
+    ],
+    "bounds_m": [
+      [
+        -0.10499999672174454,
+        -0.17499999701976776,
+        0.0
+      ],
+      [
+        0.10499999672174454,
+        0.17499999701976776,
+        0.5
+      ]
+    ],
+    "triangles": 576,
+    "uv": {
+      "meters_per_uv": 0.9429728484162851,
+      "min": 0.8620187439877833,
+      "max": 1.1421918257496488,
+      "p05": 0.8839593692722547,
+      "p95": 1.060184971403009,
+      "total_triangles": 576,
+      "valid_triangles": 576,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Antique brass": "metal",
+      "RPG linen": "fabric"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 22068
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "9ebe20115e70f458cef5443b37115de821046c46add2e174757d366d97b25d90",
+    "bytes": 22068,
+    "triangles": 576,
+    "bounds_gltf_m": [
+      [
+        -0.10499999672174454,
+        0.0,
+        -0.17499999701976776
+      ],
+      [
+        0.10499999672174454,
+        0.5,
+        0.17499999701976776
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      209.99999344348907,
+      349.9999940395355,
+      500.0
+    ],
+    "geometry_material_sha256_1e7": "961129e3c3adb2e00d6628b40378c0657e8b2767bb93819f31a944cdd675e0c0",
+    "geometry_material_uv_sha256_1e7": "c6a7cb87723ede76dd90b4c6b116c3f2b575e6a17880679e83196fa6aee625d3",
+    "finish_channels": [
+      "fabric",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 388
+      },
+      {
+        "material": "RPG linen",
+        "channel": "fabric",
+        "triangles": 188
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "18fb55ad9aeede395dfc2b5980927e7e401988452388de8173133cb1c70f7b8a",
+    "bytes": 22272,
+    "triangles": 576,
+    "bounds_gltf_m": [
+      [
+        -0.10499999672174454,
+        0.0,
+        -0.17499999701976776
+      ],
+      [
+        0.10499999672174454,
+        0.5,
+        0.17499999701976776
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      209.99999344348907,
+      349.9999940395355,
+      500.0
+    ],
+    "geometry_material_sha256_1e7": "961129e3c3adb2e00d6628b40378c0657e8b2767bb93819f31a944cdd675e0c0",
+    "geometry_material_uv_sha256_1e7": "c6a7cb87723ede76dd90b4c6b116c3f2b575e6a17880679e83196fa6aee625d3",
+    "finish_channels": [
+      "fabric",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 388
+      },
+      {
+        "material": "RPG linen",
+        "channel": "fabric",
+        "triangles": 188
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 3.44,
+  "source_sha256": "d8f16fd43754dafc6671f6a36c5d11bcc54c0a32f2615893b05bd2c7774a68c1",
+  "front_sha256": "a238cfce834da21085d356a6e444a75a7940fd45bd0c61f0996fcaac5ba3447d",
+  "rear_sha256": "c08aa8576f0856b5229536c0b7b1cb4e8b26644de81d2060041caf759c0086a1",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:22.437080+00:00",
+    "source_sha256_before": "9560cc4d5aef568c4d2d403497f7b44627fe669f8214d1b5e4f3ba9052635258",
+    "source_sha256_after": "22ab73156f2bf31f1606544582d5be42086714e42880a1eb264c805cab544e26",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "5741fa03bdcd99b8ecec38770b4cab5d8749ed6ff96e97e4077db9e089ea8ec9",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:31.128639+00:00",
+    "source_sha256_before": "22ab73156f2bf31f1606544582d5be42086714e42880a1eb264c805cab544e26",
+    "source_sha256_after": "d8f16fd43754dafc6671f6a36c5d11bcc54c0a32f2615893b05bd2c7774a68c1",
+    "mesh_geometry_uv_material_digest_preserved": "629c4f7cbad59ffccda25e116a020000b7b211e23c825506d1af0cf35a507eb9",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-sconce-01-rear.png",
+        "render_filepath": "//rpg-mansion-sconce-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "d8f16fd43754dafc6671f6a36c5d11bcc54c0a32f2615893b05bd2c7774a68c1",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

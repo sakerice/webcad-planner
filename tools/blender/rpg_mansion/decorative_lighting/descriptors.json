@@ -1,0 +1,369 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・照明試作",
+  "prototypeOnly": true,
+  "items": [
+    {
+      "id": "rpg-mansion-banker-desk-lamp-01",
+      "name": "緑ガラス笠・バンカーズデスクランプ",
+      "kind": "table-lamp",
+      "group": "住設",
+      "category": "照明",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-banker-desk-lamp-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-banker-desk-lamp-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-banker-desk-lamp-01-top.png",
+      "front": "tools/blender/rpg_mansion/decorative_lighting/evidence/rpg-mansion-banker-desk-lamp-01-front.png",
+      "rear": "tools/blender/rpg_mansion/decorative_lighting/evidence/rpg-mansion-banker-desk-lamp-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/decorative_lighting/sources/rpg-mansion-banker-desk-lamp-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/decorative_lighting/authoring_sources/rpg-mansion-banker-desk-lamp-01.blend",
+      "validation": "tools/blender/rpg_mansion/decorative_lighting/sources/rpg-mansion-banker-desk-lamp-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/decorative_lighting/build.py",
+      "w": 468.0,
+      "d": 174.0,
+      "h": 420.0,
+      "authoredNominalDimensionsMm": [
+        468,
+        174,
+        420
+      ],
+      "actualMeasuredDimensionsMm": [
+        468.0,
+        174.0,
+        420.0
+      ],
+      "geometrySignature": "weighted-oval-base-articulated-yoke-halfcylinder-open-glass-tubular-bulb",
+      "triangleBudget": 6000,
+      "defaultElevation": 740,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "desk",
+      "semanticCoverage": "Weighted oval desktop base, physical articulated yoke and hollow green glass vault, supported horizontal tubular bulb with paired sockets.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "desk",
+          "supportPlaneGltfY": 0,
+          "defaultElevationMm": 740,
+          "note": "Place bottom on a 740mm desk plane. Static fixture; no configured runtime illumination."
+        },
+        "shade": {
+          "construction": "continuous cast glass closed volume with open underside",
+          "minimumWallThicknessMm": 6,
+          "openingWidthMm": 404,
+          "openingDepthMm": 162
+        },
+        "bulb": {
+          "type": "tubular mesh bulb",
+          "materialEmissionStrength": 0.3,
+          "runtimeLightObjects": 0
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.23399999737739563,
+            -0.08699999749660492,
+            0.0
+          ],
+          [
+            0.23399999737739563,
+            0.08699999749660492,
+            0.41999998688697815
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#96703c"
+        },
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#15583d"
+        },
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#d1c7ae"
+        }
+      ],
+      "sha256": "129ef274caa6507d88e47d1d2996e84ba3eaa0223c53efca880aac3ce5858d7a",
+      "sourceSha256": "03c84ce38254d5ace4b54d71ef2a00c3fb7af71e02fbaa4f10d6cedca9576b6f",
+      "authoringSha256": "1d5c5f9dc3f83ae7d0e4c206a79760ba8aecc2345d5d748a00f8c6b2e1db0054",
+      "previewSha256": {
+        "thumb": "8e9207154543adb6a8a20356dba8f5d2ef57e03558330453186aecf97afaa91e",
+        "top": "95b87a84c6c7cf3dcb9c60a9d0481e2dfd665c6b55a3da25f9015efc8e11c606",
+        "front": "58709df92c2e22d84113350213434307e5acc57f04c2ab1f56fd870022767616",
+        "rear": "52c53fffdb37fc5ba3ea7f1608352fa518d445925e943da63103bb85776eccde"
+      },
+      "qaInstallationEvidence": {
+        "thumb": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-banker-desk-lamp-01-thumb.png",
+          "sha256": "6d404dd330d0e9581f72a742af7525d2df5e6ae78897ab6567edfaa81be83f21",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "side": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-banker-desk-lamp-01-side.png",
+          "sha256": "58011488a35f9abbdb086b5d1f785b091acfa064d0d498deea4b269b7a9dfceb",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "underside": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-banker-desk-lamp-01-underside.png",
+          "sha256": "ec6c83e1daae403799dd7d73651b68679374ae79189508e525f66458bda9d384",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 18,
+      "status": "producer-passed-root-visually-reviewed-awaiting-independent-certificate"
+    },
+    {
+      "id": "rpg-mansion-bracketed-wall-lantern-01",
+      "name": "取付板と曲線腕付き・ガラス壁ランタン",
+      "kind": "wall-lamp",
+      "group": "住設",
+      "category": "照明",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bracketed-wall-lantern-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bracketed-wall-lantern-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bracketed-wall-lantern-01-top.png",
+      "front": "tools/blender/rpg_mansion/decorative_lighting/evidence/rpg-mansion-bracketed-wall-lantern-01-front.png",
+      "rear": "tools/blender/rpg_mansion/decorative_lighting/evidence/rpg-mansion-bracketed-wall-lantern-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/decorative_lighting/sources/rpg-mansion-bracketed-wall-lantern-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/decorative_lighting/authoring_sources/rpg-mansion-bracketed-wall-lantern-01.blend",
+      "validation": "tools/blender/rpg_mansion/decorative_lighting/sources/rpg-mansion-bracketed-wall-lantern-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/decorative_lighting/build.py",
+      "w": 300.0,
+      "d": 323.5,
+      "h": 600.0,
+      "authoredNominalDimensionsMm": [
+        300,
+        323.5,
+        600
+      ],
+      "actualMeasuredDimensionsMm": [
+        300.0,
+        323.5,
+        600.0
+      ],
+      "geometrySignature": "wall-plate-gooseneck-braced-bracket-hollow-framed-lantern-clear-panes",
+      "triangleBudget": 6000,
+      "defaultElevation": 1500,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "wall-bracket",
+      "semanticCoverage": "Backplate, braced gooseneck and real roof-to-frame hangers carry a hollow lantern with four clear panes, socket and bulb.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "wall-bracket",
+          "wallContactPlaneBlenderY": 0.151,
+          "defaultElevationMm": 1500,
+          "wallAnchorPart": "Wall mounting plate",
+          "note": "Back of plate lies on declared wall plane. Lantern bottom at 1500mm; no electrical fitting or runtime Light.",
+          "wallContactPlaneGltfZ": -0.16175000315904617
+        },
+        "shade": {
+          "construction": "four closed 3mm glass panels within metal frame; hollow hip roof and visible inner socket",
+          "glassThicknessMm": 3
+        },
+        "bulb": {
+          "type": "mesh opal bulb",
+          "materialEmissionStrength": 0.3,
+          "runtimeLightObjects": 0
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.010750003159046173,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.15000000596046448,
+            -0.17249999940395355,
+            0.0
+          ],
+          [
+            0.15000000596046448,
+            0.1509999930858612,
+            0.6000000238418579
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#39352e"
+        },
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#c2ded2"
+        },
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#d1c7ae"
+        }
+      ],
+      "sha256": "e87629efe628a8b14f5817ac32b0453366b6b09ac71e71437113c001de1bc98b",
+      "sourceSha256": "4657f30a8ef97be3582de02588994dbb77c6cd8f95df83acde29dea9f563c3d4",
+      "authoringSha256": "9e41656355d7a7b6e0b226eb033fea709e87fd6160245923c34e3b7f2f85bebd",
+      "previewSha256": {
+        "thumb": "81c17d9fb6acff63e2a97a015b72ebc458d38f8efc3194dbafe4182bdb86a991",
+        "top": "155417952016e9bb16062d0d72b5b9b0994b79394e863c6431ed4d425a1a789f",
+        "front": "86ea62d9a387a82ded2aa954a354bbaf602ed7fabc918526b42be7490a44d3ee",
+        "rear": "290848f49324cd95c07d33866f0fef18a122fd0586b211eb0f0cc1db1b9f66d1"
+      },
+      "qaInstallationEvidence": {
+        "thumb": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-bracketed-wall-lantern-01-thumb.png",
+          "sha256": "ffeb4f3659050376c856a01aa4dc7b1e3c7cb5c6abfd31a7a42a1f60b159ae54",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "side": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-bracketed-wall-lantern-01-side.png",
+          "sha256": "4f7e75bf024a5d17f5de2401c350a4c502c63b46989129abf857706588940006",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "underside": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-bracketed-wall-lantern-01-underside.png",
+          "sha256": "0bd967048a1a7790f8973bd57c5e7f826b3915b6add0fc3b08090fb5577f3c2b",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 31,
+      "status": "producer-passed-root-visually-reviewed-awaiting-independent-certificate"
+    },
+    {
+      "id": "rpg-mansion-linear-four-light-pendant-01",
+      "name": "二本吊りロッド・四灯リニアペンダント",
+      "kind": "pendant-lamp",
+      "group": "住設",
+      "category": "照明",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-linear-four-light-pendant-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-linear-four-light-pendant-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-linear-four-light-pendant-01-top.png",
+      "front": "tools/blender/rpg_mansion/decorative_lighting/evidence/rpg-mansion-linear-four-light-pendant-01-front.png",
+      "rear": "tools/blender/rpg_mansion/decorative_lighting/evidence/rpg-mansion-linear-four-light-pendant-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/decorative_lighting/sources/rpg-mansion-linear-four-light-pendant-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/decorative_lighting/authoring_sources/rpg-mansion-linear-four-light-pendant-01.blend",
+      "validation": "tools/blender/rpg_mansion/decorative_lighting/sources/rpg-mansion-linear-four-light-pendant-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/decorative_lighting/build.py",
+      "w": 1400.0,
+      "d": 254.133,
+      "h": 600.0,
+      "authoredNominalDimensionsMm": [
+        1400,
+        254.133,
+        600
+      ],
+      "actualMeasuredDimensionsMm": [
+        1400.0,
+        254.133,
+        600.0
+      ],
+      "geometrySignature": "ceiling-canopy-two-suspension-rods-rectangular-beam-four-open-spun-shades",
+      "triangleBudget": 6000,
+      "defaultElevation": 2100,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "ceiling-rods",
+      "semanticCoverage": "One static four-head linear pendant with common ceiling canopy, paired suspension rods, physical shade retaining collars and four open spun shades.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "installation": {
+          "mount": "ceiling-rods",
+          "ceilingContactPlaneBlenderZ": 0.6,
+          "defaultElevationMm": 2100,
+          "ceilingPlaneMm": 2700,
+          "note": "Fixture bottom 2100mm and canopy top 2700mm. No automatic ceiling following or native illumination."
+        },
+        "shade": {
+          "construction": "four distinct downward-open spun shells with 3mm nominal sheet separation",
+          "openingDiameterMm": 246,
+          "minimumAuthoredSheetThicknessMm": 2
+        },
+        "bulb": {
+          "type": "four mesh opal bulbs",
+          "materialEmissionStrength": 0.3,
+          "runtimeLightObjects": 0
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.699999988079071,
+            -0.1270667314529419,
+            0.0
+          ],
+          [
+            0.699999988079071,
+            0.1270667314529419,
+            0.6000000238418579
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#39352e"
+        },
+        {
+          "key": "shade",
+          "label": "笠",
+          "default": "#c9bd9b"
+        },
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#fff0c9"
+        },
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#d1c7ae"
+        }
+      ],
+      "sha256": "52637361d4802565a00a514b5ba49fe2d500316eb4020eb8d17e10c7b52c686a",
+      "sourceSha256": "a8cf49e0aa62d2d36eda2eece08396be4fc7c3762ba68980de8d02ae31447684",
+      "authoringSha256": "a981766cc5dbe13274b14e578a123cada434e5e202c5647029a80bd22537d0f6",
+      "previewSha256": {
+        "thumb": "47f8eb6f259b6f6cf4562a6450d6e32d6258db26ad73c587c0f6c36172eabd29",
+        "top": "5db0596d33ca5268e0fcdcfdbb24cb27b9a71f52448f904019cb435b9ccd1d63",
+        "front": "8dd6ad37822870ff8a0ce10b6ba43acac3ddbfc158ac312a19a73baec00004cf",
+        "rear": "635736033bda87013732fc16c682050e2d15f29d3842b4cb7cbf6deda470b625"
+      },
+      "qaInstallationEvidence": {
+        "thumb": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-linear-four-light-pendant-01-thumb.png",
+          "sha256": "5640c6ea44bbf227e26ade0508b94cb6f599f681dbb779a8dbacbd3fe3924470",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "side": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-linear-four-light-pendant-01-side.png",
+          "sha256": "d21a1dfbcc61652f3089c69f805e8170815c08b4216d1339880f10a5c51164ed",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "underside": {
+          "path": "tools/blender/rpg_mansion/decorative_lighting/evidence/qa-installed-rpg-mansion-linear-four-light-pendant-01-underside.png",
+          "sha256": "556cef7b489dc1646b2da25532cdb84206183606b982b693916ad4abc9ab3d08",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 28,
+      "status": "producer-passed-root-visually-reviewed-awaiting-independent-certificate"
+    }
+  ]
+}

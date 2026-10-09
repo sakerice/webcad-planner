@@ -1,0 +1,173 @@
+{
+  "name": "hollow-roof-gable",
+  "source": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable.blend",
+  "sourceSha256": "198e1351c3bdc5e25a6697899359470a191cdd47d834134d8731cec333a05fb7",
+  "instances": [
+    {
+      "label": "slate-gable-span",
+      "id": "rpg-mansion-slate-gable-span-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slate-gable-span-01.glb",
+      "modelSha256": "ab98e580b7c4c7739301a052ffb00646ad05fd3bed040263ab33db3b195756ae",
+      "constructionDatumWorldM": [
+        0,
+        0.48,
+        2.9
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "Second roof repeat",
+      "id": "rpg-mansion-slate-gable-span-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slate-gable-span-01.glb",
+      "modelSha256": "ab98e580b7c4c7739301a052ffb00646ad05fd3bed040263ab33db3b195756ae",
+      "constructionDatumWorldM": [
+        0,
+        1.68,
+        2.9
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "gable-end-closure",
+      "id": "rpg-mansion-gable-end-closure-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gable-end-closure-01.glb",
+      "modelSha256": "7b4078f59fd9b5b093f8c7ca54bedf227d96e0bb7a2dbbfb49bed74993516713",
+      "constructionDatumWorldM": [
+        0,
+        0,
+        3
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.016499999910593033,
+        0.0
+      ]
+    },
+    {
+      "label": "West actual paneled bearing wall 1",
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "modelSha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+      "constructionDatumWorldM": [
+        -1.8,
+        0.48,
+        0
+      ],
+      "zRotationDegrees": 90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.019999999552965164,
+        0.0
+      ]
+    },
+    {
+      "label": "West actual paneled bearing wall 2",
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "modelSha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+      "constructionDatumWorldM": [
+        -1.8,
+        1.68,
+        0
+      ],
+      "zRotationDegrees": 90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.019999999552965164,
+        0.0
+      ]
+    },
+    {
+      "label": "East actual paneled bearing wall 1",
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "modelSha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+      "constructionDatumWorldM": [
+        1.8,
+        0.48,
+        0
+      ],
+      "zRotationDegrees": -90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.019999999552965164,
+        0.0
+      ]
+    },
+    {
+      "label": "East actual paneled bearing wall 2",
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "modelSha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+      "constructionDatumWorldM": [
+        1.8,
+        1.68,
+        0
+      ],
+      "zRotationDegrees": -90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.019999999552965164,
+        0.0
+      ]
+    }
+  ],
+  "fixtures": [
+    "QA fixture front wall with real open door"
+  ],
+  "views": {
+    "exterior": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-exterior.png",
+      "sha256": "f91f8095ef1833e8f990b35141a311de3ed169b52726280baf573734ca28ffc6",
+      "camera": {
+        "direction": [
+          6,
+          -8,
+          4
+        ],
+        "resolution": 1024,
+        "orthographicScale": 5.9222211837768555,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    },
+    "interior": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-interior.png",
+      "sha256": "ffeb86d692436c040bf386c87227c22544e43eba9dd92669b65c69c92a4dea67",
+      "camera": {
+        "direction": [
+          2,
+          8,
+          -0.6
+        ],
+        "resolution": 1024,
+        "orthographicScale": 5.232229232788086,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    },
+    "top": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-top.png",
+      "sha256": "acd24a028ae1bbc3749c0a42ba3eb0af67037cd3e9cd37d426bbfee292315084",
+      "camera": {
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "resolution": 1024,
+        "orthographicScale": 4.719101428985596,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    }
+  }
+}
