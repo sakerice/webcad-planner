@@ -17,4 +17,4 @@
 - **出荷済みの素材は差し替えない**: ソファ（`rpg-mansion-sofa-01`）と翼付きアームチェア（`rpg-mansion-wing-chair-01`）は、Codex が同じ ID のまま作り直していた。
   すでに置いた利用者のプランの見た目が変わるので、作り直した版は `-02` の別 ID で足し、`-01` はカタログから外して描画用に残した
   （`tools/tests/fixtures/asset-sets/shipped.json` が本番に出た55点のモデルの中身を見張る）
-- 「外部の素材を使っていない」: 生成スクリプトに外部のモデル・画像の読み込み（import_scene・append/link・images.load・URL）が無いことを 2026-10-08 に確認した（#83 の追加分は未確認）
+- 「外部の素材を使っていない」: 生成スクリプトの外部読み込み（import_scene・append/link・images.load・URL）を 2026-10-10 に全数確認した。import_scene はこのセット自身の GLB を組み立て・確認画像のために読むもの、images.load は自分で描いた確認画像の余白を測るもので、外部の素材やネットワークからの読み込みは無い
