@@ -1,0 +1,123 @@
+{
+  "model": "rpg-mansion-kitchen-bottle-rack-300-01",
+  "dimensions_mm": [
+    300.00001192092896,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.15000000596046448,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.15000000596046448,
+      0.32499998807907104,
+      0.8500000238418579
+    ]
+  ],
+  "triangles": 888,
+  "uv": {
+    "meters_per_uv": 3.660642976112983,
+    "min": 2.987379876794237,
+    "max": 4.217646869035942,
+    "p05": 3.06954588080328,
+    "p95": 4.074739294482666,
+    "total_triangles": 888,
+    "valid_triangles": 888,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 41028,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "83ee28892ef1d5c8d31b50f1bbc9fdd31e266b142c8bac259bcf6ba987429887",
+  "source_sha256": "d9da119d406fdaa561424d966de74932a657419d4f01b7d6825646fb5a7c3f6a",
+  "countertop_height_mm": 850,
+  "source_bytes": 120309,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    300.00001192092896,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.15000000596046448,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.15000000596046448,
+      0.8500000238418579,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 888,
+    "valid_triangles": 888,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 3.069544268713911,
+    "p95": 4.074927222474441,
+    "p95_p05": 1.3275349256265228,
+    "median": 3.6606403157227168
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-bottle-rack-300-01.glb",
+      "sha256": "83ee28892ef1d5c8d31b50f1bbc9fdd31e266b142c8bac259bcf6ba987429887",
+      "bytes": 41028
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-bottle-rack-300-01.blend",
+      "sha256": "d9da119d406fdaa561424d966de74932a657419d4f01b7d6825646fb5a7c3f6a",
+      "bytes": 120309
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bottle-rack-300-01-thumb.png",
+      "sha256": "d350b2917cf38cacc26939fdb016e00f6366ceb8e0f8d0c5a7a1de46e7c368e7",
+      "bytes": 225413
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bottle-rack-300-01-top.png",
+      "sha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49",
+      "bytes": 201116
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-front.png",
+      "sha256": "6ba70708cce4989a76d313eea69a42e0ce943370233cb8328199524b4312f1a9",
+      "bytes": 512887
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-rear.png",
+      "sha256": "3ee76f6aee3684a39fd552e321f4b35552b72c54354537d5ac77236dcb8cbe19",
+      "bytes": 470165
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "model": "rpg-mansion-high-backed-slipper-bath-01",
+  "dimensions_mm": [
+    1779.9999713897705,
+    819.9999928474426,
+    861.9999885559082
+  ],
+  "bounds_m": [
+    [
+      -0.8899999856948853,
+      -0.4099999964237213,
+      0.0
+    ],
+    [
+      0.8899999856948853,
+      0.4099999964237213,
+      0.8619999885559082
+    ]
+  ],
+  "triangles": 1748,
+  "uv": {
+    "meters_per_uv": 3.6669058720821432,
+    "min": 3.6642161559211988,
+    "max": 3.6703157506388298,
+    "p05": 3.6665026978391895,
+    "p95": 3.6674649798791887,
+    "total_triangles": 1748,
+    "valid_triangles": 1748,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Ivory fired porcelain": "ceramic",
+    "Bronzed cast iron brackets": "metal",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 121016,
+  "datums": {
+    "rimHeightMm": {
+      "lowEndCrest": 622,
+      "highEndCrest": 862
+    },
+    "internalFloorHeightMm": 225,
+    "clearBowlMm": {
+      "rimLength": 1650,
+      "rimWidth": 690,
+      "floorLength": 1220,
+      "floorWidth": 390,
+      "lowEndDepthToRimCrest": 397,
+      "innerOpeningLowHeight": 614,
+      "innerOpeningHighHeight": 854
+    },
+    "faucetHeightMm": null,
+    "fixtureNote": "No faucet included. Supply is a separate fixture.",
+    "capacityNote": "One bathing occupant; volume and safety are not certified.",
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.8899999856948853,
+        -0.4099999964237213,
+        0.0
+      ],
+      [
+        0.8899999856948853,
+        0.4099999964237213,
+        0.8619999885559082
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    2.3884703750809425e-05,
+    2.3885174262735145e-05,
+    1.1216816308963947e-05,
+    0.0014606776518348852,
+    2.6024760093908597e-05,
+    2.3863620754127617e-05,
+    0.001460677768250207,
+    0.1332044501462709,
+    2.3863870562005705e-05,
+    0.0014606771803376735,
+    0.0014606770639223516
+  ],
+  "source_sha256": "5c87a94336f78e7c2588e1739440e9520e7e8c3ecd74f54709482556dd3e4ff6",
+  "glb_sha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014"
+}

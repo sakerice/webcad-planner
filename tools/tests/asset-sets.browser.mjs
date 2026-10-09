@@ -22,9 +22,18 @@ try {
   assert.equal(await page.locator('.asset-set-mark').count(), 0, '標準だけのとき、見出しにセットの印が出ている');
   assert.equal(await page.locator('#sidebar [data-tool^="rpg-mansion-"]').count(), 0, '標準だけのとき、洋館の物が並んでいる');
 
+  const { readFileSync } = await import('node:fs');
+  const manifest = JSON.parse(readFileSync(new URL('../../assets/models/packs/rpg-mansion/manifest.json', import.meta.url), 'utf8'));
+  const listed = manifest.items.filter((i) => !i.retired).length;
+  const retired = manifest.items.filter((i) => i.retired).map((i) => i.id);
   await page.click('.asset-set-option[data-asset-set="rpg-mansion"]');
   await page.waitForTimeout(400);
-  assert.equal(await count(), standardOnly + 55, '洋館を足しても 55 点増えない');
+  assert.equal(await count(), standardOnly + listed, `洋館を足しても ${listed} 点増えない`);
+  // カタログから外した版は並ばないが、登録は残っている（置いてあるプランが描ける）
+  for (const id of retired) {
+    assert.equal(await page.locator(`#sidebar [data-tool="${id}"]`).count(), 0, `${id}: カタログから外した版が並んでいる`);
+    assert.ok(await page.evaluate((id) => !!getFmpItem(id), id), `${id}: カタログから外した版の登録が消えている`);
+  }
   assert.ok(await page.locator('#fmp-furniture .asset-subhdr[title="チェア"] .asset-set-mark').count(), 'チェアの見出しに洋館の印が無い');
 
   // 検索結果のカードに、そのカードの中に札が出ていること
@@ -36,7 +45,7 @@ try {
     const c = card.getBoundingClientRect(), b = badge.getBoundingClientRect();
     return b.left >= c.left - 1 && b.top >= c.top - 1 && b.right <= c.right + 1 && b.bottom <= c.bottom + 1 ? 'inside' : 'outside';
   }));
-  assert.equal(placement.length, 55, '「洋館」の検索で 55 点出ない');
+  assert.equal(placement.length, listed, `「洋館」の検索で ${listed} 点出ない`);
   assert.deepEqual([...new Set(placement)], ['inside'], '検索結果の札がカードの中に出ていない: ' + [...new Set(placement)].join(','));
   await page.fill('#object-search-input', '');
 

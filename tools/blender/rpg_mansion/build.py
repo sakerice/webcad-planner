@@ -197,7 +197,10 @@ def main():
     items=[]
     selected=sys.argv[sys.argv.index('--only')+1].split(',') if '--only' in sys.argv else None
     existing=PACK/'manifest.json'
-    if not selected and existing.exists() and len(json.loads(existing.read_text()).get('items',[]))>len(SPECS):
+    from catalogue_metadata import is_normalized, production_item, merge_items, write_catalogue
+    current=json.loads(existing.read_text()) if existing.exists() else None
+    normalized=bool(current and is_normalized(current))
+    if not selected and not normalized and existing.exists() and len(json.loads(existing.read_text()).get('items',[]))>len(SPECS):
         raise RuntimeError('Expanded catalogue exists. Use --only for legacy assets; expansion/build.py preserves all existing entries.')
     for slug,name,size,fn,category,elevation in SPECS:
         if selected and slug not in selected: continue
@@ -230,7 +233,10 @@ def main():
         recoveryC072='not-restored',provenance={'method':'Original procedural Blender modelling','externalAssets':[],
         'sharedHelpers':['tools/blender/model_kit.py','tools/blender/build_decor.py','tools/blender/shape_kit.py','tools/blender/exterior_build.py']},items=items)
     PACK.mkdir(parents=True,exist_ok=True)
-    if not selected:(PACK/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+    if normalized:
+        write_catalogue(existing, merge_items(current, items))
+    elif not selected:
+        (PACK/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
 
 def channel_descriptor(obj,key):
     mat=next(m for m in obj.data.materials if m.get('finishChannel')==key)

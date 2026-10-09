@@ -1,0 +1,1106 @@
+{
+ "note": "本番に出た洋館の素材（55点は 2026-10-08 PR #81、残りは 2026-10 の273点取り込み）。保存プランは ID で家具を持つので、この ID のモデルは差し替えない。作り直すときは別の ID で足し、元の ID は retired にして残す。",
+ "set": "rpg-mansion",
+ "items": {
+  "rpg-mansion-chair-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-chair-01.glb",
+   "sha256": "cc88d91918b287e850ba8ed495b22a58862ae5126f7ebd5f6e8c524758cee13c"
+  },
+  "rpg-mansion-desk-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-desk-01.glb",
+   "sha256": "c39663186e2f1deafb014434d8264584818091ea0b45bfc70df0046f6f36d732"
+  },
+  "rpg-mansion-bookcase-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bookcase-01.glb",
+   "sha256": "ff28a3ecd45616c65cd723a1cf0d4e6bf7735f5235672e55e30552c0fc0d2be6"
+  },
+  "rpg-mansion-candlestick-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-candlestick-01.glb",
+   "sha256": "e90befcfd413852e47c64739c42d231736ce407afe19752be35faa3dbc8b2242"
+  },
+  "rpg-mansion-frame-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-frame-01.glb",
+   "sha256": "4e0c3040d039f278b866f68980b362dde35409a1916fd9e2b28dced5565a40db"
+  },
+  "rpg-mansion-chest-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-chest-01.glb",
+   "sha256": "275f126b634cc09cfc3d213f7b07f74500a083b1a1a7df8079d7a84b732ea77a"
+  },
+  "rpg-mansion-rug-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rug-01.glb",
+   "sha256": "1edecea53c2d9dc87d964897ea760c75fa0ab1778d1e0907dc920322ed97b841"
+  },
+  "rpg-mansion-side-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-side-table-01.glb",
+   "sha256": "0e3de9ae08e7b65b1787bfd40fc4252a9bb3b595481f8494937194f92664f45d"
+  },
+  "rpg-mansion-mantel-clock-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-mantel-clock-01.glb",
+   "sha256": "95747d5301e5acd372805fdfd289d9bed0939e7acade6741834c06437989f221"
+  },
+  "rpg-mansion-letter-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-letter-01.glb",
+   "sha256": "86866397ed51b1f2bc11c27a5e57b5ac8f5fa3ba7706ace4349d1857037e49a7"
+  },
+  "rpg-mansion-key-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-key-01.glb",
+   "sha256": "11b959d36cff185876170e2c11a390d5634c108bc328e0747fc639541a9fd36c"
+  },
+  "rpg-mansion-fallen-chair-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-fallen-chair-01.glb",
+   "sha256": "b71ea27d3b931fa935e67bae935de1ce62ae3e1381366287490403fb9ad0db53"
+  },
+  "rpg-mansion-glass-shards-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-glass-shards-01.glb",
+   "sha256": "759cecf7e5a8d33f99293a2c38a37a1675f1a3dd875a62905d684822c9581347"
+  },
+  "rpg-mansion-clue-stain-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-clue-stain-01.glb",
+   "sha256": "b39c8f9e52124e9eafa40f9c03e2aecd6b9bb29b4cbce7f3247546246d9ffb23"
+  },
+  "rpg-mansion-wing-chair-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-wing-chair-01.glb",
+   "sha256": "b307c79b25cbbd34f467424ddf7fa1bf2d2b42a172596626c5384cded6addf3d"
+  },
+  "rpg-mansion-sofa-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-sofa-01.glb",
+   "sha256": "5d9230f4dd7c953db9c8bc643e61588dcd4edc81dc455a16d6b981856ee24151"
+  },
+  "rpg-mansion-chaise-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-chaise-01.glb",
+   "sha256": "94f10542405faff8e100cb95c8df931d0c7301e2c6d095eaa9a0e25c208d43d3"
+  },
+  "rpg-mansion-bench-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bench-01.glb",
+   "sha256": "658df531e1ff1c8c2ffd7e80db79ab597972cd1862b6f26eb15a5004514fbc0c"
+  },
+  "rpg-mansion-stool-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stool-01.glb",
+   "sha256": "0c3ce23e96a4d9eae0aa9b10667ae3328e3717f15f638895ab29b9d84b1f2996"
+  },
+  "rpg-mansion-dining-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-dining-table-01.glb",
+   "sha256": "78b42f0e694af94ce8e62fdc783ddfaabc519fee4a4293bb8251c806c2a6fccf"
+  },
+  "rpg-mansion-round-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-round-table-01.glb",
+   "sha256": "f70fa914634b31f0fd834a7164cf2f9e47ea88dc896536978f1a67fb71a80de1"
+  },
+  "rpg-mansion-coffee-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-coffee-table-01.glb",
+   "sha256": "f410c850b36dfe75cc2c6d9f24dfb2ea1529c0d3ecc0b3f07edba497e7f7eb5d"
+  },
+  "rpg-mansion-console-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-console-01.glb",
+   "sha256": "bc6272d9e95821624197d2c04e42a9d5086cc3a2602194a3f2f43dbb4967bc69"
+  },
+  "rpg-mansion-secretary-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-secretary-01.glb",
+   "sha256": "5165b72baebfe8d8ec81fae5d5fecc6ea7545133d2c140646d0481c6cb8edd56"
+  },
+  "rpg-mansion-worktable-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-worktable-01.glb",
+   "sha256": "98f5e32a772066f86332a3bd6900740c287f6d74e705a0c30f524c1b9457fa10"
+  },
+  "rpg-mansion-single-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-single-bed-01.glb",
+   "sha256": "5ae072fd85fe104bbf53ab6ee38a586b84aef7c02980b4fab3e1f518a1fbb9e2"
+  },
+  "rpg-mansion-canopy-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-canopy-bed-01.glb",
+   "sha256": "441891756eb07883a27d7515686d1f1c23adf3836d11f2af54760a22dc1ce14a"
+  },
+  "rpg-mansion-nightstand-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-nightstand-01.glb",
+   "sha256": "00db26a181c27c135b606c08fdb177205034a177f82cb718fc557ddabe3f2dd0"
+  },
+  "rpg-mansion-wardrobe-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-wardrobe-01.glb",
+   "sha256": "c071304c976de2e757a479f66b5ff09563bd97dd99278af66a542930ed044f72"
+  },
+  "rpg-mansion-dresser-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-dresser-01.glb",
+   "sha256": "8f579d321640901896869998c73533ff97631097da41723eec5a80b9e0c8f3f4"
+  },
+  "rpg-mansion-linen-cabinet-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-linen-cabinet-01.glb",
+   "sha256": "ffce5070e474bec58f9d567406a1003806e4b27f31b1e7db9e83d8416d5ab488"
+  },
+  "rpg-mansion-kitchen-hutch-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-hutch-01.glb",
+   "sha256": "a5bc377d946258acb7f8e868a6737af64b9c02fa2859f2e5b0515edad255bfb0"
+  },
+  "rpg-mansion-butler-sink-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-butler-sink-01.glb",
+   "sha256": "e82de8a6b4f34e10e954df78346bffd8698ea1a45ee40598959f8d4501ead8fc"
+  },
+  "rpg-mansion-range-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-range-01.glb",
+   "sha256": "c4a681262f498fb6a00f5b337fce41ce4914111e2e85fc1da064c56a4530fc62"
+  },
+  "rpg-mansion-icebox-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-icebox-01.glb",
+   "sha256": "5159a5d5af05d0fb85fffcd792fb77513a2d15b4d0d9e38367fb166f6bce032d"
+  },
+  "rpg-mansion-bathtub-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bathtub-01.glb",
+   "sha256": "fafe0bfe0c7ce4a9cfdc14a75b556879bce2f39738472bd80a5b9646fb655876"
+  },
+  "rpg-mansion-toilet-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-toilet-01.glb",
+   "sha256": "9d444b79bd0b67248ba88f9e762e41356478dffd42b2f03d770a51bb003297bb"
+  },
+  "rpg-mansion-washstand-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-washstand-01.glb",
+   "sha256": "f05be3bffc31f7e5d16d5479dacdd904e74f17624c4c51da4635af3fe7ba4996"
+  },
+  "rpg-mansion-floor-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-floor-lamp-01.glb",
+   "sha256": "69342e103bad69595fd4f8d3297d126ee67bfa4749d2d3752c924464c42487e7"
+  },
+  "rpg-mansion-table-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-table-lamp-01.glb",
+   "sha256": "4a96758aa9a91dae77e2ecdf4d57ce0694e59e73614609a73850be63a680bf5f"
+  },
+  "rpg-mansion-sconce-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-sconce-01.glb",
+   "sha256": "18fb55ad9aeede395dfc2b5980927e7e401988452388de8173133cb1c70f7b8a"
+  },
+  "rpg-mansion-chandelier-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-chandelier-01.glb",
+   "sha256": "a8df412b092f913492948e7246de9d0a6b044d47cb3b3396dc6252fc6a4eca90"
+  },
+  "rpg-mansion-mirror-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-mirror-01.glb",
+   "sha256": "459c251acacc6a9910dd4f01c29b843a03cf494db9daaa65c0cbe26bb9c2d028"
+  },
+  "rpg-mansion-curtain-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-curtain-01.glb",
+   "sha256": "dc0e749533c6e8db97eea40aa72c6c3ff66cb24c98756504a9e5512cd639698c"
+  },
+  "rpg-mansion-coat-stand-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-coat-stand-01.glb",
+   "sha256": "d921a16df15b35c583db408042d2ec2024403e33ca8f1dc0000ba054e7250acc"
+  },
+  "rpg-mansion-umbrella-stand-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-umbrella-stand-01.glb",
+   "sha256": "a4ee0042040b5e0fa27daced0df366ff6b4791a5e3aac5fc5f168ec3dc26f41b"
+  },
+  "rpg-mansion-planter-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-planter-01.glb",
+   "sha256": "a4b255d7b5c9759438ea69d7d36445e13d381acdf240dc30105298898f0194a1"
+  },
+  "rpg-mansion-fireplace-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-fireplace-01.glb",
+   "sha256": "63dcf352cb876130c59bf69c3ab2b9938b979014e7263442937995f0ae2c0fb9"
+  },
+  "rpg-mansion-radiator-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-radiator-01.glb",
+   "sha256": "9e8bac152965d8b7074e5b5b91109305533ce46b2df29f6cc67c4105d5fd4b0c"
+  },
+  "rpg-mansion-armour-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-armour-01.glb",
+   "sha256": "472dfa610d2acb582df58855768ae11c13da748f28d7719d54783f4eead8968f"
+  },
+  "rpg-mansion-kitchen-base-cupboard-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-base-cupboard-01.glb",
+   "sha256": "5d93177936de3cc186587c92af133a23de1a774215c6254fdac59df3706e2f10"
+  },
+  "rpg-mansion-kitchen-drawer-base-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-drawer-base-01.glb",
+   "sha256": "07a941ce2f2998ed47a1e96ac83d42c42d56071bd6bc4ac6d6e7c08f8a56e5a2"
+  },
+  "rpg-mansion-kitchen-corner-base-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-corner-base-01.glb",
+   "sha256": "310ae57839c33624d2fa65d56f34db7298834bae6dd06c872423bad02e32b0bf"
+  },
+  "rpg-mansion-kitchen-wall-cupboard-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-wall-cupboard-01.glb",
+   "sha256": "6de8b4bed6a222439e7fb449daa2558de485020e6964d5961955cef55de5b264"
+  },
+  "rpg-mansion-kitchen-pan-rack-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-pan-rack-01.glb",
+   "sha256": "f5f9634c7c50f7537b3cbd7bd94db6f0362705de9d29aa00f14c2e92547bf743"
+  },
+  "rpg-mansion-wing-chair-02": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-wing-chair-02.glb",
+   "sha256": "33eece9df3823e150ef58431fbcc7fe553e371984d5fd8cb02e9db76173a1fac"
+  },
+  "rpg-mansion-sofa-02": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-sofa-02.glb",
+   "sha256": "d583b5a5b445fdb2ae068830a98743a9f769d7bfafae1675e035678b9f2f3cd2"
+  },
+  "rpg-mansion-upright-piano-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-upright-piano-01.glb",
+   "sha256": "c359ea2b2909426025a3bffc40b4417b2c597c7a233dab5fa048099c9aca84d3"
+  },
+  "rpg-mansion-floor-globe-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-floor-globe-01.glb",
+   "sha256": "ffcdf8940989b428701db94eae4243ab3011f5129bc67c4aebc55047796db330"
+  },
+  "rpg-mansion-oval-pedestal-dining-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-pedestal-dining-01.glb",
+   "sha256": "943cf28ddf7a3a3ba4be075656ed9ab5cca3535fe08aaa775037008c5581a17d"
+  },
+  "rpg-mansion-kidney-writing-desk-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kidney-writing-desk-01.glb",
+   "sha256": "24af2c7b855776acc866d60713044f09ae0d0afe7ad60f9e4eef601ad2fefb66"
+  },
+  "rpg-mansion-drum-library-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-drum-library-table-01.glb",
+   "sha256": "9783abf31ee7cc1f986a28fedd89f5e6aab58ede00928ead89cab0de4ddb7fca"
+  },
+  "rpg-mansion-gateleg-drop-leaf-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gateleg-drop-leaf-01.glb",
+   "sha256": "57b5231618d22f3f2774e916ebc8fbb18f57ee0c71a37f34353c4b3a42bdea70"
+  },
+  "rpg-mansion-folding-tea-tray-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-folding-tea-tray-table-01.glb",
+   "sha256": "90258f7f9e135f895a4b8e4b9ccb91f3d43189a83a98b29ba7fb84e9c3ce6eb6"
+  },
+  "rpg-mansion-baize-card-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-baize-card-table-01.glb",
+   "sha256": "d03aee4c815d7f00dac7fab53b50d77f41ccc4c9024d2782ccfbea4e8d91eb18"
+  },
+  "rpg-mansion-trestle-banquet-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-trestle-banquet-table-01.glb",
+   "sha256": "8a229c248f6744775c46257fda64ede8f458758b208cbd39eba6d7b12aa6f351"
+  },
+  "rpg-mansion-octagonal-center-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagonal-center-table-01.glb",
+   "sha256": "80f2226e66111f1852257878b791d26a93f0e83f7941956901464a1ab715f051"
+  },
+  "rpg-mansion-half-moon-console-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-half-moon-console-01.glb",
+   "sha256": "be4151a7a7f027a55c9c52003d0a9627f7ee9bb22588b53fad579664eeda02a6"
+  },
+  "rpg-mansion-pedestal-chess-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-pedestal-chess-table-01.glb",
+   "sha256": "9847a6556e6b192e67c626ba4c76e5dc2d62e7124d906ac8eea64ca645a3fd35"
+  },
+  "rpg-mansion-oval-mirror-dressing-table-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-mirror-dressing-table-01.glb",
+   "sha256": "54815a694477861d0d03049ed1b01bbfbf0a6b6d96b9753442e2f7a355d8dd0c"
+  },
+  "rpg-mansion-davenport-writing-desk-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-davenport-writing-desk-01.glb",
+   "sha256": "bc91c9738db14e335779384fdb2024b5a2003a7a4b9858124f870f2e61043dd8"
+  },
+  "rpg-mansion-three-tier-dumbwaiter-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-three-tier-dumbwaiter-01.glb",
+   "sha256": "e1973b1e6f7561cf2e19586eee1265e07eb8f0424cb15dc7e925fe016f037588"
+  },
+  "rpg-mansion-partners-leather-desk-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-partners-leather-desk-01.glb",
+   "sha256": "e72fa7425def520cd0ce44287c949e092e0212f1f66cee021fdc51a16114b44b"
+  },
+  "rpg-mansion-roll-top-writing-desk-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-roll-top-writing-desk-01.glb",
+   "sha256": "d6d8d8c4a2b0cc388bffd68f55d973c8f0e2d9e9d1b7fab1b65d532ea3e04d7e"
+  },
+  "rpg-mansion-bow-commode-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bow-commode-01.glb",
+   "sha256": "66a126ab7f0e65515d3fec9d7c96a7789172c92e4a39fcbabe37ad7cf8f3f974"
+  },
+  "rpg-mansion-arched-vitrine-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-vitrine-01.glb",
+   "sha256": "a7d05673697d92bdf0a72751e06b0a42e00222f4fdfca42aed90afbd6d17552d"
+  },
+  "rpg-mansion-slant-bureau-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slant-bureau-01.glb",
+   "sha256": "db53d31cbd4e3f498145a3525cd9723ad70539bb1c1c6f40f26424f3f6a4f162"
+  },
+  "rpg-mansion-linen-press-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-linen-press-01.glb",
+   "sha256": "9830a37f0dfcb46a998cb328229aa5c8b72bc275a3a6dc299c683a03abcdad3f"
+  },
+  "rpg-mansion-louver-cupboard-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-louver-cupboard-01.glb",
+   "sha256": "457b08db71f07840ba17338e7a2bbc1b0b5ed1f75486ab4533212c424c333220"
+  },
+  "rpg-mansion-open-etagere-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-open-etagere-01.glb",
+   "sha256": "027b78d418f2c6a76f879746b9aad0d43e427c491b53aacf02f6045ba1b26b52"
+  },
+  "rpg-mansion-oval-pedestal-cabinet-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-pedestal-cabinet-01.glb",
+   "sha256": "253d4d8dfea9dc0b6db3b0e109160f88932a787b502a13c907b4bfa8a7c76677"
+  },
+  "rpg-mansion-apothecary-chest-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-apothecary-chest-01.glb",
+   "sha256": "19dc63e5d5b365f58bbd6aae7d5d69743b0935f4283966c9827fee9bf33897e7"
+  },
+  "rpg-mansion-blanket-coffer-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-blanket-coffer-01.glb",
+   "sha256": "e720cfdcb9e3d55c878aeb78f2ea240952ca42e7d02955221d7ca0d94712d756"
+  },
+  "rpg-mansion-glazed-credenza-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-glazed-credenza-01.glb",
+   "sha256": "0d94f86db1fc22a1efdc0b6bde80f5050e56ce213eac4455e1a616ba08abc839"
+  },
+  "rpg-mansion-tambour-music-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tambour-music-01.glb",
+   "sha256": "b4e291c2b4ebdd0964129fe89799bbcf883e7a500b81c1c76e6a40825d6ba1a2"
+  },
+  "rpg-mansion-arched-armoire-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-armoire-01.glb",
+   "sha256": "0a0f5d0410f1aabdd90932619bf34897a71301fdee97847489bdad65046b228e"
+  },
+  "rpg-mansion-corner-vitrine-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-corner-vitrine-01.glb",
+   "sha256": "e0399c46fd72dc3fd15cec2efe9061f7d68953216dafcd80ba79e71bcb896e46"
+  },
+  "rpg-mansion-map-flatfile-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-map-flatfile-01.glb",
+   "sha256": "47497152cb337042d55cf3a85430b10e08b67ccdcaec275f7f1602f096129ce8"
+  },
+  "rpg-mansion-letter-pigeonhole-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-letter-pigeonhole-01.glb",
+   "sha256": "1df799c9309ff9c2185d71a1852d2504521b4f863691d3bf5a52cf84adc9eb0e"
+  },
+  "rpg-mansion-scullery-sink-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-sink-900-01.glb",
+   "sha256": "5ac8b27d400a18d39b160b980608eea7132caf69535a3d2b0bf6b78ee36a9e6a"
+  },
+  "rpg-mansion-kitchen-four-drawer-750-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-four-drawer-750-01.glb",
+   "sha256": "fd766ca19eecc545198a3be9e20f46aaba57b55a80af0a788ba4b1f553e76de8"
+  },
+  "rpg-mansion-kitchen-bottle-rack-300-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-bottle-rack-300-01.glb",
+   "sha256": "83ee28892ef1d5c8d31b50f1bbc9fdd31e266b142c8bac259bcf6ba987429887"
+  },
+  "rpg-mansion-kitchen-three-drawer-600-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-three-drawer-600-01.glb",
+   "sha256": "1ebcba15b5393b82cac66f678f28af34baaa5556a729139a943f17ce24515b4e"
+  },
+  "rpg-mansion-kitchen-three-drawer-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-three-drawer-900-01.glb",
+   "sha256": "4b9822bd5ece8d612789f97a49f8689934cd83518945bcb88eb6827cae61dc76"
+  },
+  "rpg-mansion-kitchen-single-door-300-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-single-door-300-01.glb",
+   "sha256": "c31085a04519058452e9b180fb5a09f1623f71bf0e029ef45723fac60c680c4c"
+  },
+  "rpg-mansion-kitchen-cutlery-cupboard-750-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-cutlery-cupboard-750-01.glb",
+   "sha256": "55588e6a487383ade0a2c70be52508d403f79728985827ddefa769adeb8530b5"
+  },
+  "rpg-mansion-kitchen-double-door-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-double-door-900-01.glb",
+   "sha256": "6b0a0a4af96b62394ac6db7016957de015ba12f02c068f6f9abe6e032cd0c5c9"
+  },
+  "rpg-mansion-scullery-double-sink-1200-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-double-sink-1200-01.glb",
+   "sha256": "1bed735589904b8f2f9a969ec5e003a7647c6e84c0a5ba68f60096a595fc12ac"
+  },
+  "rpg-mansion-scullery-double-sink-1800-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-double-sink-1800-01.glb",
+   "sha256": "550158ac82f10523354da47ce74335f23f851eed794582f3d871679417ef673d"
+  },
+  "rpg-mansion-kitchen-glazed-wall-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-glazed-wall-900-01.glb",
+   "sha256": "ccdbeee1af57439fa89198d853e236447d7cd9e82782ab03a92f4b6305052a52"
+  },
+  "rpg-mansion-kitchen-spice-wall-450-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-spice-wall-450-01.glb",
+   "sha256": "e46963b29cfa5f64ba82cca31369e318661ff59072d93ebc644baf394dbede99"
+  },
+  "rpg-mansion-kitchen-plate-rack-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-plate-rack-900-01.glb",
+   "sha256": "41961f19224941587fc2cde9a22ff59609f0027e10a6141773c1087d47e877ab"
+  },
+  "rpg-mansion-kitchen-tall-larder-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-tall-larder-900-01.glb",
+   "sha256": "5d91cbd3852f8cfd8df858e4fb8576692cba84a5e1fa929a4e282210907a6c6a"
+  },
+  "rpg-mansion-kitchen-pull-pantry-450-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-pull-pantry-450-01.glb",
+   "sha256": "ab84f68d194d93f6bb9a6da102beec354f5a162d6b48d1a0df925a4911140c86"
+  },
+  "rpg-mansion-kitchen-service-island-2100-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-service-island-2100-01.glb",
+   "sha256": "312c0231b4d3332bfacbe4a43bc06dc6b94bbb588e269bc7137712a78d5c1877"
+  },
+  "rpg-mansion-kitchen-baking-dresser-1200-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-baking-dresser-1200-01.glb",
+   "sha256": "7cf2702951b6b232173580abcaac4d5f24248aa42c0ea13897f7fee68674fda5"
+  },
+  "rpg-mansion-kitchen-diagonal-corner-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-diagonal-corner-900-01.glb",
+   "sha256": "b98d663fee44663574f0fc966b9df489307af0012d8f073db25ddd3af228f533"
+  },
+  "rpg-mansion-kitchen-l-corner-right-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-l-corner-right-900-01.glb",
+   "sha256": "13e8438d8a744f2614f002f2b203fa141ef905c99d77d9a339d24de58ad8c61f"
+  },
+  "rpg-mansion-kitchen-bread-safe-600-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-bread-safe-600-01.glb",
+   "sha256": "4d0dac5ef9e4f2f41e4110a5a099b1a1ff4266c413869aa7f94ce0c1b5f22891"
+  },
+  "rpg-mansion-kitchen-cast-iron-range-750-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-cast-iron-range-750-01.glb",
+   "sha256": "871181b83573ad885e408ccc496b43e400b0192e8b805ecb07492a358ee2d8cb"
+  },
+  "rpg-mansion-kitchen-draining-stand-900-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-draining-stand-900-01.glb",
+   "sha256": "a3ec8ef5990ce00e0e0403b83b559a02a582972f9e85ce6890aa573822f4cb7f"
+  },
+  "rpg-mansion-ladder-side-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-ladder-side-01.glb",
+   "sha256": "b782ab4a68ad35ec2b7f5f70fae8a6331eeccadf5cf197d08867a4af489f81fd"
+  },
+  "rpg-mansion-caned-bergere-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-caned-bergere-01.glb",
+   "sha256": "077d9507813ef6b52c528ca11a97a97fd3533b8d11eb014a2b5a3f20a4992d9f"
+  },
+  "rpg-mansion-curved-rocker-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-curved-rocker-01.glb",
+   "sha256": "24ffe61309a8b91fe6d294d9f4f66dc40f1e821d5e804d8e4a73d0bf95cf97e7"
+  },
+  "rpg-mansion-lyre-side-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-lyre-side-01.glb",
+   "sha256": "8c004f06a348aa3958b865d32b0dff35d0d25581c2b65516f4ddba8243750fac"
+  },
+  "rpg-mansion-balloon-side-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-balloon-side-01.glb",
+   "sha256": "abdc27006ea114fa30d4ebb30fa3624c474e22a588de508845db96b39ba1dab3"
+  },
+  "rpg-mansion-windsor-bow-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-windsor-bow-01.glb",
+   "sha256": "6ea0e783cb2ab60e1869ddddb03242e882c5cd057602114ac1faa487cec00160"
+  },
+  "rpg-mansion-slipper-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slipper-01.glb",
+   "sha256": "28ea329348e823851bcac67c0ab269913fce3ff495316001db6089d2c9977704"
+  },
+  "rpg-mansion-corner-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-corner-01.glb",
+   "sha256": "ef34e6652752c8727a84683154722f1bd51c161a452f771545a6f2c2be8527a6"
+  },
+  "rpg-mansion-smoking-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-smoking-01.glb",
+   "sha256": "93f704cd3b426049371be9c35182a3c5e51d3c3314ce302a34c38e21a5504d0d"
+  },
+  "rpg-mansion-campaign-fold-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-campaign-fold-01.glb",
+   "sha256": "a82f50e4ad818d78f1620fc58a4b47ce1ca7433e6523937bf5f74cc1ecc890f7"
+  },
+  "rpg-mansion-x-back-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-x-back-01.glb",
+   "sha256": "f90558359517bebb99029295ee321706b22f82dc372a2d51c80bb1500d59130b"
+  },
+  "rpg-mansion-shield-back-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-shield-back-01.glb",
+   "sha256": "250ce57d9ba9dab9b2e8ede0e7701a7dce8364057a8654f754fe8c3cfc237850"
+  },
+  "rpg-mansion-gothic-hall-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gothic-hall-01.glb",
+   "sha256": "0bb925555a91484bed94f5e84513d4f06b22ba47169bf690cfdafae28223e339"
+  },
+  "rpg-mansion-barrel-arm-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-barrel-arm-01.glb",
+   "sha256": "3e0fd8e4eea538fb9fa1b378df4b0203b5de7e90b6595ed2049f8aab062be17d"
+  },
+  "rpg-mansion-scoop-desk-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-scoop-desk-01.glb",
+   "sha256": "4861397eaf6f7c803bf113ab5b292df1500b84738bef14159ecb0b289f46da60"
+  },
+  "rpg-mansion-prayer-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-prayer-01.glb",
+   "sha256": "cf73744470ed72a03898b4d6194f0b8a355575824ba9c0f1d73269d51876409d"
+  },
+  "rpg-mansion-music-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-music-01.glb",
+   "sha256": "d953655d442d43115e4d80c5353696c870900fbe7623ecfd27a200a76380af19"
+  },
+  "rpg-mansion-cane-stool-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-cane-stool-01.glb",
+   "sha256": "09225ed9feb715ee363bf4d4852f782591336d48d5937b4fb6a57dd23ed1709e"
+  },
+  "rpg-mansion-x-stool-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-x-stool-01.glb",
+   "sha256": "5d16dae5f7eebd7db05ef44c9029579c959b4acf861b593ff41c2a34f24531e9"
+  },
+  "rpg-mansion-saddle-stool-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-saddle-stool-01.glb",
+   "sha256": "cf2297d453dca9edf6642334881f30d14609731e60ce1555f749dea3d1886a10"
+  },
+  "rpg-mansion-piano-stool-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-piano-stool-01.glb",
+   "sha256": "99d37458a206c25ccae45d7eb0b53e96cb28ecbd2f52d5abaa26b87cfc5e87f7"
+  },
+  "rpg-mansion-boot-bench-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-boot-bench-01.glb",
+   "sha256": "aa6131c8e0229371eb69927c533871e3a8c1ce390216f5842fb4475114120de1"
+  },
+  "rpg-mansion-hall-settle-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-hall-settle-01.glb",
+   "sha256": "125b6239e601903cb4d22b6bbe4b16ed79a7943a7a960ba7286d70be2dbaf46a"
+  },
+  "rpg-mansion-telephone-bench-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-telephone-bench-01.glb",
+   "sha256": "be31f2a91a669ebe7bcaeb77554e2ea169113287aebcc57d0bc7c3e0145a485d"
+  },
+  "rpg-mansion-sleigh-double-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-sleigh-double-bed-01.glb",
+   "sha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d"
+  },
+  "rpg-mansion-iron-scroll-single-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-iron-scroll-single-bed-01.glb",
+   "sha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a"
+  },
+  "rpg-mansion-upholstered-divan-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-upholstered-divan-bed-01.glb",
+   "sha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de"
+  },
+  "rpg-mansion-spindle-single-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-spindle-single-bed-01.glb",
+   "sha256": "f4f26350930d69b6d1c227c33e5530a1190e9d8e9dc286a6e3a8c2301e942328"
+  },
+  "rpg-mansion-arched-wide-guest-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-wide-guest-bed-01.glb",
+   "sha256": "7fd11c310c07036945e6618d7fa847115201ecb5803704daf0de46b740da796d"
+  },
+  "rpg-mansion-narrow-servants-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-narrow-servants-bed-01.glb",
+   "sha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41"
+  },
+  "rpg-mansion-low-platform-double-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-low-platform-double-bed-01.glb",
+   "sha256": "d4f9e9b6c509977b0ec1d94cb61155de7d105bac284eb01d194611b50075c1c8"
+  },
+  "rpg-mansion-open-tester-four-poster-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-open-tester-four-poster-bed-01.glb",
+   "sha256": "4c969668378555393b80b248a00ff32ca3f89566a82ac4bdd25b4335fc10209a"
+  },
+  "rpg-mansion-half-tester-single-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-half-tester-single-bed-01.glb",
+   "sha256": "588716313d6ec3736eb82904795a319008a5685ddc3fae1c67ddd2278aa4c005"
+  },
+  "rpg-mansion-paired-twin-beds-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paired-twin-beds-01.glb",
+   "sha256": "651fe654f613bf8516e262fe0dae6ed9c00c742a8fce2fd157e5ce10ae4834fb"
+  },
+  "rpg-mansion-daybed-deployed-trundle-variant-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-daybed-deployed-trundle-variant-01.glb",
+   "sha256": "f67cc2842c17405219ecec0ba58d7cd52019e6199c13ef1a23eb96e26c673d35"
+  },
+  "rpg-mansion-daybed-stowed-trundle-variant-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-daybed-stowed-trundle-variant-01.glb",
+   "sha256": "b558fb2b25352330e5244fa800d2d82f07aa97e084239835ad0c75d71f1cc5b3"
+  },
+  "rpg-mansion-drawer-double-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-drawer-double-bed-01.glb",
+   "sha256": "47be09bd2d626e0b5e337812a180b9935043ecf437e529b6c4d657c7de571440"
+  },
+  "rpg-mansion-footlocker-single-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-footlocker-single-bed-01.glb",
+   "sha256": "e1a2e2df87eb58ea3511a84273c6d3241accdebd1edc2baaf0b08eb227e9e6be"
+  },
+  "rpg-mansion-rope-sprung-single-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rope-sprung-single-bed-01.glb",
+   "sha256": "ccef3648d1031e08a771bcfb3e2004745a548994340c6e13fbcc2741c06b7e76"
+  },
+  "rpg-mansion-adult-servants-bunk-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-adult-servants-bunk-bed-01.glb",
+   "sha256": "b60d6af3b8969115285ab0fe47b7253ec98a53a379e0b27fd2eb5cc137598858"
+  },
+  "rpg-mansion-alcove-enclosed-single-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-alcove-enclosed-single-bed-01.glb",
+   "sha256": "77c4ba056fa05a25fdfc33ba8206c841080b369c4ec914df4a7cb9e028494faf"
+  },
+  "rpg-mansion-sleigh-single-capacity-variant-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-sleigh-single-capacity-variant-01.glb",
+   "sha256": "9e644fe89695ece9d78e6b09ec9cd1617b5ac7ed614950299abe7e91c656ea72"
+  },
+  "rpg-mansion-campaign-x-trestle-cot-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-campaign-x-trestle-cot-01.glb",
+   "sha256": "2e21f4c40b9ae7f16539cd60523695adf070dc9d1d5809ca5b440e9a3b1d997e"
+  },
+  "rpg-mansion-barrel-vault-enclosed-bed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-barrel-vault-enclosed-bed-01.glb",
+   "sha256": "d43af33a8971ee0845daed61a34a6799bb18e1814ff67224851820c40ef9abb6"
+  },
+  "rpg-mansion-camelback-settee-two-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-camelback-settee-two-01.glb",
+   "sha256": "4ed7c3f354bd5d19cad52d0e0745eb1897a01ff6c8d280afd4341a50c2d35c6b"
+  },
+  "rpg-mansion-chesterfield-three-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-chesterfield-three-01.glb",
+   "sha256": "b6bd1d1fd2c662fb53d8d11f70efe32eef76bea10232f064ba623cf01332d9e2"
+  },
+  "rpg-mansion-open-salon-settee-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-open-salon-settee-01.glb",
+   "sha256": "55d62c3a2c812898894ad169d7ebde13cdcbdd92e6b739d3dbff242f4ea8bd0f"
+  },
+  "rpg-mansion-compact-salon-loveseat-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-compact-salon-loveseat-01.glb",
+   "sha256": "fbfb8909051d27358411c1234e37ed27f7d75e7db8b5b13505caf3d30c13cdb4"
+  },
+  "rpg-mansion-asymmetric-fainting-couch-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-asymmetric-fainting-couch-01.glb",
+   "sha256": "5bb90d006ffafdab929742ff1fc91e99837f39de1b82d2d9c50f035b95d1dd46"
+  },
+  "rpg-mansion-high-back-settle-three-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-high-back-settle-three-01.glb",
+   "sha256": "3c69b5572531aedffaf767ee717c439f7b6d6141de33157ad771e5c2290e6d95"
+  },
+  "rpg-mansion-corner-settee-left-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-corner-settee-left-01.glb",
+   "sha256": "92f3df9c8d50c3d8e19eb3597b28505255fc6d95c05db3cec7e3090a0d2889bb"
+  },
+  "rpg-mansion-corner-settee-right-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-corner-settee-right-01.glb",
+   "sha256": "db7b0d07553b2e06d93e57e6ccbb4b7fcdb28fbca333935395f3043ca8062ab6"
+  },
+  "rpg-mansion-inward-conversation-sofa-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-inward-conversation-sofa-01.glb",
+   "sha256": "6bcb63e0ce05fec7ef60cd459cb4db67afb9c465a335cd6db0aaf7686e167192"
+  },
+  "rpg-mansion-curved-window-sofa-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-curved-window-sofa-01.glb",
+   "sha256": "94957b86ea6b4e8839bcee5b2d96c4793cb43638bd3ef2bf2250e849c36db087"
+  },
+  "rpg-mansion-servants-compact-settee-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-servants-compact-settee-01.glb",
+   "sha256": "cc1eca873038343916e08fb219c242e585f75e51a71b18d566f48bdbfb3b7b95"
+  },
+  "rpg-mansion-double-end-recamier-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-double-end-recamier-01.glb",
+   "sha256": "ddadbdf03f0efcd6dcc479012897d354b61b5ea32a0813351d726a5190879320"
+  },
+  "rpg-mansion-three-side-daybed-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-three-side-daybed-01.glb",
+   "sha256": "43543dbfee1627978c1d8849325ea9fffc2583667de5cff352a00e36fc2c0327"
+  },
+  "rpg-mansion-channel-back-divan-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-channel-back-divan-01.glb",
+   "sha256": "c2c5b20e8137dd9228441fcf8b851f120fe4ff13c46dceb9da8225d2af087607"
+  },
+  "rpg-mansion-spindle-hall-settee-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-spindle-hall-settee-01.glb",
+   "sha256": "8fa8d2024272d673772c122619a36f4b5439fe68793fbac9a6adc49c91e8ba04"
+  },
+  "rpg-mansion-tete-a-tete-settee-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tete-a-tete-settee-01.glb",
+   "sha256": "85f42d426c485a66eb5733feb258daf96779acf2b0e121518254233eaf3f34f7"
+  },
+  "rpg-mansion-camelback-settee-three-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-camelback-settee-three-01.glb",
+   "sha256": "e14ef3802b14847d27139ed0f2464d92e5ba96510777ba8c6986f585653e4c74"
+  },
+  "rpg-mansion-high-back-settle-two-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-high-back-settle-two-01.glb",
+   "sha256": "072fd93c91cba882abedbb491a8cb0acc3d506d7ab907325e4f274e163289d39"
+  },
+  "rpg-mansion-paneled-wall-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+   "sha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37"
+  },
+  "rpg-mansion-rectangular-doorway-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rectangular-doorway-bay-01.glb",
+   "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc"
+  },
+  "rpg-mansion-paneled-return-corner-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-return-corner-01.glb",
+   "sha256": "eeaca0f153284cba991460371c05c622e9062e6cbf62127ce38e8da4712bc4b2"
+  },
+  "rpg-mansion-slate-gable-span-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slate-gable-span-01.glb",
+   "sha256": "ab98e580b7c4c7739301a052ffb00646ad05fd3bed040263ab33db3b195756ae"
+  },
+  "rpg-mansion-gable-end-closure-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gable-end-closure-01.glb",
+   "sha256": "7b4078f59fd9b5b093f8c7ca54bedf227d96e0bb7a2dbbfb49bed74993516713"
+  },
+  "rpg-mansion-stone-cornice-straight-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-straight-01.glb",
+   "sha256": "d4351039b2b44e9a8663d12607b2302ceca071442709ce67f7337ab6424fd3fb"
+  },
+  "rpg-mansion-stone-cornice-corner-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-corner-01.glb",
+   "sha256": "5c082dce1194992cb26a2797667c7d494afbb43416382493c67c33c60238ea4f"
+  },
+  "rpg-mansion-tuscan-support-column-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tuscan-support-column-01.glb",
+   "sha256": "3e91566d0b06e62314142670e9d3fce2bdda2a52132d9e5ce8140b75435c824e"
+  },
+  "rpg-mansion-bracketed-wall-basin-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bracketed-wall-basin-01.glb",
+   "sha256": "7a5afa913fa6966a342fda77661aeee4604e22f9fe3bf28d2e116b3ca5faad89"
+  },
+  "rpg-mansion-high-cistern-chain-wc-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-high-cistern-chain-wc-01.glb",
+   "sha256": "ce1989ca36269f141f4cbf4d48f8be0332e4cfd7ca237460c8fb1ef14fdf8f84"
+  },
+  "rpg-mansion-high-backed-slipper-bath-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-high-backed-slipper-bath-01.glb",
+   "sha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014"
+  },
+  "rpg-mansion-plain-plaster-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-plain-plaster-bay-01.glb",
+   "sha256": "8d90243779eb639f2fc21cb28e04e76a0771b2426ca8d38f5ba4e87ce3833ac8"
+  },
+  "rpg-mansion-plain-plaster-filler-600-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-plain-plaster-filler-600-01.glb",
+   "sha256": "49047f5d275d5e31b192cb99f25ce8fbca585b23967afb9ae91b8ba658980153"
+  },
+  "rpg-mansion-exterior-return-corner-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-exterior-return-corner-01.glb",
+   "sha256": "76fee9b1308dacd0abe02458a3ef9f8a5ed0ddb10b88eb08387541ae84b673a5"
+  },
+  "rpg-mansion-arched-doorway-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-doorway-bay-01.glb",
+   "sha256": "dc8ff831f5167c39d20f7f227be0af1d07aa8bd9ff382036a3f263041a51e524"
+  },
+  "rpg-mansion-raised-sill-fixed-window-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-raised-sill-fixed-window-bay-01.glb",
+   "sha256": "dd11cb6009a7364bd6d5baf93b8413ea6771bfba245e5f42b19f4d478a343807"
+  },
+  "rpg-mansion-herringbone-parquet-tile-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-herringbone-parquet-tile-01.glb",
+   "sha256": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01"
+  },
+  "rpg-mansion-coffered-ceiling-panel-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-coffered-ceiling-panel-01.glb",
+   "sha256": "6868a49047563275493a50447c3e5949fdd034ab3cda6f36db0a102f64b91043"
+  },
+  "rpg-mansion-mansard-roof-span-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-mansard-roof-span-01.glb",
+   "sha256": "75cff083ecd0d83703380e0a17785dcba53a2123afc9b3f77572223d3604d333"
+  },
+  "rpg-mansion-mansard-hipped-end-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-mansard-hipped-end-01.glb",
+   "sha256": "ef3b1ec8afe092e826d85d1b1eb70fce908bc319ff60c9c7d04a44178b8d582a"
+  },
+  "rpg-mansion-copper-bateau-cradle-bath-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-copper-bateau-cradle-bath-01.glb",
+   "sha256": "7ec1383a76a98330baa975e3345162bc5e1640027cc062c51dc5124741314ad1"
+  },
+  "rpg-mansion-paneled-built-in-bath-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-built-in-bath-01.glb",
+   "sha256": "e9afc159b2fd2b45769613c3a3f154288a2716a4decf31a4e4cb260666a2460d"
+  },
+  "rpg-mansion-quadrant-corner-bath-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-quadrant-corner-bath-01.glb",
+   "sha256": "b8fe2301cf84bb5c0c0548b3cec70a2214ebfe095997b9ed0bd491889327fede"
+  },
+  "rpg-mansion-deep-seated-hip-bath-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-deep-seated-hip-bath-01.glb",
+   "sha256": "c3f756ccd10567cca7ebb7bded521b5dd58e2ea614d936e7742dc23f8e0e3cc9"
+  },
+  "rpg-mansion-double-basin-open-console-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-double-basin-open-console-01.glb",
+   "sha256": "eeaea0882826f8c365c3a0f92ab386534e04e461f7a8a3a69463aba9c1655e28"
+  },
+  "rpg-mansion-portable-bowl-jug-washstand-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-portable-bowl-jug-washstand-01.glb",
+   "sha256": "4ad7d6a0cbe919910504df26233b0515fcc38ef789f1b187546f6492b7141f30"
+  },
+  "rpg-mansion-two-wall-corner-basin-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-two-wall-corner-basin-01.glb",
+   "sha256": "5eaf77db03fb593243c5e809a97db9e8ce68991b99283df75af62f4c450d92ee"
+  },
+  "rpg-mansion-freestanding-bath-bridge-filler-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-freestanding-bath-bridge-filler-01.glb",
+   "sha256": "c52a2e3d60abe5c654835b6f170594f42e5cf8abc3a972efa07881cde19120ef"
+  },
+  "rpg-mansion-rail-hand-shower-hose-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rail-hand-shower-hose-01.glb",
+   "sha256": "3f107ca6fb6b37a7daee5569a1ba2cf8be646df7d37a9196cdcb23e821856ccd"
+  },
+  "rpg-mansion-overhead-brass-standpipe-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-overhead-brass-standpipe-01.glb",
+   "sha256": "a045a1fcd34a2e053edaa309d8fe750a8d7a571097cf868a4b02ab247945563c"
+  },
+  "rpg-mansion-tankless-flushometer-wc-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tankless-flushometer-wc-01.glb",
+   "sha256": "66b4bde5035958b98b1d4feabe9da263a705bafc081d0348b7230468fe28233e"
+  },
+  "rpg-mansion-single-basin-mirrored-cabinet-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-single-basin-mirrored-cabinet-01.glb",
+   "sha256": "d10e9fb91489926fa4b397703adeddf269bcfb42aff7d3e1aeedacca9c6cf147"
+  },
+  "rpg-mansion-framed-glass-shower-enclosure-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-framed-glass-shower-enclosure-01.glb",
+   "sha256": "a090a879cd3b93e202ae7f3a7e85ef9b7e2f7b20936b583c8d63fa3ee6e82a99"
+  },
+  "rpg-mansion-banker-desk-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-banker-desk-lamp-01.glb",
+   "sha256": "129ef274caa6507d88e47d1d2996e84ba3eaa0223c53efca880aac3ce5858d7a"
+  },
+  "rpg-mansion-bracketed-wall-lantern-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bracketed-wall-lantern-01.glb",
+   "sha256": "e87629efe628a8b14f5817ac32b0453366b6b09ac71e71437113c001de1bc98b"
+  },
+  "rpg-mansion-linear-four-light-pendant-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-linear-four-light-pendant-01.glb",
+   "sha256": "52637361d4802565a00a514b5ba49fe2d500316eb4020eb8d17e10c7b52c686a"
+  },
+  "rpg-mansion-garden-multistem-deciduous-tree-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-multistem-deciduous-tree-01.glb",
+   "sha256": "065f03a8984a7555344120fd72974f1ac1945ea56c8ee96e2e514ff7a229389c"
+  },
+  "rpg-mansion-garden-broad-canopy-tree-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-broad-canopy-tree-01.glb",
+   "sha256": "d3291fe979e8cb09e9690f0e8e6c108742677154a417feee62404347dd79d1b9"
+  },
+  "rpg-mansion-garden-low-shrub-border-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-low-shrub-border-01.glb",
+   "sha256": "dab15b2d8be23cd3ddef798e8f13aa98a11878da6c16e800368c54bd75614eef"
+  },
+  "rpg-mansion-garden-lattice-fence-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-lattice-fence-bay-01.glb",
+   "sha256": "b6070ce8b36f6609135b0e2093115feeaa53564207fcba56c9de1d461e444ede"
+  },
+  "rpg-mansion-garden-fence-terminal-half-post-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-fence-terminal-half-post-01.glb",
+   "sha256": "8f5b206e00809f5372cad00c9a38bf3a5a76c52ecd1553768b2bb3c12cd31776"
+  },
+  "rpg-mansion-garden-fence-corner-adapter-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-fence-corner-adapter-01.glb",
+   "sha256": "6462dfa5bbb68c35a7e03a1864b6b9ed48dacfc2415676888db3d73a8fdf8b3c"
+  },
+  "rpg-mansion-garden-two-riser-deck-step-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-two-riser-deck-step-01.glb",
+   "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3"
+  },
+  "rpg-mansion-garden-brick-gate-pier-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-brick-gate-pier-01.glb",
+   "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94"
+  },
+  "rpg-mansion-garden-fan-palm-planter-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-fan-palm-planter-01.glb",
+   "sha256": "0e27bbc361fd5ae1e87ec6f4440b398329ea6a04a3be5de71cd7fc0cd962db4a"
+  },
+  "rpg-mansion-garden-wall-window-flower-box-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-wall-window-flower-box-01.glb",
+   "sha256": "f223a9a7d0259f4e4ddc485ea2499d538f58f2538a9c4aa7b1506659c1e950fb"
+  },
+  "rpg-mansion-garden-tabletop-fern-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-tabletop-fern-01.glb",
+   "sha256": "091bbcde9d0a663bc845cde21870cb2275b9128ae1df59ffcdb869feeaac07ae"
+  },
+  "rpg-mansion-garden-columnar-conifer-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-columnar-conifer-01.glb",
+   "sha256": "cede4f7c96da934df3f86693b07db6f42133730c0ece6aa147bfb5212f8ceff7"
+  },
+  "rpg-mansion-garden-standpipe-drain-basin-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-standpipe-drain-basin-01.glb",
+   "sha256": "54334c39c913db7b6fdafb6dca4f2636c31a76b75b1db97fe29837d3bfe3b97d"
+  },
+  "rpg-mansion-garden-horizontal-board-fence-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-horizontal-board-fence-01.glb",
+   "sha256": "6d699c28f84f2479f1f5405bc633417a892a5c3879a27c1b4b37ac1ec6180e1f"
+  },
+  "rpg-mansion-garden-climbing-trellis-planter-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-climbing-trellis-planter-01.glb",
+   "sha256": "2a8d9dd2217704e2e73dfe843a3fdaef056b49bf8fd358eb660c770597784654"
+  },
+  "rpg-mansion-ashlar-wall-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-ashlar-wall-bay-01.glb",
+   "sha256": "1aa654aa0c5d93f57bd29a59cf83c5db02cdc4e6c45f88f1af51175bd6c3ce10"
+  },
+  "rpg-mansion-rusticated-plinth-segment-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rusticated-plinth-segment-01.glb",
+   "sha256": "416ef0156374bde7391753fca659bc1d5085410efa35074ce7733bfc4814cdf1"
+  },
+  "rpg-mansion-half-timbered-infill-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-half-timbered-infill-bay-01.glb",
+   "sha256": "0c2968a685ada9641cf6e47381296eb7931b42fb94c024f9d9de44dae5d02675"
+  },
+  "rpg-mansion-tall-fixed-french-window-bay-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+   "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642"
+  },
+  "rpg-mansion-octagon-cabochon-floor-tile-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+   "sha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e"
+  },
+  "rpg-mansion-stone-wall-pilaster-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-wall-pilaster-01.glb",
+   "sha256": "12917dbeffca7e03257c2c91f8e79a96947e49b0ef7fbeb4b5a5bafb6327025a"
+  },
+  "rpg-mansion-stone-newel-post-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-newel-post-01.glb",
+   "sha256": "aaed91f56a834110f7d90da5ee86767fc1273704c22ecf619c094f4e4e7d8426"
+  },
+  "rpg-mansion-turned-stone-balustrade-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-turned-stone-balustrade-01.glb",
+   "sha256": "c8ad93b402a92a430f7b4c201497974434f63be5453cd1b0f48ce161dbe8fb26"
+  },
+  "rpg-mansion-wrought-iron-railing-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-wrought-iron-railing-01.glb",
+   "sha256": "0809ae2bee8fe54847b0bdec049fd38e9bd7f353c3759ca2f2cd8f9a49b722e4"
+  },
+  "rpg-mansion-portico-pediment-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-portico-pediment-01.glb",
+   "sha256": "4f6b1524dbe7b0fc58cf1fc4625a368d9cca1fc24ef0ce0d402d361082f37723"
+  },
+  "rpg-mansion-slate-gable-hipped-end-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slate-gable-hipped-end-01.glb",
+   "sha256": "e424fd12eedf61d5fe4b867158bcabadeb530b5cd2bc99c9232dd04873f81e49"
+  },
+  "rpg-mansion-standing-seam-conical-turret-roof-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-standing-seam-conical-turret-roof-01.glb",
+   "sha256": "3e8f511efe50d95d856adeedb64117d51e60b9b11964ded3f80ee96573681be5"
+  },
+  "rpg-mansion-flat-parapet-roof-cap-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-flat-parapet-roof-cap-01.glb",
+   "sha256": "3bc000c624ef69817ed29e9bca8210aafde416dfaec90c4b371c1aff0df310fc"
+  },
+  "rpg-mansion-standing-seam-lean-to-span-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-standing-seam-lean-to-span-01.glb",
+   "sha256": "dcaa1b5c010958fcb3c2504fe178860419fb0a87428c5172e5a243704e2cb628"
+  },
+  "rpg-mansion-flat-parapet-chimney-host-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-flat-parapet-chimney-host-01.glb",
+   "sha256": "a5e67f33edabf690b8636758cfee3081d2181e795b9cdd9f4f5ccfb3298792f0"
+  },
+  "rpg-mansion-hollow-brick-chimney-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-hollow-brick-chimney-01.glb",
+   "sha256": "29d2eebb7f7b995d21409ff1a66d802a2bebb44220fa3babfd8ef53608798cc1"
+  },
+  "rpg-mansion-fixed-shed-dormer-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-fixed-shed-dormer-01.glb",
+   "sha256": "fcd108a52d02d34719e11af6c5bbb0b1c0fdebadbb9bcb3c962e947ca4fba80c"
+  },
+  "rpg-mansion-gable-dormer-host-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gable-dormer-host-01.glb",
+   "sha256": "879fdc7eed292f6de059c68b66753e6f4bd2163af797d88cccfd78a2624b97db"
+  },
+  "rpg-mansion-counterbalanced-task-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-counterbalanced-task-lamp-01.glb",
+   "sha256": "576d165602944e45e67b32ba6ed02cd83957effe345fe8405038e9e5b1ed8254"
+  },
+  "rpg-mansion-guarded-carry-lantern-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-guarded-carry-lantern-01.glb",
+   "sha256": "62d6a940fdbfef3c4bd290df72bb4651493f19bc72d7a18e9714280e40c9c3a9"
+  },
+  "rpg-mansion-tripod-drum-floor-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tripod-drum-floor-lamp-01.glb",
+   "sha256": "b25c9d833f5535380e22def7029fe5621ed1e0d9bc1f214e4ac5aa79c1f5050b"
+  },
+  "rpg-mansion-arched-reading-floor-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-reading-floor-lamp-01.glb",
+   "sha256": "2bc515fd531dac6621ec365a430ca0f1f9dab72243372f506f8905702cf0a413"
+  },
+  "rpg-mansion-bowl-torchiere-floor-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bowl-torchiere-floor-lamp-01.glb",
+   "sha256": "caf9af9d4b67de4ebf59c4f1219d64fad22a99ee8eb7a35fb30ed0bed1715bb4"
+  },
+  "rpg-mansion-hexagonal-post-lantern-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-hexagonal-post-lantern-01.glb",
+   "sha256": "de292f25f5328cf9cd1591d560614f69ccda80c45c700d59a9d5e2d0688186b8"
+  },
+  "rpg-mansion-twin-articulated-wall-reading-lamp-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-twin-articulated-wall-reading-lamp-01.glb",
+   "sha256": "74a49099b26c197318043a8755442f589988d2643280df7abd95078595c3d52e"
+  },
+  "rpg-mansion-caged-workshop-pendant-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-caged-workshop-pendant-01.glb",
+   "sha256": "63d0d8c05b8d5ba8a0c5c5549c0ce4478bd55d988991c8bbe1cb0d6a60b731e1"
+  },
+  "rpg-mansion-pleated-drum-pendant-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-pleated-drum-pendant-01.glb",
+   "sha256": "a47c33ebb57c5e993cd68dc41550618bced4dca8df4f8920a2383d1bdc29ceae"
+  },
+  "rpg-mansion-three-branch-table-candelabrum-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-three-branch-table-candelabrum-01.glb",
+   "sha256": "6db6e41c72024e072fd429640753816ba4b9ed067439b14f06da57a2886f4e05"
+  },
+  "rpg-mansion-short-paired-curtain-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-short-paired-curtain-01.glb",
+   "sha256": "49f88f98a4e42faff80f21bea4a2b03df3f78fec9114331b3f7069cb0763e26c"
+  },
+  "rpg-mansion-full-height-traverse-drape-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-full-height-traverse-drape-01.glb",
+   "sha256": "74f314e1349f536e059eed1b4ce47073053709889290b8b1ae32f1d7ea480f2d"
+  },
+  "rpg-mansion-roman-batten-shade-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-roman-batten-shade-01.glb",
+   "sha256": "85a651b48070f0f65fb97134289b4a3b529ca81a484f4fe7f2f1f7bc2b5fc7ac"
+  },
+  "rpg-mansion-timber-venetian-blind-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-timber-venetian-blind-01.glb",
+   "sha256": "04ecfee8b60b4b16ef18412ba424b1714e9db5a2dac53f0e7704dd32971e439d"
+  },
+  "rpg-mansion-narrow-roller-screen-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-narrow-roller-screen-01.glb",
+   "sha256": "15301d05f90f89e67e1e8cca437a9fd4f1d7155c137ba17b4747973ba62fdad5"
+  },
+  "rpg-mansion-stair-flight-nine-riser-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-flight-nine-riser-01.glb",
+   "sha256": "d1f50da9939badc8263ecdaab7c4b23d03052dc7010584272902d7da1b4cfa68"
+  },
+  "rpg-mansion-stair-flight-eighteen-riser-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-flight-eighteen-riser-01.glb",
+   "sha256": "0c45505b42fa60f15e974f85dd729874f5d3942c9589bfd15f4b064d5f2f687d"
+  },
+  "rpg-mansion-stair-square-supported-landing-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-square-supported-landing-01.glb",
+   "sha256": "df9098e06af115568e321fa568feee64bca50d1cf19fdc44c90846bdef8e0349"
+  },
+  "rpg-mansion-stair-return-supported-landing-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-return-supported-landing-01.glb",
+   "sha256": "5d997984e301bced4299e96774c42a86570a152f63a302193c6faabc0db6dd00"
+  },
+  "rpg-mansion-stair-landing-guard-straight-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-landing-guard-straight-01.glb",
+   "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628"
+  },
+  "rpg-mansion-stair-landing-guard-corner-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-landing-guard-corner-01.glb",
+   "sha256": "412149c79231aad3e0a790dd8b67ec35025190bc3f6172e46459d64b42120b6f"
+  },
+  "rpg-mansion-stair-landing-guard-return-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-landing-guard-return-01.glb",
+   "sha256": "c5c1c61d420866fecde91ccff467e8ce84ab384edee0ea410b1d1a6734294817"
+  },
+  "rpg-mansion-stair-guard-nine-riser-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-guard-nine-riser-01.glb",
+   "sha256": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5"
+  },
+  "rpg-mansion-stair-guard-eighteen-riser-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-guard-eighteen-riser-01.glb",
+   "sha256": "6767927850f85ca8c36265abf890796db6452a6356dafa2199a3ecedbdd8f5e0"
+  },
+  "rpg-mansion-stair-terminal-receiver-newel-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+   "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e"
+  },
+  "rpg-mansion-garden-supported-oak-terrace-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-supported-oak-terrace-01.glb",
+   "sha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6"
+  },
+  "rpg-mansion-garden-braced-oak-gate-leaf-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-braced-oak-gate-leaf-01.glb",
+   "sha256": "6f24e6b1b3adc5aef8d21e03d348cf3c2f40675b9e8e954886a40eeef50d539f"
+  },
+  "rpg-mansion-garden-gate-strike-receiver-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-gate-strike-receiver-01.glb",
+   "sha256": "45b0b65925be3e379d8a95d517807f2993901dc0943118bd920e43cb9aa23a1b"
+  },
+  "rpg-mansion-period-range-canopy-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-period-range-canopy-01.glb",
+   "sha256": "f978a061d0dafc3c547a2620c2c2cf8bb0f006ab4de7ea62656b486877888e0a"
+  },
+  "rpg-mansion-manual-wash-tub-board-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-manual-wash-tub-board-01.glb",
+   "sha256": "1f54d3d6e7a0fc05522c467445b7a767a543efc393b47a27cf22267637527195"
+  },
+  "rpg-mansion-hinged-timber-drying-frame-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-hinged-timber-drying-frame-01.glb",
+   "sha256": "22726a3e9d37cd3868850c0bad20da3b707c23d5c11eccb08965621b05cc616a"
+  },
+  "rpg-mansion-narrow-hall-runner-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-narrow-hall-runner-01.glb",
+   "sha256": "2d70abca8105aec18d2e4cef833b7df34dea3976dfd0e33cd83caabc866b2024"
+  },
+  "rpg-mansion-fitted-six-panel-door-1200-01": {
+   "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-fitted-six-panel-door-1200-01.glb",
+   "sha256": "96be7522c86ac346d375e87a16a8f4d9b3025ab655eca846da25f33ad9c403b7"
+  }
+ }
+}

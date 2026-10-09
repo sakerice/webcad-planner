@@ -3360,7 +3360,8 @@ function catalogueSetMarksHtml(items){
   return html;
 }
 function renderFurnitureMegaLibrary(){
-  var all=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return !isBuildingComponentFmpItem(item);});
+  // retired はカタログに出さない（作り直した版が別の ID で並ぶ）。登録は残すので、置いてあるプランは描ける
+  var all=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return !isBuildingComponentFmpItem(item) && !item.retired;});
   var hasSets=typeof AssetSets==='object';
   var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior') };
   Object.keys(mounts).forEach(function(group){
