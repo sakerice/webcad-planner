@@ -1,0 +1,42 @@
+{
+  "model": "rpg-mansion-door-ledged-01",
+  "dimensions_mm": [
+    759.9999904632568,
+    59.99999865889549,
+    2000.0
+  ],
+  "bounds_m": [
+    [
+      -0.3799999952316284,
+      -0.029999999329447746,
+      0.0
+    ],
+    [
+      0.3799999952316284,
+      0.029999999329447746,
+      2.0
+    ]
+  ],
+  "triangles": 4480,
+  "uv": {
+    "meters_per_uv": 4.107432014541892,
+    "min": 3.6270023691079647,
+    "max": 5.071738558711414,
+    "p05": 3.79651571515111,
+    "p95": 4.5239723830281715,
+    "total_triangles": 4480,
+    "valid_triangles": 4480,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Door wood": "wood",
+    "Black iron": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 147780
+}
