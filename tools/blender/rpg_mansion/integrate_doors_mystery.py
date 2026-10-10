@@ -49,7 +49,8 @@ def main():
     items = [i for i in doc['items'] if i['id'] not in ITEMS]
     for mid, (name, category, elev, channels, _) in ITEMS.items():
         w, d, h = (int(round(v)) for v in measured[mid]['dimensions_mm_W_D_H'])
-        entry = {'id': mid, 'name': name, 'group': '家具', 'category': category,
+        group = '事件・小道具' if category in ('事件跡', '探索小物') else '家具'
+        entry = {'id': mid, 'name': name, 'group': group, 'category': category,
                  'model': f'{PACK}/models/{mid}.glb',
                  'thumb': f'{PACK}/previews/{mid}-thumb.png',
                  'top': f'{PACK}/previews/{mid}-top.png',

@@ -3386,13 +3386,16 @@ function renderFurnitureMegaLibrary(){
   // retired はカタログに出さない（作り直した版が別の ID で並ぶ）。登録は残すので、置いてあるプランは描ける
   var all=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return !isBuildingComponentFmpItem(item) && !item.retired;});
   var hasSets=typeof AssetSets==='object';
-  var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior') };
+  // 事件・小道具: 洋館セットの事件跡・探索小物(ゲームの舞台作り用)。家具とは分けて並べる
+  var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior'), '事件・小道具':document.getElementById('fmp-props') };
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
     var items=all.filter(function(item){ return catalogueGroup(item)===group && (!hasSets || AssetSets.isVisible(item)); });
     mount.innerHTML=catalogueSubcatsHtml(items);
     // 大分類の見出し(住設・家具・外構)にも、中にあるセットの印を付ける
     var body=mount.closest('.cat-body'), hdr=body&&body.previousElementSibling;
+    // 事件・小道具は、並べる物が無ければ(洋館を表示していなければ)見出しごと出さない
+    if(group==='事件・小道具' && body && hdr){ body.hidden=!items.length; hdr.hidden=!items.length; }
     if(hdr && hdr.classList.contains('cat-hdr')){
       var old=hdr.querySelector('.asset-set-marks'); if(old) old.remove();
       var marks=catalogueSetMarksHtml(items);

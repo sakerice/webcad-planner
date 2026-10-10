@@ -3311,6 +3311,10 @@ input[type="reset"]:focus-visible{
       <div class="stool" data-tool="lattice-screen" onclick="setTool('lattice-screen')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v17H3ZM6 4v17M10 4v17M14 4v17M18 4v17M3 8h18M3 17h18"/></svg>格子柵</div>
       <div id="fmp-furniture"></div>
     </div>
+    <div class="cat-hdr fmp-props-hdr" onclick="toggleCat(this)" hidden><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14ZM21 21l-5.2-5.2M8 11h6M11 8v6"/></svg>事件・小道具 <span>+</span></div>
+    <div class="cat-body" hidden>
+      <div id="fmp-props"></div>
+    </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a4 4 0 1 1-2-7 4 4 0 1 1 8 0 4 4 0 1 1-2 7M10 13v8M3 21h18M17 21v-7h4v7"/></svg>庭・外構 <span>+</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="tree" onclick="setTool('tree')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a4 4 0 1 1-2-7 4 4 0 1 1 8 0 4 4 0 1 1-2 7M10 13v8M3 21h18M17 21v-7h4v7"/></svg>植栽(木)</div>
@@ -3953,8 +3957,25 @@ var FINISH_PROPS = ['finishColors','finishRoughness','finishTextures'];
 var FINISH_TEXTURE_DEPS = {
   texture: function(key){ return cloneRepeatReadyTexture(getTexture3D(key)); },
   normal:  function(key){ var n=getTextureNormal3D(key); return n?cloneRepeatReadyTexture(n):null; },
-  tileM:   function(key,fallback){ return texTileM(key,fallback); }
+  tileM:   function(key,fallback){ return texTileM(key,fallback); },
+  slopeUV: function(mesh){ roofSlopeUVsForMesh(mesh); }
 };
+// 部品の屋根面に、家の屋根と同じ向きの UV を付け直す(roofSlopeUVs)。形は共有のキャッシュなので
+// 写しを作ってから書く。UV は実寸(m)で入れる -- 柄の繰り返しは metresPerUv が測って合わせる。
+function roofSlopeUVsForMesh(mesh){
+  if(!mesh||!mesh.geometry||!mesh.geometry.attributes.position) return;
+  if(mesh.userData&&mesh.userData.roofSlopeUV) return;
+  var g=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone();
+  mesh.updateWorldMatrix(true,false);
+  var pos=g.attributes.position, v=new THREE.Vector3(), world=new Float32Array(pos.count*3);
+  for(var i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos,i).applyMatrix4(mesh.matrixWorld);
+    world[i*3]=v.x; world[i*3+1]=v.y; world[i*3+2]=v.z;
+  }
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(roofSlopeUVs(world,1,1),2));
+  mesh.geometry=g;
+  mesh.userData=Object.assign({},mesh.userData,{roofSlopeUV:true});
+}
 function getTexture3D(key) {
   if (!key) return null;
   if (_texCache[key]) return _texCache[key];

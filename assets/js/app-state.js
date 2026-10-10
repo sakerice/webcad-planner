@@ -1769,7 +1769,7 @@ function selectedModelFinishesHtml(it){
     // 無いので揃える。「元の柄のまま」を既定にし、選んだときだけ差し替える。
     var texture=(it.finishTextures&&it.finishTextures[channel.key])||'';
     html+='<div class="pr"><label class="pl" for="finish-texture-'+channel.key+'">'+escHtml(channel.label)+'の素材</label><select id="finish-texture-'+channel.key+'" class="pi" onchange="updateSelectedModelTexture(\''+channel.key+'\',this.value)">';
-    MODEL_FINISH_TEXTURES.forEach(function(option){
+    modelFinishTextureOptions(channel.key).forEach(function(option){
       html+='<option value="'+option[0]+'" '+(texture===option[0]?'selected':'')+'>'+escHtml(option[1])+'</option>';
     });
     html+='</select></div>';
@@ -1798,11 +1798,26 @@ var MODEL_FINISH_TEXTURES=[
   ['galvalume_dark','ガルバ（黒）'],
   ['stone','石']
 ];
+// 屋根の部品(スレート切妻・マンサードなど)の「屋根面」は、屋根の設定欄と同じ屋根材から選ばせる。
+// 家具向けの一覧(オーク・塗り壁…)を屋根面に出しても意味が無く、逆に瓦を家具に出す理由も無い。
+var MODEL_ROOF_FINISH_TEXTURES=[
+  ['','元の柄のまま'],
+  ['roof_tile','瓦'],
+  ['roof_flat_tile_charcoal','平板瓦（黒灰）'],
+  ['roof_colonial_gray','化粧スレート（コロニアル）'],
+  ['roof_standing_seam_silver','ガルバ立平（銀）'],
+  ['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],
+  ['galvalume_dark','ガルバ（黒）'],
+  ['mansion_slate_roof','スレート（洋館）']
+];
+function modelFinishTextureOptions(channelKey){
+  return channelKey==='roof'?MODEL_ROOF_FINISH_TEXTURES:MODEL_FINISH_TEXTURES;
+}
 function updateSelectedModelTexture(channel,value){
   if(!ST.selected)return;
   var model=getItemFinishModel(ST.selected.type);
   if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;}))return;
-  if(value!=='' && !MODEL_FINISH_TEXTURES.some(function(o){return o[0]===value;}))return;
+  if(value!=='' && !modelFinishTextureOptions(channel).some(function(o){return o[0]===value;}))return;
   var textures=Object.assign({},ST.selected.finishTextures||{});
   if(value==='')delete textures[channel];else textures[channel]=value;
   updateSelectedProp('finishTextures',Object.keys(textures).length?textures:null);
