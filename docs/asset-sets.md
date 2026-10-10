@@ -88,6 +88,7 @@
 | `interior` | 内壁（家全体） |
 | `floor` | 床（部屋ごと） |
 | `rooms` | 部屋の名前に `match` の語が含まれるとき、その部屋の `floor` と、部屋に向いた壁の面の `wall` |
+| `doors.swing` / `doors.front` | 開き戸・玄関ドアの扉板（manifest の category が「ドア」の物）。開口の大きさは変えない。引き戸・折れ戸・浴室の透明ドアはそのまま |
 | `outdoorRooms` | 床を替えない屋外の部屋の名前（バルコニーなど） |
 | `names` | 確認画面に出す素材の日本語名 |
 

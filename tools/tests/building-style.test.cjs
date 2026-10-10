@@ -70,3 +70,27 @@ test('洋館の様式が指す素材は、すべてアプリに登録してあ�
     assert.ok(st.names[k], `${k} の日本語名が無い`);
   }
 });
+
+test('建具は開き戸と玄関ドアだけ替え、浴室の透明ドア・引き戸は残す', () => {
+  const st = { ...style, doors: { swing: 'six', front: 'entrance' } };
+  const p = B.plan({ doors: [
+    { id: 1, type: 'door-swing', finish: '' }, { id: 2, type: 'door-swing-s', finish: '' },
+    { id: 3, type: 'door-front', finish: '' }, { id: 4, type: 'door-swing', finish: 'bath-clear' },
+    { id: 5, type: 'door-slide', finish: '' },
+  ] }, st);
+  assert.deepEqual(p.doors.map((d) => [d.id, d.model]), [[1, 'six'], [2, 'six'], [3, 'entrance']]);
+  assert.equal(p.keptDoors, 2);
+});
+
+test('洋館の様式が指す扉は、洋館セットに在る「ドア」の物', () => {
+  const root = path.join(__dirname, '..', '..');
+  const sets = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/asset-sets.json'), 'utf8'));
+  const st = sets.sets.find((s) => s.id === 'rpg-mansion').style;
+  const man = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/packs/rpg-mansion/manifest.json'), 'utf8'));
+  for (const [k, id] of Object.entries(st.doors)) {
+    const it = man.items.find((i) => i.id === id);
+    assert.ok(it && !it.retired, `${k}: ${id} が manifest に無い`);
+    assert.equal(it.category, 'ドア');
+    assert.equal(/-entrance-door-/.test(id), k === 'front', `${k}: 玄関ドアと室内ドアの取り違え`);
+  }
+});

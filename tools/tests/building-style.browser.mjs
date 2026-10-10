@@ -22,7 +22,7 @@ try {
   await page.click('.building-style-open[data-asset-set="rpg-mansion"]');
   await page.waitForSelector('#asset-swap-modal input[data-style-part]');
   const parts = await page.locator('#asset-swap-modal input[data-style-part]').evaluateAll((els) => els.map((e) => e.dataset.stylePart));
-  assert.deepEqual(parts, ['exterior', 'roof', 'interior', 'floor']);
+  assert.deepEqual(parts, ['exterior', 'roof', 'interior', 'floor', 'doors']);
   // 屋根だけ外して切り替える
   const roofBefore = await page.evaluate(() => JSON.stringify(ensureRoofAppearance().whole));
   await page.locator('#asset-swap-modal input[data-style-part="roof"]').uncheck();
@@ -51,6 +51,8 @@ try {
   assert.equal(bath[1], 'mansion_marble_checker');
   assert.equal(bedroom[1], 'mansion_herringbone_oak');
   assert.match(after.status, /洋館風にしました/);
+  const doorModels = await page.evaluate(() => DATA.items.filter((i) => /^door-(swing|front)/.test(i.type) && i.doorFinish !== 'bath-clear').map((i) => i.openingModel || ''));
+  assert.ok(doorModels.length > 0 && doorModels.every((m) => /^rpg-mansion-/.test(m)), '開き戸・玄関ドアが洋館の扉になっていない: ' + doorModels.join(','));
 
   // 設定欄の「素材」から2階だけサイディングに戻せる
   await page.evaluate(() => toggleExteriorColorPanel());

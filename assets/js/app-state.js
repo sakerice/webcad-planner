@@ -2090,6 +2090,8 @@ function applyOpeningModelToItem(it,modelId){
         it.d=Math.max(30,model.d||it.d||150);
         it.windowHeight=Math.max(200,Math.min(windowMaxTopMm(it),model.h||windowHeightMm(it)));
         normalizeWindowVerticalProps(it,'windowHeight');
+      } else if(it.type==='door-front'){
+        it.w=model.w||it.w||940;
       } else if(isInteriorSwingDoorType(it.type)){
         it.w=model.w||it.w||780;
         it.d=it.w;

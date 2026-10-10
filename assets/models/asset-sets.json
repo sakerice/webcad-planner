@@ -62,7 +62,7 @@
     }
    },
    "style": {
-    "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。rooms は部屋の名前に match の語が含まれるときの素材",
+    "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。doors は開き戸(swing)と玄関ドア(front)の扉板。rooms は部屋の名前に match の語が含まれるときの素材",
     "exterior": {
      "base": "mansion_ashlar_stone",
      "upper": "mansion_brick_red"
@@ -119,6 +119,10 @@
      "mansion_white_subway_tile": "白いタイル",
      "mansion_herringbone_oak": "ヘリンボーンの床",
      "mansion_marble_checker": "白黒の大理石"
+    },
+    "doors": {
+     "swing": "rpg-mansion-door-six-panel-01",
+     "front": "rpg-mansion-entrance-door-01"
     }
    }
   }

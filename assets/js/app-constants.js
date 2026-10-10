@@ -3206,7 +3206,14 @@ function isInteriorSwingDoorType(type){
 // ないので、これまでどおり出さない。
 function isOpeningDoorModel(item){
   if(!item || item.category!=='ドア') return false;
-  return /^Classroom-door-/i.test(item.name||'') || /^original-door-/.test(item.id||'');
+  // セットの扉は、そのセットを表示しているときだけ選ばせる(カタログと同じ)
+  if(item.assetSet && typeof AssetSets==='object' && AssetSets.isVisible && !AssetSets.isVisible(item)) return false;
+  return /^Classroom-door-/i.test(item.name||'') || /^original-door-/.test(item.id||'')
+    || /^rpg-mansion-(entrance-)?door-/.test(item.id||'');
+}
+// 玄関ドア(door-front)の扉板。室内の開き戸とは大きさも金物も違うので分ける
+function isEntranceDoorModel(item){
+  return !!item && /-entrance-door-/.test(item.id||'');
 }
 // 旧名。呼んでいるところが残っていても動くように。
 function isClassroomDoorModel(item){ return isOpeningDoorModel(item); }
@@ -3214,7 +3221,8 @@ function getOpeningModelItem(it){
   var model=getFmpItem(it&&it.openingModel);
   if(!model) return null;
   if(isWindowLikeType(it.type) && model.category==='窓') return model;
-  if(isInteriorSwingDoorType(it.type) && model.category==='ドア') return model;
+  if(isInteriorSwingDoorType(it.type) && model.category==='ドア' && !isEntranceDoorModel(model)) return model;
+  if(it.type==='door-front' && model.category==='ドア' && isEntranceDoorModel(model)) return model;
   return null;
 }
 var OPENING_DOOR_MODEL_TOOL_PREFIX='opening-door-model:';
@@ -3238,6 +3246,9 @@ function getOpeningModelToolPreset(tool){
     if(doorModelId==='bath-clear-swing'||doorModelId==='bath-clear-fold') return {kind:'door',baseType:doorModelId==='bath-clear-fold'?'door-fold':'door-swing',openingModel:'',model:null,doorFinish:'bath-clear',label:doorModelId==='bath-clear-fold'?'浴室・透明折り戸':'浴室・透明開き戸'};
     var doorModel=getFmpItem(doorModelId);
     if(!doorModel || !isOpeningDoorModel(doorModel)) return null;
+    if(isEntranceDoorModel(doorModel)) return {
+      kind:'door', baseType:'door-front', openingModel:doorModelId, model:doorModel, label:'玄関ドア: '+doorModel.name
+    };
     return {
       kind:'door', baseType:'door-swing', openingModel:doorModelId, model:doorModel, label:'開き戸: '+doorModel.name
     };
@@ -3286,6 +3297,8 @@ function onAssetSetsChanged(){
   var open=[];
   document.querySelectorAll('#sidebar .asset-subcat.open > .asset-subhdr').forEach(function(h){ open.push(h.getAttribute('title')); });
   renderFurnitureMegaLibrary();
+  // 開き戸・玄関ドアの扉の選択肢も、表示するセットに合わせて作り直す
+  renderOpeningDoorModelToolMenu();
   document.querySelectorAll('#sidebar .asset-subcat > .asset-subhdr').forEach(function(h){
     if(open.indexOf(h.getAttribute('title'))>=0 && !h.parentElement.classList.contains('open')) toggleAssetCat(h);
   });
@@ -3302,10 +3315,17 @@ function renderOpeningDoorModelToolMenu(){
   html+=openingToolTileHtml(openingDoorModelToolId(''),'デフォルト','',{thumb:'assets/models/previews-v2/standard-door-default-thumb.png'},'opening-model-default-tile');
   html+=openingToolTileHtml(openingDoorModelToolId('small'),'小','',{thumb:'assets/models/previews-v2/standard-door-small-thumb.png'},'opening-model-default-tile');
   ['swing','fold'].forEach(function(kind){html+=openingToolTileHtml(openingDoorModelToolId('bath-clear-'+kind),'浴室・透明'+(kind==='fold'?'折り戸':'開き戸'),'',{thumb:'assets/icons/bath-'+kind+'.svg'},'');});
-  doors.forEach(function(item){
+  doors.filter(function(item){return !isEntranceDoorModel(item);}).forEach(function(item){
     html+=openingToolTileHtml(openingDoorModelToolId(item.id),item.name,'🚪',item,'');
   });
   html+='</div></div>';
+  // 玄関ドアの扉板(洋館など)。標準の玄関ドアは「玄関ドア」の道具のまま
+  var entrances=doors.filter(isEntranceDoorModel);
+  if(entrances.length){
+    html+='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="玄関ドアの扉"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg></span><span>玄関ドアの扉</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+    entrances.forEach(function(item){ html+=openingToolTileHtml(openingDoorModelToolId(item.id),item.name,'🚪',item,''); });
+    html+='</div></div>';
+  }
   mount.innerHTML=html;
 }
 function renderOpeningWindowModelToolMenu(){

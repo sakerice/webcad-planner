@@ -13,6 +13,8 @@
 // - 屋根: 家全体を1つの素材
 // - 内壁: 家全体を1つの壁紙。部屋の名前が決まりに当たる面だけ別の素材(水まわりのタイルなど)
 // - 床: 部屋ごとに床材。屋外(バルコニーなど)の部屋は触らない
+// - 建具: 開き戸と玄関ドアの扉板を様式の扉にする。開口の大きさは変えない(扉板が開口に合わせて伸縮する)。
+//   引き戸・折れ戸・浴室の透明ドアは、替えられる扉が無いのでそのまま
 // - 面ごと・壁ごとに個別に付けていた色・素材は、様式が見えるよう外す(Undo で戻る)
 (function(root){
   var api={};
@@ -34,6 +36,7 @@
   //   input.floors … 外壁のある階の番号
   //   input.rooms  … [{id, n, floor}]
   //   input.faces  … 内壁の面 [{key, room: 面が向いている部屋の名前 or null}]
+  //   input.doors  … 建具 [{id, type, finish}]
   // 返すのは書き込みの指示と、確認画面に出す要約。
   function plan(input,style){
     var floors=(input.floors||[]).slice().sort(function(a,b){return a-b;});
@@ -57,8 +60,16 @@
       if(rule&&rule.wall) faces.push({key:f.key,room:f.room,texture:rule.wall});
     });
 
+    var doorCfg=style.doors||{}, doors=[], keptDoors=0;
+    (input.doors||[]).forEach(function(d){
+      var model=null;
+      if(d.type==='door-front') model=doorCfg.front;
+      else if((d.type==='door-swing'||d.type==='door-swing-s')&&d.finish!=='bath-clear') model=doorCfg.swing;
+      if(model) doors.push({id:d.id,type:d.type,model:model}); else keptDoors++;
+    });
+
     return {exterior:exterior,roof:style.roof||null,interior:style.interior||null,
-            faces:faces,rooms:rooms,skippedRooms:skipped};
+            faces:faces,rooms:rooms,skippedRooms:skipped,doors:doors,keptDoors:keptDoors};
   }
 
   // 要約: 同じ素材ごとに部屋の名前をまとめる
@@ -98,7 +109,10 @@
     return {
       floors:Object.keys(floors).map(Number),
       rooms:(D.rooms||[]).map(function(r,i){ return {id:i,n:r.n,floor:r.floor||1}; }),
-      faces:faces
+      faces:faces,
+      // 扉の無い開口(door-opening・アーチ)は建具に数えない
+      doors:(D.items||[]).filter(function(it){ return it&&/^door-/.test(it.type)&&!/^door-opening/.test(it.type); })
+        .map(function(it){ return {id:it.id,type:it.type,finish:it.doorFinish||''}; })
     };
   }
   function planFor(setId){
@@ -108,7 +122,7 @@
   }
 
   var PARTS=[
-    ['exterior','外壁'],['roof','屋根'],['interior','内壁'],['floor','床']
+    ['exterior','外壁'],['roof','屋根'],['interior','内壁'],['floor','床'],['doors','建具']
   ];
   function partHtml(part,p,style){
     var lines=[];
@@ -126,6 +140,15 @@
       Object.keys(by).forEach(function(k){
         lines.push(esc(Object.keys(by[k]).join('・'))+'の壁: '+esc(texName(style,k)));
       });
+    }else if(part==='doors'){
+      if(!p.doors.length) return null;
+      var byModel={};
+      p.doors.forEach(function(d){ byModel[d.model]=(byModel[d.model]||0)+1; });
+      lines=Object.keys(byModel).map(function(m){
+        var f=typeof root.getFmpItem==='function'?root.getFmpItem(m):null;
+        return esc(f?f.name:m)+': '+byModel[m]+'か所';
+      });
+      if(p.keptDoors) lines.push('<small>そのまま: 引き戸・折れ戸など '+p.keptDoors+'か所（替えられる扉が無い）</small>');
     }else if(part==='floor'){
       if(!p.rooms.length) return null;
       lines=groupRooms(p.rooms).map(function(g){
@@ -149,7 +172,7 @@
     modal.addEventListener('click',function(e){ if(e.target===modal) close(); });
     var html='<div class="asset-swap-card" role="dialog" aria-modal="true" aria-labelledby="building-style-title">';
     html+='<div class="asset-swap-title" id="building-style-title">壁・床・屋根を'+esc(set.name)+'風にする</div>';
-    html+='<p class="asset-swap-sub">外観・内観・屋根の設定と、部屋の床材を書き換えます。チェックを外した所は替えません。'+
+    html+='<p class="asset-swap-sub">外観・内観・屋根の設定と、部屋の床材・扉を書き換えます。チェックを外した所は替えません。'+
           '面や壁ごとに付けていた色・素材は外れます。切り替えたあとでも、Undo を1回押せば全部元に戻ります。'+
           '切り替えたあとは、今までの設定欄で1か所ずつ直せます。</p>';
     html+='<div class="asset-swap-list">';
@@ -186,7 +209,7 @@
   }
   // 決めた内容を書き込む。Undo 1回で全部戻るよう、最初に1度だけ履歴を取る。
   function apply(p,parts){
-    parts=parts||{exterior:true,roof:true,interior:true,floor:true};
+    parts=parts||{exterior:true,roof:true,interior:true,floor:true,doors:true};
     if(!Object.keys(parts).some(function(k){return parts[k];})) return 0;
     var D=root.DATA;
     root.saveState();
@@ -217,6 +240,12 @@
         var room=D.rooms[r.id]; if(!room) return;
         room.floorMaterial=r.texture;
         delete room.texture; delete room.floorColor; delete room.textureFlipX; delete room.textureFlipY;
+      });
+    }
+    if(parts.doors){
+      (p.doors||[]).forEach(function(d){
+        var it=(D.items||[]).find(function(x){ return x.id===d.id; });
+        if(it) it.openingModel=d.model;   // 開口の大きさはそのまま(applyOpeningModelToItem は幅を扉に合わせてしまう)
       });
     }
     if(typeof root.markDirty==='function') root.markDirty();

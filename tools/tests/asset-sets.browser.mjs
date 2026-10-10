@@ -24,11 +24,18 @@ try {
 
   const { readFileSync } = await import('node:fs');
   const manifest = JSON.parse(readFileSync(new URL('../../assets/models/packs/rpg-mansion/manifest.json', import.meta.url), 'utf8'));
+  // 扉(category「ドア」)は家具のカタログではなく、建具の「開き戸」「玄関ドアの扉」に並ぶ(標準の扉と同じ)。
+  // 件数(.catalogue-count)は建具の選択肢も数えるので、扉も含めて増える
+  const isDoor = (i) => i.category === 'ドア';
   const listed = manifest.items.filter((i) => !i.retired).length;
+  const doorIds = manifest.items.filter((i) => !i.retired && isDoor(i)).map((i) => i.id);
+  const doorTiles = () => page.evaluate(() => [...document.querySelectorAll('#opening-door-model-tools [data-tool^="opening-door-model:rpg-mansion-"]')].length);
+  assert.equal(await doorTiles(), 0, '標準だけのとき、建具に洋館の扉が出ている');
   const retired = manifest.items.filter((i) => i.retired).map((i) => i.id);
   await page.click('.asset-set-option[data-asset-set="rpg-mansion"]');
   await page.waitForTimeout(400);
   assert.equal(await count(), standardOnly + listed, `洋館を足しても ${listed} 点増えない`);
+  assert.equal(await doorTiles(), doorIds.length, `洋館を表示しても、建具に洋館の扉 ${doorIds.length} 点が出ない`);
   // カタログから外した版は並ばないが、登録は残っている（置いてあるプランが描ける）
   for (const id of retired) {
     assert.equal(await page.locator(`#sidebar [data-tool="${id}"]`).count(), 0, `${id}: カタログから外した版が並んでいる`);
@@ -45,7 +52,7 @@ try {
     const c = card.getBoundingClientRect(), b = badge.getBoundingClientRect();
     return b.left >= c.left - 1 && b.top >= c.top - 1 && b.right <= c.right + 1 && b.bottom <= c.bottom + 1 ? 'inside' : 'outside';
   }));
-  assert.equal(placement.length, listed, `「洋館」の検索で ${listed} 点出ない`);
+  assert.equal(placement.length, listed - doorIds.length, `「洋館」の検索で ${listed - doorIds.length} 点出ない`);
   assert.deepEqual([...new Set(placement)], ['inside'], '検索結果の札がカードの中に出ていない: ' + [...new Set(placement)].join(','));
   await page.fill('#object-search-input', '');
 
