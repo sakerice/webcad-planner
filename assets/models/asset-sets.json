@@ -1,5 +1,5 @@
 {
- "note": "カタログで選べるアセットのセット。標準以外は manifest（本番のカタログと同じ形式）を持つ。新しいセットは docs/asset-sets.md の手順で足す。 mark は見出しに付ける1文字の印。 swap は置いてある家具を一括で差し替える決まり。",
+ "note": "カタログで選べるアセットのセット。標準以外は manifest（本番のカタログと同じ形式）を持つ。新しいセットは docs/asset-sets.md の手順で足す。 mark は見出しに付ける1文字の印。 swap は置いてある家具を一括で差し替える決まり。style は壁・床・屋根をまとめて切り替える様式。",
  "sets": [
   {
    "id": "standard",
@@ -13,13 +13,17 @@
    "swap": {
     "note": "置いてある家具を一括で差し替えるときの決まり（assets/js/asset-swap.js）",
     "typeKinds": {
-     "washer": "laundry"
+     "washer": "laundry",
+     "car": "car"
     },
     "prefer": {
      "washer": [
       "rpg-mansion-lidded-laundry-box-01",
       "rpg-mansion-wicker-laundry-basket-01",
       "rpg-mansion-manual-wash-tub-board-01"
+     ],
+     "car": [
+      "rpg-mansion-classic-sedan-01"
      ]
     },
     "standIns": {
@@ -52,7 +56,84 @@
      "decor",
      "plant",
      "light"
-    ]
+    ],
+    "topAlignKinds": [
+     "curtain",
+     "roller-screen"
+    ],
+    "topAlignMaxDropMm": {
+     "curtain": 300
+    }
+   },
+   "style": {
+    "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。windows は窓の種類(引き違い sliding・開き窓 casement・FIX fix・掃き出し door)ごとの窓。doors は開き戸(swing)と玄関ドア(front)の扉板。rooms は部屋の名前に match の語が含まれるときの素材",
+    "exterior": {
+     "base": "mansion_ashlar_stone",
+     "upper": "mansion_brick_red"
+    },
+    "roof": "mansion_slate_roof",
+    "interior": "mansion_damask_wallpaper",
+    "floor": "mansion_herringbone_oak",
+    "rooms": [
+     {
+      "match": [
+       "浴室",
+       "バス",
+       "風呂",
+       "洗面",
+       "脱衣",
+       "トイレ",
+       "WC",
+       "ランドリー"
+      ],
+      "floor": "mansion_marble_checker",
+      "wall": "mansion_white_subway_tile"
+     },
+     {
+      "match": [
+       "キッチン",
+       "台所"
+      ],
+      "wall": "mansion_white_subway_tile"
+     },
+     {
+      "match": [
+       "玄関",
+       "ホール",
+       "エントランス"
+      ],
+      "floor": "mansion_marble_checker"
+     }
+    ],
+    "outdoorRooms": [
+     "バルコニー",
+     "ベランダ",
+     "テラス",
+     "ポーチ",
+     "デッキ",
+     "庭",
+     "駐車",
+     "ガレージ"
+    ],
+    "names": {
+     "mansion_ashlar_stone": "切石",
+     "mansion_brick_red": "赤レンガ",
+     "mansion_slate_roof": "スレート",
+     "mansion_damask_wallpaper": "ダマスク柄の壁紙",
+     "mansion_white_subway_tile": "白いタイル",
+     "mansion_herringbone_oak": "ヘリンボーンの床",
+     "mansion_marble_checker": "白黒の大理石"
+    },
+    "doors": {
+     "swing": "rpg-mansion-door-six-panel-01",
+     "front": "rpg-mansion-entrance-door-01"
+    },
+    "windows": {
+     "sliding": "rpg-mansion-sash-window-01",
+     "casement": "rpg-mansion-casement-window-01",
+     "fix": "rpg-mansion-arched-fixed-window-01",
+     "door": "rpg-mansion-french-window-01"
+    }
    }
   }
  ]

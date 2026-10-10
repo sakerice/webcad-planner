@@ -1,0 +1,408 @@
+{
+  "generator": "original deterministic periodic height fields",
+  "resolution": [
+    1024,
+    1024
+  ],
+  "normal_convention": "OpenGL +Y tangent / image top is +V",
+  "source_seams": "identical opposing edges",
+  "visual_review": {
+    "status": "pass",
+    "diffuse_2x2": 7,
+    "boundary_intersection_crops": 7,
+    "PBR_2x2": 7,
+    "inspected": "tiling/<key>.jpg and pbr-review.jpg",
+    "orientation": "ridge at image top, eaves at bottom; seams vertical",
+    "redo_2026_10_10": {
+      "by": "Claude",
+      "keys": [
+        "roof_kawara_ibushi",
+        "roof_s_tile_terracotta",
+        "roof_copper_patina"
+      ],
+      "reason": "\u30a2\u30d7\u30ea\u306e3D\u3067\u5c4b\u6839\u6750\u306b\u898b\u3048\u306a\u304b\u3063\u305f(\u74e6\u306f\u5e73\u3089\u306a\u56db\u89d2\u30fb\u6d0b\u74e6\u306f\u5e02\u677e\u30fb\u9285\u677f\u306f\u8ff7\u5f69\u67c4)",
+      "checked": "2\u00d72\u306e\u78ba\u8a8d\u753b\u50cf\u3092\u539f\u5bf8\u3068\u7e2e\u5c0f(150px)\u3067\u3001plan (37) \u306e\u52fe\u914d\u5c4b\u6839\u306b\u8cbc\u3063\u305f3D\u3067\u76ee\u8996\u3002\u6b8b\u308a4\u7a2e\u306f\u518d\u751f\u6210\u3057\u3066\u3082\u30d0\u30a4\u30c8\u4e00\u81f4",
+      "note": "pbr-review.jpg \u306f\u4f5c\u308a\u76f4\u3057\u524d\u306e\u753b\u50cf\u306e\u307e\u307e(Blender \u3067\u306e\u64ae\u308a\u76f4\u3057\u306f\u3057\u3066\u3044\u306a\u3044)"
+    }
+  },
+  "textures": [
+    {
+      "key": "roof_kawara_ibushi",
+      "tile_mm": 1060,
+      "cols": 4,
+      "rows": 5,
+      "width_mm": 265,
+      "length_mm": 212,
+      "nominal_mm": [
+        265,
+        235
+      ],
+      "kind": "j",
+      "colour": [
+        120,
+        123,
+        125
+      ],
+      "adjustment_percent": [
+        0.0,
+        -9.787234042553195
+      ],
+      "maps": {
+        "diffuse": {
+          "path": "assets/textures/roof/roof_kawara_ibushi_diffuse.jpg",
+          "bytes": 101348,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.4479166666666667,
+          "jpeg_edge_p99": 5.0,
+          "jpeg_edge_max": 10.0,
+          "colour_space": "sRGB",
+          "quality": 85
+        },
+        "normal": {
+          "path": "assets/textures/roof/roof_kawara_ibushi_normal.jpg",
+          "bytes": 155978,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 3.41015625,
+          "jpeg_edge_p99": 13.0,
+          "jpeg_edge_max": 22.0,
+          "colour_space": "linear",
+          "quality": 85
+        },
+        "roughness": {
+          "path": "assets/textures/roof/roof_kawara_ibushi_roughness.jpg",
+          "bytes": 134852,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.43994140625,
+          "jpeg_edge_p99": 5.0,
+          "jpeg_edge_max": 7.0,
+          "colour_space": "linear",
+          "quality": 85
+        }
+      }
+    },
+    {
+      "key": "roof_s_tile_terracotta",
+      "tile_mm": 1080,
+      "cols": 4,
+      "rows": 4,
+      "width_mm": 270,
+      "length_mm": 270,
+      "nominal_mm": [
+        260,
+        290
+      ],
+      "kind": "s",
+      "colour": [
+        152,
+        84,
+        58
+      ],
+      "adjustment_percent": [
+        3.8461538461538547,
+        -6.896551724137934
+      ],
+      "maps": {
+        "diffuse": {
+          "path": "assets/textures/roof/roof_s_tile_terracotta_diffuse.jpg",
+          "bytes": 108048,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 3.6455078125,
+          "jpeg_edge_p99": 12.0,
+          "jpeg_edge_max": 15.0,
+          "colour_space": "sRGB",
+          "quality": 85
+        },
+        "normal": {
+          "path": "assets/textures/roof/roof_s_tile_terracotta_normal.jpg",
+          "bytes": 154498,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 3.9640299479166665,
+          "jpeg_edge_p99": 12.0,
+          "jpeg_edge_max": 17.0,
+          "colour_space": "linear",
+          "quality": 85
+        },
+        "roughness": {
+          "path": "assets/textures/roof/roof_s_tile_terracotta_roughness.jpg",
+          "bytes": 143570,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.48583984375,
+          "jpeg_edge_p99": 5.0,
+          "jpeg_edge_max": 8.0,
+          "colour_space": "linear",
+          "quality": 85
+        }
+      }
+    },
+    {
+      "key": "roof_flat_tile_charcoal",
+      "tile_mm": 1080,
+      "cols": 4,
+      "rows": 4,
+      "width_mm": 270,
+      "length_mm": 270,
+      "nominal_mm": [
+        265,
+        280
+      ],
+      "kind": "flat",
+      "colour": [
+        55,
+        58,
+        59
+      ],
+      "adjustment_percent": [
+        1.8867924528301883,
+        -3.57142857142857
+      ],
+      "maps": {
+        "diffuse": {
+          "path": "assets/textures/roof/roof_flat_tile_charcoal_diffuse.jpg",
+          "bytes": 58489,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 0.78466796875,
+          "jpeg_edge_p99": 3.0,
+          "jpeg_edge_max": 4.0,
+          "colour_space": "sRGB",
+          "quality": 85
+        },
+        "normal": {
+          "path": "assets/textures/roof/roof_flat_tile_charcoal_normal.jpg",
+          "bytes": 111622,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 3.0349934895833335,
+          "jpeg_edge_p99": 11.0,
+          "jpeg_edge_max": 15.0,
+          "colour_space": "linear",
+          "quality": 85
+        },
+        "roughness": {
+          "path": "assets/textures/roof/roof_flat_tile_charcoal_roughness.jpg",
+          "bytes": 143497,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.408203125,
+          "jpeg_edge_p99": 5.0,
+          "jpeg_edge_max": 6.0,
+          "colour_space": "linear",
+          "quality": 85
+        }
+      }
+    },
+    {
+      "key": "roof_colonial_gray",
+      "tile_mm": 1000,
+      "cols": 1,
+      "rows": 6,
+      "width_mm": 1000,
+      "length_mm": 166.66666666666666,
+      "nominal_mm": [
+        910,
+        182
+      ],
+      "kind": "slate",
+      "colour": [
+        72,
+        76,
+        77
+      ],
+      "adjustment_percent": [
+        9.8901098901099,
+        -8.424908424908429
+      ],
+      "maps": {
+        "diffuse": {
+          "path": "assets/textures/roof/roof_colonial_gray_diffuse.jpg",
+          "bytes": 91009,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.07470703125,
+          "jpeg_edge_p99": 4.0,
+          "jpeg_edge_max": 6.0,
+          "colour_space": "sRGB",
+          "quality": 85
+        },
+        "normal": {
+          "path": "assets/textures/roof/roof_colonial_gray_normal.jpg",
+          "bytes": 228948,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 2.962890625,
+          "jpeg_edge_p99": 11.0,
+          "jpeg_edge_max": 20.0,
+          "colour_space": "linear",
+          "quality": 85
+        },
+        "roughness": {
+          "path": "assets/textures/roof/roof_colonial_gray_roughness.jpg",
+          "bytes": 143767,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.46142578125,
+          "jpeg_edge_p99": 5.0,
+          "jpeg_edge_max": 8.0,
+          "colour_space": "linear",
+          "quality": 85
+        }
+      }
+    },
+    {
+      "key": "roof_standing_seam_silver",
+      "tile_mm": 909,
+      "cols": 3,
+      "rows": 1,
+      "width_mm": 303,
+      "length_mm": null,
+      "nominal_mm": [
+        303,
+        null
+      ],
+      "kind": "seam",
+      "colour": [
+        160,
+        164,
+        163
+      ],
+      "adjustment_percent": [
+        0.0,
+        null
+      ],
+      "maps": {
+        "diffuse": {
+          "path": "assets/textures/roof/roof_standing_seam_silver_diffuse.jpg",
+          "bytes": 35926,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 0.19580078125,
+          "jpeg_edge_p99": 1.0,
+          "jpeg_edge_max": 2.0,
+          "colour_space": "sRGB",
+          "quality": 85
+        },
+        "normal": {
+          "path": "assets/textures/roof/roof_standing_seam_silver_normal.jpg",
+          "bytes": 58585,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 0.5572916666666666,
+          "jpeg_edge_p99": 5.0,
+          "jpeg_edge_max": 6.0,
+          "colour_space": "linear",
+          "quality": 85
+        },
+        "roughness": {
+          "path": "assets/textures/roof/roof_standing_seam_silver_roughness.jpg",
+          "bytes": 85917,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.009765625,
+          "jpeg_edge_p99": 3.0,
+          "jpeg_edge_max": 5.0,
+          "colour_space": "linear",
+          "quality": 85
+        }
+      }
+    },
+    {
+      "key": "roof_copper_patina",
+      "tile_mm": 999,
+      "cols": 3,
+      "rows": 6,
+      "width_mm": 333,
+      "length_mm": 166.5,
+      "nominal_mm": [
+        303,
+        182
+      ],
+      "kind": "copper",
+      "colour": [
+        72,
+        122,
+        113
+      ],
+      "adjustment_percent": [
+        9.90099009900991,
+        -8.51648351648352
+      ],
+      "maps": {
+        "diffuse": {
+          "path": "assets/textures/roof/roof_copper_patina_diffuse.jpg",
+          "bytes": 122878,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.6764322916666667,
+          "jpeg_edge_p99": 7.0,
+          "jpeg_edge_max": 15.0,
+          "colour_space": "sRGB",
+          "quality": 85
+        },
+        "normal": {
+          "path": "assets/textures/roof/roof_copper_patina_normal.jpg",
+          "bytes": 152356,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 2.8626302083333335,
+          "jpeg_edge_p99": 12.0,
+          "jpeg_edge_max": 26.0,
+          "colour_space": "linear",
+          "quality": 85
+        },
+        "roughness": {
+          "path": "assets/textures/roof/roof_copper_patina_roughness.jpg",
+          "bytes": 141066,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 1.44580078125,
+          "jpeg_edge_p99": 5.0,
+          "jpeg_edge_max": 7.0,
+          "colour_space": "linear",
+          "quality": 85
+        }
+      }
+    },
+    {
+      "key": "roof_asphalt_shingle_brown",
+      "tile_mm": 1064,
+      "cols": 3,
+      "rows": 8,
+      "width_mm": 354.6666666666667,
+      "length_mm": 133,
+      "nominal_mm": [
+        333,
+        143
+      ],
+      "kind": "shingle",
+      "colour": [
+        78,
+        63,
+        51
+      ],
+      "adjustment_percent": [
+        6.506506506506504,
+        -6.99300699300699
+      ],
+      "maps": {
+        "diffuse": {
+          "path": "assets/textures/roof/roof_asphalt_shingle_brown_diffuse.jpg",
+          "bytes": 207751,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 3.3758138020833335,
+          "jpeg_edge_p99": 11.0,
+          "jpeg_edge_max": 16.0,
+          "colour_space": "sRGB",
+          "quality": 85
+        },
+        "normal": {
+          "path": "assets/textures/roof/roof_asphalt_shingle_brown_normal.jpg",
+          "bytes": 377270,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 5.98828125,
+          "jpeg_edge_p99": 24.0,
+          "jpeg_edge_max": 40.0,
+          "colour_space": "linear",
+          "quality": 85
+        },
+        "roughness": {
+          "path": "assets/textures/roof/roof_asphalt_shingle_brown_roughness.jpg",
+          "bytes": 137414,
+          "source_edge_max": 0,
+          "jpeg_edge_mean": 2.3232421875,
+          "jpeg_edge_p99": 8.0,
+          "jpeg_edge_max": 12.0,
+          "colour_space": "linear",
+          "quality": 85
+        }
+      }
+    }
+  ]
+}

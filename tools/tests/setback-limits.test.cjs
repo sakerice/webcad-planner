@@ -187,6 +187,7 @@ function makeCtx(data, opts) {
     isInt: false, isWalkView: function () { return false; },
     exteriorDetailEnabled: function () { return false; },
     build3DRoofGutters: function () {},
+    roofSurfaceParams: () => ({ roughness: 0.92, metalness: 0, envMapIntensity: 0.06 }),
     resolveRoofAppearance: function () { return { color: '#222', texture: null }; },
     getTexture3D: function () { return null; },
     cloneRepeatReadyTexture: function () { return null; },

@@ -3206,7 +3206,14 @@ function isInteriorSwingDoorType(type){
 // ないので、これまでどおり出さない。
 function isOpeningDoorModel(item){
   if(!item || item.category!=='ドア') return false;
-  return /^Classroom-door-/i.test(item.name||'') || /^original-door-/.test(item.id||'');
+  // セットの扉は、そのセットを表示しているときだけ選ばせる(カタログと同じ)
+  if(item.assetSet && typeof AssetSets==='object' && AssetSets.isVisible && !AssetSets.isVisible(item)) return false;
+  return /^Classroom-door-/i.test(item.name||'') || /^original-door-/.test(item.id||'')
+    || /^rpg-mansion-(entrance-)?door-/.test(item.id||'');
+}
+// 玄関ドア(door-front)の扉板。室内の開き戸とは大きさも金物も違うので分ける
+function isEntranceDoorModel(item){
+  return !!item && /-entrance-door-/.test(item.id||'');
 }
 // 旧名。呼んでいるところが残っていても動くように。
 function isClassroomDoorModel(item){ return isOpeningDoorModel(item); }
@@ -3214,7 +3221,8 @@ function getOpeningModelItem(it){
   var model=getFmpItem(it&&it.openingModel);
   if(!model) return null;
   if(isWindowLikeType(it.type) && model.category==='窓') return model;
-  if(isInteriorSwingDoorType(it.type) && model.category==='ドア') return model;
+  if(isInteriorSwingDoorType(it.type) && model.category==='ドア' && !isEntranceDoorModel(model)) return model;
+  if(it.type==='door-front' && model.category==='ドア' && isEntranceDoorModel(model)) return model;
   return null;
 }
 var OPENING_DOOR_MODEL_TOOL_PREFIX='opening-door-model:';
@@ -3238,6 +3246,9 @@ function getOpeningModelToolPreset(tool){
     if(doorModelId==='bath-clear-swing'||doorModelId==='bath-clear-fold') return {kind:'door',baseType:doorModelId==='bath-clear-fold'?'door-fold':'door-swing',openingModel:'',model:null,doorFinish:'bath-clear',label:doorModelId==='bath-clear-fold'?'浴室・透明折り戸':'浴室・透明開き戸'};
     var doorModel=getFmpItem(doorModelId);
     if(!doorModel || !isOpeningDoorModel(doorModel)) return null;
+    if(isEntranceDoorModel(doorModel)) return {
+      kind:'door', baseType:'door-front', openingModel:doorModelId, model:doorModel, label:'玄関ドア: '+doorModel.name
+    };
     return {
       kind:'door', baseType:'door-swing', openingModel:doorModelId, model:doorModel, label:'開き戸: '+doorModel.name
     };
@@ -3286,6 +3297,9 @@ function onAssetSetsChanged(){
   var open=[];
   document.querySelectorAll('#sidebar .asset-subcat.open > .asset-subhdr').forEach(function(h){ open.push(h.getAttribute('title')); });
   renderFurnitureMegaLibrary();
+  // 開き戸・玄関ドアの扉と窓の選択肢も、表示するセットに合わせて作り直す
+  renderOpeningDoorModelToolMenu();
+  renderOpeningWindowModelToolMenu();
   document.querySelectorAll('#sidebar .asset-subcat > .asset-subhdr').forEach(function(h){
     if(open.indexOf(h.getAttribute('title'))>=0 && !h.parentElement.classList.contains('open')) toggleAssetCat(h);
   });
@@ -3302,16 +3316,26 @@ function renderOpeningDoorModelToolMenu(){
   html+=openingToolTileHtml(openingDoorModelToolId(''),'デフォルト','',{thumb:'assets/models/previews-v2/standard-door-default-thumb.png'},'opening-model-default-tile');
   html+=openingToolTileHtml(openingDoorModelToolId('small'),'小','',{thumb:'assets/models/previews-v2/standard-door-small-thumb.png'},'opening-model-default-tile');
   ['swing','fold'].forEach(function(kind){html+=openingToolTileHtml(openingDoorModelToolId('bath-clear-'+kind),'浴室・透明'+(kind==='fold'?'折り戸':'開き戸'),'',{thumb:'assets/icons/bath-'+kind+'.svg'},'');});
-  doors.forEach(function(item){
+  doors.filter(function(item){return !isEntranceDoorModel(item);}).forEach(function(item){
     html+=openingToolTileHtml(openingDoorModelToolId(item.id),item.name,'🚪',item,'');
   });
   html+='</div></div>';
+  // 玄関ドアの扉板(洋館など)。標準の玄関ドアは「玄関ドア」の道具のまま
+  var entrances=doors.filter(isEntranceDoorModel);
+  if(entrances.length){
+    html+='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="玄関ドアの扉"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg></span><span>玄関ドアの扉</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+    entrances.forEach(function(item){ html+=openingToolTileHtml(openingDoorModelToolId(item.id),item.name,'🚪',item,''); });
+    html+='</div></div>';
+  }
   mount.innerHTML=html;
 }
 function renderOpeningWindowModelToolMenu(){
   var mount=document.getElementById('opening-window-model-tools');
   if(!mount) return;
-  var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item&&item.category==='窓';}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  // セットの窓は、そのセットを表示しているときだけ選ばせる(扉と同じ)
+  var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){
+    return item&&item.category==='窓'&&!item.retired&&!(item.assetSet&&typeof AssetSets==='object'&&AssetSets.isVisible&&!AssetSets.isVisible(item));
+  }).sort(function(a,b){return a.name.localeCompare(b.name);});
   var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="窓"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v16H3ZM12 4v16M3 12h18"/></svg></span><span>窓</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
   html+=openingToolTileHtml(openingWindowModelToolId(''),'引違い','',{thumb:'assets/models/previews-v2/standard-window-slide-thumb.png'},'opening-model-default-tile opening-window-tile');
   html+=openingToolTileHtml(openingWindowModelToolId('fix'),'FIX窓','',{thumb:'assets/models/previews-v2/standard-window-fix-thumb.png'},'opening-model-default-tile opening-window-tile');
@@ -3366,13 +3390,16 @@ function renderFurnitureMegaLibrary(){
   // retired はカタログに出さない（作り直した版が別の ID で並ぶ）。登録は残すので、置いてあるプランは描ける
   var all=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return !isBuildingComponentFmpItem(item) && !item.retired;});
   var hasSets=typeof AssetSets==='object';
-  var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior') };
+  // 事件・小道具: 洋館セットの事件跡・探索小物(ゲームの舞台作り用)。家具とは分けて並べる
+  var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior'), '事件・小道具':document.getElementById('fmp-props') };
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
     var items=all.filter(function(item){ return catalogueGroup(item)===group && (!hasSets || AssetSets.isVisible(item)); });
     mount.innerHTML=catalogueSubcatsHtml(items);
     // 大分類の見出し(住設・家具・外構)にも、中にあるセットの印を付ける
     var body=mount.closest('.cat-body'), hdr=body&&body.previousElementSibling;
+    // 事件・小道具は、並べる物が無ければ(洋館を表示していなければ)見出しごと出さない
+    if(group==='事件・小道具' && body && hdr){ body.hidden=!items.length; hdr.hidden=!items.length; }
     if(hdr && hdr.classList.contains('cat-hdr')){
       var old=hdr.querySelector('.asset-set-marks'); if(old) old.remove();
       var marks=catalogueSetMarksHtml(items);

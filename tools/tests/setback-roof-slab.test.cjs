@@ -142,7 +142,7 @@ const FNS = [
   'setbackSlabAppearanceItem', 'setbackLowestLimitMmAt',
   'build3DSetbackRoofSlab', 'addSetbackSlabGutters', 'setbackSectionsForBuild', 'build3DSetbackRoofs',
   // 既存の屋根アイテム描画（斜線の板がここを通っていないことの確認に使う）
-  'build3DRoofItem', 'roofEaveEdges',
+  'build3DRoofItem', 'roofEaveEdges', 'roofSlopeUVs',
 ];
 
 function makeCtx(data) {
@@ -155,6 +155,7 @@ function makeCtx(data) {
     isInt: false,
     document: { createElement: () => ({ getContext: () => ({}) }) },
     LIGHT_SETTINGS: { env: 1 },
+    roofSurfaceParams: () => ({ roughness: 0.92, metalness: 0, envMapIntensity: 0.06 }),
     resolveRoofAppearance: () => ({ color: '#222', texture: null }),
     getTexture3D: () => null,
     cloneRepeatReadyTexture: () => null,

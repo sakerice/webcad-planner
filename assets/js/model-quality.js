@@ -129,6 +129,9 @@
         if(!hasColor&&!hasRoughness&&!map) return material;
         var own=material.clone();
         if(map){
+          // 屋根の部品の屋根面は、モデルの展開(UV)の向きが部品ごとにばらばらで、瓦の段が流れに
+          // 沿って走ってしまう。屋根材を貼るときは、面の流れに沿った UV に作り直す(アプリ側)
+          if(channel==='roof'&&typeof deps.slopeUV==='function'&&!Array.isArray(mesh.material)) deps.slopeUV(mesh);
           // **柄を差し替えたら、元の柄をほどく処理は要らない。** 指定色は
           // 新しい柄にそのまま掛かる(neutralizeFinish は元の柄の色味を
           // 消すためのもので、差し替え後にかけると二重に効く)。
@@ -143,6 +146,8 @@
           if(normal){ if(map.repeat) normal.repeat.copy(map.repeat); own.normalMap=normal; }
           own.userData=Object.assign({},own.userData,{neutralizeFinish:false});
           if(hasColor) own.color.set(value);
+          // 屋根面は、部品の元の色(スレートの青灰色)を屋根材に掛けない。掛けるとどの屋根材も紺色に沈む
+          else if(channel==='roof'&&own.color) own.color.set('#ffffff');
         }else if(hasColor){
           own.color.set(value);
           if(material.map&&material.userData.neutralizeFinish)neutralizeFinish(own);

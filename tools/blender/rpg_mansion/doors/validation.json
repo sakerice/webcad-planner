@@ -1,0 +1,289 @@
+{
+  "checks": "actual exported GLB buffers; model_kit records; icon alpha",
+  "browser_check": "not performed: browser use prohibited",
+  "visual_review": {
+    "status": "pass",
+    "front_rear": 5,
+    "GLB_reimport": 5,
+    "stretch_variants": 10,
+    "stretch_scale_X_Z": [
+      [
+        1.2,
+        0.8
+      ],
+      [
+        0.8,
+        1.2
+      ]
+    ],
+    "inspected": "evidence/doors-front-rear.jpg and evidence/doors-glb-stretch.jpg"
+  },
+  "models": [
+    {
+      "id": "rpg-mansion-door-six-panel-01",
+      "dimensions_mm_W_D_H": [
+        759.9999904632568,
+        59.99999865889549,
+        2000.0
+      ],
+      "triangles": 7144,
+      "uv_degenerate": 0,
+      "geometry_degenerate": 0,
+      "channels": {
+        "Door wood": "wood",
+        "Antique brass": "metal",
+        "Hardware recess": null
+      },
+      "glass_materials": [],
+      "two_face_controls": true,
+      "origin": "bottom centre",
+      "front": "+Z",
+      "native_model_kit": "pass",
+      "icons": {
+        "thumb": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            168,
+            27,
+            344,
+            485
+          ]
+        },
+        "top": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            22,
+            236,
+            490,
+            275
+          ]
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-door-glazed-01",
+      "dimensions_mm_W_D_H": [
+        759.9999904632568,
+        59.99999865889549,
+        2000.0
+      ],
+      "triangles": 5380,
+      "uv_degenerate": 0,
+      "geometry_degenerate": 0,
+      "channels": {
+        "Door wood": "wood",
+        "Glass": null,
+        "Antique brass": "metal",
+        "Hardware recess": null
+      },
+      "glass_materials": [
+        "Glass"
+      ],
+      "two_face_controls": true,
+      "origin": "bottom centre",
+      "front": "+Z",
+      "native_model_kit": "pass",
+      "icons": {
+        "thumb": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            168,
+            27,
+            344,
+            485
+          ]
+        },
+        "top": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            22,
+            236,
+            490,
+            276
+          ]
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-door-ledged-01",
+      "dimensions_mm_W_D_H": [
+        759.9999904632568,
+        59.99999865889549,
+        2000.0
+      ],
+      "triangles": 4480,
+      "uv_degenerate": 0,
+      "geometry_degenerate": 0,
+      "channels": {
+        "Door wood": "wood",
+        "Black iron": "metal"
+      },
+      "glass_materials": [],
+      "two_face_controls": true,
+      "origin": "bottom centre",
+      "front": "+Z",
+      "native_model_kit": "pass",
+      "icons": {
+        "thumb": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            168,
+            27,
+            344,
+            485
+          ]
+        },
+        "top": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            22,
+            236,
+            490,
+            276
+          ]
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-entrance-door-01",
+      "dimensions_mm_W_D_H": [
+        939.9999976158142,
+        89.99999985098839,
+        2299.999952316284
+      ],
+      "triangles": 7828,
+      "uv_degenerate": 0,
+      "geometry_degenerate": 0,
+      "channels": {
+        "Door wood": "wood",
+        "Antique brass": "metal",
+        "Hardware recess": null
+      },
+      "glass_materials": [],
+      "two_face_controls": true,
+      "origin": "bottom centre",
+      "front": "+Z",
+      "native_model_kit": "pass",
+      "icons": {
+        "thumb": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            161,
+            26,
+            351,
+            486
+          ]
+        },
+        "top": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            22,
+            233,
+            490,
+            279
+          ]
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-entrance-door-glazed-01",
+      "dimensions_mm_W_D_H": [
+        939.9999976158142,
+        90.00000357627869,
+        2299.999952316284
+      ],
+      "triangles": 6464,
+      "uv_degenerate": 0,
+      "geometry_degenerate": 0,
+      "channels": {
+        "Door wood": "wood",
+        "Glass Ivory": null,
+        "Glass Amber": null,
+        "Glass Teal": null,
+        "Glass Ruby": null,
+        "Lead came": null,
+        "Antique brass": "metal",
+        "Hardware recess": null
+      },
+      "glass_materials": [
+        "Glass Ivory",
+        "Glass Amber",
+        "Glass Teal",
+        "Glass Ruby"
+      ],
+      "two_face_controls": true,
+      "origin": "bottom centre",
+      "front": "+Z",
+      "native_model_kit": "pass",
+      "icons": {
+        "thumb": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            161,
+            26,
+            351,
+            486
+          ]
+        },
+        "top": {
+          "size": [
+            512,
+            512
+          ],
+          "rgba": true,
+          "alpha_bounds": [
+            22,
+            232,
+            490,
+            280
+          ]
+        }
+      }
+    }
+  ],
+  "regression_tests": {
+    "pass": 18,
+    "fail": 0,
+    "files": [
+      "model-uv.test.cjs",
+      "model-quality.test.cjs",
+      "original-models.test.cjs"
+    ]
+  }
+}

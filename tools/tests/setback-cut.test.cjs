@@ -176,6 +176,7 @@ function makeCtx(data, opts) {
     exteriorDetailEnabled: function () { return false; },
     build3DRoofItem: function (grp) { grp.add(new Mesh(new Geo(), null)); },
     build3DRoofGutters: function () {},
+    roofSurfaceParams: () => ({ roughness: 0.92, metalness: 0, envMapIntensity: 0.06 }),
     resolveRoofAppearance: function () { return { color: '#222', texture: null }; },
     invalidate3D: function () {},
     __sc3: sc3
