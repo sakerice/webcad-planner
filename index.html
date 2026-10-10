@@ -84,6 +84,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/photographic-sky.js"></script>
 <script src="assets/js/asset-catalogue.js"></script>
 <script src="assets/js/asset-sets.js"></script>
+<script src="assets/js/asset-swap.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
 <style>
@@ -16712,9 +16713,15 @@ function applyInteriorLightBudget(cam){
   // 光の数は一定なので、ここで作ったものがどの階でもそのまま使える。これが無いと、
   // 初めて2階へ上がった瞬間に、2階の材質のシェーダーを作るため数秒止まった(実測 8.6秒)。
   // compileAsync は隠れている物の材質も作る(three.js r169)。
-  if(!L.precompiled&&ren&&typeof ren.compileAsync==='function'){
+  //
+  // compileAsync ではなく compile を使う。compileAsync は「作り終えたか」を setTimeout で
+  // 何度も確かめるが、その間にモデルの読み込みで 3D が作り直されて材質が捨てられると、
+  // 捨てられた材質を確かめに行って three.js の中で例外になる(isReady of undefined)。
+  // setTimeout の中なので .catch では拾えず、確かめる処理ごと止まっていた。
+  // 作り終えたかを待つ必要は無い(結果を使っていない)。シェーダーの作成を始めるのは compile で同じ。
+  if(!L.precompiled&&ren&&typeof ren.compile==='function'){
     L.precompiled=true;
-    try{ ren.compileAsync(sc3,cam).catch(function(){}); }catch(e){}
+    try{ ren.compile(sc3,cam); }catch(e){}
   }
 }
 function render3DNow(){
