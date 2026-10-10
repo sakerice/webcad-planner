@@ -6,7 +6,14 @@
   ],
   "normal_convention": "OpenGL +Y tangent / image top is +V",
   "source_seams": "identical opposing edges",
-  "visual_review": "pending",
+  "visual_review": {
+    "status": "pass",
+    "diffuse_2x2": 7,
+    "boundary_intersection_crops": 7,
+    "PBR_2x2": 7,
+    "inspected": "tiling/<key>.jpg and pbr-review.jpg",
+    "orientation": "ridge at image top, eaves at bottom; seams vertical"
+  },
   "textures": [
     {
       "key": "roof_kawara_ibushi",

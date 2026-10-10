@@ -1,7 +1,8 @@
 """Original mansion door leaves. Blender -Y front, Z up, bottom-centre origin.
 
 Blender --background --factory-startup --python tools/blender/rpg_mansion/doors/build.py
-Use -- --no-icons for geometry/UV/export only. No catalogue registration here.
+This exports geometry/UV/source only; render.py produces the icons separately.
+No catalogue registration here.
 """
 import math
 import sys
@@ -172,6 +173,9 @@ def build(kind):
     dark=material('Hardware recess','#121416',None,.75,.1)
     parts=[]
     if kind in (0,3):
+        # Continuous solid leaf core backs every panel/rail joint. A door leaf
+        # must never expose the background through a decorative join.
+        parts.append(box('Solid leaf core',(-w/2,-t*.20,0),(w/2,t*.20,h),wood,.001,2))
         frame(parts,-w/2,w/2,0,h,t,wood)
         parts.append(box('Centre muntin',(-.028,-t/2,.09),(.028,t/2,h-.09),wood,.0015,2))
         rows=[(.12,.47),(.57,1.08),(1.18,1.87)] if kind==0 else [(.14,.94),(1.07,2.16)]
@@ -179,7 +183,7 @@ def build(kind):
             for x0,x1 in [(-w/2+.095,-.04),(.04,w/2-.095)]:
                 panel(parts,x0,x1,z0,z1,t,wood)
         for z in ([.52,1.13] if kind==0 else [1.005]):
-            parts.append(box('Intermediate rail',(-w/2+.08,-t/2,z-.044),(w/2-.08,t/2,z+.044),wood,.0015,2))
+            parts.append(box('Intermediate rail',(-w/2+.08,-t/2+.001,z-.044),(w/2-.08,t/2-.001,z+.044),wood,.0015,2))
         knobs(parts,w/2-.059,1.0 if kind==0 else 1.09,t,d,metal,dark)
         if kind==3:
             # Centre decorative round pull, plus operational knobs at +X on both faces.
@@ -193,7 +197,7 @@ def build(kind):
     elif kind==1:
         frame(parts,-w/2,w/2,0,h,t,wood)
         panel(parts,-.279,.279,.12,.56,t,wood)
-        parts.append(box('Lower transom',(-.30,-t/2,.59),(.30,t/2,.685),wood,.0018,2))
+        parts.append(box('Lower transom',(-.30,-t/2+.001,.59),(.30,t/2-.001,.685),wood,.0018,2))
         g=glass()
         x0,x1,z0,z1=-.284,.284,.695,1.905
         for col in range(3):
@@ -204,7 +208,7 @@ def build(kind):
         for x in [x0,x0+(x1-x0)/3,x0+2*(x1-x0)/3,x1]:
             parts.append(box('Glazing vertical muntin',(x-.012,-t/2,z0-.008),(x+.012,t/2,z1+.008),wood,.001,2))
         for z in [z0+i*(z1-z0)/5 for i in range(6)]:
-            parts.append(box('Glazing horizontal muntin',(x0,-t/2,z-.010),(x1,t/2,z+.010),wood,.001,2))
+            parts.append(box('Glazing horizontal muntin',(x0,-t/2+.001,z-.010),(x1,t/2-.001,z+.010),wood,.001,2))
         levers(parts,w/2-.055,1.0,t,d,metal,dark)
     elif kind==2:
         # Solid planks with actual 1.5mm joints backed by a thin leaf skin.
@@ -215,7 +219,7 @@ def build(kind):
                              (xb-(.0008 if i<6 else 0),.013,h),wood,.001,2))
         for z in (.25,1.0,1.72):
             parts.append(box('Rear ledge',(-w/2+.014,.013,z-.048),(w/2-.014,.023,z+.048),wood,.002,2))
-        diagonal(parts,(-.29,.019,.29),(.29,.019,1.68),.065,.008,wood)
+        diagonal(parts,(-.29,.020,.29),(.29,.020,1.68),.065,.008,wood)
         for z in (.25,1.72):
             parts.append(box('Black strap hinge',(-w/2+.005,-.018,z-.021),(.105,-.014,z+.021),metal,.002,2))
             for x in (-.32,-.20,-.08,.075):
@@ -227,11 +231,12 @@ def build(kind):
                          box('Latch plate',(w/2-.060,-.018,.918),(w/2-.028,-.012,1.042),metal,.0015,2))
             parts.append(cylinder('Latch post',(w/2-.055,sign*.022,.969),.007,.012,metal,'Y',12))
     else:
+        parts.append(box('Solid lower leaf core',(-w/2,-t*.20,0),(w/2,t*.20,1.202),wood,.001,2))
         frame(parts,-w/2,w/2,0,h,t,wood,.090,.105)
         parts.append(box('Lower centre muntin',(-.032,-t/2,.11),(.032,t/2,1.13),wood,.0018,2))
         for xa,xb in [(-.367,-.048),(.048,.367)]:
             panel(parts,xa,xb,.14,1.065,t,wood)
-        parts.append(box('Glazing transom',(-.38,-t/2,1.105),(.38,t/2,1.202),wood,.002,2))
+        parts.append(box('Glazing transom',(-.38,-t/2+.001,1.105),(.38,t/2-.001,1.202),wood,.002,2))
         gs=[glass('Glass Ivory','#dfe8ea'),glass('Glass Amber','#d6ab59'),
             glass('Glass Teal','#4e9691'),glass('Glass Ruby','#944754')]
         lead=material('Lead came','#464643',None,.5,.65)
@@ -245,7 +250,7 @@ def build(kind):
         for x in [x0+i*(x1-x0)/3 for i in range(4)]:
             parts.append(box('Vertical lead came',(x-.0045,-.006,z0),(x+.0045,.006,z1),lead,.001,2))
         for z in [z0+i*(z1-z0)/4 for i in range(5)]:
-            parts.append(box('Horizontal lead came',(x0,-.006,z-.0045),(x1,.006,z+.0045),lead,.001,2))
+            parts.append(box('Horizontal lead came',(x0,-.005,z-.0045),(x1,.005,z+.0045),lead,.001,2))
         # Diagonal metal cames overlay the coloured rectangle grid, avoiding large circular motifs.
         diamond=[(0,0,2.14),(.24,0,1.70),(0,0,1.26),(-.24,0,1.70),(0,0,2.14)]
         for a,b in zip(diamond,diamond[1:]):

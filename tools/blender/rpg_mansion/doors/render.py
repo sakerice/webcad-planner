@@ -30,6 +30,7 @@ def setup(obj,side='front',size=512,transparent=True):
     world.node_tree.nodes['Background'].inputs[0].default_value=(.55,.55,.55,1)
     world.node_tree.nodes['Background'].inputs[1].default_value=.65
     scene.world=world
+    bpy.context.view_layer.update()
     pts=[obj.matrix_world @ v.co for v in obj.data.vertices]
     lo=Vector([min(p[i] for p in pts) for i in range(3)])
     hi=Vector([max(p[i] for p in pts) for i in range(3)])
@@ -68,13 +69,16 @@ if __name__=='__main__':
     for stem in IDS:
         bpy.ops.wm.open_mainfile(filepath=str(HERE/'sources'/(stem+'.blend')))
         obj=next(o for o in bpy.context.scene.objects if o.type=='MESH')
-        render(obj,ROOT/'assets/models/packs/rpg-mansion/previews'/(stem+'-thumb.png'),'front')
-        render(obj,ROOT/'assets/models/packs/rpg-mansion/previews'/(stem+'-top.png'),'top')
-        for side in ('front','rear'):
-            render(obj,HERE/'evidence'/(stem+'-'+side+'.jpg'),side,768,False)
+        if '--stretch-only' not in sys.argv:
+            render(obj,ROOT/'assets/models/packs/rpg-mansion/previews'/(stem+'-thumb.png'),'front')
+            render(obj,ROOT/'assets/models/packs/rpg-mansion/previews'/(stem+'-top.png'),'top')
+            for side in ('front','rear'):
+                render(obj,HERE/'evidence'/(stem+'-'+side+'.jpg'),side,768,False)
         for label,sx,sz in [('wide-short',1.2,.8),('narrow-tall',.8,1.2)]:
             obj.scale=(sx,1,sz)
             render(obj,Path('/tmp/webcad-door-proofs')/(stem+'-'+label+'.jpg'),'front',512,False)
+        if '--stretch-only' in sys.argv:
+            continue
         bpy.ops.wm.read_factory_settings(use_empty=True)
         bpy.ops.import_scene.gltf(filepath=str(ROOT/'assets/models/packs/rpg-mansion/models'/(stem+'.glb')))
         objects=[o for o in bpy.context.scene.objects if o.type=='MESH']
