@@ -33,12 +33,12 @@
     }
   ],
   "triangleBudget": 12000,
-  "measuredTriangles": 11508,
-  "glbBytes": 493856,
+  "measuredTriangles": 11700,
+  "glbBytes": 503876,
   "nativePartCount": 180,
-  "sha256": "d768677ef30b0e6000a46b9594121f0455f7b44e6c7af67f9e994c1859dc6dc0",
-  "sourceSha256": "5938183af3e0d1f0872a4df24b4c371083579fe3cd6555e5648407862d2b002c",
-  "authoringSha256": "6e365d08074c4d6150d1a780a063bff12464be5cade0fce09f10b5bfc30f8c11",
+  "sha256": "7fa0ddec909f38ac309a1c8b591786c14998854a362edcff8a9b9dc1d259cf9c",
+  "sourceSha256": "9c0d6f525e0cfa7a55480816a6bfc4959ca84b572851222729cae6fcbba7379a",
+  "authoringSha256": "8ff20246ab14e53c1c42c67e6f75c659a7a68d326cc68be3a34b59a2dfcde1b2",
   "rights": {
     "status": "original",
     "externalGeometry": false,
@@ -56,8 +56,8 @@
     "method": "clean factory-startup replay; per-material geometry signatures, PBR values and all UV triangles",
     "geometry_identical": true,
     "materials_identical": true,
-    "uv_valid_triangles": 11508,
-    "uv_p95_p05": 1.1887775250881112,
+    "uv_valid_triangles": 11700,
+    "uv_p95_p05": 1.1889995599285317,
     "same_uv_layout": false,
     "same_glb_sha256": false,
     "note": "Fresh UV island packing may vary; use the saved export source to reproduce the delivered atlas exactly."
@@ -66,5 +66,10 @@
     "passed": true,
     "same_geometry_materials_uv": true,
     "same_glb_sha256": true
+  },
+  "revision": {
+    "date": "2026-10-10",
+    "scope": "Front/rear fender terminal curls only",
+    "validation": "tools/blender/rpg_mansion/classic_car/fender-checks.json"
   }
 }

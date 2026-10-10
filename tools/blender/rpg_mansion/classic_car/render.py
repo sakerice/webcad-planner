@@ -82,13 +82,15 @@ def main():
     shot(scene,evidence/(ID+'-front.png'),(0,-8,2.35),(0,-.20,.78),3.0,(768,768))
     shot(scene,evidence/(ID+'-side.png'),(8,0,2.35),(0,0,.76),5.10,(1024,640))
     shot(scene,evidence/(ID+'-rear.png'),(4.8,7.8,3.4),(0,.15,.78),5.0,(768,768))
+    shot(scene,evidence/(ID+'-front-right.png'),(5.4,-8.1,2.7),(0,-.1,.72),4.95,(1024,768))
+    shot(scene,evidence/(ID+'-front-left.png'),(-5.4,-8.1,2.7),(0,-.1,.72),4.95,(1024,768))
     # Evidence is clearly named as Blender GLB readback, never browser runtime QA.
     (WORK/'render-record.json').write_text(json.dumps({
         'source':'delivered GLB readback' if '--authoring' not in sys.argv else 'authoring draft',
         'glb_sha256':hashlib.sha256((PACK/'models'/(ID+'.glb')).read_bytes()).hexdigest() if '--authoring' not in sys.argv else None,
         'blender':bpy.app.version_string,'renderer':'Cycles CPU','samples':scene.cycles.samples,
         'browser_test':'not performed; browser operation prohibited',
-        'views':['transparent thumbnail','transparent top','front','side','rear'],
+        'views':['transparent thumbnail','transparent top','front','side','rear','front-right','front-left'],
     },indent=2)+'\n')
 
 

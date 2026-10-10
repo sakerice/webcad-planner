@@ -114,7 +114,8 @@ def main():
         report['source_reexport']={'passed':True,'same_geometry_materials_uv':True,'same_glb_sha256':True}
     report['previews'] = [png(ROOT/PREVIEWS/(ID+'-'+view+'.png'),(512,512)) for view in ('thumb','top')]
     report['evidence'] = [png(HERE/'evidence'/(ID+'-'+view+'.png'),size) for view,size in
-                          [('front',(768,768)),('side',(1024,640)),('rear',(768,768))]]
+                          [('front',(768,768)),('side',(1024,640)),('rear',(768,768)),
+                           ('front-right',(1024,768)),('front-left',(1024,768))]]
     # Existing registry IDs are authoritative. The new asset remains unregistered.
     collisions = []
     for pattern in ('assets/models/**/manifest.json','assets/models/asset-sets.json'):

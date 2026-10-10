@@ -1,7 +1,7 @@
 {
   "assetId": "rpg-mansion-classic-sedan-01",
-  "glb_bytes": 493856,
-  "glb_sha256": "d768677ef30b0e6000a46b9594121f0455f7b44e6c7af67f9e994c1859dc6dc0",
+  "glb_bytes": 503876,
+  "glb_sha256": "7fa0ddec909f38ac309a1c8b591786c14998854a362edcff8a9b9dc1d259cf9c",
   "gltf_dimensions_mm_xyz": [
     1750.0,
     1649.9999463558197,
@@ -29,20 +29,20 @@
     "headlights": 2.154133359591166,
     "tail_lights": -2.066210205490525
   },
-  "triangles": 11508,
+  "triangles": 11700,
   "triangle_budget": 12000,
   "uv": {
-    "triangles": 11508,
-    "valid_triangles": 11508,
+    "triangles": 11700,
+    "valid_triangles": 11700,
     "degenerate_world": 0,
     "degenerate_uv": 0,
     "missing_uv_triangles": 0,
     "nonfinite_position_vertices": 0,
     "nonfinite_uv_vertices": 0,
-    "p05": 28.63028315126519,
-    "p95": 34.03480238790119,
-    "p95_p05": 1.1887693254056124,
-    "median": 30.44892647147762
+    "p05": 28.992323362784575,
+    "p95": 34.47287362729086,
+    "p95_p05": 1.1890345315181357,
+    "median": 30.832800007228897
   },
   "mesh_count": 1,
   "primitive_count": 10,
@@ -241,8 +241,8 @@
   "signature": {
     "point_support": {
       "CarBody_ClassicGreen|body": {
-        "points": 1838,
-        "digest": "3c371c1e80b0e87386192ea619146b038f08d68f5ceed3e3a2f30917694a7a64"
+        "points": 1934,
+        "digest": "e301926722fe91f07a829a59e2732ef4d7872c6a4c91c95025aa1a5b9e0d19fd"
       },
       "Classic black trim|": {
         "points": 1112,
@@ -282,7 +282,7 @@
       }
     },
     "triangle_counts": {
-      "CarBody_ClassicGreen|body": 3568,
+      "CarBody_ClassicGreen|body": 3760,
       "Classic black trim|": 1964,
       "Classic headlamp lens|": 248,
       "Classic ruby tail lamp|": 144,
@@ -294,7 +294,7 @@
       "Classic window glass|": 100
     },
     "triangle_surfaces": {
-      "CarBody_ClassicGreen|body": "e1ef22bba71d6b3b4c791d09d47242de2fcb52de9f5a162ecfb30b9bd12772b6",
+      "CarBody_ClassicGreen|body": "9b255e889c4de1ee299271e8ed3cfe0719250c4ce57a0af0fa794667bb7fb4d1",
       "Classic black trim|": "eb4a5d594f57a77b00d1bb1ef6d429a0b55d4a043ba19cb8dbb8bd0973d4a645",
       "Classic headlamp lens|": "f7be6b5c4bf1d4d2fb4abfa22f16c9346ebfd1c95cb96f29e320d5d92b6346fc",
       "Classic ruby tail lamp|": "f4f9231e43daea4f7d0f6a6951ab36518ee2ed7e8f85a8409fbfae1be135af13",
@@ -306,16 +306,16 @@
       "Classic window glass|": "950fe7d695f0dac8e58aeb0f431e9673db8b2875a0cd045e448c982e6e23fa20"
     },
     "uv_triangle_mapping": {
-      "CarBody_ClassicGreen|body": "a04221d61a784225fa13229825f25101ad95b951327f9418ba47fad851295c51",
-      "Classic black trim|": "09ed2aa7a9ca36ba0e8e7643fe7c9d535b3990996df8c6589d299dac2355f265",
-      "Classic headlamp lens|": "feb14f935153a1480526360af70c84be76d22bf83bec7dd10b5f53dacfdcad2a",
-      "Classic ruby tail lamp|": "d1ee3501666e9f6ab243429a7f449ec60e276ef0b6c27dd202d7c531fd9d2c5d",
-      "Classic saddle leather|": "455a146e90f24402fa41cce7c2339c54f2bc6931153b5333846c7cc8289f33d6",
-      "Classic satin nickel|": "5ff18374efd99a043a56ea831ed5a33d785de59723a826dd1b6aef12f1a45391",
-      "Classic tire rubber|": "11d85d19c6380a010a568c233963519023b8b0dc59954b7aa9ef675ee15c7867",
-      "Classic walnut dashboard|": "c0f0464b39ee87b4fcdf4a5058604b6dcc45ac07b14f0806718887b83d555a77",
-      "Classic warm sidewall|": "ad0a211ba66f3ebe6d13c5298b2e8467653d2b96ae42a8a9c28d762eefb75fdb",
-      "Classic window glass|": "5d945fd91923eebb75d3fb56faae494037ec5a084b078bbaa961ed29c2b83567"
+      "CarBody_ClassicGreen|body": "f9adcf90da83b829eec9098d2c3ac6d502f486716b96167d86e8656af152dffd",
+      "Classic black trim|": "cf9a4797f6f2431518bc5362edf0337a4e37c6cc1f786f415e444fbb9dda8a5e",
+      "Classic headlamp lens|": "3f18d5e5874ec7b93bfa68572d1eafbfc4cac6238c833dbf642174f94e3c5310",
+      "Classic ruby tail lamp|": "0c25dfb83c3ae680dabf65f497a9bac2d75f9085e82d4327059fe61061792762",
+      "Classic saddle leather|": "b262e429f0757afaebd5da01723b7bf2de59c12bbf11a58c6472e9ca5bbaac97",
+      "Classic satin nickel|": "edf39fdf61c3dd68d5b99f1ef627136cb97d0f8f141ca17ab25772b24e8534a8",
+      "Classic tire rubber|": "aa24d419a49128d8bb74403a5f98f49539271f4bd246f9a1dd1c625f3a18daa2",
+      "Classic walnut dashboard|": "626ea73ab48882c3c94d320d04cf8fec6cfeceaf0017bfad608f54319afebf81",
+      "Classic warm sidewall|": "1b86fc6ee0b906150b4fbe31e3abf72c6b9e026636f418112c89576321f93bc4",
+      "Classic window glass|": "5a5686e2a9cdca653b93fe0aebb92618903f70eaab6aff50c47ebcdc1895447f"
     }
   },
   "regeneration": {
@@ -323,8 +323,8 @@
     "method": "clean factory-startup replay; per-material geometry signatures, PBR values and all UV triangles",
     "geometry_identical": true,
     "materials_identical": true,
-    "uv_valid_triangles": 11508,
-    "uv_p95_p05": 1.1887775250881112,
+    "uv_valid_triangles": 11700,
+    "uv_p95_p05": 1.1889995599285317,
     "same_uv_layout": false,
     "same_glb_sha256": false,
     "note": "Fresh UV island packing may vary; use the saved export source to reproduce the delivered atlas exactly."
@@ -347,13 +347,13 @@
         255
       ],
       "visible_bbox": [
-        61,
+        64,
         133,
-        451,
+        448,
         381
       ],
       "clipped_edge_pixels": 0,
-      "sha256": "f246574a7585a764358eec65cab63d58cc7bdb0b2f7c49e8a8a5ec5f83f292e2"
+      "sha256": "75e70e7249875d99e9395391e8e41a7952d6ba88ae591e5357123745b39cfee1"
     },
     {
       "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-classic-sedan-01-top.png",
@@ -373,7 +373,7 @@
         490
       ],
       "clipped_edge_pixels": 0,
-      "sha256": "d50c28f05efbdec993ee0149f849629496e9463f6d72e69fd8178feef60e0538"
+      "sha256": "7580e27caf4cac1ddf658195208fd25a58a5d5c3177b113366ff450caa3281e1"
     }
   ],
   "evidence": [
@@ -395,7 +395,7 @@
         640
       ],
       "clipped_edge_pixels": 0,
-      "sha256": "6d24486f08fa8a881768d0b69826e55754613ee1c4f3bfd71ff2361c587e8fe4"
+      "sha256": "06377a3e5ff3d5dcc908597ec34381f1e2c61eff2360d26bcb8a18a0433b2bd7"
     },
     {
       "path": "tools/blender/rpg_mansion/classic_car/evidence/rpg-mansion-classic-sedan-01-side.png",
@@ -415,7 +415,7 @@
         500
       ],
       "clipped_edge_pixels": 0,
-      "sha256": "1d5ed5ebaaa1834fe83502ec91f1476f7d560d1d914314dd2902596192a39e33"
+      "sha256": "71aa1de3fa8507c0611dd1e843ff9a9fabb9c736c413d014f33228453d75414f"
     },
     {
       "path": "tools/blender/rpg_mansion/classic_car/evidence/rpg-mansion-classic-sedan-01-rear.png",
@@ -429,13 +429,53 @@
         255
       ],
       "visible_bbox": [
-        85,
+        90,
         229,
-        659,
+        653,
         562
       ],
       "clipped_edge_pixels": 0,
-      "sha256": "783956b98e2fbb913fa596ad0ff05fdbaaa7a09c3852004d566fc63b5e3341a1"
+      "sha256": "b948fc8f2792cd3a6aae3f12347c4bcbec72a995cbdba6fc6e56ea20326045c8"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/classic_car/evidence/rpg-mansion-classic-sedan-01-front-right.png",
+      "size": [
+        1024,
+        768
+      ],
+      "rgba": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "visible_bbox": [
+        135,
+        146,
+        913,
+        592
+      ],
+      "clipped_edge_pixels": 0,
+      "sha256": "b7ae359fcbb49c02267edc7513e22f1395cefb45031d68e65e7cfa5f4ac65b0b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/classic_car/evidence/rpg-mansion-classic-sedan-01-front-left.png",
+      "size": [
+        1024,
+        768
+      ],
+      "rgba": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "visible_bbox": [
+        112,
+        146,
+        889,
+        592
+      ],
+      "clipped_edge_pixels": 0,
+      "sha256": "4ce5248924afa87c67f02f5fb0fc7ee3d83cb84a6cb55cdb1bc1d826fd9da987"
     }
   ],
   "id_collisions": [],
