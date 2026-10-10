@@ -570,7 +570,9 @@ function extendWallForSlideDoor(){
 var ROOM_FLOOR_MATERIAL_OPTIONS=[
   ['wood_floor','フローリング（標準）'],
   ['wood_oak','フローリング（オーク）'],
-  ['tile_floor','タイル']
+  ['tile_floor','タイル'],
+  ['mansion_herringbone_oak','ヘリンボーン（洋館）'],
+  ['mansion_marble_checker','白黒の大理石（洋館）']
 ];
 function selectedRoomFloorFinishHtml(it){
   if(!it||it.type!=='room') return '';

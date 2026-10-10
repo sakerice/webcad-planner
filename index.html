@@ -85,6 +85,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/asset-catalogue.js"></script>
 <script src="assets/js/asset-sets.js"></script>
 <script src="assets/js/asset-swap.js"></script>
+<script src="assets/js/building-style.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
 <style>
@@ -3828,7 +3829,16 @@ var ASSET_TEX_MAP = {
   'galvalume_dark': 'assets/textures/wall_galvalume_dark.jpg',
   'plaster_white':  'assets/textures/wall_plaster_white.jpg',
   'wood_cedar':     'assets/textures/wood_cedar_warm.jpg',
-  'porch_tile':     'assets/textures/porch_tile_gray.jpg'
+  'porch_tile':     'assets/textures/porch_tile_gray.jpg',
+  // 洋館の様式(asset-sets.json の style)。Codex 製、PR #86。法線・粗さも同じ場所にある
+  'mansion_ashlar_stone': 'assets/textures/mansion/mansion_ashlar_stone_diffuse.jpg',
+  'mansion_brick_red': 'assets/textures/mansion/mansion_brick_red_diffuse.jpg',
+  'mansion_slate_roof': 'assets/textures/mansion/mansion_slate_roof_diffuse.jpg',
+  'mansion_damask_wallpaper': 'assets/textures/mansion/mansion_damask_wallpaper_diffuse.jpg',
+  'mansion_white_subway_tile': 'assets/textures/mansion/mansion_white_subway_tile_diffuse.jpg',
+  'mansion_wainscot_panel': 'assets/textures/mansion/mansion_wainscot_panel_diffuse.jpg',
+  'mansion_herringbone_oak': 'assets/textures/mansion/mansion_herringbone_oak_diffuse.jpg',
+  'mansion_marble_checker': 'assets/textures/mansion/mansion_marble_checker_diffuse.jpg'
 };
 // テクスチャ1枚が実世界の何メートルに貼られるか。画像はこの寸法ちょうどの
 // 1タイルとして作ってある(tools/make_interior_textures.py)。ここを間違えると
@@ -3845,7 +3855,16 @@ var TEX_TILE_M = {
   siding:        0.455,   // 窯業系サイディングの働き幅455mm
   galvalume_dark:0.9,     // 立平葺き 働き幅300mm × 3
   wood_cedar:    0.945,   // 杉本実羽目板 働き幅105mm × 9
-  roof_tile:     0.8
+  roof_tile:     0.8,
+  // 洋館の素材(納品の寸法。docs/orders/2026-10-10-codex-mansion-style-assets.md)
+  mansion_ashlar_stone:      1.2,   // 切石 600×300 目地込み
+  mansion_brick_red:         0.86,  // 英国積み12段
+  mansion_slate_roof:        1.2,   // 天然スレート 幅300 見付200
+  mansion_damask_wallpaper:  0.53,  // 壁紙の柄のリピート
+  mansion_white_subway_tile: 0.6,   // 150×75 半ずらし
+  mansion_wainscot_panel:    0.9,   // 腰板(横方向だけ繰り返す)
+  mansion_herringbone_oak:   1.4,
+  mansion_marble_checker:    0.8    // 400角の市松
 };
 function texTileM(key, fallback){
   var v = key && TEX_TILE_M[key];
@@ -3860,7 +3879,15 @@ var ASSET_TEX_NORMAL = {
   siding:         'assets/textures/wall_siding_normal.jpg',
   galvalume_dark: 'assets/textures/wall_galvalume_dark_normal.jpg',
   wood_cedar:     'assets/textures/wood_cedar_warm_normal.jpg',
-  wood_oak:       'assets/textures/floor_oak_normal.jpg'
+  wood_oak:       'assets/textures/floor_oak_normal.jpg',
+  mansion_ashlar_stone: 'assets/textures/mansion/mansion_ashlar_stone_normal.jpg',
+  mansion_brick_red: 'assets/textures/mansion/mansion_brick_red_normal.jpg',
+  mansion_slate_roof: 'assets/textures/mansion/mansion_slate_roof_normal.jpg',
+  mansion_damask_wallpaper: 'assets/textures/mansion/mansion_damask_wallpaper_normal.jpg',
+  mansion_white_subway_tile: 'assets/textures/mansion/mansion_white_subway_tile_normal.jpg',
+  mansion_wainscot_panel: 'assets/textures/mansion/mansion_wainscot_panel_normal.jpg',
+  mansion_herringbone_oak: 'assets/textures/mansion/mansion_herringbone_oak_normal.jpg',
+  mansion_marble_checker: 'assets/textures/mansion/mansion_marble_checker_normal.jpg'
 };
 var _texNormalCache = {};
 function getTextureNormal3D(key){
@@ -5835,14 +5862,17 @@ function build3DSetbackRoofSlab(pl,fp,planes){
     var rtc=cloneRepeatReadyTexture(roofTex);
     if(rtc){
       rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping;
-      setTextureRepeatNoDistort(rtc,Wm,Dm,0.8);
+      setTextureRepeatNoDistort(rtc,Wm,Dm,texTileM(ap.texture,0.8));
       applyTextureFlip(rtc,ap);
       matParams.map=rtc;
       matParams.color=0xffffff;
+      var rn=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+      if(rn){ setTextureRepeatNoDistort(rn,Wm,Dm,texTileM(ap.texture,0.8)); applyTextureFlip(rn,ap); matParams.normalMap=rn; }
     }
   }
   var topMat=makeExteriorLightingMaterial({map:matParams.map||null,color:matParams.color,
     side:THREE.DoubleSide,roughness:0.92,metalness:0.0,envMapIntensity:0.06});
+  if(matParams.normalMap){ topMat.normalMap=matParams.normalMap; topMat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',
     side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   // (t,s) と上下の別からワールド頂点へ。上面はいちばん低い制限面そのもの。
@@ -8189,6 +8219,25 @@ function setExteriorDetailValue(key,val){
   DATA.exteriorDetail[key]=val;
   if(ren) rebuild3D();
 }
+// 用意してある素材から選ぶ欄。画像を読み込む欄と並べる(読み込んだ画像は「読み込んだ画像」として出す)。
+// 値は ASSET_TEX_MAP のキーで、設定の texture にそのまま入る。
+var PRESET_WALL_TEXTURES={
+  exterior:[['siding','サイディング'],['plaster','塗り壁'],['plaster_white','塗り壁（白）'],['galvalume_dark','ガルバ（黒）'],
+    ['wood_cedar','杉板'],['mansion_brick_red','赤レンガ（洋館）'],['mansion_ashlar_stone','切石（洋館）']],
+  interior:[['wall_int','塗り壁'],['plaster_white','塗り壁（白）'],['wood_cedar','杉板'],
+    ['mansion_damask_wallpaper','ダマスク柄の壁紙（洋館）'],['mansion_white_subway_tile','白いタイル（洋館）']],
+  roof:[['roof_tile','瓦'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）']]
+};
+function presetTextureSelectHtml(kind,current,call,disabled){
+  var list=PRESET_WALL_TEXTURES[kind]||[];
+  var known=list.some(function(o){return o[0]===current;});
+  var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(disabled?0.45:1)+'"><span style="font-size:10px;color:#cce">素材</span>';
+  html+='<select class="preset-texture-select" aria-label="素材" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'"'+(disabled?' disabled':'')+'>';
+  html+='<option value=""'+(current?'':' selected')+'>素材なし（色だけ）</option>';
+  if(current&&!known) html+='<option value="'+escHtml(current.indexOf('data:')===0?'':current)+'" selected disabled>読み込んだ画像</option>';
+  list.forEach(function(o){ html+='<option value="'+o[0]+'"'+(o[0]===current?' selected':'')+'>'+o[1]+'</option>'; });
+  return html+'</select></div>';
+}
 function renderExteriorWallPanel(mode){
   mode=mode||APPEARANCE_PANEL_MODE||'exterior';
   var body=document.getElementById('exterior-wall-panel-body');
@@ -8207,6 +8256,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadInteriorTex(this,\'whole\')">';
   html += '</div>';
+  html += presetTextureSelectHtml('interior',ins.whole.texture,"updateInteriorSetting('whole','texture',VALUE)");
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ins.whole.texture)+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateInteriorSetting(\'whole\',\'textureFlipX\','+(!ins.whole.textureFlipX)+')',
@@ -8233,6 +8283,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadInteriorTex(this,\'floor\','+ifl+')">';
     html += '</div>';
+    html += presetTextureSelectHtml('interior',ifs.texture,"updateInteriorSetting('floor','texture',VALUE,"+ifl+")");
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ifs.texture)+' '+(ifs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'floor\',\'texture\',null,'+ifl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateInteriorSetting(\'floor\',\'textureFlipX\','+(!ifs.textureFlipX)+','+ifl+')',
@@ -8267,6 +8318,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
+  html += presetTextureSelectHtml('roof',roof.whole.texture,"updateRoofAppearance('whole','texture',VALUE)");
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateRoofAppearance(\'whole\',\'textureFlipX\','+(!roof.whole.textureFlipX)+')',
@@ -8283,6 +8335,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
+    html += presetTextureSelectHtml('roof',rfs.texture,"updateRoofAppearance('floor','texture',VALUE,"+rfl+")");
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateRoofAppearance(\'floor\',\'textureFlipX\','+(!rfs.textureFlipX)+','+rfl+')',
@@ -8312,6 +8365,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="finishAppearanceColorInput()" '+(!s.whole.linked?'disabled':'')+'>';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'whole\')" '+(!s.whole.linked?'disabled':'')+'>';
   html += '</div>';
+  html += presetTextureSelectHtml('exterior',s.whole.texture,"updateExteriorSetting('whole','texture',VALUE)",!s.whole.linked);
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(s.whole.texture)+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateExteriorSetting(\'whole\',\'textureFlipX\','+(!s.whole.textureFlipX)+')',
@@ -8329,6 +8383,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
+    html += presetTextureSelectHtml('exterior',fs.texture,"updateExteriorSetting('floor','texture',VALUE,"+fl+")",s.whole.linked||!fs.linked);
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateExteriorSetting(\'floor\',\'textureFlipX\','+(!fs.textureFlipX)+','+fl+')',
@@ -11886,7 +11941,7 @@ function build3DRoofGapCap(H,run){
   if(rtc){ rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping; rtc.repeat.set(1,1); applyTextureFlip(rtc,ap); }
   var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:0.92,metalness:0,envMapIntensity:0.06});
   var edgeMat=makeExteriorLightingMaterial({color:H.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
-  var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=0.8;
+  var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=texTileM(ap.texture,0.8);
   var topV=[], topUV=[], topI=[], edV=[], edI=[], k;
   for(k=0;k<run.pts.length;k++){
     var p=run.pts[k];
@@ -11942,9 +11997,11 @@ function build3DRoofItem(grp,it,w3,d3){
     var rtc=cloneRepeatReadyTexture(roofTex);
     if(rtc){
       rtc.wrapS = rtc.wrapT = THREE.RepeatWrapping;
-      setTextureRepeatNoDistort(rtc,W,D,0.8);
+      setTextureRepeatNoDistort(rtc,W,D,texTileM(ap.texture,0.8));
       applyTextureFlip(rtc,ap);
       matParams.map=rtc;
+      var rn=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+      if(rn){ setTextureRepeatNoDistort(rn,W,D,texTileM(ap.texture,0.8)); applyTextureFlip(rn,ap); matParams.normalMap=rn; }
       if(ap.texture) matParams.color=0xffffff;
     }
   }
@@ -11956,6 +12013,7 @@ function build3DRoofItem(grp,it,w3,d3){
     metalness:0.0,
     envMapIntensity:0.06
   });
+  if(matParams.normalMap){ mat.normalMap=matParams.normalMap; mat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   var skirtMat=makeExteriorLightingMaterial({color:'#d8d5ce',side:THREE.DoubleSide,roughness:0.88,envMapIntensity:0.12});
   // 結合済み(L字・コの字)の屋根は多角形の経路へ。矩形1枚のときはここを通らないので、
@@ -15765,7 +15823,9 @@ function polyAreaAbs(poly){
 var FLOOR_PBR_STEM = {
   wood_floor: 'floor_wood',
   wood_oak:   'floor_oak',
-  tile_floor: 'floor_tile'
+  tile_floor: 'floor_tile',
+  mansion_herringbone_oak: 'mansion/mansion_herringbone_oak',
+  mansion_marble_checker:  'mansion/mansion_marble_checker'
 };
 // 床の仕上げは3つ組(床材・カラー・テクスチャ)。天井・家具と同じ並び。
 //   r.floorMaterial … 床材のキー(FLOOR_PBR_STEM)。無ければ部屋名から自動

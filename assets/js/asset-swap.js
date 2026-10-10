@@ -193,15 +193,25 @@
   function renderEntry(doc){
     var picker=doc.getElementById('asset-set-picker'); if(!picker) return;
     var old=doc.getElementById('asset-swap-entry'); if(old) old.remove();
-    var sets=(root.AssetSets&&root.AssetSets.sets()||[]).filter(function(s){return s.swap;});
+    var sets=(root.AssetSets&&root.AssetSets.sets()||[]).filter(function(s){return s.swap||s.style;});
     if(!sets.length) return;
     var wrap=doc.createElement('div');wrap.id='asset-swap-entry';wrap.className='asset-swap-entry';
     sets.forEach(function(s){
-      var b=doc.createElement('button');b.type='button';b.className='asset-swap-open';b.dataset.assetSet=s.id;
-      b.textContent='家具を'+s.name+'に差し替える';
-      b.title='置いてある家具を、まとめて'+s.name+'の物に差し替えます。差し替える前に一覧で確かめられます';
-      b.addEventListener('click',function(){ open(s.id); });
-      wrap.append(b);
+      if(s.swap){
+        var b=doc.createElement('button');b.type='button';b.className='asset-swap-open';b.dataset.assetSet=s.id;
+        b.textContent='家具を'+s.name+'に差し替える';
+        b.title='置いてある家具を、まとめて'+s.name+'の物に差し替えます。差し替える前に一覧で確かめられます';
+        b.addEventListener('click',function(){ open(s.id); });
+        wrap.append(b);
+      }
+      // 壁・床・屋根の切り替え(building-style.js)。家具の差し替えと並べて置く
+      if(s.style&&root.BuildingStyle){
+        var bs=doc.createElement('button');bs.type='button';bs.className='asset-swap-open building-style-open';bs.dataset.assetSet=s.id;
+        bs.textContent='壁・床・屋根を'+s.name+'風にする';
+        bs.title='外壁・屋根・内壁・床の素材を、まとめて'+s.name+'の様式に切り替えます。切り替える前に内容を確かめられます';
+        bs.addEventListener('click',function(){ root.BuildingStyle.open(s.id); });
+        wrap.append(bs);
+      }
     });
     var st=doc.createElement('div');st.id='asset-swap-status';st.className='asset-swap-status';st.setAttribute('role','status');
     wrap.append(st);

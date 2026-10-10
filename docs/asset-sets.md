@@ -74,6 +74,27 @@
 
 同じ分類の物は、置いてある大きさ（幅・奥行・高さ）に一番近い物を選ぶ。大きさが2倍以上・半分以下しか無ければ替えずに残す。
 
+## 壁・床・屋根の様式（style）
+
+`asset-sets.json` のセットに `style` を書くと、「家具を〇〇に差し替える」の隣に「壁・床・屋根を〇〇風にする」が出る。
+決め方は `assets/js/building-style.js`。書き込む先は既存の外観・内観・屋根の設定と部屋の床材だけで、新しい保存項目は作らない。
+
+| 項目 | 意味 |
+|---|---|
+| `exterior.base` / `exterior.upper` | 外壁。2階建て以上は1階を `base`、上の階を `upper`。平屋は `upper` |
+| `roof` | 屋根（家全体） |
+| `interior` | 内壁（家全体） |
+| `floor` | 床（部屋ごと） |
+| `rooms` | 部屋の名前に `match` の語が含まれるとき、その部屋の `floor` と、部屋に向いた壁の面の `wall` |
+| `outdoorRooms` | 床を替えない屋外の部屋の名前（バルコニーなど） |
+| `names` | 確認画面に出す素材の日本語名 |
+
+素材はキーで指す。壁・屋根は `index.html` の `ASSET_TEX_MAP`（色）・`ASSET_TEX_NORMAL`（法線）・`TEX_TILE_M`（1枚の実寸）の3つに、
+床は `FLOOR_PBR_STEM`（`_diffuse` / `_normal` / `_roughness` の3枚組）に登録する。様式に書いた素材が全部登録してあるかは
+`tools/tests/building-style.test.cjs` が確かめる。設定欄の「素材」の選択肢は `PRESET_WALL_TEXTURES` と `ROOM_FLOOR_MATERIAL_OPTIONS`。
+
+洋館の腰板（`mansion_wainscot_panel`）は登録だけしてあり、様式では使っていない。高さ900mmの帯として壁の下だけに貼る仕組みが要るため。
+
 ## 作り直すとき
 
 **本番に出た物は、同じ ID のまま作り直さない。** 保存プランは家具を ID で持っているので、

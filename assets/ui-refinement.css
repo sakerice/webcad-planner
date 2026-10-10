@@ -274,3 +274,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .asset-swap-apply{background:var(--hp-primary);color:#fff}
 .asset-swap-cancel{background:#eef0ed;color:var(--hp-text)}
 @media (max-width:560px){.asset-swap-row{grid-template-columns:22px 1fr;}.asset-swap-arrow{display:none}.asset-swap-to{grid-column:2}}
+/* 壁・床・屋根の切り替え(assets/js/building-style.js)。家具の差し替えと同じカードで、行は「部位 | 内容」の2列 */
+.asset-swap-entry{display:flex;flex-wrap:wrap;gap:6px}
+.asset-swap-entry .asset-swap-status{flex-basis:100%}
+.building-style-row{grid-template-columns:24px 64px 1fr;align-items:start}
+.building-style-row input{margin-top:1px}
+.building-style-detail{display:flex;flex-direction:column;gap:3px;line-height:1.5}
+.building-style-line small{font-size:10px;color:var(--hp-muted)}
+@media (max-width:560px){.building-style-row{grid-template-columns:22px 1fr}.building-style-detail{grid-column:2}}

@@ -1,5 +1,5 @@
 {
- "note": "カタログで選べるアセットのセット。標準以外は manifest（本番のカタログと同じ形式）を持つ。新しいセットは docs/asset-sets.md の手順で足す。 mark は見出しに付ける1文字の印。 swap は置いてある家具を一括で差し替える決まり。",
+ "note": "カタログで選べるアセットのセット。標準以外は manifest（本番のカタログと同じ形式）を持つ。新しいセットは docs/asset-sets.md の手順で足す。 mark は見出しに付ける1文字の印。 swap は置いてある家具を一括で差し替える決まり。style は壁・床・屋根をまとめて切り替える様式。",
  "sets": [
   {
    "id": "standard",
@@ -53,6 +53,66 @@
      "plant",
      "light"
     ]
+   },
+   "style": {
+    "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。rooms は部屋の名前に match の語が含まれるときの素材",
+    "exterior": {
+     "base": "mansion_ashlar_stone",
+     "upper": "mansion_brick_red"
+    },
+    "roof": "mansion_slate_roof",
+    "interior": "mansion_damask_wallpaper",
+    "floor": "mansion_herringbone_oak",
+    "rooms": [
+     {
+      "match": [
+       "浴室",
+       "バス",
+       "風呂",
+       "洗面",
+       "脱衣",
+       "トイレ",
+       "WC",
+       "ランドリー"
+      ],
+      "floor": "mansion_marble_checker",
+      "wall": "mansion_white_subway_tile"
+     },
+     {
+      "match": [
+       "キッチン",
+       "台所"
+      ],
+      "wall": "mansion_white_subway_tile"
+     },
+     {
+      "match": [
+       "玄関",
+       "ホール",
+       "エントランス"
+      ],
+      "floor": "mansion_marble_checker"
+     }
+    ],
+    "outdoorRooms": [
+     "バルコニー",
+     "ベランダ",
+     "テラス",
+     "ポーチ",
+     "デッキ",
+     "庭",
+     "駐車",
+     "ガレージ"
+    ],
+    "names": {
+     "mansion_ashlar_stone": "切石",
+     "mansion_brick_red": "赤レンガ",
+     "mansion_slate_roof": "スレート",
+     "mansion_damask_wallpaper": "ダマスク柄の壁紙",
+     "mansion_white_subway_tile": "白いタイル",
+     "mansion_herringbone_oak": "ヘリンボーンの床",
+     "mansion_marble_checker": "白黒の大理石"
+    }
    }
   }
  ]
