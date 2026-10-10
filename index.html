@@ -7948,7 +7948,6 @@ var ROOF_SHEEN_PARAMS={
 var ROOF_TEXTURE_SHEEN={
   galvalume_dark:'metal',
   roof_standing_seam_silver:'metal',
-  roof_kawara_ibushi:'satin',       // いぶし瓦は銀色の鈍い艶
   roof_copper_patina:'satin',
   mansion_slate_roof:'satin'
 };
@@ -8290,15 +8289,12 @@ function setExteriorDetailValue(key,val){
 }
 // 用意してある素材から選ぶ欄。画像を読み込む欄と並べる(読み込んだ画像は「読み込んだ画像」として出す)。
 // 値は ASSET_TEX_MAP のキーで、設定の texture にそのまま入る。
-// 屋根の日本瓦・洋瓦・銅板(roof_kawara_ibushi / roof_s_tile_terracotta / roof_copper_patina)は
-// 登録だけして選択肢に出していない。瓦の谷の陰が色に無く平らな四角に見える・銅板の緑青が
-// 迷彩柄に見えるため、作り直しを頼んでいる(2026-10-10)。
 var PRESET_WALL_TEXTURES={
   exterior:[['siding','サイディング'],['plaster','塗り壁'],['plaster_white','塗り壁（白）'],['galvalume_dark','ガルバ（黒）'],
     ['wood_cedar','杉板'],['mansion_brick_red','赤レンガ（洋館）'],['mansion_ashlar_stone','切石（洋館）']],
   interior:[['wall_int','塗り壁'],['plaster_white','塗り壁（白）'],['wood_cedar','杉板'],
     ['mansion_damask_wallpaper','ダマスク柄の壁紙（洋館）'],['mansion_white_subway_tile','白いタイル（洋館）']],
-  roof:[['roof_tile','瓦'],['roof_flat_tile_charcoal','平板瓦（黒灰）'],['roof_colonial_gray','化粧スレート（コロニアル）'],['roof_standing_seam_silver','ガルバ立平（銀）'],['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）']]
+  roof:[['roof_tile','瓦'],['roof_kawara_ibushi','日本瓦（いぶし銀）'],['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],['roof_flat_tile_charcoal','平板瓦（黒灰）'],['roof_colonial_gray','化粧スレート（コロニアル）'],['roof_standing_seam_silver','ガルバ立平（銀）'],['roof_copper_patina','銅板一文字（緑青）'],['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）']]
 };
 function presetTextureSelectHtml(kind,current,call,disabled){
   var list=PRESET_WALL_TEXTURES[kind]||[];

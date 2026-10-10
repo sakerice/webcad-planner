@@ -22,9 +22,9 @@ U,V=np.meshgrid(q,q)
 
 SPECS=[
     dict(key='roof_kawara_ibushi',tile_mm=1060,cols=4,rows=5,width_mm=265,length_mm=212,
-         nominal_mm=[265,235],kind='j',colour=[110,114,114]),
+         nominal_mm=[265,235],kind='j',colour=[120,123,125]),
     dict(key='roof_s_tile_terracotta',tile_mm=1080,cols=4,rows=4,width_mm=270,length_mm=270,
-         nominal_mm=[260,290],kind='s',colour=[159,78,46]),
+         nominal_mm=[260,290],kind='s',colour=[152,84,58]),
     dict(key='roof_flat_tile_charcoal',tile_mm=1080,cols=4,rows=4,width_mm=270,length_mm=270,
          nominal_mm=[265,280],kind='flat',colour=[55,58,59]),
     dict(key='roof_colonial_gray',tile_mm=1000,cols=1,rows=6,width_mm=1000,length_mm=1000/6,
@@ -51,6 +51,40 @@ def noise(seed,low,high):
     a/=max(a.std(),1e-9)
     a=np.clip(a,-2.7,2.7)/2.7
     return np.pad(a,((0,1),(0,1)),mode='wrap')
+
+
+def streak_noise(seed):
+    """雨の流れに沿った縦の筋。横方向は細かく、縦方向はゆっくり変わる周期的なむら。"""
+    rng=np.random.default_rng(seed)
+    base=rng.normal(size=(N-1,N-1))
+    f=np.fft.rfft2(base)
+    fy=np.fft.fftfreq(N-1)[:,None]*(N-1)
+    fx=np.fft.rfftfreq(N-1)[None,:]*(N-1)
+    mask=np.exp(-((fx/60)**2))*np.exp(-((fy/3)**2))*(fx>2)
+    a=np.fft.irfft2(f*mask,s=base.shape)
+    a/=max(a.std(),1e-9)
+    a=np.clip(a,-2.5,2.5)/2.5
+    return np.pad(a,((0,1),(0,1)),mode='wrap')
+
+
+def shade_from_height(height,tile_mm,kind):
+    """形の陰を色へ焼き込む(2026-10-10 作り直し)。屋根は遠目に見るので、法線マップだけでは
+    瓦の山と谷が消えて平らな四角に見えた。谷の暗さ(高さ)と、上の段の唇が落とす影を色に入れる。"""
+    core=height[:-1,:-1]
+    step=(tile_mm/1000)/(N-1)
+    du=(np.roll(core,-1,axis=1)-np.roll(core,1,axis=1))/(2*step)
+    dv=(np.roll(core,-1,axis=0)-np.roll(core,1,axis=0))/(2*step)
+    lo,hi=np.percentile(core,2),np.percentile(core,98)
+    cavity=np.clip((core-lo)/max(hi-lo,1e-9),0,1)
+    # 光は左上(棟の側・やや左)から。画像の行は下向き = 軒へ
+    lit=np.clip(1+(-du*.45-dv*.55)*.9,.6,1.25)
+    if kind=='copper':
+        shade=(.94+.06*cavity)*np.clip(1+(-du*.45-dv*.55)*.6,.85,1.12)
+    elif kind=='j':
+        shade=(.62+.38*cavity)*lit
+    else:
+        shade=(.70+.30*cavity)*lit
+    return np.pad(shade,((0,1),(0,1)),mode='wrap')
 
 
 def smooth(a):return np.clip(a,0,1)**2*(3-2*np.clip(a,0,1))
@@ -80,10 +114,12 @@ def generate(spec,i):
         # Asymmetric J profile and sinuous S profile; row lips stay horizontal.
         wave=(.5+.5*np.cos(2*np.pi*(px-.22))) if kind=='j' else (.5+.5*np.sin(2*np.pi*px))
         height=(.023 if kind=='j' else .030)*wave + overlap-xedge*.002
-        colour+=variation[...,None]*(3 if kind=='j' else 9)
-        colour+=coarse[...,None]*4+fine[...,None]*2
-        colour-=xedge[...,None]*11+joint[...,None]*12
-        rough=.64+fine*.035+coarse*.03 if kind=='j' else .86+fine*.04
+        # 2026-10-10 作り直し(Claude): 1枚ごとの色の差は弱く(洋瓦は4×4の繰り返しが市松に見えた)、
+        # 焼きむらは1枚の中のなだらかなむらで出す。形の陰は下の shade_from_height で色に焼き込む
+        colour+=variation[...,None]*(1.5 if kind=='j' else 3)
+        colour+=coarse[...,None]*(3 if kind=='j' else 7)+fine[...,None]*2
+        colour-=xedge[...,None]*6
+        rough=.62+fine*.035+coarse*.03 if kind=='j' else .86+fine*.04
         height+=fine*.00008
     elif kind=='flat':
         height=overlap-xedge*.0017-bell(px-.80,.018)*.0007
@@ -109,15 +145,16 @@ def generate(spec,i):
         colour-=seam[...,None]*3
         rough=.39+coarse*.025+fine*.015
     elif kind=='copper':
-        # Predominantly verdigris with softly mottled remaining copper; avoid broad hard-edged islands.
-        patina=np.clip(.42+.58*smooth((coarse+.45)*1.45)+fine*.10,0,1)
-        copper=np.array([116,69,43])
-        green=np.array([67,126,115])
+        # 2026-10-10 作り直し(Claude): 大きな斑点(迷彩柄)をやめる。面のほとんどを均一に近い緑青にし、
+        # 雨の流れに沿った縦の筋で濃淡を付ける。銅の地色は板の継ぎ目・はぜの縁に細く残すだけ
+        streak=streak_noise(9001+i)
+        patina=np.clip(.93+streak*.05+fine*.02-(joint*.55+xedge*.45),0,1)
+        copper=np.array([118,74,48])
+        green=np.array([94,142,128])
         colour=copper[None,None,:]*(1-patina[...,None])+green[None,None,:]*patina[...,None]
-        colour+=fine[...,None]*4+grain[...,None]*2
-        colour-=joint[...,None]*12+xedge[...,None]*10
+        colour+=streak[...,None]*7+fine[...,None]*2+grain[...,None]*1.5
         height=py*.0012+joint*.0025+xedge*.0018+fine*.00008
-        rough=.48+patina*.32+fine*.035
+        rough=.55+patina*.28+fine*.03
     else:
         height=overlap-xedge*.0016+grain*.00028+fine*.00012
         colour+=grain[...,None]*14+fine[...,None]*5+coarse[...,None]*3+variation[...,None]*4
@@ -125,6 +162,14 @@ def generate(spec,i):
         colour[:,:,0]+=grain*3
         colour-=joint[...,None]*16+xedge[...,None]*15
         rough=.93+grain*.035
+    if kind in ('j','s','copper'):
+        colour=colour*shade_from_height(height,spec['tile_mm'],kind)[...,None]
+    if kind in ('j','s'):
+        # 上の段の唇(下端)が、すぐ下の段の上端に落とす影と、唇の明るい縁。
+        # これが無いと段の区切りが消えて、瓦ではなく波板に見える
+        lip_shadow=bell(py,.085)
+        lip_edge=bell(1-py,.025)
+        colour=colour*(1-.38*lip_shadow)[...,None]*(1+.10*lip_edge)[...,None]
     # Periodic endpoint assignment (all tile-dependent properties agree there).
     for a in (height,rough,colour):
         a[-1,...]=a[0,...];a[:,-1,...]=a[:,0,...]

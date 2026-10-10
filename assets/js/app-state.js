@@ -1803,9 +1803,12 @@ var MODEL_FINISH_TEXTURES=[
 var MODEL_ROOF_FINISH_TEXTURES=[
   ['','元の柄のまま'],
   ['roof_tile','瓦'],
+  ['roof_kawara_ibushi','日本瓦（いぶし銀）'],
+  ['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],
   ['roof_flat_tile_charcoal','平板瓦（黒灰）'],
   ['roof_colonial_gray','化粧スレート（コロニアル）'],
   ['roof_standing_seam_silver','ガルバ立平（銀）'],
+  ['roof_copper_patina','銅板一文字（緑青）'],
   ['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],
   ['galvalume_dark','ガルバ（黒）'],
   ['mansion_slate_roof','スレート（洋館）']
