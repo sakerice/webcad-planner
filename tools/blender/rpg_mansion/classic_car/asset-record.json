@@ -1,0 +1,70 @@
+{
+  "id": "rpg-mansion-classic-sedan-01",
+  "name": "洋館用クラシックセダン",
+  "packId": "rpg-mansion",
+  "provenance": "original",
+  "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-classic-sedan-01.glb",
+  "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-classic-sedan-01-thumb.png",
+  "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-classic-sedan-01-top.png",
+  "sourceBlend": "tools/blender/rpg_mansion/classic_car/rpg-mansion-classic-sedan-01.blend",
+  "authoringBlend": "tools/blender/rpg_mansion/classic_car/rpg-mansion-classic-sedan-01-authoring.blend",
+  "builder": "tools/blender/rpg_mansion/classic_car/build.py",
+  "validation": "tools/blender/rpg_mansion/classic_car/checks.json",
+  "w": 1750,
+  "d": 4600,
+  "h": 1650,
+  "actualMeasuredDimensionsMm": [
+    1750.0,
+    4599.2913246154785,
+    1649.9999463558197
+  ],
+  "units": "meters",
+  "dimensionUnits": "millimeters",
+  "frontAxis": "+Z",
+  "upAxis": "+Y",
+  "origin": "ground-center",
+  "defaultElevation": 0,
+  "staticProp": true,
+  "finishChannels": [
+    {
+      "key": "body",
+      "label": "車体塗装",
+      "default": "#28493c"
+    }
+  ],
+  "triangleBudget": 12000,
+  "measuredTriangles": 11508,
+  "glbBytes": 493856,
+  "nativePartCount": 180,
+  "sha256": "d768677ef30b0e6000a46b9594121f0455f7b44e6c7af67f9e994c1859dc6dc0",
+  "sourceSha256": "5938183af3e0d1f0872a4df24b4c371083579fe3cd6555e5648407862d2b002c",
+  "authoringSha256": "6e365d08074c4d6150d1a780a063bff12464be5cade0fce09f10b5bfc30f8c11",
+  "rights": {
+    "status": "original",
+    "externalGeometry": false,
+    "externalImages": false,
+    "sources": [],
+    "creator": "OpenAI assistant using native Blender procedural authoring for this project",
+    "basis": "Original fictional geometry; existing repository helpers; no manufacturer logo or blueprint reproduction",
+    "attributionRequiredForExternalAssets": false
+  },
+  "deliveryStatus": "new candidate asset delivered for Draft PR review; not registered in editor",
+  "placementHint": "Static passenger car on mansion driveway; front +Z; contact datum ground center",
+  "browserValidation": "not performed; browser operation prohibited",
+  "regeneration": {
+    "passed": true,
+    "method": "clean factory-startup replay; per-material geometry signatures, PBR values and all UV triangles",
+    "geometry_identical": true,
+    "materials_identical": true,
+    "uv_valid_triangles": 11508,
+    "uv_p95_p05": 1.1887775250881112,
+    "same_uv_layout": false,
+    "same_glb_sha256": false,
+    "note": "Fresh UV island packing may vary; use the saved export source to reproduce the delivered atlas exactly."
+  },
+  "sourceReexport": {
+    "passed": true,
+    "same_geometry_materials_uv": true,
+    "same_glb_sha256": true
+  }
+}
