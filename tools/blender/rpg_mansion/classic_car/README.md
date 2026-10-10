@@ -12,12 +12,12 @@
 | 検査項目 | 結果 |
 | --- | --- |
 | 実測寸法（全長 × 全幅 × 全高） | 4,599.29 × 1,750.00 × 1,649.99995 mm |
-| 三角形 | 11,508 / 12,000（余裕 492） |
-| GLB | 493,856 bytes、1 mesh / 10 material primitives |
+| 三角形 | 11,700 / 12,000（余裕 300） |
+| GLB | 503,876 bytes、1 mesh / 10 material primitives |
 | 座標・原点 | m、GLB +Z 正面 / +Y 上、接地面の中心 |
 | メッシュ | 閉じた部品の結合、非多様体の辺 0、実面積の潰れ 0 |
-| UV | 1 層、11,508 三角形すべて有効、潰れ・欠損・非有限値 0 |
-| UV 密度 p95/p05 | 約 1.189（規約の 2 未満） |
+| UV | 1 層、11,700 三角形すべて有効、潰れ・欠損・非有限値 0 |
+| UV 密度 p95/p05 | 約 1.2（規約の 2 未満、実測は checks.json） |
 | 色変更 | `finishChannel=body`、初期色 `#28493c` |
 | 材質保持 | アプリの `ModelQuality.applyFinishes` で車体の色・粗さだけ変更、他の 9 材質は保持 |
 | 512px アイコン | RGBA thumb/top、透過あり、端への切れ 0 |
@@ -40,6 +40,8 @@ GLB のバイト列が必要な場合は、保存済みの書き出し用 `.blen
 - `rpg-mansion-classic-sedan-01-validation.json`：変更していない `model_kit.run()` の検査。
 - `checks.json`、`source-checks.json`、`three-checks.json`、`render-record.json`：実データ検査記録。
 - `evidence/*-{front,side,rear}.png`：最終 GLB を Blender に読み戻した確認画像。
+- `evidence/*-{front-right,front-left}.png`：修正版のフェンダー端を斜め前の左右から確認する画像。
+- `verify_fenders.py` / `fender-checks.json`：元の部品原本との比較と端の下向き・内向きの巻き込み検査。
 - `overview.png`：一覧画像。`make_delivery.py` で素材 ZIP とともに再作成可能。
 
 GLB では車体とホイールの塗装を `body` 部位として変更できます。タイヤ、ガラス、
@@ -83,3 +85,23 @@ python3 tools/blender/rpg_mansion/classic_car/make_delivery.py
 実施していません。確認画像は Blender の GLB 読み戻しレンダーです。
 Node CLI のローダー・部位変更の成功を、ブラウザ描画の成功とは扱いません。
 main 更新・マージ・手動デプロイはこの納品範囲に含みません。
+
+## 直し（2026-10-10）
+
+フェンダー端が薄い板として前後へ張り出していた箇所だけを修正しました。
+前端はライト台座のすぐ前、後端は後ろバンパーの手前で下へ回り込み、
+終端を内側へ返して丸い閉じた面として収束させます。端の断面は厚さ約 27–34 mm。
+前後端ともバンパーの最外端より約 200 mm 内側、幅は ±875 mm 以内です。
+
+元のタイヤ上のアーチ断面・ステップ側の接続頂点は保持し、その他の 176 部品は
+物理面と材質の比較で一致しています。ID、寸法、原点、色の部位、初期色と
+10 材質は保持します。斜め前左右・斜め後ろからの GLB レンダーを目視しました。
+
+元の部品原本を用意して端の検査を再実行する場合：
+
+```sh
+mkdir -p /tmp/webcad-classic-car-fix-geometry-baseline-20261010
+git show 5c9b70bdf42a41b901cb0bed76001b1d8ce02d6e:tools/blender/rpg_mansion/classic_car/rpg-mansion-classic-sedan-01-authoring.blend \
+  > /tmp/webcad-classic-car-fix-geometry-baseline-20261010/authoring.blend
+"$BLENDER" -b -t 4 --factory-startup --python tools/blender/rpg_mansion/classic_car/verify_fenders.py
+```

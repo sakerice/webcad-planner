@@ -49,6 +49,8 @@ def main():
         'placementHint':'Static passenger car on mansion driveway; front +Z; contact datum ground center',
         'browserValidation':'not performed; browser operation prohibited',
         'regeneration':checks['regeneration'],'sourceReexport':checks['source_reexport'],
+        'revision':{'date':'2026-10-10','scope':'Front/rear fender terminal curls only',
+                    'validation':relative(HERE/'fender-checks.json')},
     }
     (HERE/'asset-record.json').write_text(json.dumps(record,indent=2,ensure_ascii=False)+'\n')
     font_path='/System/Library/Fonts/Avenir Next.ttc'
@@ -73,8 +75,8 @@ def main():
     place(PACK/'previews'/(ID+'-thumb.png'),(56,154,939,565))
     draw.text((1030,167),'4.599 m  /  1.750 m  /  1.650 m',font=font(26),fill='#233e34')
     draw.text((1030,205),'LENGTH        WIDTH          HEIGHT',font=font(16),fill='#687369')
-    draw.text((1030,267),'11,508 triangles',font=font(35),fill='#233e34')
-    draw.text((1030,318),'GLB 482 KiB  /  10 materials',font=font(25),fill='#4c5b50')
+    draw.text((1030,267),f"{checks['triangles']:,} triangles",font=font(35),fill='#233e34')
+    draw.text((1030,318),f"GLB {checks['glb_bytes']/1024:.0f} KiB  /  10 materials",font=font(25),fill='#4c5b50')
     draw.rectangle((1032,383,1109,438),fill='#28493c')
     draw.text((1130,384),'Recolorable body',font=font(24),fill='#233e34')
     draw.text((1130,416),'#28493c',font=font(21),fill='#687369')
@@ -86,7 +88,7 @@ def main():
         draw.text((rect[0],617),label,font=font(21),fill='#233e34')
         place(HERE/'evidence'/(ID+'-'+view+'.png'),rect)
     draw.line((54,963,1546,963),fill='#c7c6b9',width=2)
-    draw.text((54,983),'Blender GLB readback  |  UV and source/replay checks passed',font=font(22),fill='#44564a')
+    draw.text((54,983),'Fender ends revised 2026-10-10  |  GLB, UV and source/replay checks passed',font=font(22),fill='#44564a')
     draw.text((54,1016),'Browser / WebGL placement test: not performed',font=font(19),fill='#687369')
     overview=HERE/'overview.png'
     canvas.save(overview,optimize=True)

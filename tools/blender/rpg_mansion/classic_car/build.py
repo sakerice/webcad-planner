@@ -192,21 +192,32 @@ def wheel(side, y):
 
 def fender(side, center_y, front):
     if front:
-        path = [(-2.12,.415),(-2.00,.49),(-1.86,.57)]
+        # Begin at the hidden rounded underside of the nose, curl outward then
+        # upward into the unchanged wheel arch. Angles rotate the crown around X.
+        path = [(-2.005,.270,-140,.22,.42),(-2.040,.279,-118,.65,.86),
+                (-2.060,.323,-82,.93,1),(-2.032,.408,-48,1,1),
+                (-1.973,.493,-22,1,1),(-1.86,.57,0,1,1)]
         angles = [145-130*i/16 for i in range(17)]
-        path.extend([(center_y+.48*math.cos(math.radians(a)), .345+.48*math.sin(math.radians(a)))
+        path.extend([(center_y+.48*math.cos(math.radians(a)), .345+.48*math.sin(math.radians(a)),0,1,1)
                      for a in angles])
-        path.extend([(-.69,.415),(-.55,.390)])
+        path.extend([(-.69,.415,0,1,1),(-.55,.390,0,1,1)])
     else:
-        path = [(.65,.390),(.80,.435)]
+        path = [(.65,.390,0,1,1),(.80,.435,0,1,1)]
         angles = [165-130*i/16 for i in range(17)]
-        path.extend([(center_y+.48*math.cos(math.radians(a)), .345+.48*math.sin(math.radians(a)))
+        path.extend([(center_y+.48*math.cos(math.radians(a)), .345+.48*math.sin(math.radians(a)),0,1,1)
                      for a in angles])
-        path.extend([(1.98,.485),(2.12,.410)])
+        path.extend([(1.98,.485,0,1,1),(2.037,.413,42,1,1),
+                     (2.067,.332,80,.93,1),(2.050,.280,118,.65,.86),
+                     (2.012,.264,142,.22,.42)])
     # Rolled outer edge and convex crown; neither a box nor a flattened torus.
     cross = [(.535,-.018),(.540,.008),(.635,.033),(.780,.020),
              (.855,-.018),(.875,-.052),(.850,-.070),(.785,-.022)]
-    rings = [[(side*x, y, z+offset) for x,offset in cross] for y,z in path]
+    rings = []
+    for y,z,degrees,width_scale,depth_scale in path:
+        angle = math.radians(degrees)
+        rings.append([(side*(.705+(x-.705)*width_scale),
+                       y+offset*depth_scale*math.sin(angle),
+                       z+offset*depth_scale*math.cos(angle)) for x,offset in cross])
     loft(('Front' if front else 'Rear') + ' swept fender', rings, 'paint')
 
 
