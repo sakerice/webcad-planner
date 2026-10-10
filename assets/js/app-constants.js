@@ -3297,8 +3297,9 @@ function onAssetSetsChanged(){
   var open=[];
   document.querySelectorAll('#sidebar .asset-subcat.open > .asset-subhdr').forEach(function(h){ open.push(h.getAttribute('title')); });
   renderFurnitureMegaLibrary();
-  // 開き戸・玄関ドアの扉の選択肢も、表示するセットに合わせて作り直す
+  // 開き戸・玄関ドアの扉と窓の選択肢も、表示するセットに合わせて作り直す
   renderOpeningDoorModelToolMenu();
+  renderOpeningWindowModelToolMenu();
   document.querySelectorAll('#sidebar .asset-subcat > .asset-subhdr').forEach(function(h){
     if(open.indexOf(h.getAttribute('title'))>=0 && !h.parentElement.classList.contains('open')) toggleAssetCat(h);
   });
@@ -3331,7 +3332,10 @@ function renderOpeningDoorModelToolMenu(){
 function renderOpeningWindowModelToolMenu(){
   var mount=document.getElementById('opening-window-model-tools');
   if(!mount) return;
-  var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item&&item.category==='窓';}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  // セットの窓は、そのセットを表示しているときだけ選ばせる(扉と同じ)
+  var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){
+    return item&&item.category==='窓'&&!item.retired&&!(item.assetSet&&typeof AssetSets==='object'&&AssetSets.isVisible&&!AssetSets.isVisible(item));
+  }).sort(function(a,b){return a.name.localeCompare(b.name);});
   var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="窓"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v16H3ZM12 4v16M3 12h18"/></svg></span><span>窓</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
   html+=openingToolTileHtml(openingWindowModelToolId(''),'引違い','',{thumb:'assets/models/previews-v2/standard-window-slide-thumb.png'},'opening-model-default-tile opening-window-tile');
   html+=openingToolTileHtml(openingWindowModelToolId('fix'),'FIX窓','',{thumb:'assets/models/previews-v2/standard-window-fix-thumb.png'},'opening-model-default-tile opening-window-tile');

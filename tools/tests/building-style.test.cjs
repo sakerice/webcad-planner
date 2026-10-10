@@ -94,3 +94,38 @@ test('洋館の様式が指す扉は、洋館セットに在る「ドア」の�
     assert.equal(/-entrance-door-/.test(id), k === 'front', `${k}: 玄関ドアと室内ドアの取り違え`);
   }
 });
+
+const winModels = { sash: { w: 900, h: 1400 }, case: { w: 1200, h: 1200 }, arch: { w: 900, h: 1200 }, french: { w: 1600, h: 2200 } };
+test('窓は種類ごとに替える(引き違い・開き窓・FIX・掃き出し)', () => {
+  const st = { ...style, windows: { sliding: 'sash', casement: 'case', fix: 'arch', door: 'french' } };
+  const p = B.plan({ windowModels: winModels, windows: [
+    { id: 1, type: 'window', kind: 'sliding', w: 780, h: 1100 }, { id: 2, type: 'window', kind: 'fix', w: 900, h: 1200 },
+    { id: 3, type: 'window', kind: 'casement', w: 1200, h: 1100 }, { id: 4, type: 'window-door', kind: 'sliding', w: 1690, h: 2030 },
+  ] }, st);
+  assert.deepEqual(p.windows.map((w) => [w.id, w.model]), [[1, 'sash'], [2, 'arch'], [3, 'case'], [4, 'french']]);
+  assert.equal(p.keptWindows, 0);
+});
+
+test('洋館の様式が指す窓は、洋館セットに在る「窓」の物', () => {
+  const root = path.join(__dirname, '..', '..');
+  const sets = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/asset-sets.json'), 'utf8'));
+  const st = sets.sets.find((s) => s.id === 'rpg-mansion').style;
+  const man = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/packs/rpg-mansion/manifest.json'), 'utf8'));
+  for (const [k, id] of Object.entries(st.windows)) {
+    const it = man.items.find((i) => i.id === id);
+    assert.ok(it && !it.retired, `${k}: ${id} が manifest に無い`);
+    assert.equal(it.category, '窓');
+  }
+});
+
+test('縦横の比が合わない窓は、比の近い別の窓にするか、合う物が無ければ替えない', () => {
+  const st = { ...style, windows: { sliding: 'sash', casement: 'case', fix: 'arch', door: 'french' } };
+  const p = B.plan({ windowModels: winModels, windows: [
+    { id: 1, type: 'window', kind: 'sliding', w: 1690, h: 1080 },   // 横長: 上げ下げ(縦長)は合わず、開き窓(正方形)にする
+    { id: 2, type: 'window', kind: 'fix', w: 405, h: 1370 },        // 細長いスリット: 合う物が無い
+    { id: 3, type: 'window', kind: 'fix', w: 690, h: 250 },         // 横長の高窓: 合う物が無い
+    { id: 4, type: 'window-door', kind: 'sliding', w: 4000, h: 2000 }, // 掃き出しはフランス窓だけ。合わなければ残す
+  ] }, st);
+  assert.deepEqual(p.windows.map((w) => [w.id, w.model]), [[1, 'case']]);
+  assert.equal(p.keptWindows, 3);
+});

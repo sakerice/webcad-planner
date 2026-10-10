@@ -22,7 +22,7 @@ try {
   await page.click('.building-style-open[data-asset-set="rpg-mansion"]');
   await page.waitForSelector('#asset-swap-modal input[data-style-part]');
   const parts = await page.locator('#asset-swap-modal input[data-style-part]').evaluateAll((els) => els.map((e) => e.dataset.stylePart));
-  assert.deepEqual(parts, ['exterior', 'roof', 'interior', 'floor', 'doors']);
+  assert.deepEqual(parts, ['exterior', 'roof', 'interior', 'floor', 'doors', 'windows']);
   // 屋根だけ外して切り替える
   const roofBefore = await page.evaluate(() => JSON.stringify(ensureRoofAppearance().whole));
   await page.locator('#asset-swap-modal input[data-style-part="roof"]').uncheck();

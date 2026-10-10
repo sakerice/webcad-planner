@@ -66,7 +66,7 @@
     }
    },
    "style": {
-    "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。doors は開き戸(swing)と玄関ドア(front)の扉板。rooms は部屋の名前に match の語が含まれるときの素材",
+    "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。windows は窓の種類(引き違い sliding・開き窓 casement・FIX fix・掃き出し door)ごとの窓。doors は開き戸(swing)と玄関ドア(front)の扉板。rooms は部屋の名前に match の語が含まれるときの素材",
     "exterior": {
      "base": "mansion_ashlar_stone",
      "upper": "mansion_brick_red"
@@ -127,6 +127,12 @@
     "doors": {
      "swing": "rpg-mansion-door-six-panel-01",
      "front": "rpg-mansion-entrance-door-01"
+    },
+    "windows": {
+     "sliding": "rpg-mansion-sash-window-01",
+     "casement": "rpg-mansion-casement-window-01",
+     "fix": "rpg-mansion-arched-fixed-window-01",
+     "door": "rpg-mansion-french-window-01"
     }
    }
   }

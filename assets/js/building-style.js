@@ -15,6 +15,7 @@
 // - 床: 部屋ごとに床材。屋外(バルコニーなど)の部屋は触らない
 // - 建具: 開き戸と玄関ドアの扉板を様式の扉にする。開口の大きさは変えない(扉板が開口に合わせて伸縮する)。
 //   引き戸・折れ戸・浴室の透明ドアは、替えられる扉が無いのでそのまま
+// - 窓: 窓の種類ごとに様式の窓にする(引き違い・開き窓・FIX・掃き出し)。開口の大きさは変えない
 // - 面ごと・壁ごとに個別に付けていた色・素材は、様式が見えるよう外す(Undo で戻る)
 (function(root){
   var api={};
@@ -37,6 +38,8 @@
   //   input.rooms  … [{id, n, floor}]
   //   input.faces  … 内壁の面 [{key, room: 面が向いている部屋の名前 or null}]
   //   input.doors  … 建具 [{id, type, finish}]
+  //   input.windows … 窓 [{id, type, kind: sliding|casement|fix, w, h}]
+  //   input.windowModels … 様式の窓の大きさ {id: {w, h}}(縦横比で選ぶため)
   // 返すのは書き込みの指示と、確認画面に出す要約。
   function plan(input,style){
     var floors=(input.floors||[]).slice().sort(function(a,b){return a-b;});
@@ -68,8 +71,33 @@
       if(model) doors.push({id:d.id,type:d.type,model:model}); else keptDoors++;
     });
 
+    // 窓は開口に合わせて縦横に伸びる。縦横比が窓の元の比から離れすぎると、格子や半円の飾りが
+    // つぶれて見えるので、種類で決めた窓が合わなければ他の窓から比の近い物を選び、
+    // それも合わなければ替えない(細長いスリット窓・横長の高窓など)
+    var winCfg=style.windows||{}, windows=[], keptWindows=0, sizes=input.windowModels||{};
+    var range=winCfg.aspectRange||[0.6,1.8];
+    function stretch(id,w){
+      var m=sizes[id]; if(!m||!(w.w>0)||!(w.h>0)) return 1;
+      return (w.w/m.w)/(w.h/m.h);
+    }
+    function fits(id,w){ var r=stretch(id,w); return r>=range[0]&&r<=range[1]; }
+    var plainKeys=['sliding','casement','fix'];
+    (input.windows||[]).forEach(function(w){
+      var model=w.type==='window-door'?winCfg.door:winCfg[w.kind||'sliding'];
+      if(model&&!fits(model,w)){
+        model=null;
+        if(w.type!=='window-door'){
+          var alts=plainKeys.map(function(k){return winCfg[k];}).filter(function(id,i,a){return id&&a.indexOf(id)===i&&fits(id,w);});
+          alts.sort(function(a,b){ return Math.abs(Math.log(stretch(a,w)))-Math.abs(Math.log(stretch(b,w))); });
+          model=alts[0]||null;
+        }
+      }
+      if(model) windows.push({id:w.id,type:w.type,kind:w.kind,model:model}); else keptWindows++;
+    });
+
     return {exterior:exterior,roof:style.roof||null,interior:style.interior||null,
-            faces:faces,rooms:rooms,skippedRooms:skipped,doors:doors,keptDoors:keptDoors};
+            faces:faces,rooms:rooms,skippedRooms:skipped,doors:doors,keptDoors:keptDoors,
+            windows:windows,keptWindows:keptWindows};
   }
 
   // 要約: 同じ素材ごとに部屋の名前をまとめる
@@ -112,8 +140,19 @@
       faces:faces,
       // 扉の無い開口(door-opening・アーチ)は建具に数えない
       doors:(D.items||[]).filter(function(it){ return it&&/^door-/.test(it.type)&&!/^door-opening/.test(it.type); })
-        .map(function(it){ return {id:it.id,type:it.type,finish:it.doorFinish||''}; })
+        .map(function(it){ return {id:it.id,type:it.type,finish:it.doorFinish||''}; }),
+      windows:(D.items||[]).filter(function(it){ return it&&(it.type==='window'||it.type==='window-door'); })
+        .map(function(it){ return {id:it.id,type:it.type,kind:typeof root.effectiveWindowKind==='function'?root.effectiveWindowKind(it):(it.windowKind||'sliding'),
+          w:Number(it.w)||0,h:typeof root.windowHeightMm==='function'?root.windowHeightMm(it):(Number(it.windowHeight)||0)}; }),
+      windowModels:windowModelSizes()
     };
+  }
+  function windowModelSizes(){
+    var out={};
+    Object.keys(root.FMP_ITEMS||{}).forEach(function(k){
+      var f=root.FMP_ITEMS[k]; if(f&&f.category==='窓') out[f.id]={w:f.w,h:f.h};
+    });
+    return out;
   }
   function planFor(setId){
     var set=setCfg(setId);
@@ -122,7 +161,7 @@
   }
 
   var PARTS=[
-    ['exterior','外壁'],['roof','屋根'],['interior','内壁'],['floor','床'],['doors','建具']
+    ['exterior','外壁'],['roof','屋根'],['interior','内壁'],['floor','床'],['doors','建具'],['windows','窓']
   ];
   function partHtml(part,p,style){
     var lines=[];
@@ -149,6 +188,15 @@
         return esc(f?f.name:m)+': '+byModel[m]+'か所';
       });
       if(p.keptDoors) lines.push('<small>そのまま: 引き戸・折れ戸など '+p.keptDoors+'か所（替えられる扉が無い）</small>');
+    }else if(part==='windows'){
+      if(!p.windows.length) return null;
+      var byWin={};
+      p.windows.forEach(function(w){ byWin[w.model]=(byWin[w.model]||0)+1; });
+      lines=Object.keys(byWin).map(function(m){
+        var f=typeof root.getFmpItem==='function'?root.getFmpItem(m):null;
+        return esc(f?f.name:m)+': '+byWin[m]+'か所';
+      });
+      if(p.keptWindows) lines.push('<small>そのまま: '+p.keptWindows+'か所（細長い・横長すぎるなど、縦横の比が合う窓が無い）</small>');
     }else if(part==='floor'){
       if(!p.rooms.length) return null;
       lines=groupRooms(p.rooms).map(function(g){
@@ -172,7 +220,7 @@
     modal.addEventListener('click',function(e){ if(e.target===modal) close(); });
     var html='<div class="asset-swap-card" role="dialog" aria-modal="true" aria-labelledby="building-style-title">';
     html+='<div class="asset-swap-title" id="building-style-title">壁・床・屋根を'+esc(set.name)+'風にする</div>';
-    html+='<p class="asset-swap-sub">外観・内観・屋根の設定と、部屋の床材・扉を書き換えます。チェックを外した所は替えません。'+
+    html+='<p class="asset-swap-sub">外観・内観・屋根の設定と、部屋の床材・扉・窓を書き換えます。チェックを外した所は替えません。'+
           '面や壁ごとに付けていた色・素材は外れます。切り替えたあとでも、Undo を1回押せば全部元に戻ります。'+
           '切り替えたあとは、今までの設定欄で1か所ずつ直せます。</p>';
     html+='<div class="asset-swap-list">';
@@ -209,7 +257,7 @@
   }
   // 決めた内容を書き込む。Undo 1回で全部戻るよう、最初に1度だけ履歴を取る。
   function apply(p,parts){
-    parts=parts||{exterior:true,roof:true,interior:true,floor:true,doors:true};
+    parts=parts||{exterior:true,roof:true,interior:true,floor:true,doors:true,windows:true};
     if(!Object.keys(parts).some(function(k){return parts[k];})) return 0;
     var D=root.DATA;
     root.saveState();
@@ -246,6 +294,12 @@
       (p.doors||[]).forEach(function(d){
         var it=(D.items||[]).find(function(x){ return x.id===d.id; });
         if(it) it.openingModel=d.model;   // 開口の大きさはそのまま(applyOpeningModelToItem は幅を扉に合わせてしまう)
+      });
+    }
+    if(parts.windows){
+      (p.windows||[]).forEach(function(w){
+        var it=(D.items||[]).find(function(x){ return x.id===w.id; });
+        if(it) it.openingModel=w.model;   // 開口の大きさはそのまま(窓が開口に合わせて伸縮する)
       });
     }
     if(typeof root.markDirty==='function') root.markDirty();

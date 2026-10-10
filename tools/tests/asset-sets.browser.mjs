@@ -27,6 +27,7 @@ try {
   // 扉(category「ドア」)は家具のカタログではなく、建具の「開き戸」「玄関ドアの扉」に並ぶ(標準の扉と同じ)。
   // 件数(.catalogue-count)は建具の選択肢も数えるので、扉も含めて増える
   const isDoor = (i) => i.category === 'ドア';
+  const isWindow = (i) => i.category === '窓';   // 窓も建具の「窓」に並ぶ(家具の検索には出ない)
   const listed = manifest.items.filter((i) => !i.retired).length;
   const doorIds = manifest.items.filter((i) => !i.retired && isDoor(i)).map((i) => i.id);
   const doorTiles = () => page.evaluate(() => [...document.querySelectorAll('#opening-door-model-tools [data-tool^="opening-door-model:rpg-mansion-"]')].length);
@@ -52,7 +53,9 @@ try {
     const c = card.getBoundingClientRect(), b = badge.getBoundingClientRect();
     return b.left >= c.left - 1 && b.top >= c.top - 1 && b.right <= c.right + 1 && b.bottom <= c.bottom + 1 ? 'inside' : 'outside';
   }));
-  assert.equal(placement.length, listed - doorIds.length, `「洋館」の検索で ${listed - doorIds.length} 点出ない`);
+  const windowCount = manifest.items.filter((i) => !i.retired && isWindow(i)).length;
+  const searchable = listed - doorIds.length - windowCount;
+  assert.equal(placement.length, searchable, `「洋館」の検索で ${searchable} 点出ない`);
   assert.deepEqual([...new Set(placement)], ['inside'], '検索結果の札がカードの中に出ていない: ' + [...new Set(placement)].join(','));
   await page.fill('#object-search-input', '');
 
