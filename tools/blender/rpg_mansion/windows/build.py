@@ -54,14 +54,14 @@ def outer_frame(w,h):
         box(side+' exterior casing',(x0,-.052,.057),(x1,-.020,h),'paint',.0015)
         xi=x1-.013 if side=='left' else x0
         box(side+' raised inner bead',(xi,-.059,.065),(xi+.013,-.047,h-.008),'paint',.001)
-    box('head deep frame',(-w/2+.07,-.022,h-.074),(w/2-.07,.075,h),'paint',.0015)
-    box('head exterior casing',(-w/2+.07,-.052,h-.074),(w/2-.07,-.020,h),'paint',.0015)
+    box('head deep frame',(-w/2+.072,-.022,h-.074),(w/2-.072,.075,h),'paint',.0015)
+    box('head exterior casing',(-w/2+.072,-.052,h-.074),(w/2-.072,-.020,h),'paint',.0015)
     box('head raised bead',(-w/2+.073,-.059,h-.074),(w/2-.073,-.047,h-.061))
     box('bottom timber rail',(-w/2+.072,-.032,.045),(w/2-.072,.070,.091),'paint',.0015)
     # Interior stops close the rebate while preserving the recessed glass.
     for x in [-w/2+.066,w/2-.080]:
-        box('interior rebate stop',(x,.059,.065),(x+.014,.075,h-.066))
-    box('interior head stop',(-w/2+.073,.059,h-.080),(w/2-.073,.075,h-.066))
+        box('interior rebate stop',(x,.059,.065),(x+.014,.074,h-.066))
+    box('interior head stop',(-w/2+.073,.059,h-.080),(w/2-.073,.074,h-.066))
 
 def sash(name,x0,x1,z0,z1,y0,columns,rows,kick=0):
     t=.036; y1=y0+.038
@@ -160,6 +160,7 @@ def build_one(stem,size,kind):
             end=(radius*math.cos(angle),cz+radius*math.sin(angle))
             band('radial fanlight bar '+str(i),[(0,cz),end],.014,-.030,.005)
         cylinder('fanlight central brass rosette',(0,-.033,cz),.018,.010)
+        cylinder('fanlight interior brass rosette',(0,.008,cz),.018,.010)
         for x in [-radius/3,radius/3]:
             box('lower fixed vertical bar',(x-.009,-.025,z0+.036),(x+.009,.000,cz-.011),'paint',.0008)
         for i in [1,2]:

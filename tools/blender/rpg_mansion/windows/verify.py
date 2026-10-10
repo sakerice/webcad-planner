@@ -75,7 +75,8 @@ def audit_glb(path,size):
     assert max(abs(a-b)for a,b in zip(dims,size))<.001,(dims,size)
     assert abs(lo[1])<1e-7 and abs(lo[0]+hi[0])<1e-7 and abs(lo[2]+hi[2])<1e-7
     assert tris<=8000
-    return dict(dimensionsMm=dims,boundsGltfM=[lo,hi],triangles=tris,collapsedUvTriangles=uvbad,invalidNormals=badnorm,glassAlphaMode=glass['alphaMode'],glassBaseColorLinear=glass['pbrMetallicRoughness']['baseColorFactor'],materials={n:m.get('extras',{}).get('finishChannel')for n,m in mats.items()},primitives=primitive_rows)
+    point_set={tuple(round(c,6)for c in p)for p in pts}
+    return dict(dimensionsMm=dims,boundsGltfM=[lo,hi],triangles=tris,collapsedUvTriangles=uvbad,invalidNormals=badnorm,glassAlphaMode=glass['alphaMode'],glassBaseColorLinear=glass['pbrMetallicRoughness']['baseColorFactor'],materials={n:m.get('extras',{}).get('finishChannel')for n,m in mats.items()},primitives=primitive_rows),point_set
 
 def mesh_geometry(ob):
     ob.data.calc_loop_triangles();rows=[]
@@ -109,10 +110,12 @@ def main():
     with tempfile.TemporaryDirectory(prefix='mansion-window-regenerate-')as tmp:
         td=Path(tmp);kit.WORK_DIR=td/'validation'
         for stem,name,size,_ in SPECS:
-            path=PACK/'models'/(stem+'.glb');r=audit_glb(path,size)
+            path=PACK/'models'/(stem+'.glb');r,gltf_points=audit_glb(path,size)
             vp=HERE/'sources'/(stem+'-validation.json');rep=json.loads(vp.read_text());assert r['triangles']==rep['triangles']
             bpy.ops.wm.open_mainfile(filepath=str(HERE/'sources'/(stem+'.blend')))
             ob=next(o for o in bpy.context.scene.objects if o.type=='MESH');canonical_geometry=mesh_geometry(ob)
+            native_points={tuple(round(c,6)for c in (p.x,p.z,-p.y))for p in [ob.matrix_world@v.co for v in ob.data.vertices]}
+            assert native_points==gltf_points,('Blender-to-glTF axis mapping differs',stem)
             closed=manifold_components(ob)
             regen=td/(stem+'.glb');kit.export(ob,str(regen));stamp(regen)
             assert path.read_bytes()==regen.read_bytes(),('canonical re-export differs',stem)
@@ -124,8 +127,8 @@ def main():
             try:kit.run([(stem,size,lambda:ob,{'paint','metal'},8000)],do_export=False,do_icons=False)
             finally:kit.clear_scene=old
             native_regen=td/(stem+'-from-authoring.glb');kit.export(ob,str(native_regen));stamp(native_regen)
-            native_audit=audit_glb(native_regen,size);assert native_audit['triangles']==r['triangles']
-            row=dict(id=stem,glbSha256=sha(path),sourceBlendSha256=sha(HERE/'sources'/(stem+'.blend')),authoringBlendSha256=sha(HERE/'authoring_sources'/(stem+'.blend')),directGlbAudit=r,canonicalTopology=closed,canonicalBlendReexportByteIdentical=True,editablePartCount=partcount,editableSourceRebuildGeometryIdentical=True,editableSourceRebuildPassesModelKitAndGlbAudit=True,browserRuntimeTested=False)
+            native_audit,_=audit_glb(native_regen,size);assert native_audit['triangles']==r['triangles']
+            row=dict(id=stem,glbSha256=sha(path),sourceBlendSha256=sha(HERE/'sources'/(stem+'.blend')),authoringBlendSha256=sha(HERE/'authoring_sources'/(stem+'.blend')),directGlbAudit=r,canonicalTopology=closed,blenderToGltfPointMappingVerified='(x,y,z) -> (x,z,-y)',canonicalBlendReexportByteIdentical=True,editablePartCount=partcount,editableSourceRebuildGeometryIdentical=True,editableSourceRebuildPassesModelKitAndGlbAudit=True,browserRuntimeTested=False)
             rows.append(row)
     (HERE/'reports/technical-validation.json').write_text(json.dumps(rows,indent=2)+'\n')
     print('PASS: four direct GLB audits; four byte-identical canonical re-exports; four editable-part rebuilds')
