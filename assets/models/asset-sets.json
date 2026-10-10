@@ -52,7 +52,14 @@
      "decor",
      "plant",
      "light"
-    ]
+    ],
+    "topAlignKinds": [
+     "curtain",
+     "roller-screen"
+    ],
+    "topAlignMaxDropMm": {
+     "curtain": 300
+    }
    },
    "style": {
     "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。rooms は部屋の名前に match の語が含まれるときの素材",

@@ -126,6 +126,19 @@
         var mount=ctx.mountOf?ctx.mountOf(it.type):null, lifted=Number(pick.defaultElevation)>0;
         if((mount==='wall'||mount==='ceiling')&&!lifted) row.parts[0].elev=0;
         else if((mount==='floor'||!mount)&&lifted&&!(Number(it.elev)>0)) row.parts[0].elev=Number(pick.defaultElevation);
+        // カーテン・ロールスクリーンは上端(レール・巻き取りの箱)の高さを保つ。下端を保つと、
+        // 丈の違う物に替えたときに天井を突き抜けたり、窓の途中で切れたりする
+        if((cfg.topAlignKinds||[]).indexOf(kind)>=0&&h>0&&pick.h>0){
+          var oldBottom=Number(it.elev)||0, newBottom=Math.max(0,Math.round(oldBottom+h-pick.h));
+          // 腰窓・キッチンの窓の短いカーテンを床までの丈に替えると、窓台や天板に食い込む。
+          // 元の裾より決まった長さ以上に下がるなら替えない
+          var maxDrop=cfg.topAlignMaxDropMm&&cfg.topAlignMaxDropMm[kind];
+          if(maxDrop>0&&oldBottom-newBottom>maxDrop){
+            rows.push({id:it.id,type:it.type,kind:kind,floor:it.floor||1,action:'keep',reason:'丈の合う物が無い（長すぎて窓台に掛かる）'});
+            return;
+          }
+          row.parts[0].elev=newBottom;
+        }
         rows.push(row); return;
       }
       // 3. 代役（テレビ → 額絵）。同じ壁の、少し高い位置に掛ける

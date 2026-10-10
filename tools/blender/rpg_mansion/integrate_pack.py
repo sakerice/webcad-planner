@@ -120,6 +120,17 @@ KINDS = {
     'garden-standpipe-drain-basin-01': 'garden-equipment',
 }
 
+# カーテン・ブラインドを置いたときの高さ。納品は天井高2700mmの部屋に合わせて上端を2.7m前後に
+# していたが、アプリの部屋はそれより低いことが多く、置くと天井を突き抜けた。上端をカーテンレールの
+# 高さ(窓の上端2000〜2100mmの少し上、2200mm)に揃える。丈がそれより長い物は床から立てる
+WINDOW_DRESSING_KINDS = ('curtain', 'roller-screen')
+WINDOW_DRESSING_TOP_MM = 2200
+
+
+def window_dressing_elevation(h):
+    return max(0, int(round(WINDOW_DRESSING_TOP_MM - h)))
+
+
 KEEP = ('id', 'name', 'group', 'category', 'kind', 'model', 'thumb', 'top', 'w', 'd', 'h',
         'defaultElevation', 'provenance', 'previewVersion', 'finishChannels')
 
@@ -197,6 +208,8 @@ def main():
             out['defaultElevation'] = mm(out['defaultElevation'])
         else:
             out.pop('defaultElevation', None)
+        if out.get('kind') in WINDOW_DRESSING_KINDS:
+            out['defaultElevation'] = window_dressing_elevation(out['h'])
         out['provenance'] = 'original'
         for k, sub in (('model', 'models'), ('thumb', 'previews'), ('top', 'previews')):
             name = os.path.basename(i[k]).replace(iid, new_id, 1)

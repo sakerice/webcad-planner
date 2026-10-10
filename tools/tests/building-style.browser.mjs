@@ -52,16 +52,21 @@ try {
   assert.equal(bedroom[1], 'mansion_herringbone_oak');
   assert.match(after.status, /洋館風にしました/);
 
-  // 3D に切り替えて例外が出ない（ヘッドレスではモデルの読み込みが終わらないことがあるので、待ち切らない）
-  await page.evaluate(() => setView('3d-ext'));
-  await page.waitForTimeout(3000);
   // 設定欄の「素材」から2階だけサイディングに戻せる
   await page.evaluate(() => toggleExteriorColorPanel());
   const sel = page.locator('#exterior-wall-panel-body .preset-texture-select').nth(2);
   assert.equal(await sel.inputValue(), 'mansion_brick_red');
-  await sel.selectOption('siding');
+  // 3D の描き直しで欄が組み直されると、Playwright の「止まるまで待つ」が終わらないことがあるので、
+  // 選択を変えて change を送る(画面で選んだときと同じ onchange が動く)
+  await sel.evaluate((el) => { el.value = 'siding'; el.dispatchEvent(new Event('change', { bubbles: true })); });
   assert.equal(await page.evaluate(() => ensureExteriorWallSettings().floors[2].texture), 'siding');
-  await page.evaluate(() => { hideWallPanel(); setView('2d'); });
+  await page.evaluate(() => hideWallPanel());
+
+  // 3D に切り替えて例外が出ない（ヘッドレスではモデルの読み込みが終わらないことがあるので、待ち切らない。
+  // ソフトウェア描画で重いので、画面の操作は先に 2D で済ませておく）
+  await page.evaluate(() => setView('3d-ext'));
+  await page.waitForTimeout(3000);
+  await page.evaluate(() => setView('2d'));
 
   // 保存して開き直しても残る
   await page.evaluate(() => savePlanToStorage());

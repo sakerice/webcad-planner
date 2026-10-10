@@ -155,6 +155,7 @@ function makeCtx(data) {
     isInt: false,
     document: { createElement: () => ({ getContext: () => ({}) }) },
     LIGHT_SETTINGS: { env: 1 },
+    roofSurfaceParams: () => ({ roughness: 0.92, metalness: 0, envMapIntensity: 0.06 }),
     resolveRoofAppearance: () => ({ color: '#222', texture: null }),
     getTexture3D: () => null,
     cloneRepeatReadyTexture: () => null,

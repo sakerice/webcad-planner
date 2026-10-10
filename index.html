@@ -5870,8 +5870,9 @@ function build3DSetbackRoofSlab(pl,fp,planes){
       if(rn){ setTextureRepeatNoDistort(rn,Wm,Dm,texTileM(ap.texture,0.8)); applyTextureFlip(rn,ap); matParams.normalMap=rn; }
     }
   }
+  var sheen=roofSurfaceParams(ap);
   var topMat=makeExteriorLightingMaterial({map:matParams.map||null,color:matParams.color,
-    side:THREE.DoubleSide,roughness:0.92,metalness:0.0,envMapIntensity:0.06});
+    side:THREE.DoubleSide,roughness:sheen.roughness,metalness:sheen.metalness,envMapIntensity:sheen.envMapIntensity});
   if(matParams.normalMap){ topMat.normalMap=matParams.normalMap; topMat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',
     side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
@@ -7848,12 +7849,12 @@ function updateRoofAppearance(scope,key,value,floor,noSave){
   else if(!noSave) saveState();
   if(scope==='whole'){
     setTextureSettingValue(s.whole,key,value);
-    if(key==='color'||key==='texture') s.whole.linked=true;
+    if(key==='color'||key==='texture'||key==='sheen') s.whole.linked=true;
   } else if(scope==='floor'){
     s.floors[floor]=s.floors[floor]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
     normalizeTextureOrientationTarget(s.floors[floor]);
     setTextureSettingValue(s.floors[floor],key,value);
-    if(key==='color'||key==='texture'){
+    if(key==='color'||key==='texture'||key==='sheen'){
       s.whole.linked=false;
       s.floors[floor].linked=true;
     }
@@ -7879,13 +7880,34 @@ function resolveRoofAppearance(it){
   var s=ensureRoofAppearance();
   var fl=it.floor||1;
   var fs=normalizeTextureOrientationTarget(s.floors[fl]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false});
-  if(s.whole && s.whole.linked){
-    return appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole);
-  }
-  if(fs.linked){
-    return appearanceWithTextureOrientation(fs.color||'#2a2a30',fs.texture||null,'floor',fs);
-  }
-  return appearanceWithTextureOrientation(it.color||'#2a2a30',it.texture||null,'item',it);
+  var owner=(s.whole && s.whole.linked)?s.whole:(fs.linked?fs:it);
+  var ap=(owner===s.whole)
+    ? appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole)
+    : (owner===fs)
+      ? appearanceWithTextureOrientation(fs.color||'#2a2a30',fs.texture||null,'floor',fs)
+      : appearanceWithTextureOrientation(it.color||'#2a2a30',it.texture||null,'item',it);
+  ap.sheen=(owner&&owner.sheen)||null;
+  return ap;
+}
+
+// 屋根の質感(粗さ・金属感)。素材ごとの既定と、設定欄の「質感」での上書き。
+// 以前はどの屋根も粗さ 0.92・金属感 0 で、ガルバの屋根も紙のように見えた。
+var ROOF_SHEEN_OPTIONS=[
+  ['','素材に合わせる'],['matte','マット'],['satin','半艶'],['metal','金属']
+];
+var ROOF_SHEEN_PARAMS={
+  matte:{roughness:0.92,metalness:0.0,envMapIntensity:0.06},
+  satin:{roughness:0.55,metalness:0.0,envMapIntensity:0.22},
+  metal:{roughness:0.40,metalness:0.55,envMapIntensity:0.42}
+};
+// 素材の既定の質感。載っていない素材(瓦・画像・色だけ)はマット
+var ROOF_TEXTURE_SHEEN={
+  galvalume_dark:'metal',
+  mansion_slate_roof:'satin'
+};
+function roofSurfaceParams(ap){
+  var key=(ap&&ap.sheen)||(ap&&ap.texture&&ROOF_TEXTURE_SHEEN[ap.texture])||'matte';
+  return ROOF_SHEEN_PARAMS[key]||ROOF_SHEEN_PARAMS.matte;
 }
 
 function interiorFaceKey(w,face){
@@ -8238,6 +8260,12 @@ function presetTextureSelectHtml(kind,current,call,disabled){
   list.forEach(function(o){ html+='<option value="'+o[0]+'"'+(o[0]===current?' selected':'')+'>'+o[1]+'</option>'; });
   return html+'</select></div>';
 }
+function roofSheenSelectHtml(current,call){
+  var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#cce">質感</span>';
+  html+='<select class="roof-sheen-select" aria-label="屋根の質感" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'">';
+  ROOF_SHEEN_OPTIONS.forEach(function(o){ html+='<option value="'+o[0]+'"'+((current||'')===o[0]?' selected':'')+'>'+o[1]+'</option>'; });
+  return html+'</select></div>';
+}
 function renderExteriorWallPanel(mode){
   mode=mode||APPEARANCE_PANEL_MODE||'exterior';
   var body=document.getElementById('exterior-wall-panel-body');
@@ -8319,6 +8347,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
   html += presetTextureSelectHtml('roof',roof.whole.texture,"updateRoofAppearance('whole','texture',VALUE)");
+  html += roofSheenSelectHtml(roof.whole.sheen,"updateRoofAppearance('whole','sheen',VALUE)");
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateRoofAppearance(\'whole\',\'textureFlipX\','+(!roof.whole.textureFlipX)+')',
@@ -8336,6 +8365,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
     html += presetTextureSelectHtml('roof',rfs.texture,"updateRoofAppearance('floor','texture',VALUE,"+rfl+")");
+    html += roofSheenSelectHtml(rfs.sheen,"updateRoofAppearance('floor','sheen',VALUE,"+rfl+")");
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateRoofAppearance(\'floor\',\'textureFlipX\','+(!rfs.textureFlipX)+','+rfl+')',
@@ -11939,7 +11969,8 @@ function build3DRoofGapCap(H,run){
   var ap=resolveRoofAppearance(H);
   var roofTex=ap.texture?getTexture3D(ap.texture):null, rtc=roofTex?cloneRepeatReadyTexture(roofTex):null;
   if(rtc){ rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping; rtc.repeat.set(1,1); applyTextureFlip(rtc,ap); }
-  var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:0.92,metalness:0,envMapIntensity:0.06});
+  var sheen=roofSurfaceParams(ap);
+  var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:sheen.roughness,metalness:sheen.metalness,envMapIntensity:sheen.envMapIntensity});
   var edgeMat=makeExteriorLightingMaterial({color:H.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=texTileM(ap.texture,0.8);
   var topV=[], topUV=[], topI=[], edV=[], edI=[], k;
@@ -12005,13 +12036,14 @@ function build3DRoofItem(grp,it,w3,d3){
       if(ap.texture) matParams.color=0xffffff;
     }
   }
+  var sheen=roofSurfaceParams(ap);   // 既定はマット(暗色でもピアノブラック化しない)
   var mat=makeExteriorLightingMaterial({
     map:matParams.map||null,
     color:matParams.color||ap.color||'#2a2a30',
     side:THREE.DoubleSide,
-    roughness:0.92,       // 屋根材はマット(暗色でもピアノブラック化しない)
-    metalness:0.0,
-    envMapIntensity:0.06
+    roughness:sheen.roughness,
+    metalness:sheen.metalness,
+    envMapIntensity:sheen.envMapIntensity
   });
   if(matParams.normalMap){ mat.normalMap=matParams.normalMap; mat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
@@ -12712,7 +12744,10 @@ function buildItem3D(it){
   var h=getItemHeightValue(it)*U, col=it.color||getItemCol(it.type);
   if(isOpeningItemType(it.type)) return;
   var grp = new THREE.Group();
-  grp.position.set((it.x+it.w/2)*U, fy+(it.elev||0)*U, (it.y+it.d/2)*U);
+  // カタログの物の高さ(elev)は床の仕上げ面から測る(ROOM_FLOOR_FINISH_LIFT_M の注記)。
+  // 血痕(厚さ1mm・高さ1mm)は仕上げ面の1mm上に乗り、面と重なってちらつかない
+  var elevM=(it.elev||0)*U+(isFmpItemType(it.type)?ROOM_FLOOR_FINISH_LIFT_M:0);
+  grp.position.set((it.x+it.w/2)*U, fy+elevM, (it.y+it.d/2)*U);
   grp.rotation.y = -it.rot*Math.PI/180;
   grp.scale.set(it.flipX?-1:1, 1, it.flipY?-1:1);
   if(isFmpItemType(it.type)){
@@ -15903,6 +15938,10 @@ function stairwellHolesForRoom(r,stairQuadsCache){
   });
   return holes;
 }
+// 床の仕上げ面は、床の高さ(roomFloorTopY)より 4mm 上に貼る(スラブの天端と重ねると
+// ちらつくため)。**床に置く物はこの面に立てる。** 血痕・割れたガラスのような厚さ数mmの物は、
+// 床の高さに置くと仕上げ面の下に埋まって見えなくなった(buildItem3D)。
+var ROOM_FLOOR_FINISH_LIFT_M=0.004;
 // 部屋の床(スラブ本体・仕上げ面)を、階段の穴があれば THREE.Shape+holes で、
 // なければ従来通りの単純な Box/Plane で生成する
 function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
@@ -15918,7 +15957,7 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
     }
     var slab=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matFloor);
     slab.rotation.x=-Math.PI/2;
-    slab.position.set(rcx,floorY+0.004,rcz);
+    slab.position.set(rcx,floorY+ROOM_FLOOR_FINISH_LIFT_M,rcz);
     slab.receiveShadow=true;
     out.slab=slab;
     return out;
@@ -15968,7 +16007,7 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   var flatGeo=new THREE.ShapeGeometry(outline);
   flatGeo.rotateX(-Math.PI/2);
   var slab=new THREE.Mesh(flatGeo,matFloor);
-  slab.position.y=floorY+0.004;
+  slab.position.y=floorY+ROOM_FLOOR_FINISH_LIFT_M;
   slab.receiveShadow=true;
   out.slab=slab;
   return out;
@@ -15999,7 +16038,7 @@ function buildSkipDeckMeshes(r,matFloor,deckM,yBottom,yTop,holes){
     mark3DSelectable(body,r,'room'); sc3.add(body);
     var face=new THREE.Mesh(new THREE.PlaneGeometry(w3,d3),matFloor);
     face.rotation.x=-Math.PI/2;
-    face.position.set(cx,yTop+0.004,cz);
+    face.position.set(cx,yTop+ROOM_FLOOR_FINISH_LIFT_M,cz);
     face.receiveShadow=true;
     mark3DSelectable(face,r,'room'); sc3.add(face);
   });

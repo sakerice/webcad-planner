@@ -1027,6 +1027,8 @@ function setTextureSettingValue(obj,key,value){
   // null を残すと保存 JSON が「一度も触っていない設定」と別物になる
   if(key==='skirting' && (value===null||value===undefined)) delete obj.skirting;
   if(key==='skirtingColor' && !value) delete obj.skirtingColor;
+  // 屋根の質感も、未指定(=素材に合わせる)ならフィールドを持たない
+  if(key==='sheen' && !value) delete obj.sheen;
 }
 function appearanceWithTextureOrientation(color, texture, source, owner, prefix){
   var flipX=false, flipY=false;
