@@ -94,13 +94,14 @@ for (const set of doc.sets.filter((s) => s.manifest)) {
       assert.ok(!seen.has(it.id), `${where}: ID が重複`); seen.add(it.id);
       assert.ok(!standardIds.has(it.id), `${where}: 標準のカタログと同じ ID`);
       assert.ok(it.name && it.group && it.category, `${where}: 名前・大分類・分類が要る`);
-      assert.ok(['住設', '家具', '外構'].includes(it.group), `${where}: 大分類は 住設/家具/外構 のどれか`);
+      assert.ok(['住設', '家具', '外構', '事件・小道具'].includes(it.group), `${where}: 大分類は 住設/家具/外構/事件・小道具 のどれか`);
       for (const k of ['w', 'd', 'h']) assert.ok(Number(it[k]) > 0, `${where}: ${k} が正の mm でない`);
       for (const k of ['model', 'thumb', 'top']) assert.ok(it[k] && existsSync(join(ROOT, it[k])), `${where}: ${k} のファイルが無い (${it[k]})`);
       assert.match(it.model, /\.glb$/, `${where}: モデルは GLB`);
       // 色を変えられる部位。割れたガラスのように色を持たない物だけ空でよい（空の配列を明示する）
       assert.ok(Array.isArray(it.finishChannels), `${where}: 色を変えられる部位(finishChannels)の定義が無い`);
       for (const ch of it.finishChannels) assert.ok(ch.key && ch.label && /^#[0-9a-f]{6}$/i.test(ch.default), `${where}: 部位 ${ch.key} の定義が不完全`);
+      for (const ch of it.finishChannels) assert.ok(!/[A-Za-z]{3,}/.test(ch.label), `${where}: 部位 ${ch.key} の表示名が英語のまま (${ch.label})`);
       // 分類(kind)は標準と同じ名前を使う。標準の見出しの下に混ざって並ぶため。無い物はセット独自の見出しになる
       if (it.kind) assert.ok(kinds[it.kind], `${where}: 分類 ${it.kind} が tags.json に無い`);
       assert.ok(!/[A-Za-z]{3,}/.test(it.name), `${where}: 画面に出す名前が英語のまま (${it.name})`);

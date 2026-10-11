@@ -85,6 +85,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/asset-catalogue.js"></script>
 <script src="assets/js/asset-sets.js"></script>
 <script src="assets/js/asset-swap.js"></script>
+<script src="assets/js/building-style.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
 <style>
@@ -3310,6 +3311,10 @@ input[type="reset"]:focus-visible{
       <div class="stool" data-tool="lattice-screen" onclick="setTool('lattice-screen')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v17H3ZM6 4v17M10 4v17M14 4v17M18 4v17M3 8h18M3 17h18"/></svg>格子柵</div>
       <div id="fmp-furniture"></div>
     </div>
+    <div class="cat-hdr fmp-props-hdr" onclick="toggleCat(this)" hidden><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14ZM21 21l-5.2-5.2M8 11h6M11 8v6"/></svg>事件・小道具 <span>+</span></div>
+    <div class="cat-body" hidden>
+      <div id="fmp-props"></div>
+    </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a4 4 0 1 1-2-7 4 4 0 1 1 8 0 4 4 0 1 1-2 7M10 13v8M3 21h18M17 21v-7h4v7"/></svg>庭・外構 <span>+</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="tree" onclick="setTool('tree')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a4 4 0 1 1-2-7 4 4 0 1 1 8 0 4 4 0 1 1-2 7M10 13v8M3 21h18M17 21v-7h4v7"/></svg>植栽(木)</div>
@@ -3828,7 +3833,24 @@ var ASSET_TEX_MAP = {
   'galvalume_dark': 'assets/textures/wall_galvalume_dark.jpg',
   'plaster_white':  'assets/textures/wall_plaster_white.jpg',
   'wood_cedar':     'assets/textures/wood_cedar_warm.jpg',
-  'porch_tile':     'assets/textures/porch_tile_gray.jpg'
+  'porch_tile':     'assets/textures/porch_tile_gray.jpg',
+  // 洋館の様式(asset-sets.json の style)。Codex 製、PR #86。法線・粗さも同じ場所にある
+  'mansion_ashlar_stone': 'assets/textures/mansion/mansion_ashlar_stone_diffuse.jpg',
+  'mansion_brick_red': 'assets/textures/mansion/mansion_brick_red_diffuse.jpg',
+  'mansion_slate_roof': 'assets/textures/mansion/mansion_slate_roof_diffuse.jpg',
+  'mansion_damask_wallpaper': 'assets/textures/mansion/mansion_damask_wallpaper_diffuse.jpg',
+  'mansion_white_subway_tile': 'assets/textures/mansion/mansion_white_subway_tile_diffuse.jpg',
+  'mansion_wainscot_panel': 'assets/textures/mansion/mansion_wainscot_panel_diffuse.jpg',
+  'mansion_herringbone_oak': 'assets/textures/mansion/mansion_herringbone_oak_diffuse.jpg',
+  'mansion_marble_checker': 'assets/textures/mansion/mansion_marble_checker_diffuse.jpg',
+  // 屋根材(Codex 製、PR #88)。軒先が画像の下、棟が上
+  'roof_kawara_ibushi': 'assets/textures/roof/roof_kawara_ibushi_diffuse.jpg',
+  'roof_s_tile_terracotta': 'assets/textures/roof/roof_s_tile_terracotta_diffuse.jpg',
+  'roof_flat_tile_charcoal': 'assets/textures/roof/roof_flat_tile_charcoal_diffuse.jpg',
+  'roof_colonial_gray': 'assets/textures/roof/roof_colonial_gray_diffuse.jpg',
+  'roof_standing_seam_silver': 'assets/textures/roof/roof_standing_seam_silver_diffuse.jpg',
+  'roof_copper_patina': 'assets/textures/roof/roof_copper_patina_diffuse.jpg',
+  'roof_asphalt_shingle_brown': 'assets/textures/roof/roof_asphalt_shingle_brown_diffuse.jpg'
 };
 // テクスチャ1枚が実世界の何メートルに貼られるか。画像はこの寸法ちょうどの
 // 1タイルとして作ってある(tools/make_interior_textures.py)。ここを間違えると
@@ -3845,7 +3867,24 @@ var TEX_TILE_M = {
   siding:        0.455,   // 窯業系サイディングの働き幅455mm
   galvalume_dark:0.9,     // 立平葺き 働き幅300mm × 3
   wood_cedar:    0.945,   // 杉本実羽目板 働き幅105mm × 9
-  roof_tile:     0.8
+  roof_tile:     0.8,
+  // 洋館の素材(納品の寸法。docs/orders/2026-10-10-codex-mansion-style-assets.md)
+  mansion_ashlar_stone:      1.2,   // 切石 600×300 目地込み
+  mansion_brick_red:         0.86,  // 英国積み12段
+  mansion_slate_roof:        1.2,   // 天然スレート 幅300 見付200
+  mansion_damask_wallpaper:  0.53,  // 壁紙の柄のリピート
+  mansion_white_subway_tile: 0.6,   // 150×75 半ずらし
+  mansion_wainscot_panel:    0.9,   // 腰板(横方向だけ繰り返す)
+  mansion_herringbone_oak:   1.4,
+  mansion_marble_checker:    0.8,   // 400角の市松
+  // 屋根材(納品の寸法。働き幅・働き長さを整数個に割り付けた1タイル)
+  roof_kawara_ibushi: 1.06,
+  roof_s_tile_terracotta: 1.08,
+  roof_flat_tile_charcoal: 1.08,
+  roof_colonial_gray: 1.0,
+  roof_standing_seam_silver: 0.909,
+  roof_copper_patina: 0.999,
+  roof_asphalt_shingle_brown: 1.064
 };
 function texTileM(key, fallback){
   var v = key && TEX_TILE_M[key];
@@ -3860,7 +3899,22 @@ var ASSET_TEX_NORMAL = {
   siding:         'assets/textures/wall_siding_normal.jpg',
   galvalume_dark: 'assets/textures/wall_galvalume_dark_normal.jpg',
   wood_cedar:     'assets/textures/wood_cedar_warm_normal.jpg',
-  wood_oak:       'assets/textures/floor_oak_normal.jpg'
+  wood_oak:       'assets/textures/floor_oak_normal.jpg',
+  mansion_ashlar_stone: 'assets/textures/mansion/mansion_ashlar_stone_normal.jpg',
+  mansion_brick_red: 'assets/textures/mansion/mansion_brick_red_normal.jpg',
+  mansion_slate_roof: 'assets/textures/mansion/mansion_slate_roof_normal.jpg',
+  mansion_damask_wallpaper: 'assets/textures/mansion/mansion_damask_wallpaper_normal.jpg',
+  mansion_white_subway_tile: 'assets/textures/mansion/mansion_white_subway_tile_normal.jpg',
+  mansion_wainscot_panel: 'assets/textures/mansion/mansion_wainscot_panel_normal.jpg',
+  mansion_herringbone_oak: 'assets/textures/mansion/mansion_herringbone_oak_normal.jpg',
+  mansion_marble_checker: 'assets/textures/mansion/mansion_marble_checker_normal.jpg',
+  roof_kawara_ibushi: 'assets/textures/roof/roof_kawara_ibushi_normal.jpg',
+  roof_s_tile_terracotta: 'assets/textures/roof/roof_s_tile_terracotta_normal.jpg',
+  roof_flat_tile_charcoal: 'assets/textures/roof/roof_flat_tile_charcoal_normal.jpg',
+  roof_colonial_gray: 'assets/textures/roof/roof_colonial_gray_normal.jpg',
+  roof_standing_seam_silver: 'assets/textures/roof/roof_standing_seam_silver_normal.jpg',
+  roof_copper_patina: 'assets/textures/roof/roof_copper_patina_normal.jpg',
+  roof_asphalt_shingle_brown: 'assets/textures/roof/roof_asphalt_shingle_brown_normal.jpg'
 };
 var _texNormalCache = {};
 function getTextureNormal3D(key){
@@ -3903,8 +3957,25 @@ var FINISH_PROPS = ['finishColors','finishRoughness','finishTextures'];
 var FINISH_TEXTURE_DEPS = {
   texture: function(key){ return cloneRepeatReadyTexture(getTexture3D(key)); },
   normal:  function(key){ var n=getTextureNormal3D(key); return n?cloneRepeatReadyTexture(n):null; },
-  tileM:   function(key,fallback){ return texTileM(key,fallback); }
+  tileM:   function(key,fallback){ return texTileM(key,fallback); },
+  slopeUV: function(mesh){ roofSlopeUVsForMesh(mesh); }
 };
+// 部品の屋根面に、家の屋根と同じ向きの UV を付け直す(roofSlopeUVs)。形は共有のキャッシュなので
+// 写しを作ってから書く。UV は実寸(m)で入れる -- 柄の繰り返しは metresPerUv が測って合わせる。
+function roofSlopeUVsForMesh(mesh){
+  if(!mesh||!mesh.geometry||!mesh.geometry.attributes.position) return;
+  if(mesh.userData&&mesh.userData.roofSlopeUV) return;
+  var g=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone();
+  mesh.updateWorldMatrix(true,false);
+  var pos=g.attributes.position, v=new THREE.Vector3(), world=new Float32Array(pos.count*3);
+  for(var i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos,i).applyMatrix4(mesh.matrixWorld);
+    world[i*3]=v.x; world[i*3+1]=v.y; world[i*3+2]=v.z;
+  }
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(roofSlopeUVs(world,1,1),2));
+  mesh.geometry=g;
+  mesh.userData=Object.assign({},mesh.userData,{roofSlopeUV:true});
+}
 function getTexture3D(key) {
   if (!key) return null;
   if (_texCache[key]) return _texCache[key];
@@ -5835,14 +5906,18 @@ function build3DSetbackRoofSlab(pl,fp,planes){
     var rtc=cloneRepeatReadyTexture(roofTex);
     if(rtc){
       rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping;
-      setTextureRepeatNoDistort(rtc,Wm,Dm,0.8);
+      setTextureRepeatNoDistort(rtc,Wm,Dm,texTileM(ap.texture,0.8));
       applyTextureFlip(rtc,ap);
       matParams.map=rtc;
       matParams.color=0xffffff;
+      var rn=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+      if(rn){ setTextureRepeatNoDistort(rn,Wm,Dm,texTileM(ap.texture,0.8)); applyTextureFlip(rn,ap); matParams.normalMap=rn; }
     }
   }
+  var sheen=roofSurfaceParams(ap);
   var topMat=makeExteriorLightingMaterial({map:matParams.map||null,color:matParams.color,
-    side:THREE.DoubleSide,roughness:0.92,metalness:0.0,envMapIntensity:0.06});
+    side:THREE.DoubleSide,roughness:sheen.roughness,metalness:sheen.metalness,envMapIntensity:sheen.envMapIntensity});
+  if(matParams.normalMap){ topMat.normalMap=matParams.normalMap; topMat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',
     side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   // (t,s) と上下の別からワールド頂点へ。上面はいちばん低い制限面そのもの。
@@ -7818,12 +7893,12 @@ function updateRoofAppearance(scope,key,value,floor,noSave){
   else if(!noSave) saveState();
   if(scope==='whole'){
     setTextureSettingValue(s.whole,key,value);
-    if(key==='color'||key==='texture') s.whole.linked=true;
+    if(key==='color'||key==='texture'||key==='sheen') s.whole.linked=true;
   } else if(scope==='floor'){
     s.floors[floor]=s.floors[floor]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
     normalizeTextureOrientationTarget(s.floors[floor]);
     setTextureSettingValue(s.floors[floor],key,value);
-    if(key==='color'||key==='texture'){
+    if(key==='color'||key==='texture'||key==='sheen'){
       s.whole.linked=false;
       s.floors[floor].linked=true;
     }
@@ -7849,13 +7924,36 @@ function resolveRoofAppearance(it){
   var s=ensureRoofAppearance();
   var fl=it.floor||1;
   var fs=normalizeTextureOrientationTarget(s.floors[fl]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false});
-  if(s.whole && s.whole.linked){
-    return appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole);
-  }
-  if(fs.linked){
-    return appearanceWithTextureOrientation(fs.color||'#2a2a30',fs.texture||null,'floor',fs);
-  }
-  return appearanceWithTextureOrientation(it.color||'#2a2a30',it.texture||null,'item',it);
+  var owner=(s.whole && s.whole.linked)?s.whole:(fs.linked?fs:it);
+  var ap=(owner===s.whole)
+    ? appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole)
+    : (owner===fs)
+      ? appearanceWithTextureOrientation(fs.color||'#2a2a30',fs.texture||null,'floor',fs)
+      : appearanceWithTextureOrientation(it.color||'#2a2a30',it.texture||null,'item',it);
+  ap.sheen=(owner&&owner.sheen)||null;
+  return ap;
+}
+
+// 屋根の質感(粗さ・金属感)。素材ごとの既定と、設定欄の「質感」での上書き。
+// 以前はどの屋根も粗さ 0.92・金属感 0 で、ガルバの屋根も紙のように見えた。
+var ROOF_SHEEN_OPTIONS=[
+  ['','素材に合わせる'],['matte','マット'],['satin','半艶'],['metal','金属']
+];
+var ROOF_SHEEN_PARAMS={
+  matte:{roughness:0.92,metalness:0.0,envMapIntensity:0.06},
+  satin:{roughness:0.55,metalness:0.0,envMapIntensity:0.22},
+  metal:{roughness:0.40,metalness:0.55,envMapIntensity:0.42}
+};
+// 素材の既定の質感。載っていない素材(瓦・画像・色だけ)はマット
+var ROOF_TEXTURE_SHEEN={
+  galvalume_dark:'metal',
+  roof_standing_seam_silver:'metal',
+  roof_copper_patina:'satin',
+  mansion_slate_roof:'satin'
+};
+function roofSurfaceParams(ap){
+  var key=(ap&&ap.sheen)||(ap&&ap.texture&&ROOF_TEXTURE_SHEEN[ap.texture])||'matte';
+  return ROOF_SHEEN_PARAMS[key]||ROOF_SHEEN_PARAMS.matte;
 }
 
 function interiorFaceKey(w,face){
@@ -8189,6 +8287,31 @@ function setExteriorDetailValue(key,val){
   DATA.exteriorDetail[key]=val;
   if(ren) rebuild3D();
 }
+// 用意してある素材から選ぶ欄。画像を読み込む欄と並べる(読み込んだ画像は「読み込んだ画像」として出す)。
+// 値は ASSET_TEX_MAP のキーで、設定の texture にそのまま入る。
+var PRESET_WALL_TEXTURES={
+  exterior:[['siding','サイディング'],['plaster','塗り壁'],['plaster_white','塗り壁（白）'],['galvalume_dark','ガルバ（黒）'],
+    ['wood_cedar','杉板'],['mansion_brick_red','赤レンガ（洋館）'],['mansion_ashlar_stone','切石（洋館）']],
+  interior:[['wall_int','塗り壁'],['plaster_white','塗り壁（白）'],['wood_cedar','杉板'],
+    ['mansion_damask_wallpaper','ダマスク柄の壁紙（洋館）'],['mansion_white_subway_tile','白いタイル（洋館）']],
+  roof:[['roof_tile','瓦'],['roof_kawara_ibushi','日本瓦（いぶし銀）'],['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],['roof_flat_tile_charcoal','平板瓦（黒灰）'],['roof_colonial_gray','化粧スレート（コロニアル）'],['roof_standing_seam_silver','ガルバ立平（銀）'],['roof_copper_patina','銅板一文字（緑青）'],['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）']]
+};
+function presetTextureSelectHtml(kind,current,call,disabled){
+  var list=PRESET_WALL_TEXTURES[kind]||[];
+  var known=list.some(function(o){return o[0]===current;});
+  var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(disabled?0.45:1)+'"><span style="font-size:10px;color:#cce">素材</span>';
+  html+='<select class="preset-texture-select" aria-label="素材" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'"'+(disabled?' disabled':'')+'>';
+  html+='<option value=""'+(current?'':' selected')+'>素材なし（色だけ）</option>';
+  if(current&&!known) html+='<option value="'+escHtml(current.indexOf('data:')===0?'':current)+'" selected disabled>読み込んだ画像</option>';
+  list.forEach(function(o){ html+='<option value="'+o[0]+'"'+(o[0]===current?' selected':'')+'>'+o[1]+'</option>'; });
+  return html+'</select></div>';
+}
+function roofSheenSelectHtml(current,call){
+  var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#cce">質感</span>';
+  html+='<select class="roof-sheen-select" aria-label="屋根の質感" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'">';
+  ROOF_SHEEN_OPTIONS.forEach(function(o){ html+='<option value="'+o[0]+'"'+((current||'')===o[0]?' selected':'')+'>'+o[1]+'</option>'; });
+  return html+'</select></div>';
+}
 function renderExteriorWallPanel(mode){
   mode=mode||APPEARANCE_PANEL_MODE||'exterior';
   var body=document.getElementById('exterior-wall-panel-body');
@@ -8207,6 +8330,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadInteriorTex(this,\'whole\')">';
   html += '</div>';
+  html += presetTextureSelectHtml('interior',ins.whole.texture,"updateInteriorSetting('whole','texture',VALUE)");
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ins.whole.texture)+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateInteriorSetting(\'whole\',\'textureFlipX\','+(!ins.whole.textureFlipX)+')',
@@ -8233,6 +8357,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadInteriorTex(this,\'floor\','+ifl+')">';
     html += '</div>';
+    html += presetTextureSelectHtml('interior',ifs.texture,"updateInteriorSetting('floor','texture',VALUE,"+ifl+")");
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ifs.texture)+' '+(ifs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'floor\',\'texture\',null,'+ifl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateInteriorSetting(\'floor\',\'textureFlipX\','+(!ifs.textureFlipX)+','+ifl+')',
@@ -8267,6 +8392,8 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
+  html += presetTextureSelectHtml('roof',roof.whole.texture,"updateRoofAppearance('whole','texture',VALUE)");
+  html += roofSheenSelectHtml(roof.whole.sheen,"updateRoofAppearance('whole','sheen',VALUE)");
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateRoofAppearance(\'whole\',\'textureFlipX\','+(!roof.whole.textureFlipX)+')',
@@ -8283,6 +8410,8 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
+    html += presetTextureSelectHtml('roof',rfs.texture,"updateRoofAppearance('floor','texture',VALUE,"+rfl+")");
+    html += roofSheenSelectHtml(rfs.sheen,"updateRoofAppearance('floor','sheen',VALUE,"+rfl+")");
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateRoofAppearance(\'floor\',\'textureFlipX\','+(!rfs.textureFlipX)+','+rfl+')',
@@ -8312,6 +8441,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="finishAppearanceColorInput()" '+(!s.whole.linked?'disabled':'')+'>';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'whole\')" '+(!s.whole.linked?'disabled':'')+'>';
   html += '</div>';
+  html += presetTextureSelectHtml('exterior',s.whole.texture,"updateExteriorSetting('whole','texture',VALUE)",!s.whole.linked);
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(s.whole.texture)+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateExteriorSetting(\'whole\',\'textureFlipX\','+(!s.whole.textureFlipX)+')',
@@ -8329,6 +8459,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
+    html += presetTextureSelectHtml('exterior',fs.texture,"updateExteriorSetting('floor','texture',VALUE,"+fl+")",s.whole.linked||!fs.linked);
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateExteriorSetting(\'floor\',\'textureFlipX\','+(!fs.textureFlipX)+','+fl+')',
@@ -10593,7 +10724,8 @@ function buildWinFrames(flFilt){
           // モデル建具は縦に伸ばしすぎるとGLB内蔵の取手・ノブまで比例して
           // 上に移動してしまう。スラブは実寸2.0mまでの伸縮にとどめ、
           // それを超える分は欄間(上部パネル)で埋めて取手高さを実物どおりに保つ
-          var slabH=Math.min(panelH,2.0);
+          // 玄関ドアの扉板(洋館など)は扉そのものが 2.3m あるので、その高さまで伸ばしてよい
+          var slabH=Math.min(panelH,frontDoor?Math.max(2.0,(openingModel.h||2000)*U):2.0);
           var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,slabH,Math.max((openingModel.d||40)*U,leafT),null);
           var modelLeafWrap=new THREE.Group();
           modelLeafWrap.position.set(leafX,panelBottomGap,0);
@@ -11739,6 +11871,34 @@ function roofPolygonOutlineMm(it){
   });
 }
 // 結合屋根のメッシュ。build3DRoofItem から parts があるときだけ呼ばれる。
+// 屋根の面の柄の向き。三角形ごとに、その面の流れ(水上→水下)に沿って貼る。
+// 以前は真上からの投影(u=x/W, v=z/D)で、棟が東西の屋根でしか瓦の段が軒と平行に
+// ならなかった(棟が南北の屋根・寄棟の妻側の面では、段が軒と直交した)。勾配の分だけ
+// 柄が流れ方向に伸びてもいた。
+//   u … 軒と平行な向きの長さ   v … 流れに沿った実長(水上へ増える = 画像の上が棟)
+// 返す値はこれまでと同じく W・D で割った値(テクスチャの繰り返しは W/柄, D/柄 のまま)。
+// 水平な面(陸屋根)と垂直な面は従来の真上からの投影のまま -- 既存の陸屋根は変わらない。
+function roofSlopeUVs(verts,W,D){
+  var uvs=[], i, k;
+  for(i=0;i+8<verts.length;i+=9){
+    var ax=verts[i],ay=verts[i+1],az=verts[i+2];
+    var ux=verts[i+3]-ax,uy=verts[i+4]-ay,uz=verts[i+5]-az;
+    var vx=verts[i+6]-ax,vy=verts[i+7]-ay,vz=verts[i+8]-az;
+    var nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    var nl=Math.hypot(nx,ny,nz)||1; nx/=nl; ny/=nl; nz/=nl;
+    if(ny<0){ nx=-nx; ny=-ny; nz=-nz; }
+    var hl=Math.hypot(nx,nz);
+    for(k=0;k<3;k++){
+      var x=verts[i+k*3], z=verts[i+k*3+2];
+      if(ny>0.999||ny<0.05||hl<1e-6){ uvs.push((x+W/2)/W,(z+D/2)/D); continue; }
+      var sx=nx/hl, sz=nz/hl;                    // 水下の向き(平面)
+      var along=x*(-sz)+z*sx;                    // 軒と平行
+      var up=-(x*sx+z*sz)/ny;                    // 流れに沿った実長
+      uvs.push(along/W, up/D);
+    }
+  }
+  return uvs;
+}
 function build3DRoofPolygon(grp,it,mat,edgeMat,skirtMat,W,D){
   var m=roofPolygonModel(it);
   if(!m) return false;
@@ -11793,9 +11953,7 @@ function build3DRoofPolygon(grp,it,mat,edgeMat,skirtMat,W,D){
     var geo=new THREE.BufferGeometry();
     var verts=new Float32Array(points);
     geo.setAttribute('position',new THREE.BufferAttribute(verts,3));
-    var uvs=[];
-    for(var ui=0;ui<verts.length;ui+=3) uvs.push((verts[ui]+W/2)/W,(verts[ui+2]+D/2)/D);
-    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(roofSlopeUVs(verts,W,D),2));
     geo.computeVertexNormals();
     var mesh=new THREE.Mesh(geo,material);
     mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
@@ -11884,9 +12042,10 @@ function build3DRoofGapCap(H,run){
   var ap=resolveRoofAppearance(H);
   var roofTex=ap.texture?getTexture3D(ap.texture):null, rtc=roofTex?cloneRepeatReadyTexture(roofTex):null;
   if(rtc){ rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping; rtc.repeat.set(1,1); applyTextureFlip(rtc,ap); }
-  var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:0.92,metalness:0,envMapIntensity:0.06});
+  var sheen=roofSurfaceParams(ap);
+  var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:sheen.roughness,metalness:sheen.metalness,envMapIntensity:sheen.envMapIntensity});
   var edgeMat=makeExteriorLightingMaterial({color:H.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
-  var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=0.8;
+  var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=texTileM(ap.texture,0.8);
   var topV=[], topUV=[], topI=[], edV=[], edI=[], k;
   for(k=0;k<run.pts.length;k++){
     var p=run.pts[k];
@@ -11942,20 +12101,24 @@ function build3DRoofItem(grp,it,w3,d3){
     var rtc=cloneRepeatReadyTexture(roofTex);
     if(rtc){
       rtc.wrapS = rtc.wrapT = THREE.RepeatWrapping;
-      setTextureRepeatNoDistort(rtc,W,D,0.8);
+      setTextureRepeatNoDistort(rtc,W,D,texTileM(ap.texture,0.8));
       applyTextureFlip(rtc,ap);
       matParams.map=rtc;
+      var rn=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+      if(rn){ setTextureRepeatNoDistort(rn,W,D,texTileM(ap.texture,0.8)); applyTextureFlip(rn,ap); matParams.normalMap=rn; }
       if(ap.texture) matParams.color=0xffffff;
     }
   }
+  var sheen=roofSurfaceParams(ap);   // 既定はマット(暗色でもピアノブラック化しない)
   var mat=makeExteriorLightingMaterial({
     map:matParams.map||null,
     color:matParams.color||ap.color||'#2a2a30',
     side:THREE.DoubleSide,
-    roughness:0.92,       // 屋根材はマット(暗色でもピアノブラック化しない)
-    metalness:0.0,
-    envMapIntensity:0.06
+    roughness:sheen.roughness,
+    metalness:sheen.metalness,
+    envMapIntensity:sheen.envMapIntensity
   });
+  if(matParams.normalMap){ mat.normalMap=matParams.normalMap; mat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   var skirtMat=makeExteriorLightingMaterial({color:'#d8d5ce',side:THREE.DoubleSide,roughness:0.88,envMapIntensity:0.12});
   // 結合済み(L字・コの字)の屋根は多角形の経路へ。矩形1枚のときはここを通らないので、
@@ -11966,11 +12129,7 @@ function build3DRoofItem(grp,it,w3,d3){
     var geo=new THREE.BufferGeometry();
     var verts=new Float32Array(points);
     geo.setAttribute('position',new THREE.BufferAttribute(verts,3));
-    var uvs=[];
-    for(var ui=0; ui<verts.length; ui+=3){
-      uvs.push((verts[ui]+W/2)/W, (verts[ui+2]+D/2)/D);
-    }
-    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(roofSlopeUVs(verts,W,D),2));
     geo.computeVertexNormals();
     var mesh=new THREE.Mesh(geo,material||mat);
     mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
@@ -12654,7 +12813,10 @@ function buildItem3D(it){
   var h=getItemHeightValue(it)*U, col=it.color||getItemCol(it.type);
   if(isOpeningItemType(it.type)) return;
   var grp = new THREE.Group();
-  grp.position.set((it.x+it.w/2)*U, fy+(it.elev||0)*U, (it.y+it.d/2)*U);
+  // カタログの物の高さ(elev)は床の仕上げ面から測る(ROOM_FLOOR_FINISH_LIFT_M の注記)。
+  // 血痕(厚さ1mm・高さ1mm)は仕上げ面の1mm上に乗り、面と重なってちらつかない
+  var elevM=(it.elev||0)*U+(isFmpItemType(it.type)?ROOM_FLOOR_FINISH_LIFT_M:0);
+  grp.position.set((it.x+it.w/2)*U, fy+elevM, (it.y+it.d/2)*U);
   grp.rotation.y = -it.rot*Math.PI/180;
   grp.scale.set(it.flipX?-1:1, 1, it.flipY?-1:1);
   if(isFmpItemType(it.type)){
@@ -15765,7 +15927,9 @@ function polyAreaAbs(poly){
 var FLOOR_PBR_STEM = {
   wood_floor: 'floor_wood',
   wood_oak:   'floor_oak',
-  tile_floor: 'floor_tile'
+  tile_floor: 'floor_tile',
+  mansion_herringbone_oak: 'mansion/mansion_herringbone_oak',
+  mansion_marble_checker:  'mansion/mansion_marble_checker'
 };
 // 床の仕上げは3つ組(床材・カラー・テクスチャ)。天井・家具と同じ並び。
 //   r.floorMaterial … 床材のキー(FLOOR_PBR_STEM)。無ければ部屋名から自動
@@ -15843,6 +16007,10 @@ function stairwellHolesForRoom(r,stairQuadsCache){
   });
   return holes;
 }
+// 床の仕上げ面は、床の高さ(roomFloorTopY)より 4mm 上に貼る(スラブの天端と重ねると
+// ちらつくため)。**床に置く物はこの面に立てる。** 血痕・割れたガラスのような厚さ数mmの物は、
+// 床の高さに置くと仕上げ面の下に埋まって見えなくなった(buildItem3D)。
+var ROOM_FLOOR_FINISH_LIFT_M=0.004;
 // 部屋の床(スラブ本体・仕上げ面)を、階段の穴があれば THREE.Shape+holes で、
 // なければ従来通りの単純な Box/Plane で生成する
 function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
@@ -15858,7 +16026,7 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
     }
     var slab=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matFloor);
     slab.rotation.x=-Math.PI/2;
-    slab.position.set(rcx,floorY+0.004,rcz);
+    slab.position.set(rcx,floorY+ROOM_FLOOR_FINISH_LIFT_M,rcz);
     slab.receiveShadow=true;
     out.slab=slab;
     return out;
@@ -15908,7 +16076,7 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   var flatGeo=new THREE.ShapeGeometry(outline);
   flatGeo.rotateX(-Math.PI/2);
   var slab=new THREE.Mesh(flatGeo,matFloor);
-  slab.position.y=floorY+0.004;
+  slab.position.y=floorY+ROOM_FLOOR_FINISH_LIFT_M;
   slab.receiveShadow=true;
   out.slab=slab;
   return out;
@@ -15939,7 +16107,7 @@ function buildSkipDeckMeshes(r,matFloor,deckM,yBottom,yTop,holes){
     mark3DSelectable(body,r,'room'); sc3.add(body);
     var face=new THREE.Mesh(new THREE.PlaneGeometry(w3,d3),matFloor);
     face.rotation.x=-Math.PI/2;
-    face.position.set(cx,yTop+0.004,cz);
+    face.position.set(cx,yTop+ROOM_FLOOR_FINISH_LIFT_M,cz);
     face.receiveShadow=true;
     mark3DSelectable(face,r,'room'); sc3.add(face);
   });
@@ -17896,6 +18064,7 @@ function setTool(t){
 }
 function canApplyOpeningPresetToItem(it,preset){
   if(!it||!preset) return false;
+  if(preset.kind==='door' && preset.baseType==='door-front') return it.type==='door-front';
   if(preset.kind==='door' && !(isInteriorSwingDoorType(it.type)||it.type==='door-fold'||it.type==='door-fold-w')) return false;
   if(preset.kind==='window' && !isWindowLikeType(it.type)) return false;
   return true;

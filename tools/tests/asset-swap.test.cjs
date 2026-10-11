@@ -123,3 +123,28 @@ test('床に置いていた物は、元の高さを書き換えない', () => {
   const r = one(item(1, 'std-chair', 480, 500));
   assert.equal(r.parts[0].elev, undefined);
 });
+
+test('カーテン・ロールスクリーンは上端の高さを保つ（丈の違う物に替えても天井を突き抜けない）', () => {
+  const cat2 = [{ id: 'set-roller', kind: 'roller-screen', name: '巻き上げ', w: 700, d: 50, h: 1258 }];
+  const sw = { stretchKinds: ['roller-screen'], topAlignKinds: ['roller-screen'] };
+  const r = S.plan([item(1, 'std-roller', 1690, 50, 0, { elev: 1790 })], {
+    setId: 'set', catalogue: cat2, swap: sw, kindOf: () => 'roller-screen', heightOf: () => 250,
+  })[0];
+  assert.equal(r.parts[0].elev, 1790 + 250 - 1258);
+  const low = S.plan([item(1, 'std-roller', 1690, 50, 0, { elev: 300 })], {
+    setId: 'set', catalogue: cat2, swap: sw, kindOf: () => 'roller-screen', heightOf: () => 250,
+  })[0];
+  assert.equal(low.parts[0].elev, 0, '床より下には下げない');
+});
+
+test('腰窓の短いカーテンを床までの丈に替えない（窓台に掛かる）', () => {
+  const cat2 = [{ id: 'set-long', kind: 'curtain', name: '長いカーテン', w: 1220, d: 150, h: 2065 }];
+  const sw = { stretchKinds: ['curtain'], topAlignKinds: ['curtain'], topAlignMaxDropMm: { curtain: 300 } };
+  const ctx2 = { setId: 'set', catalogue: cat2, swap: sw, kindOf: () => 'curtain', heightOf: (t) => (t === 'std-short' ? 1350 : 2040) };
+  const short = S.plan([item(1, 'std-short', 900, 150, 0, { elev: 690 })], ctx2)[0];
+  assert.equal(short.action, 'keep');
+  assert.match(short.reason, /丈/);
+  const long = S.plan([item(2, 'std-long', 1300, 150, 0, { elev: 0 })], ctx2)[0];
+  assert.equal(long.action, 'swap');
+  assert.equal(long.parts[0].elev, 0);
+});

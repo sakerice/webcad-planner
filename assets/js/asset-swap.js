@@ -126,6 +126,19 @@
         var mount=ctx.mountOf?ctx.mountOf(it.type):null, lifted=Number(pick.defaultElevation)>0;
         if((mount==='wall'||mount==='ceiling')&&!lifted) row.parts[0].elev=0;
         else if((mount==='floor'||!mount)&&lifted&&!(Number(it.elev)>0)) row.parts[0].elev=Number(pick.defaultElevation);
+        // カーテン・ロールスクリーンは上端(レール・巻き取りの箱)の高さを保つ。下端を保つと、
+        // 丈の違う物に替えたときに天井を突き抜けたり、窓の途中で切れたりする
+        if((cfg.topAlignKinds||[]).indexOf(kind)>=0&&h>0&&pick.h>0){
+          var oldBottom=Number(it.elev)||0, newBottom=Math.max(0,Math.round(oldBottom+h-pick.h));
+          // 腰窓・キッチンの窓の短いカーテンを床までの丈に替えると、窓台や天板に食い込む。
+          // 元の裾より決まった長さ以上に下がるなら替えない
+          var maxDrop=cfg.topAlignMaxDropMm&&cfg.topAlignMaxDropMm[kind];
+          if(maxDrop>0&&oldBottom-newBottom>maxDrop){
+            rows.push({id:it.id,type:it.type,kind:kind,floor:it.floor||1,action:'keep',reason:'丈の合う物が無い（長すぎて窓台に掛かる）'});
+            return;
+          }
+          row.parts[0].elev=newBottom;
+        }
         rows.push(row); return;
       }
       // 3. 代役（テレビ → 額絵）。同じ壁の、少し高い位置に掛ける
@@ -193,15 +206,25 @@
   function renderEntry(doc){
     var picker=doc.getElementById('asset-set-picker'); if(!picker) return;
     var old=doc.getElementById('asset-swap-entry'); if(old) old.remove();
-    var sets=(root.AssetSets&&root.AssetSets.sets()||[]).filter(function(s){return s.swap;});
+    var sets=(root.AssetSets&&root.AssetSets.sets()||[]).filter(function(s){return s.swap||s.style;});
     if(!sets.length) return;
     var wrap=doc.createElement('div');wrap.id='asset-swap-entry';wrap.className='asset-swap-entry';
     sets.forEach(function(s){
-      var b=doc.createElement('button');b.type='button';b.className='asset-swap-open';b.dataset.assetSet=s.id;
-      b.textContent='家具を'+s.name+'に差し替える';
-      b.title='置いてある家具を、まとめて'+s.name+'の物に差し替えます。差し替える前に一覧で確かめられます';
-      b.addEventListener('click',function(){ open(s.id); });
-      wrap.append(b);
+      if(s.swap){
+        var b=doc.createElement('button');b.type='button';b.className='asset-swap-open';b.dataset.assetSet=s.id;
+        b.textContent='家具を'+s.name+'に差し替える';
+        b.title='置いてある家具を、まとめて'+s.name+'の物に差し替えます。差し替える前に一覧で確かめられます';
+        b.addEventListener('click',function(){ open(s.id); });
+        wrap.append(b);
+      }
+      // 壁・床・屋根の切り替え(building-style.js)。家具の差し替えと並べて置く
+      if(s.style&&root.BuildingStyle){
+        var bs=doc.createElement('button');bs.type='button';bs.className='asset-swap-open building-style-open';bs.dataset.assetSet=s.id;
+        bs.textContent='壁・床・屋根を'+s.name+'風にする';
+        bs.title='外壁・屋根・内壁・床の素材を、まとめて'+s.name+'の様式に切り替えます。切り替える前に内容を確かめられます';
+        bs.addEventListener('click',function(){ root.BuildingStyle.open(s.id); });
+        wrap.append(bs);
+      }
     });
     var st=doc.createElement('div');st.id='asset-swap-status';st.className='asset-swap-status';st.setAttribute('role','status');
     wrap.append(st);

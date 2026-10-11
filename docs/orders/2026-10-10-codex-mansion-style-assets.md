@@ -107,3 +107,73 @@ PR の本文と、この欄の両方に書く。
 - モデル5点: ID・名前・寸法（実測）・`finishChannel` の部位名と既定の色・三角形数
 - 作るためのスクリプトの場所と、作り直し方
 - 検査の結果
+
+
+### 納品メモ追記（2026-10-10、PR提出前の制作・素材検証段階）
+
+2026-10-10のユーザー承認により、指定タイル寸法と継ぎ目なしを優先し、部材寸法を調整しました。腰板は高さ900mmの横方向リピート専用とし、上部の漆喰は実装側で分けます。アプリ組み込み・manifest登録は行っていません。
+
+#### テクスチャ8種
+- mansion_ashlar_stone: 1タイル1200mm角、1024×1024。assets/textures/mansion/mansion_ashlar_stone_diffuse.jpg / mansion_ashlar_stone_normal.jpg / mansion_ashlar_stone_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_ashlar_stone.jpg。
+- mansion_damask_wallpaper: 1タイル530mm角、1024×1024。assets/textures/mansion/mansion_damask_wallpaper_diffuse.jpg / mansion_damask_wallpaper_normal.jpg / mansion_damask_wallpaper_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_damask_wallpaper.jpg。
+- mansion_herringbone_oak: 1タイル1400mm角、1024×1024。assets/textures/mansion/mansion_herringbone_oak_diffuse.jpg / mansion_herringbone_oak_normal.jpg / mansion_herringbone_oak_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_herringbone_oak.jpg。
+- mansion_marble_checker: 1タイル800mm角、1024×1024。assets/textures/mansion/mansion_marble_checker_diffuse.jpg / mansion_marble_checker_normal.jpg / mansion_marble_checker_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_marble_checker.jpg。
+- mansion_brick_red: 1タイル860mm角、1024×1024。assets/textures/mansion/mansion_brick_red_diffuse.jpg / mansion_brick_red_normal.jpg / mansion_brick_red_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_brick_red.jpg。
+- mansion_slate_roof: 1タイル1200mm角、1024×1024。assets/textures/mansion/mansion_slate_roof_diffuse.jpg / mansion_slate_roof_normal.jpg / mansion_slate_roof_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_slate_roof.jpg。
+- mansion_white_subway_tile: 1タイル600mm角、1024×1024。assets/textures/mansion/mansion_white_subway_tile_diffuse.jpg / mansion_white_subway_tile_normal.jpg / mansion_white_subway_tile_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_white_subway_tile.jpg。
+- mansion_wainscot_panel: 1タイル900mm角、1024×1024。assets/textures/mansion/mansion_wainscot_panel_diffuse.jpg / mansion_wainscot_panel_normal.jpg / mansion_wainscot_panel_roughness.jpg。確認画像: tools/blender/rpg_mansion/style_assets/tiling/mansion_wainscot_panel.jpg。
+
+調整寸法：
+- 赤レンガ: 860mm角、10mm目地、12段（段ピッチ71.666667mm）。長手素地205×61.666667mm、小口素地97.5×61.666667mm。横ピッチ215/107.5mm、英国積みの長手段/小口段交互。元指定215×65mmの素地を調整。
+- スレート: 1200mm角、幅300mm、名目長600mm、見付200mm、6段、半ずらし150mm。見付250→200mm（20%縮小）。5段240mmではタイル外周で半ずらしが連続しないため、偶数6段とした。
+- 白サブウェイタイル: 600mm角、目地3mm、素地147×72mm。目地込みピッチ150×75mm、4列×8段、半ずらし75mm。元素地150×75mmを調整。
+- 腰板: 高900mm、横周期900mm、板ピッチ100mm、上端笠木30mm、下端巾木80mm。漆喰なし。縦方向リピートは受入れ範囲に含めない。
+- 切石: 目地込み600×300mm、石本体595×295mm、目地5mm。その他は原指定530/1400/800mm周期。
+
+色データの扱い: diffuseはsRGBとしてデコードする色データ。normal/roughnessはlinearとして扱いsRGB変換しない。JPEGメタデータによる色管理保証ではない。normalはOpenGL（+Y上）で、JPEG不可逆圧縮後はシェーダーでnormalizeする。JPEG品質は85、今回追加4種のnormalのみ圧縮誤差低減のため90。
+
+#### モデル5点（前回完成素材を変更せず保全）
+- rpg-mansion-landscape-painting-1000-01 / 金縁の横長の額絵 1000: 実測W×D×H 1000.000×60.000×700.000mm、8166三角形。
+  - Flat walnut backing: finishChannel=wood、既定sRGB=#614c3a。
+  - Antique gold frame: finishChannel=metal、既定sRGB=#c7a461。
+  - Burnished gilt bead: finishChannel=metal、既定sRGB=#ddbc79。
+  - Patinated gold recess: finishChannel=metal、既定sRGB=#8e6f3f。
+  - Original painted linen canvas: finishChannel=canvas、既定sRGB=#ffffff。
+- rpg-mansion-landscape-painting-1400-01 / 金縁の横長の額絵 1400: 実測W×D×H 1400.000×70.000×900.000mm、8934三角形。
+  - Flat walnut backing: finishChannel=wood、既定sRGB=#614c3a。
+  - Antique gold frame: finishChannel=metal、既定sRGB=#c7a461。
+  - Burnished gilt bead: finishChannel=metal、既定sRGB=#ddbc79。
+  - Patinated gold recess: finishChannel=metal、既定sRGB=#8e6f3f。
+  - Original painted linen canvas: finishChannel=canvas、既定sRGB=#ffffff。
+- rpg-mansion-landscape-painting-1800-01 / 金縁の横長の額絵 1800: 実測W×D×H 1800.000×80.000×1100.000mm、10758三角形。
+  - Flat walnut backing: finishChannel=wood、既定sRGB=#614c3a。
+  - Antique gold frame: finishChannel=metal、既定sRGB=#c7a461。
+  - Burnished gilt bead: finishChannel=metal、既定sRGB=#ddbc79。
+  - Patinated gold recess: finishChannel=metal、既定sRGB=#8e6f3f。
+  - Original painted linen canvas: finishChannel=canvas、既定sRGB=#ffffff。
+- rpg-mansion-wicker-laundry-basket-01 / 籐の洗濯カゴ: 実測W×D×H 600.000×450.000×600.000mm、17344三角形。
+  - Honey wicker 0: finishChannel=wood、既定sRGB=#816142。
+  - Honey wicker 1: finishChannel=wood、既定sRGB=#93734f。
+  - Honey wicker 2: finishChannel=wood、既定sRGB=#a0805b。
+  - Honey wicker 3: finishChannel=wood、既定sRGB=#8a6a48。
+  - Warm ivory linen: finishChannel=fabric、既定sRGB=#e5e1d1。
+  - Muted sage linen: finishChannel=fabric、既定sRGB=#93a497。
+- rpg-mansion-lidded-laundry-box-01 / 蓋付きの木製ランドリーボックス: 実測W×D×H 600.000×500.000×850.000mm、12240三角形。
+  - Oiled walnut rails: finishChannel=wood、既定sRGB=#503521。
+  - Walnut inset panels: finishChannel=wood、既定sRGB=#5d422b。
+  - Subtle walnut grain: finishChannel=wood、既定sRGB=#482c19。
+  - Aged brass hardware: finishChannel=metal、既定sRGB=#c5a66c。
+
+#### 再生成
+- Python 3、NumPy、SciPy、Pillow: python tools/blender/rpg_mansion/style_assets/generate_order_textures.py
+- テクスチャ検証: python tools/blender/rpg_mansion/style_assets/validate_order_textures.py
+- Blender 4.3.2: blender --background --python tools/blender/rpg_mansion/style_assets/build_style_models.py
+- GLB/画像検証: python tools/blender/rpg_mansion/style_assets/validate_style_models.py
+- .blend原本・正面/背面画像・検証JSONは同style_assets/内。GLBと透過previewは発注指定パス。
+
+#### 検査結果と未実施範囲
+- 24maps＋8tile確認画像の全32JPEG: 1024×1024/RGB/JPEGデコード、roughness灰色、normal＋Z・正負勾配、再生成byte一致、1タイル座標移動生成byte一致。各種周期寸法と交互段の外周連続性を確認。腰板は横方向のみ。
+- 2×2確認画像を実見。落着いた色、英国積み/半ずらし、木目・切石・ダマスク・白黒大理石を確認。
+- JPEGnormalの長さ誤差はtexture-validation.jsonへ記録。損失圧縮後のnormalizeが必要。
+- 5モデルの寸法、GLB方向、finishChannel、三角形数、透過画像は既存models-validation-report.jsonに記録。今回はモデル全ファイルをSHA照合し変更なし。
+- 2026-10-10: origin/main（a06d6db104c11114bc3e62a74f4dc37eae60216e）を取得し、codex/mansion-style-assets-20261010へ71ファイルを衝突なしで追加。node --test tools/tests/asset-sets.test.cjsは8/8成功。sh tools/run_tests.shは113テストファイルとlint自己検査を実行し、失敗なし（exit=0表示）。Playwright未導入時にskipするブラウザ検証は実施済みとは扱わない。commit、push、PR作成・下書き解除、main反映、deployは未実施。

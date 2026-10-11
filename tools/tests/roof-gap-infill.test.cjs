@@ -121,6 +121,7 @@ test('塞ぐ壁の厚みは縁の外(低い方の屋根の上)にあり、高い
     roofGapInfillRuns: () => [{ nx: 1, ny: 0, pts: [
       { x: 5430, y: 5000, bottom: 4.39, top: 5.8, capTopIn: 6.06, capBottomOut: 5.8, capTopOut: 6.06 },
       { x: 5430, y: 7000, bottom: 4.39, top: 4.8, capTopIn: 5.06, capBottomOut: 4.8, capTopOut: 5.06 }] }],
+    roofSurfaceParams: () => ({ roughness: 0.92, metalness: 0, envMapIntensity: 0.06 }),
     resolveRoofAppearance: () => ({ color: '#222' }), getTexture3D: () => null, cloneRepeatReadyTexture: () => null,
     applyTextureFlip: () => {}, makeExteriorLightingMaterial: () => ({}),
     roofGapInfillAppearance: () => ({ color: '#fff' }),
