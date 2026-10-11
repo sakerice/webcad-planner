@@ -3279,6 +3279,7 @@ function renderOpeningModelToolMenus(){
   renderOpeningWindowModelToolMenu();
   AssetCatalogue.installGlobal(document.getElementById('sidebar'));
   if(typeof AssetSets==='object') AssetSets.renderPicker(document,onAssetSetsChanged,window.localStorage);
+  if(typeof AssetSwap==='object') AssetSwap.renderEntry(document);
 }
 // 表示するセットを切り替えたら、カタログを描き直す。開いていた小見出しは開いたままにする。
 function onAssetSetsChanged(){
@@ -3290,6 +3291,8 @@ function onAssetSetsChanged(){
   });
   var sidebar=document.getElementById('sidebar');
   if(sidebar && sidebar._globalCatalogueSearch) sidebar._globalCatalogueSearch();
+  // 切り替えでピッカーが作り直されるので、差し替えの入口も付け直す
+  if(typeof AssetSwap==='object') AssetSwap.renderEntry(document);
 }
 function renderOpeningDoorModelToolMenu(){
   var mount=document.getElementById('opening-door-model-tools');
