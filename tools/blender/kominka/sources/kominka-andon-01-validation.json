@@ -1,0 +1,43 @@
+{
+  "model": "kominka-andon-01",
+  "dimensions_mm": [
+    300.00001192092896,
+    300.00001192092896,
+    800.000011920929
+  ],
+  "bounds_m": [
+    [
+      -0.15000000596046448,
+      -0.15000000596046448,
+      0.0
+    ],
+    [
+      0.15000000596046448,
+      0.15000000596046448,
+      0.800000011920929
+    ]
+  ],
+  "triangles": 2376,
+  "uv": {
+    "meters_per_uv": 2.0823083725078577,
+    "min": 1.9604193993565653,
+    "max": 2.1433090844487817,
+    "p05": 1.983740754465485,
+    "p95": 2.1291188531366383,
+    "total_triangles": 2376,
+    "valid_triangles": 2376,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_dark": "wood",
+    "Kominka_wood": "wood",
+    "Kominka_paper": "paper"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 85072
+}

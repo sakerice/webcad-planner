@@ -1,0 +1,43 @@
+{
+  "model": "kominka-hanagoza-01",
+  "dimensions_mm": [
+    2000.0,
+    2000.0,
+    9.999999776482582
+  ],
+  "bounds_m": [
+    [
+      -1.0,
+      -1.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0,
+      0.009999999776482582
+    ]
+  ],
+  "triangles": 13608,
+  "uv": {
+    "meters_per_uv": 10.809249397092461,
+    "min": 10.194998420983339,
+    "max": 11.420066776467818,
+    "p05": 10.26604970145852,
+    "p95": 11.230582852251715,
+    "total_triangles": 13608,
+    "valid_triangles": 13608,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_rush": "rush",
+    "Kominka_fabric": "fabric",
+    "Kominka_bamboo": "bamboo"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 471884
+}
