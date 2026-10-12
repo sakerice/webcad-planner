@@ -79,9 +79,34 @@ try {
   const file = await dl;
   assert.match(file.suggestedFilename(), /^LDK拡張案_\d{8}\.json$/);
 
-  // 3D では編集中の側だけ。2D に戻ると左右に戻る
+  // 3D も左右に並ぶ。右の半分を押すと右が編集中になる（以後の操作は右の間取りに効く）
+  await page.evaluate(() => CompareMode.activate(0));
   await page.evaluate(() => setView('3d-ext'));
-  assert.equal(await page.locator('#c2d-peer').isHidden(), true);
+  // 家具のモデルの読み込みは待たない（画面の無いブラウザでは遅い）。壁・屋根が描かれれば足りる
+  await page.waitForFunction(() => window.ren && window.sc3, null, { timeout: 60000 });
+  await page.waitForTimeout(3000);
+  const both = await page.evaluate(() => {
+    render3DNow();
+    // 左右それぞれの半分に家が描かれている（地の色一色ではない）
+    const c = ren.domElement, w = c.width, h = c.height, g = document.createElement('canvas'); g.width = w; g.height = h;
+    const x = g.getContext('2d'); render3DNow(); x.drawImage(c, 0, 0);
+    const a = document.getElementById('canvas-area').getBoundingClientRect(), pr = w / c.clientWidth;
+    const frames = [...document.querySelectorAll('.compare-frame')].map((f) => f.getBoundingClientRect());
+    return frames.map((r) => {
+      const d = x.getImageData(Math.round((r.left - a.left + r.width * 0.2) * pr), Math.round(h * 0.3), Math.round(r.width * 0.6 * pr), Math.round(h * 0.4)).data;
+      const seen = new Set(); for (let i = 0; i < d.length; i += 4 * 97) seen.add((d[i] >> 4) + ',' + (d[i + 1] >> 4) + ',' + (d[i + 2] >> 4));
+      return seen.size;
+    });
+  });
+  assert.ok(both[0] > 20 && both[1] > 20, '左右の 3D のどちらかが描かれていない: ' + both.join(','));
+  const rightHalf = await page.evaluate(() => {
+    const frames = [...document.querySelectorAll('.compare-frame')].map((f) => f.getBoundingClientRect());
+    return { x: frames[1].left + frames[1].width / 2, y: frames[1].top + frames[1].height / 2 };
+  });
+  await page.mouse.click(rightHalf.x, rightHalf.y);
+  assert.equal(await page.evaluate(() => CompareMode.activeSide()), 1, '3D で右を押しても右が編集中にならない');
+  const pick = await page.evaluate(() => ({ name: DATA.planName }));
+  assert.equal(pick.name, 'LDK拡張案', '右を押したのに左の間取りが編集中のまま');
   await page.evaluate(() => setView('2d'));
   assert.equal(await page.locator('#c2d-peer').isVisible(), true);
 

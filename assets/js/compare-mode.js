@@ -15,6 +15,21 @@ var CompareMode = (function(){
   // 作業面ごとに入れ替える全体の変数。ST はこの項目だけ（ツールや吸着の設定は左右で共通）
   // PLAN_LIBRARY_ID / PLAN_SAVE_INFO は「ブラウザのどこに保存した物か」（plan-library.js）
   var GLOBALS = ['DATA','HISTORY','REDO_HISTORY','DIRTY','nextId','PLAN_LIBRARY_ID','PLAN_SAVE_INFO'];
+  // 3D の場面と、組み立てのたびに作り直す作業用の変数・間取りから求めた値の控え。
+  // 左右それぞれが自分の場面(sc3)を持ち、描くときと組み立てるときに入れ替える（描画の窓 ren は1つ）
+  var SCENE_GLOBALS = ['sc3','_skyMesh','_gndMesh','_doorAnims','_fmpInstancePools','_downspoutRegistry',
+    '_activeInteriorShadowLightCount','_lightBudget','_cutawayViewKey','_walkCollWalls','_walkCollFloor',
+    '_walkCullApplied','_walkCullAt','_setbackRoofCache','_setbackRoomRoofsCache','_roofCeilingExtentCache',
+    '_wallOutsideGridCache','_stairLinkCache','_roofPolygonModelCache','_roofPolygonModelCacheN','_setbackBuildingBox'];
+  GLOBALS = GLOBALS.concat(SCENE_GLOBALS);
+  function freshSceneState(){
+    return {sc3:null,_skyMesh:null,_gndMesh:null,_doorAnims:[],_fmpInstancePools:{},_downspoutRegistry:[],
+      _activeInteriorShadowLightCount:0,
+      _lightBudget:{list:null,x:NaN,y:NaN,z:NaN,at:0,culled:false,dummies:null,sig:'',precompiled:false},
+      _cutawayViewKey:'',_walkCollWalls:null,_walkCollFloor:null,_walkCullApplied:false,_walkCullAt:0,
+      _setbackRoofCache:null,_setbackRoomRoofsCache:{},_roofCeilingExtentCache:{},_wallOutsideGridCache:{},
+      _stairLinkCache:{},_roofPolygonModelCache:{},_roofPolygonModelCacheN:0,_setbackBuildingBox:null};
+  }
   var VIEW_KEYS = ['floor','zoom','panX','panY','selected','multiSelected','selectAll','drawing','drawPts','_camStash'];
   var SIDE_NAMES = ['左','右'];
   var on = false, active = 0, panes = [], peer = null, peerCtx = null, frames = [], bar = null;
@@ -108,7 +123,7 @@ var CompareMode = (function(){
     bar = document.createElement('div');
     bar.className = 'compare-bar';
     bar.innerHTML = '<label class="compare-sync"><input type="checkbox" checked> 倍率と位置を揃える</label>'+
-      '<span class="compare-3d-note">3D は編集中の側だけを表示しています</span>'+
+      '<span class="compare-3d-note">視点は左右で連動します。触った側が編集中になります</span>'+
       '<span class="compare-msg" role="status"></span>'+
       '<button type="button" class="compare-stop">比較をやめる</button>';
     bar.querySelector('input').addEventListener('change', function(e){
@@ -136,13 +151,19 @@ var CompareMode = (function(){
     if(tb){ var t = tb.getBoundingClientRect(); if(t.bottom > a.top && t.top < a.top + 80) top = Math.round(t.bottom - a.top + 8); }
     return {left:left, top:top, width:a.width, height:a.height};
   }
+  // 左右それぞれの欄の位置（CSS の画素。図面の欄の左上から）
+  function halves(){
+    var v = visibleRect(), W = v.width - v.left, half = Math.floor(W/2);
+    return {x:[v.left, v.left + W - half], w:half, h:v.height, v:v, W:W};
+  }
   function layout(){
-    var v = visibleRect(), W = v.width - v.left, H = v.height, half = Math.floor(W/2);
-    var x = [v.left, v.left + W - half];
-    canvas.width = half; canvas.height = H;
-    canvas.style.left = x[active]+'px';
-    peer.width = half; peer.height = H;
-    peer.style.left = x[1-active]+'px';
+    var hv = halves(), v = hv.v, W = hv.W, H = hv.h, half = hv.w, x = hv.x;
+    if(ST.view==='2d'){
+      canvas.width = half; canvas.height = H;
+      canvas.style.left = x[active]+'px';
+      peer.width = half; peer.height = H;
+      peer.style.left = x[1-active]+'px';
+    }
     frames.forEach(function(f,i){
       f.style.left = x[i]+'px'; f.style.width = half+'px';
     });
@@ -151,9 +172,9 @@ var CompareMode = (function(){
   function render(){
     var two = ST.view==='2d';
     area().classList.toggle('compare-3d', !two);
+    area().classList.toggle('compare-walk', ST.view==='3d-walk');
     frames.forEach(function(f,i){
       f.classList.toggle('is-active', i===active);
-      f.hidden = !two && i!==active;
       var input = f.querySelector('.compare-name');
       if(document.activeElement!==input) input.value = planName(i);
       f.querySelector('.compare-state').textContent = i===active ? '編集中' : 'タップで編集';
@@ -177,8 +198,88 @@ var CompareMode = (function(){
     api.lastPeerMs = performance.now()-t0;
   }
   function redraw(){
-    if(ST.view==='2d'){ layout(); draw2d(); drawPeer(); }
+    layout();
+    if(ST.view==='2d'){ draw2d(); drawPeer(); }
+    else if(typeof invalidate3D==='function') invalidate3D();
     render();
+  }
+
+  // ───── 3D を左右に並べる ─────
+  // 描画の窓(ren)は1つのまま、左右の場面を半分ずつ描く（WebGL を2つ持つと、iPad では
+  // 画像やモデルの読み込みが2倍になり、メモリが足りなくなる）。カメラ(camExt)は1つを共有するので、
+  // 視点は左右で連動する。後処理(AO・ブルーム)は1つの場面に結び付いているので、比較中は使わない。
+  function compare3D(){ return on && ST.view!=='2d' && typeof ren!=='undefined' && ren && panes.length===2; }
+  // その側の場面が無ければ作り、組み立て直しが要れば組み立てる（入れ替えた状態で呼ぶ）
+  function ensureScene(i){
+    var other = panes[1-i] && (1-i===active ? {sky:_skyMesh, env:sc3 && sc3.environment} : {sky:panes[1-i].g._skyMesh, env:panes[1-i].g.sc3 && panes[1-i].g.sc3.environment});
+    var need = !!panes[i].needsBuild;
+    withPane(i, function(){
+      if(!sc3){ createScene3DBase({sky:other.sky, environment:other.env}); need = true; }
+      if(need){ syncPlanGlobals(); build3D(); }
+    });
+    if(need){ panes[i].needsBuild = false; panes[i].shadowDirty = true; syncPlanGlobals(); }  // 壁の高さ・方位を編集中の側へ戻す
+  }
+  function disposeScene(sc, sharedSky){
+    if(!sc) return;
+    sc.traverse(function(o){
+      if(o===sharedSky) return;
+      if(o.geometry && (!sharedSky || o.geometry!==sharedSky.geometry)) o.geometry.dispose();
+      if(o.isLight && o.shadow && o.shadow.map){ o.shadow.map.dispose(); o.shadow.map = null; }
+    });
+    sc.clear();
+  }
+  var savedRect = null;
+  // 3D の画面での操作（選ぶ・動かす・歩く向き）は、編集中の側の半分を窓と見なして計算させる
+  function patchRect(){
+    if(!ren || savedRect) return;
+    var el = ren.domElement;
+    savedRect = el.getBoundingClientRect;
+    el.getBoundingClientRect = function(){
+      var r = savedRect.call(el);
+      if(!compare3D()) return r;
+      var hv = halves(), a = area().getBoundingClientRect();
+      return new DOMRect(a.left + hv.x[active], r.top, hv.w, r.height);
+    };
+  }
+  // 3D でもう片方の半分を押したら、その側を編集中にする（そのまま回す・選ぶ操作に入る）
+  function onWrapDown(e){
+    if(!compare3D()) return;
+    var hv = halves(), a = area().getBoundingClientRect(), x = e.clientX - a.left;
+    var side = x >= hv.x[1] ? 1 : (x >= hv.x[0] ? 0 : -1);
+    if(side>=0 && side!==active) activate(side);
+  }
+  function unpatchRect(){ if(ren && savedRect){ ren.domElement.getBoundingClientRect = savedRect; savedRect = null; } }
+  function renderBoth(base){
+    ensureScene(active); ensureScene(1-active);
+    patchRect();
+    var hv = halves(), size = new THREE.Vector2(); ren.getSize(size);
+    var H = size.y, shadowWanted = ren.shadowMap && ren.shadowMap.needsUpdate;
+    var aspect = hv.w / Math.max(1, H);
+    if(Math.abs(camExt.aspect - aspect) > 1e-4){ camExt.aspect = aspect; camExt.updateProjectionMatrix(); }
+    // 左のパネルの下など、どちらの半分でもない所は図面の欄と同じ地の色で塗る
+    var prevClear = new THREE.Color(); ren.getClearColor(prevClear); var prevAlpha = ren.getClearAlpha();
+    ren.setClearColor(0xf0ece4, 1); ren.setScissorTest(false); ren.clear(); ren.setClearColor(prevClear, prevAlpha);
+    ren.setScissorTest(true);
+    [active, 1-active].forEach(function(i){
+      withPane(i, function(){
+        if(ren.shadowMap) ren.shadowMap.needsUpdate = !!(shadowWanted || panes[i].shadowDirty);
+        panes[i].shadowDirty = false;
+        if(typeof updateInteriorCutawayWalls==='function') updateInteriorCutawayWalls();
+        if(i!==active && typeof isWalkView==='function' && isWalkView() && WALK.active && typeof applyWalkCulling==='function') applyWalkCulling();
+        ren.setViewport(hv.x[i], 0, hv.w, H);
+        ren.setScissor(hv.x[i], 0, hv.w, H);
+        applyInteriorLightBudget(camExt);
+        if(i===active && typeof layoutSetbackDimLabels==='function') layoutSetbackDimLabels(camExt);
+        ren.render(sc3, camExt);
+      });
+    });
+    ren.setScissorTest(false);
+    ren.setViewport(0, 0, size.x, size.y);
+  }
+  // 空を共有している側の環境マップを、描く直前に揃える
+  function shareEnvironment(){
+    var me = panes[active] , other = panes[1-active];
+    if(other && other.g.sc3 && sc3){ other.g.sc3.environment = sc3.environment; if(other.g._skyMesh && _skyMesh) other.g._skyMesh.material = _skyMesh.material; }
   }
 
   function activate(i){
@@ -212,14 +313,18 @@ var CompareMode = (function(){
     a.classList.add('compare-on');
     panes[0] = capture();
     // 右の作業面: Undo の履歴は空から。中身は読み込みと同じ手順で整える
-    panes[1] = {g:{DATA:planB, HISTORY:[], REDO_HISTORY:[], DIRTY:false, nextId:1,
-        PLAN_LIBRARY_ID:from.libId||null, PLAN_SAVE_INFO:from.libId ? {where:'list', name:from.name, at:null} : null},
+    panes[1] = {g:Object.assign(freshSceneState(), {DATA:planB, HISTORY:[], REDO_HISTORY:[], DIRTY:false, nextId:1,
+        PLAN_LIBRARY_ID:from.libId||null, PLAN_SAVE_INFO:from.libId ? {where:'list', name:from.name, at:null} : null}),
+      needsBuild:true,
       v:Object.assign({}, panes[0].v, {selected:null, multiSelected:[], selectAll:false, drawing:false, drawPts:[]})};
     on = true; active = 0;
     withPane(1, function(){ normalizeLoadedPlan(); if(api.syncView){ ST.zoom = panes[0].v.zoom; ST.panX = panes[0].v.panX; ST.panY = panes[0].v.panY; ST.floor = panes[0].v.floor; } });
     syncPlanGlobals();
     window.addEventListener('resize', onResize);
     window.addEventListener('beforeunload', onBeforeUnload);
+    var w3 = document.getElementById('c3d-wrap'); if(w3) w3.addEventListener('pointerdown', onWrapDown, true);
+    // ガラスの透過をやめる（glassTransmissionEnabled）。3D を開いていれば、いまの場面を組み直す
+    if(typeof ren!=='undefined' && ren && ST.view!=='2d') rebuild3D();
     layout();
     resetView();
     if(!api.syncView) withPane(1, function(){ resetView(); });
@@ -238,14 +343,18 @@ var CompareMode = (function(){
   function stop(){
     if(!on) return;
     if(active!==0) activate(0);
+    if(panes[1] && panes[1].g.sc3) disposeScene(panes[1].g.sc3, panes[1].g._skyMesh);
+    unpatchRect();
     on = false;
     window.removeEventListener('resize', onResize);
     window.removeEventListener('beforeunload', onBeforeUnload);
+    var w3 = document.getElementById('c3d-wrap'); if(w3) w3.removeEventListener('pointerdown', onWrapDown, true);
     if(peer) peer.remove(); frames.forEach(function(f){ f.remove(); }); if(bar) bar.remove();
     peer = null; frames = []; bar = null; panes = [];
-    var a = area(); a.classList.remove('compare-on','compare-3d');
+    var a = area(); a.classList.remove('compare-on','compare-3d','compare-walk');
     canvas.style.left = '0px';
     resize2d();
+    if(typeof ren!=='undefined' && ren && ST.view!=='2d'){ window.dispatchEvent(new Event('resize')); rebuild3D(); }
   }
   // 右に書き出していない変更があれば、書き出すか捨てるかをたずねる
   function requestStop(){
@@ -358,7 +467,34 @@ var CompareMode = (function(){
       return r;
     };
     var baseSetView = setView;
-    setView = function(v){ var r = baseSetView.apply(this, arguments); if(on){ redraw(); } return r; };
+    setView = function(v){
+      var was = ST.view;
+      var r = baseSetView.apply(this, arguments);
+      // 平面図で編集したあと 3D に入ると、もう片方の場面は古いので組み立て直す
+      if(on && v!=='2d' && (was==='2d' || isInt!==panes[1-active].lastInt)){ panes[1-active].needsBuild = true; panes[1-active].lastInt = isInt; }
+      if(on){ redraw(); }
+      return r;
+    };
+    // 3D の1コマ: 比較中は左右を半分ずつ描く
+    var baseRender = render3DNow;
+    render3DNow = function(){
+      if(!compare3D() || !sc3 || !camExt) return baseRender.apply(this, arguments);
+      shareEnvironment();
+      return renderBoth(baseRender);
+    };
+    // 組み立て直し（編集・モデルや画像の読み込み完了）は、もう片方の場面にも要る
+    var baseRebuild = rebuild3D;
+    rebuild3D = function(){
+      if(on && panes.length===2) panes[1-active].needsBuild = true;
+      return baseRebuild.apply(this, arguments);
+    };
+    // 時刻・光の設定を変えたら、もう片方の場面の光も同じにする
+    var baseLighting = applyLightingToScene;
+    applyLightingToScene = function(){
+      var r = baseLighting.apply(this, arguments);
+      if(on && panes.length===2 && panes[1-active].g.sc3){ var args = arguments; withPane(1-active, function(){ syncNorthFromPlan(); baseLighting.call(null, false); }); syncNorthFromPlan(); }
+      return r;
+    };
     // 右を編集中の「保存」は、ブラウザの保存枠（左の物）を上書きせず JSON に書き出す
     var baseSave = savePlanToStorage;
     savePlanToStorage = function(){

@@ -288,7 +288,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 #canvas-area.compare-on .compare-peer{position:absolute;top:0;touch-action:none;cursor:pointer}
 .compare-frame{position:absolute;top:0;height:100%;box-sizing:border-box;pointer-events:none;z-index:6;border:1px solid #c9cdd4}
 .compare-frame.is-active{border:3px solid var(--hp-primary)}
-#canvas-area.compare-3d .compare-frame.is-active{display:none}
 .compare-tag{position:absolute;bottom:104px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;max-width:calc(100% - 24px);padding:4px 6px 4px 10px;border-radius:999px;background:rgba(255,255,255,.95);box-shadow:var(--hp-shadow);font-size:12px;pointer-events:auto;white-space:nowrap}
 .compare-side{font-weight:700}
 .compare-frame.is-active .compare-side{color:var(--hp-primary)}
@@ -332,3 +331,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .plan-library-btn.danger{color:#b42318}
 .plan-library-empty{font-size:12px;color:var(--hp-muted);padding:12px 4px}
 .plan-library-name-input{width:100%;box-sizing:border-box;height:40px;padding:0 12px;border:1px solid #d6ddd8;border-radius:10px;font:inherit;font-size:14px}
+
+/* ウォークスルーでは下に十字キーが出るので、札を上へ逃がす */
+#canvas-area.compare-walk .compare-tag{bottom:230px}
