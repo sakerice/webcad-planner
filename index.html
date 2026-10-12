@@ -3843,6 +3843,14 @@ var ASSET_TEX_MAP = {
   'mansion_wainscot_panel': 'assets/textures/mansion/mansion_wainscot_panel_diffuse.jpg',
   'mansion_herringbone_oak': 'assets/textures/mansion/mansion_herringbone_oak_diffuse.jpg',
   'mansion_marble_checker': 'assets/textures/mansion/mansion_marble_checker_diffuse.jpg',
+  // 古民家の様式。Codex 製、PR #91（茅葺きの作り直しと畳は Claude）。法線・粗さも同じ場所にある
+  'kominka_yakisugi': 'assets/textures/kominka/kominka_yakisugi_diffuse.jpg',
+  'kominka_shikkui': 'assets/textures/kominka/kominka_shikkui_diffuse.jpg',
+  'kominka_juraku': 'assets/textures/kominka/kominka_juraku_diffuse.jpg',
+  'kominka_kayabuki': 'assets/textures/kominka/kominka_kayabuki_diffuse.jpg',
+  'kominka_old_pine_floor': 'assets/textures/kominka/kominka_old_pine_floor_diffuse.jpg',
+  'kominka_doma': 'assets/textures/kominka/kominka_doma_diffuse.jpg',
+  'kominka_tatami': 'assets/textures/kominka/kominka_tatami_diffuse.jpg',
   // 屋根材(Codex 製、PR #88)。軒先が画像の下、棟が上
   'roof_kawara_ibushi': 'assets/textures/roof/roof_kawara_ibushi_diffuse.jpg',
   'roof_s_tile_terracotta': 'assets/textures/roof/roof_s_tile_terracotta_diffuse.jpg',
@@ -3877,6 +3885,14 @@ var TEX_TILE_M = {
   mansion_wainscot_panel:    0.9,   // 腰板(横方向だけ繰り返す)
   mansion_herringbone_oak:   1.4,
   mansion_marble_checker:    0.8,   // 400角の市松
+  // 古民家の素材(納品の寸法。docs/orders/2026-10-12-codex-kominka-set.md)
+  kominka_yakisugi: 1.08,   // 焼杉板 働き幅180mm × 6
+  kominka_shikkui: 1.0,
+  kominka_juraku: 1.0,
+  kominka_kayabuki: 1.2,   // 茅葺き 6段
+  kominka_old_pine_floor: 1.8,   // 乱尺の松板
+  kominka_doma: 1.2,
+  kominka_tatami: 1.82,   // 畳 910×1820 を2枚
   // 屋根材(納品の寸法。働き幅・働き長さを整数個に割り付けた1タイル)
   roof_kawara_ibushi: 1.06,
   roof_s_tile_terracotta: 1.08,
@@ -3908,6 +3924,13 @@ var ASSET_TEX_NORMAL = {
   mansion_wainscot_panel: 'assets/textures/mansion/mansion_wainscot_panel_normal.jpg',
   mansion_herringbone_oak: 'assets/textures/mansion/mansion_herringbone_oak_normal.jpg',
   mansion_marble_checker: 'assets/textures/mansion/mansion_marble_checker_normal.jpg',
+  kominka_yakisugi: 'assets/textures/kominka/kominka_yakisugi_normal.jpg',
+  kominka_shikkui: 'assets/textures/kominka/kominka_shikkui_normal.jpg',
+  kominka_juraku: 'assets/textures/kominka/kominka_juraku_normal.jpg',
+  kominka_kayabuki: 'assets/textures/kominka/kominka_kayabuki_normal.jpg',
+  kominka_old_pine_floor: 'assets/textures/kominka/kominka_old_pine_floor_normal.jpg',
+  kominka_doma: 'assets/textures/kominka/kominka_doma_normal.jpg',
+  kominka_tatami: 'assets/textures/kominka/kominka_tatami_normal.jpg',
   roof_kawara_ibushi: 'assets/textures/roof/roof_kawara_ibushi_normal.jpg',
   roof_s_tile_terracotta: 'assets/textures/roof/roof_s_tile_terracotta_normal.jpg',
   roof_flat_tile_charcoal: 'assets/textures/roof/roof_flat_tile_charcoal_normal.jpg',
@@ -8291,10 +8314,12 @@ function setExteriorDetailValue(key,val){
 // 値は ASSET_TEX_MAP のキーで、設定の texture にそのまま入る。
 var PRESET_WALL_TEXTURES={
   exterior:[['siding','サイディング'],['plaster','塗り壁'],['plaster_white','塗り壁（白）'],['galvalume_dark','ガルバ（黒）'],
-    ['wood_cedar','杉板'],['mansion_brick_red','赤レンガ（洋館）'],['mansion_ashlar_stone','切石（洋館）']],
+    ['wood_cedar','杉板'],['mansion_brick_red','赤レンガ（洋館）'],['mansion_ashlar_stone','切石（洋館）'],
+    ['kominka_yakisugi','焼杉板（古民家）'],['kominka_shikkui','白漆喰（古民家）']],
   interior:[['wall_int','塗り壁'],['plaster_white','塗り壁（白）'],['wood_cedar','杉板'],
-    ['mansion_damask_wallpaper','ダマスク柄の壁紙（洋館）'],['mansion_white_subway_tile','白いタイル（洋館）']],
-  roof:[['roof_tile','瓦'],['roof_kawara_ibushi','日本瓦（いぶし銀）'],['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],['roof_flat_tile_charcoal','平板瓦（黒灰）'],['roof_colonial_gray','化粧スレート（コロニアル）'],['roof_standing_seam_silver','ガルバ立平（銀）'],['roof_copper_patina','銅板一文字（緑青）'],['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）']]
+    ['mansion_damask_wallpaper','ダマスク柄の壁紙（洋館）'],['mansion_white_subway_tile','白いタイル（洋館）'],
+    ['kominka_shikkui','白漆喰（古民家）'],['kominka_juraku','聚楽の土壁（古民家）']],
+  roof:[['roof_tile','瓦'],['roof_kawara_ibushi','日本瓦（いぶし銀）'],['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],['roof_flat_tile_charcoal','平板瓦（黒灰）'],['roof_colonial_gray','化粧スレート（コロニアル）'],['roof_standing_seam_silver','ガルバ立平（銀）'],['roof_copper_patina','銅板一文字（緑青）'],['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）'],['kominka_kayabuki','茅葺き（古民家）']]
 };
 function presetTextureSelectHtml(kind,current,call,disabled){
   var list=PRESET_WALL_TEXTURES[kind]||[];
@@ -15929,7 +15954,10 @@ var FLOOR_PBR_STEM = {
   wood_oak:   'floor_oak',
   tile_floor: 'floor_tile',
   mansion_herringbone_oak: 'mansion/mansion_herringbone_oak',
-  mansion_marble_checker:  'mansion/mansion_marble_checker'
+  mansion_marble_checker:  'mansion/mansion_marble_checker',
+  kominka_old_pine_floor:  'kominka/kominka_old_pine_floor',
+  kominka_doma:            'kominka/kominka_doma',
+  kominka_tatami:          'kominka/kominka_tatami'
 };
 // 床の仕上げは3つ組(床材・カラー・テクスチャ)。天井・家具と同じ並び。
 //   r.floorMaterial … 床材のキー(FLOOR_PBR_STEM)。無ければ部屋名から自動

@@ -93,16 +93,16 @@
     "provenance": "original",
     "maps": {
       "diffuse": {
-        "edgeMean": 1.13427734375,
-        "edgeMax": 5.0
+        "edgeMean": 2.16845703125,
+        "edgeMax": 25.0
       },
       "normal": {
-        "edgeMean": 2.798665364583333,
-        "edgeMax": 20.0
+        "edgeMean": 6.4599609375,
+        "edgeMax": 68.0
       },
       "roughness": {
-        "edgeMean": 1.595703125,
-        "edgeMax": 7.0
+        "edgeMean": 1.89501953125,
+        "edgeMax": 8.0
       }
     }
   },
@@ -166,6 +166,37 @@
       "roughness": {
         "edgeMean": 1.62744140625,
         "edgeMax": 7.0
+      }
+    }
+  },
+  {
+    "key": "kominka_tatami",
+    "name": "畳",
+    "tileMm": 1820,
+    "matMm": [
+      910,
+      1820
+    ],
+    "heriMm": 30,
+    "normalConvention": "OpenGL +Y; RGB=(normal*0.5+0.5)",
+    "jpegQuality": 85,
+    "imageSize": [
+      1024,
+      1024
+    ],
+    "provenance": "original",
+    "maps": {
+      "diffuse": {
+        "edgeMean": 1.29345703125,
+        "edgeMax": 15.0
+      },
+      "normal": {
+        "edgeMean": 4.388997395833333,
+        "edgeMax": 23.0
+      },
+      "roughness": {
+        "edgeMean": 1.85302734375,
+        "edgeMax": 8.0
       }
     }
   }

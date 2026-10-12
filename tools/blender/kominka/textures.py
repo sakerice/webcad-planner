@@ -75,15 +75,31 @@ def juraku():
     return color,.07*FINE+.02*MICRO+.1*straw,.95+.02*FINE
 
 
+def aniso_noise(rx, ry, seed):
+    # Gaussian-filtered noise stretched along one axis (ry>rx: streaks along v).
+    rng=np.random.default_rng(seed)
+    spectrum=np.fft.fft2(rng.normal(size=(N,N)))
+    spectrum*=np.exp(-2*np.pi*np.pi*(rx*rx*FX*FX+ry*ry*FY*FY))
+    a=np.fft.ifft2(spectrum).real
+    return a/(a.std()+1e-12)
+
+
 def kayabuki():
-    # Hundreds of individual grey-brown reeds run along v (roof upslope).
-    wav=.27*np.sin(2*np.pi*V*3)+.18*np.sin(2*np.pi*V*7)
-    reeds=np.sin(2*np.pi*X*237+wav)+.4*np.sin(2*np.pi*X*419+.5*wav)
-    bundles=.6*np.sin(2*np.pi*X*17+.15*np.sin(2*np.pi*V))
-    ends=.65*np.sin(2*np.pi*(V*7+X*2))+.30*np.sin(2*np.pi*(V*13-X*7))
-    tone=4.2*reeds+3*bundles+1.1*COARSE+1.4*ends+.8*FINE
-    color=np.stack([111+tone,104+tone*.94,89+tone*.90],axis=-1)
-    return color,.65*reeds+.6*bundles+.18*ends+.03*FINE,.96+.014*FINE
+    # Redone by Claude (2026-10-12): the first version drew 5mm sine reeds, which at
+    # 1024px/1.2m read as corduroy. A thatch surface shows the trimmed butt ends of
+    # reed bundles: short streaks along the slope (v), stacked in courses with a
+    # shadowed lip every 200mm, weathered grey-brown with darker damp patches.
+    streak=aniso_noise(.7,9,411)                 # individual reed ends, ~1mm wide x ~10mm long
+    clump=aniso_noise(3,24,412)                  # bundles of reeds
+    course=(V*6+.06*MEDIUM)%1                    # 6 courses per 1.2m tile, slightly wavy
+    lip=np.clip(1-course/.3,0,1)**3              # shadow under the overhang of the course above
+    rise=course                                  # each course thickens toward its top
+    damp=np.clip(.5*COARSE+.35*MEDIUM-.15,0,None)
+    tone=9*streak+6*clump-30*lip-8*damp+2.5*FINE
+    color=np.stack([118+tone,108+tone*.95,88+tone*.88],axis=-1)
+    height=.9*streak+1.2*clump+6*rise-4*lip
+    rough=np.clip(.94+.02*FINE+.03*lip,0,1)
+    return color,height,rough
 
 
 def old_pine():
@@ -126,6 +142,29 @@ def doma():
     return color,.08*FINE+.012*MICRO+relief,.94+.015*FINE
 
 
+def tatami():
+    # Added by Claude (2026-10-12). Two 910x1820mm mats side by side make one 1820mm
+    # tile; repeated, they lie in a plain grid. The rush weave runs across each mat
+    # (rows every ~4mm along v), the cloth border (heri, 30mm) runs along the long sides.
+    mat=(X*2)%1                                  # 0..1 across each mat's 910mm width
+    d=np.minimum(mat,1-mat)*910                  # mm to the nearest long side
+    heri=np.clip((30-d)*.6,0,1)
+    seam=np.exp(-(d/1.2)**2)
+    weave=np.sin(2*np.pi*V*121+.25*FINE)          # the ~15mm rows of the mat surface (目)
+    endseam=np.exp(-(wrap_distance(V,0)*1820/1.2)**2)  # short ends of the mats meet at the tile edge
+    reed=aniso_noise(6,.6,421)                   # individual rush stems run across (along u)
+    tone=3*COARSE+1.5*MEDIUM+6*np.abs(weave)**.5*np.sign(weave)+3*reed
+    mats=np.where(np.floor(X*2)%2==0,2,-2)       # the two mats age a little differently
+    color=np.stack([178+tone+mats,170+tone*.95+mats,116+tone*.75],axis=-1)
+    hericolor=np.stack([46+1.5*FINE,40+1.5*FINE,34+1.5*FINE],axis=-1)
+    color=color*(1-heri[...,None])+hericolor*heri[...,None]
+    seam=np.maximum(seam,endseam*(1-heri))
+    color=color*(1-.5*seam[...,None])
+    height=.25*weave+.1*reed+.6*heri-.8*seam
+    rough=np.clip(.86+.02*FINE+.06*heri,0,1)
+    return color,height,rough
+
+
 def encode(a):
     if a.ndim==2:a=np.repeat(a[...,None],3,axis=2)
     a=np.concatenate((a,a[:1,:,:]),axis=0)
@@ -139,9 +178,9 @@ def main():
     target=out/'assets/textures/kominka';target.mkdir(parents=True,exist_ok=True)
     evidence=out/'tools/blender/kominka/evidence';evidence.mkdir(parents=True,exist_ok=True)
     catalog=json.loads((HERE/'catalogue.json').read_text())
-    functions=[yakisugi,shikkui,juraku,kayabuki,old_pine,doma]
+    functions=[yakisugi,shikkui,juraku,kayabuki,old_pine,doma,tatami]
     reports=[]
-    sheet=Image.new('RGB',(3*640,2*686),'#e6e4df');draw=ImageDraw.Draw(sheet)
+    sheet=Image.new('RGB',(3*640,3*686),'#e6e4df');draw=ImageDraw.Draw(sheet)
     for i,(it,fun) in enumerate(zip(catalog['textures'],functions)):
         rgb,height,rough=fun()
         dhdu=(np.roll(height,-1,axis=1)-np.roll(height,1,axis=1))/(2*it['tileMm']/N)
