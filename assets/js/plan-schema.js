@@ -209,7 +209,7 @@
       var seen = Object.create(null);
       plan[name].forEach(function (o, i) {
         var id = o && o.id;
-        if (id === undefined || id === null) return;
+        if (id === undefined || id === null || id === '') return;
         var key = String(id);
         if (seen[key] !== undefined) {
           errors.push(name + '[' + i + ']: id "' + key + '" が ' + name + '[' + seen[key] + '] と重複');
@@ -249,10 +249,21 @@
     Object.keys(plan).forEach(function (k) {
       if (COLLECTIONS.indexOf(k) < 0) out[k] = plan[k];
     });
+    // Reserve every existing ID before assigning any placeholder. References
+    // (baseRoom, appearance maps, etc.) keep pointing at the original objects.
+    var usedIds = new Set();
+    COLLECTIONS.forEach(function (name) {
+      plan[name].forEach(function (o) {
+        if (o.id !== undefined && o.id !== null && o.id !== '') usedIds.add(String(o.id));
+      });
+    });
     var nextId = 1;
     function idFor(o) {
       if (o.id !== undefined && o.id !== null && o.id !== '') return o.id;
-      return 'p' + (nextId++);
+      var id;
+      do { id = 'p' + (nextId++); } while (usedIds.has(id));
+      usedIds.add(id);
+      return id;
     }
     function base(o) {
       var c = {};

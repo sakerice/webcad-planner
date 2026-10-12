@@ -172,3 +172,21 @@ test('テスト用に凍結した間取りは1件も error を出さずに通る
   const s = summarize(plan);
   assert.ok(s.walls > 20 && s.rooms > 10 && s.items > 100, '足場として十分な大きさの間取りであること');
 });
+
+test('missing and empty IDs skip every reserved ID, including IDs encountered later and in other collections', () => {
+  const input=okPlan();
+  input.walls=[{...input.walls[0],id:''},{...input.walls[1],id:'p1'},{...input.walls[0],id:null}];
+  input.rooms[0].id='p2';
+  input.items=[{...input.items[0],id:undefined,baseRoom:'p2'},
+    {...input.items[0],id:''},{...input.items[0],id:''},{...input.items[0],id:0}];
+  const before=JSON.stringify(input);
+  assert.equal(validatePlan(input).ok,true);
+  const out=normalizePlan(input);
+  assert.equal(JSON.stringify(input),before,'normalization must not mutate its input');
+  assert.equal(validatePlan(out).ok,true);
+  const objects=[...out.walls,...out.rooms,...out.items];
+  assert.equal(new Set(objects.map(o=>String(o.id))).size,objects.length);
+  assert.equal(out.walls[1].id,'p1');assert.equal(out.rooms[0].id,'p2');
+  assert.equal(out.items[0].baseRoom,'p2');assert.equal(out.items[3].id,0);
+  assert.deepEqual(normalizePlan(out),out,'repeated normalization must keep IDs stable');
+});
