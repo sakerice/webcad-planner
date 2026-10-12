@@ -3210,6 +3210,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" id="unity-render-toolbar-btn" onclick="openUnityRenderModal()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h5l2-3h4l2 3h5v14H3ZM16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg> 画像AIレンダー</button>
   <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5h18v15H3ZM3 10h18M7 5l3 5M14 5l3 5M10 13l5 2-5 3Z"/></svg> 動画AIレンダー</button>
   <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 2h10l4 4v16H5ZM15 2v5h4M8 11h8v6H8ZM12 11v6M8 20h8"/></svg> JIS図面</button>
+  <button class="tbtn" id="compare-btn" onclick="CompareMode.openPicker()" title="2つの間取りを左右に並べて見比べます。どちらも編集できます"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h7v16H3zM14 4h7v16h-7z"/></svg>比較</button>
   <button class="tbtn mob-hide" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg>JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
@@ -3254,6 +3255,7 @@ input[type="reset"]:focus-visible{
           <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 17V4M8 8l4-4 4 4M4 16v5h16v-5"/></svg> 保存読込</button>
           <button class="pbtn sec" type="button" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg> JSON保存</button>
           <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> JSON読込</button>
+          <button class="pbtn sec" type="button" onclick="CompareMode.openPicker()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h7v16H3zM14 4h7v16h-7z"/></svg> 比較</button>
           <button class="pbtn sec" type="button" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
           <!-- JIS図面もツールバー(mob-hide)にしか無く、768px以下では入口が
                1つも無かった。書き出し系はここに集めるのが既存の並びである。 -->
@@ -19453,7 +19455,14 @@ function exportPlan(){
   ensureHeightDefaults();
   syncExteriorWallSettings();
   captureViewState();
-  downloadJsonFile(JSON.stringify(DATA,null,2),'plan.json');
+  downloadJsonFile(JSON.stringify(DATA,null,2),planExportFileName());
+}
+// 書き出すファイルの名前。プランに名前があれば「名前_日付.json」、無ければ従来どおり plan.json
+function planExportFileName(){
+  var name=String((DATA&&DATA.planName)||'').trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_');
+  if(!name) return 'plan.json';
+  var d=new Date(), p=function(n){return (n<10?'0':'')+n;};
+  return name+'_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'.json';
 }
 async function savePlanToStorage(){
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
