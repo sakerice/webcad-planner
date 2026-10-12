@@ -277,8 +277,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .asset-swap-cancel{background:#eef0ed;color:var(--hp-text)}
 @media (max-width:560px){.asset-swap-row{grid-template-columns:22px 1fr;}.asset-swap-arrow{display:none}.asset-swap-to{grid-column:2}}
 /* 壁・床・屋根の切り替え(assets/js/building-style.js)。家具の差し替えと同じカードで、行は「部位 | 内容」の2列 */
-.asset-swap-entry{display:flex;flex-wrap:wrap;gap:6px}
-.asset-swap-entry .asset-swap-status{flex-basis:100%}
+.asset-swap-entry{border:1px solid #e3e7e4;border-radius:12px;background:#fff;overflow:hidden}
+.asset-swap-summary{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer;list-style:none;touch-action:manipulation}
+.asset-swap-summary::-webkit-details-marker{display:none}
+.asset-swap-summary::after{content:'';margin-left:auto;width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.asset-swap-entry[open] .asset-swap-summary::after{transform:translateY(2px) rotate(-135deg)}
+.asset-swap-group{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px 12px;border-top:1px solid #eef0ee}
+.asset-swap-group-title{flex-basis:100%;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--hp-muted)}
+.asset-swap-group-title .asset-set-mark{position:static;box-shadow:none}
+.asset-swap-group .asset-swap-open{flex:1 1 100%;text-align:left;padding:0 12px}
 .building-style-row{grid-template-columns:24px 64px 1fr;align-items:start}
 .building-style-row input{margin-top:1px}
 .building-style-detail{display:flex;flex-direction:column;gap:3px;line-height:1.5}

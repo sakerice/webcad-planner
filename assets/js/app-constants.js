@@ -3209,7 +3209,8 @@ function isOpeningDoorModel(item){
   // セットの扉は、そのセットを表示しているときだけ選ばせる(カタログと同じ)
   if(item.assetSet && typeof AssetSets==='object' && AssetSets.isVisible && !AssetSets.isVisible(item)) return false;
   return /^Classroom-door-/i.test(item.name||'') || /^original-door-/.test(item.id||'')
-    || /^rpg-mansion-(entrance-)?door-/.test(item.id||'');
+    // セット(洋館・古民家…)の扉は <セット>-door-… / <セット>-entrance-door-… という名前で納める
+    || (!!item.assetSet && /^[a-z0-9]+(-[a-z0-9]+)*?-(entrance-)?door-/.test(item.id||''));
 }
 // 玄関ドア(door-front)の扉板。室内の開き戸とは大きさも金物も違うので分ける
 function isEntranceDoorModel(item){

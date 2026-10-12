@@ -135,6 +135,119 @@
      "door": "rpg-mansion-french-window-01"
     }
    }
+  },
+  {
+   "id": "kominka",
+   "name": "日本古民家",
+   "mark": "古",
+   "manifest": "assets/models/packs/kominka/manifest.json",
+   "swap": {
+    "note": "置いてある家具を一括で差し替えるときの決まり（assets/js/asset-swap.js）",
+    "prefer": {
+     "chair": [
+      "kominka-chair-01"
+     ]
+    },
+    "standIns": {
+     "tv": {
+      "ids": [
+       "kominka-hengaku-01"
+      ],
+      "liftMm": 120
+     }
+    },
+    "stretchKinds": [
+     "roller-screen",
+     "rug"
+    ],
+    "expand": {
+     "table-set": {
+      "chair": "kominka-chair-01"
+     },
+     "kitchen-unit": {
+      "minWidth": 1200
+     }
+    },
+    "looseKinds": [
+     "wall-decor",
+     "mirror",
+     "decor",
+     "plant",
+     "light"
+    ],
+    "topAlignKinds": [
+     "roller-screen"
+    ]
+   },
+   "style": {
+    "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。windows は窓の種類(引き違い sliding・開き窓 casement・FIX fix・掃き出し door)ごとの窓。doors は開き戸(swing)と玄関ドア(front)の扉板。rooms は部屋の名前に match の語が含まれるときの素材",
+    "exterior": {
+     "base": "kominka_yakisugi",
+     "upper": "kominka_shikkui"
+    },
+    "roof": "roof_kawara_ibushi",
+    "interior": "kominka_shikkui",
+    "floor": "kominka_old_pine_floor",
+    "rooms": [
+     {
+      "match": [
+       "和室",
+       "座敷",
+       "客間",
+       "仏間"
+      ],
+      "floor": "kominka_tatami",
+      "wall": "kominka_juraku"
+     },
+     {
+      "match": [
+       "浴室",
+       "バス",
+       "風呂"
+      ],
+      "floor": "tile_floor",
+      "wall": "wood_cedar"
+     },
+     {
+      "match": [
+       "玄関",
+       "土間"
+      ],
+      "floor": "kominka_doma"
+     }
+    ],
+    "outdoorRooms": [
+     "バルコニー",
+     "ベランダ",
+     "テラス",
+     "ポーチ",
+     "デッキ",
+     "庭",
+     "駐車",
+     "ガレージ"
+    ],
+    "names": {
+     "kominka_yakisugi": "焼杉板",
+     "kominka_shikkui": "白漆喰",
+     "roof_kawara_ibushi": "いぶし瓦",
+     "kominka_old_pine_floor": "古い松の板の間",
+     "kominka_tatami": "畳",
+     "kominka_juraku": "聚楽の土壁",
+     "tile_floor": "タイル",
+     "wood_cedar": "杉板",
+     "kominka_doma": "三和土"
+    },
+    "doors": {
+     "swing": "kominka-door-itado-01",
+     "front": "kominka-entrance-door-01"
+    },
+    "windows": {
+     "sliding": "kominka-sliding-window-01",
+     "casement": "kominka-casement-window-01",
+     "fix": "kominka-round-window-01",
+     "door": "kominka-engawa-glass-door-01"
+    }
+   }
   }
  ]
 }
