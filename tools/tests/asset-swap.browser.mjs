@@ -15,7 +15,8 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('dialog', (d) => d.accept());
   await page.goto(APP + '?preset=2f');
-  await page.waitForSelector('.asset-swap-open', { timeout: 60000 });
+  await page.waitForSelector('#asset-swap-entry', { state: 'attached', timeout: 60000 });
+  await page.evaluate(() => { document.getElementById('asset-swap-entry').open = true; });  // 入口は折りたたみ「一括差し替え」の中
   await page.waitForTimeout(800);
   const snapshot = () => page.evaluate(() => JSON.stringify(DATA, (k, v) => (k === '_texObj' ? undefined : v)));
   const before = await snapshot();
@@ -55,7 +56,8 @@ try {
   const p2 = await context.newPage();
   p2.on('pageerror', (e) => errors.push(e.message));
   await p2.goto(APP + '?preset=2f');
-  await p2.waitForSelector('.asset-swap-open', { timeout: 60000 });
+  await p2.waitForSelector('#asset-swap-entry', { state: 'attached', timeout: 60000 });
+  await p2.evaluate(() => { document.getElementById('asset-swap-entry').open = true; });  // 入口は折りたたみ「一括差し替え」の中
   await p2.waitForTimeout(800);
   const before2 = await p2.evaluate(() => JSON.stringify(DATA, (k, v) => (k === '_texObj' ? undefined : v)));
   await p2.evaluate(() => AssetSwap.apply(AssetSwap.planFor('rpg-mansion').filter((r) => r.action !== 'keep')));
