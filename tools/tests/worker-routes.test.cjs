@@ -331,7 +331,7 @@ test('ページごとの補足に、何ページ目かを入れる', async () =>
     vertexFetch(async (req) => {
       const body = JSON.parse(await req.text());
       seen.push(body.contents[0].parts.filter((p) => p.text).pop().text);
-      return vertexReply({ floors: [{ floor: seen.length, width: 3640, depth: 4095, rooms: [] }] });
+      return vertexReply({ floors: [{ floor: seen.length, width: 3640, depth: 4095, rooms: [{ name: "洋室", parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] });
     }));
   assert.match(seen[0], /1ページ目/);
   assert.match(seen[1], /2ページ目/);
@@ -353,7 +353,7 @@ test('同じ階が2回来たら、ページの並び順を正とする', async (
 
 test('使用量は全ページの合計になる', async () => {
   const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG] }, VERTEX_ENV,
-    vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] })));
+    vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [{ name: "洋室", parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] })));
   const body = await res.json();
   assert.equal(body.usage.calls, 2, '何回送ったかが残っていない');
   assert.equal(body.usage.inputTokens, 4000, 'ページぶんの合計になっていない');
@@ -391,7 +391,7 @@ test('使う前に数える（送ってから断ると費用は戻らない）',
   const { env, seen } = quotaEnv({ AI_DAILY_IMPORTS_PER_USER: '5' });
   let called = 0;
   await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, env,
-    vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }); }));
+    vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [{ name: "洋室", parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] }); }));
   assert.equal(seen.length, 1, '数を取りに行っていない');
   // 数えるのは回数ではなく「点」。呼び出しによって費用が10倍以上違うため。
   // 図面1枚の読み取りが10点。3ページなら30点。
@@ -415,7 +415,7 @@ test('上限を超えたら、AIを呼ばずに断る', async () => {
 test('数の仕組みが無い環境では通す（機能まで止めない）', async () => {
   let called = 0;
   const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV,
-    vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }); }));
+    vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [{ name: "洋室", parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] }); }));
   assert.equal(res.status, 200);
   assert.equal(called, 1);
 });
@@ -423,7 +423,7 @@ test('数の仕組みが無い環境では通す（機能まで止めない）',
 test('数える相手は接続元。上限は環境変数で変えられる', async () => {
   const { env, seen } = quotaEnv({ AI_DAILY_IMPORTS_PER_USER: '2', AI_DAILY_IMPORTS_TOTAL: '30' });
   await callAi('/api/ai/import-plan', { image: PNG }, env,
-    vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] })),
+    vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [{ name: "洋室", parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] })),
     { 'cf-connecting-ip': '203.0.113.9' });
   assert.equal(seen[0].who, '203.0.113.9');
   assert.equal(seen[0].perDay, 126, '1回=63点で換算していない');
@@ -447,7 +447,7 @@ test('鍵があれば OpenAI へ送る（既定は gpt-6-astra）', async () => 
     sent = { url: req.url, auth: req.headers.get('authorization'), body: JSON.parse(await req.text()) };
     return new Response(JSON.stringify({
       status: 'completed',
-      output: [{ content: [{ text: JSON.stringify({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }) }] }],
+      output: [{ content: [{ text: JSON.stringify({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [{ name: "洋室", parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] }) }] }],
       usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
     }), { status: 200, headers: { 'content-type': 'application/json' } });
   });
@@ -544,7 +544,7 @@ test('上限は「回数」で設定する（点は内部の数え方）', async
 // 読み取りは1回投げて1回答えを受け取るだけで、モデルは自分の書いた座標が
 // 間取りとしてどう見えるかを一度も見ていなかった。画面が答えを平面図として
 // 描き直し、元の図面と並べてもう一度渡す。
-const ONE_FLOOR = { floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] };
+const ONE_FLOOR = { floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [{ name: "洋室", parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] };
 
 test('読み取りは、見直しのために素のJSONをページごとに返す', async () => {
   const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG] }, VERTEX_ENV,

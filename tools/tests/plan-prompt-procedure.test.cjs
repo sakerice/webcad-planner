@@ -86,16 +86,14 @@ test('カタログの品物は大きさを変えさせない', async () => {
   assert.match(p, /図に描かれている窓の幅/, '窓の幅を図から取る指示が無い');
 });
 
-test('部屋の面積を検算させる（L字の取りこぼしに気づく唯一の手）', async () => {
+test('部屋面積は画像の室内輪郭と検算し、外形の凹みを埋めない', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   const p = buildPlanPrompt();
-  // L字を長方形1つで済ませる誤りは、手順に書いても直らなかった。寸法線で
-  // 効いたのは検算だったので、同じ手を面積に当てる。合計が width×depth に
-  // 足りなければ、どこかの部屋が凹みを埋めている。
-  assert.match(p, /部屋の面積を検算する/, '面積の検算が無い');
-  assert.match(p, /width × depth と一致するか/, '何と比べるのかが無い');
-  assert.match(p, /手順6の見落とし/, '足りないときの原因が示されていない');
-  assert.match(p, /輪郭に凹みがあるのに parts が1つの部屋がある/, 'L字の取りこぼしに気づかせる指示が無い');
+  assert.match(p, /部屋の面積を検算する/);
+  assert.match(p, /画像で確認した建物の室内輪郭と照合する/);
+  assert.match(p, /width × depth は外接長方形/);
+  assert.match(p, /部屋ではない場所を面積合わせのために埋めない/);
+  assert.match(p, /部屋どうしが重なっている場合は境界を読み直す/);
 });
 
 test('階段の折り返しを見直させる', async () => {

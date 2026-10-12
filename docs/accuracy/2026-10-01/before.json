@@ -1,0 +1,76 @@
+{
+  "evaluation": "offline synthetic extraction reconstruction; no model calls",
+  "results": [
+    {
+      "fixture": "metric-partition",
+      "labelledAreaErrorMm2": 180000,
+      "roomsLost": 0,
+      "expectedAdjacency": [
+        "A/B"
+      ],
+      "actualAdjacency": [
+        "A/B"
+      ],
+      "openingWallOffsetsMm": [
+        90,
+        0
+      ],
+      "openingsOnWall": 1,
+      "openings": 2
+    },
+    {
+      "fixture": "narrow-strip",
+      "labelledAreaErrorMm2": 200000,
+      "roomsLost": 1,
+      "expectedAdjacency": [
+        "A/B"
+      ],
+      "actualAdjacency": [],
+      "openingWallOffsetsMm": [
+        100
+      ],
+      "openingsOnWall": 0,
+      "openings": 1
+    },
+    {
+      "fixture": "l-shaped-recess",
+      "labelledAreaErrorMm2": 188100,
+      "roomsLost": 0,
+      "expectedAdjacency": [],
+      "actualAdjacency": [],
+      "openingWallOffsetsMm": [
+        90
+      ],
+      "openingsOnWall": 0,
+      "openings": 1
+    },
+    {
+      "fixture": "courtyard",
+      "labelledAreaErrorMm2": 293906.25,
+      "roomsLost": 0,
+      "expectedAdjacency": [],
+      "actualAdjacency": [],
+      "openingWallOffsetsMm": [
+        90
+      ],
+      "openingsOnWall": 0,
+      "openings": 1
+    },
+    {
+      "fixture": "standard-module",
+      "labelledAreaErrorMm2": 0,
+      "roomsLost": 0,
+      "expectedAdjacency": [
+        "A/B"
+      ],
+      "actualAdjacency": [
+        "A/B"
+      ],
+      "openingWallOffsetsMm": [
+        0
+      ],
+      "openingsOnWall": 1,
+      "openings": 1
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+[
+ {"name":"metric-partition","width":2000,"depth":2000,"rooms":[{"name":"A","parts":[{"x0":0,"y0":0,"x1":1000,"y1":2000}]},{"name":"B","parts":[{"x0":1000,"y0":0,"x1":2000,"y1":2000}]}],"openings":[{"type":"door","x":1000,"y":1000,"axis":"v"},{"type":"window","x":500,"y":0,"axis":"h"}]},
+ {"name":"narrow-strip","width":2000,"depth":2000,"rooms":[{"name":"A","parts":[{"x0":0,"y0":0,"x1":100,"y1":2000}]},{"name":"B","parts":[{"x0":100,"y0":0,"x1":2000,"y1":2000}]}],"openings":[{"type":"door","x":100,"y":1000,"axis":"v"}]},
+ {"name":"l-shaped-recess","width":2000,"depth":2000,"rooms":[{"name":"A","parts":[{"x0":0,"y0":0,"x1":1000,"y1":2000},{"x0":1000,"y0":0,"x1":2000,"y1":1000}]}],"openings":[{"type":"window","x":1500,"y":1000,"axis":"h"}]},
+ {"name":"courtyard","width":3000,"depth":3000,"rooms":[{"name":"A","parts":[{"x0":0,"y0":0,"x1":3000,"y1":1000},{"x0":0,"y0":1000,"x1":1000,"y1":2000},{"x0":2000,"y0":1000,"x1":3000,"y1":2000},{"x0":0,"y0":2000,"x1":3000,"y1":3000}]}],"openings":[{"type":"window","x":1000,"y":1500,"axis":"v"}]},
+ {"name":"standard-module","width":3640,"depth":2730,"rooms":[{"name":"A","parts":[{"x0":0,"y0":0,"x1":1820,"y1":2730}]},{"name":"B","parts":[{"x0":1820,"y0":0,"x1":3640,"y1":2730}]}],"openings":[{"type":"door","x":1820,"y":1200,"axis":"v"}]}
+]
