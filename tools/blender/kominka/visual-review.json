@@ -1,0 +1,98 @@
+{
+  "outcome": "pass",
+  "reviewDate": "2026-10-12",
+  "method": "Visual inspection of actual Blender source renders and exported texture images",
+  "modelIds": [
+    "kominka-door-itado-01",
+    "kominka-door-shoji-01",
+    "kominka-entrance-door-01",
+    "kominka-sliding-window-01",
+    "kominka-casement-window-01",
+    "kominka-round-window-01",
+    "kominka-engawa-glass-door-01",
+    "kominka-dining-table-01",
+    "kominka-chair-01",
+    "kominka-zaisu-01",
+    "kominka-zataku-01",
+    "kominka-sofa-01",
+    "kominka-bed-1000-01",
+    "kominka-bed-1400-01",
+    "kominka-tansu-01",
+    "kominka-kaidan-dansu-01",
+    "kominka-mizuya-01",
+    "kominka-butsudan-01",
+    "kominka-desk-01",
+    "kominka-shoe-storage-01",
+    "kominka-andon-01",
+    "kominka-pendant-01",
+    "kominka-hengaku-01",
+    "kominka-kakejiku-01",
+    "kominka-tsuitate-01",
+    "kominka-sudare-01",
+    "kominka-hanagoza-01",
+    "kominka-irori-01",
+    "kominka-kamado-01",
+    "kominka-sink-01",
+    "kominka-hinoki-bath-01",
+    "kominka-ishidoro-01"
+  ],
+  "checks": {
+    "frontRear": "pass: fronts correspond to Blender -Y / glTF +Z; backs inspected",
+    "thumbAndTop": "pass: all 32; top camera has +X right and +Y up in Blender coordinates",
+    "openingStretch": "pass: all 7 openings at w120/h80 and w80/h120; no disconnected bars or missing frames",
+    "textureTiling": "pass: all 6 procedural diffuse images repeated 2x2; no visible boundary seam",
+    "texturePbr": "pass: all 6 diffuse/normal/roughness map sets rendered on physical 2x2 tiles",
+    "sourceReplay": "pass: 32 script-generated GLBs and 18 texture JPEGs byte-identical; 32 blend re-exports byte-identical",
+    "assetSetsTest": "pass: 9 tests, 0 failures",
+    "browser": "not performed: prohibited",
+    "appPlacementAndRecolor": "not performed: outside asset delivery scope"
+  },
+  "reviewSheets": [
+    {
+      "path": "tools/blender/kominka/evidence/review-front-rear-a.jpg",
+      "sha256": "2a8c36305ee98e4251f19b63ac5cdb57eec341865d1662dece1b3ac406620e4e"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/review-front-rear-b.jpg",
+      "sha256": "9365de996693232143df0fb043435f70bd0270e1c459b56def94ab23513e8bc5"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/review-furniture.jpg",
+      "sha256": "ac66ae529c0e9bcdd5a8dcffd23bd1cf7a0e17fd672070c2524badbd83ea1685"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/review-interior.jpg",
+      "sha256": "0129bd5b31fc1a0b05d6de8dc0b7f307888fde42926e62cd9c84d53e6eea8f57"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/review-openings-stretch.jpg",
+      "sha256": "961ba771c824178185e2ae83cbe3210212effc05a2f3062cd19f3b01f01e8a09"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/review-openings.jpg",
+      "sha256": "c580f9458f34640a146977f6f3e8a72550555afe6cc7a3eee0cefe9811a31b71"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/review-texture-pbr.jpg",
+      "sha256": "caa63eeb426c80faff3c2cd8f2a1f5c75ebb2e2f24fb60c5372925c983444210"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/review-tops.jpg",
+      "sha256": "71f0cedcde1bab0bcd479d7987168091e3abd172c257dacb9f771daebfffa69e"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/textures-tile4-sheet.jpg",
+      "sha256": "76c6b6d6c19ecec643a48365d1882c42ff9a7fb18864bdf67a8c3973bdb3b4df"
+    }
+  ],
+  "scripts": {
+    "build.py": "3a74364a1fa88e6d25de197ee76642c31097e5a281f6e4311a5c51c3a4adfdae",
+    "render.py": "72bbb871268077b052c5b300df31bef23af31d9cbe712d342c287913adad3549",
+    "review_sheets.py": "2606d5bdd108cd38b59de2a411f095c9a7659486b4ee5cb806e1438689472135",
+    "render_textures.py": "00e23e6d454b99358ded7a3b27f928481c4b9adf2e50c4c9ea8b7769b0534843",
+    "verify.py": "ccc3928c543f30a13135fb16cf7fd67828cb7570760548cdece2ed57fb717692",
+    "textures.py": "1504c5921c3aec51ee1e7bc204c148f464f82c16e56bc91da710f523bb49eab2",
+    "reexport.py": "4c3d04cbb49bd33d8c6f22bb97e1f46997888c6cbe0f4a6a851363223d2f4b27"
+  },
+  "sourceRegenerationLogs": "Temporary paths only; full render logs and intermediate attempts are not committed"
+}

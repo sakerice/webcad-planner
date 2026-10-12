@@ -44,10 +44,13 @@ test('内壁は家全体を壁紙にし、水まわりとキッチンの面だ�
   assert.deepEqual(p.faces.map((f) => [f.key, f.texture]), [['a', 'subway'], ['d', 'subway']]);
 });
 
-test('洋館の様式が指す素材は、すべてアプリに登録してあり、ファイルもある', () => {
-  const root = path.join(__dirname, '..', '..');
-  const sets = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/asset-sets.json'), 'utf8'));
-  const st = sets.sets.find((s) => s.id === 'rpg-mansion').style;
+const root = path.join(__dirname, '..', '..');
+// 様式(style)を持つセットすべて(洋館・古民家…)
+const styledSets = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/asset-sets.json'), 'utf8')).sets.filter((s) => s.style);
+const manifestOf = (set) => JSON.parse(fs.readFileSync(path.join(root, set.manifest), 'utf8'));
+
+for (const set of styledSets) test(`${set.name}の様式が指す素材は、すべてアプリに登録してあり、ファイルもある`, () => {
+  const st = set.style;
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const keys = new Set([st.exterior.base, st.exterior.upper, st.roof, st.interior]);
   st.rooms.forEach((r) => r.wall && keys.add(r.wall));
@@ -82,11 +85,9 @@ test('建具は開き戸と玄関ドアだけ替え、浴室の透明ドア・�
   assert.equal(p.keptDoors, 2);
 });
 
-test('洋館の様式が指す扉は、洋館セットに在る「ドア」の物', () => {
-  const root = path.join(__dirname, '..', '..');
-  const sets = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/asset-sets.json'), 'utf8'));
-  const st = sets.sets.find((s) => s.id === 'rpg-mansion').style;
-  const man = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/packs/rpg-mansion/manifest.json'), 'utf8'));
+for (const set of styledSets) test(`${set.name}の様式が指す扉は、そのセットに在る「ドア」の物`, () => {
+  const st = set.style;
+  const man = manifestOf(set);
   for (const [k, id] of Object.entries(st.doors)) {
     const it = man.items.find((i) => i.id === id);
     assert.ok(it && !it.retired, `${k}: ${id} が manifest に無い`);
@@ -106,11 +107,9 @@ test('窓は種類ごとに替える(引き違い・開き窓・FIX・掃き出�
   assert.equal(p.keptWindows, 0);
 });
 
-test('洋館の様式が指す窓は、洋館セットに在る「窓」の物', () => {
-  const root = path.join(__dirname, '..', '..');
-  const sets = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/asset-sets.json'), 'utf8'));
-  const st = sets.sets.find((s) => s.id === 'rpg-mansion').style;
-  const man = JSON.parse(fs.readFileSync(path.join(root, 'assets/models/packs/rpg-mansion/manifest.json'), 'utf8'));
+for (const set of styledSets) test(`${set.name}の様式が指す窓は、そのセットに在る「窓」の物`, () => {
+  const st = set.style;
+  const man = manifestOf(set);
   for (const [k, id] of Object.entries(st.windows)) {
     const it = man.items.find((i) => i.id === id);
     assert.ok(it && !it.retired, `${k}: ${id} が manifest に無い`);

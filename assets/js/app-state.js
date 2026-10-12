@@ -572,7 +572,10 @@ var ROOM_FLOOR_MATERIAL_OPTIONS=[
   ['wood_oak','フローリング（オーク）'],
   ['tile_floor','タイル'],
   ['mansion_herringbone_oak','ヘリンボーン（洋館）'],
-  ['mansion_marble_checker','白黒の大理石（洋館）']
+  ['mansion_marble_checker','白黒の大理石（洋館）'],
+  ['kominka_tatami','畳（古民家）'],
+  ['kominka_old_pine_floor','古い松の板の間（古民家）'],
+  ['kominka_doma','三和土（古民家）']
 ];
 function selectedRoomFloorFinishHtml(it){
   if(!it||it.type!=='room') return '';
@@ -1811,7 +1814,8 @@ var MODEL_ROOF_FINISH_TEXTURES=[
   ['roof_copper_patina','銅板一文字（緑青）'],
   ['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],
   ['galvalume_dark','ガルバ（黒）'],
-  ['mansion_slate_roof','スレート（洋館）']
+  ['mansion_slate_roof','スレート（洋館）'],
+  ['kominka_kayabuki','茅葺き（古民家）']
 ];
 function modelFinishTextureOptions(channelKey){
   return channelKey==='roof'?MODEL_ROOF_FINISH_TEXTURES:MODEL_FINISH_TEXTURES;

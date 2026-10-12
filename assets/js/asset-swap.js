@@ -203,32 +203,50 @@
   }
   function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 
+  // 入口は「表示するセット」の下の折りたたみ「一括差し替え」にまとめ、中をセットごとに分ける。
+  // セットが増えるたびにボタンが2つずつ並ぶと、左のパネルが縦に伸びすぎるため(利用者の指摘)。
+  var ENTRY_OPEN_KEY='hp.assetSwapEntryOpen';
   function renderEntry(doc){
     var picker=doc.getElementById('asset-set-picker'); if(!picker) return;
     var old=doc.getElementById('asset-swap-entry'); if(old) old.remove();
+    var oldSt=doc.getElementById('asset-swap-status'); if(oldSt) oldSt.remove();
     var sets=(root.AssetSets&&root.AssetSets.sets()||[]).filter(function(s){return s.swap||s.style;});
     if(!sets.length) return;
-    var wrap=doc.createElement('div');wrap.id='asset-swap-entry';wrap.className='asset-swap-entry';
+    var wrap=doc.createElement('details');wrap.id='asset-swap-entry';wrap.className='asset-swap-entry';
+    try{ wrap.open=root.localStorage.getItem(ENTRY_OPEN_KEY)==='1'; }catch(e){}
+    wrap.addEventListener('toggle',function(){ try{ root.localStorage.setItem(ENTRY_OPEN_KEY,wrap.open?'1':'0'); }catch(e){} });
+    var sum=doc.createElement('summary');sum.className='asset-swap-summary';sum.textContent='一括差し替え';
+    wrap.append(sum);
     sets.forEach(function(s){
+      var g=doc.createElement('div');g.className='asset-swap-group';g.dataset.assetSet=s.id;
+      g.setAttribute('role','group');g.setAttribute('aria-label',s.name);
+      var h=doc.createElement('div');h.className='asset-swap-group-title';
+      if(s.mark){ var m=doc.createElement('span');m.className='asset-set-mark';m.textContent=s.mark;h.append(m); }
+      h.append(doc.createTextNode(s.name));
+      g.append(h);
       if(s.swap){
         var b=doc.createElement('button');b.type='button';b.className='asset-swap-open';b.dataset.assetSet=s.id;
-        b.textContent='家具を'+s.name+'に差し替える';
+        b.textContent='家具を差し替える';
+        b.setAttribute('aria-label','家具を'+s.name+'に差し替える');
         b.title='置いてある家具を、まとめて'+s.name+'の物に差し替えます。差し替える前に一覧で確かめられます';
         b.addEventListener('click',function(){ open(s.id); });
-        wrap.append(b);
+        g.append(b);
       }
       // 壁・床・屋根の切り替え(building-style.js)。家具の差し替えと並べて置く
       if(s.style&&root.BuildingStyle){
         var bs=doc.createElement('button');bs.type='button';bs.className='asset-swap-open building-style-open';bs.dataset.assetSet=s.id;
-        bs.textContent='壁・床・屋根を'+s.name+'風にする';
-        bs.title='外壁・屋根・内壁・床の素材を、まとめて'+s.name+'の様式に切り替えます。切り替える前に内容を確かめられます';
+        bs.textContent='建物の仕上げを替える';
+        bs.setAttribute('aria-label','壁・床・屋根を'+s.name+'風にする');
+        bs.title='外壁・屋根・内壁・床の素材と扉・窓を、まとめて'+s.name+'の様式に切り替えます。切り替える前に内容を確かめられます';
         bs.addEventListener('click',function(){ root.BuildingStyle.open(s.id); });
-        wrap.append(bs);
+        g.append(bs);
       }
+      wrap.append(g);
     });
-    var st=doc.createElement('div');st.id='asset-swap-status';st.className='asset-swap-status';st.setAttribute('role','status');
-    wrap.append(st);
     picker.append(wrap);
+    // 結果の知らせは、折りたたんでいても見えるよう外に置く
+    var st=doc.createElement('div');st.id='asset-swap-status';st.className='asset-swap-status';st.setAttribute('role','status');
+    picker.append(st);
   }
 
   function open(setId){
