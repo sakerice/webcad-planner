@@ -1,8 +1,8 @@
 // 比較モード（2つの間取りを左右に並べて、どちらも編集する）を、実物のページで通す。
 //
 // 見るもの: 3つの選び方で右が開く／右を本当にクリック・キー操作して編集しても左は変わらない／Undo は側ごと／
-// 右の「保存」はブラウザの保存枠（左の物）を上書きせず JSON に書き出す／名前がファイル名になる／
-// 書き出していない右をやめるときにたずねる／3D では編集中の側だけ／比較をやめると元の1画面。
+// 右の「保存」は前回のプランの枠（左の物）を上書きせずブラウザの一覧へ入れる／名前がファイル名になる／
+// 保存していない右をやめるときにたずねる／3D では編集中の側だけ／比較をやめると元の1画面。
 import assert from 'node:assert/strict';
 
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -57,17 +57,27 @@ try {
   assert.equal((await count()).items, left0.items, '右の Undo が効かない');
   await page.evaluate(() => { saveState(); DATA.items.pop(); draw2d(); });
 
-  // 名前を付ける（Undo できる操作として入る）。右の「保存」は JSON に書き出し、ブラウザの保存枠は触らない
+  // 名前を付ける（Undo できる操作として入る）。右の「保存」はブラウザの一覧へ入れ、前回のプランの枠（左の物）は触らない
   await page.fill('.compare-frame >> nth=1 >> .compare-name', 'LDK拡張案');
   await page.press('.compare-frame >> nth=1 >> .compare-name', 'Enter');
   assert.equal(await page.evaluate(() => DATA.planName), 'LDK拡張案');
+  assert.match(await page.locator('.compare-frame >> nth=1 >> .compare-saved').textContent(), /まだ保存していません/);
   const stored0 = await page.evaluate(async () => JSON.stringify(await StorageAdapter.load()));
-  const dl = page.waitForEvent('download');
   await page.click('#save-btn');
+  await page.waitForSelector('.plan-library-name-input');
+  assert.equal(await page.inputValue('.plan-library-name-input'), 'LDK拡張案');
+  await page.press('.plan-library-name-input', 'Enter');
+  await page.waitForFunction(() => PLAN_LIBRARY_ID);
+  assert.equal(await page.evaluate(async () => JSON.stringify(await StorageAdapter.load())), stored0, '右の保存が前回のプランの枠を上書きした');
+  assert.equal(await page.evaluate(() => CompareMode.isDirty(1)), false, '保存したのに未保存のまま');
+  assert.match(await page.locator('.compare-frame >> nth=1 >> .compare-saved').textContent(), /一覧「LDK拡張案」に保存済み/);
+  const libRows = await page.evaluate(async () => (await PlanLibrary.list()).map((r) => r.name));
+  assert.deepEqual(libRows, ['LDK拡張案']);
+  // 書き出すファイル名は「名前_日付.json」
+  const dl = page.waitForEvent('download');
+  await page.evaluate(() => exportPlan());
   const file = await dl;
   assert.match(file.suggestedFilename(), /^LDK拡張案_\d{8}\.json$/);
-  assert.equal(await page.evaluate(async () => JSON.stringify(await StorageAdapter.load())), stored0, '右の保存がブラウザの保存枠を上書きした');
-  assert.equal(await page.evaluate(() => CompareMode.isDirty(1)), false, '書き出したのに未書き出しのまま');
 
   // 3D では編集中の側だけ。2D に戻ると左右に戻る
   await page.evaluate(() => setView('3d-ext'));
@@ -75,14 +85,14 @@ try {
   await page.evaluate(() => setView('2d'));
   assert.equal(await page.locator('#c2d-peer').isVisible(), true);
 
-  // 書き出していない右をやめるときはたずねる。「続ける」で残り、「書き出さずにやめる」で1画面へ
+  // 保存していない右をやめるときはたずねる。「続ける」で残り、「保存せずにやめる」で1画面へ
   await page.evaluate(() => { saveState(); DATA.items.pop(); draw2d(); });
   await page.click('.compare-stop');
   await page.waitForSelector('#compare-modal');
   await page.click('#compare-modal button:has-text("比較を続ける")');
   assert.equal(await page.evaluate(() => CompareMode.isOn()), true);
   await page.click('.compare-stop');
-  await page.click('#compare-modal button:has-text("書き出さずにやめる")');
+  await page.click('#compare-modal button:has-text("保存せずにやめる")');
   const after = await page.evaluate(() => ({ on: CompareMode.isOn(), peer: !!document.getElementById('c2d-peer'),
     width: canvas.width, area: document.getElementById('canvas-area').clientWidth, items: DATA.items.length }));
   assert.deepEqual(after, { on: false, peer: false, width: after.area, area: after.area, items: left0.items });
@@ -92,7 +102,11 @@ try {
   await page.waitForTimeout(500);
   await page.click('#compare-btn');
   await page.click('.compare-choice >> nth=2');
+  await page.waitForSelector('.plan-library-row');
+  assert.deepEqual(await page.locator('.plan-library-name').allTextContents(), ['前回のプラン', 'LDK拡張案']);
+  await page.click('.plan-library-row >> nth=1 >> button:has-text("右に開く")');
   await page.waitForSelector('#c2d-peer');
+  assert.match(await page.locator('.compare-frame >> nth=1 >> .compare-saved').textContent(), /一覧「LDK拡張案」/);
   await page.evaluate(() => CompareMode.stop());
   await page.click('#compare-btn');
   const chooser = page.waitForEvent('filechooser');
@@ -104,7 +118,7 @@ try {
   await page.evaluate(() => CompareMode.stop());
 
   assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
-  console.log('比較モード: 3つの開き方・左右の独立した編集と Undo・右の書き出し・やめるときの確認・3D の扱いが通った');
+  console.log('比較モード: 3つの開き方・左右の独立した編集と Undo・右の一覧への保存・やめるときの確認・3D の扱いが通った');
 } finally {
   await browser.close();
 }

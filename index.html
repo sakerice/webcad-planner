@@ -86,6 +86,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/asset-sets.js"></script>
 <script src="assets/js/asset-swap.js"></script>
 <script src="assets/js/building-style.js"></script>
+<script src="assets/js/plan-library.js"></script>
 <script src="assets/js/compare-mode.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
@@ -3200,6 +3201,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" onclick="clearFloor()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg> 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3h13l3 3v15H4ZM8 3v6h8V3M8 21v-8h8v8"/></svg> 保存</button>
+  <button class="tbtn mob-hide" id="plan-library-btn" onclick="PlanLibrary.openList()" title="名前を付けてブラウザに保存したプランの一覧。開く・名前の変更・削除・書き出しができます"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16M4 12h16M4 19h10"/></svg>保存一覧</button>
   <button class="tbtn" id="share-btn" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <!-- 画像AI/動画AIレンダーも、狭い幅でヘッダーから消さない。 -->
@@ -3255,6 +3257,7 @@ input[type="reset"]:focus-visible{
           <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 17V4M8 8l4-4 4 4M4 16v5h16v-5"/></svg> 保存読込</button>
           <button class="pbtn sec" type="button" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg> JSON保存</button>
           <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> JSON読込</button>
+          <button class="pbtn sec" type="button" onclick="PlanLibrary.openList()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16M4 12h16M4 19h10"/></svg> 保存一覧</button>
           <button class="pbtn sec" type="button" onclick="CompareMode.openPicker()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h7v16H3zM14 4h7v16h-7z"/></svg> 比較</button>
           <button class="pbtn sec" type="button" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
           <!-- JIS図面もツールバー(mob-hide)にしか無く、768px以下では入口が

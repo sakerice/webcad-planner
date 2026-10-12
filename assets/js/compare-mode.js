@@ -13,7 +13,8 @@
 // 3D: 編集中の側だけを全面に出す（左右の 3D は計画の 2-4）。
 var CompareMode = (function(){
   // 作業面ごとに入れ替える全体の変数。ST はこの項目だけ（ツールや吸着の設定は左右で共通）
-  var GLOBALS = ['DATA','HISTORY','REDO_HISTORY','DIRTY','nextId'];
+  // PLAN_LIBRARY_ID / PLAN_SAVE_INFO は「ブラウザのどこに保存した物か」（plan-library.js）
+  var GLOBALS = ['DATA','HISTORY','REDO_HISTORY','DIRTY','nextId','PLAN_LIBRARY_ID','PLAN_SAVE_INFO'];
   var VIEW_KEYS = ['floor','zoom','panX','panY','selected','multiSelected','selectAll','drawing','drawPts','_camStash'];
   var SIDE_NAMES = ['左','右'];
   var on = false, active = 0, panes = [], peer = null, peerCtx = null, frames = [], bar = null;
@@ -71,6 +72,15 @@ var CompareMode = (function(){
     });
   }
   function isDirty(i){ return i===active ? !!DIRTY : !!panes[i].g.DIRTY; }
+  function saveInfo(i){ return i===active ? PLAN_SAVE_INFO : panes[i].g.PLAN_SAVE_INFO; }
+  // 札の下に出す「ブラウザに保存されているか」
+  function saveLine(i){
+    var info = saveInfo(i);
+    if(!info) return 'ブラウザ: まだ保存していません';
+    var where = info.where==='list' ? '一覧「'+(info.name||'名前なし')+'」' : '前回のプラン';
+    if(isDirty(i)) return 'ブラウザ: '+where+'に保存後、変更あり';
+    return 'ブラウザ: '+where+'に保存済み'+(info.at ? '（'+PlanLibrary.nowLabel(info.at)+'）' : '');
+  }
 
   function buildFrames(area){
     frames = [0,1].map(function(i){
@@ -85,7 +95,10 @@ var CompareMode = (function(){
       name.addEventListener('change', function(){ setPlanName(i, name.value); syncChrome(); render(); });
       name.addEventListener('keydown', function(e){ e.stopPropagation(); if(e.key==='Enter') name.blur(); });
       var state = document.createElement('span'); state.className = 'compare-state';
-      tag.append(side, name, state);
+      var row = document.createElement('div'); row.className = 'compare-tag-row';
+      row.append(side, name, state);
+      var saved = document.createElement('div'); saved.className = 'compare-saved';
+      tag.append(row, saved);
       f.append(tag);
       area.appendChild(f);
       return f;
@@ -143,8 +156,10 @@ var CompareMode = (function(){
       f.hidden = !two && i!==active;
       var input = f.querySelector('.compare-name');
       if(document.activeElement!==input) input.value = planName(i);
-      f.querySelector('.compare-state').textContent =
-        (i===active?'編集中':'タップで編集')+(isDirty(i)?(i===0?' ・未保存':' ・未書き出し'):'');
+      f.querySelector('.compare-state').textContent = i===active ? '編集中' : 'タップで編集';
+      var sl = f.querySelector('.compare-saved');
+      sl.textContent = saveLine(i);
+      sl.classList.toggle('is-unsaved', !saveInfo(i) || isDirty(i));
     });
     if(peer) peer.hidden = !two;
   }
@@ -182,7 +197,8 @@ var CompareMode = (function(){
     if(typeof SHARED!=='undefined' && SHARED.roomId){ alert('共同編集中は比較を使えません。共同編集を終えてから使ってください。'); return false; }
     return true;
   }
-  function start(planB){
+  function start(planB, from){
+    from = from || {};
     if(on || !canStart()) return;
     if(ST.view!=='2d') setView('2d');
     var a = area();
@@ -196,7 +212,8 @@ var CompareMode = (function(){
     a.classList.add('compare-on');
     panes[0] = capture();
     // 右の作業面: Undo の履歴は空から。中身は読み込みと同じ手順で整える
-    panes[1] = {g:{DATA:planB, HISTORY:[], REDO_HISTORY:[], DIRTY:false, nextId:1},
+    panes[1] = {g:{DATA:planB, HISTORY:[], REDO_HISTORY:[], DIRTY:false, nextId:1,
+        PLAN_LIBRARY_ID:from.libId||null, PLAN_SAVE_INFO:from.libId ? {where:'list', name:from.name, at:null} : null},
       v:Object.assign({}, panes[0].v, {selected:null, multiSelected:[], selectAll:false, drawing:false, drawPts:[]})};
     on = true; active = 0;
     withPane(1, function(){ normalizeLoadedPlan(); if(api.syncView){ ST.zoom = panes[0].v.zoom; ST.panX = panes[0].v.panX; ST.panY = panes[0].v.panY; ST.floor = panes[0].v.floor; } });
@@ -208,6 +225,15 @@ var CompareMode = (function(){
     if(!api.syncView) withPane(1, function(){ resetView(); });
     redraw();
     status('触った側が編集中になります');
+    // 左がブラウザの「前回のプラン」と同じ中身なら、保存済みと出す
+    if(!PLAN_SAVE_INFO && !DIRTY) StorageAdapter.load().then(function(d){
+      var strip = function(o){ o = JSON.parse(JSON.stringify(o, function(k, v){ return k==='_texObj' ? undefined : v; })); delete o.viewState; return JSON.stringify(o); };
+      if(on && d && strip(d)===strip(panes[0].g.DATA)){
+        panes[0].g.PLAN_SAVE_INFO = {where:'last', at:null};
+        if(active===0) PLAN_SAVE_INFO = panes[0].g.PLAN_SAVE_INFO;
+        render();
+      }
+    });
   }
   function stop(){
     if(!on) return;
@@ -225,13 +251,20 @@ var CompareMode = (function(){
   function requestStop(){
     if(!on) return;
     if(!isDirty(1)){ stop(); return; }
-    dialog('右のプランに、書き出していない変更があります',
-      '比較をやめると、右のプランは閉じます。JSON ファイルに書き出してから閉じますか。',
-      [['書き出してやめる','primary',function(){ exportSide(1); stop(); }],
-       ['書き出さずにやめる','',function(){ stop(); }],
+    dialog('右のプランに、保存していない変更があります',
+      '比較をやめると、右のプランは閉じます。ブラウザの一覧に保存してから閉じますか。',
+      [['保存してやめる','primary',function(){ saveRight().then(function(meta){ if(meta) stop(); }); }],
+       ['保存せずにやめる','',function(){ stop(); }],
        ['比較を続ける','',function(){}]]);
   }
-  function exportSide(i){ withPane(i, function(){ exportPlan(); }); render(); }
+  // 右はブラウザの一覧へ保存する（前回のプランの枠は左の物なので使わない）
+  function saveRight(){
+    activate(1);
+    return PlanLibrary.saveCurrent({title:'右のプランを名前を付けて保存', defaultName:'比較のプラン'}).then(function(meta){
+      if(meta) status('右のプランを、ブラウザの一覧「'+meta.name+'」に保存しました');
+      render(); return meta;
+    });
+  }
   function onResize(){ if(on) redraw(); }
   function onBeforeUnload(e){ if(on && isDirty(1)){ e.preventDefault(); e.returnValue=''; } }
 
@@ -244,11 +277,8 @@ var CompareMode = (function(){
         start(JSON.parse(serializeDataSnapshot()));
       }],
       ['JSON ファイルを開く','書き出しておいたプランを右に開きます',function(){ pickFile(); }],
-      ['ブラウザに保存したプラン','「保存」で残したプランを右に開きます',function(){
-        StorageAdapter.load().then(function(d){
-          if(!d){ alert('ブラウザに保存されたプランがありません。'); return; }
-          start(d);
-        });
+      ['ブラウザに保存したプラン','「保存」や「名前を付けて保存」で残したプランから選んで、右に開きます',function(){
+        PlanLibrary.openList({mode:'pick', onPick:function(plan, id, name){ start(plan, {libId:id, name:name}); }});
       }]
     ];
     dialog('比較するプランを選ぶ','いま開いているプランを左に、選んだプランを右に並べます。どちらも編集できます。',
@@ -332,12 +362,9 @@ var CompareMode = (function(){
     // 右を編集中の「保存」は、ブラウザの保存枠（左の物）を上書きせず JSON に書き出す
     var baseSave = savePlanToStorage;
     savePlanToStorage = function(){
-      if(on && active===1){ exportPlan(); status('右のプランは JSON ファイルに書き出しました（ブラウザの保存は左のプランのままです）。'); return; }
+      if(on && active===1) return saveRight();
       return baseSave.apply(this, arguments);
     };
-    // 書き出したら、右は「書き出し済み」。左はブラウザに保存するまで未保存のまま
-    var baseExport = exportPlan;
-    exportPlan = function(){ var r = baseExport.apply(this, arguments); if(on && active===1) clearDirty(); return r; };
     // 「全体表示」は半分の図面に収める（元の処理は左のパネルの幅を避ける分を引くので、ずれる）
     var baseReset = resetView;
     resetView = function(){
