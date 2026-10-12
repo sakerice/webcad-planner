@@ -1,0 +1,45 @@
+{
+  "model": "kominka-bed-1000-01",
+  "dimensions_mm": [
+    1000.0,
+    2099.9999046325684,
+    400.0000059604645
+  ],
+  "bounds_m": [
+    [
+      -0.5,
+      -1.0499999523162842,
+      0.0
+    ],
+    [
+      0.5,
+      1.0499999523162842,
+      0.4000000059604645
+    ]
+  ],
+  "triangles": 4528,
+  "uv": {
+    "meters_per_uv": 8.239843806313338,
+    "min": 7.141719009664161,
+    "max": 10.45849145867358,
+    "p05": 7.782123274913085,
+    "p95": 9.500694471481083,
+    "total_triangles": 4528,
+    "valid_triangles": 4528,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_dark": "wood",
+    "Kominka_wood": "wood",
+    "Kominka_edge": "wood",
+    "Kominka_cream": "fabric",
+    "Kominka_fabric": "fabric"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 159772
+}

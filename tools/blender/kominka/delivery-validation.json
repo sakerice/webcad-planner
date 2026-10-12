@@ -1,0 +1,3797 @@
+{
+  "modelCount": 32,
+  "textureCount": 6,
+  "textureMapCount": 18,
+  "models": [
+    {
+      "id": "kominka-door-itado-01",
+      "name": "板戸",
+      "measuredMm": [
+        759.9999904632568,
+        59.99999865889549,
+        2000.0
+      ],
+      "triangles": 1680,
+      "boundsGltfM": [
+        [
+          -0.3799999952316284,
+          0.0,
+          -0.029999999329447746
+        ],
+        [
+          0.3799999952316284,
+          2.0,
+          0.029999999329447746
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-door-itado-01.blend",
+      "glbSha256": "67f3da7cc614f44ab8c4db335d191c18099bb8b06918ae27737d9e4e6e514c13",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-door-shoji-01",
+      "name": "腰付き障子戸",
+      "measuredMm": [
+        759.9999904632568,
+        59.99999865889549,
+        2000.0
+      ],
+      "triangles": 1692,
+      "boundsGltfM": [
+        [
+          -0.3799999952316284,
+          0.0,
+          -0.029999999329447746
+        ],
+        [
+          0.3799999952316284,
+          2.0,
+          0.029999999329447746
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-door-shoji-01.blend",
+      "glbSha256": "64c2bcd6ac836d79ec9a0d2003d9bd7df1d01af5dbfa96adb2400c975d5706f3",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-entrance-door-01",
+      "name": "格子戸の玄関",
+      "measuredMm": [
+        1700.0000476837158,
+        119.99999731779099,
+        2099.9999046325684
+      ],
+      "triangles": 3120,
+      "boundsGltfM": [
+        [
+          -0.8500000238418579,
+          0.0,
+          -0.05999999865889549
+        ],
+        [
+          0.8500000238418579,
+          2.0999999046325684,
+          0.05999999865889549
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Glass",
+          "channel": null,
+          "baseColor": [
+            0.7379103899002075,
+            0.8069522380828857,
+            0.8227857351303101,
+            0.25
+          ],
+          "alphaMode": "BLEND"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-entrance-door-01.blend",
+      "glbSha256": "f9a4d9af03fa1ff90c8d12b0e725407165dd5e9a08d1f96a38a540b26bc5564a",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-sliding-window-01",
+      "name": "格子の引き違い窓",
+      "measuredMm": [
+        1600.000023841858,
+        180.00000715255737,
+        1100.000023841858
+      ],
+      "triangles": 2996,
+      "boundsGltfM": [
+        [
+          -0.800000011920929,
+          0.0,
+          -0.09000000357627869
+        ],
+        [
+          0.800000011920929,
+          1.100000023841858,
+          0.09000000357627869
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Glass",
+          "channel": null,
+          "baseColor": [
+            0.7379103899002075,
+            0.8069522380828857,
+            0.8227857351303101,
+            0.25
+          ],
+          "alphaMode": "BLEND"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-sliding-window-01.blend",
+      "glbSha256": "0154529999062ce7dc48483f79b8a5062246661e37f51fc02e72b9dc9cebafa9",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-casement-window-01",
+      "name": "出格子窓",
+      "measuredMm": [
+        1200.0000476837158,
+        349.9999940395355,
+        1100.000023841858
+      ],
+      "triangles": 2328,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.17499999701976776
+        ],
+        [
+          0.6000000238418579,
+          1.100000023841858,
+          0.17499999701976776
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-casement-window-01.blend",
+      "glbSha256": "edd125348fc85fda60f8007922ac3d37db31e5ba79629044eaed8ae1f81a29d0",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-round-window-01",
+      "name": "丸窓",
+      "measuredMm": [
+        899.9999761581421,
+        150.00000596046448,
+        899.9999761581421
+      ],
+      "triangles": 2972,
+      "boundsGltfM": [
+        [
+          -0.44999998807907104,
+          0.0,
+          -0.07500000298023224
+        ],
+        [
+          0.44999998807907104,
+          0.8999999761581421,
+          0.07500000298023224
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "bamboo",
+          "label": "竹",
+          "default": "#83714d"
+        },
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_bamboo",
+          "channel": "bamboo",
+          "baseColor": [
+            0.22696587443351746,
+            0.16513219475746155,
+            0.07421357184648514,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-round-window-01.blend",
+      "glbSha256": "136c0238d1140978339bd84eef9ba274a014fca2b752ded2dbef39968bd0b806",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-engawa-glass-door-01",
+      "name": "縁側のガラス戸",
+      "measuredMm": [
+        1799.9999523162842,
+        150.00000596046448,
+        2000.0
+      ],
+      "triangles": 6612,
+      "boundsGltfM": [
+        [
+          -0.8999999761581421,
+          0.0,
+          -0.07500000298023224
+        ],
+        [
+          0.8999999761581421,
+          2.0,
+          0.07500000298023224
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Glass",
+          "channel": null,
+          "baseColor": [
+            0.7379103899002075,
+            0.8069522380828857,
+            0.8227857351303101,
+            0.25
+          ],
+          "alphaMode": "BLEND"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-engawa-glass-door-01.blend",
+      "glbSha256": "121454ccf1d2ee15ca04355c3a7c5d2d7103d8dfc1e2a954fdefdbb9c206cd7b",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-dining-table-01",
+      "name": "欅の食卓",
+      "measuredMm": [
+        1500.0,
+        850.0000238418579,
+        699.999988079071
+      ],
+      "triangles": 1656,
+      "boundsGltfM": [
+        [
+          -0.75,
+          0.0,
+          -0.42500001192092896
+        ],
+        [
+          0.75,
+          0.699999988079071,
+          0.42500001192092896
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-dining-table-01.blend",
+      "glbSha256": "a2e85705ce59871e10c6052e6076ee130cd7db25842b0d577093c69aaf0dcdcf",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-chair-01",
+      "name": "民芸の椅子",
+      "measuredMm": [
+        449.99998807907104,
+        500.0,
+        800.000011920929
+      ],
+      "triangles": 4388,
+      "boundsGltfM": [
+        [
+          -0.22499999403953552,
+          0.0,
+          -0.25
+        ],
+        [
+          0.22499999403953552,
+          0.800000011920929,
+          0.25
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "rush",
+          "label": "い草",
+          "default": "#96956a"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_rush",
+          "channel": "rush",
+          "baseColor": [
+            0.3049873113632202,
+            0.30054378509521484,
+            0.1441284716129303,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-chair-01.blend",
+      "glbSha256": "13d73f1a0a30a9c9e7d3debaf5374bc8ecea68e3913198bfb7d377c4f31410d5",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-zaisu-01",
+      "name": "座椅子",
+      "measuredMm": [
+        449.99998807907104,
+        550.000011920929,
+        449.99998807907104
+      ],
+      "triangles": 1600,
+      "boundsGltfM": [
+        [
+          -0.22499999403953552,
+          0.0,
+          -0.2750000059604645
+        ],
+        [
+          0.22499999403953552,
+          0.44999998807907104,
+          0.2750000059604645
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-zaisu-01.blend",
+      "glbSha256": "dd046cf20f101f67b4c6d5664495ef66690e76a38b945a572c12ed87f23927a5",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-zataku-01",
+      "name": "座卓",
+      "measuredMm": [
+        1500.0,
+        899.9999761581421,
+        330.00001311302185
+      ],
+      "triangles": 2760,
+      "boundsGltfM": [
+        [
+          -0.75,
+          0.0,
+          -0.44999998807907104
+        ],
+        [
+          0.75,
+          0.33000001311302185,
+          0.44999998807907104
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-zataku-01.blend",
+      "glbSha256": "b8ff0c3aa9ad53778228492c48e8a5043bb950a2d05eefbf8321509bc2123a3b",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-sofa-01",
+      "name": "木枠の長椅子",
+      "measuredMm": [
+        1799.9999523162842,
+        800.000011920929,
+        750.0
+      ],
+      "triangles": 5928,
+      "boundsGltfM": [
+        [
+          -0.8999999761581421,
+          0.0,
+          -0.4000000059604645
+        ],
+        [
+          0.8999999761581421,
+          0.75,
+          0.4000000059604645
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-sofa-01.blend",
+      "glbSha256": "1c4d561fe736b79a23c95d0bd84a4826f5ae23bc5137b420b3f4357dd16199c6",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-bed-1000-01",
+      "name": "布団を敷いた和の寝台",
+      "measuredMm": [
+        1000.0,
+        2099.9999046325684,
+        400.0000059604645
+      ],
+      "triangles": 4528,
+      "boundsGltfM": [
+        [
+          -0.5,
+          0.0,
+          -1.0499999523162842
+        ],
+        [
+          0.5,
+          0.4000000059604645,
+          1.0499999523162842
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_cream",
+          "channel": "fabric",
+          "baseColor": [
+            0.637596845626831,
+            0.5647115111351013,
+            0.42869049310684204,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-bed-1000-01.blend",
+      "glbSha256": "e4d873f7b47b3b9f3bdcd2c629c0567d12e00f1056b5a71d452784325ed21220",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-bed-1400-01",
+      "name": "布団を敷いた和の寝台（二人用）",
+      "measuredMm": [
+        1399.999976158142,
+        2099.9999046325684,
+        400.0000059604645
+      ],
+      "triangles": 5156,
+      "boundsGltfM": [
+        [
+          -0.699999988079071,
+          0.0,
+          -1.0499999523162842
+        ],
+        [
+          0.699999988079071,
+          0.4000000059604645,
+          1.0499999523162842
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_cream",
+          "channel": "fabric",
+          "baseColor": [
+            0.637596845626831,
+            0.5647115111351013,
+            0.42869049310684204,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-bed-1400-01.blend",
+      "glbSha256": "c9a0854bb4ea8cd6cb8922c6b91ac8b9b702cd1397fdafc00e938004c00993b1",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-tansu-01",
+      "name": "衣装箪笥",
+      "measuredMm": [
+        899.9999761581421,
+        449.99998807907104,
+        1100.000023841858
+      ],
+      "triangles": 5004,
+      "boundsGltfM": [
+        [
+          -0.44999998807907104,
+          0.0,
+          -0.22499999403953552
+        ],
+        [
+          0.44999998807907104,
+          1.100000023841858,
+          0.22499999403953552
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-tansu-01.blend",
+      "glbSha256": "2d112117e9c37e2a790f6373b596e865dec680244267f4e7e7b2e266375ef188",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-kaidan-dansu-01",
+      "name": "階段箪笥",
+      "measuredMm": [
+        1799.9999523162842,
+        449.99998807907104,
+        1799.9999523162842
+      ],
+      "triangles": 11088,
+      "boundsGltfM": [
+        [
+          -0.8999999761581421,
+          0.0,
+          -0.22499999403953552
+        ],
+        [
+          0.8999999761581421,
+          1.7999999523162842,
+          0.22499999403953552
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-kaidan-dansu-01.blend",
+      "glbSha256": "3cde28dce42931eee38284406ac943a1ba2a398e583fc419cbe04b0af1f832b6",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-mizuya-01",
+      "name": "水屋箪笥",
+      "measuredMm": [
+        1200.0000476837158,
+        449.99998807907104,
+        1799.9999523162842
+      ],
+      "triangles": 6060,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.22499999403953552
+        ],
+        [
+          0.6000000238418579,
+          1.7999999523162842,
+          0.22499999403953552
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Glass",
+          "channel": null,
+          "baseColor": [
+            0.7379103899002075,
+            0.8069522380828857,
+            0.8227857351303101,
+            0.25
+          ],
+          "alphaMode": "BLEND"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-mizuya-01.blend",
+      "glbSha256": "5b58e293409b77cdb14828c4e429d9e104a840184707573ea94df4ea7b88aceb",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-butsudan-01",
+      "name": "仏壇",
+      "measuredMm": [
+        699.999988079071,
+        600.0000238418579,
+        1500.0
+      ],
+      "triangles": 3036,
+      "boundsGltfM": [
+        [
+          -0.3499999940395355,
+          0.0,
+          -0.30000001192092896
+        ],
+        [
+          0.3499999940395355,
+          1.5,
+          0.30000001192092896
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_gold",
+          "channel": "metal",
+          "baseColor": [
+            0.2541520893573761,
+            0.16202937066555023,
+            0.05126945674419403,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-butsudan-01.blend",
+      "glbSha256": "c5062ce16cb5b807c9b57504dd512a7cd243110c17c97112c48ca223992feff9",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-desk-01",
+      "name": "書院机",
+      "measuredMm": [
+        1200.0000476837158,
+        600.0000238418579,
+        720.0000286102295
+      ],
+      "triangles": 3264,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.30000001192092896
+        ],
+        [
+          0.6000000238418579,
+          0.7200000286102295,
+          0.30000001192092896
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-desk-01.blend",
+      "glbSha256": "60830ced030ebf61c9994a960b1b9823853c18d1e0ce68789cb63a13ae03a50b",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-shoe-storage-01",
+      "name": "下駄箱",
+      "measuredMm": [
+        899.9999761581421,
+        349.9999940395355,
+        1000.0
+      ],
+      "triangles": 3036,
+      "boundsGltfM": [
+        [
+          -0.44999998807907104,
+          0.0,
+          -0.17499999701976776
+        ],
+        [
+          0.44999998807907104,
+          1.0,
+          0.17499999701976776
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-shoe-storage-01.blend",
+      "glbSha256": "0d4e0ef8e56e61f56adcc7fdafed678d89592029bdaada5bd4b235e61cf6671a",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-andon-01",
+      "name": "行灯",
+      "measuredMm": [
+        300.00001192092896,
+        300.00001192092896,
+        800.000011920929
+      ],
+      "triangles": 2376,
+      "boundsGltfM": [
+        [
+          -0.15000000596046448,
+          0.0,
+          -0.15000000596046448
+        ],
+        [
+          0.15000000596046448,
+          0.800000011920929,
+          0.15000000596046448
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-andon-01.blend",
+      "glbSha256": "fdcac822afe2f02bdd385a79118caf6eadb79390367231260f7a5f7a4683e270",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-pendant-01",
+      "name": "和紙のペンダント照明",
+      "measuredMm": [
+        500.0,
+        500.0,
+        400.0000059604645
+      ],
+      "triangles": 10088,
+      "boundsGltfM": [
+        [
+          -0.25,
+          0.0,
+          -0.25
+        ],
+        [
+          0.25,
+          0.4000000059604645,
+          0.25
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "bamboo",
+          "label": "竹",
+          "default": "#83714d"
+        },
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_bamboo",
+          "channel": "bamboo",
+          "baseColor": [
+            0.22696587443351746,
+            0.16513219475746155,
+            0.07421357184648514,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-pendant-01.blend",
+      "glbSha256": "5fdd6193288137a6f97141baa086c3cbad9a02707aedbb5ec80132f5a0cb8a33",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-hengaku-01",
+      "name": "扁額",
+      "measuredMm": [
+        1200.0000476837158,
+        50.00000074505806,
+        449.99998807907104
+      ],
+      "triangles": 924,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.02500000037252903
+        ],
+        [
+          0.6000000238418579,
+          0.44999998807907104,
+          0.02500000037252903
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_ink",
+          "channel": null,
+          "baseColor": [
+            0.019382361322641373,
+            0.02518685907125473,
+            0.021219009533524513,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-hengaku-01.blend",
+      "glbSha256": "7636260d54d30ee0a96273bb0cc97db6e1d2f66c3282e9593669d173ea6cb205",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-kakejiku-01",
+      "name": "掛け軸",
+      "measuredMm": [
+        550.000011920929,
+        29.999999329447746,
+        1700.0000476837158
+      ],
+      "triangles": 1288,
+      "boundsGltfM": [
+        [
+          -0.2750000059604645,
+          0.0,
+          -0.014999999664723873
+        ],
+        [
+          0.2750000059604645,
+          1.7000000476837158,
+          0.014999999664723873
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_ink",
+          "channel": null,
+          "baseColor": [
+            0.019382361322641373,
+            0.02518685907125473,
+            0.021219009533524513,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-kakejiku-01.blend",
+      "glbSha256": "4a6540f32930f9475df53424efd7560732c807424bb4ff99b8d1305bed2d6a6c",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-tsuitate-01",
+      "name": "衝立",
+      "measuredMm": [
+        1200.0000476837158,
+        349.9999940395355,
+        1200.0000476837158
+      ],
+      "triangles": 1304,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.17499999701976776
+        ],
+        [
+          0.6000000238418579,
+          1.2000000476837158,
+          0.17499999701976776
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "paper",
+          "label": "和紙",
+          "default": "#ded8c6"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_paper",
+          "channel": "paper",
+          "baseColor": [
+            0.7304607629776001,
+            0.68668532371521,
+            0.5647115111351013,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-tsuitate-01.blend",
+      "glbSha256": "dd48d1c778a06f7eead63ecb44fdc78eaee532fba1ec47da995ca2508856a253",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-sudare-01",
+      "name": "簾",
+      "measuredMm": [
+        1799.9999523162842,
+        29.999999329447746,
+        1799.9999523162842
+      ],
+      "triangles": 3552,
+      "boundsGltfM": [
+        [
+          -0.8999999761581421,
+          0.0,
+          -0.014999999664723873
+        ],
+        [
+          0.8999999761581421,
+          1.7999999523162842,
+          0.014999999664723873
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "bamboo",
+          "label": "竹",
+          "default": "#83714d"
+        },
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_bamboo",
+          "channel": "bamboo",
+          "baseColor": [
+            0.22696587443351746,
+            0.16513219475746155,
+            0.07421357184648514,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-sudare-01.blend",
+      "glbSha256": "a95571d0f2e36882a31472d29fb9e072551d7dac03dddc39c1b213d5a554e2c2",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-hanagoza-01",
+      "name": "花ござ",
+      "measuredMm": [
+        2000.0,
+        2000.0,
+        9.999999776482582
+      ],
+      "triangles": 13608,
+      "boundsGltfM": [
+        [
+          -1.0,
+          0.0,
+          -1.0
+        ],
+        [
+          1.0,
+          0.009999999776482582,
+          1.0
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "bamboo",
+          "label": "竹",
+          "default": "#83714d"
+        },
+        {
+          "key": "fabric",
+          "label": "布",
+          "default": "#263c51"
+        },
+        {
+          "key": "rush",
+          "label": "い草",
+          "default": "#96956a"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_rush",
+          "channel": "rush",
+          "baseColor": [
+            0.3049873113632202,
+            0.30054378509521484,
+            0.1441284716129303,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fabric",
+          "channel": "fabric",
+          "baseColor": [
+            0.019382361322641373,
+            0.045186202973127365,
+            0.08228270709514618,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_bamboo",
+          "channel": "bamboo",
+          "baseColor": [
+            0.22696587443351746,
+            0.16513219475746155,
+            0.07421357184648514,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-hanagoza-01.blend",
+      "glbSha256": "58927655291cac0d88e4c607ae737b58a1b32590176dc351895a96c85556c340",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-irori-01",
+      "name": "囲炉裏",
+      "measuredMm": [
+        1200.0000476837158,
+        1200.0000476837158,
+        449.99998807907104
+      ],
+      "triangles": 5528,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          0.6000000238418579,
+          0.44999998807907104,
+          0.6000000238418579
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_ash",
+          "channel": null,
+          "baseColor": [
+            0.2788942754268646,
+            0.2746773064136505,
+            0.24228112399578094,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fire",
+          "channel": null,
+          "baseColor": [
+            0.02955683507025242,
+            0.017641954123973846,
+            0.012983032502233982,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-irori-01.blend",
+      "glbSha256": "3d74433aa5e1684ab5aa4cf59a2382fa36695245fb09a14b0f21f61ce015a0db",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-kamado-01",
+      "name": "竈",
+      "measuredMm": [
+        1200.0000476837158,
+        699.999988079071,
+        800.000011920929
+      ],
+      "triangles": 5644,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.3499999940395355
+        ],
+        [
+          0.6000000238418579,
+          0.800000011920929,
+          0.3499999940395355
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#282a29"
+        },
+        {
+          "key": "plaster",
+          "label": "漆喰",
+          "default": "#d9d2c0"
+        },
+        {
+          "key": "stone",
+          "label": "石",
+          "default": "#85847c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_plaster",
+          "channel": "plaster",
+          "baseColor": [
+            0.6938717365264893,
+            0.6444796919822693,
+            0.5271151065826416,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_fire",
+          "channel": null,
+          "baseColor": [
+            0.02955683507025242,
+            0.017641954123973846,
+            0.012983032502233982,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_stone",
+          "channel": "stone",
+          "baseColor": [
+            0.2345505803823471,
+            0.23074005544185638,
+            0.2015562504529953,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_metal",
+          "channel": "metal",
+          "baseColor": [
+            0.021219009533524513,
+            0.023153366521000862,
+            0.022173885256052017,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_wood",
+          "channel": "wood",
+          "baseColor": [
+            0.10702310502529144,
+            0.052860647439956665,
+            0.024157632142305374,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_dark",
+          "channel": "wood",
+          "baseColor": [
+            0.04373503103852272,
+            0.024157632142305374,
+            0.014443843625485897,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-kamado-01.blend",
+      "glbSha256": "0521ab73f6b0480242f347d73bb2ddee56551bead047fa1bc1638ceff1f9f5b4",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-sink-01",
+      "name": "研ぎ出しの流し",
+      "measuredMm": [
+        1200.0000476837158,
+        600.0000238418579,
+        800.000011920929
+      ],
+      "triangles": 1816,
+      "boundsGltfM": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.30000001192092896
+        ],
+        [
+          0.6000000238418579,
+          0.800000011920929,
+          0.30000001192092896
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "brass",
+          "label": "真鍮",
+          "default": "#897247"
+        },
+        {
+          "key": "stone",
+          "label": "石",
+          "default": "#85847c"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_stone",
+          "channel": "stone",
+          "baseColor": [
+            0.2345505803823471,
+            0.23074005544185638,
+            0.2015562504529953,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_brass",
+          "channel": "brass",
+          "baseColor": [
+            0.25015828013420105,
+            0.16826939582824707,
+            0.06301001459360123,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-sink-01.blend",
+      "glbSha256": "94ac756cb2842d06592d6668e54423ba521f5bd98eb5b834dc45675ea5683533",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-hinoki-bath-01",
+      "name": "檜風呂",
+      "measuredMm": [
+        1399.999976158142,
+        800.000011920929,
+        600.0000238418579
+      ],
+      "triangles": 6624,
+      "boundsGltfM": [
+        [
+          -0.699999988079071,
+          0.0,
+          -0.4000000059604645
+        ],
+        [
+          0.699999988079071,
+          0.6000000238418579,
+          0.4000000059604645
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "copper",
+          "label": "銅",
+          "default": "#805344"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#5c412b"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_hinoki",
+          "channel": "wood",
+          "baseColor": [
+            0.4019777774810791,
+            0.2581828534603119,
+            0.11697066575288773,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_edge",
+          "channel": "wood",
+          "baseColor": [
+            0.16202937066555023,
+            0.0802198201417923,
+            0.040915198624134064,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_copper",
+          "channel": "copper",
+          "baseColor": [
+            0.2158605009317398,
+            0.08650045841932297,
+            0.05780543014407158,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-hinoki-bath-01.blend",
+      "glbSha256": "b15fa3bb0c8f45f1b96c1e61bdfc196d9527e304e213999aa8e6bfe1629ff9b6",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    },
+    {
+      "id": "kominka-ishidoro-01",
+      "name": "石灯籠",
+      "measuredMm": [
+        600.0000238418579,
+        600.0000238418579,
+        1500.0
+      ],
+      "triangles": 1496,
+      "boundsGltfM": [
+        [
+          -0.30000001192092896,
+          0.0,
+          -0.30000001192092896
+        ],
+        [
+          0.30000001192092896,
+          1.5,
+          0.30000001192092896
+        ]
+      ],
+      "finishChannels": [
+        {
+          "key": "stone",
+          "label": "石",
+          "default": "#85847c"
+        }
+      ],
+      "materials": [
+        {
+          "name": "Kominka_stone",
+          "channel": "stone",
+          "baseColor": [
+            0.2345505803823471,
+            0.23074005544185638,
+            0.2015562504529953,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Kominka_ink",
+          "channel": null,
+          "baseColor": [
+            0.019382361322641373,
+            0.02518685907125473,
+            0.021219009533524513,
+            1
+          ],
+          "alphaMode": "OPAQUE"
+        }
+      ],
+      "source": "tools/blender/kominka/sources/kominka-ishidoro-01.blend",
+      "glbSha256": "59386486f05b128a81d27d74677c221fb5c1d8136e108192c14808adba6e70f7",
+      "checks": "pass",
+      "regeneration": "byte-identical GLB",
+      "blendReexport": "byte-identical GLB"
+    }
+  ],
+  "textures": [
+    {
+      "key": "kominka_yakisugi",
+      "name": "焼杉",
+      "tileMm": 1080,
+      "boardPitchMm": 180,
+      "battenWidthMm": 30,
+      "maps": [
+        {
+          "map": "diffuse",
+          "edgeMean": 1.09765625,
+          "sha256": "b5ed0358a72b951ff0a0e53340829248b855136b8059f9e290fc8edfb135149f"
+        },
+        {
+          "map": "normal",
+          "edgeMean": 3.518391927083333,
+          "sha256": "d253e17eb1bca8d9acc53ae94bf75cb5485f9f8b077d98b005d50316cdc08836"
+        },
+        {
+          "map": "roughness",
+          "edgeMean": 1.8662109375,
+          "sha256": "56578ef2a2ab43c175b7edc4795f5ac4644e31b83e1aaa509773caa53d5c9d0b"
+        }
+      ],
+      "checks": "pass"
+    },
+    {
+      "key": "kominka_shikkui",
+      "name": "白漆喰",
+      "tileMm": 1000,
+      "maps": [
+        {
+          "map": "diffuse",
+          "edgeMean": 0.38525390625,
+          "sha256": "9d017fc1eb7c582c3a89d7924fd8a52ec5b5fc9807230cbb08ebe1b20b531f19"
+        },
+        {
+          "map": "normal",
+          "edgeMean": 0.59814453125,
+          "sha256": "052c10ff271a8cff290f40425a1c94db222ba9b20e6d978b335fdd01f8ca0c9b"
+        },
+        {
+          "map": "roughness",
+          "edgeMean": 1.51513671875,
+          "sha256": "12129f28abd3f3835f8c42ff1f2cb03037f107423beb43601c346c7d2376c2be"
+        }
+      ],
+      "checks": "pass"
+    },
+    {
+      "key": "kominka_juraku",
+      "name": "聚楽",
+      "tileMm": 1000,
+      "maps": [
+        {
+          "map": "diffuse",
+          "edgeMean": 1.01708984375,
+          "sha256": "9d50de3b79897b98f2a5169439d498efd073040fa6503df620a98eb8e9b95362"
+        },
+        {
+          "map": "normal",
+          "edgeMean": 2.96826171875,
+          "sha256": "b5ec7244042a21a26266cc5ad86aabc1afc0f2aa8e5aa897a39d8e15f40ab9ad"
+        },
+        {
+          "map": "roughness",
+          "edgeMean": 1.83056640625,
+          "sha256": "9ffb4143dcf1ba903149bea6b810d251889d5047ce5376b1f07540bc7443c2ea"
+        }
+      ],
+      "checks": "pass"
+    },
+    {
+      "key": "kominka_kayabuki",
+      "name": "茅葺き",
+      "tileMm": 1200,
+      "flowAxis": "v",
+      "maps": [
+        {
+          "map": "diffuse",
+          "edgeMean": 1.13427734375,
+          "sha256": "b26c5327738aabbc760fb2a569b2f064d46173b77bb4a679a4f7e2b735c229c1"
+        },
+        {
+          "map": "normal",
+          "edgeMean": 2.798665364583333,
+          "sha256": "c98f8cbff690f733054a55f8286050fc151d7543f5e6e4b88c0a3fbd8f82ba73"
+        },
+        {
+          "map": "roughness",
+          "edgeMean": 1.595703125,
+          "sha256": "80309d83bb9100244ea273bd5766559c03df3f9c5dd35874017dca7967101bbe"
+        }
+      ],
+      "checks": "pass"
+    },
+    {
+      "key": "kominka_old_pine_floor",
+      "name": "古い松の板の間",
+      "tileMm": 1800,
+      "boardWidthsMm": [
+        180,
+        210,
+        150,
+        240,
+        180,
+        210,
+        150,
+        240,
+        240
+      ],
+      "maps": [
+        {
+          "map": "diffuse",
+          "edgeMean": 1.4747721354166665,
+          "sha256": "6eb05bf1ffd4070180865ad213fc88fefa9a2fa9ce1ae7379493122c8e131fae"
+        },
+        {
+          "map": "normal",
+          "edgeMean": 1.7195638020833333,
+          "sha256": "b260dba0e34a3fa22645137a85013588c67d88934887953dcf4d30e44eb43455"
+        },
+        {
+          "map": "roughness",
+          "edgeMean": 1.9033203125,
+          "sha256": "c129eef988b669737d782dca77c3ea49fb7c9ade6f4f56f10f1ff5c357605e77"
+        }
+      ],
+      "checks": "pass"
+    },
+    {
+      "key": "kominka_doma",
+      "name": "三和土",
+      "tileMm": 1200,
+      "maps": [
+        {
+          "map": "diffuse",
+          "edgeMean": 1.07568359375,
+          "sha256": "11f5781556afd4480e11c566c2afd6ae9eedbf4d960af6cdc98f911fc338da05"
+        },
+        {
+          "map": "normal",
+          "edgeMean": 2.79736328125,
+          "sha256": "fee46ebc3e227c3a5a0df9689698f2cbd6e37f71179d77dfef35c564dee67aae"
+        },
+        {
+          "map": "roughness",
+          "edgeMean": 1.62744140625,
+          "sha256": "8337e83ce6ccaed557c33add8fd776a17075a13d1e8d82eba69d38ca939cde4e"
+        }
+      ],
+      "checks": "pass"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "tools/blender/kominka/sources/kominka-door-itado-01.blend",
+      "sha256": "9b1a6abffac77a4850e88931a47069b63aea8fe51dd23c8430c53052d2d3c18d"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-door-itado-01.glb",
+      "sha256": "67f3da7cc614f44ab8c4db335d191c18099bb8b06918ae27737d9e4e6e514c13"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-door-itado-01-validation.json",
+      "sha256": "724fec24a4696b5338a4b6545eb8d062911135e105bdd7335c8cdd9dfd20ed9f"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-door-itado-01-thumb.png",
+      "sha256": "bd8fa5c5be02a170d2eb8d66242a6d69864ac6c04c4c08e75bd3f3ab386779f3"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-door-itado-01-top.png",
+      "sha256": "890beec23ae8b1f8971d802903362bdd38ef09f85a4018d0eb8ee2ad221b3e3f"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-itado-01-front.jpg",
+      "sha256": "4c75791f0ff398aa5ad7f73d4e5000d94ceaedffc8080bd6d6ff773de8a43830"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-itado-01-rear.jpg",
+      "sha256": "e59179206169dc28069fef5d2422e3344d9b0bd6f19d3e01878dce89e268da51"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-itado-01-w120-h80.jpg",
+      "sha256": "106ea9fb08e7eadea13991b8b21e40ce0ba5658c88ef83bd96c5c11e0de5d1cf"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-itado-01-w80-h120.jpg",
+      "sha256": "db827c1c9f69c684162c4f856dc4f28f86b49a214ca1aaa98485c1a67ee75712"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-door-shoji-01.blend",
+      "sha256": "b593a7a7899a09cfb9755bd7de186b30687385ebaa9525f4c73b989c31257eaa"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-door-shoji-01.glb",
+      "sha256": "64c2bcd6ac836d79ec9a0d2003d9bd7df1d01af5dbfa96adb2400c975d5706f3"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-door-shoji-01-validation.json",
+      "sha256": "2d1aaa5d914830557a317fa22500808f923b0d68341f2763a06e51d6f3a335fa"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-door-shoji-01-thumb.png",
+      "sha256": "c17e58acfda69e09796102c67b0206e7b94c9eb02517ce6f6bc478397570b800"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-door-shoji-01-top.png",
+      "sha256": "24733249663d81ebb9a824769a5782d16aa0ab6e89dfd61f176bd88735542f3e"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-shoji-01-front.jpg",
+      "sha256": "b6dea374636935b32d36659d4163faf1d405ba8c6cc140b656a2080650514502"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-shoji-01-rear.jpg",
+      "sha256": "eb0b9cc3a52e387a24f8648ddc607ee821a858cd8bb7879bfbccc2ecb855b618"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-shoji-01-w120-h80.jpg",
+      "sha256": "26a18956ad3d68a4aef94313519e3ac840bd705f78e014b19039c10280f033e6"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-door-shoji-01-w80-h120.jpg",
+      "sha256": "7f9a8b261711565528229d1ead5b5796981b875e312309bb783242d0d5889ff2"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-entrance-door-01.blend",
+      "sha256": "f85cd5d9a3c806f2cc3fecfffd5b60bbe73854de53c4f275b889ba8951046c24"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-entrance-door-01.glb",
+      "sha256": "f9a4d9af03fa1ff90c8d12b0e725407165dd5e9a08d1f96a38a540b26bc5564a"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-entrance-door-01-validation.json",
+      "sha256": "f3d36131af979138844c10f46e6bd99ea460f6ebd3d630bea52a1324565a3787"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-entrance-door-01-thumb.png",
+      "sha256": "6ff3c655320952933f6d8594afeff71c0832cf8863b6a033f482450a61b65c0f"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-entrance-door-01-top.png",
+      "sha256": "a33a63dfa353039de63d39d60c0914c2f5482c11d86fcf88980a8b5754554705"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-entrance-door-01-front.jpg",
+      "sha256": "bacd874aee7187ab8bdf791fb1098f7eabefa03bbcd5b77da2c65a105874a422"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-entrance-door-01-rear.jpg",
+      "sha256": "29e0cdb576d7ccbffc09fadf2f74d1c62ff1127b7f55d9056c34e88e0cfee525"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-entrance-door-01-w120-h80.jpg",
+      "sha256": "0ade739a79404a372a4a5c81f43e60a84070d3c8ec039df94b9122fed3dc3378"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-entrance-door-01-w80-h120.jpg",
+      "sha256": "0060c124892d21be02fd745e490c04be80a36d8bde66a5d5c4f7cf7f97d598bf"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sliding-window-01.blend",
+      "sha256": "0fa8fa203e4694150fed2d48eecef5e427bf0485c134b2326c1b43b2198cf2f5"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-sliding-window-01.glb",
+      "sha256": "0154529999062ce7dc48483f79b8a5062246661e37f51fc02e72b9dc9cebafa9"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sliding-window-01-validation.json",
+      "sha256": "c7471e0492c83ab5a600d89e8bfff76d42330e95f42abb424e67be4a647f5f69"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sliding-window-01-thumb.png",
+      "sha256": "3087490111b89ecd825d2aa3ad04188fba01956eded8fda5fc2c8e40b1c4ddc9"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sliding-window-01-top.png",
+      "sha256": "f538fca3b7050527bb0da6dbf1b0369dd6465a6c7b6b724f514807b2ee5e2ad0"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sliding-window-01-front.jpg",
+      "sha256": "7d15f80841614ad8f493d15e240994adc5ff7f09f155192fa00724699316d91c"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sliding-window-01-rear.jpg",
+      "sha256": "9e5f822cb16f35ab04053483a62e3020fdf30c3f6a4848b0957b6710869a0fdc"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sliding-window-01-w120-h80.jpg",
+      "sha256": "d6ffeb5ec7e9a2d51d3d86e0a2cfc92dcbc822f1d36420723da3635bb815ff28"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sliding-window-01-w80-h120.jpg",
+      "sha256": "a461d5285c24122fc66e32ba3bef1a2bc384e4bc5a012ea3cf803d0bd01de77a"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-casement-window-01.blend",
+      "sha256": "bf64c3fc9231714728ecc21d2b463f4b0d24ade93116e7e9edde5aa53d835abe"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-casement-window-01.glb",
+      "sha256": "edd125348fc85fda60f8007922ac3d37db31e5ba79629044eaed8ae1f81a29d0"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-casement-window-01-validation.json",
+      "sha256": "ef1e25e05e2b45fe0af7d14b7035a9911a99c64335f2dfcc4f48129e9e8151f7"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-casement-window-01-thumb.png",
+      "sha256": "9cfd79b7f7cbd3f587108916af6706b07a0dd79e4fd71b50854d51dedd307d57"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-casement-window-01-top.png",
+      "sha256": "fd592e175f1644e66c02a16a31d081ad745556c208edc7ed4a34a358d0aa1e29"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-casement-window-01-front.jpg",
+      "sha256": "2e307525482ac522c27e406ccc6a122bd8fd0f9551b5b5232366a1ce89e76716"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-casement-window-01-rear.jpg",
+      "sha256": "1770c066fb3e801323e4f0def3876b9877f873df639608b5b7b03defa70a3a66"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-casement-window-01-w120-h80.jpg",
+      "sha256": "d74df9921dbf85c7fc4aaa86808af1f63e3244606803ffcacd14cef0b7397b16"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-casement-window-01-w80-h120.jpg",
+      "sha256": "37c6e6c7628c8dc82a5f6db14c8a85ef315efb6c2c3cf99568ea3b6e437cd544"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-round-window-01.blend",
+      "sha256": "b04401d305fb893741b8f52a070f14f98c4d98360bdb8426fb7f0c59b619d98e"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-round-window-01.glb",
+      "sha256": "136c0238d1140978339bd84eef9ba274a014fca2b752ded2dbef39968bd0b806"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-round-window-01-validation.json",
+      "sha256": "f7357d60e373aa64f893f1bb506b73bd97bdf5f095c36c73a6e71c240e5224e0"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-round-window-01-thumb.png",
+      "sha256": "59223e7b4a1db2cb5bb1f63ec23d114696351f3f43d571929811f2ba82c6a48c"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-round-window-01-top.png",
+      "sha256": "c4349630a2ccd5eca6077fca948f7f023453d1bf80cf2f27fcaccdddb882d227"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-round-window-01-front.jpg",
+      "sha256": "29924f745ab1927c2b4e866560e0dc4a13cca028f2de51f56d9e8ef2e1855f69"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-round-window-01-rear.jpg",
+      "sha256": "17a5c9078c918a92fc32ce564d9808f271f7506cb80f2d1da0e3234613e1736f"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-round-window-01-w120-h80.jpg",
+      "sha256": "963a140f1260d51725f68a35de2bdabfb51bfd402d2cb3d5e922b2c4262f5328"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-round-window-01-w80-h120.jpg",
+      "sha256": "1283f0214b1139da7989dc271e89d28a3957f5fced6ec38ce90cd56f6e6f8a0d"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-engawa-glass-door-01.blend",
+      "sha256": "4f9f769b3eca0a28c55cbdb7cae26bf2951b53457b950be1780d80d0fd140ad4"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-engawa-glass-door-01.glb",
+      "sha256": "121454ccf1d2ee15ca04355c3a7c5d2d7103d8dfc1e2a954fdefdbb9c206cd7b"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-engawa-glass-door-01-validation.json",
+      "sha256": "c846c78e71b42534d360fa4db8fe3531f634d6df2a99f6c52a8c73e90ffa8467"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-engawa-glass-door-01-thumb.png",
+      "sha256": "f634f2401ffbfe56c6ad83c4459c01331f963bd8e6104e9acd718d9009105b61"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-engawa-glass-door-01-top.png",
+      "sha256": "4e927af51c5374af526c6820e7f05cdcf39e4de528b1b662f4046e973db6ec60"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-engawa-glass-door-01-front.jpg",
+      "sha256": "39eb91df35c814c4b2f5ba1a77c8d4d48b8c704cb3ca03ce9c82fa276388885b"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-engawa-glass-door-01-rear.jpg",
+      "sha256": "60da7bf80b9ff2053cbe7a0addc600318fd8a881f6f472afcffde42442181c3b"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-engawa-glass-door-01-w120-h80.jpg",
+      "sha256": "d311a4b1622ebb5dab1d689ce2966792f975d6cef1767245249636e0dbdeed29"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-engawa-glass-door-01-w80-h120.jpg",
+      "sha256": "baeeccb02094bfa40731d9c49551a2aad76772c66c751c79d914e3cb744b4dad"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-dining-table-01.blend",
+      "sha256": "c6fc8eb86a2d359ca125191c637658ee81c6440a60237d42ddaf96c5cbc63b96"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-dining-table-01.glb",
+      "sha256": "a2e85705ce59871e10c6052e6076ee130cd7db25842b0d577093c69aaf0dcdcf"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-dining-table-01-validation.json",
+      "sha256": "5c7655be69361161eb2005b6ecbfcad93e3b003192c412d691c254f2fed1947f"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-dining-table-01-thumb.png",
+      "sha256": "601f9e1c6ee22028d030ba5ef14bc566f4c04d571e01a37b4515d92e5af86fa2"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-dining-table-01-top.png",
+      "sha256": "7af48f92d93e9612ad8d7a382c510f508ef5b3df0d062a08fa704cf1990838ae"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-dining-table-01-front.jpg",
+      "sha256": "a742fa80d39ea0a547d0a531a23fafdc70ef4012b4ac8efa7e5d99c6be9f3568"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-dining-table-01-rear.jpg",
+      "sha256": "0de232fe6b9bbc8b08d37c830dbc59cc82690ebbc4e082aeacbd72b4efae0524"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-chair-01.blend",
+      "sha256": "81784e3b7d75cfe6667f80d301dca06b0ca2f39213d574b213c7e0115596fd12"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-chair-01.glb",
+      "sha256": "13d73f1a0a30a9c9e7d3debaf5374bc8ecea68e3913198bfb7d377c4f31410d5"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-chair-01-validation.json",
+      "sha256": "90e6b46d0bbf0e0516a411f0e15e927a27a711ee0f5de4ee91d2744926a02d58"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-chair-01-thumb.png",
+      "sha256": "ad07c52dffcffe5f851576a2f753bb2fc73ca52b55e50cdc8a8d43adbf801b6a"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-chair-01-top.png",
+      "sha256": "a72014daf0f99b9cb1c06baa191d222edb6211320984e32964961eadb8625b79"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-chair-01-front.jpg",
+      "sha256": "e1142a513876c3a0cfb98b77f2697853a1237239fc85eb904dc19908fe26e8e5"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-chair-01-rear.jpg",
+      "sha256": "86325d80daeec8c23ecfe014ba40364a79e3fffde869d6b38e0b6ecf0c5dfeff"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-zaisu-01.blend",
+      "sha256": "afc87733792a52be980f00d88cedc3c9c068b3b4a01d6500224e7e8a35804537"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-zaisu-01.glb",
+      "sha256": "dd046cf20f101f67b4c6d5664495ef66690e76a38b945a572c12ed87f23927a5"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-zaisu-01-validation.json",
+      "sha256": "7f64969dcc17d3f91d2317f92665e5367ba60a666b25fa656e2929375c38b58e"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-zaisu-01-thumb.png",
+      "sha256": "7389ab75b5dd240cb39df9248036a4a482abc501619f7146952bc8f060838f92"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-zaisu-01-top.png",
+      "sha256": "58d1e14e4bce767a40312ce60d0cf467d3e83786515b8f9700b19eb99642d748"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-zaisu-01-front.jpg",
+      "sha256": "49a3d3f124d84618d6dbec4a82210c66dd5dfe68af4b1db15bc1418b7ee9f916"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-zaisu-01-rear.jpg",
+      "sha256": "24c0cd499faab41ddb555f454c8ec7bea771d937238efc258fd10aef482533f4"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-zataku-01.blend",
+      "sha256": "88c111e420d26180856cf09e41a33e164a5bfc84dc6685528677e14af13e853f"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-zataku-01.glb",
+      "sha256": "b8ff0c3aa9ad53778228492c48e8a5043bb950a2d05eefbf8321509bc2123a3b"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-zataku-01-validation.json",
+      "sha256": "fd08c085a50baeb8fda6099980b077e771bd24b71d0a86afecb31a3b32b0c688"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-zataku-01-thumb.png",
+      "sha256": "223079424cd1335cdc455100d81f38859f5ba4b261716ac83c66cf5c9a2e53aa"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-zataku-01-top.png",
+      "sha256": "10d4245ebd3d8bf799989856a924069336e81814e22a0d80eac9691a74e1efcc"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-zataku-01-front.jpg",
+      "sha256": "41319b32c3a6356c59c689b1b646cfac4835ac4166930e60c22b03c5ace0d6c1"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-zataku-01-rear.jpg",
+      "sha256": "d2a89356bed6aecb14653f0948bc5f3cc8450b8c66087bfd9558c5dd0f1bcd27"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sofa-01.blend",
+      "sha256": "2f412070baa3eb269075a7cbc65c3f2eb38ccd2b32249d2951523adb342baa9b"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-sofa-01.glb",
+      "sha256": "1c4d561fe736b79a23c95d0bd84a4826f5ae23bc5137b420b3f4357dd16199c6"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sofa-01-validation.json",
+      "sha256": "30231e782333337da36224a3464cff1cce1ea2eada5f606f774d59afacfc1d72"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sofa-01-thumb.png",
+      "sha256": "d79bbea8eae3dd4bf59386c5c24df5089d2192faf0f3b4bbec0400dfe6def2b6"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sofa-01-top.png",
+      "sha256": "fad9174b1de032e9b16b910682afcd2a9c1a6277624780f1a5de6c494d683f84"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sofa-01-front.jpg",
+      "sha256": "7b64984880f5b620070fb0b2ac1da25c1a377b9609756ed53e9ff50cd0fb9fae"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sofa-01-rear.jpg",
+      "sha256": "3e268d6ef827ca9c4e89be665dca1e7ae940edde756712c59d84a5f338dbd7b0"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-bed-1000-01.blend",
+      "sha256": "eb98483688ca41c57a961a4368261964262c60c717c95a7cbf128c93effcfe9a"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-bed-1000-01.glb",
+      "sha256": "e4d873f7b47b3b9f3bdcd2c629c0567d12e00f1056b5a71d452784325ed21220"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-bed-1000-01-validation.json",
+      "sha256": "2f0db21428b897c8c813ec15ca2456b4fe3ffb30a5dcefb211bee6509dab6ace"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-bed-1000-01-thumb.png",
+      "sha256": "f6e362bc42de5931848bfec96ee0c6ffdc75f1ac84a0050db09d4633ac016f47"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-bed-1000-01-top.png",
+      "sha256": "7d2826664ddd43417bea93422435b3c84a4ab6f47361f7da6ae688b9d54a7c0e"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-bed-1000-01-front.jpg",
+      "sha256": "097c49969c76f4fa0c47af8c25f231a523c48996b1950ef9507478fa0322e186"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-bed-1000-01-rear.jpg",
+      "sha256": "c1b0ad97d294e460c1553059dc7f8d8110d35534835df6f19afb25e533a082bd"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-bed-1400-01.blend",
+      "sha256": "ce1dab658fb3df861a496ef6f71cf5e5e02c8b00b7dd29f9e581e245b25bf1cd"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-bed-1400-01.glb",
+      "sha256": "c9a0854bb4ea8cd6cb8922c6b91ac8b9b702cd1397fdafc00e938004c00993b1"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-bed-1400-01-validation.json",
+      "sha256": "e6d4078186d92e9cde805165557802e15faaf5a86d13d2eceb2f4bbe1d9627de"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-bed-1400-01-thumb.png",
+      "sha256": "329bd6038cd57bbdbde1d7b109afcf798b17e2b9cbb6f169e26474aaf5d02d91"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-bed-1400-01-top.png",
+      "sha256": "ba5a734e86045fbe5616b114b69084b2bcdfb5663d4bf77f35d1a6d8313f524c"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-bed-1400-01-front.jpg",
+      "sha256": "f06edc467be303a7794408b3150e97973e99889b31d6eb92c892dff12682be76"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-bed-1400-01-rear.jpg",
+      "sha256": "926725abd08c433e3aae81e193b6c00b16ec152c94fe7c1295d3a5fe0f19cc1b"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-tansu-01.blend",
+      "sha256": "af759f99810662ba44071a56792184934b10c2c04636caf2e8a5dbda6eb6548b"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-tansu-01.glb",
+      "sha256": "2d112117e9c37e2a790f6373b596e865dec680244267f4e7e7b2e266375ef188"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-tansu-01-validation.json",
+      "sha256": "ee538e8772cdc9a3af9dac238cc37c455158ebbba2eb16dcb0d09acddb15ef71"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-tansu-01-thumb.png",
+      "sha256": "65a6b48061d32bc381393aa995a59fd9b62c3e6d946939f071edb7b7f7fc08e0"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-tansu-01-top.png",
+      "sha256": "8736a48afc008cb13510657c517bc4b0f289759cee0af1a065434cb3ee5b1f74"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-tansu-01-front.jpg",
+      "sha256": "923ff24b4561c626dcc91ec85ec0851ff496a5f8d99273cd67ce06ce0db25bfb"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-tansu-01-rear.jpg",
+      "sha256": "76f6d6cb436dbf6a96f87a3b53223aac6a7074ea9bde35e0ce8ee9c142499625"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-kaidan-dansu-01.blend",
+      "sha256": "6ab90d32cddd672634687d5c39642379e97136f07900345ae699a4115622e394"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-kaidan-dansu-01.glb",
+      "sha256": "3cde28dce42931eee38284406ac943a1ba2a398e583fc419cbe04b0af1f832b6"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-kaidan-dansu-01-validation.json",
+      "sha256": "5aa84cf4e97e766a22a7629124cf925300a1701e3e3f727a480db657e61c0dad"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kaidan-dansu-01-thumb.png",
+      "sha256": "f35db97bf95e9a38288e5fe91d72316d2a065633f047df9aaf21df5edaeed2d6"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kaidan-dansu-01-top.png",
+      "sha256": "d6f910f69a298afcc66a3495eda1c53e74766a37f8adc5ddf93a995fa43106db"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-kaidan-dansu-01-front.jpg",
+      "sha256": "89bce70d87ee84b0f0e7b17d7b9864e1863d1c500843b99b8f98943322588a59"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-kaidan-dansu-01-rear.jpg",
+      "sha256": "1cee942f02be1682a70aba777212635c9da104eda3adea3384d1a75bae9ff1e1"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-mizuya-01.blend",
+      "sha256": "cd493106c19348f5720689b624cb0ceefd8bf4a52aefece38cb1f4be2d55e64e"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-mizuya-01.glb",
+      "sha256": "5b58e293409b77cdb14828c4e429d9e104a840184707573ea94df4ea7b88aceb"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-mizuya-01-validation.json",
+      "sha256": "34dbf6bc699e0dc9ae6de959a69ead71e001239b53a67821d793ed3f8cea4e1d"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-mizuya-01-thumb.png",
+      "sha256": "073bf8b9d0ee1daec3785952af55d90685a1e1d25d06cae6475e37f4ea84a07c"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-mizuya-01-top.png",
+      "sha256": "68a41657bc9000b5a8d3ff35147e08608719654d280fc944155d4ac5100444a2"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-mizuya-01-front.jpg",
+      "sha256": "f673b80dd873c0e3f507bf6e55c49f457b78a57f0d795cc9360699f8a66e44df"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-mizuya-01-rear.jpg",
+      "sha256": "e013cda1e74a15397c5b1b42e41c92abea6accda28530c2cbd886650001ed358"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-butsudan-01.blend",
+      "sha256": "c444f288894e43bafc05a564765911c5bd044ff7fbb317aeb2e26309b81d9282"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-butsudan-01.glb",
+      "sha256": "c5062ce16cb5b807c9b57504dd512a7cd243110c17c97112c48ca223992feff9"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-butsudan-01-validation.json",
+      "sha256": "48faaf60cc30fb3c914d1f3eaf823bd2c24c7f55b0ba80c58a2034e268c57a30"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-butsudan-01-thumb.png",
+      "sha256": "92290fad51e5ad6e8a651f918b6eee7eb8b61b0ffcf23bd7035db134c89a63a0"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-butsudan-01-top.png",
+      "sha256": "6b399958fee4acf5c65d5a7e979d6986bc86fef1e016c5135c8e4a4198fa56e3"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-butsudan-01-front.jpg",
+      "sha256": "2d1c6251caa90dd256ea8a102cf9dd03aa37e9c3975cbeb536381b54388d58ae"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-butsudan-01-rear.jpg",
+      "sha256": "4d9c0758864b6a9c91a5a343b238ccd2a79d1cd8074bbef11b89b57ae5a79c74"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-desk-01.blend",
+      "sha256": "a745c5c31d7722c48549d2cd08a5f128f5e411a13e092b7127348ddcead9ccf7"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-desk-01.glb",
+      "sha256": "60830ced030ebf61c9994a960b1b9823853c18d1e0ce68789cb63a13ae03a50b"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-desk-01-validation.json",
+      "sha256": "9dda62e54000d46ec3e421afb78454f189b444db272143eaa3f213ec6c30133d"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-desk-01-thumb.png",
+      "sha256": "219caeb94141e9356beaf3660193ff540f930961fce51aa820cee70b9b5beb72"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-desk-01-top.png",
+      "sha256": "7953e271998bbe30f9a36831d88f33cf693f309edd5de4b4d2393da896df7537"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-desk-01-front.jpg",
+      "sha256": "cdb780299b0cfd8d33b6bc441b5eeb51eaace4d0641a5b9691a0a77f1ef082d7"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-desk-01-rear.jpg",
+      "sha256": "89f844bc538416d302a3d25644de23f4a384d3842e5c5ce3fe2e588f55d5dde9"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-shoe-storage-01.blend",
+      "sha256": "b15b78882bc4a9b829cefe10cab46321ff74ed00d7f3260f7669f429cfaec7ad"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-shoe-storage-01.glb",
+      "sha256": "0d4e0ef8e56e61f56adcc7fdafed678d89592029bdaada5bd4b235e61cf6671a"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-shoe-storage-01-validation.json",
+      "sha256": "63ba3eb5e5126e222851a8a7d96889d85273064141c532a18054d422868878e3"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-shoe-storage-01-thumb.png",
+      "sha256": "696a02554cf04210745442a28e3878ad150f96914242feb8a00a53cf49adfb4d"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-shoe-storage-01-top.png",
+      "sha256": "e27168bfb58a3c192a861df57319dc1a66dabc0b8a041664afb315462d3e62cd"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-shoe-storage-01-front.jpg",
+      "sha256": "b2fb359919ccf6d8ba132c27079ded0b0d50d32cd2abbd266590224f0d88a1ef"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-shoe-storage-01-rear.jpg",
+      "sha256": "ae95355b672d01cebc4d5cb81689ecd0784d91a42597bff3934e7b5b01cc50cb"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-andon-01.blend",
+      "sha256": "b5413a274c8c28d419b61185c770a3491be5d6e345ec98dc3661d587c618f26c"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-andon-01.glb",
+      "sha256": "fdcac822afe2f02bdd385a79118caf6eadb79390367231260f7a5f7a4683e270"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-andon-01-validation.json",
+      "sha256": "3af4c753f3635e25862b1d8c49422bd3fa4bd3c6af139eafa2a346929959f1a8"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-andon-01-thumb.png",
+      "sha256": "53647248f2c956969f035dd32749890edd5d4d9b4a4252d483569f4b1932925e"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-andon-01-top.png",
+      "sha256": "165035747b8e0647d960b5415b4648723fc3c0ac540c217d6dac58b7b1caf2e8"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-andon-01-front.jpg",
+      "sha256": "848fc974ea47746b28d8f3682299c21faf59df5aa1885647cffa953deff7ae97"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-andon-01-rear.jpg",
+      "sha256": "1fffba844c35f96042702731dbd547b32776c7eb54db31546af611f7fd2b53c4"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-pendant-01.blend",
+      "sha256": "d7857214c05e247b4ec44b408577b7b992ac9e970f23c11b7185e8d0b6bb0b89"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-pendant-01.glb",
+      "sha256": "5fdd6193288137a6f97141baa086c3cbad9a02707aedbb5ec80132f5a0cb8a33"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-pendant-01-validation.json",
+      "sha256": "7491dc5c41d7833b5ed78748d723cb16438aa063e7022eeef8aa413698051389"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-pendant-01-thumb.png",
+      "sha256": "86335ed671996e9f297537eb42fbe76105f4f35f30d1388c20cc50f1b68f7aff"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-pendant-01-top.png",
+      "sha256": "1de64b47899523bee6e21d145f2b6d38398b86aa100b13002ab415ce093f3643"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-pendant-01-front.jpg",
+      "sha256": "b1548238e14c033525598e3bde6117120db85e22e0a6bd44e381f14e5bcbc45c"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-pendant-01-rear.jpg",
+      "sha256": "83e0761c264b3f2ac59e87ca0612a5ae32f55b20e68c89763dc4403387c20dfc"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-hengaku-01.blend",
+      "sha256": "a70bb0ee1b05f1f0d27e07b55b18b5b46cdcd5ee73a7aa868f01d01bbb2701ae"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-hengaku-01.glb",
+      "sha256": "7636260d54d30ee0a96273bb0cc97db6e1d2f66c3282e9593669d173ea6cb205"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-hengaku-01-validation.json",
+      "sha256": "14ac19fd041e1e351d363c739edeed5ca81e2ed9079867243f709e018441c4fa"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-hengaku-01-thumb.png",
+      "sha256": "262910663a3edbc2dd13ca27a9811dd0dbbd2a606cc3e83a057f8f860b72547c"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-hengaku-01-top.png",
+      "sha256": "090335c1abc23f10e53bd2993a5bdd9deda9876c9fc9616c306ca5bbfe203a23"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-hengaku-01-front.jpg",
+      "sha256": "95ea1ef7dd83b0bf17ac7cf473017985934b21f048be074dddf40ff3c4981c9f"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-hengaku-01-rear.jpg",
+      "sha256": "bebaf8fe2ac846c9e68fa7245e5e1470f580967e1198dd0e515693f11ad1b72d"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-kakejiku-01.blend",
+      "sha256": "777983b56b1f6a8015d6d4106ff94d24ed39b190c88206beaf356b5d5748db6a"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-kakejiku-01.glb",
+      "sha256": "4a6540f32930f9475df53424efd7560732c807424bb4ff99b8d1305bed2d6a6c"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-kakejiku-01-validation.json",
+      "sha256": "7644b931ecc6be15a69c774d294f31f881cef24372d6bfa6a7b8de3037d263f7"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kakejiku-01-thumb.png",
+      "sha256": "e54c1ac48bec517fff9550a26ea28275ee5312499241012aef44d54a4f2cd65d"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kakejiku-01-top.png",
+      "sha256": "f916d122755d9f6d35d15a6d7b65ad9111438e6e045f5ee89e7801946f26fbc7"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-kakejiku-01-front.jpg",
+      "sha256": "55307c8111aac0678b562591959e1ca995362a6bb33acf55259a51d2b0393406"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-kakejiku-01-rear.jpg",
+      "sha256": "eebada52579a0502880e82aeace6f16243e9046a9f56046a56a58a5851caddb5"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-tsuitate-01.blend",
+      "sha256": "ad81c12dd883205cb3083b95a82e33e5110323fa655245fffa70eab11b8a7ef1"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-tsuitate-01.glb",
+      "sha256": "dd48d1c778a06f7eead63ecb44fdc78eaee532fba1ec47da995ca2508856a253"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-tsuitate-01-validation.json",
+      "sha256": "6b0850357bf4ff2eeb2fe598ca5d482cc8b48776f95f066fe7c04fb62e003481"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-tsuitate-01-thumb.png",
+      "sha256": "edf9f50046cf6860163fb5716f768828e9181042f3573b51812dda2f3cf8a691"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-tsuitate-01-top.png",
+      "sha256": "77467f9ed2319aba78a6a2518248d74ddd7ec0178ffb6fe16327cb6c86eecf21"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-tsuitate-01-front.jpg",
+      "sha256": "b4636f06f88c2b0a94703e9289f3c52b94bcf172327174e4f9abdff0e7017f64"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-tsuitate-01-rear.jpg",
+      "sha256": "3c93133d221763a2a41215fb62f0d7491e49563e082a5ba52eec42979ae96bda"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sudare-01.blend",
+      "sha256": "07544777fc1519f1d7b54cf655b84886bd7ac822caf2b11b156fb24826c7e597"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-sudare-01.glb",
+      "sha256": "a95571d0f2e36882a31472d29fb9e072551d7dac03dddc39c1b213d5a554e2c2"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sudare-01-validation.json",
+      "sha256": "1a77b55dc7e4e5f3cdd211c33222185e77846e1cba161612c58dca3c785d8b76"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sudare-01-thumb.png",
+      "sha256": "de14bfa7e670de6773ddc8c510e94750b31b2117a9d6f2b96add3e0b42d21de3"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sudare-01-top.png",
+      "sha256": "ce812ea809225c47b5aefc08e4fbb4d4d6c6418a8269803650f9346f7f66e3fb"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sudare-01-front.jpg",
+      "sha256": "049063140ab8632f034e8cae2328cd2e05de0d7bc9ed77d6e4bd8caf0ebe61f6"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sudare-01-rear.jpg",
+      "sha256": "18e6fc01865155f0861ad5e4a3b4b561ffaef12a235714a76e64c8b0ac299f2e"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-hanagoza-01.blend",
+      "sha256": "90faf654c29b9555440b054f3dfd1419de6118df33869b1027055b40408ba2fd"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-hanagoza-01.glb",
+      "sha256": "58927655291cac0d88e4c607ae737b58a1b32590176dc351895a96c85556c340"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-hanagoza-01-validation.json",
+      "sha256": "0ffc57eed39ffc8449bce9a5feb9e4f2156fa52b3090456122cbf7ed88fa862f"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-hanagoza-01-thumb.png",
+      "sha256": "b378368b980503618680ff073e87fafc046db3871d53d75918f36553f961e8c9"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-hanagoza-01-top.png",
+      "sha256": "1209cbf47053e3c43307f4e9e800492263c7950231dc69f382b9ce6b3af8bf9c"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-hanagoza-01-front.jpg",
+      "sha256": "19ce3e6c59caaffb532c74f51d6cbc5615d5aa14cfd3adde6d449c2dd2978820"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-hanagoza-01-rear.jpg",
+      "sha256": "f1073539822b9b1b88b36be7d5688eb9490da2648ca097c95ebc5fec64f9a11e"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-irori-01.blend",
+      "sha256": "90ec6d4ef21bb6b7bb7adc6fe67b553be768ac3fb6955311e2b10d38224044d5"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-irori-01.glb",
+      "sha256": "3d74433aa5e1684ab5aa4cf59a2382fa36695245fb09a14b0f21f61ce015a0db"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-irori-01-validation.json",
+      "sha256": "db4b49d7c34238624de65e7d138ebd2e74ca4f5bb8336a9a9bbdfaecb14c2ea1"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-irori-01-thumb.png",
+      "sha256": "f8007b3fd83420840417513f793929c718bcbf7e08406267d324b7516e1862eb"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-irori-01-top.png",
+      "sha256": "e2cf8ba39deee864ec5c3983283803294de1d16127c2fcbf9cce5c0c29621198"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-irori-01-front.jpg",
+      "sha256": "65654f76fd4927c3dd55759e0999a372bfb981c310e55bbfcec4ccc87d8d9f4b"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-irori-01-rear.jpg",
+      "sha256": "08633f3fcfd815529248cdfa76be17486dcd1872d376ffa03f6806859f036d22"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-kamado-01.blend",
+      "sha256": "dfa3cd49bbea76dab774747b630923769c6e8edc801e20f8065e51303269ae45"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-kamado-01.glb",
+      "sha256": "0521ab73f6b0480242f347d73bb2ddee56551bead047fa1bc1638ceff1f9f5b4"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-kamado-01-validation.json",
+      "sha256": "1c5b47164c5432ceb2a2cccd4d836369f98d6799c0c1d7151cd29d4448bcbbcc"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kamado-01-thumb.png",
+      "sha256": "d3d37bdde41710133e0fd5b9740e6a46c3a42f811cee5295fd6967e240d00e7a"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kamado-01-top.png",
+      "sha256": "826567ff57dd0eebd7502a494be0f5181b37335ba9d12fcd9198fc2254051d47"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-kamado-01-front.jpg",
+      "sha256": "6d3881a34bdaad06fd8c444f756ccb9e68b3acde3dab73e5b969d1224e193e01"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-kamado-01-rear.jpg",
+      "sha256": "1984566c533f7efb10298dfa1a818cb771ac485ebd82b07628ec746be5e4886a"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sink-01.blend",
+      "sha256": "3041e4fce68956c0f5c0f8ce18188a5dc6e4b260be32f854b3c9a41e4312b5bc"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-sink-01.glb",
+      "sha256": "94ac756cb2842d06592d6668e54423ba521f5bd98eb5b834dc45675ea5683533"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-sink-01-validation.json",
+      "sha256": "99a4c54c9599b7121058cb55d092ac7d137201511dda00cff20229586362fde4"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sink-01-thumb.png",
+      "sha256": "8ee6759715af229b53ca2a1229a2eac64a1042f3b8a1cccb6527a6075b3d776d"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-sink-01-top.png",
+      "sha256": "6d7cac6f729d1286d6ab09b4a643dc5b5e4ea6165b523cd83a620d840b2b82b9"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sink-01-front.jpg",
+      "sha256": "acec0386fafca30260b2df6aa7d7ee1d3bda6034cd49eeef9682e68366662ff9"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-sink-01-rear.jpg",
+      "sha256": "e8d09c47bd438a3b7734621afc61ea71d7b948ba6fc64ad208b64829b462eabc"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-hinoki-bath-01.blend",
+      "sha256": "5ea3242d4591e748d4bcdc4ece94533bcefcc4e58f7e26ee434a7ae15e6cc95b"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-hinoki-bath-01.glb",
+      "sha256": "b15fa3bb0c8f45f1b96c1e61bdfc196d9527e304e213999aa8e6bfe1629ff9b6"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-hinoki-bath-01-validation.json",
+      "sha256": "62c8169d915d4ff00bad74ce8aa710601a037725cf528332e7a7406a39ea7d92"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-hinoki-bath-01-thumb.png",
+      "sha256": "d5acfaba5c687d4acfad75d56c4c63e19a95ad1208a9aca42cf90ee63016feec"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-hinoki-bath-01-top.png",
+      "sha256": "5a3d2c08f8ed787ac7a234557e5af39265ad9c4f05f133a65c76142070203269"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-hinoki-bath-01-front.jpg",
+      "sha256": "f209e596de0d76f60c52eeaac6bd184872850fdcac9468348506cf29ac4007d2"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-hinoki-bath-01-rear.jpg",
+      "sha256": "290e18e2329e666b981f54a97d8860473f8cd181e7dbec2b11548fe5b530fb4b"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-ishidoro-01.blend",
+      "sha256": "4949c900c5190559bb5451599fc165474240810e41d271eca1b1ec067213d6b0"
+    },
+    {
+      "path": "assets/models/packs/kominka/models/kominka-ishidoro-01.glb",
+      "sha256": "59386486f05b128a81d27d74677c221fb5c1d8136e108192c14808adba6e70f7"
+    },
+    {
+      "path": "tools/blender/kominka/sources/kominka-ishidoro-01-validation.json",
+      "sha256": "b89c832d32094d1bdc117eca377436c1aa33a343ad8868149c3117dbb4e5f12f"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-ishidoro-01-thumb.png",
+      "sha256": "04299eee9422a44ea73bba30c61f627900c2a9e219697dc3bf82044870efeb92"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-ishidoro-01-top.png",
+      "sha256": "333ec75224054329b02f33bf1703be197496a5d348f066555199aa27aaa472cc"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-ishidoro-01-front.jpg",
+      "sha256": "cdaffd31cf0259c5abef038fb226c575ff0b3bc9da9ce94a8ea1112a2032b567"
+    },
+    {
+      "path": "tools/blender/kominka/evidence/kominka-ishidoro-01-rear.jpg",
+      "sha256": "c0074fcffb0dbe605639b349b625aa4b7b748e1cd298fbcdb24d77f1f684d2e9"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_yakisugi_diffuse.jpg",
+      "sha256": "b5ed0358a72b951ff0a0e53340829248b855136b8059f9e290fc8edfb135149f"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_yakisugi_normal.jpg",
+      "sha256": "d253e17eb1bca8d9acc53ae94bf75cb5485f9f8b077d98b005d50316cdc08836"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_yakisugi_roughness.jpg",
+      "sha256": "56578ef2a2ab43c175b7edc4795f5ac4644e31b83e1aaa509773caa53d5c9d0b"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_shikkui_diffuse.jpg",
+      "sha256": "9d017fc1eb7c582c3a89d7924fd8a52ec5b5fc9807230cbb08ebe1b20b531f19"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_shikkui_normal.jpg",
+      "sha256": "052c10ff271a8cff290f40425a1c94db222ba9b20e6d978b335fdd01f8ca0c9b"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_shikkui_roughness.jpg",
+      "sha256": "12129f28abd3f3835f8c42ff1f2cb03037f107423beb43601c346c7d2376c2be"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_juraku_diffuse.jpg",
+      "sha256": "9d50de3b79897b98f2a5169439d498efd073040fa6503df620a98eb8e9b95362"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_juraku_normal.jpg",
+      "sha256": "b5ec7244042a21a26266cc5ad86aabc1afc0f2aa8e5aa897a39d8e15f40ab9ad"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_juraku_roughness.jpg",
+      "sha256": "9ffb4143dcf1ba903149bea6b810d251889d5047ce5376b1f07540bc7443c2ea"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_kayabuki_diffuse.jpg",
+      "sha256": "b26c5327738aabbc760fb2a569b2f064d46173b77bb4a679a4f7e2b735c229c1"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_kayabuki_normal.jpg",
+      "sha256": "c98f8cbff690f733054a55f8286050fc151d7543f5e6e4b88c0a3fbd8f82ba73"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_kayabuki_roughness.jpg",
+      "sha256": "80309d83bb9100244ea273bd5766559c03df3f9c5dd35874017dca7967101bbe"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_old_pine_floor_diffuse.jpg",
+      "sha256": "6eb05bf1ffd4070180865ad213fc88fefa9a2fa9ce1ae7379493122c8e131fae"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_old_pine_floor_normal.jpg",
+      "sha256": "b260dba0e34a3fa22645137a85013588c67d88934887953dcf4d30e44eb43455"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_old_pine_floor_roughness.jpg",
+      "sha256": "c129eef988b669737d782dca77c3ea49fb7c9ade6f4f56f10f1ff5c357605e77"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_doma_diffuse.jpg",
+      "sha256": "11f5781556afd4480e11c566c2afd6ae9eedbf4d960af6cdc98f911fc338da05"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_doma_normal.jpg",
+      "sha256": "fee46ebc3e227c3a5a0df9689698f2cbd6e37f71179d77dfef35c564dee67aae"
+    },
+    {
+      "path": "assets/textures/kominka/kominka_doma_roughness.jpg",
+      "sha256": "8337e83ce6ccaed557c33add8fd776a17075a13d1e8d82eba69d38ca939cde4e"
+    }
+  ],
+  "tests": {
+    "glbBuffers": "pass",
+    "dimensions": "pass",
+    "origin": "pass",
+    "uv": "pass",
+    "materialChannels": "pass",
+    "glass": "pass",
+    "previewAlphaAndFraming": "pass",
+    "modelKit": "pass",
+    "regeneration": "pass",
+    "blendReexport": "pass",
+    "browser": "not performed: Mac browser use prohibited",
+    "appIntegration": "not performed: Claude owns integration"
+  }
+}
