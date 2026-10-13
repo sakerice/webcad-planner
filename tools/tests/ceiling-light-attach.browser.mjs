@@ -30,6 +30,20 @@ try{
   assert.deepEqual(off,[],url+': 取付面から離れた照明がある');
   const outdoor=rows.filter(r=>r.elev>3000&&r.elev<4000);
   assert.ok(outdoor.length>=1,url+': 軒下のダウンライト（屋根の下面 3.3m 前後）が無い');
+  // 階段室（天井が階段の穴）のダウンライトは、穴の上の階の天井に付く。1階の天井高(2538)の空中に残らない
+  const stair=await page.evaluate(()=>DATA.items.filter(i=>i.type==='light-down'&&(roomAtPointOnFloor(i.floor||1,i.x+i.w/2,i.y+i.d/2)||{}).n==='階段').map(i=>{
+   const fl=i.floor||1,cx=i.x+i.w/2,cy=i.y+i.d/2;
+   // 穴の続く階を上がり、天井のある階（3階建ての階段室は3階）の天井を期待値にする
+   let f=fl; while(f<fl+8&&ceilingHasStairHoleAt(f,cx,cy)) f++;
+   const ru=roomAtPointOnFloor(f,cx,cy);
+   const want=Math.round(((ru?roomFloorTopY(ru):floorTopY(f))+ceilingFinishElevationMm(f,cx,cy)*U-item3DBaseY(i))/U);
+   return {id:i.id,floor:fl,elev:Math.round(i.elev),want,attachFloor:f,f1Ceil:ceilingFinishElevationMm(fl,cx,cy)};
+  }));
+  assert.ok(stair.length>=1,url+': 階段室のダウンライトが見つからない');
+  for(const s of stair){
+   assert.ok(s.elev>s.f1Ceil+500,url+': 階段室の灯 '+s.id+' が1階の天井高の空中に残っている ('+s.elev+')');
+   assert.ok(Math.abs(s.elev-s.want)<=1,url+': 階段室の灯 '+s.id+' が上の階の天井 '+s.want+' に付いていない ('+s.elev+')');
+  }
  }
  // 意図して下げたシーリングライト（吊り下げ扱い）は触らない。天井裏に埋まった物は下ろす
  const kept=await page.evaluate(()=>{
