@@ -4,7 +4,7 @@
   "tool": "official image_gen.imagegen",
   "model": "Internal image model identifier not exposed by tool.",
   "referenceLibraryId": "libfile_2f425b7689988191a769cd823769fce5",
-  "referenceStatus": "Read metadata succeeded. Local materialization denied by automatic approval review; reference pixels not inspected.",
+  "referenceStatus": "Official Library transfer succeeded and reference pixels viewed after explicit human approval, message Sentinel_f39c600b68d081918212588a5969d292 (2026-10-14 03:26 JST), replying to the Mac reference-use permission question. Prior denied attempts were not bypassed.",
   "initialSpecs": [
     {
       "id": "walker-male-02a",
@@ -230,6 +230,28 @@
       "prompt": "Identity preserving front-master edit of this adult young woman. Keep exact naturally lean adult body/limbs, mature facial identity, bob shape, above-knee straight skirt, skyblue/coral/ivory layered outfit and shoes,40degree A-pose, handsize, and fullbodyframing. Enlarge the whole HEAD includinghairandface by TWENTYFIVE PERCENT. Current crown-to-chin isonly194px for1203pxfullbody,about6.2headunits. Target crown-to-chin230–235px for1203pxfullbody,about5.2heads. Headtopnear23px andchin near255px. Keep shortnaturalneck belowhead. Do not shrink limbs or enlarge hands or makecheeksround.\nClean fill style: remove all shiny/lightstreaks fromhair, all knee highlight/shadow shapes, all skincontourshading, all skirtshadowcrease. Hair uniformsolidwarmbrown#624739,skirt/jacketuniformskyblue#61C4F2,blouse/waist/heelinsertuniformcoral#FF786E,trimpipingandsoleuniformivory#FFF2DC,skinuniformpeach. One solid flat tone per material, no gradients, texture, clothwrinkles or glossyhighlights. Keep normal thinfacelines,constructionseamsandthincontours. Uniformlightgray#E5E5E5background,nofloor,castshadowortext. OutputonecorrectedfemaleFRONTmaster.",
       "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-8418db18-13c3-46f3-8e1f-21856a7c7bdf.png",
       "assessment": "Review candidate: adult natural limbs and mature face, compact skirt, cleanup applied; measurement pending."
+    },
+    {
+      "id": "walker-male-02a",
+      "view": "front",
+      "revision": "functional-street",
+      "iteration": 1,
+      "prompt": "Use case: identity-preserve / stylized-concept. EDIT IMAGE 1, the original adult male walking-character FRONT master. Image 2 is ONLY a structural-density and natural adult-body quality benchmark: do not copy any person's identity, specific outfit, color pattern, emblem, logo or accessories from it. Output ONE corrected original full-body front character, not a collage.\n\nLOCK from image 1: exact mature facial identity, age24 adult body, naturally lean limbs, head/body size, head crown and chin positions, body length,40-degree symmetric A-pose, feet position, hand size, coral/turquoise/ivory palette and1254px-square framing. Whole-body1218px / visible head242px, about5.03 head units. No changes to proportions or pose. Keep hands with4–5 thick simplified digits lightly aligned, not realistic knuckle detail. Plain uniform light-gray #E5E5E5 background, no floor, no shadow, no text.\n\nRevise ONLY clothing construction, fitted small accessory and shoes so the design has recognizable functional shapes instead of a generic plain shirt and plain trousers. It is an original cheerful street-utility style, visually economical:\n\n1. TURQUOISE short structured overshirt jacket, open over IVORY plain tee, small natural folded collar. Keep the IVORY shoulder yoke, continuous across the rear. Add ONE broad clearly attached rectangular patch pocket to the wearer's left chest with a short IVORY top flap; simple thin seam boundaries, no stitching texture. Add one shallow angled entry pocket at the opposite lower front, defined by a single short bound edge. Hem has small clean stepped side notches; an ivory tee hem is visibly layered below the shorter jacket. Each sleeve has ONE broad CORAL rounded elbow-reinforcement panel, not tiny patches. Cuffs are clean turquoise with a narrow ivory inner band.\n2. A very compact flat IVORY rectangular crossbody pouch lies flush at the wearer's right lower ribs/upper hip, never protrudes out far from the silhouette. A narrow CORAL strap runs diagonally across the torso and connects visibly to both pouch attachment points; no floating strap, long tail or dangling cords. Simple TURQUOISE flap and one plain dark buckle show how it opens. No markings.\n3. CORAL fitted straight ankle trousers keep their exact naturally slim shape. Add one broad simple knee-construction seam per leg, and one shallow bound side-entry pocket. These are deliberate straight tailoring seams, NOT wrinkle marks or shadow creases. Keep the IVORY ankle cuffs.\n4. Adult-size clean low-top trainers: CORAL upper, clearly separated TURQUOISE toe cap and wide midfoot fastening strap, CORAL heel counter and IVORY sole. One or two construction contours make the fastening and sole physically readable. No loose laces, logos or floating tabs. Avoid huge toy shoes.\n5. The CORAL cap remains same silhouette and size. REMOVE the unexplained cyan rectangle sticking out at its back-right edge. Replace with a short CORAL adjustable belt lying flush along the rear cap edge and a small TURQUOISE buckle seated on the cap fabric. Strap and buckle must visibly attach to the hat; no detached rectangular block.\n\nRendering: crisp thin uniform contours, bright flat cel fills. Each region ONE solid flat color, at most one very simple hard-edged shadow level. ZERO cloth wrinkles, stitching texture, hatching, fine fabric texture, gradients, glossy highlights or realistic shading. Large blank surfaces remain between these few functional shapes. Preserve all adult face and body silhouette coordinates; details come from collar, pockets, layered hem, fitted pouch, elbow panels and shoe fastening. Do not add extra ornament or patterned clothing.",
+      "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-734ebd40-e53a-483e-8099-874d30be6ce6.png",
+      "deliveredCandidate": "candidates/functional-street/walker-male-02a-front-functional.png",
+      "inputImages": [
+        {
+          "role": "edit target; adult identity/body/proportion locked",
+          "path": "candidates/natural-limbs/walker-male-02a-front.png"
+        },
+        {
+          "role": "structural-density/natural-body quality benchmark only; no identity/costume/logo/pattern copying",
+          "library_file_id": "libfile_2f425b7689988191a769cd823769fce5",
+          "repositoryCopy": false
+        }
+      ],
+      "assessment": "Direction review pending: clothing construction improved, original evaluation candidate preserved. Visible head241px/full1220px=5.062241; sleeves37.2664/37.4238degrees. Four-to-five-digit separation final QA pending."
     }
-  ]
+  ],
+  "referenceUse": "Quality benchmark as second image input for functional-street revision only. No reference pixels copied into repository; prompt forbids specific identities, outfits, logos or patterns."
 }

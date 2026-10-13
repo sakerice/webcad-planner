@@ -20,6 +20,7 @@ LATEST = [
     ("walker-male-02a",9,251,1227),
     ("walker-female-02c",15,237,1225),
 ]
+FUNCTIONAL = [("walker-male-02a",10,251,1230)]
 SAMPLES = {
     "walker-male-02a": [
         ("肌","#F3BD93",628,205),("髪","#293955",617,90),
@@ -39,6 +40,18 @@ SAMPLES = {
         ("靴底","#FFF2DC",492,1212),
     ],
 }
+FUNCTIONAL_SAMPLES = [
+    ("肌","#F3BD93",628,205),("髪","#293955",617,90),
+    ("目","#276F88",586,165),("帽子","#FF695F",622,40),
+    ("上着","#26B8C5",543,410),("肩切替","#FFF2DC",486,313),
+    ("シャツ","#FFF2DC",622,362),("パンツ","#FF695F",551,921),
+    ("パンツ裾","#FFF2DC",515,1083),("胸ポケット","#26B8C5",705,418),
+    ("胸ポケット蓋","#FFF2DC",706,379),("肘切替","#FF695F",353,460),
+    ("鞄本体","#FFF2DC",708,573),("鞄蓋","#26B8C5",713,515),
+    ("鞄紐","#FF695F",624,427),("靴本体","#FF695F",520,1184),
+    ("靴つま先","#26B8C5",469,1191),("靴ストラップ","#26B8C5",493,1157),
+    ("靴底","#FFF2DC",478,1218),("帽子バックル","#26B8C5",706,103),
+]
 
 def foreground_mask(im):
     r,g,b=im.split()
@@ -53,9 +66,10 @@ def sample(im,x,y):
     return "#"+"".join(f"{int(median([p[c] for p in pixels])):02X}" for c in range(3))
 
 results=[]
-for group,entries in [("early-broad-limbs",EARLY),("natural-limbs",LATEST)]:
+for group,entries in [("early-broad-limbs",EARLY),("natural-limbs",LATEST),("functional-street",FUNCTIONAL)]:
     for identifier,top,chin,sole in entries:
-        path=ROOT/"candidates"/group/(identifier+"-front.png")
+        suffix="-front-functional.png" if group=="functional-street" else "-front.png"
+        path=ROOT/"candidates"/group/(identifier+suffix)
         with Image.open(path) as check:
             check.verify()
         with Image.open(path) as opened:
@@ -81,7 +95,7 @@ for group,entries in [("early-broad-limbs",EARLY),("natural-limbs",LATEST)]:
             "head_measurement_basis":"visible crown silhouette including close-fitting hat/hair; hidden skull not measured",
             "visually_displayed":True,
         }
-        if group=="natural-limbs":
+        if group!="early-broad-limbs":
             ys=[340,570] if identifier=="walker-male-02a" else [340,540]
             edges=[]
             for y in ys:
@@ -92,19 +106,21 @@ for group,entries in [("early-broad-limbs",EARLY),("natural-limbs",LATEST)]:
             entry["a_pose_sleeve_outer_edge"]={"rows_y":ys,"edges_x":edges,"degrees_from_vertical":[round(a,4) for a in angles],"basis":"straight sleeve silhouette, not skeleton joints"}
             colors=[]
             lines=[f"# {identifier} 色表 — 確認候補","","生成指示の意図色と原寸PNGの3×3画素中央値。肌・髪・目・服各部・靴を記録。低振幅のラスタ色ぶれとアンチエイリアスがあるため、全画素のHEX一致や未生成方向の一致は未検査。","","| 部位 | 意図色 | 画像サンプル | 中心座標(x,y) |","|---|---|---|---|"]
-            for label,target,x,y in SAMPLES[identifier]:
+            selected_samples=FUNCTIONAL_SAMPLES if group=="functional-street" else SAMPLES[identifier]
+            for label,target,x,y in selected_samples:
                 actual=sample(im,x,y)
                 colors.append({"part":label,"intended_hex":target,"sample_hex":actual,"sample_xy":[x,y]})
                 lines.append(f"| {label} | {target} | {actual} | ({x},{y}) |")
             entry["color_samples"]=colors
-            (path.parent/(identifier+"-colors.md")).write_text("\n".join(lines)+"\n",encoding="utf-8")
+            color_suffix="-colors-functional.md" if group=="functional-street" else "-colors.md"
+            (path.parent/(identifier+color_suffix)).write_text("\n".join(lines)+"\n",encoding="utf-8")
         results.append(entry)
 
 report={
     "state":"Incomplete direction review; no accepted final asset set.",
     "images":results,
-    "checks_passed":["8 PNGs decode","all dimensions 1254x1254 >=1024x1024","all visible-crown head-unit ratios 5.0-5.5","two latest A-pose sleeve slopes 30-45 degrees","recorded SHA-256 and color samples"],
-    "not_completed":["latest direction approval","other four natural-limbs fronts","side/back/turnaround consistency","four-or-five-digit separation final QA","all six final color tables","six-person height-calibrated lineup","six-person lineup Library save","strict per-region single-color pixel verification","reference image pixel inspection"],
+    "checks_passed":["9 PNGs decode","all dimensions 1254x1254 >=1024x1024","all visible-crown head-unit ratios 5.0-5.5","three direction-review A-pose sleeve slopes 30-45 degrees","recorded SHA-256 and color samples","reference image officially materialized and pixels inspected"],
+    "not_completed":["latest direction approval","other four natural-limbs fronts","side/back/turnaround consistency","four-or-five-digit separation final QA","all six final color tables","six-person height-calibrated lineup","six-person lineup Library save","strict per-region single-color pixel verification"],
 }
 (ROOT/"inspection.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print(json.dumps({"images":len(results),"head_units":{e["file"]:e["head_units"] for e in results},"latest_arm_angles":{e["id"]:e["a_pose_sleeve_outer_edge"]["degrees_from_vertical"] for e in results if "a_pose_sleeve_outer_edge" in e}},ensure_ascii=False))

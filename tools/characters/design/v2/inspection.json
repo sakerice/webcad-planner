@@ -518,14 +518,250 @@
           ]
         }
       ]
+    },
+    {
+      "file": "candidates/functional-street/walker-male-02a-front-functional.png",
+      "id": "walker-male-02a",
+      "status": "direction_review_pending",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "467aeb5974ee01514b2e15a7806d374145c0de075ceab6eac0c3647028a10ebb",
+      "foreground_bbox_inclusive": [
+        198,
+        10,
+        1041,
+        1230
+      ],
+      "crown_y": 10,
+      "chin_xy": [
+        627,
+        251
+      ],
+      "chin_rgb": [
+        41,
+        40,
+        29
+      ],
+      "sole_y": 1230,
+      "head_height_px": 241,
+      "full_height_px": 1220,
+      "head_units": 5.062241,
+      "head_measurement_basis": "visible crown silhouette including close-fitting hat/hair; hidden skull not measured",
+      "visually_displayed": true,
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          340,
+          570
+        ],
+        "edges_x": [
+          [
+            436,
+            800
+          ],
+          [
+            261,
+            976
+          ]
+        ],
+        "degrees_from_vertical": [
+          37.2664,
+          37.4238
+        ],
+        "basis": "straight sleeve silhouette, not skeleton joints"
+      },
+      "color_samples": [
+        {
+          "part": "肌",
+          "intended_hex": "#F3BD93",
+          "sample_hex": "#FFD0A4",
+          "sample_xy": [
+            628,
+            205
+          ]
+        },
+        {
+          "part": "髪",
+          "intended_hex": "#293955",
+          "sample_hex": "#354259",
+          "sample_xy": [
+            617,
+            90
+          ]
+        },
+        {
+          "part": "目",
+          "intended_hex": "#276F88",
+          "sample_hex": "#03C6EA",
+          "sample_xy": [
+            586,
+            165
+          ]
+        },
+        {
+          "part": "帽子",
+          "intended_hex": "#FF695F",
+          "sample_hex": "#FD6A54",
+          "sample_xy": [
+            622,
+            40
+          ]
+        },
+        {
+          "part": "上着",
+          "intended_hex": "#26B8C5",
+          "sample_hex": "#09C8DE",
+          "sample_xy": [
+            543,
+            410
+          ]
+        },
+        {
+          "part": "肩切替",
+          "intended_hex": "#FFF2DC",
+          "sample_hex": "#FEF8ED",
+          "sample_xy": [
+            486,
+            313
+          ]
+        },
+        {
+          "part": "シャツ",
+          "intended_hex": "#FFF2DC",
+          "sample_hex": "#FEF9EF",
+          "sample_xy": [
+            622,
+            362
+          ]
+        },
+        {
+          "part": "パンツ",
+          "intended_hex": "#FF695F",
+          "sample_hex": "#FE6A54",
+          "sample_xy": [
+            551,
+            921
+          ]
+        },
+        {
+          "part": "パンツ裾",
+          "intended_hex": "#FFF2DC",
+          "sample_hex": "#FFF9EE",
+          "sample_xy": [
+            515,
+            1083
+          ]
+        },
+        {
+          "part": "胸ポケット",
+          "intended_hex": "#26B8C5",
+          "sample_hex": "#0BCADE",
+          "sample_xy": [
+            705,
+            418
+          ]
+        },
+        {
+          "part": "胸ポケット蓋",
+          "intended_hex": "#FFF2DC",
+          "sample_hex": "#FEF9EE",
+          "sample_xy": [
+            706,
+            379
+          ]
+        },
+        {
+          "part": "肘切替",
+          "intended_hex": "#FF695F",
+          "sample_hex": "#FD6653",
+          "sample_xy": [
+            353,
+            460
+          ]
+        },
+        {
+          "part": "鞄本体",
+          "intended_hex": "#FFF2DC",
+          "sample_hex": "#FEF9EE",
+          "sample_xy": [
+            708,
+            573
+          ]
+        },
+        {
+          "part": "鞄蓋",
+          "intended_hex": "#26B8C5",
+          "sample_hex": "#09CADE",
+          "sample_xy": [
+            713,
+            515
+          ]
+        },
+        {
+          "part": "鞄紐",
+          "intended_hex": "#FF695F",
+          "sample_hex": "#F87058",
+          "sample_xy": [
+            624,
+            427
+          ]
+        },
+        {
+          "part": "靴本体",
+          "intended_hex": "#FF695F",
+          "sample_hex": "#FB6E57",
+          "sample_xy": [
+            520,
+            1184
+          ]
+        },
+        {
+          "part": "靴つま先",
+          "intended_hex": "#26B8C5",
+          "sample_hex": "#0AC9DF",
+          "sample_xy": [
+            469,
+            1191
+          ]
+        },
+        {
+          "part": "靴ストラップ",
+          "intended_hex": "#26B8C5",
+          "sample_hex": "#0ECDE2",
+          "sample_xy": [
+            493,
+            1157
+          ]
+        },
+        {
+          "part": "靴底",
+          "intended_hex": "#FFF2DC",
+          "sample_hex": "#FEF9EE",
+          "sample_xy": [
+            478,
+            1218
+          ]
+        },
+        {
+          "part": "帽子バックル",
+          "intended_hex": "#26B8C5",
+          "sample_hex": "#03C9D2",
+          "sample_xy": [
+            706,
+            103
+          ]
+        }
+      ]
     }
   ],
   "checks_passed": [
-    "8 PNGs decode",
+    "9 PNGs decode",
     "all dimensions 1254x1254 >=1024x1024",
     "all visible-crown head-unit ratios 5.0-5.5",
-    "two latest A-pose sleeve slopes 30-45 degrees",
-    "recorded SHA-256 and color samples"
+    "three direction-review A-pose sleeve slopes 30-45 degrees",
+    "recorded SHA-256 and color samples",
+    "reference image officially materialized and pixels inspected"
   ],
   "not_completed": [
     "latest direction approval",
@@ -535,7 +771,6 @@
     "all six final color tables",
     "six-person height-calibrated lineup",
     "six-person lineup Library save",
-    "strict per-region single-color pixel verification",
-    "reference image pixel inspection"
+    "strict per-region single-color pixel verification"
   ]
 }
