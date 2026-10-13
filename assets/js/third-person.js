@@ -13,6 +13,13 @@ var ThirdPerson = (function(){
   var on = false;                      // 三人称で歩いているか
   var DIST = 2.4, HEAD = 1.55, MIN_DIST = 0.35, CRAMPED = 0.8;
   var figure = null, parts = null, phase = 0, lastX = null, lastZ = null;
+  // 人物の GLB（Codex がデザインし Meshy で立体化した物）。読めなければ仮の人形で歩く
+  var CHARACTERS = [
+    {id:'walker-male-01', label:'男性', url:'assets/models/characters/walker-male-01.glb', height:1.72},
+    {id:'walker-female-01', label:'女性', url:'assets/models/characters/walker-female-01.glb', height:1.60}
+  ];
+  var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null;
+  var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
   var ray = null, colliders = null, collidersFor = null;
 
   function mat(color){ return new THREE.MeshStandardMaterial({color:color, roughness:0.75, metalness:0}); }
@@ -22,6 +29,46 @@ var ThirdPerson = (function(){
     var mesh = new THREE.Mesh(g, m); mesh.castShadow = true;
     var pivot = new THREE.Group(); pivot.add(mesh);
     return pivot;
+  }
+  // GLB の人物を読み込む。骨組みと動き(idle・walk)を持ち、原点は足元、正面は +Z の約束
+  function loadCharacter(c){
+    if(models[c.id]) return models[c.id];
+    models[c.id] = {state:'loading'};
+    var loader = (typeof getGltfLoader==='function') ? getGltfLoader() : new THREE.GLTFLoader();
+    loader.load(c.url + '?v=' + (typeof MODEL_ASSET_VER!=='undefined' ? MODEL_ASSET_VER : 1), function(gltf){
+      var root = gltf.scene;
+      // 身長を約束の値に合わせる（Meshy の書き出しの縮尺の誤差を吸収する）
+      var box = new THREE.Box3().setFromObject(root), h = box.max.y - box.min.y;
+      if(h > 0.1) root.scale.multiplyScalar(c.height / h);
+      root.traverse(function(o){ if(o.isMesh){ o.castShadow = true; o.frustumCulled = false; } o.userData._thirdPerson = true; });
+      var holder = new THREE.Group(); holder.name = '_thirdPersonFigure';
+      root.rotation.y = Math.PI;                          // GLB の正面 +Z を、歩く向き(-Z)へ向ける
+      holder.add(root); holder.userData._thirdPerson = true;
+      models[c.id] = {state:'ready', holder:holder, clips:gltf.animations || []};
+      if(on && CHARACTERS[charIndex] === c) useModel(c);
+    }, undefined, function(){ models[c.id] = {state:'failed'}; });
+    return models[c.id];
+  }
+  function clipNamed(list, name){
+    return list.find(function(a){ return a.name === name; }) || list.find(function(a){ return a.name.toLowerCase().indexOf(name) >= 0; }) || null;
+  }
+  // 読み込めた人物に差し替える（読み込み前・失敗時は仮の人形のまま）
+  function useModel(c){
+    var m = models[c.id];
+    if(!m || m.state !== 'ready') return false;
+    var old = figure;
+    figure = m.holder; figureFor = c.id;
+    if(old && old !== figure && old.parent){ old.parent.add(figure); old.parent.remove(old); }
+    mixer = new THREE.AnimationMixer(figure);
+    var walk = clipNamed(m.clips, 'walk'), idle = clipNamed(m.clips, 'idle');
+    actions = {walk: walk ? mixer.clipAction(walk) : null, idle: idle ? mixer.clipAction(idle) : null};
+    if(actions.idle) actions.idle.play();
+    if(actions.walk){ actions.walk.play(); actions.walk.setEffectiveWeight(0); }
+    parts = null;
+    lastX = null;
+    if(typeof walkApplyCamera==='function') walkApplyCamera();
+    if(typeof invalidate3D==='function') invalidate3D();
+    return true;
   }
   // 身長 1.65m の人形。原点は足元の中心、正面は -Z（WALK.yaw=0 の進む向き）
   function buildFigure(){
@@ -63,7 +110,15 @@ var ThirdPerson = (function(){
   function feetY(){ return floorTopY(WALK.floor) + (WALK.groundOff || 0); }
   function place(){
     if(!camExt || !sc3) return;
-    if(!figure) figure = buildFigure();
+    var want = CHARACTERS[charIndex];
+    if(figureFor !== want.id && !useModel(want)){
+      // まだ読めていない・読めなかった人物は、仮の人形で歩く（読めたら差し替わる）
+      if(figureFor !== 'doll'){
+        if(figure && figure.parent) figure.parent.remove(figure);
+        figure = buildFigure(); mixer = null; actions = null; figureFor = 'doll';
+      }
+      loadCharacter(want);
+    }
     if(figure.parent !== sc3) sc3.add(figure);       // いま歩いている側の場面に立たせる（比較中のもう片方は描く直前に移す）
     var fy = feetY();
     figure.position.set(WALK.x, fy, WALK.z);
@@ -71,11 +126,20 @@ var ThirdPerson = (function(){
     // 歩いた距離だけ手足を振る（止まると元へ戻す）
     var moved = lastX === null ? 0 : Math.hypot(WALK.x - lastX, WALK.z - lastZ);
     lastX = WALK.x; lastZ = WALK.z;
-    if(moved > 0.0005){ phase += moved * 4.2; } else { phase *= 0.8; }
-    var s = Math.sin(phase), swing = Math.min(1, Math.abs(phase) > 0.01 ? 1 : 0) * 0.5;
-    parts.legL.rotation.x = s * swing; parts.legR.rotation.x = -s * swing;
-    parts.armL.rotation.x = -s * swing * 0.8; parts.armR.rotation.x = s * swing * 0.8;
-    parts.hips.position.y = 0.86 + Math.abs(Math.cos(phase)) * 0.025 * (swing ? 1 : 0);
+    if(mixer){
+      // 歩いた分だけ walk を進め、止まったら idle へ寄せる
+      var now = performance.now(), dt = lastTick ? Math.min(0.1, (now - lastTick) / 1000) : 0; lastTick = now;
+      var walking = moved > 0.0005;
+      if(actions.walk) actions.walk.setEffectiveWeight(walking ? 1 : 0);
+      if(actions.idle) actions.idle.setEffectiveWeight(walking ? 0 : 1);
+      mixer.update(walking ? Math.max(dt, moved / WALK_SPEED) : dt);
+    } else if(parts){
+      if(moved > 0.0005){ phase += moved * 4.2; } else { phase *= 0.8; }
+      var s = Math.sin(phase), swing = Math.min(1, Math.abs(phase) > 0.01 ? 1 : 0) * 0.5;
+      parts.legL.rotation.x = s * swing; parts.legR.rotation.x = -s * swing;
+      parts.armL.rotation.x = -s * swing * 0.8; parts.armR.rotation.x = s * swing * 0.8;
+      parts.hips.position.y = 0.86 + Math.abs(Math.cos(phase)) * 0.025 * (swing ? 1 : 0);
+    }
     // カメラ: 頭の後ろ。見る向きは一人称と同じ(WALK.yaw と WALK.pitch)
     var pitch = WALK.pitch || 0;
     var dir = new THREE.Vector3(-Math.sin(WALK.yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(WALK.yaw) * Math.cos(pitch));
@@ -110,7 +174,7 @@ var ThirdPerson = (function(){
   function updateButton(){
     var b = document.getElementById('walk-tps-toggle');
     if(!b) return;
-    b.innerHTML = on ? '三人<br>称' : '一人<br>称';
+    b.innerHTML = on ? '三人称<br>' + CHARACTERS[charIndex].label : '一人<br>称';
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
     b.title = on ? '一人称に切り替え' : '三人称に切り替え（人物の後ろから見る）';
   }
@@ -121,7 +185,12 @@ var ThirdPerson = (function(){
     if(h && !document.getElementById('walk-tps-toggle')){
       var b = document.createElement('button');
       b.id = 'walk-tps-toggle'; b.type = 'button'; b.className = 'wk-btn wk-height wk-tps';
-      b.addEventListener('click', function(){ setOn(!on); });
+      b.addEventListener('click', function(){
+        // 一人称 → 三人称(男性) → 三人称(女性) → 一人称 の順に切り替える
+        if(!on){ charIndex = 0; setOn(true); }
+        else if(charIndex < CHARACTERS.length - 1){ charIndex++; if(!useModel(CHARACTERS[charIndex])) loadCharacter(CHARACTERS[charIndex]); updateButton(); }
+        else setOn(false);
+      });
       h.parentNode.insertBefore(b, h.nextSibling);
       updateButton();
     }
@@ -149,5 +218,6 @@ var ThirdPerson = (function(){
   window.addEventListener('load', function(){
     if(window.THREE) install(); else window.addEventListener('three-ready', install, {once:true});
   });
-  return { isEnabled:function(){ return enabled; }, isOn:function(){ return on; }, setOn:setOn, _place:place };
+  return { isEnabled:function(){ return enabled; }, isOn:function(){ return on; }, setOn:setOn, _place:place,
+    character:function(){ return CHARACTERS[charIndex].id; }, modelState:function(id){ return (models[id]||{}).state || 'none'; } };
 })();

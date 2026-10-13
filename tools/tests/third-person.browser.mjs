@@ -55,7 +55,9 @@ try {
   assert.ok(t.at < 1e-6, '人物が歩いている位置に立っていない');
   assert.ok(!t.visible || t.back > 0.7, 'カメラが人物の後ろに引けていない: ' + t.back);
   assert.ok(Math.abs(t.yaw) < 1e-6, 'カメラの向きが一人称と違う');
-  // 一人称に戻すと人物は消え、カメラは目の位置に戻る
+  // もう1回で女性に替わり、さらにもう1回で一人称に戻る（人物は消え、カメラは目の位置に戻る）
+  await pressToggle(p2);
+  assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-01');
   await pressToggle(p2);
   const back = await p2.evaluate(() => { let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; }); return { figure: !!f, d: Math.hypot(camExt.position.x - WALK.x, camExt.position.z - WALK.z) }; });
   assert.deepEqual(back, { figure: false, d: 0 });
