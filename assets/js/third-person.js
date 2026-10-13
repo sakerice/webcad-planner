@@ -40,6 +40,7 @@ var ThirdPerson = (function(){
       // 身長を約束の値に合わせる（Meshy の書き出しの縮尺の誤差を吸収する）
       var box = new THREE.Box3().setFromObject(root), h = box.max.y - box.min.y;
       if(h > 0.1) root.scale.multiplyScalar(c.height / h);
+      toonify(root);
       root.traverse(function(o){ if(o.isMesh){ o.castShadow = true; o.frustumCulled = false; } o.userData._thirdPerson = true; });
       var holder = new THREE.Group(); holder.name = '_thirdPersonFigure';
       root.rotation.y = Math.PI;                          // GLB の正面 +Z を、歩く向き(-Z)へ向ける
@@ -48,6 +49,46 @@ var ThirdPerson = (function(){
       if(on && CHARACTERS[charIndex] === c) useModel(c);
     }, undefined, function(){ models[c.id] = {state:'failed'}; });
     return models[c.id];
+  }
+  // アニメ調の見た目にする（参考: 家庭用ゲーム機のアニメ調の主人公）。
+  // - 陰影を3段のトゥーン（MeshToonMaterial と段々の濃淡の画像）にし、写実的な照り返しをやめる
+  // - 輪郭線: 同じ骨組みで動く、少し太らせた裏面だけの黒い写しを重ねる（裏返しの殻の手法）
+  var toonRamp = null;
+  function rampTexture(){
+    if(toonRamp) return toonRamp;
+    var data = new Uint8Array([178, 178, 178, 255, 222, 222, 222, 255, 255, 255, 255, 255]);   // 影・中間・明るい所（影を濃くしすぎると顔がまだらになる）
+    toonRamp = new THREE.DataTexture(data, 3, 1, THREE.RGBAFormat);
+    toonRamp.minFilter = toonRamp.magFilter = THREE.NearestFilter;
+    toonRamp.needsUpdate = true;
+    return toonRamp;
+  }
+  var OUTLINE_M = 0.006;
+  function outlineMaterial(){
+    var m = new THREE.MeshBasicMaterial({color:0x2a2226, side:THREE.BackSide});
+    m.onBeforeCompile = function(sh){
+      sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  transformed += normalize(objectNormal) * ' + OUTLINE_M.toFixed(4) + ';');
+    };
+    m.customProgramCacheKey = function(){ return 'tps-outline'; };
+    return m;
+  }
+  function toonify(root){
+    var meshes = [];
+    root.traverse(function(o){ if(o.isMesh) meshes.push(o); });
+    meshes.forEach(function(o){
+      var src = o.material;
+      var toon = new THREE.MeshToonMaterial({
+        color: 0xffffff, map: src.map || null, gradientMap: rampTexture()
+        // 法線の画像は使わない（服のしわの細かい凹凸が、段々の陰影ではまだらの模様になる）
+      });
+      if(toon.map) toon.map.colorSpace = THREE.SRGBColorSpace;
+      o.material = toon;
+      // 輪郭線（スキン付きなら同じ骨組みに結び付ける）
+      var line = o.isSkinnedMesh ? new THREE.SkinnedMesh(o.geometry, outlineMaterial()) : new THREE.Mesh(o.geometry, outlineMaterial());
+      if(o.isSkinnedMesh) line.bind(o.skeleton, o.bindMatrix);
+      line.position.copy(o.position); line.quaternion.copy(o.quaternion); line.scale.copy(o.scale);
+      line.castShadow = false; line.frustumCulled = false; line.name = '_outline';
+      o.parent.add(line);
+    });
   }
   function clipNamed(list, name){
     // Meshy の書き出しの名前は Walking・Running・Chair_Sit_Idle_M など。座る待機を立ち待機と取り違えない
