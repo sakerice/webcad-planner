@@ -50,7 +50,9 @@ var ThirdPerson = (function(){
     return models[c.id];
   }
   function clipNamed(list, name){
-    return list.find(function(a){ return a.name === name; }) || list.find(function(a){ return a.name.toLowerCase().indexOf(name) >= 0; }) || null;
+    // Meshy の書き出しの名前は Walking・Running・Chair_Sit_Idle_M など。座る待機を立ち待機と取り違えない
+    return list.find(function(a){ return a.name === name; })
+      || list.find(function(a){ var n = a.name.toLowerCase(); return n.indexOf(name) >= 0 && n.indexOf('sit') < 0 && n.indexOf('chair') < 0; }) || null;
   }
   // 読み込めた人物に差し替える（読み込み前・失敗時は仮の人形のまま）
   function useModel(c){
@@ -63,7 +65,8 @@ var ThirdPerson = (function(){
     var walk = clipNamed(m.clips, 'walk'), idle = clipNamed(m.clips, 'idle');
     actions = {walk: walk ? mixer.clipAction(walk) : null, idle: idle ? mixer.clipAction(idle) : null};
     if(actions.idle) actions.idle.play();
-    if(actions.walk){ actions.walk.play(); actions.walk.setEffectiveWeight(0); }
+    if(actions.walk){ actions.walk.play(); actions.walk.setEffectiveWeight(actions.idle ? 0 : 1); }
+    mixer.update(0);
     parts = null;
     lastX = null;
     if(typeof walkApplyCamera==='function') walkApplyCamera();
@@ -130,9 +133,14 @@ var ThirdPerson = (function(){
       // 歩いた分だけ walk を進め、止まったら idle へ寄せる
       var now = performance.now(), dt = lastTick ? Math.min(0.1, (now - lastTick) / 1000) : 0; lastTick = now;
       var walking = moved > 0.0005;
-      if(actions.walk) actions.walk.setEffectiveWeight(walking ? 1 : 0);
-      if(actions.idle) actions.idle.setEffectiveWeight(walking ? 0 : 1);
-      mixer.update(walking ? Math.max(dt, moved / WALK_SPEED) : dt);
+      if(actions.idle){
+        if(actions.walk) actions.walk.setEffectiveWeight(walking ? 1 : 0);
+        actions.idle.setEffectiveWeight(walking ? 0 : 1);
+        mixer.update(walking ? Math.max(dt, moved / WALK_SPEED) : dt);
+      } else if(walking){
+        // 待機の動きが無い人物は、止まったら歩く動きをその場で止める（腕を広げた骨組みの基本の姿にしない）
+        mixer.update(Math.max(dt, moved / WALK_SPEED));
+      }
     } else if(parts){
       if(moved > 0.0005){ phase += moved * 4.2; } else { phase *= 0.8; }
       var s = Math.sin(phase), swing = Math.min(1, Math.abs(phase) > 0.01 ? 1 : 0) * 0.5;
