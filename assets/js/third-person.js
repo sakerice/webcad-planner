@@ -9,7 +9,8 @@
 // - カメラ: 人物の頭の後ろ上、いつも同じ距離（狭い家で寄ったり離れたりすると煩わしいので、壁で縮めない）。
 //   上下のドラッグは一人称と同じ向き（WALK.pitch をそのまま使う）。カメラと人物の間に壁・家具などが入ったら、
 //   それ（壁なら壁に付いた窓・ドアも）を見えなくする。影は落とし続ける（部屋の明るさが変わらないように）
-// - 下キー: 後ろ向きに歩かず、その場で振り返ってから、振り返った向きへ前に歩く（カメラも後ろへ回り込む）
+// - 下キー: カメラの向きはそのままで、人物がカメラの方へ向き直り、体の前をカメラに向けて手前へ歩いてくる
+//   （カメラは同じ距離を保って下がる）。上キーで奥へ歩くと、また背中を向ける
 var ThirdPerson = (function(){
   var enabled = /[?&]tps=1\b/.test(location.search);
   var on = false;                      // 三人称で歩いているか
@@ -23,7 +24,7 @@ var ThirdPerson = (function(){
   var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null;
   var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
   var ray = null, walls = null, wallsFor = null, hidden = [], HIDDEN_LAYER = 1;
-  var turnLeft = 0, backHeld = false, lastTurnAt = 0;   // 下キーで振り返る残りの角度と、下キーを押し続けているか
+  var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;   // 人物の向き（カメラの向き WALK.yaw からのずれ。0=背中、π=正面をカメラへ）
 
   function mat(color){ return new THREE.MeshStandardMaterial({color:color, roughness:0.75, metalness:0}); }
   function limb(len, r, m){
@@ -206,9 +207,19 @@ var ThirdPerson = (function(){
     if(figure.parent !== sc3) sc3.add(figure);       // いま歩いている側の場面に立たせる（比較中のもう片方は描く直前に移す）
     var fy = feetY();
     figure.position.set(WALK.x, fy, WALK.z);
-    figure.rotation.set(0, WALK.yaw, 0);
     // 歩いた距離だけ手足を振る（止まると元へ戻す）
     var moved = lastX === null ? 0 : Math.hypot(WALK.x - lastX, WALK.z - lastZ);
+    // 人物の向き: 奥へ歩けば背中、手前（カメラの方）へ歩けば正面をカメラへ向ける。止まったら向きはそのまま
+    if(moved > 0.0005){
+      var along = (WALK.x - lastX) * -Math.sin(WALK.yaw) + (WALK.z - lastZ) * -Math.cos(WALK.yaw);
+      if(along < -moved * 0.5) bodyTarget = Math.PI; else if(along > moved * 0.5) bodyTarget = 0;
+    }
+    var tnow = performance.now(), tdt = lastBodyAt ? Math.min(0.1, (tnow - lastBodyAt) / 1000) : 0; lastBodyAt = tnow;
+    if(bodyOff !== bodyTarget){
+      var step = TURN_RATE * tdt;
+      bodyOff = Math.abs(bodyTarget - bodyOff) <= step ? bodyTarget : bodyOff + (bodyTarget > bodyOff ? step : -step);
+    }
+    figure.rotation.set(0, WALK.yaw + bodyOff, 0);
     lastX = WALK.x; lastZ = WALK.z;
     if(mixer){
       // 歩いた分だけ walk を進め、止まったら idle へ寄せる
@@ -253,7 +264,7 @@ var ThirdPerson = (function(){
     on = !!v && enabled;
     if(!on && figure && figure.parent) figure.parent.remove(figure);
     if(!on) setHidden([]);
-    lastX = null; turnLeft = 0;
+    lastX = null; bodyOff = bodyTarget = 0;
     updateButton();
     if(typeof isWalkView==='function' && isWalkView() && WALK.active){ walkApplyCamera(); if(typeof invalidate3D==='function') invalidate3D(); }
   }
@@ -284,30 +295,6 @@ var ThirdPerson = (function(){
     walkApplyCamera = function(){
       var r = baseApply.apply(this, arguments);
       if(on && typeof isWalkView==='function' && isWalkView()) place();
-      return r;
-    };
-    // 下キー: 三人称では、その場で振り返ってから、振り返った向きへ前に歩く
-    var baseUpdate = updateWalkMode;
-    updateWalkMode = function(now){
-      if(!on || typeof isWalkView !== 'function' || !isWalkView() || !WALK.active){ backHeld = false; turnLeft = 0; return baseUpdate.apply(this, arguments); }
-      var back = !!(WALK.keys.back || iMov['arrowdown'] || iMov['s']);
-      if(back && !backHeld) turnLeft = Math.PI;            // 押した瞬間に半回転を始める
-      backHeld = back;
-      var saved = {kb:WALK.keys.back, kf:WALK.keys.fwd, ad:iMov['arrowdown'], s:iMov['s']};
-      WALK.keys.back = false; iMov['arrowdown'] = false; iMov['s'] = false;
-      var turning = false;
-      if(turnLeft > 0){
-        var dt = Math.min(0.1, Math.max(0.001, (now - (lastTurnAt || now)) / 1000));
-        var step = Math.min(turnLeft, TURN_RATE * dt);
-        WALK.yaw += step; turnLeft -= step; turning = true;
-      } else if(back){
-        WALK.keys.fwd = true;                                // 振り返り終えたら、押している間は前へ歩く
-      }
-      lastTurnAt = now;
-      var r;
-      try { r = baseUpdate.apply(this, arguments); }
-      finally { WALK.keys.back = saved.kb; WALK.keys.fwd = saved.kf; iMov['arrowdown'] = saved.ad; iMov['s'] = saved.s; }
-      if(turning){ walkApplyCamera(); return true; }
       return r;
     };
     // 描く場面に人物を入れる（比較モードでは左右それぞれの場面に、描く直前に移す）
