@@ -66,7 +66,7 @@ const FNS = [
   'roomExplicitCeilingMm', 'roomCeilingCapM', 'roomCeilingHeightM', 'roomRenderedCeilingMm',
   'roomLevelLabel', 'usesFinishedHeightModel', 'ceilingFinishThicknessM',
   'roomCeilingElevationMm', 'shiftRoomCeilingFixtures', 'followRoomCeiling',
-  'ceilingFinishElevationMm', 'ceilingAttachElevationMm', 'roofTopLimitAtPlanPoint',
+  'ceilingFinishElevationMm', 'ceilingAttachElevationMm', 'ceilingHasStairHoleAt', 'pointInPolyXZ', 'roofTopLimitAtPlanPoint',
   'roofCoversPlanPoint', 'roofUndersideWorldYAt', 'roofBaseWorldY', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'setbackOutlineCoversLocal', 'wallFullHeightM',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
