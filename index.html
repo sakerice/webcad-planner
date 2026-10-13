@@ -18546,6 +18546,7 @@ canvas.addEventListener('mouseup',function(){
   }
   var wasDragging=DRAG.active;
   DRAG.active=false; DRAG.group=null; ST._snapState=null;
+  if(wasDragging) snapMovedCeilingLightsToAttachSurface();   // 別の部屋・軒下へ動かした照明を取付面へ
   if(wasDragging) updateProps();
   if(ren)build3D();
   if(wasDragging) queueSharedSync(80);
@@ -22434,10 +22435,49 @@ function snapOutdoorCeilingFixturesToRoof(){
   if(moved) console.info('[WebCAD] 軒下の天井付け器具 '+moved+'個を屋根の下面へ寄せ直しました');
   return moved;
 }
+// 天井付けの照明を、読み込みのたびに取付面（部屋の天井仕上げ面・軒下なら屋根の下面）へ寄せる。
+//
+// 上の2つの寄せ直しは「1度だけ」走る作りで、済んだ印をプランに書く。ところが既定プランは
+// 生成し直されることがあり、印だけが残って高さが古い値に戻った（軒下のダウンライトが
+// 屋根から 750mm 浮いた）。利用者のプランでも、天井高を変えた後に置いた照明が古い既定値の
+// まま残ることがある。印に頼らず、照明は毎回取付面に付ける。
+//
+// ダウンライトは埋込なので必ず取付面。直付け(シーリング)・スポットは、取付面より
+// LIGHT_ATTACH_TOLERANCE_MM を超えて下げてある物は意図した吊り下げとみなして触らない。
+// 天井裏に埋まっている物(取付面より上)は常に下ろす。上に天井も屋根も無い物は触らない。
+var LIGHT_ATTACH_TOLERANCE_MM=300;
+function snapCeilingLightToAttachSurface(it){
+  if(!it||!isLightItemType(it.type)) return false;
+  var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+  if(topOff===undefined) return false;
+  var want=ceilingAttachElevationMm(it);
+  if(want===null||!isFinite(want)) return false;
+  want-=topOff;
+  var cur=Number(it.elev)||0, drop=want-cur;        // 正なら取付面より下に浮いている
+  if(Math.abs(drop)<=1) return false;
+  if(it.type!=='light-down'&&drop>LIGHT_ATTACH_TOLERANCE_MM) return false;
+  it.elev=want;
+  return true;
+}
+function snapCeilingLightsToAttachSurface(){
+  if(!DATA||!DATA.items) return 0;
+  var moved=0;
+  DATA.items.forEach(function(it){ if(snapCeilingLightToAttachSurface(it)) moved++; });
+  if(moved) console.info('[WebCAD] 天井付けの照明 '+moved+'個を取付面へ寄せました');
+  return moved;
+}
+// 平面図で照明を別の部屋（天井高の違う部屋・軒下）へ動かしたとき、動かした物だけ寄せ直す
+function snapMovedCeilingLightsToAttachSurface(){
+  var list=[];
+  if(ST&&ST.selected) list.push(ST.selected);
+  if(ST&&ST.multiSelected&&ST.multiSelected.length) list=list.concat(ST.multiSelected);
+  return list.filter(snapCeilingLightToAttachSurface).length;
+}
 function normalizeLegacyFurnitureItems(){
   if(!DATA||!DATA.items) return;
   snapCeilingFixturesToCeiling();
   snapOutdoorCeilingFixturesToRoof();
+  snapCeilingLightsToAttachSurface();
   DATA.items=DATA.items.filter(function(it){return it && it.type!=='tv';});
   if(ST && ST.selected && ST.selected.type==='tv') ST.selected=null;
   DATA.items.forEach(function(it){

@@ -124,10 +124,40 @@ function followRoomCeiling(room,mutate){
 //
 // **足元が部屋と屋外で違う**ことに注意する。屋内は床仕上げ面、屋外は地面
 // (item3DBaseY が返す)。屋根の下面はワールドの高さなので、足元を引いて戻す。
+// 点が多角形(世界座標 x,z)の中にあるか
+function pointInPolyXZ(px,pz,poly){
+  var inside=false;
+  for(var i=0,j=poly.length-1;i<poly.length;j=i++){
+    var xi=poly[i].x,zi=poly[i].z,xj=poly[j].x,zj=poly[j].z;
+    if((zi>pz)!==(zj>pz) && px<(xj-xi)*(pz-zi)/(zj-zi)+xi) inside=!inside;
+  }
+  return inside;
+}
+// この階の天井が、その位置で階段の穴（吹き抜け）になっているか。穴の位置に天井面は無い
+function ceilingHasStairHoleAt(fl,cx,cy){
+  if(typeof stairwellHolesForRoom!=='function'||typeof stairwellQuadsForFloor!=='function') return false;
+  var r=roomAtPointOnFloor(fl,cx,cy);
+  if(!r) return false;
+  var cache={}; cache[fl]=stairwellQuadsForFloor(fl+1);
+  var holes=stairwellHolesForRoom(r,cache)||[];
+  var px=cx*U, pz=cy*U;
+  return holes.some(function(poly){ return pointInPolyXZ(px,pz,poly); });
+}
 function ceilingAttachElevationMm(it){
   if(!it) return null;
   var fl=it.floor||1;
   var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  // 階段室: この階の天井が階段の穴なら、穴の上にある階の天井が取付面。
+  // 穴が上の階へ続く（吹き抜けの階段）なら、天井のある階まで上がる。
+  // （階段室のダウンライトが、存在しない1階の天井の高さで空中に浮いていた）
+  var f=fl;
+  while(f<fl+8 && ceilingHasStairHoleAt(f,cx,cy)) f++;
+  if(f>fl){
+    var ru=roomAtPointOnFloor(f,cx,cy);
+    var base=ru?roomFloorTopY(ru):floorTopY(f);
+    var worldCeil=base+ceilingFinishElevationMm(f,cx,cy)*U;
+    return Math.round((worldCeil-item3DBaseY(it))/U);
+  }
   if(roomAtPointOnFloor(fl,cx,cy)) return ceilingFinishElevationMm(fl,cx,cy);
   var items=(typeof DATA!=='undefined'&&DATA&&DATA.items)?DATA.items:null;
   if(!items) return null;
