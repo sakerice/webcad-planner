@@ -1,0 +1,341 @@
+{
+  "id": "kominka-kitchen-run-2560-01",
+  "sourceOrder": {
+    "branch": "claude/kominka-kitchen",
+    "blobSha": "7cce2dde555c8225c814e7ee9bf83692ab6925a8",
+    "commonOrderSha": "eaec626ece41e1eff4de3273ca52a831323ea08c"
+  },
+  "measuredMm": [
+    2559.999942779541,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "boundsGltfM": [
+    [
+      -1.2799999713897705,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      1.2799999713897705,
+      0.8500000238418579,
+      0.32499998807907104
+    ]
+  ],
+  "triangles": 16400,
+  "uvDegenerate": 0,
+  "geometryDegenerate": 0,
+  "materials": [
+    {
+      "name": "Kominka_dark",
+      "channel": "wood",
+      "baseColor": [
+        0.04373503103852272,
+        0.024157632142305374,
+        0.014443843625485897,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_wood",
+      "channel": "wood",
+      "baseColor": [
+        0.10702310502529144,
+        0.052860647439956665,
+        0.024157632142305374,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_edge",
+      "channel": "wood",
+      "baseColor": [
+        0.16202937066555023,
+        0.0802198201417923,
+        0.040915198624134064,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_metal",
+      "channel": "metal",
+      "baseColor": [
+        0.021219009533524513,
+        0.023153366521000862,
+        0.022173885256052017,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_plaster",
+      "channel": "plaster",
+      "baseColor": [
+        0.6938717365264893,
+        0.6444796919822693,
+        0.5271151065826416,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_stone",
+      "channel": "stone",
+      "baseColor": [
+        0.2345505803823471,
+        0.23074005544185638,
+        0.2015562504529953,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_brass",
+      "channel": "metal",
+      "baseColor": [
+        0.25015828013420105,
+        0.16826939582824707,
+        0.06301001459360123,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_fire",
+      "channel": "plaster",
+      "baseColor": [
+        0.02955683507025242,
+        0.017641954123973846,
+        0.012983032502233982,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    },
+    {
+      "name": "Kominka_ash",
+      "channel": "stone",
+      "baseColor": [
+        0.2788942754268646,
+        0.2746773064136505,
+        0.24228112399578094,
+        1
+      ],
+      "alphaMode": "OPAQUE"
+    }
+  ],
+  "finishChannels": [
+    {
+      "key": "wood",
+      "label": "木部",
+      "default": "#5c412b"
+    },
+    {
+      "key": "stone",
+      "label": "石",
+      "default": "#85847c"
+    },
+    {
+      "key": "plaster",
+      "label": "漆喰",
+      "default": "#d9d2c0"
+    },
+    {
+      "key": "metal",
+      "label": "金物",
+      "default": "#282a29"
+    }
+  ],
+  "circularPotRims": [
+    {
+      "centerX": 0.515,
+      "radiusMm": 216.0000004433744,
+      "radialVariationMm": 4.087850863365716e-05
+    },
+    {
+      "centerX": 1.03,
+      "radiusMm": 216.00000112175562,
+      "radialVariationMm": 8.763915593235083e-05
+    }
+  ],
+  "images": [
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kitchen-run-2560-01-thumb.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "occupiedPixels": 79869,
+      "contentBoundsPx": [
+        27,
+        109,
+        484,
+        402
+      ],
+      "alpha": {
+        "zero": 182027,
+        "opaque": 77885
+      },
+      "sha256": "1536fd6c3c58e5ae6bda58f1e821b7d85b17448f7e1e28a29671ae3cd37a36bc",
+      "regeneratedPixels": "identical"
+    },
+    {
+      "path": "assets/models/packs/kominka/previews/kominka-kitchen-run-2560-01-top.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "occupiedPixels": 53851,
+      "contentBoundsPx": [
+        27,
+        197,
+        484,
+        314
+      ],
+      "alpha": {
+        "zero": 208208,
+        "opaque": 51771
+      },
+      "sha256": "6b803c3c00d9e77b1f16d3106278f8c52f9cb63e6f86269ea3a98c16d2858045",
+      "regeneratedPixels": "identical"
+    },
+    {
+      "path": "tools/blender/kominka/set3/evidence/kominka-kitchen-run-2560-01-front.jpg",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "occupiedPixels": 63750,
+      "contentBoundsPx": [
+        27,
+        179,
+        484,
+        332
+      ],
+      "alpha": null,
+      "sha256": "79633b0b90a3d8de1e449ae094bbf9c868892c6f4a468de0859d138f530af021",
+      "regeneratedPixels": "identical"
+    },
+    {
+      "path": "tools/blender/kominka/set3/evidence/kominka-kitchen-run-2560-01-rear.jpg",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "occupiedPixels": 64099,
+      "contentBoundsPx": [
+        27,
+        179,
+        484,
+        331
+      ],
+      "alpha": null,
+      "sha256": "0957d0ca129b88172405e14f9043dd388abc07fb5cda4745546e464966b09880",
+      "regeneratedPixels": "identical"
+    },
+    {
+      "path": "tools/blender/kominka/set3/evidence/compare-kitchen.jpg",
+      "size": [
+        1024,
+        512
+      ],
+      "mode": "RGB",
+      "occupiedPixels": 138730,
+      "contentBoundsPx": [
+        55,
+        38,
+        968,
+        473
+      ],
+      "alpha": null,
+      "sha256": "528198fc085bd998846b257c42b17172173a421299c8c8d6f2eb2727bf3777f1",
+      "regeneratedPixels": "identical"
+    }
+  ],
+  "glbSha256": "fda94771a8c432e4c48da65ee71cb9602b50fc7d14299071c62b67e2b765b48a",
+  "blendSha256": "07845504f3924494f6b00a1f296cb717aa0aaadd704980f269ff7e63b188d1d0",
+  "blenderReimport": {
+    "dimensionsBlenderMm": [
+      2559.999942779541,
+      649.9999761581421,
+      850.0000238418579
+    ],
+    "boundsBlenderM": [
+      [
+        -1.2799999713897705,
+        -0.32499998807907104,
+        0.0
+      ],
+      [
+        1.2799999713897705,
+        0.32499998807907104,
+        0.8500000238418579
+      ]
+    ],
+    "triangles": 16400,
+    "uv": {
+      "meters_per_uv": 12.757411405727645,
+      "min": 11.085189730107526,
+      "max": 14.259563595180422,
+      "p05": 11.850216798248386,
+      "p95": 13.323631459576783,
+      "total_triangles": 16400,
+      "valid_triangles": 16400,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "channels": [
+      "metal",
+      "plaster",
+      "stone",
+      "wood"
+    ],
+    "frontAxis": "+Z",
+    "upAxis": "+Y",
+    "pivot": "bottom-center",
+    "blenderVersion": "5.1.2",
+    "importedObjectTransform": {
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "checks": {
+    "modelKit": "pass",
+    "independentGlbBuffers": "pass",
+    "unitsAxesOrigin": "pass",
+    "actualFrontGeometry": "pass: handles and hearths face +Z",
+    "uv": "pass",
+    "fourMaterialChannels": "pass",
+    "existingPalette": "pass",
+    "noGlobalScaling": "pass",
+    "manifestAppendOnly": "pass",
+    "pixelsAlphaFraming": "pass",
+    "scriptRegeneration": "byte-identical GLB",
+    "blendReexport": "byte-identical GLB",
+    "imageRegeneration": "all five images pixel-identical",
+    "browser": "not performed: browser operation prohibited",
+    "appPlacementAndFinishInteraction": "not performed: Claude owns integration"
+  }
+}
