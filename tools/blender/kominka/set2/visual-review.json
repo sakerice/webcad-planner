@@ -1,0 +1,60 @@
+{
+  "reviewMethod": "Final saved-original renders inspected in thumb/front/rear/top contact sheets, plus all seven same-scene set1/set2 comparisons; no browser used",
+  "images": [
+    {
+      "path": "tools/blender/kominka/set2/evidence/review-front.jpg",
+      "sha256": "9c8f6399d8ee93e696b94d815e543f1e28e417d9b400f8846ad7ffbeaef4cf08"
+    },
+    {
+      "path": "tools/blender/kominka/set2/evidence/review-rear.jpg",
+      "sha256": "564f25d98ac6ab25077590ac2951f3ac8d5b6ef0795b6bf7ecc4d8830325f8a6"
+    },
+    {
+      "path": "tools/blender/kominka/set2/evidence/review-thumb.jpg",
+      "sha256": "c204162b2cfe0a6cd09cbf7643f1620328c4cae9afedb9f31f283f63dd178804"
+    },
+    {
+      "path": "tools/blender/kominka/set2/evidence/review-top.jpg",
+      "sha256": "74ec0403fce869ba085ac0ba42e6bc97031e47bdbff7289eb11358b100993389"
+    }
+  ],
+  "modelIds": [
+    "kominka-rickshaw-01",
+    "kominka-engawa-bench-1800-01",
+    "kominka-engawa-bench-2600-01",
+    "kominka-gate-post-01",
+    "kominka-kitchen-counter-450-01",
+    "kominka-kitchen-counter-600-01",
+    "kominka-kitchen-counter-900-01",
+    "kominka-kitchen-worktable-01",
+    "kominka-kamado-single-01",
+    "kominka-smoke-hood-01",
+    "kominka-icebox-01",
+    "kominka-sink-900-01",
+    "kominka-chadansu-1500-01",
+    "kominka-chadansu-900-01",
+    "kominka-oshiire-01",
+    "kominka-hanadai-01",
+    "kominka-bonsai-01",
+    "kominka-curtain-long-01",
+    "kominka-curtain-short-01",
+    "kominka-washstand-01",
+    "kominka-washstand-small-01",
+    "kominka-toilet-01",
+    "kominka-shower-01",
+    "kominka-tarai-01",
+    "kominka-monohoshi-01",
+    "kominka-ac-cover-01"
+  ],
+  "front": "pass: passenger seat, cabinet doors/pulls, firemouth, signboard face Blender -Y / glTF +Z; top-image front is toward bottom",
+  "quality": "pass after eliminating cupboard top overlaps, degenerate towel faces, closed toilet seat aperture, and hood flue gap",
+  "colors": "pass: reused set1 wood/metal/paper/brass/copper values; natural linen/indigo and hinoki match comparison renders",
+  "browser": "not performed: prohibited",
+  "appIntegration": "not performed: Claude owns integration",
+  "library": {
+    "status": "saved",
+    "library_file_id": "libfile_5751c0e059d88191a832ce9d1d7a3c2d",
+    "file_id": "file_00000000c73c8207b096986ad073b0cb",
+    "file_name": "review-thumb.jpg"
+  }
+}
