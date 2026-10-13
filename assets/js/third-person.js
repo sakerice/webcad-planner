@@ -6,12 +6,14 @@
 //
 // - 人物: 独自に組んだ簡単な人形（頭・胴・腕・脚）。歩いた距離に合わせて手足を振る。
 //   本採用の人物モデルは後で差し替える（外部の素材は仮まで、という取り決めのため、最初から独自の形）
-// - カメラ: 人物の頭の後ろ上。上下のドラッグは一人称と同じ向き（WALK.pitch をそのまま使う）。
-//   壁の向こうに出ないよう、頭からカメラへ光線を飛ばし、壁に当たったら手前へ寄せる
+// - カメラ: 人物の頭の後ろ上、いつも同じ距離（狭い家で寄ったり離れたりすると煩わしいので、壁で縮めない）。
+//   上下のドラッグは一人称と同じ向き（WALK.pitch をそのまま使う）。カメラと人物の間に壁・家具などが入ったら、
+//   それ（壁なら壁に付いた窓・ドアも）を見えなくする。影は落とし続ける（部屋の明るさが変わらないように）
+// - 下キー: 後ろ向きに歩かず、その場で振り返ってから、振り返った向きへ前に歩く（カメラも後ろへ回り込む）
 var ThirdPerson = (function(){
   var enabled = /[?&]tps=1\b/.test(location.search);
   var on = false;                      // 三人称で歩いているか
-  var DIST = 2.4, HEAD = 1.55, MIN_DIST = 0.35, CRAMPED = 0.8;
+  var DIST = 2.4, HEAD = 1.55, NEAR_PAD = 0.35, TURN_RATE = Math.PI / 0.45;
   var figure = null, parts = null, phase = 0, lastX = null, lastZ = null;
   // 人物の GLB（Codex がデザインし Meshy で立体化した物）。読めなければ仮の人形で歩く
   var CHARACTERS = [
@@ -20,7 +22,8 @@ var ThirdPerson = (function(){
   ];
   var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null;
   var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
-  var ray = null, colliders = null, collidersFor = null;
+  var ray = null, walls = null, wallsFor = null, hidden = [], HIDDEN_LAYER = 1;
+  var turnLeft = 0, backHeld = false, lastTurnAt = 0;   // 下キーで振り返る残りの角度と、下キーを押し続けているか
 
   function mat(color){ return new THREE.MeshStandardMaterial({color:color, roughness:0.75, metalness:0}); }
   function limb(len, r, m){
@@ -135,20 +138,57 @@ var ThirdPerson = (function(){
     return g;
   }
 
-  // 壁・天井・床など、カメラがすり抜けてはいけない物（家具の小物や半透明のガラスは除く）
-  function collect(){
-    if(collidersFor === sc3 && colliders && colliders._n === sc3.children.length) return colliders;
-    colliders = [];
-    sc3.traverse(function(o){
-      if(!o.isMesh || !o.visible || o.userData._thirdPerson) return;
-      var m = o.material;
-      if(!m || Array.isArray(m) || m.transparent) return;
-      var root = o; while(root.parent && root.parent !== sc3) root = root.parent;
-      var kind = root.userData && root.userData.selectKind;
-      if(kind === 'wall' || kind === 'room' || (root.userData && root.userData.selectRef && /^(roof|stair|floor|slab)/.test(root.userData.selectRef.type || ''))) colliders.push(o);
+  // カメラと人物の間に入ったら消す物: 床・天井（部屋）以外の、選べる物すべて（壁・ドア・窓・家具・植木など）。
+  // 壁を消すときは、その壁に付いた窓・ドアも消す。場面を組み直したら集め直す。
+  // 家具のまとめ描き（同じ形の家具を1つにまとめた物）は1つだけ消せないので対象にしない
+  function collectWalls(){
+    if(wallsFor === sc3 && walls && walls._n === sc3.children.length) return walls;
+    walls = {meshes:[], openings:[], _n:sc3.children.length};
+    sc3.children.forEach(function(root){
+      var ud = root.userData || {}, ref = ud.selectRef;
+      if(ud._thirdPerson || !ud.b || ud.selectKind === 'room') return;
+      root.traverse(function(o){ if(o.isMesh && !o.isInstancedMesh){ o.userData._tpsWallRoot = root; walls.meshes.push(o); } });
+      if(ref && ref.type && typeof isOpeningItemType === 'function' && isOpeningItemType(ref.type)) walls.openings.push(root);
     });
-    colliders._n = sc3.children.length; collidersFor = sc3;
-    return colliders;
+    wallsFor = sc3;
+    // 消した物も影は落とす: 影を描くカメラに、消した物を入れる層も見せる
+    sc3.traverse(function(o){ if(o.isLight && o.shadow && o.shadow.camera) o.shadow.camera.layers.enable(HIDDEN_LAYER); });
+    return walls;
+  }
+  function setHidden(list){
+    hidden.forEach(function(root){
+      if(list.indexOf(root) >= 0) return;
+      root.traverse(function(o){ if(o.userData._tpsLayers !== undefined){ o.layers.mask = o.userData._tpsLayers; delete o.userData._tpsLayers; } });
+    });
+    list.forEach(function(root){
+      if(hidden.indexOf(root) >= 0) return;
+      root.traverse(function(o){ if(o.userData._tpsLayers === undefined){ o.userData._tpsLayers = o.layers.mask; o.layers.set(HIDDEN_LAYER); } });
+    });
+    hidden = list;
+  }
+  var _box = null, _ctr = null;
+  function hideBetween(head, cam){
+    var w = collectWalls();
+    if(!ray) ray = new THREE.Raycaster();
+    ray.layers.enable(HIDDEN_LAYER);                         // 消している壁にも当てて、間にある間は消したままにする
+    var dir = cam.clone().sub(head), len = dir.length();
+    ray.set(head, dir.normalize()); ray.near = 0; ray.far = len + NEAR_PAD;   // カメラが壁の厚みの中にいるときも消す
+    var list = [];
+    ray.intersectObjects(w.meshes, false).forEach(function(h){
+      var root = h.object.userData._tpsWallRoot;
+      if(root && list.indexOf(root) < 0) list.push(root);
+    });
+    if(list.length && w.openings.length){
+      // 消した壁の中にある窓・ドアも消す（壁だけ消すと、枠が宙に浮いて見える）
+      _box = _box || new THREE.Box3(); _ctr = _ctr || new THREE.Vector3();
+      var boxes = list.filter(function(root){ return root.userData.selectKind === 'wall'; })
+        .map(function(root){ return new THREE.Box3().setFromObject(root).expandByScalar(0.05); });
+      w.openings.forEach(function(op){
+        _box.setFromObject(op).getCenter(_ctr);
+        if(list.indexOf(op) < 0 && boxes.some(function(bx){ return bx.containsPoint(_ctr); })) list.push(op);
+      });
+    }
+    setHidden(list);
   }
 
   function feetY(){ return floorTopY(WALK.floor) + (WALK.groundOff || 0); }
@@ -189,23 +229,19 @@ var ThirdPerson = (function(){
       parts.armL.rotation.x = -s * swing * 0.8; parts.armR.rotation.x = s * swing * 0.8;
       parts.hips.position.y = 0.86 + Math.abs(Math.cos(phase)) * 0.025 * (swing ? 1 : 0);
     }
-    // カメラ: 頭の後ろ。見る向きは一人称と同じ(WALK.yaw と WALK.pitch)
+    // カメラ: 頭の後ろ、いつも同じ距離。見る向きは一人称と同じ(WALK.yaw と WALK.pitch)
     var pitch = WALK.pitch || 0;
     var dir = new THREE.Vector3(-Math.sin(WALK.yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(WALK.yaw) * Math.cos(pitch));
     var head = new THREE.Vector3(WALK.x, fy + HEAD, WALK.z);
-    var d = DIST;
-    if(!ray) ray = new THREE.Raycaster();
-    ray.set(head, dir.clone().negate()); ray.far = DIST + 0.2; ray.near = 0;
-    var hits = ray.intersectObjects(collect(), false);
-    if(hits.length) d = Math.max(MIN_DIST, Math.min(DIST, hits[0].distance - 0.2));
-    // 後ろに壁が近く(狭い廊下・壁を背にしたとき)人物の後ろへ引けないときは、一人称の目線に戻す。
-    // カメラを上げて見下ろす方法も試したが、壁に近い視点は壁の向こうが透けて見え、かえって分かりにくい
-    if(d < CRAMPED){ figure.visible = false; return; }
     figure.visible = true;
-    camExt.position.copy(head).addScaledVector(dir, -d);
+    camExt.position.copy(head).addScaledVector(dir, -DIST);
     camExt.position.y += 0.15;                                   // 肩越しに少し上から
+    // 見下ろしても天井の上、見上げても床の下へは出さない（上の階の床や地面で画面がふさがらないように）
+    var ceil = (typeof floorBaseY === 'function' && typeof wallFullHeightM === 'function') ? floorBaseY(WALK.floor) + wallFullHeightM(WALK.floor) - 0.12 : Infinity;
+    camExt.position.y = Math.max(fy + 0.25, Math.min(ceil, camExt.position.y));
     camExt.rotation.order = 'YXZ';
     camExt.rotation.set(pitch, WALK.yaw, 0);
+    hideBetween(head, camExt.position);
   }
   function attachTo(scene){
     if(!figure || !on) return;
@@ -216,37 +252,62 @@ var ThirdPerson = (function(){
   function setOn(v){
     on = !!v && enabled;
     if(!on && figure && figure.parent) figure.parent.remove(figure);
-    lastX = null;
+    if(!on) setHidden([]);
+    lastX = null; turnLeft = 0;
     updateButton();
     if(typeof isWalkView==='function' && isWalkView() && WALK.active){ walkApplyCamera(); if(typeof invalidate3D==='function') invalidate3D(); }
   }
   function updateButton(){
     var b = document.getElementById('walk-tps-toggle');
     if(!b) return;
-    b.innerHTML = on ? '三人称<br>' + CHARACTERS[charIndex].label : '一人<br>称';
+    b.textContent = on ? '三人称・' + CHARACTERS[charIndex].label : '一人称';
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
     b.title = on ? '一人称に切り替え' : '三人称に切り替え（人物の後ろから見る）';
   }
   function install(){
     if(!enabled) return;
-    // 切り替えボタンを、ウォークスルーの視点の高さボタンの隣に足す
+    // 切り替えボタンを、十字キーの上に横長の小さなボタンで足す（十字キーの中に置くと方向キーと紛れる）
     var h = document.getElementById('walk-height-toggle');
     if(h && !document.getElementById('walk-tps-toggle')){
       var b = document.createElement('button');
-      b.id = 'walk-tps-toggle'; b.type = 'button'; b.className = 'wk-btn wk-height wk-tps';
+      b.id = 'walk-tps-toggle'; b.type = 'button'; b.className = 'wk-tps';
       b.addEventListener('click', function(){
         // 一人称 → 三人称(男性) → 三人称(女性) → 一人称 の順に切り替える
         if(!on){ charIndex = 0; setOn(true); }
         else if(charIndex < CHARACTERS.length - 1){ charIndex++; if(!useModel(CHARACTERS[charIndex])) loadCharacter(CHARACTERS[charIndex]); updateButton(); }
         else setOn(false);
       });
-      h.parentNode.insertBefore(b, h.nextSibling);
+      h.parentNode.appendChild(b);
       updateButton();
     }
     var baseApply = walkApplyCamera;
     walkApplyCamera = function(){
       var r = baseApply.apply(this, arguments);
       if(on && typeof isWalkView==='function' && isWalkView()) place();
+      return r;
+    };
+    // 下キー: 三人称では、その場で振り返ってから、振り返った向きへ前に歩く
+    var baseUpdate = updateWalkMode;
+    updateWalkMode = function(now){
+      if(!on || typeof isWalkView !== 'function' || !isWalkView() || !WALK.active){ backHeld = false; turnLeft = 0; return baseUpdate.apply(this, arguments); }
+      var back = !!(WALK.keys.back || iMov['arrowdown'] || iMov['s']);
+      if(back && !backHeld) turnLeft = Math.PI;            // 押した瞬間に半回転を始める
+      backHeld = back;
+      var saved = {kb:WALK.keys.back, kf:WALK.keys.fwd, ad:iMov['arrowdown'], s:iMov['s']};
+      WALK.keys.back = false; iMov['arrowdown'] = false; iMov['s'] = false;
+      var turning = false;
+      if(turnLeft > 0){
+        var dt = Math.min(0.1, Math.max(0.001, (now - (lastTurnAt || now)) / 1000));
+        var step = Math.min(turnLeft, TURN_RATE * dt);
+        WALK.yaw += step; turnLeft -= step; turning = true;
+      } else if(back){
+        WALK.keys.fwd = true;                                // 振り返り終えたら、押している間は前へ歩く
+      }
+      lastTurnAt = now;
+      var r;
+      try { r = baseUpdate.apply(this, arguments); }
+      finally { WALK.keys.back = saved.kb; WALK.keys.fwd = saved.kf; iMov['arrowdown'] = saved.ad; iMov['s'] = saved.s; }
+      if(turning){ walkApplyCamera(); return true; }
       return r;
     };
     // 描く場面に人物を入れる（比較モードでは左右それぞれの場面に、描く直前に移す）
@@ -259,7 +320,7 @@ var ThirdPerson = (function(){
     var baseSetView = setView;
     setView = function(v){
       var r = baseSetView.apply(this, arguments);
-      if(v !== '3d-walk' && figure && figure.parent) figure.parent.remove(figure);
+      if(v !== '3d-walk'){ if(figure && figure.parent) figure.parent.remove(figure); setHidden([]); }
       if(v === '3d-walk' && on){ lastX = null; walkApplyCamera(); }
       return r;
     };

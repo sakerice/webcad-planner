@@ -19,3 +19,11 @@
   すでに置いた利用者のプランの見た目が変わるので、作り直した版は `-02` の別 ID で足し、`-01` はカタログから外して描画用に残した
   （`tools/tests/fixtures/asset-sets/shipped.json` が本番に出た55点のモデルの中身を見張る）
 - 「外部の素材を使っていない」: 生成スクリプトの外部読み込み（import_scene・append/link・images.load・URL）を 2026-10-10 に全数確認した。import_scene はこのセット自身の GLB を組み立て・確認画像のために読むもの、images.load は自分で描いた確認画像の余白を測るもので、外部の素材やネットワークからの読み込みは無い
+
+## 三人称ウォークスルーの人物（仮。隠しスイッチ `?tps=1` の裏、本番には未公開）
+
+| ファイル | 出どころ | 権利の根拠 | 編集できる元 | 記録日 |
+|---|---|---|---|---|
+| `assets/models/characters/walker-male-01.glb`・`walker-female-01.glb` | 形と色: Codex のデザイン画像（PR #99）を Meshy の「画像から 3D」で立体化し、Meshy で骨組みを付けた。動き: 待機（Breathing Idle）・座る（Sitting Idle）・歩く（男性 Catwalk Walk Forward 03、女性 Walk）は Adobe Mixamo の動きを、`tools/characters/retarget_mixamo.py` で人物の骨に移し替えた。走る動きは Meshy の物 | Meshy・Mixamo とも、それぞれの利用条件に従う（**利用条件の本文はまだ確かめていない**）。Mixamo の動きは人物の GLB に組み込んだ形でだけ置き、動きだけのファイル（FBX）はリポジトリに入れていない | Meshy のワークスペース上の元モデル。動きの移し替えはスクリプトから再実行できる | 2026-10-14 |
+
+- この人物は利用者の確認で「参考のテイストと遠い」とされ、作り直す（第2版のデザインを Codex に依頼済み、sourceId `webcad-planner/walk-characters-design-v2-2026-10-14`）。本番に出す前に、Meshy・Mixamo の利用条件を確かめてこの欄を更新する
