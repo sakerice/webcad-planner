@@ -341,3 +341,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 
 /* ウォークスルーでは下に十字キーが出るので、札を上へ逃がす */
 #canvas-area.compare-walk .compare-tag{bottom:230px}
+/* 三人称のウォークスルーの切り替え(assets/js/third-person.js。?tps=1 のときだけ出る)。十字キーの右下の空きに置く */
+#walk-dpad .wk-tps{grid-column:3;grid-row:3}
+#walk-dpad .wk-tps[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
