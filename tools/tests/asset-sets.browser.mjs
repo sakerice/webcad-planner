@@ -19,7 +19,8 @@ try {
   const count = () => page.evaluate(() => Number((document.querySelector('.catalogue-count').textContent.match(/\d+/) || [0])[0]));
 
   const standardOnly = await count();
-  assert.equal(await page.locator('.asset-set-mark').count(), 0, '標準だけのとき、見出しにセットの印が出ている');
+  // 一括差し替えの折りたたみの中の見出し（洋館・日本古民家）は印を付けて並べる物なので数えない
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('.asset-set-mark')].filter((e) => !e.closest('#asset-swap-entry')).length), 0, '標準だけのとき、見出しにセットの印が出ている');
   assert.equal(await page.locator('#sidebar [data-tool^="rpg-mansion-"]').count(), 0, '標準だけのとき、洋館の物が並んでいる');
 
   const { readFileSync } = await import('node:fs');

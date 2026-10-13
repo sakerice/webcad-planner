@@ -86,6 +86,8 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/asset-sets.js"></script>
 <script src="assets/js/asset-swap.js"></script>
 <script src="assets/js/building-style.js"></script>
+<script src="assets/js/plan-library.js"></script>
+<script src="assets/js/compare-mode.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
 <style>
@@ -3199,6 +3201,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" onclick="clearFloor()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg> 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3h13l3 3v15H4ZM8 3v6h8V3M8 21v-8h8v8"/></svg> 保存</button>
+  <button class="tbtn mob-hide" id="plan-library-btn" onclick="PlanLibrary.openList()" title="名前を付けてブラウザに保存したプランの一覧。開く・名前の変更・削除・書き出しができます"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16M4 12h16M4 19h10"/></svg>保存一覧</button>
   <button class="tbtn" id="share-btn" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <!-- 画像AI/動画AIレンダーも、狭い幅でヘッダーから消さない。 -->
@@ -3209,6 +3212,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" id="unity-render-toolbar-btn" onclick="openUnityRenderModal()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h5l2-3h4l2 3h5v14H3ZM16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg> 画像AIレンダー</button>
   <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5h18v15H3ZM3 10h18M7 5l3 5M14 5l3 5M10 13l5 2-5 3Z"/></svg> 動画AIレンダー</button>
   <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 2h10l4 4v16H5ZM15 2v5h4M8 11h8v6H8ZM12 11v6M8 20h8"/></svg> JIS図面</button>
+  <button class="tbtn" id="compare-btn" onclick="CompareMode.openPicker()" title="2つの間取りを左右に並べて見比べます。どちらも編集できます"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h7v16H3zM14 4h7v16h-7z"/></svg>比較</button>
   <button class="tbtn mob-hide" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg>JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
@@ -3253,6 +3257,8 @@ input[type="reset"]:focus-visible{
           <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 17V4M8 8l4-4 4 4M4 16v5h16v-5"/></svg> 保存読込</button>
           <button class="pbtn sec" type="button" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg> JSON保存</button>
           <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> JSON読込</button>
+          <button class="pbtn sec" type="button" onclick="PlanLibrary.openList()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16M4 12h16M4 19h10"/></svg> 保存一覧</button>
+          <button class="pbtn sec" type="button" onclick="CompareMode.openPicker()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h7v16H3zM14 4h7v16h-7z"/></svg> 比較</button>
           <button class="pbtn sec" type="button" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
           <!-- JIS図面もツールバー(mob-hide)にしか無く、768px以下では入口が
                1つも無かった。書き出し系はここに集めるのが既存の並びである。 -->
@@ -4269,6 +4275,64 @@ function applyGradeSettings(){
   _gradePass.uniforms.gLift.value=GRADE_LIFT;
   _gradePass.uniforms.gBalance.value.set(GRADE_BALANCE[0],GRADE_BALANCE[1],GRADE_BALANCE[2]);
 }
+// 3D の場面の土台（空・半球光・太陽・環境光・地面）を作り、sc3 / _skyMesh / _gndMesh に入れる。
+// init3D から1度呼ぶほか、比較モードが右の間取り用の2つ目の場面を作るときにも呼ぶ
+// （そのときは全体の変数を右の物に入れ替えた状態で呼ばれる。shared に左の空を渡すと、
+// 空の見た目と環境マップを左と共有し、作り直さない）。
+function createScene3DBase(shared){
+  sc3=new THREE.Scene();
+  sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
+  var skyGeo=new THREE.SphereGeometry(900,48,24);
+  _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({
+    map:makeSkyTexture(),
+    side:THREE.BackSide,
+    fog:false,
+    toneMapped:false
+  }));
+  _skyMesh.name='_sky';
+  _skyMesh.renderOrder=-10;
+  sc3.add(_skyMesh);
+
+  var hemi=new THREE.HemisphereLight(0xffffff,0x777777,LIGHT_SETTINGS.hemi);
+  hemi.name='HemiLight';
+  sc3.add(hemi);
+
+  var sun=new THREE.DirectionalLight(0xffffff,LIGHT_SETTINGS.sun);
+  sun.name='SunLight';
+  sun.position.set(100,200,100); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
+  sun.shadow.camera.top=150; sun.shadow.camera.bottom=-150;
+  sun.shadow.bias = -0.00018;
+  sun.shadow.normalBias = 0.018;
+  sun.shadow.radius = 2.1;
+  sc3.add(sun);
+  sc3.add(sun.target);
+  
+  var amb = new THREE.AmbientLight(0xffffff, LIGHT_SETTINGS.ambient);
+  amb.name='AmbientLight';
+  sc3.add(amb);
+  // 環境光はアプリ内の空(makeSkyTexture)から生成する。
+  // 外部HDR(outdoor.hdr)は暖色の色被りがあり、時間帯にも追従しないため不使用
+  if(shared && shared.sky){
+    // 空は左の物と同じジオメトリ・マテリアル(時刻の変化も一緒に効く)。環境マップも同じ物を使う
+    sc3.remove(_skyMesh); _skyMesh.geometry.dispose(); if(_skyMesh.material.map) _skyMesh.material.map.dispose(); _skyMesh.material.dispose();
+    _skyMesh=new THREE.Mesh(shared.sky.geometry,shared.sky.material);
+    _skyMesh.name='_sky'; _skyMesh.renderOrder=-10; sc3.add(_skyMesh);
+    sc3.environment=shared.environment||null;
+    applyLightingToScene(false);
+  }else{
+    refreshEnvironmentFromSky();
+    applyLightingToScene(false);
+    refreshSkyTexture();
+  }
+
+  // Ground – resized in buildLandscape() based on building footprint
+  _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
+    new THREE.MeshStandardMaterial({color:0xd7d5ce,roughness:1.0,metalness:0.0}));
+  _gndMesh.rotation.x=-Math.PI/2; _gndMesh.position.set(4,0,2);
+  _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
+}
 function init3D(){
   if(ren) return;
   if(typeof window.THREE==='undefined'){
@@ -4324,49 +4388,7 @@ function init3D(){
     if(sc3){ rebuild3D(); }
     if(typeof invalidate3D==='function') invalidate3D();
   },false);
-  sc3=new THREE.Scene();
-  sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
-  var skyGeo=new THREE.SphereGeometry(900,48,24);
-  _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({
-    map:makeSkyTexture(),
-    side:THREE.BackSide,
-    fog:false,
-    toneMapped:false
-  }));
-  _skyMesh.name='_sky';
-  _skyMesh.renderOrder=-10;
-  sc3.add(_skyMesh);
-
-  var hemi=new THREE.HemisphereLight(0xffffff,0x777777,LIGHT_SETTINGS.hemi);
-  hemi.name='HemiLight';
-  sc3.add(hemi);
-
-  var sun=new THREE.DirectionalLight(0xffffff,LIGHT_SETTINGS.sun);
-  sun.name='SunLight';
-  sun.position.set(100,200,100); sun.castShadow=true;
-  sun.shadow.mapSize.set(2048,2048);
-  sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
-  sun.shadow.camera.top=150; sun.shadow.camera.bottom=-150;
-  sun.shadow.bias = -0.00018;
-  sun.shadow.normalBias = 0.018;
-  sun.shadow.radius = 2.1;
-  sc3.add(sun);
-  sc3.add(sun.target);
-  
-  var amb = new THREE.AmbientLight(0xffffff, LIGHT_SETTINGS.ambient);
-  amb.name='AmbientLight';
-  sc3.add(amb);
-  // 環境光はアプリ内の空(makeSkyTexture)から生成する。
-  // 外部HDR(outdoor.hdr)は暖色の色被りがあり、時間帯にも追従しないため不使用
-  refreshEnvironmentFromSky();
-  applyLightingToScene(false);
-  refreshSkyTexture();
-
-  // Ground – resized in buildLandscape() based on building footprint
-  _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
-    new THREE.MeshStandardMaterial({color:0xd7d5ce,roughness:1.0,metalness:0.0}));
-  _gndMesh.rotation.x=-Math.PI/2; _gndMesh.position.set(4,0,2);
-  _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
+  createScene3DBase();
 
   camExt=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.1,2000);
   camExt.position.set(12,9,18); camExt.lookAt(4,1,2);
@@ -6497,36 +6519,109 @@ function rebuild3D(quiet){
   });
 }
 
-// グループ直下の「同一マテリアル・同一影設定・同一属性構成」のメッシュを1つに統合し
-// ドローコールを削減する。見た目は不変。グループ単位の選択/移動/表示制御は維持される。
-// GLBモデルはネストしたグループ内にあるため対象外(直下の子のみ統合)
+// グループの中の「見た目が同じマテリアル・同じ影設定・同じ属性構成」のメッシュを1つに統合し、
+// ドローコールを減らす。見た目は不変。グループ単位の選択/移動/表示制御は維持される。
+//
+// 以前は「グループ直下」かつ「同じマテリアルのオブジェクト」だけを対象にしていた。ところが壁の
+// 面・巾木・格子などは、ピースごとに中身の同じマテリアルを作り直しているため uuid が全部違い、
+// 1本の壁が80回近く描かれていた（既定プラン2階建ての外観で、描画の約半分が壁だった）。
+// そこで、マテリアルの中身（種類・色・質感・貼ってある画像とその繰り返し）が同じなら同じと見なし、
+// グループの奥のピースも、グループから見た位置に直して統合する。比較モードで2つの家を
+// 同時に描く余力を作るための最適化（作り直し計画 2-4 / 段階4）。
+//
+// 統合しない物（個別に動かす・差し替える物）:
+//   - userData.noMerge の付いたメッシュと、その付いたグループの下（扉の開閉・引き戸など）
+//   - 内観3Dのカットアウェイで材質を差し替える壁の面（userData.cutawayWall）
+//   - InstancedMesh・SkinnedMesh・マテリアル配列・モーフを持つ物
+//   - 下に挙げた以外の userData を持つメッシュ（後から個別に探して触る処理があるかもしれない）
+var MERGE_SAFE_USERDATA={name:1,b:1,selectRef:1,selectKind:1,interiorFace:1,exteriorFace:1,skirting:1,skirtingWallId:1,skirtingFaceKey:1};
+var MERGE_TEXTURE_SLOTS=['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap','alphaMap','bumpMap','lightMap','specularMap','clearcoatMap','clearcoatNormalMap','clearcoatRoughnessMap','transmissionMap','thicknessMap','sheenColorMap','sheenRoughnessMap','iridescenceMap','anisotropyMap'];
+var MERGE_MATERIAL_PROPS=['type','roughness','metalness','opacity','transparent','side','shadowSide','depthWrite','depthTest','colorWrite','alphaTest','alphaToCoverage','premultipliedAlpha','dithering','polygonOffset','polygonOffsetFactor','polygonOffsetUnits','envMapIntensity','vertexColors','flatShading','wireframe','toneMapped','fog','blending','emissiveIntensity','aoMapIntensity','lightMapIntensity','bumpScale','displacementScale','transmission','thickness','ior','clearcoat','clearcoatRoughness','sheen','sheenRoughness','iridescence','specularIntensity','reflectivity','attenuationDistance','anisotropy','stencilWrite','forceSinglePass','visible'];
+function mergeTextureSignature(t){
+  if(!t) return '-';
+  if(!t.isTexture||!t.source) return 'x'+(t.uuid||'?');
+  return [t.source.uuid,t.repeat.x,t.repeat.y,t.offset.x,t.offset.y,t.rotation,t.center.x,t.center.y,
+    t.flipY,t.wrapS,t.wrapT,t.magFilter,t.minFilter,t.anisotropy,t.colorSpace,t.channel,t.matrixAutoUpdate?1:0].join(',');
+}
+function mergeMaterialSignature(m){
+  if(!m || m.onBeforeCompile && m.onBeforeCompile!==THREE.Material.prototype.onBeforeCompile) return null;
+  if(m.isShaderMaterial || m.customProgramCacheKey!==THREE.Material.prototype.customProgramCacheKey) return null;
+  if(m.clippingPlanes && m.clippingPlanes.length) return null;
+  var parts=MERGE_MATERIAL_PROPS.map(function(k){ return String(m[k]); });
+  ['color','emissive','specularColor','sheenColor','attenuationColor'].forEach(function(k){ parts.push(m[k]&&m[k].isColor?m[k].getHexString():'-'); });
+  parts.push(m.normalScale?m.normalScale.x+':'+m.normalScale.y:'-', m.normalMapType, m.envMap?('e'+m.envMap.uuid):'-');
+  MERGE_TEXTURE_SLOTS.forEach(function(k){ parts.push(mergeTextureSignature(m[k])); });
+  if(m.userData && Object.keys(m.userData).length) parts.push(JSON.stringify(m.userData));
+  if(m.defines && Object.keys(m.defines).length) parts.push(JSON.stringify(m.defines));
+  return parts.join('|');
+}
+function mergeGeometrySignature(g){
+  if(!g || !g.attributes || !g.attributes.position) return null;
+  if(g.morphAttributes && Object.keys(g.morphAttributes).length) return null;
+  return Object.keys(g.attributes).sort().map(function(k){
+    var a=g.attributes[k]; return k+':'+a.itemSize+(a.normalized?'n':'')+(a.isInterleavedBufferAttribute?'i':'')+(a.array&&a.array.constructor.name);
+  }).join(',');
+}
 function mergeGroupMeshes(grp){
   var merge=window.THREE&&THREE.BufferGeometryUtils&&THREE.BufferGeometryUtils.mergeGeometries;
   if(!merge||!grp||!grp.isGroup) return;
   var byKey={};
-  grp.children.forEach(function(o){
-    if(!o.isMesh||!o.geometry||(o.userData&&o.userData.noMerge)) return;
-    if(Array.isArray(o.material)) return;
-    var attrs=Object.keys(o.geometry.attributes).sort().join(',');
-    var key=o.material.uuid+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0)+'|'+attrs+'|'+(o.renderOrder||0);
+  function relMatrix(o){
+    o.updateMatrix();
+    var m=o.matrix.clone(), p=o.parent;
+    while(p && p!==grp){ p.updateMatrix(); m.premultiply(p.matrix); p=p.parent; }
+    return p===grp ? m : null;
+  }
+  function visit(node){
+    node.children.slice().forEach(function(o){
+      if(o.userData && o.userData.noMerge) return;           // この物と、その下は個別に扱う
+      if(o.isMesh) consider(o);
+      if(o.children && o.children.length) visit(o);
+    });
+  }
+  function consider(o){
+    if(o.isInstancedMesh||o.isSkinnedMesh||o.isLine||o.isPoints||Array.isArray(o.material)) return;
+    if(o.children && o.children.length) return;              // 子を持つメッシュは動かさない
+    if(o.visible===false || o.userData.cutawayWall) return;
+    var ud=o.userData||{};
+    for(var k in ud){ if(!MERGE_SAFE_USERDATA[k]) return; }
+    if(o.onBeforeRender!==THREE.Object3D.prototype.onBeforeRender || o.onAfterRender!==THREE.Object3D.prototype.onAfterRender) return;
+    var ms=mergeMaterialSignature(o.material), gs=mergeGeometrySignature(o.geometry);
+    if(!ms||!gs) return;
+    var key=ms+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0)+'|'+gs+'|'+(o.renderOrder||0)+'|'+(o.frustumCulled?1:0)+'|'+o.layers.mask;
     (byKey[key]=byKey[key]||[]).push(o);
-  });
+  }
+  visit(grp);
   Object.keys(byKey).forEach(function(k){
     var list=byKey[k];
     if(list.length<2) return;
-    var geos=list.map(function(o){
-      o.updateMatrix();
-      var g=o.geometry.clone().applyMatrix4(o.matrix);
-      return g.index?g.toNonIndexed():g;
+    var mats=list.map(relMatrix);
+    if(mats.some(function(m){ return !m; })) return;
+    var geos=list.map(function(o,i){
+      var g=o.geometry.clone().applyMatrix4(mats[i]);
+      // 鏡像(負の拡大)を含む位置合わせは面の向きが裏返るので、頂点の並びを戻す
+      if(mats[i].determinant()<0 && g.index){ var ix=g.index.array; for(var t=0;t<ix.length;t+=3){ var tmp=ix[t+1]; ix[t+1]=ix[t+2]; ix[t+2]=tmp; } }
+      g=g.index?g.toNonIndexed():g;
+      if(mats[i].determinant()<0 && !o.geometry.index){
+        var pos=g.attributes.position; // 添字の無い形は、三角形ごとに2点目と3点目を入れ替える
+        Object.keys(g.attributes).forEach(function(name){
+          var a=g.attributes[name], n=a.itemSize, arr=a.array;
+          for(var t=0;t<a.count;t+=3){ for(var c=0;c<n;c++){ var x=arr[(t+1)*n+c]; arr[(t+1)*n+c]=arr[(t+2)*n+c]; arr[(t+2)*n+c]=x; } }
+        });
+      }
+      g.groups=[];
+      return g;
     });
     var merged=merge(geos,false);
     geos.forEach(function(g){ g.dispose(); });
     if(!merged) return;
     var first=list[0];
-    list.forEach(function(o){ grp.remove(o); o.geometry.dispose(); });
+    list.forEach(function(o){ if(o.parent) o.parent.remove(o); o.geometry.dispose(); });
     var m=new THREE.Mesh(merged,first.material);
     m.castShadow=first.castShadow; m.receiveShadow=first.receiveShadow;
     m.renderOrder=first.renderOrder||0;
+    m.frustumCulled=first.frustumCulled;
+    m.layers.mask=first.layers.mask;
     m.userData=Object.assign({},first.userData);
     m.matrixAutoUpdate=false;
     grp.add(m);
@@ -9611,6 +9706,14 @@ function makeFloorSlabMaterial(matFloor){
   if(matFloor && matFloor.color) avg=matFloor.color.getHex();
   return new THREE.MeshStandardMaterial({color:avg,roughness:0.95,metalness:0.0,envMapIntensity:0.04});
 }
+// 窓ガラスの「透過」(奥の景色が少し歪んで透ける表現)。three.js はこれのために、ガラス以外の
+// 物を毎コマもう1回、画面と同じ大きさで描き直す（既定プラン2階建ての外観で描画が2762→1436回）。
+// タッチ端末(iPad)と比較モード(2つの家を描く)では使わず、ふつうの半透明のガラスにする。
+function glassTransmissionEnabled(){
+  var touch=typeof navigator!=='undefined' && (navigator.maxTouchPoints||0)>0;
+  var comparing=typeof CompareMode!=='undefined' && CompareMode.isOn && CompareMode.isOn();
+  return !touch && !comparing;
+}
 function makeWallGlassMaterial(){
   // 昼間の窓は反射が勝って室内が透けにくい実際の見え方に寄せる
   // (不透明度が低すぎると白い内装が透けて「白い箱」に見える)
@@ -9620,7 +9723,7 @@ function makeWallGlassMaterial(){
     opacity:0.52,
     roughness:0.14,        // 低すぎると空テクスチャの雲筋が縞状に映り込む
     metalness:0.0,
-    transmission:0.2,
+    transmission:glassTransmissionEnabled()?0.2:0,
     thickness:0.02,
     envMapIntensity:0.75,
     side:THREE.DoubleSide,
@@ -9876,7 +9979,7 @@ function buildWall3D(w){
       face.rotation.y=rotY+(sp.sign<0?Math.PI:0);
       face.userData.exteriorFace=true;
       markInteriorCutawayCandidate(face,w,sp.sign,0);
-      face.userData.noMerge=true; // カットアウェイで個別に材質差し替えが必要
+      if(face.userData.cutawayWall) face.userData.noMerge=true; // カットアウェイで個別に材質差し替えが必要
       wallGroup.add(face);
     });
   }
@@ -9912,7 +10015,7 @@ function buildWall3D(w){
       );
       face.rotation.y=rotY+(faceInfo.sign<0?Math.PI:0);
       face.userData.interiorFace=true;
-      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); face.userData.noMerge=true; }
+      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); if(face.userData.cutawayWall) face.userData.noMerge=true; }
       wallGroup.add(face);
       addSkirting(yBase,mid,segLen,normalX,normalZ,intOff,faceMat,faceInfo);
     });
@@ -9948,7 +10051,6 @@ function buildWall3D(w){
       z1+dirZ*mid+normalZ*(intOff+SK_T/2)
     );
     mesh.rotation.y=rotY;
-    mesh.userData.noMerge=true;
     mesh.userData.skirting=true;
     // どの壁のどの面の巾木かを持たせる(面単位のON/OFF・色の検証と調査用)
     mesh.userData.skirtingWallId=w.id;
@@ -10070,7 +10172,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*coreA,fy,z1+dirZ*coreA);
     mesh.rotation.y=rotY;
-    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); if(mesh.userData.cutawayWall) mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
     if(extMat&&extSpans.length){
       extSpans.forEach(function(sp){
@@ -10094,7 +10196,7 @@ function buildWall3D(w){
       var face=slopedFaceMesh(aa,bb,yBase,h,wallInteriorFaceOffsetM(w),faceInfo.sign,
         makeInteriorWallMaterial(w,len,faceInfo));
       face.userData.interiorFace=true;
-      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); face.userData.noMerge=true; }
+      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); if(face.userData.cutawayWall) face.userData.noMerge=true; }
       wallGroup.add(face);
     });
   }
@@ -10136,7 +10238,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*coreMid,fy+yBase+h/2,z1+dirZ*coreMid);
     mesh.rotation.y=rotY;
-    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); if(mesh.userData.cutawayWall) mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
     addExteriorFace(coreA,coreB,yBase,h);
     addInteriorFaces(a,b,yBase,h);
@@ -10199,7 +10301,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*a,fy,z1+dirZ*a);
     mesh.rotation.y=rotY;
-    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); if(mesh.userData.cutawayWall) mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
   }
   function addLatticePiece(a,b,yBase,h){
@@ -10218,7 +10320,7 @@ function buildWall3D(w){
         var barLen=Math.min(bw,segLen);
         var bar=new THREE.Mesh(new THREE.BoxGeometry(barLen,h,depth),barMat);
         bar.position.set(x1+dirX*x,fy+yBase+h/2,z1+dirZ*x);
-        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(bar,w,0,0); bar.userData.noMerge=true; } wallGroup.add(bar);
+        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(bar,w,0,0); if(bar.userData.cutawayWall) bar.userData.noMerge=true; } wallGroup.add(bar);
       }
     } else {
       var hpitch=0.22, bh=0.045;
@@ -10227,7 +10329,7 @@ function buildWall3D(w){
         var yy=yBase+(rows===1?h/2:h*j/(rows-1));
         var rail=new THREE.Mesh(new THREE.BoxGeometry(segLen,bh,depth),barMat);
         rail.position.set(x1+dirX*(a+segLen/2),fy+yy,z1+dirZ*(a+segLen/2));
-        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(rail,w,0,0); rail.userData.noMerge=true; } wallGroup.add(rail);
+        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(rail,w,0,0); if(rail.userData.cutawayWall) rail.userData.noMerge=true; } wallGroup.add(rail);
       }
       var postPitch=0.9, pw=0.04;
       var posts=Math.max(2,Math.floor(segLen/postPitch)+1);
@@ -10235,7 +10337,7 @@ function buildWall3D(w){
         var px=a+(posts===1?segLen/2:segLen*k/(posts-1));
         var post=new THREE.Mesh(new THREE.BoxGeometry(pw,h,depth),barMat);
         post.position.set(x1+dirX*px,fy+yBase+h/2,z1+dirZ*px);
-        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(post,w,0,0); post.userData.noMerge=true; } wallGroup.add(post);
+        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(post,w,0,0); if(post.userData.cutawayWall) post.userData.noMerge=true; } wallGroup.add(post);
       }
     }
   }
@@ -19480,7 +19582,14 @@ function exportPlan(){
   ensureHeightDefaults();
   syncExteriorWallSettings();
   captureViewState();
-  downloadJsonFile(JSON.stringify(DATA,null,2),'plan.json');
+  downloadJsonFile(JSON.stringify(DATA,null,2),planExportFileName());
+}
+// 書き出すファイルの名前。プランに名前があれば「名前_日付.json」、無ければ従来どおり plan.json
+function planExportFileName(){
+  var name=String((DATA&&DATA.planName)||'').trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_');
+  if(!name) return 'plan.json';
+  var d=new Date(), p=function(n){return (n<10?'0':'')+n;};
+  return name+'_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'.json';
 }
 async function savePlanToStorage(){
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない

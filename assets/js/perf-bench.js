@@ -112,6 +112,12 @@
       return window.DATA && DATA.walls && DATA.walls.length>4 && (!loading || loading.offsetParent===null);
     },120000);
     await sleep(1500);
+    // &compare=1 は比較モードで同じ間取りを左右に2つ並べた状態で測る（2つ描く重さ）
+    if(/[?&]compare=1\b/.test(location.search) && window.CompareMode){
+      CompareMode.start(JSON.parse(serializeDataSnapshot()));
+      result.compare=true;
+      await sleep(800);
+    }
     var views=[['3d-ext','外観3D'],['3d-int','内観3D']];
     for(var v=0;v<views.length;v++){
       var enterMs=await enter(views[v][0]);
