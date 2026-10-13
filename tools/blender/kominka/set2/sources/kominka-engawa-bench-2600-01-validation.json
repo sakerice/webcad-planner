@@ -1,0 +1,43 @@
+{
+  "model": "kominka-engawa-bench-2600-01",
+  "dimensions_mm": [
+    2599.9999046325684,
+    899.9999761581421,
+    449.99998807907104
+  ],
+  "bounds_m": [
+    [
+      -1.2999999523162842,
+      -0.44999998807907104,
+      0.0
+    ],
+    [
+      1.2999999523162842,
+      0.44999998807907104,
+      0.44999998807907104
+    ]
+  ],
+  "triangles": 2340,
+  "uv": {
+    "meters_per_uv": 5.509601877174961,
+    "min": 5.085485229530017,
+    "max": 5.912366232545818,
+    "p05": 5.264509490024861,
+    "p95": 5.837345511992916,
+    "total_triangles": 2340,
+    "valid_triangles": 2340,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_edge": "wood",
+    "Kominka_wood": "wood",
+    "Kominka_dark": "wood"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 101824
+}

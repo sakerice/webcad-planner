@@ -1,0 +1,42 @@
+{
+  "model": "kominka-sink-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    600.0000238418579,
+    800.000011920929
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.30000001192092896,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.30000001192092896,
+      0.800000011920929
+    ]
+  ],
+  "triangles": 1816,
+  "uv": {
+    "meters_per_uv": 2.531343475989365,
+    "min": 2.3069952529604323,
+    "max": 2.8182078852491914,
+    "p05": 2.378327698264428,
+    "p95": 2.70000699601949,
+    "total_triangles": 1816,
+    "valid_triangles": 1816,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_stone": "stone",
+    "Kominka_brass": "brass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 63944
+}
