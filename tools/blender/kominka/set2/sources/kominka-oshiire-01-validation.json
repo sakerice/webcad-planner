@@ -1,0 +1,45 @@
+{
+  "model": "kominka-oshiire-01",
+  "dimensions_mm": [
+    1000.0,
+    579.9999833106995,
+    1899.999976158142
+  ],
+  "bounds_m": [
+    [
+      -0.5,
+      -0.28999999165534973,
+      0.0
+    ],
+    [
+      0.5,
+      0.28999999165534973,
+      1.899999976158142
+    ]
+  ],
+  "triangles": 3160,
+  "uv": {
+    "meters_per_uv": 5.879736442997271,
+    "min": 5.357371338692988,
+    "max": 6.231724212142266,
+    "p05": 5.6112625050270015,
+    "p95": 6.015019789830518,
+    "total_triangles": 3160,
+    "valid_triangles": 3160,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_wood": "wood",
+    "Kominka_dark": "wood",
+    "Kominka_edge": "wood",
+    "Kominka_paper": "paper",
+    "Kominka_metal": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 111188
+}

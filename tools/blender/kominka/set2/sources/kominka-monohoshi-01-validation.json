@@ -1,0 +1,44 @@
+{
+  "model": "kominka-monohoshi-01",
+  "dimensions_mm": [
+    1100.000023841858,
+    79.99999821186066,
+    300.00001192092896
+  ],
+  "bounds_m": [
+    [
+      -0.550000011920929,
+      -0.03999999910593033,
+      0.0
+    ],
+    [
+      0.550000011920929,
+      0.03999999910593033,
+      0.30000001192092896
+    ]
+  ],
+  "triangles": 2304,
+  "uv": {
+    "meters_per_uv": 1.2084689296655402,
+    "min": 1.097565930219447,
+    "max": 1.438100940715683,
+    "p05": 1.142759592772981,
+    "p95": 1.3164791634923165,
+    "total_triangles": 2304,
+    "valid_triangles": 2304,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_bamboo": "bamboo",
+    "Kominka_metal": "metal",
+    "Kominka_linen": "linen",
+    "Kominka_indigo": "indigo"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 79868
+}

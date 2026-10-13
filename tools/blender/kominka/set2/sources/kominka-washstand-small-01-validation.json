@@ -1,0 +1,45 @@
+{
+  "model": "kominka-washstand-small-01",
+  "dimensions_mm": [
+    500.0,
+    400.0000059604645,
+    800.000011920929
+  ],
+  "bounds_m": [
+    [
+      -0.25,
+      -0.20000000298023224,
+      0.0
+    ],
+    [
+      0.25,
+      0.20000000298023224,
+      0.800000011920929
+    ]
+  ],
+  "triangles": 3472,
+  "uv": {
+    "meters_per_uv": 2.501140106389122,
+    "min": 2.1660461923573546,
+    "max": 3.1467935777793383,
+    "p05": 2.28641768753622,
+    "p95": 2.661024811511476,
+    "total_triangles": 3472,
+    "valid_triangles": 3472,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_wood": "wood",
+    "Kominka_dark": "wood",
+    "Kominka_edge": "wood",
+    "Kominka_WhiteCeramic": null,
+    "Kominka_brass": "brass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 130192
+}
