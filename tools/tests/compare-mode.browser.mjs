@@ -103,8 +103,16 @@ try {
     const frames = [...document.querySelectorAll('.compare-frame')].map((f) => f.getBoundingClientRect());
     return { x: frames[1].left + frames[1].width / 2, y: frames[1].top + frames[1].height / 2 };
   });
-  await page.mouse.click(rightHalf.x, rightHalf.y);
-  assert.equal(await page.evaluate(() => CompareMode.activeSide()), 1, '3D で右を押しても右が編集中にならない');
+  // 組み立て中の「準備中」の覆いの上では図面に届かない。画面の無いブラウザでは家具のモデルが届くたびに
+  // 組み立て直しで覆いが出るので、覆いが無いときに押せるまで数回試す
+  let hit = '-';
+  for (let t = 0; t < 20 && (await page.evaluate(() => CompareMode.activeSide())) !== 1; t++) {
+    await page.waitForFunction(() => { const l = document.getElementById('app-loading'); return !l || !l.classList.contains('show'); }, null, { timeout: 120000 });
+    hit = await page.evaluate((p) => { const e = document.elementFromPoint(p.x, p.y); return e ? e.tagName + '#' + e.id : '-'; }, rightHalf);
+    if (hit.startsWith('CANVAS')) await page.mouse.click(rightHalf.x, rightHalf.y);
+    else await page.waitForTimeout(500);
+  }
+  assert.equal(await page.evaluate(() => CompareMode.activeSide()), 1, '3D で右を押しても右が編集中にならない（押した所: ' + hit + '）');
   const pick = await page.evaluate(() => ({ name: DATA.planName }));
   assert.equal(pick.name, 'LDK拡張案', '右を押したのに左の間取りが編集中のまま');
   await page.evaluate(() => setView('2d'));
