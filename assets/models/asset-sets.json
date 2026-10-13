@@ -146,6 +146,12 @@
     "prefer": {
      "chair": [
       "kominka-chair-01"
+     ],
+     "washer": [
+      "kominka-tarai-01"
+     ],
+     "car": [
+      "kominka-rickshaw-01"
      ]
     },
     "standIns": {
@@ -157,6 +163,7 @@
      }
     },
     "stretchKinds": [
+     "curtain",
      "roller-screen",
      "rug"
     ],
@@ -176,8 +183,16 @@
      "light"
     ],
     "topAlignKinds": [
+     "curtain",
      "roller-screen"
-    ]
+    ],
+    "typeKinds": {
+     "washer": "laundry",
+     "car": "car"
+    },
+    "topAlignMaxDropMm": {
+     "curtain": 300
+    }
    },
    "style": {
     "note": "壁・床・屋根をまとめて切り替えるときの様式（assets/js/building-style.js）。素材のキーは index.html の ASSET_TEX_MAP と床材の FLOOR_PBR_STEM。windows は窓の種類(引き違い sliding・開き窓 casement・FIX fix・掃き出し door)ごとの窓。doors は開き戸(swing)と玄関ドア(front)の扉板。rooms は部屋の名前に match の語が含まれるときの素材",
