@@ -1,0 +1,38 @@
+{
+  "approval": "2D reference approved; 3D pending human review",
+  "provisional_outfits": [
+    "male A",
+    "female A"
+  ],
+  "review_source": "unpainted GLB readback renders",
+  "review_real_displayed": true,
+  "directions": [
+    "front",
+    "three-quarter",
+    "side",
+    "back",
+    "face"
+  ],
+  "visual_findings": [
+    "Eyes, gentle closed mouth, ears, hair, garment/hem thickness, watch/hair clip and house shoes recognizable in actual geometry",
+    "Male hair short swept mass; female bob/ivory clip and cream long skirt distinct in side/back",
+    "Shoulder angular peaks and long exposed neck revised; skin/sock clipping revised",
+    "Initial hair-face occlusion and triangle overbudget rejected; not counted as deliverables"
+  ],
+  "remaining_form_review_differences": [
+    "Hair back mass and trouser waist joins simplified",
+    "Sleeve and finger detail remain first-pass",
+    "Warm white cotton and socks vary slightly from 2D sampled colours",
+    "Actual head ratios differ from reference 2D ratios; recorded without claiming equality"
+  ],
+  "not_tested": [
+    "human 3D approval",
+    "final A/B outfit selection",
+    "rig weights/deformation",
+    "idle/walk/sit",
+    "walk step length and cycle",
+    "in-place drift and animated floor contact",
+    "animated skirt collision",
+    "app/browser/device integration"
+  ]
+}
