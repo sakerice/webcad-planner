@@ -10821,20 +10821,29 @@ function buildWinFrames(flFilt){
         var movingX=slideWant?fixedX:(leftOpen?leftPos:rightPos);
         // 引き違い2枚のレールピッチは34mm(戸厚36mmでほぼ密着する実際の納まり)
         addBox(doorLeafMat,fixedX,panelY,-0.019,panelW,panelH,leafT);
-        var slideLeaf=addBox(doorLeafMat,movingX,panelY, 0.019,panelW,panelH,leafT);
+        // 可動戸は戸板と引手をひとつのグループにまとめ、グループごと滑らせる。
+        // (以前は引手を建具グループに直付けしていたため、戸が開いても引手が残った)
+        var slideLeaf=new THREE.Group();
+        slideLeaf.position.set(movingX,0,0);
+        slideLeaf.userData.noMerge=true; // ウォークスルーで動かすため統合しない
+        grp.add(slideLeaf);
+        var slideLeafMesh=new THREE.Mesh(new THREE.BoxGeometry(panelW,panelH,leafT),doorLeafMat);
+        slideLeafMesh.position.set(0,panelY,0.019); slideLeafMesh.castShadow=true; slideLeafMesh.receiveShadow=true;
+        slideLeaf.add(slideLeafMesh);
         // 掘り込み引手: 各戸の召し合わせ側端部から25mm内側、縦長30x100(中心H950)・両面。
         // パネル面より一段暗いグレーで2mm沈んで見える表現
         var pullMat=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
-        function addPull(px0,pz0,edgeDir){
+        function addPull(parent,px0,pz0,edgeDir){
           var hx=px0+edgeDir*(panelW/2-0.025-0.015);
           [-1,1].forEach(function(sside){
-            addBox(pullMat,hx,doorHardwareY(0.95),pz0+sside*(leafT/2-0.001),0.030,0.100,0.004);
+            var pm=new THREE.Mesh(new THREE.BoxGeometry(0.030,0.100,0.004),pullMat);
+            pm.position.set(hx,doorHardwareY(0.95),pz0+sside*(leafT/2-0.001));
+            pm.castShadow=true; pm.receiveShadow=true; parent.add(pm);
           });
         }
         // 固定戸: 召し合わせ側=可動戸側 / 可動戸: 召し合わせ側=固定戸側
-        addPull(fixedX,-0.019,(movingX>=fixedX)?1:-1);
-        addPull(movingX, 0.019,(fixedX>=movingX)?1:-1);
-        slideLeaf.userData.noMerge=true; // ウォークスルーで動かすため統合しない
+        addPull(grp,fixedX,-0.019,(movingX>=fixedX)?1:-1);
+        addPull(slideLeaf,0, 0.019,(fixedX>=movingX)?1:-1);
         _doorAnims.push({it:it,grp:grp,slideMesh:slideLeaf,openX:fixedX,
           closedX:(leftOpen?leftPos:rightPos),
           initiallyOpen:slideOpen,_want:slideWant});
@@ -10918,6 +10927,12 @@ function buildWinFrames(flFilt){
             });
           }
         }
+        // 回転軸の中身(戸板・取っ手・丁番)は建具グループ側の統合から外す。
+        // 外さないと取っ手が統合されて回転軸の外へ付け替えられ、扉だけが回って
+        // 取っ手が壁に残る(比較モードで統合がサブグループまで降りるようになってから)。
+        // ドローコールは回転軸の中だけで統合して保つ。
+        pivot.userData.noMerge=true;
+        mergeGroupMeshes(pivot);
         grp.add(pivot);
         // ウォークスルーの接近自動開閉用に登録
         _doorAnims.push({it:it,grp:grp,pivot:pivot,openY:doorOpenY,
@@ -18533,6 +18548,7 @@ canvas.addEventListener('mouseup',function(){
   }
   var wasDragging=DRAG.active;
   DRAG.active=false; DRAG.group=null; ST._snapState=null;
+  if(wasDragging) snapMovedCeilingLightsToAttachSurface();   // 別の部屋・軒下へ動かした照明を取付面へ
   if(wasDragging) updateProps();
   if(ren)build3D();
   if(wasDragging) queueSharedSync(80);
@@ -22421,10 +22437,49 @@ function snapOutdoorCeilingFixturesToRoof(){
   if(moved) console.info('[WebCAD] 軒下の天井付け器具 '+moved+'個を屋根の下面へ寄せ直しました');
   return moved;
 }
+// 天井付けの照明を、読み込みのたびに取付面（部屋の天井仕上げ面・軒下なら屋根の下面）へ寄せる。
+//
+// 上の2つの寄せ直しは「1度だけ」走る作りで、済んだ印をプランに書く。ところが既定プランは
+// 生成し直されることがあり、印だけが残って高さが古い値に戻った（軒下のダウンライトが
+// 屋根から 750mm 浮いた）。利用者のプランでも、天井高を変えた後に置いた照明が古い既定値の
+// まま残ることがある。印に頼らず、照明は毎回取付面に付ける。
+//
+// ダウンライトは埋込なので必ず取付面。直付け(シーリング)・スポットは、取付面より
+// LIGHT_ATTACH_TOLERANCE_MM を超えて下げてある物は意図した吊り下げとみなして触らない。
+// 天井裏に埋まっている物(取付面より上)は常に下ろす。上に天井も屋根も無い物は触らない。
+var LIGHT_ATTACH_TOLERANCE_MM=300;
+function snapCeilingLightToAttachSurface(it){
+  if(!it||!isLightItemType(it.type)) return false;
+  var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+  if(topOff===undefined) return false;
+  var want=ceilingAttachElevationMm(it);
+  if(want===null||!isFinite(want)) return false;
+  want-=topOff;
+  var cur=Number(it.elev)||0, drop=want-cur;        // 正なら取付面より下に浮いている
+  if(Math.abs(drop)<=1) return false;
+  if(it.type!=='light-down'&&drop>LIGHT_ATTACH_TOLERANCE_MM) return false;
+  it.elev=want;
+  return true;
+}
+function snapCeilingLightsToAttachSurface(){
+  if(!DATA||!DATA.items) return 0;
+  var moved=0;
+  DATA.items.forEach(function(it){ if(snapCeilingLightToAttachSurface(it)) moved++; });
+  if(moved) console.info('[WebCAD] 天井付けの照明 '+moved+'個を取付面へ寄せました');
+  return moved;
+}
+// 平面図で照明を別の部屋（天井高の違う部屋・軒下）へ動かしたとき、動かした物だけ寄せ直す
+function snapMovedCeilingLightsToAttachSurface(){
+  var list=[];
+  if(ST&&ST.selected) list.push(ST.selected);
+  if(ST&&ST.multiSelected&&ST.multiSelected.length) list=list.concat(ST.multiSelected);
+  return list.filter(snapCeilingLightToAttachSurface).length;
+}
 function normalizeLegacyFurnitureItems(){
   if(!DATA||!DATA.items) return;
   snapCeilingFixturesToCeiling();
   snapOutdoorCeilingFixturesToRoof();
+  snapCeilingLightsToAttachSurface();
   DATA.items=DATA.items.filter(function(it){return it && it.type!=='tv';});
   if(ST && ST.selected && ST.selected.type==='tv') ST.selected=null;
   DATA.items.forEach(function(it){
