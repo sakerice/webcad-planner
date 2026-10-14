@@ -17,9 +17,9 @@ var ThirdPerson = (function(){
   var DIST = 2.4, HEAD = 1.55, NEAR_PAD = 0.35, TURN_RATE = Math.PI / 0.45;
   var figure = null, parts = null, phase = 0, lastX = null, lastZ = null;
   // 人物の GLB（Codex がデザインし Meshy で立体化、動きは Mixamo）。読めなければ仮の人形で歩く。
-  // 第2版（5.5頭身前後、利用者が選んだ男性 b・女性 a）。第1版（-01）はファイルを残しておく
+  // 第2版（5.5頭身前後）の女性 a。男性 b は色の画像のむらが残るため、リリースの範囲から外した（利用者の判断）。
+  // 人物を足すときは、この表に足すと切り替えの順番に入る（一人称 → 三人称・各人物 → 一人称）
   var CHARACTERS = [
-    {id:'walker-male-02b', label:'男性', url:'assets/models/characters/walker-male-02b.glb', height:1.72},
     {id:'walker-female-02a', label:'女性', url:'assets/models/characters/walker-female-02a.glb', height:1.60}
   ];
   var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null, bones = {};
@@ -408,7 +408,7 @@ var ThirdPerson = (function(){
       var b = document.createElement('button');
       b.id = 'walk-tps-toggle'; b.type = 'button'; b.className = 'wk-tps';
       b.addEventListener('click', function(){
-        // 一人称 → 三人称(男性) → 三人称(女性) → 一人称 の順に切り替える
+        // 一人称 → 三人称（人物の表の順） → 一人称 の順に切り替える
         if(!on){ charIndex = 0; setOn(true); }
         else if(charIndex < CHARACTERS.length - 1){ charIndex++; if(!useModel(CHARACTERS[charIndex])) loadCharacter(CHARACTERS[charIndex]); updateButton(); }
         else setOn(false);

@@ -129,8 +129,7 @@ try {
   assert.ok(sit.turned.stillSeated && sit.turned.dyaw > 0.1, '座ったまま左右キーでカメラが回らない: ' + JSON.stringify(sit.turned));
   assert.ok(Math.abs(sit.turned.facing) < 1e-6, 'カメラを回したら、座っている人物まで回った: ' + JSON.stringify(sit.turned));
   assert.equal(sit.after, false, '前へ歩く操作で立ち上がらない');
-  // もう1回で女性に替わり、さらにもう1回で一人称に戻る（人物は消え、カメラは目の位置に戻る）
-  await pressToggle(p2);
+  // 人物は女性だけ（男性はリリースの範囲から外した）。もう1回押すと一人称に戻る（人物は消え、カメラは目の位置に戻る）
   assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-02a');
   await pressToggle(p2);
   const back = await p2.evaluate(() => { let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; }); return { figure: !!f, d: Math.hypot(camExt.position.x - WALK.x, camExt.position.z - WALK.z) }; });
