@@ -1,65 +1,50 @@
-# Claude向け2D人物デザイン第2版 — 正式6案
+# 人物v2 頭身改稿 — Claude修正依頼 #167
 
-本人17:08 JST `Sentinel_05ffbbd842d08191a86a1d3d32c81fc9`「納品形式はClaude側の要求に従ってください」に従い、男女各3案・各3方向を揃えた。14:31承認の最新4正面head `1f1815e5ca7aca53d0893152e9f2926877c05c68` の絵柄/成人体型/在宅服を基準として保持し、男女Cを同じ方向へ追加。旧5〜5.5頭身/旧衣装へ戻していない。
+本人が承認したのは絵柄のみという明示訂正に従い、6案を5.3〜5.8頭身へ改稿した。絵柄の基準は14:31承認4原図（head `1f1815e5`）。服・配色の系統・小物と物理的な左右位置を保持し、頭を大きく、脚と首を短め、手足をやや太めの相対体型へ変更した。胴は服が読める長さを維持。想定身長は男性172cm/女性160cm。
 
-**dot/Codexの正式納品は2D画像のみ。** 本人17:02 `Sentinel_b2789cd77240819194fdcc93430add48` の役割訂正でこちらの3D制作を停止。誤着手の全途中物89ファイルは同じMacのworktree外へ移し全SHAを照合、Git公開履歴head046553f3も保持。正式2Dパックと本PRの現在の差分へ3Dを含めない。[保持記録](3d-misstart-preservation.json)。Meshy/3D/rig/動き/陰影・輪郭線/組込みは元Claude担当。完了報告の保存は親が最終確認後に行う。
+同じ枝とPR103で同ID/同ファイル名を差し替えた。前納品#143/head `e7fb1a30899e40aa35ae44fd0c1983eb567f494c` の6.5頭身版は[candidates/superseded-adult-issue143-20261014](candidates/superseded-adult-issue143-20261014)へ全45ファイルをバイト保持。#143のKanban/完了報告と旧Libraryを変更しない。今回の進捗は#167、完了hookは親が監査後に行う。3D・アプリ・ブラウザ・main push/merge/deployは実施していない。
 
-![6案一覧](lineup.png)
+![同縮尺6案](lineup.png)
 
-正式単体18枚は全て1254×1254の正式imagegen出力をバイト変更せずコピー。三面図6枚は2640×1280、一覧4800×1280。三面図/一覧は人物bbox切出し・等方拡縮・配置・文字のみで人物を加筆しない。Aポーズを広げたため一覧の列幅を800pxに確保し、手先の切れを修正した。前版の25PNG/6色表等は[candidates/superseded-six-20261014](candidates/superseded-six-20261014)へバイトを保持して移動。最新承認4原図は[attachment-style-review](candidates/attachment-style-review-20261014/README.md)内で不変。
+正式単体18PNGは全て1254×1254の正式imagegen原出力とバイト一致。三面図6PNGは3120×1280、一覧5400×1280、顔比較1枚3600×1280。正式PNG計26枚＋色表6件。三面図/一覧/比較は切出し・等方配置とラベルのみで人物加筆なし。
 
-## 6案と承認基準の対応
+## 実画素の頭身
 
-| ID | 基準/狙い | 正面 | 横 | 背面 | 三面図 | 色表 |
-|---|---|---|---|---|---|---|
-| walker-male-02a | 承認M-A：黄色スウェットの在宅カジュアル | [front](walker-male-02a-front.png) | [side](walker-male-02a-side.png) | [back](walker-male-02a-back.png) | [turnaround](walker-male-02a-turnaround.png) | [colors](walker-male-02a-colors.md) |
-| walker-male-02b | 承認M-B：ミント半袖ハーフジップの軽い在宅服 | [front](walker-male-02b-front.png) | [side](walker-male-02b-side.png) | [back](walker-male-02b-back.png) | [turnaround](walker-male-02b-turnaround.png) | [colors](walker-male-02b-colors.md) |
-| walker-male-02c | 追加C：コーラルカーディガンのきれいめ在宅服 | [front](walker-male-02c-front.png) | [side](walker-male-02c-side.png) | [back](walker-male-02c-back.png) | [turnaround](walker-male-02c-turnaround.png) | [colors](walker-male-02c-colors.md) |
-| walker-female-02a | 承認F-A：緑スウェットと長スカートの在宅服 | [front](walker-female-02a-front.png) | [side](walker-female-02a-side.png) | [back](walker-female-02a-back.png) | [turnaround](walker-female-02a-turnaround.png) | [colors](walker-female-02a-colors.md) |
-| walker-female-02b | 承認F-B：青ボートネックとワイドパンツのきれいめ在宅服 | [front](walker-female-02b-front.png) | [side](walker-female-02b-side.png) | [back](walker-female-02b-back.png) | [turnaround](walker-female-02b-turnaround.png) | [colors](walker-female-02b-colors.md) |
-| walker-female-02c | 追加C：オートミール半袖ニットとローズパンツの在宅服 | [front](walker-female-02c-front.png) | [side](walker-female-02c-side.png) | [back](walker-female-02c-back.png) | [turnaround](walker-female-02c-turnaround.png) | [colors](walker-female-02c-colors.md) |
+髪を含む頭頂〜顎と頭頂〜足底を、原寸の正面・横12枚と完成三面図の正面・横12パネルで別に測った。座標/RGBと±1pxの境界不確かさを[final-inspection.json](final-inspection.json)へ記録。
 
-M-A時計は正面右/背面左、M-B腕輪は正面左/背面右、F-A白髪留めは正面右/背面左。F-B金円盤は前胸だけ、背面は細いチェーンだけ。Cは装飾を追加しない。M-B横のみ画面右向きで身体右側の腕輪を見せ、他5案は左向きの身体左側。白T裾はA/B男性・C男性・A/C女性に存在し、F-Bへ勝手に足していない。女性Aは本人の最新在宅服要求の長スカートで、旧膝上指定へ戻していない。
+| ID | 正面 頭頂/顎(x,y)/足底 | 正面 頭高/全高px・頭身 | 横 頭頂/顎(x,y)/足底 | 横 頭高/全高px・頭身 | 三面図 正面/横頭身 |
+|---|---|---|---|---|---|
+| walker-male-02a | 23/(618,246)/1225 | 223/1202・5.390135 | 14/(556,240)/1225 | 226/1211・5.358407 | 5.399103/5.351111 |
+| walker-male-02b | 16/(618,232)/1225 | 216/1209・5.597222 | 5/(679,218)/1224 | 213/1219・5.723005 | 5.600000/5.733333 |
+| walker-male-02c | 14/(618,242)/1226 | 228/1212・5.315789 | 12/(558,234)/1229 | 222/1217・5.481982 | 5.327434/5.472727 |
+| walker-female-02a | 15/(618,227)/1223 | 212/1208・5.698113 | 15/(553,227)/1228 | 212/1213・5.721698 | 5.685279/5.714286 |
+| walker-female-02b | 19/(617,229)/1228 | 210/1209・5.757143 | 21/(565,239)/1227 | 218/1206・5.532110 | 5.743590/5.544554 |
+| walker-female-02c | 18/(623,229)/1228 | 211/1210・5.734597 | 10/(561,229)/1228 | 219/1218・5.561644 | 5.743590/5.572139 |
 
-## 原寸の頭身とAポーズ検査
+背面6枚も頭頂・足底と見える後頭部髪境界を実測した。顎は非可視なので顎座標/頭身はnull。髪境界を顎へ置き換えていない。隠れた顎の厳密な背面頭身はしていない。
 
-頭身は髪を含む頭頂〜顎と頭頂〜足底の実画素から計算し、顎輪郭の座標/RGBも保存。±1pxの境界不確かさがある。背面の顎は見えないため推測値を記入しない。袖外縁の角度はy400/520の局所投影角で、隠れた肩関節角の測定ではない。
+一覧は6px/cm、男性1032px/女性960px、全員足底y1132。完成画素で12cm差を再走査。三面図は7px/cm、男性1204px/女性1120px、各方向足底y1230。列幅を広げ全指先を保持。正面袖y400/520の局所投影角は全て30〜45度で、隠れた肩関節角の厳密測定ではない。横は腕がカメラ方向に広がるAポーズの投影。
 
-| ID | 頭頂y | 顎(x,y) | 足底y | 頭高/全高px | 実測頭身 | 正面袖外縁 左/右° |
-|---|---:|---|---:|---|---:|---|
-| walker-male-02a | 14 | (618, 200) | 1226 | 186/1212 | 6.516129 | 34.670/37.174 |
-| walker-male-02b | 12 | (618, 199) | 1222 | 187/1210 | 6.470588 | 35.311/33.358 |
-| walker-male-02c | 14 | (618, 201) | 1224 | 187/1210 | 6.470588 | 30.964/30.964 |
-| walker-female-02a | 23 | (618, 206) | 1217 | 183/1194 | 6.524590 | 30.611/31.661 |
-| walker-female-02b | 21 | (620, 206) | 1216 | 185/1195 | 6.459459 | 37.174/37.476 |
-| walker-female-02c | 22 | (620, 207) | 1220 | 185/1198 | 6.475676 | 35.628/36.254 |
+## 維持したものと修正
 
+M-A黄色/深緑＋身体左時計、M-Bミント/トープ＋身体右腕輪、M-Cコーラル/青灰＋装飾なし。F-A緑/クリーム長スカート＋身体左髪留め、F-B青ボートネック/チャコール＋前胸金円盤（背は細チェーンのみ）、F-Cオートミールポロ/ローズ＋装飾なし。靴・靴下・白T裾の有無を保持。M-B横は右向き、他5案は左向き。
 
-三面図の完成PNG正面パネルも別に実測した。等方縮尺後の端数/AAにより原寸値と僅かに異なる。
+縦長の丸い目、穏やかな瞼、小さい鼻と口、柔らかい頬顎、まとまった髪、控えめな輪郭と簡潔なセル影を実表示で確認。[approved-face-comparison.png](approved-face-comparison.png)は同じ切出し座標・同縮尺のbefore/after。A/Bのbeforeは本人承認4原図、Cのbeforeは旧版（本人承認ではない）と明記した。
 
-| ID | 頭頂y | 顎(x,y) | 足底y | 頭高/全高px | 三面図実測頭身 |
-|---|---:|---|---:|---|---:|
-| walker-male-02a | 26 | (439, 211) | 1230 | 185/1204 | 6.508108 |
-| walker-male-02b | 26 | (438, 212) | 1230 | 186/1204 | 6.473118 |
-| walker-male-02c | 26 | (444, 212) | 1230 | 186/1204 | 6.473118 |
-| walker-female-02a | 110 | (436, 282) | 1230 | 172/1120 | 6.511628 |
-| walker-female-02b | 110 | (440, 284) | 1230 | 174/1120 | 6.436782 |
-| walker-female-02c | 110 | (438, 283) | 1230 | 173/1120 | 6.473988 |
+正式imagegen＋imagegen技能で当工程39回、採用18方向。[production-generations.json](production-generations.json)に全指示・入力スナップショットSHA・原出力SHA・採否を保存。作品/キャラ名を生成文章へ入れず、具体的人物・服・ロゴ・模様の複写指示なし。
 
-[final-inspection.json](final-inspection.json) に18画像寸法/bbox、6実測、構成変換/各SHAを保存。姿勢の狭い局所輪郭を見つけ、承認原図を保持したまま正式imagegenの姿勢のみ編集で明確な35〜45度Aポーズへ調整。正面の局所袖角は全て30〜45度に収まった。側/背も腕/袖と手の高さを合わせる編集を行ったが、生成された独立投影の手先位置等には数十px程度の残差があり、完全に同じ3D投影や骨格関節角とは主張しない。服・髪・配色・小物・全身/足底/手の形は18方向を実表示して確認した。[実表示QA](manual-qa.json)。
+正面6案を実測してから横背へ進んだ。頭の拡大不足/過大、袖角不足、女性Cの48度超を修正。旧横参照に引かれた6頭身超を直し、男性背面の頭部サイズも合わせた。女性C横5.907を追加修正。小幅編集で逆に頭身が戻った男性C試作は不採用にし、実測合格の原出力を復元した。不採用を正式枚数へ水増ししない。女性A靴下の色採取点が靴にかかったため1116へ修正し、全色値を現在の3×3中央値で保存。
 
-一覧は6px/cm、男性1032px=172cm、女性960px=160cm、全員足底y1132。完成PNGを再走査して72px=12cm差と手先の非切れを確認。三面図は7px/cmで男性1204px/女性1120pxを各3方向で共通にした。
+18単体・6三面図・一覧・顔比較を実表示して検査。独立投影の手先/裾位置には数十pxの残差があり、同一3D投影とは主張しない。配色は部位/色系統を維持し、RGB値・AA・微小濃淡は画素ごとに完全同一ではない。数学的な全画素2色や背景完全均一ではない。
 
-## 生成・修正・権利
+未実施：本人による今回の体型/姿勢の最終選択、背面の隠れた顎/骨格関節角、同一3D投影、素材物性、3D/rig/動き、アプリ/ブラウザ/実室内評価。
 
-画像の制作・人物/姿勢の編集は正式 `image_gen.imagegen` とimagegen技能のみ。新しいCLI/APIキーや外部サービスに切替えていない。全指示/入力・出力SHA/採否は[production-generations.json](production-generations.json)。当工程33回＋承認基準4原図の元生成文章を記録し、正式採用18方向と比較用の履歴を区別。固有作品/キャラ名を生成指示へ含めず、具体的な人物/服/ロゴ/模様の複製を指示していない。元の外部参照画素をこの納品へ含めない。
+## 引渡しとLibrary
 
-低解像度の2ビュー試作1774×887は各887pxのため不採用。拡大で条件を満たしたとせず、正方形単体へ再生成。前の狭いポーズ18画像もMac原本を保持して正式採用数へ足さず、姿勢の一致を修正した。腕輪の色採取点が皮膚、靴下の点がパンツにかかっていた誤採取を修正。虹彩は瞳孔でなく色領域を再採取した。[colour-inspection.json](colour-inspection.json)。
+[handoff-manifest.json](handoff-manifest.json)は正式26PNG/6色表の32ファイルを列挙。[verify_deliverables.py](verify_deliverables.py)は実画素・寸法・原出力一致・姿勢・縮尺・履歴保持を確認する。変更はv2成果と台帳1行のみ。旧84PNGと停止3D89ファイルは保持確認だけで再制作していない。
 
-[権利台帳](../../../../docs/legal/asset-sets-ledger.md) に公式[ROW Terms of Use](https://openai.com/policies/row-terms-of-use/)と[Services Agreement](https://openai.com/policies/services-agreement/)のContent/Ownership・Similarity条項を2026-10-14確認して記録。利用者とOpenAI間の法の許容範囲でのOutput帰属であり、独占性/第三者権利/参照権利の移転/非侵害を保証しない。公開再利用ライセンスは付与していない。
+Libraryの現行技能/補助ファイルが能力更新後に取得不能（cloud skill一覧なし、current helper fetch失敗）。古い補助や非公式保存は使用せず、今回のLibrary保存は未実施。親の指示に従い画像/PRを先に納品し、[レビューまとめ](candidates/proportion-issue167-20261014/issue167-review.png)の固定URLとMac原本名・寸法・SHAを返す。[review-image-manifest.json](review-image-manifest.json)、[library-save-status.json](library-save-status.json)に記録。旧#143 Libraryは履歴保持。
 
-画素レベルではAA、低振幅のラスタ差、広い色面の微小な濃淡があり、全画素2色や背景の全画素均一を保証しない。細い輪郭と少数の大きな無地面/セル影を基準に確認。未実施：本人による新C/納品姿勢の最終選択、同一3D投影/隠れた関節角、素材物性、3D/rig/アニメ、アプリ/実室内/ブラウザ検査。3Dと本番の操作は停止したまま。
+レビューまとめは5400×5884、上から新一覧・顔比較・三面図6案（左男性A/B/C、右女性A/B/C）。検査用合成で新しい案ではない。親が正式保存経路と元Claudeセッションへの完了報告を確認する。
 
-## 引渡し
-
-[verify_deliverables.py](verify_deliverables.py) は現在の正式25PNG/6色表/6実測/原出力一致/姿勢/縮尺/基準原図・旧画像保持を検査する。正式6案一覧をMacの実ファイルから正式Libraryへ保存済み。`library_file_id: libfile_958eda43d7908191a1c635ab01097b5f`、`file_id: file_000000009250820e81d65968f56a407b`、サーバー名 `lineup(1).png`（同名衝突で付番）、3,374,345bytes。公式helperでメタデータを実ファイルへ書き戻し、Library読み戻しと原本のSHA256 `10690b0ab2f4aaaf7822096d4372f9f9a9d6fac8741a22034156705348eb963f` 一致を確認。[保存証跡](library-save-status.json)。旧6案Library `libfile_c50f1dff50c88191be9e01d40febb5a2`、承認4案Library `libfile_046fd46e92ec8191bed86b399fca949b` は履歴として保持。誤着手3D Libraryを2D引渡しに含めない。[正式引渡し一覧](handoff-manifest.json)は現行25PNG・6色表と検査/生成記録だけを指し、過去候補と3D途中物を採用に含めない。親が元Claude session `fbf688bf-1ba3-4478-bef4-3ba2070ab0ed` への完了条件・返送を最終確認する。
+[権利台帳](../../../../docs/legal/asset-sets-ledger.md)の公式OpenAI Content/Ownership・Similarity条件を継承。法/適用契約の許容範囲でのOutput帰属であり、独占性・第三者権利・非侵害・参照権利移転を保証しない。
