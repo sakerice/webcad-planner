@@ -57,6 +57,29 @@ try{
  });
  assert.equal(kept.low,1500,'300mm を超えて下げたシーリングライトは吊り下げとみなして触らない');
  assert.equal(kept.buried,kept.ceil,'天井裏に埋まった照明は天井面へ下ろす');
+ // 勾配天井の部屋: 取付面は**その位置の**天井面。部屋の天井高（勾配のいちばん高い所）ではない。
+ // （利用者のプランの勾配天井の LDK で、低い側のシーリングライトが天井から 70mm 浮いたまま残り、
+ //   ダウンライトなら天井裏まで持ち上げられていた）
+ const slope=await page.evaluate(()=>{
+  const r=DATA.rooms.find(x=>x.n==='LDK')||DATA.rooms.find(x=>x.n==='主寝室');
+  r.ceiling={type:'sloped',lowMm:2200,highMm:3600,direction:0};
+  const prof=roomCeilingProfile(r);
+  const pts=[[r.x+r.w*0.2,r.y+r.d*0.2],[r.x+r.w*0.5,r.y+r.d*0.5],[r.x+r.w*0.8,r.y+r.d*0.8]];
+  return pts.map(([cx,cy])=>{
+   const dl=mkItem('light-down',cx-90,cy-90,0,r.floor,180,180); dl.elev=2000;
+   const cl=mkItem('light-ceiling',cx-150,cy-150,0,r.floor,300,300);
+   DATA.items.push(dl,cl);
+   const surf=Math.round((Math.min(floorBaseY(r.floor)+roomCeilingHeightM(r),roomCeilingWorldYAtMm(r,prof,cx,cy))-item3DBaseY(dl))/U);
+   cl.elev=surf-70;                                  // 天井から 70mm 浮いている
+   snapCeilingLightsToAttachSurface();
+   return {surf,dl:Math.round(dl.elev)+CEILING_FIXTURE_TOP_MM['light-down'],cl:Math.round(cl.elev)+CEILING_FIXTURE_TOP_MM['light-ceiling'],roomMax:roomCeilingElevationMm(r)};
+  });
+ });
+ assert.ok(!!slope.length&&slope.some(s=>s.surf<s.roomMax-100),'勾配天井の低い側の点が取れていない: '+JSON.stringify(slope));
+ for(const s of slope){
+  assert.ok(Math.abs(s.dl-s.surf)<=13,'勾配天井のダウンライトがその位置の天井面に付いていない: '+JSON.stringify(s));
+  assert.ok(Math.abs(s.cl-s.surf)<=13,'勾配天井のシーリングライトがその位置の天井面に付いていない: '+JSON.stringify(s));
+ }
  assert.deepEqual(errors,[]);
  console.log('ok ceiling lights attached');
 }finally{await browser.close();}
