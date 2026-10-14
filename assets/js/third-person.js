@@ -21,10 +21,13 @@ var ThirdPerson = (function(){
     {id:'walker-male-01', label:'男性', url:'assets/models/characters/walker-male-01.glb', height:1.72},
     {id:'walker-female-01', label:'女性', url:'assets/models/characters/walker-female-01.glb', height:1.60}
   ];
-  var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null;
+  var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null, bones = {};
   var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
   var ray = null, walls = null, wallsFor = null, hidden = [], HIDDEN_LAYER = 1;
-  var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;   // 人物の向き（カメラの向き WALK.yaw からのずれ。0=背中、π=正面をカメラへ）
+  var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
+  // 座る: 近くの座れる家具（ソファ・椅子）。seat は座っている家具、near は座れる候補。sitBlend は 0=立ち 1=座り
+  var SEAT_KINDS = {sofa:'ソファ', chair:'椅子'}, SEAT_REACH = 1.3, HIP_ABOVE_SEAT = 0.08, SIT_TIME = 0.35;
+  var seat = null, near = null, sitBlend = 0, lastAnimAt = 0, lastSeat = null;   // lastSeat: 立ち上がる途中も、座っていた家具から離れていくように   // 人物の向き（カメラの向き WALK.yaw からのずれ。0=背中、π=正面をカメラへ）
 
   function mat(color){ return new THREE.MeshStandardMaterial({color:color, roughness:0.75, metalness:0}); }
   function limb(len, r, m){
@@ -108,8 +111,12 @@ var ThirdPerson = (function(){
     if(old && old !== figure && old.parent){ old.parent.add(figure); old.parent.remove(old); }
     mixer = new THREE.AnimationMixer(figure);
     var walk = clipNamed(m.clips, 'walk'), idle = clipNamed(m.clips, 'idle');
-    actions = {walk: walk ? mixer.clipAction(walk) : null, idle: idle ? mixer.clipAction(idle) : null};
+    var sit = m.clips.find(function(a){ return a.name === 'Sitting'; }) || null;
+    actions = {walk: walk ? mixer.clipAction(walk) : null, idle: idle ? mixer.clipAction(idle) : null, sit: sit ? mixer.clipAction(sit) : null};
     if(actions.idle) actions.idle.play();
+    if(actions.sit){ actions.sit.play(); actions.sit.setEffectiveWeight(0); }
+    bones = {};
+    figure.traverse(function(o){ if(o.isBone){ if(/Hips$/.test(o.name)) bones.hips = o; else if(/Head$/.test(o.name)) bones.head = o; } });
     if(actions.walk){ actions.walk.play(); actions.walk.setEffectiveWeight(actions.idle ? 0 : 1); }
     mixer.update(0);
     parts = null;
@@ -141,10 +148,11 @@ var ThirdPerson = (function(){
 
   // カメラと人物の間に入ったら消す物: 床・天井（部屋）以外の、選べる物すべて（壁・ドア・窓・家具・植木など）。
   // 壁を消すときは、その壁に付いた窓・ドアも消す。場面を組み直したら集め直す。
-  // 家具のまとめ描き（同じ形の家具を1つにまとめた物）は1つだけ消せないので対象にしない
+  // 家具のまとめ描き（同じ形の家具を1つの物で何台も描く仕組み）は、当たった家具だけを大きさ0にして消す
   function collectWalls(){
     if(wallsFor === sc3 && walls && walls._n === sc3.children.length) return walls;
-    walls = {meshes:[], openings:[], _n:sc3.children.length};
+    walls = {meshes:[], openings:[], instanced:[], _n:sc3.children.length};
+    sc3.traverse(function(o){ if(o.isInstancedMesh && !o.userData._thirdPerson) walls.instanced.push(o); });
     sc3.children.forEach(function(root){
       var ud = root.userData || {}, ref = ud.selectRef;
       if(ud._thirdPerson || !ud.b || ud.selectKind === 'room') return;
@@ -167,6 +175,23 @@ var ThirdPerson = (function(){
     });
     hidden = list;
   }
+  var hiddenInst = {}, ZERO = null;
+  // 戻すときは、階の間引き(applyWalkCulling)が消している物は消したままにする
+  function setHiddenInstances(next){
+    next = next || {};
+    ZERO = ZERO || new THREE.Matrix4().makeScale(0, 0, 0);
+    Object.keys(hiddenInst).forEach(function(key){
+      if(next[key]) return;
+      var h = hiddenInst[key], ud = h.mesh.userData, vis = ud.instanceWalkVisible ? ud.instanceWalkVisible[h.id] !== false : true;
+      h.mesh.setMatrixAt(h.id, vis && ud.instanceBaseMatrices ? ud.instanceBaseMatrices[h.id] : ZERO);
+      h.mesh.instanceMatrix.needsUpdate = true;
+    });
+    Object.keys(next).forEach(function(key){
+      var h = next[key]; h.mesh.setMatrixAt(h.id, ZERO);
+      if(!hiddenInst[key]) h.mesh.instanceMatrix.needsUpdate = true;
+    });
+    hiddenInst = next;
+  }
   var _box = null, _ctr = null;
   function hideBetween(head, cam){
     var w = collectWalls();
@@ -177,6 +202,7 @@ var ThirdPerson = (function(){
     var list = [];
     ray.intersectObjects(w.meshes, false).forEach(function(h){
       var root = h.object.userData._tpsWallRoot;
+      if(root && seat && root.userData.selectRef === seat.item) return;   // 座っている家具は消さない
       if(root && list.indexOf(root) < 0) list.push(root);
     });
     if(list.length && w.openings.length){
@@ -190,6 +216,90 @@ var ThirdPerson = (function(){
       });
     }
     setHidden(list);
+    // まとめ描きの家具: 当たった家具（の全部品）を大きさ0にする。どの番号がどの家具かは instanceRefs に書いてある
+    // 消している家具は大きさ0で光線が当たらないので、当てる間だけ元の位置へ戻しておく（画面に送り直しはしない）
+    Object.keys(hiddenInst).forEach(function(key){ var h = hiddenInst[key], b = h.mesh.userData.instanceBaseMatrices; if(b) h.mesh.setMatrixAt(h.id, b[h.id]); });
+    var refs = [];
+    ray.intersectObjects(w.instanced.filter(function(m){ return m.userData.instanceRefs; }), false).forEach(function(h){
+      var ref = h.instanceId !== undefined ? h.object.userData.instanceRefs[h.instanceId] : null;
+      if(!ref || (seat && ref === seat.item) || refs.indexOf(ref) >= 0) return;   // 座っている家具は消さない
+      refs.push(ref);
+    });
+    var next = {};
+    if(refs.length) w.instanced.forEach(function(m){
+      var r = m.userData.instanceRefs; if(!r) return;
+      r.forEach(function(ref, idx){ if(refs.indexOf(ref) >= 0) next[m.uuid + ':' + idx] = {mesh:m, id:idx}; });
+    });
+    setHiddenInstances(next);
+  }
+
+  // ── 座る ──────────────────────────────────────────────────────
+  // 座れる家具は、カタログの分類（kind）が sofa・chair の物。向き・位置は間取りのデータから求める
+  // （食卓の椅子のように、同じ形をまとめて描いている家具は 3D から1脚ずつ取り出せないため）。
+  // 正面は、回転 0 で図面の下向き(+y)、回転で回る（モデルの正面 +Z の約束と同じ）
+  function seatKind(it){
+    var f = (typeof getFmpItem === 'function') ? getFmpItem(it.type) : null;
+    return f && SEAT_KINDS[f.kind] ? f.kind : null;
+  }
+  var _down = null;
+  function seatInfo(it){
+    var r = (it.rot || 0) * Math.PI / 180, fx = -Math.sin(r), fy = Math.cos(r);
+    var cx = it.x + it.w / 2, cy = it.y + it.d / 2;
+    // 座面の中心: 背もたれの分だけ、家具の中心より少し前
+    var sx = (cx + fx * it.d * 0.1) * U, sz = (cy + fy * it.d * 0.1) * U;
+    var floorY = floorTopY(it.floor) + (it.elev || 0) * U;
+    return {item:it, x:sx, z:sz, floorY:floorY, yaw:Math.atan2(-fx, -fy), kind:seatKind(it)};
+  }
+  // 座面の高さ: 座面の中心へ上から光線を下ろし、床から 15〜65cm の高さで当たった一番上の面
+  // （椅子を食卓に入れてあると、先に食卓の天板(70cm)に当たるので、それより低い所だけを見る）
+  function seatTop(info){
+    if(info.top !== undefined) return info.top;
+    if(!_down) _down = new THREE.Raycaster();
+    _down.set(new THREE.Vector3(info.x, info.floorY + 1.2, info.z), new THREE.Vector3(0, -1, 0)); _down.near = 0; _down.far = 1.2;
+    var best = null;
+    _down.intersectObjects(sc3.children, true).forEach(function(h){
+      var o = h.object; while(o && !o.userData._thirdPerson) o = o.parent;
+      if(o) return;
+      var y = h.point.y - info.floorY;
+      if(y > 0.15 && y < 0.65 && (best === null || y > best)) best = y;
+    });
+    info.top = info.floorY + (best === null ? 0.42 : best);     // 測れなければ一般的な座面の高さ 42cm
+    return info.top;
+  }
+  function findNearSeat(){
+    if(typeof DATA === 'undefined' || !DATA.items) return null;
+    var bestD = SEAT_REACH, best = null;
+    DATA.items.forEach(function(it){
+      if(it.floor !== WALK.floor || !seatKind(it)) return;
+      var info = seatInfo(it), d = Math.hypot(info.x - WALK.x, info.z - WALK.z);
+      if(d < bestD){ bestD = d; best = info; }
+    });
+    return best;
+  }
+  function sitDown(){
+    if(!near || !on) return;
+    seat = lastSeat = near; seatTop(seat);
+    WALK.yaw = seat.yaw; WALK.pitch = Math.min(WALK.pitch || 0, 0);   // 座った向き（家具の正面）を見る
+    bodyOff = bodyTarget = 0;
+    updateSitButton();
+    if(typeof walkApplyCamera === 'function') walkApplyCamera();
+    if(typeof invalidate3D === 'function') invalidate3D();
+  }
+  function standUp(){
+    if(!seat) return;
+    seat = null;
+    updateSitButton();
+    if(typeof walkApplyCamera === 'function') walkApplyCamera();
+    if(typeof invalidate3D === 'function') invalidate3D();
+  }
+  function updateSitButton(){
+    var b = document.getElementById('walk-sit-toggle');
+    if(!b) return;
+    var show = on && !!(seat || near) && typeof isWalkView === 'function' && isWalkView();
+    b.style.display = show ? '' : 'none';
+    if(!show) return;
+    b.textContent = seat ? '立ち上がる' : SEAT_KINDS[near.kind] + 'に座る';
+    b.setAttribute('aria-pressed', seat ? 'true' : 'false');
   }
 
   function feetY(){ return floorTopY(WALK.floor) + (WALK.groundOff || 0); }
@@ -221,17 +331,34 @@ var ThirdPerson = (function(){
     }
     figure.rotation.set(0, WALK.yaw + bodyOff, 0);
     lastX = WALK.x; lastZ = WALK.z;
+    // 座れる家具が近くにあれば「座る」を出す（座っている間は「立ち上がる」）
+    if(!seat){ var nn = findNearSeat(); if((nn && nn.item) !== (near && near.item)){ near = nn; updateSitButton(); } }
+    var now = performance.now(), dt = lastTick ? Math.min(0.1, (now - lastTick) / 1000) : 0; lastTick = now;
     if(mixer){
-      // 歩いた分だけ walk を進め、止まったら idle へ寄せる
-      var now = performance.now(), dt = lastTick ? Math.min(0.1, (now - lastTick) / 1000) : 0; lastTick = now;
-      var walking = moved > 0.0005;
+      sitBlend = Math.max(0, Math.min(1, sitBlend + (seat ? 1 : -1) * dt / SIT_TIME));
+      // 歩いた分だけ walk を進め、止まったら idle へ寄せる。座るときは sit へ寄せる
+      var walking = moved > 0.0005 && !seat;
       if(actions.idle){
-        if(actions.walk) actions.walk.setEffectiveWeight(walking ? 1 : 0);
-        actions.idle.setEffectiveWeight(walking ? 0 : 1);
+        var stand = 1 - (actions.sit ? sitBlend : 0);
+        if(actions.walk) actions.walk.setEffectiveWeight(walking ? stand : 0);
+        actions.idle.setEffectiveWeight(walking ? 0 : stand);
+        if(actions.sit) actions.sit.setEffectiveWeight(1 - stand);
         mixer.update(walking ? Math.max(dt, moved / WALK_SPEED) : dt);
       } else if(walking){
         // 待機の動きが無い人物は、止まったら歩く動きをその場で止める（腕を広げた骨組みの基本の姿にしない）
         mixer.update(Math.max(dt, moved / WALK_SPEED));
+      }
+      var from = seat || lastSeat;
+      if(sitBlend > 0 && from && bones.hips){
+        // 腰が座面の中心の上に来るよう、人物ごと動かす（足は床に置いたまま）
+        if(seat) figure.rotation.set(0, seat.yaw, 0);
+        figure.updateMatrixWorld(true);
+        var hp = bones.hips.getWorldPosition(new THREE.Vector3());
+        var k = sitBlend * sitBlend * (3 - 2 * sitBlend);           // なめらかに寄せる
+        figure.position.x += (from.x - hp.x) * k;
+        figure.position.z += (from.z - hp.z) * k;
+        var wantY = figure.position.y + (from.top + HIP_ABOVE_SEAT - hp.y);
+        figure.position.y += (Math.max(from.floorY - 0.05, wantY) - figure.position.y) * k;
       }
     } else if(parts){
       if(moved > 0.0005){ phase += moved * 4.2; } else { phase *= 0.8; }
@@ -244,6 +371,12 @@ var ThirdPerson = (function(){
     var pitch = WALK.pitch || 0;
     var dir = new THREE.Vector3(-Math.sin(WALK.yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(WALK.yaw) * Math.cos(pitch));
     var head = new THREE.Vector3(WALK.x, fy + HEAD, WALK.z);
+    if(sitBlend > 0){
+      // 座っている間（と立ち上がる途中）は、座った人物の頭の後ろから見る
+      figure.updateMatrixWorld(true);
+      var hd = bones.head ? bones.head.getWorldPosition(new THREE.Vector3()) : figure.position.clone().setY(figure.position.y + HEAD);
+      head.lerp(hd, sitBlend);
+    }
     figure.visible = true;
     camExt.position.copy(head).addScaledVector(dir, -DIST);
     camExt.position.y += 0.15;                                   // 肩越しに少し上から
@@ -263,8 +396,8 @@ var ThirdPerson = (function(){
   function setOn(v){
     on = !!v && enabled;
     if(!on && figure && figure.parent) figure.parent.remove(figure);
-    if(!on) setHidden([]);
-    lastX = null; bodyOff = bodyTarget = 0;
+    if(!on){ setHidden([]); setHiddenInstances({}); }
+    lastX = null; bodyOff = bodyTarget = 0; seat = null; near = null; sitBlend = 0; updateSitButton();
     updateButton();
     if(typeof isWalkView==='function' && isWalkView() && WALK.active){ walkApplyCamera(); if(typeof invalidate3D==='function') invalidate3D(); }
   }
@@ -291,6 +424,29 @@ var ThirdPerson = (function(){
       h.parentNode.appendChild(b);
       updateButton();
     }
+    // 「座る／立ち上がる」は画面の下の中央に出す（座れる家具の近くに来たときだけ）
+    var hud = document.getElementById('walk-hud');
+    if(hud && !document.getElementById('walk-sit-toggle')){
+      var sb = document.createElement('button');
+      sb.id = 'walk-sit-toggle'; sb.type = 'button'; sb.style.display = 'none';
+      sb.addEventListener('click', function(){ if(seat) standUp(); else sitDown(); });
+      hud.appendChild(sb);
+    }
+    // 座っている間に歩く操作をしたら立ち上がる。止まっていても、待機・座りの動きを見せるため 30コマ/秒で描く
+    var baseUpdate = updateWalkMode;
+    updateWalkMode = function(now){
+      if(on && seat){
+        var k = WALK.keys || {};
+        var moving = k.fwd || k.back || k.left || k.right || ['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].some(function(c){ return iMov[c]; });
+        if(moving) standUp();
+      }
+      var r = baseUpdate.apply(this, arguments);
+      if(!r && on && mixer && typeof isWalkView === 'function' && isWalkView() && WALK.active && now - lastAnimAt > 33){
+        lastAnimAt = now; walkApplyCamera(); return true;
+      }
+      if(r) lastAnimAt = now;
+      return r;
+    };
     var baseApply = walkApplyCamera;
     walkApplyCamera = function(){
       var r = baseApply.apply(this, arguments);
@@ -307,7 +463,7 @@ var ThirdPerson = (function(){
     var baseSetView = setView;
     setView = function(v){
       var r = baseSetView.apply(this, arguments);
-      if(v !== '3d-walk'){ if(figure && figure.parent) figure.parent.remove(figure); setHidden([]); }
+      if(v !== '3d-walk'){ if(figure && figure.parent) figure.parent.remove(figure); setHidden([]); setHiddenInstances({}); seat = null; near = null; sitBlend = 0; updateSitButton(); }
       if(v === '3d-walk' && on){ lastX = null; walkApplyCamera(); }
       return r;
     };
@@ -316,5 +472,5 @@ var ThirdPerson = (function(){
     if(window.THREE) install(); else window.addEventListener('three-ready', install, {once:true});
   });
   return { isEnabled:function(){ return enabled; }, isOn:function(){ return on; }, setOn:setOn, _place:place,
-    character:function(){ return CHARACTERS[charIndex].id; }, modelState:function(id){ return (models[id]||{}).state || 'none'; } };
+    character:function(){ return CHARACTERS[charIndex].id; }, sitDown:sitDown, standUp:standUp, seated:function(){ return seat && seat.item; }, nearSeat:function(){ return near && near.item; }, modelState:function(id){ return (models[id]||{}).state || 'none'; } };
 })();

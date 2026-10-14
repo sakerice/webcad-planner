@@ -8,7 +8,9 @@ import assert from 'node:assert/strict';
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 const APP = process.env.APP_URL || 'http://localhost:8932/';
-let browser = await chromium.launch();
+// HEADED=1 で画面のあるブラウザ(GPU あり)で走らせる。画面の無いブラウザは 3D の組み立てが遅く、マシンが混んでいると待ち切れない
+const launch = () => chromium.launch({ headless: !process.env.HEADED });
+let browser = await launch();
 try {
   const errors = [];
   async function open(q) {
@@ -42,7 +44,7 @@ try {
   const e1 = await p1.evaluate(eye);
   assert.ok(Math.hypot(e1.cx - e1.x, e1.cz - e1.z) < 1e-6 && Math.abs(e1.cy - e1.y) < 1e-6, '一人称のカメラが目の位置にない');
   // 画面の無いブラウザでは、3D のページを続けて開くと後の方が動かなくなるので、ブラウザごと開き直す
-  await browser.close(); browser = await chromium.launch();
+  await browser.close(); browser = await launch();
 
   // 隠しスイッチあり: 三人称にすると、人物の後ろから見る
   const p2 = await open('&tps=1');
@@ -75,6 +77,31 @@ try {
   assert.ok(turn.moved < 1e-9 || turn.along < -0.99, 'カメラの方へ歩いていない: ' + JSON.stringify(turn));
   assert.ok(turn.moved < 1e-9 || Math.abs(Math.abs(turn.face) - Math.PI) < 1e-6, '人物がカメラの方を向いていない: ' + JSON.stringify(turn));
   assert.ok(Math.abs(t.yaw) < 1e-6, 'カメラの向きが一人称と違う');
+  // 座る: ソファの前に来ると「ソファに座る」が出て、押すと座面の上に座る。歩く操作をすると立ち上がる
+  const sit = await p2.evaluate(async () => {
+    const sofa = DATA.items.find((i) => { const f = getFmpItem(i.type); return f && f.kind === 'sofa' && i.floor === WALK.floor; });
+    const r = (sofa.rot || 0) * Math.PI / 180, fx = -Math.sin(r), fy = Math.cos(r);
+    const cx = (sofa.x + sofa.w / 2) / 1000, cz = (sofa.y + sofa.d / 2) / 1000;
+    WALK.x = cx + fx * 1.0; WALK.z = cz + fy * 1.0; walkApplyCamera();
+    const btn = document.getElementById('walk-sit-toggle');
+    const label = btn.style.display !== 'none' ? btn.textContent : '';
+    btn.click();
+    // 座る動きは時間で進む。描画の回り(requestAnimationFrame)は窓が裏にあると止まるので、ここで時間を置いて進める
+    for (let i = 0; i < 8; i++) { await new Promise((res) => setTimeout(res, 100)); walkApplyCamera(); }
+    let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; });
+    const seated = ThirdPerson.seated() === sofa, label2 = btn.textContent;
+    // 腰が座面の中心（ソファの中心より少し前）の上にあるか
+    let hips = null; f.traverse((o) => { if (o.isBone && /Hips$/.test(o.name)) hips = o; });
+    const hp = hips ? hips.getWorldPosition(new THREE.Vector3()) : f.position;
+    const sx = cx + fx * sofa.d * 0.1 / 1000, sz = cz + fy * sofa.d * 0.1 / 1000;
+    const off = Math.hypot(hp.x - sx, hp.z - sz);
+    WALK.keys.fwd = true; updateWalkMode(performance.now()); WALK.keys.fwd = false;
+    return {label, label2, seated, off, hipsFound: !!hips, after: !!ThirdPerson.seated()};
+  });
+  assert.equal(sit.label, 'ソファに座る', 'ソファの前で「ソファに座る」が出ない');
+  assert.ok(sit.seated && sit.label2 === '立ち上がる', '押しても座らない: ' + JSON.stringify(sit));
+  assert.ok(!sit.hipsFound || sit.off < 0.08, '腰が座面の上にない: ' + sit.off);
+  assert.equal(sit.after, false, '歩く操作で立ち上がらない');
   // もう1回で女性に替わり、さらにもう1回で一人称に戻る（人物は消え、カメラは目の位置に戻る）
   await pressToggle(p2);
   assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-01');
@@ -83,7 +110,7 @@ try {
   assert.deepEqual(back, { figure: false, d: 0 });
 
   assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
-  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ・ボタンの位置・下キーでカメラの方へ歩く・一人称へ戻す、が通った');
+  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る・一人称へ戻す、が通った');
 } finally {
   await browser.close();
 }
