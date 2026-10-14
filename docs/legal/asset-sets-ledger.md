@@ -26,4 +26,6 @@
 |---|---|---|---|---|
 | `assets/models/characters/walker-male-01.glb`・`walker-female-01.glb` | 形と色: Codex のデザイン画像（PR #99）を Meshy の「画像から 3D」で立体化し、Meshy で骨組みを付けた。動き: 待機（Breathing Idle）・座る（Sitting Idle）・歩く（男性 Catwalk Walk Forward 03、女性 Walk）は Adobe Mixamo の動きを、`tools/characters/retarget_mixamo.py` で人物の骨に移し替えた。走る動きは Meshy の物 | Meshy・Mixamo とも、それぞれの利用条件に従う（**利用条件の本文はまだ確かめていない**）。Mixamo の動きは人物の GLB に組み込んだ形でだけ置き、動きだけのファイル（FBX）はリポジトリに入れていない | Meshy のワークスペース上の元モデル。動きの移し替えはスクリプトから再実行できる | 2026-10-14 |
 
-- この人物は利用者の確認で「参考のテイストと遠い」とされ、作り直す（第2版のデザインを Codex に依頼済み、sourceId `webcad-planner/walk-characters-design-v2-2026-10-14`）。本番に出す前に、Meshy・Mixamo の利用条件を確かめてこの欄を更新する
+| `assets/models/characters/walker-male-02b.glb`・`walker-female-02a.glb`（第2版。いま使っている物） | 形と色: Codex のデザイン画像（PR #103、5.5頭身前後、利用者が男性 b・女性 a を選んだ）を Meshy で立体化。女性 a は「高詳細」のマルチビュー（正面・横・背面）から作り、四角面1万5千にリメッシュ。男性 b は同じ作り方だと細い腕がリメッシュで崩れて骨組みが付かなかったので、「スマートトポロジー」（正面1枚・3万面）で作り直した。骨組みは Meshy。動きは第1版と同じく Mixamo（待機・座る・歩く。歩くは男性 Catwalk Walk Forward 03、女性 Walk） | 同上（**利用条件の本文はまだ確かめていない**） | Meshy のワークスペース上の元モデル | 2026-10-14 |
+
+- 第1版の人物は利用者の確認で「参考のテイストと遠い」とされ、第2版に作り直した（第1版のファイルは残してあるが、アプリはもう読まない）（第2版のデザインを Codex に依頼済み、sourceId `webcad-planner/walk-characters-design-v2-2026-10-14`）。本番に出す前に、Meshy・Mixamo の利用条件を確かめてこの欄を更新する

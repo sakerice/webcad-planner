@@ -16,10 +16,11 @@ var ThirdPerson = (function(){
   var on = false;                      // 三人称で歩いているか
   var DIST = 2.4, HEAD = 1.55, NEAR_PAD = 0.35, TURN_RATE = Math.PI / 0.45;
   var figure = null, parts = null, phase = 0, lastX = null, lastZ = null;
-  // 人物の GLB（Codex がデザインし Meshy で立体化した物）。読めなければ仮の人形で歩く
+  // 人物の GLB（Codex がデザインし Meshy で立体化、動きは Mixamo）。読めなければ仮の人形で歩く。
+  // 第2版（5.5頭身前後、利用者が選んだ男性 b・女性 a）。第1版（-01）はファイルを残しておく
   var CHARACTERS = [
-    {id:'walker-male-01', label:'男性', url:'assets/models/characters/walker-male-01.glb', height:1.72},
-    {id:'walker-female-01', label:'女性', url:'assets/models/characters/walker-female-01.glb', height:1.60}
+    {id:'walker-male-02b', label:'男性', url:'assets/models/characters/walker-male-02b.glb', height:1.72},
+    {id:'walker-female-02a', label:'女性', url:'assets/models/characters/walker-female-02a.glb', height:1.60}
   ];
   var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null, bones = {};
   var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
@@ -370,11 +371,12 @@ var ThirdPerson = (function(){
     // カメラ: 頭の後ろ、いつも同じ距離。見る向きは一人称と同じ(WALK.yaw と WALK.pitch)
     var pitch = WALK.pitch || 0;
     var dir = new THREE.Vector3(-Math.sin(WALK.yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(WALK.yaw) * Math.cos(pitch));
-    var head = new THREE.Vector3(WALK.x, fy + HEAD, WALK.z);
+    var headH = HEAD * CHARACTERS[charIndex].height / 1.72;      // 頭の高さは人物の身長に合わせる（HEAD は身長 1.72m のとき）
+    var head = new THREE.Vector3(WALK.x, fy + headH, WALK.z);
     if(sitBlend > 0){
       // 座っている間（と立ち上がる途中）は、座った人物の頭の後ろから見る
       figure.updateMatrixWorld(true);
-      var hd = bones.head ? bones.head.getWorldPosition(new THREE.Vector3()) : figure.position.clone().setY(figure.position.y + HEAD);
+      var hd = bones.head ? bones.head.getWorldPosition(new THREE.Vector3()) : figure.position.clone().setY(figure.position.y + headH);
       head.lerp(hd, sitBlend);
     }
     figure.visible = true;

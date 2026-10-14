@@ -104,7 +104,7 @@ try {
   assert.equal(sit.after, false, '歩く操作で立ち上がらない');
   // もう1回で女性に替わり、さらにもう1回で一人称に戻る（人物は消え、カメラは目の位置に戻る）
   await pressToggle(p2);
-  assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-01');
+  assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-02a');
   await pressToggle(p2);
   const back = await p2.evaluate(() => { let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; }); return { figure: !!f, d: Math.hypot(camExt.position.x - WALK.x, camExt.position.z - WALK.z) }; });
   assert.deepEqual(back, { figure: false, d: 0 });
