@@ -59,8 +59,7 @@ var ThirdPerson = (function(){
     return models[c.id];
   }
   // アニメ調の見た目にする（参考: 家庭用ゲーム機のアニメ調の主人公）。
-  // - 陰影を3段のトゥーン（MeshToonMaterial と段々の濃淡の画像）にし、写実的な照り返しをやめる
-  // - 輪郭線: 同じ骨組みで動く、少し太らせた裏面だけの黒い写しを重ねる（裏返しの殻の手法）
+  // 陰影を3段のトゥーン（MeshToonMaterial と段々の濃淡の画像）にし、写実的な照り返しをやめる
   var toonRamp = null;
   function rampTexture(){
     if(toonRamp) return toonRamp;
@@ -69,15 +68,6 @@ var ThirdPerson = (function(){
     toonRamp.minFilter = toonRamp.magFilter = THREE.NearestFilter;
     toonRamp.needsUpdate = true;
     return toonRamp;
-  }
-  var OUTLINE_M = 0.006;
-  function outlineMaterial(){
-    var m = new THREE.MeshBasicMaterial({color:0x2a2226, side:THREE.BackSide});
-    m.onBeforeCompile = function(sh){
-      sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  transformed += normalize(objectNormal) * ' + OUTLINE_M.toFixed(4) + ';');
-    };
-    m.customProgramCacheKey = function(){ return 'tps-outline'; };
-    return m;
   }
   function toonify(root){
     var meshes = [];
@@ -90,12 +80,7 @@ var ThirdPerson = (function(){
       });
       if(toon.map) toon.map.colorSpace = THREE.SRGBColorSpace;
       o.material = toon;
-      // 輪郭線（スキン付きなら同じ骨組みに結び付ける）
-      var line = o.isSkinnedMesh ? new THREE.SkinnedMesh(o.geometry, outlineMaterial()) : new THREE.Mesh(o.geometry, outlineMaterial());
-      if(o.isSkinnedMesh) line.bind(o.skeleton, o.bindMatrix);
-      line.position.copy(o.position); line.quaternion.copy(o.quaternion); line.scale.copy(o.scale);
-      line.castShadow = false; line.frustumCulled = false; line.name = '_outline';
-      o.parent.add(line);
+      // 輪郭線（裏返しの殻）は付けない（利用者の判断で外した。家の中では線が浮いて見える）
     });
   }
   function clipNamed(list, name){
@@ -288,6 +273,9 @@ var ThirdPerson = (function(){
   }
   function standUp(){
     if(!seat) return;
+    // 座ったままカメラを回していたら、人物は座っていた向きから、カメラの向きへ回って立ち上がる
+    var d = seat.yaw - WALK.yaw;
+    bodyOff = Math.atan2(Math.sin(d), Math.cos(d)); bodyTarget = 0;
     seat = null;
     updateSitButton();
     if(typeof walkApplyCamera === 'function') walkApplyCamera();
@@ -434,12 +422,13 @@ var ThirdPerson = (function(){
       sb.addEventListener('click', function(){ if(seat) standUp(); else sitDown(); });
       hud.appendChild(sb);
     }
-    // 座っている間に歩く操作をしたら立ち上がる。止まっていても、待機・座りの動きを見せるため 30コマ/秒で描く
+    // 座っている間に前後へ歩く操作をしたら立ち上がる（左右は、座ったままカメラを回す）。
+    // 止まっていても、待機・座りの動きを見せるため 30コマ/秒で描く
     var baseUpdate = updateWalkMode;
     updateWalkMode = function(now){
       if(on && seat){
         var k = WALK.keys || {};
-        var moving = k.fwd || k.back || k.left || k.right || ['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].some(function(c){ return iMov[c]; });
+        var moving = k.fwd || k.back || ['arrowup','arrowdown','w','s'].some(function(c){ return iMov[c]; });
         if(moving) standUp();
       }
       var r = baseUpdate.apply(this, arguments);

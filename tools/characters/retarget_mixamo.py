@@ -10,7 +10,7 @@
 # （DROP に挙げた物は捨てる）。
 import sys
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Vector, Quaternion
 
 argv = sys.argv[sys.argv.index('--') + 1:]
 SRC, DST = argv[0], argv[1]
@@ -64,7 +64,13 @@ for clip_name, fbx in CLIPS:
     # 休み姿勢の違い（Mixamo は T 字、Meshy は腕が下がり気味など）を消すため、人物側の休み姿勢の骨を
     # 動き側の休み姿勢の骨と同じ方向に向けてから差を当てる（骨の向き = 骨の Y 軸）
     Y = Vector((0, 1, 0))
-    align = {n: (tgt_rest[n].to_quaternion() @ Y).rotation_difference(src_rest[n].to_quaternion() @ Y) for n in names}
+    # 向きをそろえるのは、休み姿勢そのものが違う腕だけ（Mixamo は腕が水平、Meshy は斜め下）。
+    # 背骨・鎖骨・首・脚までそろえると、Mixamo の人形の鎖骨の上向きや背骨の反りが乗り、
+    # 肩が持ち上がって胸が丸まった（利用者の指摘）。それ以外は休み姿勢からの差だけを当てる
+    def needs_align(n):
+        return any(k in n for k in ('Arm', 'Hand'))
+    align = {n: ((tgt_rest[n].to_quaternion() @ Y).rotation_difference(src_rest[n].to_quaternion() @ Y)
+                 if needs_align(n) else Quaternion()) for n in names}
     hip = 'mixamorig:Hips'
     scale = tgt_rest[hip].translation.z / src_rest[hip].translation.z  # Blender は上が Z
 

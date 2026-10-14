@@ -77,6 +77,22 @@ try {
   assert.ok(turn.moved < 1e-9 || turn.along < -0.99, 'カメラの方へ歩いていない: ' + JSON.stringify(turn));
   assert.ok(turn.moved < 1e-9 || Math.abs(Math.abs(turn.face) - Math.PI) < 1e-6, '人物がカメラの方を向いていない: ' + JSON.stringify(turn));
   assert.ok(Math.abs(t.yaw) < 1e-6, 'カメラの向きが一人称と違う');
+  // カメラと人物の間の壁は見えなくするだけで、当たり判定は残す（消した壁を通り抜けて外へ出られない）
+  const hiddenWall = await p2.evaluate(() => {
+    WALK.x = 7.28; WALK.z = 3.4; WALK.yaw = Math.PI / 2; walkApplyCamera();
+    const walls = new Set();
+    sc3.traverse((o) => { if (o.userData._tpsLayers !== undefined && o.userData.selectKind === 'wall' && DATA.walls.includes(o.userData.selectRef)) walls.add(o.userData.selectRef); });
+    const w = [...walls][0];
+    if (!w) return {count: 0};
+    // 開口（ドア）の位置を避けて、壁の上の点を探す
+    for (let t = 0.1; t <= 0.9; t += 0.05) {
+      const x = w.x1 + (w.x2 - w.x1) * t, y = w.y1 + (w.y2 - w.y1) * t;
+      if (walkBlockedAt(x, y, WALK.floor)) return {count: walls.size, blocked: true};
+    }
+    return {count: walls.size, blocked: false};
+  });
+  assert.ok(hiddenWall.count > 0, 'カメラと人物の間の壁が消えていない');
+  assert.equal(hiddenWall.blocked, true, '見えなくした壁の当たり判定が無くなっている');
   // 座る: ソファの前に来ると「ソファに座る」が出て、押すと座面の上に座る。歩く操作をすると立ち上がる
   const sit = await p2.evaluate(async () => {
     const sofa = DATA.items.find((i) => { const f = getFmpItem(i.type); return f && f.kind === 'sofa' && i.floor === WALK.floor; });
@@ -95,13 +111,23 @@ try {
     const hp = hips ? hips.getWorldPosition(new THREE.Vector3()) : f.position;
     const sx = cx + fx * sofa.d * 0.1 / 1000, sz = cz + fy * sofa.d * 0.1 / 1000;
     const off = Math.hypot(hp.x - sx, hp.z - sz);
+    // 座ったまま左右キー: 立ち上がらず、カメラだけが回る（人物は座った向きのまま）
+    const yaw0 = WALK.yaw;
+    WALK.keys.left = true; let t = performance.now();
+    for (let i = 0; i < 5; i++) { t += 50; updateWalkMode(t); }
+    WALK.keys.left = false;
+    walkApplyCamera();
+    const turned = {stillSeated: ThirdPerson.seated() === sofa, dyaw: WALK.yaw - yaw0,
+      facing: Math.atan2(Math.sin(f.rotation.y - yaw0), Math.cos(f.rotation.y - yaw0))};
     WALK.keys.fwd = true; updateWalkMode(performance.now()); WALK.keys.fwd = false;
-    return {label, label2, seated, off, hipsFound: !!hips, after: !!ThirdPerson.seated()};
+    return {label, label2, seated, off, hipsFound: !!hips, after: !!ThirdPerson.seated(), turned};
   });
   assert.equal(sit.label, 'ソファに座る', 'ソファの前で「ソファに座る」が出ない');
   assert.ok(sit.seated && sit.label2 === '立ち上がる', '押しても座らない: ' + JSON.stringify(sit));
   assert.ok(!sit.hipsFound || sit.off < 0.08, '腰が座面の上にない: ' + sit.off);
-  assert.equal(sit.after, false, '歩く操作で立ち上がらない');
+  assert.ok(sit.turned.stillSeated && sit.turned.dyaw > 0.1, '座ったまま左右キーでカメラが回らない: ' + JSON.stringify(sit.turned));
+  assert.ok(Math.abs(sit.turned.facing) < 1e-6, 'カメラを回したら、座っている人物まで回った: ' + JSON.stringify(sit.turned));
+  assert.equal(sit.after, false, '前へ歩く操作で立ち上がらない');
   // もう1回で女性に替わり、さらにもう1回で一人称に戻る（人物は消え、カメラは目の位置に戻る）
   await pressToggle(p2);
   assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-02a');
@@ -110,7 +136,7 @@ try {
   assert.deepEqual(back, { figure: false, d: 0 });
 
   assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
-  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る・一人称へ戻す、が通った');
+  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は見た目だけ消す）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す）・一人称へ戻す、が通った');
 } finally {
   await browser.close();
 }
