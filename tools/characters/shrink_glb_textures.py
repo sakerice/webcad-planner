@@ -3,10 +3,42 @@
 Meshy の書き出しは 2048px の PNG を3枚（色・法線・金属/粗さ）持ち、1体 11MB ある。
 ウォークスルーの人物は画面の一部にしか映らないので、1024px の JPEG で足りる（約 1/5 になる）。
 
+縮める前に、色の島（UV の島）の外側の余白を、島の縁の色で埋め広げる。Meshy のテクスチャは島が細かく
+大量に分かれていて余白がほとんど無く、そのまま縮めると島の縁に隣の島や黒い余白の色が混ざり、
+人物の表面に線やすき間が見えた（利用者の指摘）。
+
   python3 tools/characters/shrink_glb_textures.py in.glb out.glb [SIZE=1024]
 """
 import io, json, struct, sys
+import numpy as np
 from PIL import Image
+
+
+def shrink_padded(im, size):
+    """色の島の外側（黒い余白）を混ぜずに縮め、縮めた後で島の外側を縁の色で埋め広げる。
+    黒い余白も一緒に縮めると、島の縁に黒や隣の島の色が混ざって線に見える"""
+    a = np.asarray(im.convert('RGB'))
+    mask = (a.astype(np.uint16).sum(axis=2) > 15)
+    w, h = im.size
+    if max(w, h) > size:
+        w, h = (size, size) if w == h else (size, round(h * size / w))
+    # 余白を 0 にした色と、島の有無を同じように縮め、割り戻す（余白の色が混ざらない）
+    pre = Image.fromarray((a * mask[..., None]).astype(np.uint8)).resize((w, h), Image.BOX)
+    msk = Image.fromarray((mask * 255).astype(np.uint8)).resize((w, h), Image.BOX)
+    c = np.asarray(pre).astype(np.float32); m = np.asarray(msk).astype(np.float32) / 255.0
+    filled = m > 0.05
+    c[filled] = c[filled] / m[filled][:, None]
+    for _ in range(max(4, w // 128)):              # 2048px なら 16px 埋め広げる
+        if filled.all(): break
+        acc = np.zeros_like(c); cnt = np.zeros(filled.shape, np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            mm = np.roll(filled, (dy, dx), axis=(0, 1))
+            acc += np.roll(c, (dy, dx), axis=(0, 1)) * mm[..., None]; cnt += mm
+        grow = (~filled) & (cnt > 0)
+        c[grow] = acc[grow] / cnt[grow][:, None]
+        filled |= grow
+    return Image.fromarray(c.clip(0, 255).astype(np.uint8))
+
 
 def main(src, dst, size=1024):
     data = open(src, 'rb').read()
@@ -20,7 +52,9 @@ def main(src, dst, size=1024):
         bv = img['bufferView']
         im = Image.open(io.BytesIO(views[bv]))
         im = im.convert('RGB')
-        if max(im.size) > size:
+        if 'normal' not in (img.get('name') or ''):
+            im = shrink_padded(im, size)
+        elif max(im.size) > size:
             im = im.resize((size, size) if im.size[0] == im.size[1] else (size, round(im.size[1] * size / im.size[0])), Image.LANCZOS)
         out = io.BytesIO()
         im.save(out, 'JPEG', quality=88 if 'normal' in (img.get('name') or '') else 85, subsampling=0)

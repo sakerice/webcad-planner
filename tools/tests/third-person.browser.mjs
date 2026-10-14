@@ -8,8 +8,9 @@ import assert from 'node:assert/strict';
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 const APP = process.env.APP_URL || 'http://localhost:8932/';
-// HEADED=1 で画面のあるブラウザ(GPU あり)で走らせる。画面の無いブラウザは 3D の組み立てが遅く、マシンが混んでいると待ち切れない
-const launch = () => chromium.launch({ headless: !process.env.HEADED });
+// 画面の無いブラウザでも Mac の GPU(Metal)を使う（使わないと 3D の組み立てが遅く、マシンが混んでいると待ち切れない）。
+// 画面のあるブラウザは利用者の操作を奪うので使わない
+const launch = () => chromium.launch({ args: ['--use-angle=metal'] });
 let browser = await launch();
 try {
   const errors = [];
