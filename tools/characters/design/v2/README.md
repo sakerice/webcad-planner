@@ -1,6 +1,8 @@
 # Walk 人物デザイン v2 — 成人体型・現代大学生6案
 
-**最新：2026-10-14 11:57 JST、本人が小物を評価し、顔/髪から明確な絵柄変更とF-B服装の全面変更を指示。** [新顔・髪の正面4案、拡大顔/全身前後比較、実測/修正、正式Library保存/読み戻し](candidates/face-redesign-review-20261014/README.md)を別版として追加。最終承認待ちでDraft/InProgress維持。
+**最新：2026-10-14 12:44/12:47 JST、本人が添付画像そのものを絵柄基準にし、顔だけでなく全身の描き直しを指示。** [添付観察・全身統一4正面・顔/服靴/全身比較・実測・正式Library保存/読み戻し](candidates/attachment-style-review-20261014/README.md)を別版で追加。前版の角まぶた等の推測方向は撤回。F-B服装と今回絵柄は本人承認待ち、Draft/InProgress維持。
+
+**前回：2026-10-14 11:57 JST、本人が小物を評価し、顔/髪から明確な絵柄変更とF-B服装の全面変更を指示。** [新顔・髪の正面4案、拡大顔/全身前後比較、実測/修正、正式Library保存/読み戻し](candidates/face-redesign-review-20261014/README.md)を別版として追加。最終承認待ちでDraft/InProgress維持。
 
 **前回：2026-10-14 11:12 JST、本人から在宅4案へ「結構良くなりました」と評価があり、成人の等身/服装を維持して絵柄と小物を追加する指示。** [絵柄＋小物の正面4案・前後比較・実測/修正/正式Library結果](candidates/style-accessories-review-20261014/README.md)を新しい別版として追加。今回の絵柄レビュー待ち、Draft/InProgress維持、Claude完了報告なし。
 
