@@ -27,7 +27,7 @@ var ThirdPerson = (function(){
   var ray = null, walls = null, wallsFor = null, hidden = [], HIDDEN_LAYER = 1;
   var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
   // 座る: 近くの座れる家具（ソファ・椅子）。seat は座っている家具、near は座れる候補。sitBlend は 0=立ち 1=座り
-  var SEAT_KINDS = {sofa:'ソファ', chair:'椅子'}, SEAT_REACH = 1.3, HIP_ABOVE_SEAT = 0.08, SIT_TIME = 0.35;
+  var SEAT_KINDS = {sofa:'ソファ', chair:'椅子'}, SEAT_FROM_FRONT_MM = 140, SEAT_REACH = 1.3, HIP_ABOVE_SEAT = 0.08, SIT_TIME = 0.35;
   var seat = null, near = null, sitBlend = 0, lastAnimAt = 0, lastSeat = null;   // lastSeat: 立ち上がる途中も、座っていた家具から離れていくように   // 人物の向き（カメラの向き WALK.yaw からのずれ。0=背中、π=正面をカメラへ）
 
   function mat(color){ return new THREE.MeshStandardMaterial({color:color, roughness:0.75, metalness:0}); }
@@ -231,8 +231,10 @@ var ThirdPerson = (function(){
   function seatInfo(it){
     var r = (it.rot || 0) * Math.PI / 180, fx = -Math.sin(r), fy = Math.cos(r);
     var cx = it.x + it.w / 2, cy = it.y + it.d / 2;
-    // 座面の中心: 背もたれの分だけ、家具の中心より少し前
-    var sx = (cx + fx * it.d * 0.1) * U, sz = (cy + fy * it.d * 0.1) * U;
+    // 腰を置く所: 浅めに腰掛ける（座面の前の縁から 140mm）。奥まで座らせると、座りの動きで
+    // 下がる膝から下が、椅子やソファの前の部分にめり込んだ（利用者の指摘）
+    var fwd = Math.max(it.d * 0.1, it.d / 2 - SEAT_FROM_FRONT_MM);
+    var sx = (cx + fx * fwd) * U, sz = (cy + fy * fwd) * U;
     var floorY = floorTopY(it.floor) + (it.elev || 0) * U;
     return {item:it, x:sx, z:sz, floorY:floorY, yaw:Math.atan2(-fx, -fy), kind:seatKind(it)};
   }

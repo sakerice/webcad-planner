@@ -109,7 +109,7 @@ try {
     // 腰が座面の中心（ソファの中心より少し前）の上にあるか
     let hips = null; f.traverse((o) => { if (o.isBone && /Hips$/.test(o.name)) hips = o; });
     const hp = hips ? hips.getWorldPosition(new THREE.Vector3()) : f.position;
-    const sx = cx + fx * sofa.d * 0.1 / 1000, sz = cz + fy * sofa.d * 0.1 / 1000;
+    const fwd = Math.max(sofa.d * 0.1, sofa.d / 2 - 140) / 1000, sx = cx + fx * fwd, sz = cz + fy * fwd;   // 浅めに腰掛ける（前の縁から 140mm）
     const off = Math.hypot(hp.x - sx, hp.z - sz);
     // 座ったまま左右キー: 立ち上がらず、カメラだけが回る（人物は座った向きのまま）
     const yaw0 = WALK.yaw;
