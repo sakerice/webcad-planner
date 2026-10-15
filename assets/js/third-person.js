@@ -4,11 +4,12 @@
 // 一人称のウォークスルーには手を入れない。歩く位置・向き・当たり判定は WALK（一人称と同じ物）を
 // そのまま使い、カメラの置き場所だけを「人物の後ろ」に替える（walkApplyCamera の後ろに足す）。
 //
-// - 人物: 独自に組んだ簡単な人形（頭・胴・腕・脚）。歩いた距離に合わせて手足を振る。
-//   本採用の人物モデルは後で差し替える（外部の素材は仮まで、という取り決めのため、最初から独自の形）
+// - 人物: 女性 a の GLB（Codex のデザインを Meshy で立体化、動きは Mixamo の待機・歩き・座り）。
+//   読み込み前・失敗時だけ、独自に組んだ簡単な人形で歩く
 // - カメラ: 人物の頭の後ろ上、いつも同じ距離（狭い家で寄ったり離れたりすると煩わしいので、壁で縮めない）。
 //   上下のドラッグは一人称と同じ向き（WALK.pitch をそのまま使う）。カメラと人物の間に壁・家具などが入ったら、
-//   それ（壁なら壁に付いた窓・ドアも）を見えなくする。影は落とし続ける（部屋の明るさが変わらないように）
+//   それ（壁なら壁に付いた窓・ドアも）を見えなくする。影は落とし続ける（部屋の明るさが変わらないように）。
+//   それでも隠れた部分は、人物を単色のシルエットで描く
 // - 下キー: カメラの向きはそのままで、人物がカメラの方へ向き直り、体の前をカメラに向けて手前へ歩いてくる
 //   （カメラは同じ距離を保って下がる）。上キーで奥へ歩くと、また背中を向ける
 var ThirdPerson = (function(){
@@ -25,14 +26,10 @@ var ThirdPerson = (function(){
   var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null, bones = {};
   var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
   var ray = null, walls = null, wallsFor = null, hidden = [], HIDDEN_LAYER = 1;
-  // カメラと人物の間に物があるときの見せ方（検討中。URL の &tpsocc= で切り替えて見比べる）
-  //   hide       … 間の壁・家具を見た目だけ消す（当たり判定は残る）
-  //   silhouette … 何も消さず、隠れた人物の部分を単色のシルエットで描く
-  //   mix        … 壁（と壁の窓・ドア）だけ消し、家具に隠れた部分はシルエットで描く
-  //   both       … hide と同じく消し、それでも隠れた部分（頭とカメラを結ぶ線から外れた低い家具など）はシルエットで描く
-  var OCC_MODES = ['hide', 'silhouette', 'mix', 'both'];
-  var occMode = ((location.search.match(/[?&]tpsocc=(\w+)/) || [])[1]) || 'hide';
-  if(OCC_MODES.indexOf(occMode) < 0) occMode = 'hide';
+  // カメラと人物の間に物があるとき: 頭とカメラを結ぶ線上の壁・家具は見た目だけ消し（当たり判定は残る）、
+  // それでも隠れた部分（線から外れた低い家具など）は、人物を単色のシルエットで描く。
+  // 4つの方式（消すだけ／シルエットだけ／壁だけ消してシルエット／両方）を撮り比べ、利用者が「両方」に決めた（2026-10-15）。
+  // シルエットだけでは、カメラが人物の後ろの決まった距離にあるため壁の外に出て、画面が壁の裏側でふさがる
   var SILHOUETTE_COLOR = 0x4f7fd0;
   var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
   // 座る: 近くの座れる家具（ソファ・椅子）。seat は座っている家具、near は座れる候補。sitBlend は 0=立ち 1=座り
@@ -84,17 +81,6 @@ var ThirdPerson = (function(){
     _silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false});
     return _silMat;
   }
-  function setOcclusion(mode){
-    if(OCC_MODES.indexOf(mode) < 0) return;
-    occMode = mode;
-    Object.keys(models).forEach(function(id){
-      var m = models[id]; if(!m.holder) return;
-      m.holder.traverse(function(o){ if(o.name === '_silhouette') o.visible = mode !== 'hide'; });
-    });
-    if(mode === 'silhouette'){ setHidden([]); setHiddenInstances({}); }
-    if(typeof walkApplyCamera === 'function') walkApplyCamera();
-    if(typeof invalidate3D === 'function') invalidate3D();
-  }
   function toonify(root){
     var meshes = [];
     root.traverse(function(o){ if(o.isMesh) meshes.push(o); });
@@ -112,7 +98,7 @@ var ThirdPerson = (function(){
       var sil = o.isSkinnedMesh ? new THREE.SkinnedMesh(o.geometry, silhouetteMaterial()) : new THREE.Mesh(o.geometry, silhouetteMaterial());
       if(o.isSkinnedMesh) sil.bind(o.skeleton, o.bindMatrix);
       sil.position.copy(o.position); sil.quaternion.copy(o.quaternion); sil.scale.copy(o.scale);
-      sil.castShadow = false; sil.frustumCulled = false; sil.name = '_silhouette'; sil.renderOrder = 10; sil.visible = occMode !== 'hide';
+      sil.castShadow = false; sil.frustumCulled = false; sil.name = '_silhouette'; sil.renderOrder = 10;
       o.renderOrder = 11;
       o.parent.add(sil);
     });
@@ -217,8 +203,6 @@ var ThirdPerson = (function(){
   }
   var _box = null, _ctr = null;
   function hideBetween(head, cam){
-    if(occMode === 'silhouette'){ if(hidden.length) setHidden([]); if(Object.keys(hiddenInst).length) setHiddenInstances({}); return; }
-    var wallsOnly = occMode === 'mix';
     var w = collectWalls();
     if(!ray) ray = new THREE.Raycaster();
     ray.layers.enable(HIDDEN_LAYER);                         // 消している壁にも当てて、間にある間は消したままにする
@@ -228,7 +212,6 @@ var ThirdPerson = (function(){
     ray.intersectObjects(w.meshes, false).forEach(function(h){
       var root = h.object.userData._tpsWallRoot;
       if(root && seat && root.userData.selectRef === seat.item) return;   // 座っている家具は消さない
-      if(wallsOnly && root && root.userData.selectKind !== 'wall') return;   // 組み合わせ: 家具は消さず、シルエットで見せる
       if(root && list.indexOf(root) < 0) list.push(root);
     });
     if(list.length && w.openings.length){
@@ -251,7 +234,7 @@ var ThirdPerson = (function(){
       if(b) h.mesh.setMatrixAt(h.id, b[h.id]);
     });
     var refs = [];
-    if(!wallsOnly) ray.intersectObjects(w.instanced.filter(function(m){ return m.userData.instanceRefs; }), false).forEach(function(h){
+    ray.intersectObjects(w.instanced.filter(function(m){ return m.userData.instanceRefs; }), false).forEach(function(h){
       var ref = h.instanceId !== undefined ? h.object.userData.instanceRefs[h.instanceId] : null;
       if(!ref || (seat && ref === seat.item) || refs.indexOf(ref) >= 0) return;   // 座っている家具は消さない
       refs.push(ref);
@@ -510,5 +493,5 @@ var ThirdPerson = (function(){
     if(window.THREE) install(); else window.addEventListener('three-ready', install, {once:true});
   });
   return { isEnabled:function(){ return enabled; }, isOn:function(){ return on; }, setOn:setOn, _place:place,
-    character:function(){ return CHARACTERS[charIndex].id; }, sitDown:sitDown, standUp:standUp, setOcclusion:setOcclusion, occlusion:function(){ return occMode; }, seated:function(){ return seat && seat.item; }, nearSeat:function(){ return near && near.item; }, modelState:function(id){ return (models[id]||{}).state || 'none'; } };
+    character:function(){ return CHARACTERS[charIndex].id; }, sitDown:sitDown, standUp:standUp, seated:function(){ return seat && seat.item; }, nearSeat:function(){ return near && near.item; }, modelState:function(id){ return (models[id]||{}).state || 'none'; } };
 })();
