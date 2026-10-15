@@ -88,6 +88,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/building-style.js"></script>
 <script src="assets/js/plan-library.js"></script>
 <script src="assets/js/compare-mode.js"></script>
+<script src="assets/js/third-person.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
 <style>
@@ -4281,6 +4282,7 @@ function applyGradeSettings(){
 // 空の見た目と環境マップを左と共有し、作り直さない）。
 function createScene3DBase(shared){
   sc3=new THREE.Scene();
+  sc3.userData.mainScene=true;   // 間取りを描く場面(環境マップ用の一時的な場面と区別する)
   sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
   var skyGeo=new THREE.SphereGeometry(900,48,24);
   _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({

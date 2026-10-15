@@ -341,3 +341,18 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 
 /* ウォークスルーでは下に十字キーが出るので、札を上へ逃がす */
 #canvas-area.compare-walk .compare-tag{bottom:230px}
+/* 三人称のウォークスルーの切り替え(assets/js/third-person.js。?tps=1 のときだけ出る)。
+   十字キーの中に置くと方向キーと紛れるので、十字キーの上に横長の小さなボタンで置く */
+#walk-dpad .wk-tps{position:absolute;left:0;right:0;bottom:100%;margin-bottom:8px;height:30px;padding:0 10px;
+  border:0;border-radius:15px;background:rgba(255,255,255,.96);color:var(--hp-text);font:inherit;font-size:12px;font-weight:700;
+  white-space:nowrap;cursor:pointer;pointer-events:auto;touch-action:manipulation;
+  box-shadow:0 4px 12px rgba(24,20,18,.13),inset 0 0 0 1px rgba(31,27,24,.05)}
+#walk-dpad .wk-tps:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+#walk-dpad .wk-tps[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
+/* 三人称で、座れる家具（ソファ・椅子）の近くに来たときに出る「○○に座る／立ち上がる」。画面の下の中央 */
+#walk-sit-toggle{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);height:40px;padding:0 22px;
+  border:0;border-radius:20px;background:rgba(255,255,255,.96);color:var(--hp-text);font:inherit;font-size:14px;font-weight:700;
+  white-space:nowrap;cursor:pointer;pointer-events:auto;touch-action:manipulation;
+  box-shadow:0 4px 12px rgba(24,20,18,.16),inset 0 0 0 1px rgba(31,27,24,.05)}
+#walk-sit-toggle:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+#walk-sit-toggle[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
