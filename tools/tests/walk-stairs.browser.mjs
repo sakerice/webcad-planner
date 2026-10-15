@@ -6,6 +6,8 @@
 //
 //  1. 上り下り: 階段の部材を、入口 → 出口の順にたどって歩き、上の階まで上がれて、1階まで下りられる
 //  2. 抜けない: 階段の上の点から8方向に歩き続けても、外壁の範囲の外へ出ない
+//  3. 家の外では地面に立つ: 1階の外へ出るドアから外へ歩くと、足元が描いてある面（ポーチ・外階段・地面）に下り、
+//     床の高さのまま浮かない（三人称で浮いて見えて報告された）。外から家の中へ戻れる
 import assert from 'node:assert/strict';
 
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -85,15 +87,35 @@ try {
           if (WALK.floor >= 2 && b && (x < b.x0 - 50 || x > b.x1 + 50 || z < b.y0 - 50 || z > b.y1 + 50)) escapes.push({ from: p.map(Math.round), floor: fl, dir: k, to: [Math.round(x), Math.round(z)], endFloor: WALK.floor });
         }
       });
-      return { firstFloor, up, down, escapes };
+      // 家の外では地面に立つ。外へ出るドアごとに、外へ歩いて足元を見て、家の中へ戻る
+      function walkTo(tx, tz) { let tt = performance.now(); for (let i = 0; i < 200; i++) { const dx = tx - WALK.x / U, dz = tz - WALK.z / U; if (Math.hypot(dx, dz) < 100) break; WALK.yaw = Math.atan2(-dx, -dz); WALK.keys = { fwd: true }; tt += 50; updateWalkMode(tt); } WALK.keys = {}; }
+      const outdoors = DATA.items.filter((i) => i.floor === 1 && isOpeningItemType(i.type) && !isWindowLikeType(i.type)).map((i) => {
+        const pts = openingSidePoints(i), out = pts.find((p) => !roomAtPointOnFloor(1, p[0], p[1])), inn = pts.find((p) => roomAtPointOnFloor(1, p[0], p[1]));
+        if (!out || !inn) return null;
+        const dx = out[0] - inn[0], dz = out[1] - inn[1], l = Math.hypot(dx, dz);
+        const inside = [inn[0] - dx / l * 600, inn[1] - dz / l * 600], outside = [out[0] + dx / l * 2500, out[1] + dz / l * 2500];
+        ST.floor = 1; WALK.floor = 1; WALK.groundOff = 0; _walkCollFloor = null;
+        WALK.x = inside[0] * U; WALK.z = inside[1] * U; walkUpdateGround(true);
+        walkTo(outside[0], outside[1]);
+        const feetOut = floorTopY(1) + WALK.groundOff, stillOutside = !roomAtPointOnFloor(1, WALK.x / U, WALK.z / U);
+        walkTo(inside[0], inside[1]);
+        const backIn = Math.hypot(WALK.x / U - inside[0], WALK.z / U - inside[1]) < 200;
+        return { door: i.type, feetOut: +feetOut.toFixed(2), floorTop: +floorTopY(1).toFixed(2), stillOutside, backIn };
+      }).filter(Boolean);
+      return { firstFloor, up, down, escapes, outdoors };
     });
     if (process.env.DEBUG) console.log(preset, 'up', r.up.floors.join('→'), 'down', r.down.floors.join('→'));
     assert.ok(r.up.floors.length > 1 && r.up.reached, `${preset}: 階段を上りきれない ${JSON.stringify(r.up)}`);
     assert.equal(r.down.floors[r.down.floors.length - 1], r.firstFloor, `${preset}: 階段を下りきれない ${JSON.stringify(r.down)}`);
     assert.ok(r.down.reached, `${preset}: 階段の下まで戻れない ${JSON.stringify(r.down)}`);
     assert.deepEqual(r.escapes, [], `${preset}: 階段から家の外へ抜けた`);
+    assert.ok(r.outdoors.length > 0, `${preset}: 外へ出るドアが見つからない`);
+    for (const o of r.outdoors) {
+      assert.ok(o.stillOutside && o.feetOut < o.floorTop - 0.3, `${preset}: 家の外で床の高さのまま浮いている ${JSON.stringify(o)}`);
+      assert.ok(o.backIn, `${preset}: 外から家の中へ戻れない ${JSON.stringify(o)}`);
+    }
     assert.deepEqual(errors, [], `${preset}: ページで例外: ${errors.join(' / ')}`);
-    console.log(`ok ${preset}: 上り ${r.up.floors.join('→')}階 / 下り ${r.down.floors.join('→')}階 / 外へ抜けた所 0`);
+    console.log(`ok ${preset}: 上り ${r.up.floors.join('→')}階 / 下り ${r.down.floors.join('→')}階 / 外へ抜けた所 0 / 外の足元 ${r.outdoors.map((o) => o.feetOut + 'm').join(',')}（床 ${r.outdoors[0].floorTop}m）・家に戻れる`);
     await page.context().close();
   }
 } finally {

@@ -17220,7 +17220,35 @@ function walkUnderDeckAt(xMm,zMm,floor){
 // 段差の下に空間があり、いま天板より下に居る(curOff)なら、下の床を返す --
 // 段差の天端を足元にすると、ハーフ収納のような段差の下の空間へ歩いて入れない
 // (1.8m を一度に上る段差として止められていた。利用者の報告)。
+// 家の外(1階でどの部屋にも入っていない所)の足元の高さ(1階の床天端からのm)。いまの足元から一段
+// (WALK_MAX_STEP_UP_M)以内で上がれる面のうち、真下でいちばん上の面に立つ。地面・敷地・基礎・
+// 外階段・スロープ・ポーチ(ブロックで描かれることが多い)など、1階の外に描いてある物が対象。
+// 外に出ても床の高さのまま歩き、地面から 60cm 浮いていた(三人称で見えて報告された)。
+// 一段より高い物(車・塀・庇)には乗らない。部屋の中、2階以上、何も描いていない所は null(今までどおり床の高さ)。
+var _walkOutdoorMeshes=null, _walkOutdoorFor=null, _walkOutdoorN=-1, _walkDownRay=null;
+function walkOutdoorGroundOff(xMm,zMm,floor,curOff){
+  if(floor!==1 || !sc3 || roomAtPointOnFloor(1,xMm,zMm)) return null;
+  if(_walkOutdoorFor!==sc3 || _walkOutdoorN!==sc3.children.length){
+    _walkOutdoorMeshes=[];
+    if(window._gndMesh) _walkOutdoorMeshes.push(_gndMesh);
+    sc3.children.forEach(function(root){
+      var ud=root.userData||{}, ref=ud.selectRef;
+      if(ud._thirdPerson || !ref || ud.selectKind!=='item' || (ref.floor||1)!==1) return;
+      if(isOpeningItemType(ref.type) || isLightItemType(ref.type)) return;
+      root.traverse(function(o){ if(o.isMesh && !o.isInstancedMesh) _walkOutdoorMeshes.push(o); });
+    });
+    _walkOutdoorFor=sc3; _walkOutdoorN=sc3.children.length;
+  }
+  if(!_walkDownRay){ _walkDownRay=new THREE.Raycaster(); _walkDownRay.layers.enableAll(); }
+  var top=floorTopY(1), from=top+((curOff===undefined||curOff===null)?0:curOff)+WALK_MAX_STEP_UP_M+0.02;
+  _walkDownRay.set(new THREE.Vector3(xMm*U,from,zMm*U),new THREE.Vector3(0,-1,0));
+  _walkDownRay.near=0; _walkDownRay.far=from-top+2;
+  var hits=_walkDownRay.intersectObjects(_walkOutdoorMeshes,false);
+  return hits.length?hits[0].point.y-top:null;
+}
 function walkFlatGroundAt(xMm,zMm,floor,curOff){
+  var outdoor=(typeof walkOutdoorGroundOff==='function')?walkOutdoorGroundOff(xMm,zMm,floor,curOff):null;
+  if(outdoor!==null) return outdoor;
   var y=roomFloorAt(floor,xMm,zMm)-floorTopY(floor);
   var l=walkFloorLandingGroundAt(xMm,zMm,floor);
   var up=(l!==null&&l>y)?l:y;
@@ -17305,7 +17333,8 @@ function walkUpdateGround(snap){
   // 現実に無いし、乗れてしまうとスキップフロアの縁を歩いただけで壁を抜けたように
   // 上へ出る。テレポート(snap)は免除する -- スポーン地点は段差の上のこともある。
   var target=walkFlatGroundAt(xMm,zMm,fl,prevOff);
-  if(!snap && target-prevOff>WALK_MAX_STEP_UP_M) return;
+  var cameIn=fl===1 && prevOff<-0.05 && roomAtPointOnFloor(1,xMm,zMm);   // 外(地面)から部屋に入った
+  if(!snap && !cameIn && target-prevOff>WALK_MAX_STEP_UP_M) return;
   WALK.groundOff=target;
 }
 // 立ち位置が塞がっているか。walkBlockedAt は**壁しか見ない**ので、
@@ -17853,7 +17882,9 @@ function updateWalkMode(now){
       if(walkLevelStairGroundAt(WALK.x/U,WALK.z/U,WALK.floor,0)===null &&
          walkLevelStairGroundAt(txM,tzM,WALK.floor,120)===null){
         var here=floorTopY(WALK.floor)+(WALK.groundOff||0);
-        if(floorTopY(WALK.floor)+walkFlatGroundAt(txM,tzM,WALK.floor,WALK.groundOff||0)-here>WALK_MAX_STEP_UP_M) return true;
+        // 外から部屋へ入るときは、床との段差があっても入れる(外階段の無い出入り口から出ると戻れなくなる)
+        var entering=WALK.floor===1 && !roomAtPointOnFloor(1,WALK.x/U,WALK.z/U) && roomAtPointOnFloor(1,txM,tzM);
+        if(!entering && floorTopY(WALK.floor)+walkFlatGroundAt(txM,tzM,WALK.floor,WALK.groundOff||0)-here>WALK_MAX_STEP_UP_M) return true;
       }
       return false;
     }
