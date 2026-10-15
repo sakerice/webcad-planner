@@ -1,0 +1,116 @@
+[
+  {
+    "id": "homewear-male-a",
+    "prompt": "Make a new ORIGINAL outfit-direction candidate for the EXACT young adult male in reference1. Preserve his same compact dark-brown hair, cute simplified face and eyes, natural adult body proportions, natural arm and hand lengths, and front-facing frozen A-pose32-36 degrees down/outward. Same head/crown-to-sole framing, full body from crown near y15 to shoe soles near y1210 on a1254 square, uncropped, five simple clearly countable fingers per hand lightly aligned. Age24, nominal172cm. The image is a clean front model-sheet only, no labels.\nOUTFIT DIRECTION M-A: relaxed, fashion-conscious at-home casual, designed through silhouette and layering. A SOFT BUTTER YELLOW boxy CROPPED crewneck sweatshirt: broad dropped shoulder seam, roomy gently rounded long sleeves, ordinary narrow cuff, body hem at high hip (~y505), wider torso than reference's fitted shirt. Heavy soft sweatshirt material shown ONLY by the roomy rounded outline, no fabric texture or fold lines. Under it a plain IVORY tee has a straight hem extending ~20px lower, an intentional visible horizontal layer. DARK SLATE GREEN wide-leg easy trousers with broad straight silhouettes and slight taper just at ankles, ankle length, one simple elastic waist edge mostly hidden, no central crease, pockets, drawcords or fine stitching. Normal IVORY ankle socks and simple warm CARAMEL BROWN rounded low-profile house mules, closed toe and closed silhouette for this front, palecream sole, no logos/buckles/laces. Outfit has an intentional short-top/long-wide-bottom proportion; do not fall back to slim pants or a fitted generic sweater. Clothing is genuine ordinary contemporary young-adult apparel, no costume panels. No backpack, hat, jewelry or decoration.\nART: thin economical clean dark outlines, simple cute facial features (white eye area, one dark iris/pupil shape, one small white highlight; tiny nose and mouth). STRICT flat cel fills, one solid base color per material with at most one sharply bounded shadow tone, no gradients, grain, gloss, textile texture, wrinkles or fine creases. Plain UNIFORM LIGHT GRAY background#E5E5E5, no floor, cast/contact shadow, scene, vignette, labels or text. Original design; no emblems or patterns. Reference1 is anatomy/face/pose guide only: replace ALL its clothes with specified new shapes and layers, do not copy its shirt or pants cut. Natural adult proportions must remain; body/head are not made wider or smaller merely because clothes are roomy.",
+    "referenced_image_paths": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-male-02a-front.png"
+    ],
+    "source": "generated_images/exec-07895efb-5de8-4cfc-97d1-98224a8da86f.png",
+    "selected": true,
+    "review": "Viewed full front: dropped shoulders/rounded roomy sleeves, short sweatshirt and visible white tee hem, wider easy trouser silhouette, socks/simple mules; adult head/body/A-pose and five digits retained. First candidate accepted for outfit-direction review, not human approval.",
+    "call_number": 1,
+    "repository_output": "homewear-male-a-front.png",
+    "source_sha256": "2381c369eae4fa4d5438e8a2c8776b25e7147dcf7c32ca557990c631ebe9f81a",
+    "input_snapshot_repository": [
+      "../../walker-male-02a-front.png"
+    ],
+    "official_tool": "image_gen.imagegen",
+    "model_internal_id": "not exposed"
+  },
+  {
+    "id": "homewear-male-b",
+    "prompt": "Create a NEW ORIGINAL relaxed stylish HOME outfit for the exact young adult male in reference1. Preserve exactly the compact darkbrown hair, simple cute adult face/eyes, head size and natural adult anatomy/arm-hand length of reference1. Front orthographic full-body A-pose arms32-36degrees down/outward, lightly aligned five clear simple fingers each hand. Age24, nominal172cm, natural adult model-sheet height, crown near y15/sole y1210 on1254 square, full body uncropped, no labels.\nOUTFIT M-B: ordinary modern college-aged at-home style, sharply different silhouette from a long-sleeve shirt or crewneck sweater. MUTED LIGHT SEAFOAM/MINT half-zip SOFT KNIT POLO with a broad normal soft folded polo collar; a simple short plain central zipper line (~55px) with one tiny rectangular slider, no individual teeth. Wide boxy body, dropped shoulder seams, generous ELBOW-LENGTH short sleeves ending just below elbows with wide relaxed openings, not tight sleeve hems. Top body hem around high hip y520, un-tucked. Plain WHITE tee underneath visibly extends ~25px below at hem, plus a small collar-neck edge. Ordinary WARM STONE/TAUPE wide easy pants, elastic waist hidden, broad relaxed upper leg with smooth gently tapered ankle-length silhouette, no pockets/center creases/drawstrings. Soft cotton/knit top and matte lightweight woven bottom are expressed solely by different garment silhouettes, no weave or texture. IVORY ankle socks plus simple DARK INK BLUE closed-toe rounded house slippers with low palegray soles, no heels/straps/marks. Use fitting length relationships and roomy volume as fashion design, not decoration. No hat, backpack, jewelry, patterns, emblems, invented panels or logos. White hem is intentional visible layering.\nDRAWING: same simple cute face style as reference1, clean thin dark outlines, large low-information solid color regions, maximum2 sharply bounded cel tones per surface. NO fine wrinkles, gradients, grain, cloth texture, glossy shading, tiny stitch detail or cast/contact shadow. A completely plain uniform LIGHT GRAY#E5E5E5 backdrop without floor/text/labels/vignette. Replace all reference1 clothing, preserving body; outfit reference2 is only the shared home-casual rendering/roomy fit calibration. Keep ordinary real adult clothing, no costume uniform.",
+    "referenced_image_paths": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-male-02a-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/homewear-review-20261014/homewear-male-a-front.png"
+    ],
+    "source": "generated_images/exec-e6378b34-c84a-497f-b875-0860244dcdc8.png",
+    "selected": true,
+    "review": "Viewed: roomy elbow-length polo, broad collar/short simple zip, white layered hem, relaxed taupe pants and socks/simple slippers; adult proportions/A-pose/five fingers retained. Source photo garment-volume relationships expressed as different palette and original cut.",
+    "call_number": 2,
+    "repository_output": "homewear-male-b-front.png",
+    "source_sha256": "0af9bffaab709d3150b482f0a175f56aecc5e58f35ffc3b54165be7a0db8691d",
+    "input_snapshot_repository": [
+      "../../walker-male-02a-front.png",
+      "homewear-male-a-front.png"
+    ],
+    "official_tool": "image_gen.imagegen",
+    "model_internal_id": "not exposed"
+  },
+  {
+    "id": "homewear-female-a",
+    "prompt": "Create a new ORIGINAL stylish relaxed AT-HOME outfit on the EXACT young adult woman in reference1. Same warm brown compact chin-length bob, cute simplified face and eyes, head size, adult torso/limbs and natural arm/hand length. Age24, nominal160cm. FRONT orthographic full body in same frozen A-pose32-36degrees down/outward. Five simple distinct countable fingers per hand, lightly aligned. Same hair-crown near y20 and soles near y1210 on1254 square; body proportions must remain natural even under roomy clothes, uncropped full body, no labels/text.\nOUTFIT F-A: short wide SOFT DUSTY ROSE/PINK sweatshirt with dropped shoulders and generously rounded long sleeves, ordinary narrow cuffs, soft boxy body at high hip ~y500. The shape expresses thick soft cotton without drawing any texture or wrinkle. Plain IVORY tee beneath it has a visible ~20px longer straight hem. A CREAM ankle-length RELAXED LONG PLEATED SKIRT starts below the hidden comfortable elastic waist and ends at upper ankles around y1090, modest softly widening A-line, not a huge cone. Crucial: simplify pleats to ONLY THREE VERY BROAD LARGE PLANES, a broad central cream plane and two slightly darker warm-cream planes, at most two solid tones. Only two or three major clean boundaries, NO many thin parallel vertical crease lines, no fine pleat ribs, no fabric texture/gradients. Skirt communicates light draping fabric through these large planes and silhouette, contrasting with rounded sweatshirt. Long skirt is explicitly authorized by latest review. IVORY socks visible at ankles and simple muted SLATE LAVENDER closed-toe low house mules with palecream soles, no laces/straps/buckles/logos. Real comfortable contemporary young adult clothes, easy waist, cozy yet carefully proportioned. No hats/bags/jewelry or costume motifs. Replace reference1's fitted long cardigan/short skirt with this distinctly new silhouette and layer lengths.\nART: maintain reference1's cute simple white eye area+one dark iris/pupil shape+one small white highlight, tiny nose/mouth, thin economical outlines. Strict solid flat cel fills, at most2 sharply bounded tones, no gradients, grain, sheen, texture, fine wrinkles/creases. Uniform LIGHT GRAY#E5E5E5 background no floor/cast/contact shadow/vignette. Reference2 gives consistent minimal cell-like home-apparel presentation, not body/garment copying. No text.",
+    "referenced_image_paths": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-female-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/homewear-review-20261014/homewear-male-a-front.png"
+    ],
+    "source": "generated_images/exec-fb810741-ba80-4f1a-8274-f2fc2ca64be5.png",
+    "selected": false,
+    "review": "Viewed: adult proportions/face retained; cropped relaxed rose sweatshirt, white hem layer, ankle-length skirt with3 broad planes and2 large boundaries, socks/slate-lavender home mules. No fine pleat lines or texture; latest long-skirt authorization applied. Latest parent's specific long-skirt direction retained; sweatshirt color alone revised to deep green. Rose original preserved as earlier color candidate.",
+    "call_number": 3,
+    "repository_output": "earlier-color/homewear-female-a-dusty-rose-front.png",
+    "source_sha256": "12c7d494560eb3f330c3454c331f6b7b9f07d127f01e5482106346be0ba40a5b",
+    "input_snapshot_repository": [
+      "../../walker-female-02c-front.png",
+      "homewear-male-a-front.png"
+    ],
+    "official_tool": "image_gen.imagegen",
+    "model_internal_id": "not exposed"
+  },
+  {
+    "id": "homewear-female-b",
+    "prompt": "Design a new ORIGINAL relaxed fashion-conscious AT-HOME outfit for the EXACT young adult woman in reference1. Preserve same compact warmbrown chin-length bob, cute simple white/dark/highlight eyes, face, head size, adult body proportions, natural arm/hand length, age24 nominal160cm. Front orthographic full-body A-pose arms32-36degrees downward/outward, hands lightly aligned with FIVE simple clearly countable fingers each. Crown near y20 and soles near y1210 on1254 square, same natural adult anatomy underneath clothes. Uncropped complete body.\nOUTFIT F-B: ordinary contemporary home casual, through deliberately contrasting garment lengths and silhouettes. A soft DUSTY BLUE/LAVENDER SHORT BOX CARDIGAN, deep normal V-neck and two broad plain front panels, relaxed dropped shoulder line and softly roomy THREE-QUARTER sleeves ending midforearm, simple wide cuffs. Open at front, ordinary2 large plain round buttons on one edge, NO decorative piping. Cardigan BODY hem at high hip~y485. Underneath a plain IVORY long tee with straight loose hem around y555, clearly ~70px longer than cropped cardigan; layered length relationship important, not a generic long fitted cardigan. Cardigan soft light knit expressed by broad shape only, NO weave, stitch/rib pattern or fold drawing. WARM LIGHT STONE/CREAM easy pants with comfortable hidden elastic waist, broad relaxed hip/thigh and a deliberate GENTLE TAPER toward ankles, ankle-length hems, matte smooth woven fabric expressed only by its outline. No pockets/fly hardware/center creases/drawcords. IVORY ankle socks plus simple muted WARM CHESTNUT closed-toe rounded house slippers/mules with flat cream soles, no laces/straps/buckles/marks. Style should feel comfortable in an ordinary home yet intentional: short open upper layer+long pale inner layer+loose tapered bottoms. Do NOT reproduce reference1's straight long fitted cardigan or knee-length skirt. Reference2 is rendering/home-footwear/simplified surface calibration, not copying clothes. No bags/hats/jewelry/logos/symbols/patterns/costume panels.\nART: thin clean economical dark outlines, cute simplified adult face, maximum2 hard-bounded flat cel tones per material. Large clear solid-color surfaces; no gradients, grain, fabric texture, wrinkles/fine creases, shiny lighting. Plain UNIFORM LIGHTGRAY#E5E5E5 backdrop without floor/cast/contact shadows/text/labels/vignette. Original garment design with real ordinary silhouettes.",
+    "referenced_image_paths": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-female-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/homewear-review-20261014/homewear-female-a-front.png"
+    ],
+    "source": "generated_images/exec-aa0628c9-fcce-4230-97d7-38bd9fde6369.png",
+    "selected": false,
+    "review": "Viewed: desired cropped3/4 cardigan/long white inner layer/soft tapered pants achieved, but faint internal trouser crease/pocket lines and small tonal wedge appeared below tee. Targeted trouser cleanup before review delivery.",
+    "call_number": 4,
+    "repository_output": "rejected/homewear-female-b-before-trouser-cleanup.png",
+    "source_sha256": "09c4b5cb7d30472d1e1fec289323640a3c8f45e2f2eddd8a63dfe06c2bc784fc",
+    "input_snapshot_repository": [
+      "../../walker-female-02c-front.png",
+      "earlier-color/homewear-female-a-dusty-rose-front.png"
+    ],
+    "official_tool": "image_gen.imagegen",
+    "model_internal_id": "not exposed"
+  },
+  {
+    "id": "homewear-female-b",
+    "prompt": "Clean up the EXACT supplied home-fashion front candidate with one specific change only: make the CREAM PANTS entirely smooth unbroken flat solid cream surfaces. REMOVE the thin internal vertical lines near x533,y600-730 and x718,y600-730 and the small triangular shaded fold below the inner tee near crotch. Pants have NO pockets, front pressed crease or wrinkle drawing. Keep the crotch separation silhouette/normal short center construction boundary but no shading wedge. Preserve their relaxed gentle tapered OUTER silhouette. Everything else stays: adult body/face/head/compact brown bob, A-pose, five countable fingers, cropped loose dustyblue/lavender cardigan and large2 plain buttons, threequarter sleeve cuffs, long ivory tee hem, ivory socks and brown simple indoor slippers, same full-body framing and gray background. Flat cel fill, no texture, gradient or floor/shadow.",
+    "referenced_image_paths": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-aa0628c9-fcce-4230-97d7-38bd9fde6369.png"
+    ],
+    "source": "generated_images/exec-c0fb2b80-f11e-4315-8f60-3b09ef51ca73.png",
+    "selected": true,
+    "review": "Viewed correction: internal trouser crease/pocket lines and crotch shadow wedge removed. Cropped cardigan,3/4 sleeves, much longer ivory tee, relaxed tapered pants, socks/slippers preserved; five fingers and adult proportions retained.",
+    "call_number": 5,
+    "repository_output": "homewear-female-b-front.png",
+    "source_sha256": "10a35d53afda27788b25464b7e2f4915e4cf7348569ed713ea4959b30d4a18d9",
+    "input_snapshot_repository": [
+      "rejected/homewear-female-b-before-trouser-cleanup.png"
+    ],
+    "official_tool": "image_gen.imagegen",
+    "model_internal_id": "not exposed"
+  },
+  {
+    "id": "homewear-female-a",
+    "prompt": "Make ONE color-only adjustment to the EXACT supplied at-home adult female front candidate: change the entire dusty-rose sweatshirt (body, sleeves, neckline band, cuffs and hem) to a calm DEEP SPRUCE/FOREST GREEN base color approximately#346353, with matching cuffs/bands and maximumone subtle sharply bounded shadow tone. Preserve ALL its silhouette: roomy round long sleeves, dropped shoulder seam, cropped high-hip length, and visible longer IVORY tee hem below. Preserve the exact adult body proportions, face/simple eyes, head size, compact brown bob, A-pose, five fingers, CREAM ankle-length skirt with THREE BROAD PLANES, ivory socks and slate-lavender simple indoor mules, uniform lightgray backdrop, no text/floor/shadow. Do not redesign or add details. Low-information flat cel fills, no texture, gradients, wrinkle lines or fine pleats.",
+    "referenced_image_paths": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/homewear-review-20261014/homewear-female-a-front.png"
+    ],
+    "source": "generated_images/exec-e574ea12-59eb-45ec-9e34-bd903125e8a0.png",
+    "selected": true,
+    "review": "Viewed: sweatshirt changed to deep forest green only, cropped rounded shape/white hem/cream ankle-length3-plane skirt and adult face/body retained. Specific latest parent's direction represented; rose prior variant preserved. 3D leg interference untested.",
+    "call_number": 6,
+    "repository_output": "homewear-female-a-front.png",
+    "source_sha256": "2ab9c7fde4efd8fc0f84fcced0559889934c531bb5bd881a007742ab79827061",
+    "input_snapshot_repository": [
+      "earlier-color/homewear-female-a-dusty-rose-front.png"
+    ],
+    "official_tool": "image_gen.imagegen",
+    "model_internal_id": "not exposed"
+  }
+]

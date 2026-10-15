@@ -1,0 +1,463 @@
+{
+  "active_specification": "Latest human review 2026-10-14 04:02 JST; former5–5.5-head criterion WITHDRAWN.",
+  "measurement_basis": "Visible hair crown-to-chin/full-height pixel distances. Skull under hair is not directly measured.",
+  "arm_method": "Manual 2D approximate joint centers (about±10px uncertainty) under clothing. Preserve segment lengths and arrange them downward: shoulder_y+upper_arm+forearm, plus hand length for fingertip. These are estimated lowered positions, not a generated lowered-pose image, anatomical guarantee, 3D/rig verification or motion test.",
+  "images": [
+    {
+      "id": "walker-male-02a",
+      "file": "candidates/modern-student/walker-male-02a-front-modern.png",
+      "status": "parent_direction_review_pending",
+      "sha256": "afde463c9e30f9abdc1960c5007583c4785f7259bb3fad3f48222305fd314222",
+      "size": [
+        1254,
+        1254
+      ],
+      "crown_y": 15,
+      "chin_xy": [
+        623,
+        196
+      ],
+      "sole_y": 1210,
+      "foreground_bbox_inclusive": [
+        252,
+        15,
+        990,
+        1210
+      ],
+      "head_height_px": 181,
+      "full_height_px": 1195,
+      "visible_hair_crown_head_units": 6.60221,
+      "head_units_are_recorded_not_fixed_acceptance_gate": true,
+      "design_height_cm": 172,
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            396,
+            846
+          ],
+          [
+            320,
+            923
+          ]
+        ],
+        "degrees_from_vertical": [
+          32.3474,
+          32.6869
+        ]
+      },
+      "anatomical_guides": {
+        "hip_zone_y": [
+          610,
+          670
+        ],
+        "crotch_y": 657,
+        "crotch_basis": "visible center leg-gap boundary",
+        "knee_y_estimated": 890
+      },
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            498,
+            270
+          ],
+          "elbow_xy": [
+            405,
+            430
+          ],
+          "wrist_xy": [
+            311,
+            586
+          ],
+          "longest_fingertip_xy": [
+            269,
+            704
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 182.132,
+          "hand_px": 125.252,
+          "arm_shoulder_to_wrist_over_full_height": 0.307278,
+          "hand_over_full_height": 0.104813,
+          "hand_nominal_cm_from_design_height": 18.03,
+          "lowered_wrist_estimated_y": 637.197,
+          "lowered_fingertip_estimated_y": 762.448,
+          "thigh_fraction_from_crotch": 0.452568
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            746,
+            270
+          ],
+          "elbow_xy": [
+            839,
+            430
+          ],
+          "wrist_xy": [
+            933,
+            586
+          ],
+          "longest_fingertip_xy": [
+            975,
+            705
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 182.132,
+          "hand_px": 126.194,
+          "arm_shoulder_to_wrist_over_full_height": 0.307278,
+          "hand_over_full_height": 0.105602,
+          "hand_nominal_cm_from_design_height": 18.16,
+          "lowered_wrist_estimated_y": 637.197,
+          "lowered_fingertip_estimated_y": 763.391,
+          "thigh_fraction_from_crotch": 0.456614
+        }
+      ],
+      "colors": [
+        {
+          "part": "肌",
+          "intended_hex": "#F8D2B1",
+          "sample_hex": "#FEE2C9",
+          "sample_xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "intended_hex": "#443E39",
+          "sample_hex": "#443D3A",
+          "sample_xy": [
+            620,
+            57
+          ]
+        },
+        {
+          "part": "目（虹彩・瞳の単純形）",
+          "intended_hex": "#493F39",
+          "sample_hex": "#3A312C",
+          "sample_xy": [
+            595,
+            132
+          ]
+        },
+        {
+          "part": "目の白部",
+          "intended_hex": "#FFFFFF",
+          "sample_hex": "#FBFBFA",
+          "sample_xy": [
+            583,
+            125
+          ]
+        },
+        {
+          "part": "シャツ本体",
+          "intended_hex": "#A8D0F5",
+          "sample_hex": "#A9D2FD",
+          "sample_xy": [
+            540,
+            391
+          ]
+        },
+        {
+          "part": "襟",
+          "intended_hex": "#A8D0F5",
+          "sample_hex": "#A8D2FC",
+          "sample_xy": [
+            577,
+            231
+          ]
+        },
+        {
+          "part": "胸ポケット",
+          "intended_hex": "#A8D0F5",
+          "sample_hex": "#A8D2FC",
+          "sample_xy": [
+            695,
+            350
+          ]
+        },
+        {
+          "part": "Tシャツ",
+          "intended_hex": "#FFFFFF",
+          "sample_hex": "#FEFDFE",
+          "sample_xy": [
+            620,
+            415
+          ]
+        },
+        {
+          "part": "普通のパンツ",
+          "intended_hex": "#454545",
+          "sample_hex": "#4C4B4A",
+          "sample_xy": [
+            548,
+            895
+          ]
+        },
+        {
+          "part": "靴本体",
+          "intended_hex": "#FFFFFF",
+          "sample_hex": "#FEFEFE",
+          "sample_xy": [
+            467,
+            1180
+          ]
+        },
+        {
+          "part": "靴底",
+          "intended_hex": "#DEDEDE",
+          "sample_hex": "#E4E4E4",
+          "sample_xy": [
+            468,
+            1205
+          ]
+        }
+      ],
+      "visually_displayed": true
+    },
+    {
+      "id": "walker-female-02c",
+      "file": "candidates/modern-student/walker-female-02c-front-modern.png",
+      "status": "parent_direction_review_pending",
+      "sha256": "ad0fb8ffef3cbd99aebfd08a3d7e3a6812a76e424593251ea1334d78df16c11d",
+      "size": [
+        1254,
+        1254
+      ],
+      "crown_y": 20,
+      "chin_xy": [
+        623,
+        197
+      ],
+      "sole_y": 1211,
+      "foreground_bbox_inclusive": [
+        284,
+        20,
+        957,
+        1211
+      ],
+      "head_height_px": 177,
+      "full_height_px": 1191,
+      "visible_hair_crown_head_units": 6.728814,
+      "head_units_are_recorded_not_fixed_acceptance_gate": true,
+      "design_height_cm": 160,
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            418,
+            824
+          ],
+          [
+            342,
+            899
+          ]
+        ],
+        "degrees_from_vertical": [
+          32.3474,
+          32.0054
+        ]
+      },
+      "anatomical_guides": {
+        "hip_zone_y": [
+          575,
+          655
+        ],
+        "crotch_y": 645,
+        "crotch_basis": "estimated pelvis under skirt; not directly visible",
+        "knee_y_estimated": 850
+      },
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            516,
+            265
+          ],
+          "elbow_xy": [
+            428,
+            414
+          ],
+          "wrist_xy": [
+            341,
+            561
+          ],
+          "longest_fingertip_xy": [
+            299,
+            675
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 170.816,
+          "hand_px": 121.491,
+          "arm_shoulder_to_wrist_over_full_height": 0.288717,
+          "hand_over_full_height": 0.102007,
+          "hand_nominal_cm_from_design_height": 16.32,
+          "lowered_wrist_estimated_y": 608.862,
+          "lowered_fingertip_estimated_y": 730.353,
+          "thigh_fraction_from_crotch": 0.416354
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            730,
+            265
+          ],
+          "elbow_xy": [
+            818,
+            414
+          ],
+          "wrist_xy": [
+            905,
+            561
+          ],
+          "longest_fingertip_xy": [
+            944,
+            675
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 170.816,
+          "hand_px": 120.487,
+          "arm_shoulder_to_wrist_over_full_height": 0.288717,
+          "hand_over_full_height": 0.101164,
+          "hand_nominal_cm_from_design_height": 16.19,
+          "lowered_wrist_estimated_y": 608.862,
+          "lowered_fingertip_estimated_y": 729.348,
+          "thigh_fraction_from_crotch": 0.411456
+        }
+      ],
+      "colors": [
+        {
+          "part": "肌",
+          "intended_hex": "#F8D2B1",
+          "sample_hex": "#FEDFC5",
+          "sample_xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "intended_hex": "#645247",
+          "sample_hex": "#5E4B3F",
+          "sample_xy": [
+            620,
+            57
+          ]
+        },
+        {
+          "part": "目（虹彩・瞳の単純形）",
+          "intended_hex": "#493F39",
+          "sample_hex": "#5B493A",
+          "sample_xy": [
+            598,
+            132
+          ]
+        },
+        {
+          "part": "目の白部",
+          "intended_hex": "#FFFFFF",
+          "sample_hex": "#F6F6F6",
+          "sample_xy": [
+            587,
+            126
+          ]
+        },
+        {
+          "part": "カーディガン本体",
+          "intended_hex": "#F3A58F",
+          "sample_hex": "#F89E8B",
+          "sample_xy": [
+            548,
+            386
+          ]
+        },
+        {
+          "part": "カーディガン袖口",
+          "intended_hex": "#F3A58F",
+          "sample_hex": "#F89E8B",
+          "sample_xy": [
+            350,
+            543
+          ]
+        },
+        {
+          "part": "白トップス",
+          "intended_hex": "#FFFFFF",
+          "sample_hex": "#FFFFFF",
+          "sample_xy": [
+            620,
+            345
+          ]
+        },
+        {
+          "part": "スカート本体",
+          "intended_hex": "#456582",
+          "sample_hex": "#465F81",
+          "sample_xy": [
+            557,
+            597
+          ]
+        },
+        {
+          "part": "普通のウエスト部",
+          "intended_hex": "#456582",
+          "sample_hex": "#475F7F",
+          "sample_xy": [
+            650,
+            478
+          ]
+        },
+        {
+          "part": "ローファー本体",
+          "intended_hex": "#FFF6E4",
+          "sample_hex": "#FEF9EE",
+          "sample_xy": [
+            519,
+            1176
+          ]
+        },
+        {
+          "part": "靴底",
+          "intended_hex": "#D6D6D6",
+          "sample_hex": "#C3C4C4",
+          "sample_xy": [
+            511,
+            1206
+          ]
+        }
+      ],
+      "visually_displayed": true
+    }
+  ],
+  "checks_passed": [
+    "2 PNGs decode >=1024x1024",
+    "visible-crown proportions recorded without5-head gate",
+    "A-pose sleeve slope30–45degrees",
+    "estimated lowered wrists in pelvic guide zones",
+    "estimated lowered fingertips on upper-to-middle thighs and above knee guides",
+    "SHA-256 and color samples"
+  ],
+  "unperformed": [
+    "parent latest-front quality approval",
+    "all6 final fronts",
+    "side/back/turnaround consistency",
+    "direct lowered-pose image",
+    "3D/rig/motion (prohibited)",
+    "final digit-separation QA",
+    "strict flat-region HEX equality",
+    "lineup and lineup Library save"
+  ],
+  "library": {
+    "route": "official current prepared-upload helper",
+    "status": "failed: Library prepare_uploads is not available",
+    "saved_ids": [],
+    "direct_fallback_taken": false
+  }
+}
