@@ -83,7 +83,19 @@ function ceilingFinishElevationMm(floor,cx,cy){
     // 勾配天井の部屋の天井範囲は、範囲の中の実際の天井面から測る(部屋の天井高とは違う)。
     var ae=(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.areaFinishElevationMm)?CeilingDesigner.areaFinishElevationMm(r,cx,cy):null;
     if(ae!==null&&ae!==undefined) return ae;
-    return roomCeilingElevationMm(r)+(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+    var offset=(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+    // 勾配天井（と斜線で削られた天井）は、**その位置の**天井面の高さ。部屋の天井高は勾配の
+    // いちばん高い所なので、それを使うと勾配の低い側の照明が天井裏へ持ち上がり、
+    // 吊り下げとみなして動かさない照明は天井から浮いたまま残った（plan 37 の LDK で 70mm）。
+    // 描画の自動照明（部屋ごとの照明の割り付け）と同じ求め方にする。
+    var prof=(typeof roomCeilingProfile==='function'&&typeof roomCeilingWorldYAtMm==='function')?roomCeilingProfile(r):null;
+    if(prof){
+      var fl0=r.floor||fl, flat=floorBaseY(fl0)+roomCeilingHeightM(r);
+      var worldY=Math.min(flat,roomCeilingWorldYAtMm(r,prof,cx,cy));
+      return Math.round((worldY-floorBaseY(fl0)-floorSlabHeightMForFloor(fl0)-ceilingFinishThicknessM())/U)
+        -(roomFloorOffsetMm(r)+roomSkipLevelMm(r))+offset;
+    }
+    return roomCeilingElevationMm(r)+offset;
   }
   return Math.round((wallFullHeightM(fl)-floorSlabHeightMForFloor(fl)-ceilingFinishThicknessM())/U);
 }
