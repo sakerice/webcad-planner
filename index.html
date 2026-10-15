@@ -17119,7 +17119,10 @@ function stairLocalProgress(it,xMm,zMm,marginMm){
   var ly=-dx*Math.sin(r)+dy*Math.cos(r);
   if(it.flipX) lx=-lx;
   if(it.flipY) ly=-ly;
-  if(Math.abs(lx)>it.w/2+margin || Math.abs(ly)>it.d/2+margin) return null;
+  // 直進階段は、上り下りの向き(ly)にだけ余白を足す。横(lx)にも足すと、外壁に接した階段の上から
+  // 壁の中まで入り込め、降りた所で壁にめり込んだ(そこから外壁を抜けて家の外へ出られた)
+  var marginX=(it.type==='stair-corner')?margin:0;
+  if(Math.abs(lx)>it.w/2+marginX || Math.abs(ly)>it.d/2+margin) return null;
   var t;
   if(it.type==='stair-corner'){
     // 廻り階段: 内側隅(ローカル右下 w/2,d/2)まわりの角度で進行率を出す。
@@ -17723,7 +17726,10 @@ function walkWallVerticalRangeM(w){
 }
 function buildWalkCollisionCache(floor){
   // 3D で一時的に非表示にした壁も、以前どおりぶつかる(見えなくしても壁はある)。
-  _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
+  // **上下の階の壁も入れる。** どの壁に当たるかは高さ(体の範囲にかかるか)で決まるので、階で絞る必要はない。
+  // いまの階の壁だけを見ていたため、階段の上端で足元が上の階の床近くまで上がると、いまの階の外壁は
+  // 「またげる段差」になり、体にかかっている上の階の外壁は階が違うので見ず、外壁を越えて家の外へ出られた(報告された)。
+  _walkCollWalls=DATA.walls.filter(function(w){return Math.abs((w.floor||1)-floor)<=1;}).map(function(w){
     var vr=walkWallVerticalRangeM(w);
     return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w),
       bottomY:vr.bottom, topY:vr.top};
@@ -17760,6 +17766,61 @@ function walkBlockedAt(xMm,zMm,floor,feetY){
   }
   return false;
 }
+// (xMm,zMm) がいちばん深くめり込んでいる壁と、その深さ(mm)・壁のどちら側か。めり込んでいなければ null。
+// 判定の条件(高さ・ドアの開口)は walkBlockedAt と同じ。
+function walkWallPenetration(xMm,zMm,floor){
+  if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
+  var feet=floorTopY(floor)+((WALK&&WALK.groundOff)||0), head=feet+WALK_BODY_HEIGHT_M, best=null;
+  for(var i=0;i<_walkCollWalls.length;i++){
+    var w=_walkCollWalls[i];
+    if(w.topY!==undefined&&(w.topY<=feet+WALK_MAX_STEP_UP_M||w.bottomY>=head)) continue;
+    var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
+    if(len2<1) continue;
+    var t=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len2, tc=Math.max(0,Math.min(1,t));
+    var dist=Math.hypot(xMm-(w.x1+tc*dx),zMm-(w.y1+tc*dy));
+    var depth=w.thick/2+WALK_PLAYER_RADIUS_MM-dist;
+    if(depth<=0) continue;
+    var alongMm=tc*Math.sqrt(len2), pad=WALK_PLAYER_RADIUS_MM*0.3;
+    if(w.gaps.some(function(g){return alongMm>=g.a-pad && alongMm<=g.b+pad;})) continue;
+    if(!best||depth>best.depth) best={depth:depth, wall:w, side:((xMm-w.x1)*dy-(zMm-w.y1)*dx)>=0?1:-1};
+  }
+  return best;
+}
+// (ax,az)→(bx,bz) の一歩が、体の高さにかかる壁の芯を横切るか(ドアの開口は除く)
+function walkCrossesWall(ax,az,bx,bz,floor){
+  if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
+  var feet=floorTopY(floor)+((WALK&&WALK.groundOff)||0), head=feet+WALK_BODY_HEIGHT_M;
+  function side(px,pz,w){ return (px-w.x1)*(w.y2-w.y1)-(pz-w.y1)*(w.x2-w.x1); }
+  for(var i=0;i<_walkCollWalls.length;i++){
+    var w=_walkCollWalls[i];
+    if(w.topY!==undefined&&(w.topY<=feet+WALK_MAX_STEP_UP_M||w.bottomY>=head)) continue;
+    var s1=side(ax,az,w), s2=side(bx,bz,w);
+    if((s1>0)===(s2>0)) continue;                         // 芯の同じ側にいる
+    // 一歩の線分と壁の線分が交わるか(壁の向きで見て、両端が一歩の両側にあるか)
+    var dx=bx-ax, dz=bz-az;
+    var e1=(w.x1-ax)*dz-(w.y1-az)*dx, e2=(w.x2-ax)*dz-(w.y2-az)*dx;
+    if((e1>0)===(e2>0)) continue;
+    var len=Math.hypot(w.x2-w.x1,w.y2-w.y1);
+    var tt=Math.abs(s1)/(Math.abs(s1)+Math.abs(s2)||1);
+    var cx=ax+dx*tt, cz=az+dz*tt;
+    var along=((cx-w.x1)*(w.x2-w.x1)+(cz-w.y1)*(w.y2-w.y1))/Math.max(1,len);
+    if(w.gaps.some(function(g){return along>=g.a && along<=g.b;})) continue;
+    return true;
+  }
+  return false;
+}
+// 壁にめり込んだ位置から動いてよい行き先か。めり込みが浅くなり、かつ壁の芯の向こうへ越えない方向だけ通す。
+// 以前は「めり込んだらどの方向にも動ける」で、階段の上から外壁にめり込んだあと、そのまま外壁を
+// 突き抜けて家の外の空中へ歩き出せた(報告された)。入ってきた側へは必ず戻れるので、詰むことはない。
+function walkUnstickAllows(cx,cz,tx,tz,floor){
+  var pen=walkWallPenetration(cx,cz,floor);
+  if(!pen) return true;                         // 壁以外(段差など)で塞がれているときは今までどおり
+  var w=pen.wall, dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
+  var t=((tx-w.x1)*dx+(tz-w.y1)*dy)/len2, tc=Math.max(0,Math.min(1,t));
+  var distT=Math.hypot(tx-(w.x1+tc*dx),tz-(w.y1+tc*dy));
+  var sideT=((tx-w.x1)*dy-(tz-w.y1)*dx)>=0?1:-1;
+  return sideT===pen.side && (w.thick/2+WALK_PLAYER_RADIUS_MM-distT)<pen.depth;
+}
 var _lastWalkTick=0;
 function updateWalkMode(now){
   if(!isWalkView()||!WALK.active) return false;
@@ -17784,7 +17845,9 @@ function updateWalkMode(now){
       // 入口の120mm手前から階段側へ乗り移れるようにし、乗った後は同じ余白内へ
       // 誘導する。コーナーから直階段へ接続する境界も両方の判定が重なるため連続する。
       var stairTarget=walkStairSampleAt(txM,tzM,WALK.floor,120);
-      if(stairHere || stairTarget) return !stairTarget;
+      // 階段の上でも、壁の芯を横切る動きだけは止める。階段の端が外壁に接していると、余白(120mm)の分だけ
+      // 壁の芯の向こうへ出られ、そこから家の外へ抜けた(報告された)。端に寄って歩くことは今までどおりできる
+      if(stairHere || stairTarget) return !stairTarget || walkCrossesWall(WALK.x/U,WALK.z/U,txM,tzM,WALK.floor);
       if(walkBlockedAt(txM,tzM,WALK.floor)) return true;
       // 段差の壁。階段の上に居ない状態で、登れない高さの床へは踏み出せない。
       if(walkLevelStairGroundAt(WALK.x/U,WALK.z/U,WALK.floor,0)===null &&
@@ -17802,7 +17865,10 @@ function updateWalkMode(now){
     var stuckHere=stepBlocked(WALK.x/U,WALK.z/U);
     // 壁への軸別スライド: 斜めに壁へ突っ込んでも、通れる軸方向にはそのまま進める
     if(stuckHere){
-      WALK.x=nx; WALK.z=nz;
+      // めり込んでいる壁の、入ってきた側へ浅くなる向きにだけ動く(壁を突き抜けさせない)
+      if(walkUnstickAllows(WALK.x/U,WALK.z/U,nx/U,nz/U,WALK.floor)){ WALK.x=nx; WALK.z=nz; }
+      else if(walkUnstickAllows(WALK.x/U,WALK.z/U,nx/U,WALK.z/U,WALK.floor)){ WALK.x=nx; }
+      else if(walkUnstickAllows(WALK.x/U,WALK.z/U,WALK.x/U,nz/U,WALK.floor)){ WALK.z=nz; }
     } else if(!stepBlocked(nx/U,nz/U)){
       WALK.x=nx; WALK.z=nz;
     } else if(!stepBlocked(nx/U,WALK.z/U)){
