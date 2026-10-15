@@ -31,6 +31,8 @@ var ThirdPerson = (function(){
   // 4つの方式（消すだけ／シルエットだけ／壁だけ消してシルエット／両方）を撮り比べ、利用者が「両方」に決めた（2026-10-15）。
   // シルエットだけでは、カメラが人物の後ろの決まった距離にあるため壁の外に出て、画面が壁の裏側でふさがる
   var SILHOUETTE_COLOR = 0x4f7fd0;
+  // 試し: URL に &tpshide=0 を付けると、壁・家具を消さずシルエットだけで見せる（利用者が試したいと言った形）
+  var HIDE_BETWEEN = !/[?&]tpshide=0\b/.test(location.search);
   var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
   // 座る: 近くの座れる家具（ソファ・椅子）。seat は座っている家具、near は座れる候補。sitBlend は 0=立ち 1=座り
   var SEAT_KINDS = {sofa:'ソファ', chair:'椅子'}, SEAT_FROM_FRONT_MM = 140, SEAT_REACH = 1.3, HIP_ABOVE_SEAT = 0.08, SIT_TIME = 0.35;
@@ -203,6 +205,7 @@ var ThirdPerson = (function(){
   }
   var _box = null, _ctr = null;
   function hideBetween(head, cam){
+    if(!HIDE_BETWEEN) return;
     var w = collectWalls();
     if(!ray) ray = new THREE.Raycaster();
     ray.layers.enable(HIDDEN_LAYER);                         // 消している壁にも当てて、間にある間は消したままにする
