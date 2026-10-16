@@ -59,6 +59,11 @@ try {
   assert.ok(t.figure, '人物が場面に無い');
   assert.ok(t.at < 1e-6, '人物が歩いている位置に立っていない');
   assert.ok(t.visible, '人物が見えていない');
+  // 三人称の間は、十字キーの真ん中の「立ち視点／座り視点」を出さない（目の高さの切り替えは三人称では意味が無い）
+  assert.equal(await p2.evaluate(() => getComputedStyle(document.getElementById('walk-height-toggle')).visibility), 'hidden', '三人称なのに立ち／座り視点の切り替えが出ている');
+  // 隠れた部分を描くシルエット（人物と同じ骨組みで動く単色の写し、手前に物がある所にだけ描く）が付いている
+  const sil = await p2.evaluate(() => { let n = 0, ok = true; sc3.traverse((o) => { if (o.name === '_silhouette') { n++; ok = ok && o.visible && o.material.depthFunc === THREE.GreaterDepth && o.renderOrder < 11; } }); return {n, ok}; });
+  assert.ok(sil.n > 0 && sil.ok, '隠れた部分のシルエットが無い: ' + JSON.stringify(sil));
   assert.ok(Math.abs(t.back - 2.4 * Math.cos(t.pitch)) < 1e-3, 'カメラが人物の後ろの決まった距離にない: ' + t.back);
   // 切り替えボタンは十字キーの中ではなく、上に置く
   const pos = await p2.evaluate(() => { const b = document.getElementById('walk-tps-toggle').getBoundingClientRect(); const f = document.querySelector('#walk-dpad .wk-fwd').getBoundingClientRect(); return {bottom: b.bottom, fwdTop: f.top, w: b.width, h: b.height}; });
@@ -134,9 +139,10 @@ try {
   await pressToggle(p2);
   const back = await p2.evaluate(() => { let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; }); return { figure: !!f, d: Math.hypot(camExt.position.x - WALK.x, camExt.position.z - WALK.z) }; });
   assert.deepEqual(back, { figure: false, d: 0 });
+  assert.equal(await p2.evaluate(() => getComputedStyle(document.getElementById('walk-height-toggle')).visibility), 'visible', '一人称に戻しても立ち／座り視点の切り替えが出ない');
 
   assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
-  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は見た目だけ消す）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す）・一人称へ戻す、が通った');
+  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は見た目だけ消し、隠れた部分はシルエット）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す）・一人称へ戻す、が通った');
 } finally {
   await browser.close();
 }

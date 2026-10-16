@@ -4,11 +4,12 @@
 // 一人称のウォークスルーには手を入れない。歩く位置・向き・当たり判定は WALK（一人称と同じ物）を
 // そのまま使い、カメラの置き場所だけを「人物の後ろ」に替える（walkApplyCamera の後ろに足す）。
 //
-// - 人物: 独自に組んだ簡単な人形（頭・胴・腕・脚）。歩いた距離に合わせて手足を振る。
-//   本採用の人物モデルは後で差し替える（外部の素材は仮まで、という取り決めのため、最初から独自の形）
+// - 人物: 女性 a の GLB（Codex のデザインを Meshy で立体化、動きは Mixamo の待機・歩き・座り）。
+//   読み込み前・失敗時だけ、独自に組んだ簡単な人形で歩く
 // - カメラ: 人物の頭の後ろ上、いつも同じ距離（狭い家で寄ったり離れたりすると煩わしいので、壁で縮めない）。
 //   上下のドラッグは一人称と同じ向き（WALK.pitch をそのまま使う）。カメラと人物の間に壁・家具などが入ったら、
-//   それ（壁なら壁に付いた窓・ドアも）を見えなくする。影は落とし続ける（部屋の明るさが変わらないように）
+//   それ（壁なら壁に付いた窓・ドアも）を見えなくする。影は落とし続ける（部屋の明るさが変わらないように）。
+//   それでも隠れた部分は、人物を単色のシルエットで描く
 // - 下キー: カメラの向きはそのままで、人物がカメラの方へ向き直り、体の前をカメラに向けて手前へ歩いてくる
 //   （カメラは同じ距離を保って下がる）。上キーで奥へ歩くと、また背中を向ける
 var ThirdPerson = (function(){
@@ -25,6 +26,13 @@ var ThirdPerson = (function(){
   var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null, bones = {};
   var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
   var ray = null, walls = null, wallsFor = null, hidden = [], HIDDEN_LAYER = 1;
+  // カメラと人物の間に物があるとき: 頭とカメラを結ぶ線上の壁・家具は見た目だけ消し（当たり判定は残る）、
+  // それでも隠れた部分（線から外れた低い家具など）は、人物を単色のシルエットで描く。
+  // 4つの方式（消すだけ／シルエットだけ／壁だけ消してシルエット／両方）を撮り比べ、利用者が「両方」に決めた（2026-10-15）。
+  // シルエットだけでは、カメラが人物の後ろの決まった距離にあるため壁の外に出て、画面が壁の裏側でふさがる
+  var SILHOUETTE_COLOR = 0x4f7fd0;
+  // 試し: URL に &tpshide=0 を付けると、壁・家具を消さずシルエットだけで見せる（利用者が試したいと言った形）
+  var HIDE_BETWEEN = !/[?&]tpshide=0\b/.test(location.search);
   var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
   // 座る: 近くの座れる家具（ソファ・椅子）。seat は座っている家具、near は座れる候補。sitBlend は 0=立ち 1=座り
   var SEAT_KINDS = {sofa:'ソファ', chair:'椅子'}, SEAT_FROM_FRONT_MM = 140, SEAT_REACH = 1.3, HIP_ABOVE_SEAT = 0.08, SIT_TIME = 0.35;
@@ -69,6 +77,12 @@ var ThirdPerson = (function(){
     toonRamp.needsUpdate = true;
     return toonRamp;
   }
+  var _silMat = null;
+  function silhouetteMaterial(){
+    if(_silMat) return _silMat;
+    _silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false});
+    return _silMat;
+  }
   function toonify(root){
     var meshes = [];
     root.traverse(function(o){ if(o.isMesh) meshes.push(o); });
@@ -81,6 +95,14 @@ var ThirdPerson = (function(){
       if(toon.map) toon.map.colorSpace = THREE.SRGBColorSpace;
       o.material = toon;
       // 輪郭線（裏返しの殻）は付けない（利用者の判断で外した。家の中では線が浮いて見える）
+      // シルエット: 同じ骨組みで動く単色の写し。「手前に物がある所」にだけ描く（深さが奥のときだけ通す）。
+      // 人物より先に描き（renderOrder）、人物が見えている所は人物が上から塗るので、自分の体には重ならない
+      var sil = o.isSkinnedMesh ? new THREE.SkinnedMesh(o.geometry, silhouetteMaterial()) : new THREE.Mesh(o.geometry, silhouetteMaterial());
+      if(o.isSkinnedMesh) sil.bind(o.skeleton, o.bindMatrix);
+      sil.position.copy(o.position); sil.quaternion.copy(o.quaternion); sil.scale.copy(o.scale);
+      sil.castShadow = false; sil.frustumCulled = false; sil.name = '_silhouette'; sil.renderOrder = 10;
+      o.renderOrder = 11;
+      o.parent.add(sil);
     });
   }
   function clipNamed(list, name){
@@ -172,14 +194,18 @@ var ThirdPerson = (function(){
       h.mesh.setMatrixAt(h.id, vis && ud.instanceBaseMatrices ? ud.instanceBaseMatrices[h.id] : ZERO);
       h.mesh.instanceMatrix.needsUpdate = true;
     });
+    // 消したままの物も、送り直しが要るかを毎回確かめる。階の間引き(applyWalkCulling)が、見える状態に
+    // 変わった家具を元の位置へ書き戻すことがあり、こちらの「消した」が上書きされて残っていた
     Object.keys(next).forEach(function(key){
-      var h = next[key]; h.mesh.setMatrixAt(h.id, ZERO);
-      if(!hiddenInst[key]) h.mesh.instanceMatrix.needsUpdate = true;
+      var h = next[key], prev = hiddenInst[key];
+      h.mesh.setMatrixAt(h.id, ZERO);
+      if(!prev || !prev.wasZero) h.mesh.instanceMatrix.needsUpdate = true;
     });
     hiddenInst = next;
   }
   var _box = null, _ctr = null;
   function hideBetween(head, cam){
+    if(!HIDE_BETWEEN) return;
     var w = collectWalls();
     if(!ray) ray = new THREE.Raycaster();
     ray.layers.enable(HIDDEN_LAYER);                         // 消している壁にも当てて、間にある間は消したままにする
@@ -204,7 +230,12 @@ var ThirdPerson = (function(){
     setHidden(list);
     // まとめ描きの家具: 当たった家具（の全部品）を大きさ0にする。どの番号がどの家具かは instanceRefs に書いてある
     // 消している家具は大きさ0で光線が当たらないので、当てる間だけ元の位置へ戻しておく（画面に送り直しはしない）
-    Object.keys(hiddenInst).forEach(function(key){ var h = hiddenInst[key], b = h.mesh.userData.instanceBaseMatrices; if(b) h.mesh.setMatrixAt(h.id, b[h.id]); });
+    var _q = new THREE.Matrix4();
+    Object.keys(hiddenInst).forEach(function(key){
+      var h = hiddenInst[key], b = h.mesh.userData.instanceBaseMatrices;
+      h.mesh.getMatrixAt(h.id, _q); h.wasZero = _q.elements[0] === 0 && _q.elements[5] === 0 && _q.elements[10] === 0;
+      if(b) h.mesh.setMatrixAt(h.id, b[h.id]);
+    });
     var refs = [];
     ray.intersectObjects(w.instanced.filter(function(m){ return m.userData.instanceRefs; }), false).forEach(function(h){
       var ref = h.instanceId !== undefined ? h.object.userData.instanceRefs[h.instanceId] : null;
@@ -399,6 +430,10 @@ var ThirdPerson = (function(){
     b.textContent = on ? '三人称・' + CHARACTERS[charIndex].label : '一人称';
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
     b.title = on ? '一人称に切り替え' : '三人称に切り替え（人物の後ろから見る）';
+    // 十字キーの真ん中の「立ち視点／座り視点」は目の高さの切り替えなので、三人称では意味が無い。三人称の間は隠す
+    // （場所は空けたままにして、十字キーの並びは動かさない）
+    var h = document.getElementById('walk-height-toggle');
+    if(h) h.style.visibility = on ? 'hidden' : '';
   }
   function install(){
     if(!enabled) return;
