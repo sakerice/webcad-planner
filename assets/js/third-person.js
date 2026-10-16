@@ -30,7 +30,8 @@ var ThirdPerson = (function(){
   // それでも隠れた部分（線から外れた低い家具など）は、人物を単色のシルエットで描く。
   // 4つの方式（消すだけ／シルエットだけ／壁だけ消してシルエット／両方）を撮り比べ、利用者が「両方」に決めた（2026-10-15）。
   // シルエットだけでは、カメラが人物の後ろの決まった距離にあるため壁の外に出て、画面が壁の裏側でふさがる
-  var SILHOUETTE_COLOR = 0x4f7fd0;
+  // シルエットは薄く（後ろの壁や家具が透けて見える程度。濃いと人物より目立つ — 利用者の指摘）
+  var SILHOUETTE_COLOR = 0x4f7fd0, SILHOUETTE_OPACITY = 0.3;
   // 試し: URL に &tpshide=0 を付けると、壁・家具を消さずシルエットだけで見せる（利用者が試したいと言った形）
   var HIDE_BETWEEN = !/[?&]tpshide=0\b/.test(location.search);
   var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
@@ -80,7 +81,10 @@ var ThirdPerson = (function(){
   var _silMat = null;
   function silhouetteMaterial(){
     if(_silMat) return _silMat;
-    _silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false});
+    // 半透明にするが、three.js の「透ける物」には入れない（透ける物は不透明な物の後に描かれ、人物より後になって
+    // 人物自身の顔やスカートの上にまで乗った）。不透明な物の列で人物より先に描き、色の混ぜ方だけを自前で指定する
+    _silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, opacity:SILHOUETTE_OPACITY, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false,
+      blending:THREE.CustomBlending, blendEquation:THREE.AddEquation, blendSrc:THREE.SrcAlphaFactor, blendDst:THREE.OneMinusSrcAlphaFactor});
     return _silMat;
   }
   function toonify(root){
@@ -176,16 +180,60 @@ var ThirdPerson = (function(){
     sc3.traverse(function(o){ if(o.isLight && o.shadow && o.shadow.camera) o.shadow.camera.layers.enable(HIDDEN_LAYER); });
     return walls;
   }
-  function setHidden(list){
-    hidden.forEach(function(root){
-      if(list.indexOf(root) >= 0) return;
-      root.traverse(function(o){ if(o.userData._tpsLayers !== undefined){ o.layers.mask = o.userData._tpsLayers; delete o.userData._tpsLayers; } });
+  // 間に入った物は、パッと消さずに薄くしてから消す（戻すときも薄い所から戻す。利用者の要望）。
+  // 薄くする間だけ、その物の材質を透ける写しに差し替え、消えきったら描かない層へ移して元の材質に戻す。
+  // 光線は消している物にも当たるので、薄くしている途中でも「間にある」ままでいられる
+  var FADE_TIME = 0.25, fades = [], lastFadeAt = 0;
+  function fadeMaterials(root, on){
+    root.traverse(function(o){
+      if(!o.isMesh) return;
+      if(on && !o.userData._tpsFadeOrig){
+        var orig = o.material;
+        var mk = function(m){ var c = m.clone(); c.transparent = true; c.depthWrite = false; c.userData._tpsFadeBase = m.opacity; return c; };
+        o.userData._tpsFadeOrig = orig;
+        o.material = Array.isArray(orig) ? orig.map(mk) : mk(orig);
+      } else if(!on && o.userData._tpsFadeOrig){
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){ m.dispose(); });
+        o.material = o.userData._tpsFadeOrig;
+        delete o.userData._tpsFadeOrig;
+      }
     });
+  }
+  function fadeOpacity(root, k){
+    root.traverse(function(o){
+      if(!o.isMesh || !o.userData._tpsFadeOrig) return;
+      (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){ m.opacity = m.userData._tpsFadeBase * k; });
+    });
+  }
+  function layerHide(root, on){
+    root.traverse(function(o){
+      if(on && o.userData._tpsLayers === undefined){ o.userData._tpsLayers = o.layers.mask; o.layers.set(HIDDEN_LAYER); }
+      else if(!on && o.userData._tpsLayers !== undefined){ o.layers.mask = o.userData._tpsLayers; delete o.userData._tpsLayers; }
+    });
+  }
+  // list: いま間にある物。now を渡さなければ、すぐに全部を元へ戻す（三人称を切ったとき）
+  function setHidden(list, now){
+    if(now === undefined){
+      fades.forEach(function(f){ layerHide(f.root, false); fadeMaterials(f.root, false); });
+      fades = []; hidden = []; lastFadeAt = 0;
+      return;
+    }
+    var dt = lastFadeAt ? Math.min(0.1, (now - lastFadeAt) / 1000) : 0; lastFadeAt = now;
     list.forEach(function(root){
-      if(hidden.indexOf(root) >= 0) return;
-      root.traverse(function(o){ if(o.userData._tpsLayers === undefined){ o.userData._tpsLayers = o.layers.mask; o.layers.set(HIDDEN_LAYER); } });
+      if(fades.some(function(f){ return f.root === root; })) return;
+      fades.push({root:root, k:1});
+      fadeMaterials(root, true);
     });
-    hidden = list;
+    fades = fades.filter(function(f){
+      var want = list.indexOf(f.root) >= 0 ? 0 : 1, was = f.k;
+      if(want < f.k) f.k = Math.max(0, f.k - dt / FADE_TIME); else if(want > f.k) f.k = Math.min(1, f.k + dt / FADE_TIME);
+      if(f.k > 0 && was === 0) layerHide(f.root, false);           // 消えきっていた物を戻し始める
+      fadeOpacity(f.root, f.k);
+      if(f.k === 0 && was > 0) layerHide(f.root, true);            // 消えきった
+      if(f.k === 1 && want === 1){ fadeMaterials(f.root, false); return false; }   // 戻りきった
+      return true;
+    });
+    hidden = fades.map(function(f){ return f.root; });
   }
   var hiddenInst = {}, ZERO = null;
   // 戻すときは、階の間引き(applyWalkCulling)が消している物は消したままにする
@@ -231,7 +279,7 @@ var ThirdPerson = (function(){
         if(list.indexOf(op) < 0 && boxes.some(function(bx){ return bx.containsPoint(_ctr); })) list.push(op);
       });
     }
-    setHidden(list);
+    setHidden(list, performance.now());
     // まとめ描きの家具: 当たった家具（の全部品）を大きさ0にする。どの番号がどの家具かは instanceRefs に書いてある
     // 消している家具は大きさ0で光線が当たらないので、当てる間だけ元の位置へ戻しておく（画面に送り直しはしない）
     var _q = new THREE.Matrix4();

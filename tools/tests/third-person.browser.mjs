@@ -84,8 +84,13 @@ try {
   assert.ok(turn.moved < 1e-9 || Math.abs(Math.abs(turn.face) - Math.PI) < 1e-6, '人物がカメラの方を向いていない: ' + JSON.stringify(turn));
   assert.ok(Math.abs(t.yaw) < 1e-6, 'カメラの向きが一人称と違う');
   // カメラと人物の間の壁は見えなくするだけで、当たり判定は残す（消した壁を通り抜けて外へ出られない）
-  const hiddenWall = await p2.evaluate(() => {
+  // 間の壁はパッと消さず、薄くしてから消す（0.25秒）。置いた直後は薄くなり始めた所で、まだ消えきっていない
+  const hiddenWall = await p2.evaluate(async () => {
     WALK.x = 7.28; WALK.z = 3.4; WALK.yaw = Math.PI / 2; walkApplyCamera();
+    await new Promise((res) => setTimeout(res, 60)); walkApplyCamera();
+    let fading = 0, gone = 0;
+    sc3.traverse((o) => { if (o.isMesh && o.userData._tpsFadeOrig) { const m = Array.isArray(o.material) ? o.material[0] : o.material; if (m.opacity > 0.05 && m.opacity < 0.95) fading++; } if (o.userData._tpsLayers !== undefined) gone++; });
+    for (let i = 0; i < 8; i++) { await new Promise((res) => setTimeout(res, 60)); walkApplyCamera(); }
     const walls = new Set();
     sc3.traverse((o) => { if (o.userData._tpsLayers !== undefined && o.userData.selectKind === 'wall' && DATA.walls.includes(o.userData.selectRef)) walls.add(o.userData.selectRef); });
     const w = [...walls][0];
@@ -93,10 +98,11 @@ try {
     // 開口（ドア）の位置を避けて、壁の上の点を探す
     for (let t = 0.1; t <= 0.9; t += 0.05) {
       const x = w.x1 + (w.x2 - w.x1) * t, y = w.y1 + (w.y2 - w.y1) * t;
-      if (walkBlockedAt(x, y, WALK.floor)) return {count: walls.size, blocked: true};
+      if (walkBlockedAt(x, y, WALK.floor)) return {count: walls.size, blocked: true, fading, gone};
     }
-    return {count: walls.size, blocked: false};
+    return {count: walls.size, blocked: false, fading, gone};
   });
+  assert.ok(hiddenWall.fading > 0 && hiddenWall.gone === 0, '間の壁がパッと消えた（薄くなる途中が無い）: ' + JSON.stringify(hiddenWall));
   assert.ok(hiddenWall.count > 0, 'カメラと人物の間の壁が消えていない');
   assert.equal(hiddenWall.blocked, true, '見えなくした壁の当たり判定が無くなっている');
   // 座る: ソファの前に来ると「ソファに座る」が出て、押すと座面の上に座る。歩く操作をすると立ち上がる
@@ -166,7 +172,7 @@ try {
   assert.equal(await p2.evaluate(() => getComputedStyle(document.getElementById('walk-height-toggle')).visibility), 'visible', '一人称に戻しても立ち／座り視点の切り替えが出ない');
 
   assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
-  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は見た目だけ消し、隠れた部分はシルエット）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す・どの席でも足が床の上）・一人称へ戻す、が通った');
+  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は薄くしてから見た目だけ消し、隠れた部分はシルエット）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す・どの席でも足が床の上）・一人称へ戻す、が通った');
 } finally {
   await browser.close();
 }
