@@ -30,8 +30,9 @@ var ThirdPerson = (function(){
   // それでも隠れた部分（線から外れた低い家具など）は、人物を単色のシルエットで描く。
   // 4つの方式（消すだけ／シルエットだけ／壁だけ消してシルエット／両方）を撮り比べ、利用者が「両方」に決めた（2026-10-15）。
   // シルエットだけでは、カメラが人物の後ろの決まった距離にあるため壁の外に出て、画面が壁の裏側でふさがる
-  // シルエットは薄く（後ろの壁や家具が透けて見える程度。濃いと人物より目立つ — 利用者の指摘）
-  var SILHOUETTE_COLOR = 0x4f7fd0, SILHOUETTE_OPACITY = 0.3;
+  // シルエットは白っぽい一色（濃い青は人物より目立った — 利用者の指摘）。
+  // 半透明にはしない: 体の部品が重なる所ほど濃く塗り重なり、スカートの中の脚などの形が透けて見えた（利用者の指摘）
+  var SILHOUETTE_COLOR = 0xdce6f6;
   // 試し: URL に &tpshide=0 を付けると、壁・家具を消さずシルエットだけで見せる（利用者が試したいと言った形）
   var HIDE_BETWEEN = !/[?&]tpshide=0\b/.test(location.search);
   var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
@@ -81,10 +82,7 @@ var ThirdPerson = (function(){
   var _silMat = null;
   function silhouetteMaterial(){
     if(_silMat) return _silMat;
-    // 半透明にするが、three.js の「透ける物」には入れない（透ける物は不透明な物の後に描かれ、人物より後になって
-    // 人物自身の顔やスカートの上にまで乗った）。不透明な物の列で人物より先に描き、色の混ぜ方だけを自前で指定する
-    _silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, opacity:SILHOUETTE_OPACITY, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false,
-      blending:THREE.CustomBlending, blendEquation:THREE.AddEquation, blendSrc:THREE.SrcAlphaFactor, blendDst:THREE.OneMinusSrcAlphaFactor});
+_silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false});
     return _silMat;
   }
   function toonify(root){
