@@ -430,6 +430,10 @@ var ThirdPerson = (function(){
     b.textContent = on ? '三人称・' + CHARACTERS[charIndex].label : '一人称';
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
     b.title = on ? '一人称に切り替え' : '三人称に切り替え（人物の後ろから見る）';
+    // 十字キーの真ん中の「立ち視点／座り視点」は目の高さの切り替えなので、三人称では意味が無い。三人称の間は隠す
+    // （場所は空けたままにして、十字キーの並びは動かさない）
+    var h = document.getElementById('walk-height-toggle');
+    if(h) h.style.visibility = on ? 'hidden' : '';
   }
   function install(){
     if(!enabled) return;
