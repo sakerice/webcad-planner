@@ -1,5 +1,5 @@
-// 三人称のウォークスルー（作り直し計画 段階5）。完成までは隠しスイッチの裏に置く:
-// URL に ?tps=1 を付けたときだけ、ウォークスルーの操作盤に「一人称／三人称」の切り替えが出る。
+// 三人称のウォークスルー（作り直し計画 段階5）。ウォークスルーの操作盤に「一人称／三人称」の切り替えが出る
+// （始めは一人称）。URL に ?tps=0 を付けると切り替えを出さない（不具合が出たときの逃げ道）。
 //
 // 一人称のウォークスルーには手を入れない。歩く位置・向き・当たり判定は WALK（一人称と同じ物）を
 // そのまま使い、カメラの置き場所だけを「人物の後ろ」に替える（walkApplyCamera の後ろに足す）。
@@ -13,7 +13,7 @@
 // - 下キー: カメラの向きはそのままで、人物がカメラの方へ向き直り、体の前をカメラに向けて手前へ歩いてくる
 //   （カメラは同じ距離を保って下がる）。上キーで奥へ歩くと、また背中を向ける
 var ThirdPerson = (function(){
-  var enabled = /[?&]tps=1\b/.test(location.search);
+  var enabled = !/[?&]tps=0\b/.test(location.search);
   var on = false;                      // 三人称で歩いているか
   var DIST = 2.4, HEAD = 1.55, NEAR_PAD = 0.35, TURN_RATE = Math.PI / 0.45;
   var figure = null, parts = null, phase = 0, lastX = null, lastZ = null;
@@ -348,7 +348,9 @@ _silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, depthFunc:THREE.G
   function sitDown(){
     if(!near || !on) return;
     seat = lastSeat = near; seatTop(seat);
-    WALK.yaw = seat.yaw; WALK.pitch = Math.min(WALK.pitch || 0, 0);   // 座った向き（家具の正面）を見る
+    // カメラの向きは変えない。人物だけが家具の正面を向いて座る（座った姿が見える）。
+    // 以前はカメラを家具の正面へ向け、毎回人物の背中側へ回り込んでいた（利用者の指摘）。
+    // 座った向きの景色は、座ったまま左右キーでカメラを回して見る
     bodyOff = bodyTarget = 0;
     updateSitButton();
     if(typeof walkApplyCamera === 'function') walkApplyCamera();
