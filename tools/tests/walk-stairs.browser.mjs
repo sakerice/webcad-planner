@@ -8,6 +8,10 @@
 //  2. 抜けない: 階段の上の点から8方向に歩き続けても、外壁の範囲の外へ出ない
 //  3. 家の外では地面に立つ: 1階の外へ出るドアから外へ歩くと、足元が描いてある面（ポーチ・外階段・地面）に下り、
 //     床の高さのまま浮かない（三人称で浮いて見えて報告された）。外から家の中へ戻れる
+//  4. 階段の下は階段の上ではない: 階段の高い所の真下（階段下のトイレ・収納）を床の高さで歩いても、
+//     壁にめり込まない（平面で階段の範囲に入っただけで「階段の上」とされ、壁を素通りしていた）
+//  5. 上の階の壁に頭がかすっても上れる: 階段の途中の真上に上の階の壁があっても（上下に重ねた階段の、
+//     頭上を空けるため床を上げた収納の壁など）、上りきれる（利用者のプランで3階へ上がれなかった）
 import assert from 'node:assert/strict';
 
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -102,7 +106,42 @@ try {
         const backIn = Math.hypot(WALK.x / U - inside[0], WALK.z / U - inside[1]) < 200;
         return { door: i.type, feetOut: +feetOut.toFixed(2), floorTop: +floorTopY(1).toFixed(2), stillOutside, backIn };
       }).filter(Boolean);
-      return { firstFloor, up, down, escapes, outdoors };
+      // 4. 階段の下: 階段の踏み面が 1.6m 以上の所の真下に床の高さで立ち、8方向へ歩いて、階段の下に居る間に
+      //    壁にめり込まないか（階段の低い所まで来て踏み面に乗ったら、そこからは階段の上の決まりで見る）
+      const under = [];
+      parts.forEach(({ it }) => {
+        for (const fx of [0.3, 0.5, 0.7]) for (const fy of [0.15, 0.5, 0.85]) {
+          const p = toPlan(it, (fx - 0.5) * it.w, (fy - 0.5) * it.d), s = walkStairSampleAt(p[0], p[1], it.floor, 0);
+          if (!s || s.offM < 1.6) continue;
+          ST.floor = it.floor; WALK.floor = it.floor; WALK.groundOff = roomFloorAt(it.floor, p[0], p[1]) - floorTopY(it.floor);
+          if (walkWallPenetration(p[0], p[1], it.floor)) continue;   // 階段の端が壁に接していて、置いた点がもう壁にかかっている
+          for (let k = 0; k < 8; k++) {
+            ST.floor = it.floor; WALK.floor = it.floor; _walkCollFloor = null;
+            WALK.x = p[0] * U; WALK.z = p[1] * U; WALK.groundOff = roomFloorAt(it.floor, p[0], p[1]) - floorTopY(it.floor);
+            WALK.yaw = k * Math.PI / 4; WALK.keys = { fwd: true };
+            let tt = performance.now(), deepest = 0;
+            for (let i = 0; i < 30; i++) { tt += 50; updateWalkMode(tt); if (WALK.floor !== it.floor) break; const ss = walkStairSampleAt(WALK.x / U, WALK.z / U, it.floor, 0); if (ss && ss.offM - WALK.groundOff <= 0.45) break; const pen = walkWallPenetration(WALK.x / U, WALK.z / U, WALK.floor); if (pen) deepest = Math.max(deepest, pen.depth); }
+            WALK.keys = {};
+            if (deepest > 60) under.push({ from: p.map(Math.round), dir: k, depthMm: Math.round(deepest) });
+          }
+        }
+      });
+      // 5. 上の階の壁: 最初の直階段の、踏み面が床から 1.45m の所の真上に、上の階の壁を一時的に置いて上る
+      //    （頭は 3.1m で上の階の床(約 2.9m)より上に出るが、胸はかからない高さ）
+      let headroom = null;
+      const flight = parts.find(({ it }) => it.type === 'stair');
+      if (flight) {
+        const it = flight.it;
+        let ly = 0, bestD = 1e9;
+        for (let f = -0.5; f <= 0.5; f += 0.02) { const q = toPlan(it, 0, f * it.d), sm = walkStairSampleAt(q[0], q[1], it.floor, 0); if (sm && Math.abs(sm.offM - 1.45) < bestD) { bestD = Math.abs(sm.offM - 1.45); ly = f * it.d; } }
+        const a = toPlan(it, -it.w, ly), b = toPlan(it, it.w, ly);
+        const w = { x1: a[0], y1: a[1], x2: b[0], y2: b[1], floor: it.floor + 1, thick: 120 };
+        DATA.walls.push(w); _walkCollFloor = null;
+        const res = walkPath([start].concat(path, [end]), firstFloor);
+        DATA.walls.splice(DATA.walls.indexOf(w), 1); _walkCollFloor = null;
+        headroom = { floors: res.floors, reached: near(res, path[path.length - 1]) || near(res, end) };
+      }
+      return { firstFloor, up, down, escapes, outdoors, under, headroom };
     });
     if (process.env.DEBUG) console.log(preset, 'up', r.up.floors.join('→'), 'down', r.down.floors.join('→'));
     assert.ok(r.up.floors.length > 1 && r.up.reached, `${preset}: 階段を上りきれない ${JSON.stringify(r.up)}`);
@@ -114,8 +153,10 @@ try {
       assert.ok(o.stillOutside && o.feetOut < o.floorTop - 0.3, `${preset}: 家の外で床の高さのまま浮いている ${JSON.stringify(o)}`);
       assert.ok(o.backIn, `${preset}: 外から家の中へ戻れない ${JSON.stringify(o)}`);
     }
+    assert.deepEqual(r.under, [], `${preset}: 階段の下を歩くと壁にめり込む`);
+    assert.ok(!r.headroom || (r.headroom.floors.length > 1 && r.headroom.reached), `${preset}: 階段の途中の真上に上の階の壁があると上れない ${JSON.stringify(r.headroom)}`);
     assert.deepEqual(errors, [], `${preset}: ページで例外: ${errors.join(' / ')}`);
-    console.log(`ok ${preset}: 上り ${r.up.floors.join('→')}階 / 下り ${r.down.floors.join('→')}階 / 外へ抜けた所 0 / 外の足元 ${r.outdoors.map((o) => o.feetOut + 'm').join(',')}（床 ${r.outdoors[0].floorTop}m）・家に戻れる`);
+    console.log(`ok ${preset}: 上り ${r.up.floors.join('→')}階 / 下り ${r.down.floors.join('→')}階 / 外へ抜けた所 0 / 外の足元 ${r.outdoors.map((o) => o.feetOut + 'm').join(',')}（床 ${r.outdoors[0].floorTop}m）・家に戻れる / 階段の下でめり込まない / 真上の壁があっても上れる`);
     await page.context().close();
   }
 } finally {
