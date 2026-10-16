@@ -134,6 +134,30 @@ try {
   assert.ok(sit.turned.stillSeated && sit.turned.dyaw > 0.1, '座ったまま左右キーでカメラが回らない: ' + JSON.stringify(sit.turned));
   assert.ok(Math.abs(sit.turned.facing) < 1e-6, 'カメラを回したら、座っている人物まで回った: ' + JSON.stringify(sit.turned));
   assert.equal(sit.after, false, '前へ歩く操作で立ち上がらない');
+  // 座った足が床にめり込まない。座面の高さは家具ごとに違い、低い座面では足が床の下へ入っていた（利用者の指摘）。
+  // プランの座れる家具すべてに座らせ、足先がその階の床より上にあるかを見る
+  const feet = await p2.evaluate(async () => {
+    const out = [];
+    for (const it of DATA.items.filter((i) => { const f = getFmpItem(i.type); return f && (f.kind === 'sofa' || f.kind === 'chair'); })) {
+      ST.floor = it.floor; WALK.floor = it.floor; _walkCollFloor = null;
+      const r = (it.rot || 0) * Math.PI / 180, cx = (it.x + it.w / 2) / 1000, cz = (it.y + it.d / 2) / 1000;
+      WALK.x = cx - Math.sin(r) * 0.9; WALK.z = cz + Math.cos(r) * 0.9; walkUpdateGround(true);
+      let t = performance.now(); for (let i = 0; i < 3; i++) { t += 50; updateWalkMode(t); walkApplyCamera(); }
+      const btn = document.getElementById('walk-sit-toggle');
+      if (btn.style.display === 'none') continue;
+      btn.click();
+      for (let i = 0; i < 12; i++) { await new Promise((res) => setTimeout(res, 60)); walkApplyCamera(); }
+      let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; });
+      f.updateMatrixWorld(true);
+      let low = Infinity; const v = new THREE.Vector3();
+      f.traverse((o) => { if (o.isBone && /(Foot|ToeBase|Toe_End)$/.test(o.name)) low = Math.min(low, o.getWorldPosition(v).y); });
+      out.push({ type: it.type, floor: it.floor, above: +(low - floorTopY(it.floor)).toFixed(3) });
+      ThirdPerson.standUp(); for (let i = 0; i < 8; i++) { await new Promise((res) => setTimeout(res, 60)); walkApplyCamera(); }
+    }
+    return out;
+  });
+  assert.ok(feet.length >= 2, '座れる家具に座れない: ' + JSON.stringify(feet));
+  assert.deepEqual(feet.filter((x) => x.above < -0.005), [], '座った足が床にめり込んでいる');
   // 人物は女性だけ（男性はリリースの範囲から外した）。もう1回押すと一人称に戻る（人物は消え、カメラは目の位置に戻る）
   assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-02a');
   await pressToggle(p2);
@@ -142,7 +166,7 @@ try {
   assert.equal(await p2.evaluate(() => getComputedStyle(document.getElementById('walk-height-toggle')).visibility), 'visible', '一人称に戻しても立ち／座り視点の切り替えが出ない');
 
   assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
-  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は見た目だけ消し、隠れた部分はシルエット）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す）・一人称へ戻す、が通った');
+  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は見た目だけ消し、隠れた部分はシルエット）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す・どの席でも足が床の上）・一人称へ戻す、が通った');
 } finally {
   await browser.close();
 }
