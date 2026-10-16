@@ -124,7 +124,11 @@ var ThirdPerson = (function(){
     if(actions.idle) actions.idle.play();
     if(actions.sit){ actions.sit.play(); actions.sit.setEffectiveWeight(0); }
     bones = {};
-    figure.traverse(function(o){ if(o.isBone){ if(/Hips$/.test(o.name)) bones.hips = o; else if(/Head$/.test(o.name)) bones.head = o; } });
+    figure.traverse(function(o){ if(o.isBone){
+      if(/Hips$/.test(o.name)) bones.hips = o; else if(/Head$/.test(o.name)) bones.head = o;
+      else if(/(Left|Right)UpLeg$/.test(o.name)) bones[RegExp.$1 === 'Left' ? 'upL' : 'upR'] = o;
+      else if(/(Left|Right)(Foot|ToeBase|Toe_End)$/.test(o.name)) (bones.feet = bones.feet || {})[o.name] = o;
+    } });
     if(actions.walk){ actions.walk.play(); actions.walk.setEffectiveWeight(actions.idle ? 0 : 1); }
     mixer.update(0);
     parts = null;
@@ -381,6 +385,7 @@ var ThirdPerson = (function(){
         figure.position.z += (from.z - hp.z) * k;
         var wantY = figure.position.y + (from.top + HIP_ABOVE_SEAT - hp.y);
         figure.position.y += (Math.max(from.floorY - 0.05, wantY) - figure.position.y) * k;
+        liftFeetAboveFloor(from.floorY);
       }
     } else if(parts){
       if(moved > 0.0005){ phase += moved * 4.2; } else { phase *= 0.8; }
@@ -409,6 +414,37 @@ var ThirdPerson = (function(){
     camExt.rotation.order = 'YXZ';
     camExt.rotation.set(pitch, WALK.yaw, 0);
     hideBetween(head, camExt.position);
+  }
+  // 座った足が床にめり込むなら、膝を上げて（腿を付け根まわりに起こして）足を床の上へ出す。
+  // 座面の高さは家具ごとに違い、腰は座面に合わせて置くので、低い座面ほど足が床の下へ入る（利用者の指摘）
+  var FOOT_CLEAR = 0.02, LIFT_MAX = 0.9;
+  function footLowY(side){
+    var low = Infinity, v = new THREE.Vector3();
+    Object.keys(bones.feet || {}).forEach(function(n){ if(n.indexOf(side) >= 0) low = Math.min(low, bones.feet[n].getWorldPosition(v).y); });
+    return low;
+  }
+  function liftFeetAboveFloor(floorY){
+    var axis = new THREE.Vector3(1, 0, 0).applyQuaternion(figure.quaternion);   // 人物の左右の向き
+    [['Left', bones.upL], ['Right', bones.upR]].forEach(function(e){
+      var up = e[1]; if(!up || !up.parent) return;
+      figure.updateMatrixWorld(true);
+      var d = floorY + FOOT_CLEAR - footLowY(e[0]);
+      if(!(d > 0)) return;
+      // 付け根から足先までの長さで角度を見積もり、上がる向きへ回す（向きは試して決める）
+      var hip = up.getWorldPosition(new THREE.Vector3()), reach = Math.max(0.3, hip.y - footLowY(e[0]));
+      var ang = Math.min(LIFT_MAX, Math.asin(Math.min(1, d / reach)) * 1.3), base = up.quaternion.clone(), best = null;
+      [ang, -ang].forEach(function(a){
+        var pq = up.parent.getWorldQuaternion(new THREE.Quaternion());
+        var wq = new THREE.Quaternion().setFromAxisAngle(axis, a).multiply(pq.clone().multiply(base));
+        up.quaternion.copy(pq.invert().multiply(wq));
+        up.updateMatrixWorld(true);
+        var y = footLowY(e[0]);
+        if(!best || y > best.y) best = {y: y, q: up.quaternion.clone()};
+        up.quaternion.copy(base);
+      });
+      up.quaternion.copy(best.q);
+    });
+    figure.updateMatrixWorld(true);
   }
   function attachTo(scene){
     if(!figure || !on) return;
