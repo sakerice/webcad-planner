@@ -18055,8 +18055,10 @@ function setDynamicResolution(low){
     if(composer.setPixelRatio) composer.setPixelRatio(r);
     composer.setSize(wrap.clientWidth,wrap.clientHeight);
   }
-  // 操作中は重いパス(N8AO / Bloom)も止める。静止したら元の品質へ戻る
-  if(_n8aoPass) _n8aoPass.enabled=!low;
+  // 操作中も N8AO(部屋の隅や家具の下の陰影)は止めない。止めると歩くたびに陰影が消え、止まると現れて
+  // ちらついて見え、質も低く見えた(利用者の指摘)。操作中は AO だけ半分の解像度で計算する
+  // (実測 1280x820・解像度1.2: AOなし 34ms / 半分の解像度のAO 33ms で、重さは変わらない)。Bloom は止める
+  if(_n8aoPass){ _n8aoPass.enabled=true; if(_n8aoPass.configuration.halfRes!==low) _n8aoPass.configuration.halfRes=low; }
   if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night')&&!low;
 }
 function loop3D(){
