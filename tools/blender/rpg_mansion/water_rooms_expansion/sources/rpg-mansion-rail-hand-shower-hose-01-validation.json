@@ -1,0 +1,101 @@
+{
+  "model": "rpg-mansion-rail-hand-shower-hose-01",
+  "dimensions_mm": [
+    377.98720598220825,
+    262.7953886985779,
+    1176.7717599868774
+  ],
+  "bounds_m": [
+    [
+      -0.18899360299110413,
+      -0.13139769434928894,
+      0.0
+    ],
+    [
+      0.18899360299110413,
+      0.13139769434928894,
+      1.1767717599868774
+    ]
+  ],
+  "triangles": 1128,
+  "uv": {
+    "meters_per_uv": 0.935033046538693,
+    "min": 0.9344930796793963,
+    "max": 0.935748016241528,
+    "p05": 0.9348964843944733,
+    "p95": 0.9351548323555191,
+    "total_triangles": 1128,
+    "valid_triangles": 1128,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Aged polished brass": "metal",
+    "Ivory fired porcelain": "ceramic",
+    "Dark flexible shower hose": "rubber"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 75456,
+  "datums": {
+    "defaultElevationMm": 850,
+    "capacityNote": "One static rail-mounted handset with real continuous hose and sliding holder. No water simulation.",
+    "installation": {
+      "mount": "wall-plates",
+      "wallContactPlaneBlenderY": 0.075,
+      "defaultElevationMm": 850,
+      "originalLocalAnchorHeightsM": [
+        0.375,
+        1.17,
+        0.515
+      ],
+      "wallContactPlaneGltfZ": -0.1313976913690567
+    },
+    "faucetHeightMm": null,
+    "showerHeadOriginalBlenderM": [
+      0.1,
+      -0.172,
+      1.139
+    ],
+    "bottomCenterTranslationBlenderM": [
+      0.0030064061284065247,
+      0.0563976913690567,
+      -0.03522823750972748
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.19200000166893005,
+        -0.18779538571834564,
+        0.03522823750972748
+      ],
+      [
+        0.185987189412117,
+        0.07500000298023224,
+        1.2120000123977661
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0004360200096774255,
+    9.720773759151295e-05,
+    3.6865907716787654e-05,
+    9.720768605347985e-05,
+    3.6865854449767214e-05,
+    0.000428449400557129,
+    0.00022572606917492521,
+    0.00010996478840752388,
+    0.0003293545891930686,
+    8.375068728128095e-05,
+    0.0004233435759365041,
+    9.720757407194469e-05,
+    8.193839399458133e-05,
+    3.581968845386048e-05,
+    3.582025897230778e-05
+  ],
+  "source_sha256": "0e499241ed9e55911fb1b48b55d07e27b7ae033bd5d69d9a0ac7987790c9fdc3",
+  "glb_sha256": "3f107ca6fb6b37a7daee5569a1ba2cf8be646df7d37a9196cdcb23e821856ccd"
+}

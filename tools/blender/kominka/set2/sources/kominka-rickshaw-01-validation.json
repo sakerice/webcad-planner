@@ -1,0 +1,45 @@
+{
+  "model": "kominka-rickshaw-01",
+  "dimensions_mm": [
+    1100.000023841858,
+    2599.9999046325684,
+    1649.999976158142
+  ],
+  "bounds_m": [
+    [
+      -0.550000011920929,
+      -1.2999999523162842,
+      0.0
+    ],
+    [
+      0.550000011920929,
+      1.2999999523162842,
+      1.649999976158142
+    ]
+  ],
+  "triangles": 6300,
+  "uv": {
+    "meters_per_uv": 9.56934014995404,
+    "min": 8.68902787519873,
+    "max": 12.368158887357687,
+    "p05": 9.125060608632124,
+    "p95": 10.934235232411128,
+    "total_triangles": 6300,
+    "valid_triangles": 6300,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_wood": "wood",
+    "Kominka_metal": "metal",
+    "Kominka_dark": "wood",
+    "Kominka_lacquer": "lacquer",
+    "Kominka_cushion": "cushion"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 274232
+}

@@ -63,6 +63,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .catalogue-search input{width:100%;min-width:0;min-height:44px;padding:10px 14px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius);background:#fff;color:var(--hp-text);font:inherit;font-size:16px;touch-action:manipulation}
 .catalogue-count{margin-top:8px;color:var(--hp-muted);font-size:11px;line-height:1.6}
 #sidebar .asset-subcat[hidden],#sidebar .asset-tile[hidden]{display:none!important}
+/* 事件・小道具は、洋館を表示していないとき見出しごと隠す(renderFurnitureMegaLibrary) */
+#sidebar .cat-hdr[hidden],#sidebar .cat-body[hidden]{display:none!important}
 #sidebar .asset-grid .asset-dimensions{font-size:10px;line-height:1.5;color:var(--hp-muted);white-space:normal;overflow-wrap:anywhere}
 #sidebar .asset-grid .asset-tile.active .asset-dimensions{color:#fff}
 #sidebar .asset-grid .asset-tile .asset-name{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -231,3 +233,126 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* 開いた欄を一瞬示す(強調はオレンジの1色だけ)。見出しの浮きの影は別の規則が
    !important で持っているので、box-shadow には触らず outline で描く。 */
 #sidebar .asset-subcat.plan-recommend-target>.asset-subhdr{outline:2px solid var(--hp-primary);outline-offset:-2px}
+/* カタログの「表示するセット」(assets/js/asset-sets.js)。検索欄の下に capsule の切り替えを並べる */
+.asset-set-picker{margin-top:12px}
+.asset-set-label{color:var(--hp-text);font-size:12px;font-weight:700;margin-bottom:6px}
+.asset-set-options{display:flex;flex-wrap:wrap;gap:6px}
+.asset-set-option{min-height:40px;padding:0 16px;border:0;border-radius:var(--hp-control-radius);background:#f1f3f1;color:var(--hp-muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.asset-set-option[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
+.asset-set-option:focus-visible{outline:2px solid var(--hp-primary);outline-offset:2px}
+/* 標準以外のセットの家具に付ける札。標準の家具に混ぜて並べても見分けられるように */
+#sidebar .asset-grid .asset-set-badge,.catalogue-result .asset-set-badge{position:absolute;top:7px;left:7px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;background:#e3f1fc;color:#1d6aa8}
+/* 標準以外のセットの物が入っている見出しに付ける印 */
+.asset-set-marks{font-style:normal;margin-left:auto;margin-right:8px;display:inline-flex;gap:4px}
+.asset-set-mark{font-style:normal;display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 7px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap;background:#e3f1fc;color:#1d6aa8;vertical-align:middle}
+.asset-set-marks .asset-set-mark{margin-left:0}
+.asset-set-mark::before{content:attr(data-mark)}
+/* 小見出しの印はアイコンの右上に重ねる。名前の幅を取らないので、長い名前も省略されない */
+.asset-subhdr .sicon{position:relative}
+.asset-subhdr .sicon .asset-set-mark{position:absolute;top:-9px;left:50%;transform:translateX(-50%);height:14px;padding:0 4px;font-size:8px;line-height:1;box-shadow:0 0 0 2px #fff}
+/* 検索結果のカードを札の位置の基準にする。無いと札がすべて結果欄の左上1か所に重なり、カードには出ない */
+#sidebar .catalogue-result{position:relative}
+/* 置いてある家具の一括差し替え(assets/js/asset-swap.js)。入口は「表示するセット」の下、確認は既存の間取り選択と同じ浮いたカード */
+.asset-swap-entry{margin-top:10px}
+.asset-swap-open{min-height:40px;padding:0 16px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius);background:#fff;color:var(--hp-text);font:inherit;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.asset-swap-open:hover{border-color:var(--hp-primary)}
+.asset-swap-status{margin-top:6px;color:var(--hp-muted);font-size:11px;line-height:1.6}
+.asset-swap-status:empty{display:none}
+#asset-swap-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,16,30,.45)}
+.asset-swap-card{background:#fff;color:var(--hp-text);border-radius:16px;max-width:620px;width:100%;max-height:calc(100dvh - 36px);overflow-y:auto;padding:22px;box-shadow:var(--hp-shadow)}
+.asset-swap-title{font-size:16px;font-weight:700}
+.asset-swap-sub{font-size:12px;color:var(--hp-muted);line-height:1.7;margin:8px 0 12px}
+.asset-swap-list{display:flex;flex-direction:column;gap:4px}
+.asset-swap-row{display:grid;grid-template-columns:24px 1fr 18px 1fr;align-items:center;gap:6px;padding:8px 10px;border-radius:12px;background:#f6f7f5;font-size:12px;cursor:pointer}
+.asset-swap-row input{width:18px;height:18px;accent-color:var(--hp-primary)}
+.asset-swap-row small,.asset-swap-keep small{display:block;color:var(--hp-muted);font-size:10px;margin-top:2px}
+.asset-swap-arrow{color:var(--hp-muted);text-align:center}
+.asset-swap-to{font-weight:600}
+.asset-swap-keep{margin-top:12px;font-size:12px}
+.asset-swap-keep summary{cursor:pointer;color:var(--hp-muted);padding:6px 0}
+.asset-swap-keep ul{margin:4px 0 0;padding-left:18px;line-height:1.8}
+.asset-swap-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.asset-swap-apply,.asset-swap-cancel{min-height:42px;padding:0 20px;border:0;border-radius:var(--hp-control-radius);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.asset-swap-apply{background:var(--hp-primary);color:#fff}
+.asset-swap-cancel{background:#eef0ed;color:var(--hp-text)}
+@media (max-width:560px){.asset-swap-row{grid-template-columns:22px 1fr;}.asset-swap-arrow{display:none}.asset-swap-to{grid-column:2}}
+/* 壁・床・屋根の切り替え(assets/js/building-style.js)。家具の差し替えと同じカードで、行は「部位 | 内容」の2列 */
+.asset-swap-entry{border:1px solid #e3e7e4;border-radius:12px;background:#fff;overflow:hidden}
+.asset-swap-summary{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer;list-style:none;touch-action:manipulation}
+.asset-swap-summary::-webkit-details-marker{display:none}
+.asset-swap-summary::after{content:'';margin-left:auto;width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.asset-swap-entry[open] .asset-swap-summary::after{transform:translateY(2px) rotate(-135deg)}
+.asset-swap-group{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px 12px;border-top:1px solid #eef0ee}
+.asset-swap-group-title{flex-basis:100%;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--hp-muted)}
+.asset-swap-group-title .asset-set-mark{position:static;box-shadow:none}
+.asset-swap-group .asset-swap-open{flex:1 1 100%;text-align:left;padding:0 12px}
+.building-style-row{grid-template-columns:24px 64px 1fr;align-items:start}
+.building-style-row input{margin-top:1px}
+.building-style-detail{display:flex;flex-direction:column;gap:3px;line-height:1.5}
+.building-style-line small{font-size:10px;color:var(--hp-muted)}
+@media (max-width:560px){.building-style-row{grid-template-columns:22px 1fr}.building-style-detail{grid-column:2}}
+/* 比較モード(assets/js/compare-mode.js)。図面の欄を左右に分け、編集中の側に枠と名前を出す */
+#canvas-area.compare-on .compare-peer{position:absolute;top:0;touch-action:none;cursor:pointer}
+.compare-frame{position:absolute;top:0;height:100%;box-sizing:border-box;pointer-events:none;z-index:6;border:1px solid #c9cdd4}
+.compare-frame.is-active{border:3px solid var(--hp-primary)}
+.compare-tag{position:absolute;bottom:104px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;max-width:calc(100% - 24px);padding:4px 6px 4px 10px;border-radius:999px;background:rgba(255,255,255,.95);box-shadow:var(--hp-shadow);font-size:12px;pointer-events:auto;white-space:nowrap}
+.compare-side{font-weight:700}
+.compare-frame.is-active .compare-side{color:var(--hp-primary)}
+.compare-name{width:9em;min-width:0;height:28px;padding:0 8px;border:1px solid #d6ddd8;border-radius:8px;font:inherit;font-size:12px;background:#fff}
+.compare-state{color:var(--hp-muted);font-size:11px}
+.compare-frame.is-active .compare-state{color:var(--hp-primary);font-weight:700}
+.compare-bar{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:var(--hp-shadow);font-size:12px;white-space:nowrap;max-width:calc(100% - 24px)}
+.compare-sync{display:flex;align-items:center;gap:6px;cursor:pointer}
+.compare-sync input{width:16px;height:16px;accent-color:var(--hp-primary)}
+.compare-3d-note{display:none;color:var(--hp-muted)}
+#canvas-area.compare-3d .compare-3d-note{display:inline}
+#canvas-area.compare-3d .compare-sync{display:none}
+.compare-msg{color:var(--hp-muted);font-size:11px}
+.compare-msg:empty{display:none}
+.compare-stop{min-height:34px;padding:0 14px;border:0;border-radius:999px;background:#eef0ed;color:var(--hp-text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+#compare-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,16,30,.45)}
+.compare-card{max-width:460px}
+.compare-choices{display:flex;flex-direction:column;gap:8px}
+.compare-choice{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px 14px;border:1px solid #d6ddd8;border-radius:12px;background:#fff;font:inherit;text-align:left;cursor:pointer}
+.compare-choice:hover{border-color:var(--hp-primary)}
+.compare-choice strong{font-size:13px}
+.compare-choice small{font-size:11px;color:var(--hp-muted)}
+@media (max-width:560px){.compare-name{width:6em}.compare-state{display:none}}
+.compare-tag{flex-direction:column;align-items:stretch;gap:2px;border-radius:14px;padding:5px 8px 5px 10px}
+.compare-tag-row{display:flex;align-items:center;gap:6px}
+.compare-saved{font-size:10.5px;color:#2f7d4f;padding-left:2px}
+.compare-saved.is-unsaved{color:#b4541f}
+/* ブラウザに名前付きで残したプランの一覧(assets/js/plan-library.js) */
+#plan-library-modal{position:fixed;inset:0;z-index:1001;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,16,30,.45)}
+.plan-library-card{max-width:560px}
+.plan-library-save-new{width:100%;margin-bottom:10px}
+.plan-library-list{display:flex;flex-direction:column;gap:6px}
+.plan-library-row{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;padding:8px;border-radius:12px;background:#f6f7f5}
+.plan-library-thumb{width:96px;height:72px;border-radius:8px;background:#e9ece8;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.plan-library-thumb img{width:100%;height:100%;object-fit:cover}
+.plan-library-name{font-size:13px;font-weight:700}
+.plan-library-date{font-size:11px;color:var(--hp-muted);margin:2px 0 6px}
+.plan-library-actions{display:flex;flex-wrap:wrap;gap:4px}
+.plan-library-btn{min-height:30px;padding:0 10px;border:1px solid #d6ddd8;border-radius:8px;background:#fff;font:inherit;font-size:11px;font-weight:600;cursor:pointer}
+.plan-library-btn.primary{background:var(--hp-primary);border-color:var(--hp-primary);color:#fff}
+.plan-library-btn.danger{color:#b42318}
+.plan-library-empty{font-size:12px;color:var(--hp-muted);padding:12px 4px}
+.plan-library-name-input{width:100%;box-sizing:border-box;height:40px;padding:0 12px;border:1px solid #d6ddd8;border-radius:10px;font:inherit;font-size:14px}
+
+/* ウォークスルーでは下に十字キーが出るので、札を上へ逃がす */
+#canvas-area.compare-walk .compare-tag{bottom:230px}
+/* 三人称のウォークスルーの切り替え(assets/js/third-person.js。?tps=1 のときだけ出る)。
+   十字キーの中に置くと方向キーと紛れるので、十字キーの上に横長の小さなボタンで置く */
+#walk-dpad .wk-tps{position:absolute;left:0;right:0;bottom:100%;margin-bottom:8px;height:30px;padding:0 10px;
+  border:0;border-radius:15px;background:rgba(255,255,255,.96);color:var(--hp-text);font:inherit;font-size:12px;font-weight:700;
+  white-space:nowrap;cursor:pointer;pointer-events:auto;touch-action:manipulation;
+  box-shadow:0 4px 12px rgba(24,20,18,.13),inset 0 0 0 1px rgba(31,27,24,.05)}
+#walk-dpad .wk-tps:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+#walk-dpad .wk-tps[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
+/* 三人称で、座れる家具（ソファ・椅子）の近くに来たときに出る「○○に座る／立ち上がる」。画面の下の中央 */
+#walk-sit-toggle{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);height:40px;padding:0 22px;
+  border:0;border-radius:20px;background:rgba(255,255,255,.96);color:var(--hp-text);font:inherit;font-size:14px;font-weight:700;
+  white-space:nowrap;cursor:pointer;pointer-events:auto;touch-action:manipulation;
+  box-shadow:0 4px 12px rgba(24,20,18,.16),inset 0 0 0 1px rgba(31,27,24,.05)}
+#walk-sit-toggle:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+#walk-sit-toggle[aria-pressed="true"]{background:var(--hp-primary);color:#fff}

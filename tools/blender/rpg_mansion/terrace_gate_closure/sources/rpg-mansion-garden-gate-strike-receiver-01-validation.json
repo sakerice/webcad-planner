@@ -1,0 +1,96 @@
+{
+  "model": "rpg-mansion-garden-gate-strike-receiver-01",
+  "dimensions_mm": [
+    55.9999942779541,
+    118.00000071525574,
+    110.00001430511475
+  ],
+  "bounds_m": [
+    [
+      -0.02799999713897705,
+      -0.05900000035762787,
+      0.0
+    ],
+    [
+      0.02799999713897705,
+      0.05900000035762787,
+      0.11000001430511475
+    ]
+  ],
+  "triangles": 172,
+  "uv": {
+    "meters_per_uv": 0.23859009092800218,
+    "min": 0.23852387078635195,
+    "max": 0.2386691608469278,
+    "p05": 0.23852875604208915,
+    "p95": 0.23862866261941965,
+    "total_triangles": 172,
+    "valid_triangles": 172,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Garden charcoal iron": "metal",
+    "Weathered brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 2000,
+  "glb_bytes": 15420,
+  "datums": {
+    "defaultElevationMm": 1095,
+    "installation": {
+      "mount": "gate-pier-receiver",
+      "constructionMountPlaneX": 1.206,
+      "constructionPoseUsesBottomCentreShift": true,
+      "socketAxisConstructionBlenderM": [
+        1.167,
+        -0.045,
+        1.17
+      ],
+      "socketClearOpeningMm": [
+        18,
+        18
+      ],
+      "boltDiameterMm": 12,
+      "bearingOnAcceptedReceiverPlate": true,
+      "counting": "Zero core. Separate reusable fitted strike accessory; not an extra gate construction.",
+      "note": "Two stand-off feet seat on the actual accepted receiver plate. They clear existing through-anchor tips and provide a hollow socket for the delivered leaf bolt."
+    },
+    "nativeEditableParts": 9,
+    "bottomCenterTranslationBlenderM": [
+      -1.1779999732971191,
+      0.0040000006556510925,
+      -1.0950000286102295
+    ],
+    "originalBoundsM": [
+      [
+        1.149999976158142,
+        -0.06300000101327896,
+        1.0950000286102295
+      ],
+      [
+        1.2059999704360962,
+        0.054999999701976776,
+        1.2050000429153442
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.00012054519792907097,
+    1.1519974691509562e-05,
+    1.151997514625691e-05,
+    1.101601659077763e-05,
+    1.1016013483337398e-05,
+    5.508047858408342e-06,
+    5.507968921847351e-06,
+    6.109426540964098e-07,
+    6.109461949677097e-07
+  ],
+  "source_sha256": "5b5dd8c2d1b410275d3790da1a63e911974fb440160b5dd6df9b56fa736ea93c",
+  "glb_sha256": "45b0b65925be3e379d8a95d517807f2993901dc0943118bd920e43cb9aa23a1b",
+  "authoring_sha256": "3999a86f0755baf41962159fa37951ca607622d03a36c09c098257e5b37d9a00"
+}

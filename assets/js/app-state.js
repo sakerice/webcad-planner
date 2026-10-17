@@ -83,7 +83,19 @@ function ceilingFinishElevationMm(floor,cx,cy){
     // 勾配天井の部屋の天井範囲は、範囲の中の実際の天井面から測る(部屋の天井高とは違う)。
     var ae=(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.areaFinishElevationMm)?CeilingDesigner.areaFinishElevationMm(r,cx,cy):null;
     if(ae!==null&&ae!==undefined) return ae;
-    return roomCeilingElevationMm(r)+(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+    var offset=(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+    // 勾配天井（と斜線で削られた天井）は、**その位置の**天井面の高さ。部屋の天井高は勾配の
+    // いちばん高い所なので、それを使うと勾配の低い側の照明が天井裏へ持ち上がり、
+    // 吊り下げとみなして動かさない照明は天井から浮いたまま残った（plan 37 の LDK で 70mm）。
+    // 描画の自動照明（部屋ごとの照明の割り付け）と同じ求め方にする。
+    var prof=(typeof roomCeilingProfile==='function'&&typeof roomCeilingWorldYAtMm==='function')?roomCeilingProfile(r):null;
+    if(prof){
+      var fl0=r.floor||fl, flat=floorBaseY(fl0)+roomCeilingHeightM(r);
+      var worldY=Math.min(flat,roomCeilingWorldYAtMm(r,prof,cx,cy));
+      return Math.round((worldY-floorBaseY(fl0)-floorSlabHeightMForFloor(fl0)-ceilingFinishThicknessM())/U)
+        -(roomFloorOffsetMm(r)+roomSkipLevelMm(r))+offset;
+    }
+    return roomCeilingElevationMm(r)+offset;
   }
   return Math.round((wallFullHeightM(fl)-floorSlabHeightMForFloor(fl)-ceilingFinishThicknessM())/U);
 }
@@ -124,10 +136,40 @@ function followRoomCeiling(room,mutate){
 //
 // **足元が部屋と屋外で違う**ことに注意する。屋内は床仕上げ面、屋外は地面
 // (item3DBaseY が返す)。屋根の下面はワールドの高さなので、足元を引いて戻す。
+// 点が多角形(世界座標 x,z)の中にあるか
+function pointInPolyXZ(px,pz,poly){
+  var inside=false;
+  for(var i=0,j=poly.length-1;i<poly.length;j=i++){
+    var xi=poly[i].x,zi=poly[i].z,xj=poly[j].x,zj=poly[j].z;
+    if((zi>pz)!==(zj>pz) && px<(xj-xi)*(pz-zi)/(zj-zi)+xi) inside=!inside;
+  }
+  return inside;
+}
+// この階の天井が、その位置で階段の穴（吹き抜け）になっているか。穴の位置に天井面は無い
+function ceilingHasStairHoleAt(fl,cx,cy){
+  if(typeof stairwellHolesForRoom!=='function'||typeof stairwellQuadsForFloor!=='function') return false;
+  var r=roomAtPointOnFloor(fl,cx,cy);
+  if(!r) return false;
+  var cache={}; cache[fl]=stairwellQuadsForFloor(fl+1);
+  var holes=stairwellHolesForRoom(r,cache)||[];
+  var px=cx*U, pz=cy*U;
+  return holes.some(function(poly){ return pointInPolyXZ(px,pz,poly); });
+}
 function ceilingAttachElevationMm(it){
   if(!it) return null;
   var fl=it.floor||1;
   var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  // 階段室: この階の天井が階段の穴なら、穴の上にある階の天井が取付面。
+  // 穴が上の階へ続く（吹き抜けの階段）なら、天井のある階まで上がる。
+  // （階段室のダウンライトが、存在しない1階の天井の高さで空中に浮いていた）
+  var f=fl;
+  while(f<fl+8 && ceilingHasStairHoleAt(f,cx,cy)) f++;
+  if(f>fl){
+    var ru=roomAtPointOnFloor(f,cx,cy);
+    var base=ru?roomFloorTopY(ru):floorTopY(f);
+    var worldCeil=base+ceilingFinishElevationMm(f,cx,cy)*U;
+    return Math.round((worldCeil-item3DBaseY(it))/U);
+  }
   if(roomAtPointOnFloor(fl,cx,cy)) return ceilingFinishElevationMm(fl,cx,cy);
   var items=(typeof DATA!=='undefined'&&DATA&&DATA.items)?DATA.items:null;
   if(!items) return null;
@@ -570,7 +612,12 @@ function extendWallForSlideDoor(){
 var ROOM_FLOOR_MATERIAL_OPTIONS=[
   ['wood_floor','フローリング（標準）'],
   ['wood_oak','フローリング（オーク）'],
-  ['tile_floor','タイル']
+  ['tile_floor','タイル'],
+  ['mansion_herringbone_oak','ヘリンボーン（洋館）'],
+  ['mansion_marble_checker','白黒の大理石（洋館）'],
+  ['kominka_tatami','畳（古民家）'],
+  ['kominka_old_pine_floor','古い松の板の間（古民家）'],
+  ['kominka_doma','三和土（古民家）']
 ];
 function selectedRoomFloorFinishHtml(it){
   if(!it||it.type!=='room') return '';
@@ -1025,6 +1072,8 @@ function setTextureSettingValue(obj,key,value){
   // null を残すと保存 JSON が「一度も触っていない設定」と別物になる
   if(key==='skirting' && (value===null||value===undefined)) delete obj.skirting;
   if(key==='skirtingColor' && !value) delete obj.skirtingColor;
+  // 屋根の質感も、未指定(=素材に合わせる)ならフィールドを持たない
+  if(key==='sheen' && !value) delete obj.sheen;
 }
 function appearanceWithTextureOrientation(color, texture, source, owner, prefix){
   var flipX=false, flipY=false;
@@ -1765,7 +1814,7 @@ function selectedModelFinishesHtml(it){
     // 無いので揃える。「元の柄のまま」を既定にし、選んだときだけ差し替える。
     var texture=(it.finishTextures&&it.finishTextures[channel.key])||'';
     html+='<div class="pr"><label class="pl" for="finish-texture-'+channel.key+'">'+escHtml(channel.label)+'の素材</label><select id="finish-texture-'+channel.key+'" class="pi" onchange="updateSelectedModelTexture(\''+channel.key+'\',this.value)">';
-    MODEL_FINISH_TEXTURES.forEach(function(option){
+    modelFinishTextureOptions(channel.key).forEach(function(option){
       html+='<option value="'+option[0]+'" '+(texture===option[0]?'selected':'')+'>'+escHtml(option[1])+'</option>';
     });
     html+='</select></div>';
@@ -1794,11 +1843,30 @@ var MODEL_FINISH_TEXTURES=[
   ['galvalume_dark','ガルバ（黒）'],
   ['stone','石']
 ];
+// 屋根の部品(スレート切妻・マンサードなど)の「屋根面」は、屋根の設定欄と同じ屋根材から選ばせる。
+// 家具向けの一覧(オーク・塗り壁…)を屋根面に出しても意味が無く、逆に瓦を家具に出す理由も無い。
+var MODEL_ROOF_FINISH_TEXTURES=[
+  ['','元の柄のまま'],
+  ['roof_tile','瓦'],
+  ['roof_kawara_ibushi','日本瓦（いぶし銀）'],
+  ['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],
+  ['roof_flat_tile_charcoal','平板瓦（黒灰）'],
+  ['roof_colonial_gray','化粧スレート（コロニアル）'],
+  ['roof_standing_seam_silver','ガルバ立平（銀）'],
+  ['roof_copper_patina','銅板一文字（緑青）'],
+  ['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],
+  ['galvalume_dark','ガルバ（黒）'],
+  ['mansion_slate_roof','スレート（洋館）'],
+  ['kominka_kayabuki','茅葺き（古民家）']
+];
+function modelFinishTextureOptions(channelKey){
+  return channelKey==='roof'?MODEL_ROOF_FINISH_TEXTURES:MODEL_FINISH_TEXTURES;
+}
 function updateSelectedModelTexture(channel,value){
   if(!ST.selected)return;
   var model=getItemFinishModel(ST.selected.type);
   if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;}))return;
-  if(value!=='' && !MODEL_FINISH_TEXTURES.some(function(o){return o[0]===value;}))return;
+  if(value!=='' && !modelFinishTextureOptions(channel).some(function(o){return o[0]===value;}))return;
   var textures=Object.assign({},ST.selected.finishTextures||{});
   if(value==='')delete textures[channel];else textures[channel]=value;
   updateSelectedProp('finishTextures',Object.keys(textures).length?textures:null);
@@ -2086,6 +2154,8 @@ function applyOpeningModelToItem(it,modelId){
         it.d=Math.max(30,model.d||it.d||150);
         it.windowHeight=Math.max(200,Math.min(windowMaxTopMm(it),model.h||windowHeightMm(it)));
         normalizeWindowVerticalProps(it,'windowHeight');
+      } else if(it.type==='door-front'){
+        it.w=model.w||it.w||940;
       } else if(isInteriorSwingDoorType(it.type)){
         it.w=model.w||it.w||780;
         it.d=it.w;

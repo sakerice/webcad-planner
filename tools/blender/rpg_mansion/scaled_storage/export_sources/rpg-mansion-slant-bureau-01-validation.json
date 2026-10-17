@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-slant-bureau-01",
+  "dimensions_mm": [
+    1000.0,
+    540.0000214576721,
+    1200.0000476837158
+  ],
+  "bounds_m": [
+    [
+      -0.5,
+      -0.27000001072883606,
+      0.0
+    ],
+    [
+      0.5,
+      0.27000001072883606,
+      1.2000000476837158
+    ]
+  ],
+  "triangles": 4616,
+  "uv": {
+    "meters_per_uv": 8.164183447459202,
+    "min": 7.439359857252951,
+    "max": 10.68984974658881,
+    "p05": 7.7091169337792245,
+    "p95": 10.454542390378252,
+    "total_triangles": 4616,
+    "valid_triangles": 4616,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.002": "wood",
+    "Mansion walnut mouldings.002": "wood",
+    "Mansion walnut veneered fields.002": "wood",
+    "Mansion patinated brass.002": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 198912,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "db53d31cbd4e3f498145a3525cd9723ad70539bb1c1c6f40f26424f3f6a4f162",
+  "sourceSha256": "72f579d7ff3d3cfcc7ad9ec494ce69d732231172b31032d0319655e25178b7c0",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "7822801ced8a295a15e5be1d7fab35a6ff05e19b70aeabe3e682ed8297b4cb4f",
+    "authoredDataSignature": "769bb7b2244d8f6ee8f87eface2d385accc2ea48342c203d78dabefd3be3c5ba",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

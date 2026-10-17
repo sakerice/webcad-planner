@@ -1,0 +1,59 @@
+{
+  "model": "rpg-mansion-sleigh-double-bed-01",
+  "dimensions_mm": [
+    1659.999966621399,
+    2300.0001907348633,
+    1150.0000953674316
+  ],
+  "bounds_m": [
+    [
+      -0.8299999833106995,
+      -1.1500000953674316,
+      0.0
+    ],
+    [
+      0.8299999833106995,
+      1.1500000953674316,
+      1.1500000953674316
+    ]
+  ],
+  "triangles": 3300,
+  "uv": {
+    "meters_per_uv": 7.98300825951126,
+    "min": 7.982072312542194,
+    "max": 7.983844334389431,
+    "p05": 7.982868601992537,
+    "p95": 7.98316195126118,
+    "total_triangles": 3300,
+    "valid_triangles": 3300,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Walnut structural heartwood": "wood",
+    "Aged brass joints and finials": "metal",
+    "Polished walnut mouldings": "wood",
+    "Ivory woven mattress and pillows": "bedding",
+    "Deep teal velvet bed cover": "cover"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 228096,
+  "modelSha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d",
+  "sourceSha256": "46f06093851cda6feb34e0d799d33a125e3786e2045d130c4718b4e3b24e7eb1",
+  "authoringSha256": "ac1ad518671d61997c2dc6e8ecfc252276081140937e0ad743489a70acd3a962",
+  "features": {
+    "mattressTopM": 0.537,
+    "mattressSupportM": 0.372,
+    "sleepingCapacity": 2,
+    "mattressDimensionsM": [
+      1.528,
+      1.908,
+      0.165
+    ],
+    "topology": "continuous-bent-head-and-foot-boards/rolled-crowns/open-slat-frame/five-ground-legs"
+  }
+}

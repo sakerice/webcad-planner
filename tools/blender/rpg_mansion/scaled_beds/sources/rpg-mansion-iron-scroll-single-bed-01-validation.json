@@ -1,0 +1,59 @@
+{
+  "model": "rpg-mansion-iron-scroll-single-bed-01",
+  "dimensions_mm": [
+    1100.000023841858,
+    2119.999885559082,
+    1220.0000286102295
+  ],
+  "bounds_m": [
+    [
+      -0.550000011920929,
+      -1.059999942779541,
+      0.0
+    ],
+    [
+      0.550000011920929,
+      1.059999942779541,
+      1.2200000286102295
+    ]
+  ],
+  "triangles": 3880,
+  "uv": {
+    "meters_per_uv": 6.054706444335769,
+    "min": 6.054063889259042,
+    "max": 6.0555105487468355,
+    "p05": 6.054580231928015,
+    "p95": 6.05481998770244,
+    "total_triangles": 3880,
+    "valid_triangles": 3880,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Wrought iron scrollwork": "metal",
+    "Walnut structural heartwood": "wood",
+    "Aged brass joints and finials": "metal",
+    "Ivory woven mattress and pillows": "bedding",
+    "Deep teal velvet bed cover": "cover"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 267724,
+  "modelSha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a",
+  "sourceSha256": "329f519ab711d5a196c4879192abd418f8bc46f09dd0cb7913aae421bf8c2cfb",
+  "authoringSha256": "8ae16c4bc4e0015db09bb7f1a1dc749df13726f943cd235557113614973c7fef",
+  "features": {
+    "mattressTopM": 0.509,
+    "mattressSupportM": 0.34400000000000003,
+    "sleepingCapacity": 1,
+    "mattressDimensionsM": [
+      0.9680000000000001,
+      1.9500000000000002,
+      0.165
+    ],
+    "topology": "arched-wrought-iron-head-foot/open-spindles/four-S-scrolls/brass-finials/open-slat-frame"
+  }
+}

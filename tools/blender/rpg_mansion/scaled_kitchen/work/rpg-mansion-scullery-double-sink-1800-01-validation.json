@@ -1,0 +1,148 @@
+{
+  "model": "rpg-mansion-scullery-double-sink-1800-01",
+  "dimensions_mm": [
+    1799.9999523162842,
+    649.9999761581421,
+    1162.4497175216675
+  ],
+  "bounds_m": [
+    [
+      -0.8999999761581421,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.8999999761581421,
+      0.32499998807907104,
+      1.1624497175216675
+    ]
+  ],
+  "triangles": 4350,
+  "uv": {
+    "meters_per_uv": 6.0913023005962526,
+    "min": 5.395445267551498,
+    "max": 7.802661399180269,
+    "p05": 5.6626131091882765,
+    "p95": 7.102417829202201,
+    "total_triangles": 4350,
+    "valid_triangles": 4350,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone",
+    "Ivory glazed ceramic": "ceramic"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 167260,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "550158ac82f10523354da47ce74335f23f851eed794582f3d871679417ef673d",
+  "source_sha256": "0d80ce83c3cd86cb85c0b2b869064c133739fed6b18dddc620fd2160c65a59f9",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.002",
+      "Curved brass drawer pull.003"
+    ],
+    "corrected_polygons": 52,
+    "geometry_normals_material_signature": "a41d9257aeb19f45ec57803a23fc03a9707b570b71564015140516125465c7bc",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 6.0913023005962526,
+      "min": 5.395445267551498,
+      "max": 7.802661399180269,
+      "p05": 5.6626131091882765,
+      "p95": 7.102417829202201,
+      "total_triangles": 4350,
+      "valid_triangles": 4350,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 230272,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    1799.9999523162842,
+    649.9999761581421,
+    1162.4497175216675
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.8999999761581421,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.8999999761581421,
+      1.1624497175216675,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 4350,
+    "valid_triangles": 4350,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 5.66261301403271,
+    "p95": 7.10241773101208,
+    "p95_p05": 1.2542650739881647,
+    "median": 6.0912798166193625
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "ceramic",
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-scullery-double-sink-1800-01.glb",
+      "sha256": "550158ac82f10523354da47ce74335f23f851eed794582f3d871679417ef673d",
+      "bytes": 167260
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-scullery-double-sink-1800-01.blend",
+      "sha256": "0d80ce83c3cd86cb85c0b2b869064c133739fed6b18dddc620fd2160c65a59f9",
+      "bytes": 230272
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1800-01-thumb.png",
+      "sha256": "430ad69d5eda004da62ee7d438bc06449c47add59304f24ed82813792e28c76c",
+      "bytes": 198232
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1800-01-top.png",
+      "sha256": "04ef3cd53952900f65804d8881b20fe631cbabde759eb9bd8bd2d792c3486d69",
+      "bytes": 183588
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-front.png",
+      "sha256": "eccac8b85ca9427bd90fec31a9680d06f52fd0a7be8f5b2092d4c8bcd97e7d5b",
+      "bytes": 503476
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-rear.png",
+      "sha256": "0ca3b071f8763a6d3233b182408851e342c09109699e4e8b0d808981f265d4aa",
+      "bytes": 468152
+    }
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "model": "rpg-mansion-short-paired-curtain-01",
+  "dimensions_mm": [
+    1220.0000286102295,
+    197.80001044273376,
+    2065.0980472564697
+  ],
+  "bounds_m": [
+    [
+      -0.6100000143051147,
+      -0.09890000522136688,
+      0.0
+    ],
+    [
+      0.6100000143051147,
+      0.09890000522136688,
+      2.0650980472564697
+    ]
+  ],
+  "triangles": 9924,
+  "uv": {
+    "meters_per_uv": 9.77450957951384,
+    "min": 9.583019632338367,
+    "max": 10.060918274544385,
+    "p05": 9.755799551665888,
+    "p95": 9.791098733703247,
+    "total_triangles": 9924,
+    "valid_triangles": 9924,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Antique brass hardware": "metal",
+    "Wine woven curtain": "fabric",
+    "Sewn warm trim": "trim"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "datums": {
+    "constructionFamily": "short-paired-rod-curtain",
+    "countingClass": "new-construction",
+    "coreConstructionCount": 1,
+    "variantOf": null,
+    "staticDisplayState": "closed/deployed",
+    "host": "raised-sill",
+    "installation": {
+      "mount": "interior-wall",
+      "wallContactPlaneBlenderY": 0.0,
+      "attachmentAboveApertureMm": 90,
+      "defaultBottomElevationMm": 644.902,
+      "originalFloorDatumM": 0,
+      "proofRotationBlenderZDegrees": 180,
+      "proofWallPlaneY": 0.12,
+      "nominalClothBaselineMm": 650,
+      "wallContactPlaneCanonicalBlenderY": 0.09890000522136688
+    },
+    "fit": {
+      "apertureWidthMm": 920,
+      "coverWidthMm": 1220,
+      "sourceRule": "curtain: within300, width+100..400",
+      "widthSurplusMm": 300,
+      "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+      "fabricCoverageWidthMm": 1144,
+      "fabricCoverageRangeMm": [
+        647.5,
+        2646
+      ],
+      "bottomBelowApertureMm": 150,
+      "topAboveApertureMm": 46,
+      "measuredHardwareEnvelopeHeightRangeMm": [
+        644.902,
+        2710.0
+      ]
+    },
+    "constructionDetails": "Two closed pleated panels, fourteen rod rings, sewn hems, continuous rod, finials and two screwed wall brackets. Cloth span1144mm; overlapped centre. No drawn-open asset counted.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.09890000522136688,
+      -0.6449019312858582
+    ],
+    "originalInstalledBoundsBlenderM": [
+      [
+        -0.6100000143051147,
+        -0.19780001044273376,
+        0.6449019312858582
+      ],
+      [
+        0.6100000143051147,
+        0.0,
+        2.7100000381469727
+      ]
+    ],
+    "defaultElevationMm": 644.902
+  },
+  "closedComponentSignedVolumesM3": [
+    1.9587961332945286e-05,
+    0.0023153729352068573,
+    3.0348115179397893e-06,
+    4.6097291791132473e-07,
+    3.0353364953346825e-06,
+    4.614136438855592e-07,
+    3.0344222068379146e-06,
+    7.385944513771414e-07,
+    3.027289343056816e-06,
+    7.400460617645861e-07,
+    3.036753772297139e-06,
+    1.977911123170658e-05,
+    7.392957286356275e-07,
+    3.0334025116947787e-06,
+    3.0348451147688096e-06,
+    7.392211500700765e-07,
+    3.0344601403461038e-06,
+    7.393080068140988e-07,
+    0.0023153453963008865,
+    7.394468563385685e-07,
+    1.9585336948087714e-05,
+    4.6184167482958105e-07,
+    3.0389011650792447e-06,
+    3.025443220394663e-06,
+    4.62661167451491e-07,
+    3.0292239898699357e-06,
+    7.433598815017246e-07,
+    3.033968368981731e-06,
+    4.5844293102466784e-07,
+    3.037371698155766e-06,
+    1.977908326603976e-05,
+    4.634315094638931e-07,
+    3.0294442391702115e-06,
+    1.990410237340258e-05,
+    4.268749762559316e-07,
+    4.268846775327506e-07,
+    3.37212474429786e-05,
+    5.955099065128406e-06,
+    1.9908792940744505e-05,
+    4.5948551511780034e-07,
+    4.306202754378324e-07,
+    4.286096858171138e-07,
+    3.3744866414053804e-05,
+    5.948373654973696e-06,
+    0.0005307848293038352,
+    1.9591348063840996e-05,
+    1.9589747959495675e-05
+  ],
+  "triangle_budget": 12000,
+  "glb_bytes": 682208
+}

@@ -1,0 +1,142 @@
+{
+  "model": "rpg-mansion-kitchen-cast-iron-range-750-01",
+  "dimensions_mm": [
+    750.0,
+    649.9999761581421,
+    863.4999990463257
+  ],
+  "bounds_m": [
+    [
+      -0.375,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.375,
+      0.32499998807907104,
+      0.8634999990463257
+    ]
+  ],
+  "triangles": 2308,
+  "uv": {
+    "meters_per_uv": 2.869810460542077,
+    "min": 2.5537710049178024,
+    "max": 3.397861971164908,
+    "p05": 2.6840886799656216,
+    "p95": 3.2748463957836673,
+    "total_triangles": 2308,
+    "valid_triangles": 2308,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Cast iron fittings": "iron",
+    "Antique brass hardware": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 89416,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "871181b83573ad885e408ccc496b43e400b0192e8b805ecb07492a358ee2d8cb",
+  "source_sha256": "fa8b1e9c95bce5d5777e251af8facbdc1c010eba18530dbbf4ea3a461615ca52",
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.002",
+      "Curved brass drawer pull.003"
+    ],
+    "corrected_polygons": 52,
+    "geometry_normals_material_signature": "924efadc9474dce90cd623979beafb840b0954a329ef96f91d0c8c2c9dbc2611",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 2.869810460542077,
+      "min": 2.5537710049178024,
+      "max": 3.397861971164908,
+      "p05": 2.6840886799656216,
+      "p95": 3.2748463957836673,
+      "total_triangles": 2308,
+      "valid_triangles": 2308,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 170187,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    750.0,
+    649.9999761581421,
+    863.4999990463257
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.375,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.375,
+      0.8634999990463257,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 2308,
+    "valid_triangles": 2308,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 2.684078401745761,
+    "p95": 3.2748291524252995,
+    "p95_p05": 1.2200944466805836,
+    "median": 2.8698104795843067
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "iron",
+    "metal"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-cast-iron-range-750-01.glb",
+      "sha256": "871181b83573ad885e408ccc496b43e400b0192e8b805ecb07492a358ee2d8cb",
+      "bytes": 89416
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-cast-iron-range-750-01.blend",
+      "sha256": "fa8b1e9c95bce5d5777e251af8facbdc1c010eba18530dbbf4ea3a461615ca52",
+      "bytes": 170187
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cast-iron-range-750-01-thumb.png",
+      "sha256": "b40266645bffb0356c0196ba16233c421f9d8eda67d218c4a0488300326d7c1a",
+      "bytes": 247031
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cast-iron-range-750-01-top.png",
+      "sha256": "73a7a6c9b5e06d5d9b2fa6392624ac83e965df2eb7fbffb140c4fbcd2f45b360",
+      "bytes": 243499
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-front.png",
+      "sha256": "d06c18c85d13476711a696e6139a32854e19fb398e9a62a640a14029ee5d8b1b",
+      "bytes": 629777
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-rear.png",
+      "sha256": "e9e955734961cec4425f04f0ccc65d8b1802c97e354c0de88e2ab72b92f0602e",
+      "bytes": 604213
+    }
+  }
+}

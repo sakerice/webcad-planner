@@ -1,0 +1,120 @@
+{
+  "model": "rpg-mansion-kitchen-draining-stand-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    899.9999761581421
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.32499998807907104,
+      0.8999999761581421
+    ]
+  ],
+  "triangles": 1160,
+  "uv": {
+    "meters_per_uv": 3.2188154148598334,
+    "min": 2.698717720303665,
+    "max": 4.205386205305457,
+    "p05": 2.802080787290954,
+    "p95": 4.070417786092196,
+    "total_triangles": 1160,
+    "valid_triangles": 1160,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut": "wood",
+    "Carved walnut moulding": "wood",
+    "Warm limestone worktop": "stone"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 50216,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "a3ec8ef5990ce00e0e0403b83b559a02a582972f9e85ce6890aa573822f4cb7f",
+  "source_sha256": "4f74c5d4d023fcb571a4502427fd3806404923761dbaa71e4a2d361fba4f112a",
+  "source_bytes": 124413,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    899.9999761581421
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.44999998807907104,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.44999998807907104,
+      0.8999999761581421,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 1160,
+    "valid_triangles": 1160,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 2.8020807945967396,
+    "p95": 4.070495969545352,
+    "p95_p05": 1.4526690227471315,
+    "median": 3.2188159608945206
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-draining-stand-900-01.glb",
+      "sha256": "a3ec8ef5990ce00e0e0403b83b559a02a582972f9e85ce6890aa573822f4cb7f",
+      "bytes": 50216
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-draining-stand-900-01.blend",
+      "sha256": "4f74c5d4d023fcb571a4502427fd3806404923761dbaa71e4a2d361fba4f112a",
+      "bytes": 124413
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-draining-stand-900-01-thumb.png",
+      "sha256": "f9fec10144e04a252148503db961b7ac55cbf9961bc8d3f6df3dcc88cc4b24f0",
+      "bytes": 240419
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-draining-stand-900-01-top.png",
+      "sha256": "cac923a6aaabc3b4822aa1be896c37996660e2bf261d6b2ab0361c8e3e0776a2",
+      "bytes": 257220
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-front.png",
+      "sha256": "22502867ceff39caca8477b107291fa352cd16b4dc8ffa5eb1e0e7776b1a73c2",
+      "bytes": 538582
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-rear.png",
+      "sha256": "93c3dfe7d7c2530230ae3675098bee1398615174aa01e0bb27cbef94d5b0fd41",
+      "bytes": 536143
+    }
+  }
+}

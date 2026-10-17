@@ -1,0 +1,104 @@
+{
+  "model": "rpg-mansion-framed-glass-shower-enclosure-01",
+  "dimensions_mm": [
+    1000.0,
+    1022.0000743865967,
+    2014.4999027252197
+  ],
+  "bounds_m": [
+    [
+      -0.5,
+      -0.5110000371932983,
+      0.0
+    ],
+    [
+      0.5,
+      0.5110000371932983,
+      2.0144999027252197
+    ]
+  ],
+  "triangles": 1148,
+  "uv": {
+    "meters_per_uv": 5.124368087359999,
+    "min": 5.117595464429864,
+    "max": 5.130104486378627,
+    "p05": 5.122762986627898,
+    "p95": 5.126566021016113,
+    "total_triangles": 1148,
+    "valid_triangles": 1148,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Ivory fired porcelain": "ceramic",
+    "Aged polished brass": "metal",
+    "Bronzed cast iron brackets": "metal",
+    "Clear pale shower safety-glass representation": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 84904,
+  "datums": {
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+    "rimHeightMm": 124,
+    "internalFloorHeightMm": 35,
+    "clearBowlMm": {
+      "trayOpeningWidth": 903,
+      "trayOpeningDepth": 903,
+      "trayDepth": 89
+    },
+    "fixtureNote": "Framed static transparent enclosure with closed glass door and hollow tray. Water supply fixture is a separate asset; the door is not animated.",
+    "glassNominalThicknessMm": {
+      "fixed": 6,
+      "door": 7
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.011000007390975952,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.5,
+        -0.5220000147819519,
+        0.0
+      ],
+      [
+        0.5,
+        0.5,
+        2.0144999027252197
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.05325146600171138,
+    1.9181918582707642e-05,
+    0.0016766442252749885,
+    0.0016766679376966445,
+    0.0016766409778483644,
+    0.0016766174376243725,
+    0.0037473868578672413,
+    0.0037473264771203186,
+    0.009925572765889465,
+    0.009925549398658964,
+    0.009903545051088286,
+    0.011110485659628471,
+    7.286628442670918e-05,
+    4.115664523851591e-05,
+    7.287923957240611e-05,
+    4.115978178257743e-05,
+    7.775848886619012e-05,
+    2.1163309914603214e-05,
+    2.1162963093956922e-05
+  ],
+  "source_sha256": "4613189a4e86111c88afb1ae17f8ffb7d3469db54b0dfed1a26c4420fe654579",
+  "glb_sha256": "a090a879cd3b93e202ae7f3a7e85ef9b7e2f7b20936b583c8d63fa3ee6e82a99"
+}

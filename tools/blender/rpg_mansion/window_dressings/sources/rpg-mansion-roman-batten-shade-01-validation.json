@@ -1,0 +1,128 @@
+{
+  "model": "rpg-mansion-roman-batten-shade-01",
+  "dimensions_mm": [
+    1000.0,
+    149.92325007915497,
+    1927.9999732971191
+  ],
+  "bounds_m": [
+    [
+      -0.5,
+      -0.07496162503957748,
+      0.0
+    ],
+    [
+      0.5,
+      0.07496162503957748,
+      1.9279999732971191
+    ]
+  ],
+  "triangles": 1164,
+  "uv": {
+    "meters_per_uv": 3.515693828133206,
+    "min": 3.5078658992836393,
+    "max": 3.523825296852834,
+    "p05": 3.513319481498361,
+    "p95": 3.516980286666362,
+    "total_triangles": 1164,
+    "valid_triangles": 1164,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Oiled blind timber": "wood",
+    "Antique brass hardware": "metal",
+    "Oatmeal woven linen": "fabric",
+    "Cotton support tape": "cord"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "datums": {
+    "constructionFamily": "roman-batten-shade",
+    "countingClass": "new-construction",
+    "coreConstructionCount": 1,
+    "variantOf": null,
+    "staticDisplayState": "closed/deployed",
+    "host": "raised-sill",
+    "installation": {
+      "mount": "interior-wall",
+      "wallContactPlaneBlenderY": 0.0,
+      "attachmentAboveApertureMm": 42,
+      "defaultBottomElevationMm": 750.0,
+      "originalFloorDatumM": 0,
+      "proofRotationBlenderZDegrees": 180,
+      "proofWallPlaneY": 0.12,
+      "nominalClothBaselineMm": 750,
+      "wallContactPlaneCanonicalBlenderY": 0.07496162503957748
+    },
+    "fit": {
+      "apertureWidthMm": 920,
+      "coverWidthMm": 1000,
+      "sourceRule": "screen: within200, width+0..100",
+      "widthSurplusMm": 80,
+      "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+      "fabricCoverageWidthMm": 970,
+      "fabricCoverageRangeMm": [
+        765,
+        2610
+      ],
+      "bottomBelowApertureMm": 35,
+      "topAboveApertureMm": 10,
+      "measuredHardwareEnvelopeHeightRangeMm": [
+        750.0,
+        2678.0
+      ]
+    },
+    "constructionDetails": "Continuous linen folded over nine physical battens, two rear lift tapes/cords, fabric head attachment, weighted hem and screwed headrail brackets. Fully lowered static state.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.07496162503957748,
+      -0.75
+    ],
+    "originalInstalledBoundsBlenderM": [
+      [
+        -0.5,
+        -0.14992325007915497,
+        0.75
+      ],
+      [
+        0.5,
+        0.0,
+        2.677999973297119
+      ]
+    ],
+    "defaultElevationMm": 750.0
+  },
+  "closedComponentSignedVolumesM3": [
+    4.495348912314512e-05,
+    4.495308530749752e-05,
+    4.495339938633458e-05,
+    4.495611756283319e-05,
+    4.495401056677402e-05,
+    4.495305741632651e-05,
+    4.495125419149793e-05,
+    4.495295373393083e-05,
+    6.935050108343908e-05,
+    1.9486106367594416e-05,
+    6.935026992020235e-05,
+    1.9485485305873837e-05,
+    0.0007079647241141629,
+    0.0003895723524086253,
+    0.002934792726591693,
+    1.9904691725969328e-05,
+    4.225124333364278e-07,
+    4.231745454793163e-07,
+    2.7236545217116814e-05,
+    1.9910731983448698e-05,
+    4.240961667771133e-07,
+    4.2313088973363265e-07,
+    2.723433044593548e-05,
+    0.003540483481629054,
+    4.495381680650705e-05
+  ],
+  "triangle_budget": 6000,
+  "glb_bytes": 84024
+}

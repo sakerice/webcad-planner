@@ -1,0 +1,105 @@
+{
+  "model": "rpg-mansion-freestanding-bath-bridge-filler-01",
+  "dimensions_mm": [
+    347.9999899864197,
+    443.000003695488,
+    1037.683129310608
+  ],
+  "bounds_m": [
+    [
+      -0.17399999499320984,
+      -0.22150000929832458,
+      0.0
+    ],
+    [
+      0.17399999499320984,
+      0.2214999943971634,
+      1.037683129310608
+    ]
+  ],
+  "triangles": 1204,
+  "uv": {
+    "meters_per_uv": 1.052264500531477,
+    "min": 1.051670589561663,
+    "max": 1.0531637575957478,
+    "p05": 1.0521040588756838,
+    "p95": 1.052418419096565,
+    "total_triangles": 1204,
+    "valid_triangles": 1204,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Aged polished brass": "metal",
+    "Ivory fired porcelain": "ceramic"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 81784,
+  "datums": {
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+    "faucetHeightMm": 1038,
+    "spoutOutletOriginalBlenderM": [
+      0,
+      -0.36,
+      0.85
+    ],
+    "supplyMountCentersOriginalBlenderM": [
+      [
+        -0.115,
+        0,
+        0
+      ],
+      [
+        0.115,
+        0,
+        0
+      ]
+    ],
+    "pairingNote": "Separate floor filler; place with the approved slipper bath using measured supply-base datum, not visual envelope center. Paired installation evidence is supplied separately.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.16249999403953552,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.17399999499320984,
+        -0.3840000033378601,
+        0.0
+      ],
+      [
+        0.17399999499320984,
+        0.05900000035762787,
+        1.037683129310608
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0005533832363718478,
+    3.8794829227602655e-05,
+    0.0015146713661427687,
+    0.00031066115540549316,
+    7.739100510661954e-06,
+    6.1087772943816755e-06,
+    3.6942994180814534e-06,
+    3.694902602546792e-06,
+    0.0015146709695272875,
+    0.0003106611413083253,
+    7.738275295802547e-06,
+    6.1095036774835e-06,
+    3.6965830455907675e-06,
+    3.697194946046995e-06,
+    0.0003080590377066983
+  ],
+  "source_sha256": "21c65772e17231da7e87c293db50006696347e55b9dcd0b0af19d80eed0ce2df",
+  "glb_sha256": "c52a2e3d60abe5c654835b6f170594f42e5cf8abc3a972efa07881cde19120ef"
+}

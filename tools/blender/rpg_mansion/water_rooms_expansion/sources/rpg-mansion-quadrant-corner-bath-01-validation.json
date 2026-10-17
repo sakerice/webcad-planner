@@ -1,0 +1,92 @@
+{
+  "model": "rpg-mansion-quadrant-corner-bath-01",
+  "dimensions_mm": [
+    1299.9999523162842,
+    1299.9999523162842,
+    610.0000143051147
+  ],
+  "bounds_m": [
+    [
+      -0.6499999761581421,
+      -0.6499999761581421,
+      0.0
+    ],
+    [
+      0.6499999761581421,
+      0.6499999761581421,
+      0.6100000143051147
+    ]
+  ],
+  "triangles": 628,
+  "uv": {
+    "meters_per_uv": 3.0471078446610296,
+    "min": 3.04527619630445,
+    "max": 3.0482946394153783,
+    "p05": 3.046702760921177,
+    "p95": 3.047719753796282,
+    "total_triangles": 628,
+    "valid_triangles": 628,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Ivory fired porcelain": "ceramic",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 45720,
+  "datums": {
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "faucetHeightMm": null,
+    "fixtureNote": "Bath only; a separate supply fixture is required.",
+    "capacityNote": "One bathing occupant. Static design, not ergonomic or plumbing certification.",
+    "rimHeightMm": 610,
+    "internalFloorHeightMm": 140,
+    "clearBowlMm": {
+      "maximumOpeningWidth": 1098.5,
+      "maximumOpeningDepth": 1098.5,
+      "depth": 470
+    },
+    "footprintNote": "Real quarter-circle front with two perpendicular straight back edges; not a rotated oval.",
+    "installationCorner": {
+      "originalBlenderWallPlanes": {
+        "x": 0.65,
+        "y": 0.65
+      },
+      "cornerAssemblyClearanceMm": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.6499999761581421,
+        -0.6499999761581421,
+        0.0
+      ],
+      [
+        0.6499999761581421,
+        0.6499999761581421,
+        0.6100000143051147
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.39487624499209534,
+    1.0370644474733126e-05,
+    0.0001267298672852727,
+    0.00012672053223165375
+  ],
+  "source_sha256": "a472a49fc93b244d91e8063a118d185113fd8aa491580614b4c5c39304b21353",
+  "glb_sha256": "b8fe2301cf84bb5c0c0548b3cec70a2214ebfe095997b9ed0bd491889327fede"
+}

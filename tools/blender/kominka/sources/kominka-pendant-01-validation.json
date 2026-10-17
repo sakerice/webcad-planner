@@ -1,0 +1,43 @@
+{
+  "model": "kominka-pendant-01",
+  "dimensions_mm": [
+    500.0,
+    500.0,
+    400.0000059604645
+  ],
+  "bounds_m": [
+    [
+      -0.25,
+      -0.25,
+      0.0
+    ],
+    [
+      0.25,
+      0.25,
+      0.4000000059604645
+    ]
+  ],
+  "triangles": 10088,
+  "uv": {
+    "meters_per_uv": 3.2246727843234084,
+    "min": 2.744429324726663,
+    "max": 4.033668564883873,
+    "p05": 2.964794763202996,
+    "p95": 3.6727331212539025,
+    "total_triangles": 10088,
+    "valid_triangles": 10088,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_paper": "paper",
+    "Kominka_bamboo": "bamboo",
+    "Kominka_fabric": "fabric"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 353300
+}

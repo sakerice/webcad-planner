@@ -39,3 +39,14 @@ test('render loop still refreshes animated-door and edited-object shadows',()=>{
  s.WALK._doorsAnim=true;time+=34;s.loop3D();assert.equal(s.ren.shadowMap.needsUpdate,true);
  s.ren.shadowMap.needsUpdate=false;s.WALK._doorsAnim=false;s._needs3DShadowUpdate=true;time+=34;s.loop3D();assert.equal(s.ren.shadowMap.needsUpdate,true);assert.equal(s._needs3DShadowUpdate,false);assert.equal(frames,3);
 });
+// 歩く・回すなどの操作中も、部屋の隅や家具の下の陰影(AO)は消さない。操作中は AO を半分の解像度で計算し、
+// 止まったら元の解像度へ戻す（操作中に AO を止めていたため、歩くたびに陰影が消えて現れ、ちらついて見えた — 利用者の指摘）
+test('AO stays on while moving (half resolution), and returns to full resolution when still',()=>{
+ const el={clientWidth:800,clientHeight:600};
+ const s=env(['setDynamicResolution'],{ren:{setPixelRatio(){},setSize(){}},composer:{setPixelRatio(){},setSize(){}},
+  _n8aoPass:{enabled:true,configuration:{halfRes:false}},_bloomPass:null,LIGHT_SETTINGS:{timeOfDay:'day'},
+  navigator:{maxTouchPoints:0},isMobileLayout:()=>false,isWalkView:()=>true,WALK:{active:true},ST:{view:'3d-walk'},
+  window:{devicePixelRatio:2},document:{getElementById:()=>el},_dynResLow:false});
+ s.setDynamicResolution(true);assert.equal(s._n8aoPass.enabled,true);assert.equal(s._n8aoPass.configuration.halfRes,true);
+ s.setDynamicResolution(false);assert.equal(s._n8aoPass.enabled,true);assert.equal(s._n8aoPass.configuration.halfRes,false);
+});

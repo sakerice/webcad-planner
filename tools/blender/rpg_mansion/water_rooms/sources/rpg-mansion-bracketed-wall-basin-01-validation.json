@@ -1,0 +1,116 @@
+{
+  "model": "rpg-mansion-bracketed-wall-basin-01",
+  "dimensions_mm": [
+    680.0000071525574,
+    544.9999570846558,
+    563.4910464286804
+  ],
+  "bounds_m": [
+    [
+      -0.3400000035762787,
+      -0.2724999785423279,
+      0.0
+    ],
+    [
+      0.3400000035762787,
+      0.2724999785423279,
+      0.5634910464286804
+    ]
+  ],
+  "triangles": 1896,
+  "uv": {
+    "meters_per_uv": 1.9064959093977263,
+    "min": 1.9037661452328911,
+    "max": 1.9095928150989865,
+    "p05": 1.9058441763184633,
+    "p95": 1.907046928902064,
+    "total_triangles": 1896,
+    "valid_triangles": 1896,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Ivory fired porcelain": "ceramic",
+    "Bronzed cast iron brackets": "metal",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 130744,
+  "datums": {
+    "rimHeightMm": 870,
+    "clearBowlMm": {
+      "rimLength": 540,
+      "rimWidth": 350,
+      "floorLength": 290,
+      "floorWidth": 135,
+      "depth": 140
+    },
+    "faucetHeightMm": 1093.5,
+    "defaultElevationMm": 530,
+    "capacityNote": "Single hand basin.",
+    "installation": {
+      "mount": "wall-brackets",
+      "wallContactPlaneBlenderY": 0.285,
+      "defaultElevationMm": 530,
+      "bearingPlateCentersX": [
+        -0.185,
+        0.185
+      ],
+      "anchorCentersLocalZ": [
+        0.038,
+        0.255
+      ],
+      "topBearingZ": 0.183,
+      "note": "Two physical wall plates and triangulated brackets carry the shell; P-trap is not structural support.",
+      "wallContactPlaneGltfZ": -0.27249999701976774
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.012500002980232239,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.3400000035762787,
+        -0.25999999046325684,
+        0.0
+      ],
+      [
+        0.3400000035762787,
+        0.2849999964237213,
+        0.5634910464286804
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0224964223309873,
+    0.00045080565418157786,
+    8.847327778009155e-05,
+    7.42270744898595e-05,
+    5.2957985303692095e-06,
+    5.091070003497104e-06,
+    7.422703659898389e-05,
+    5.295351646357931e-06,
+    5.091283128422219e-06,
+    6.75657101965044e-05,
+    0.0002815340645933399,
+    0.0002871621785038202,
+    0.00037166228594287537,
+    0.00022399148108812975,
+    1.2472549618299425e-06,
+    1.2474277658232804e-06,
+    0.0002871632351959758,
+    0.00037166197550201713,
+    0.00022399203463407955,
+    1.247297404916026e-06,
+    1.2473380290127054e-06,
+    8.031089329563198e-06
+  ],
+  "source_sha256": "0931a9211c841e79bb92ea860ecf1143eea5b16b68d31420ccf6ffb1a4c17934",
+  "glb_sha256": "7a5afa913fa6966a342fda77661aeee4604e22f9fe3bf28d2e116b3ca5faad89"
+}

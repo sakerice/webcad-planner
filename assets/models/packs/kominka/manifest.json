@@ -1,0 +1,1606 @@
+{
+ "set": "kominka",
+ "name": "日本古民家",
+ "items": [
+  {
+   "name": "板戸",
+   "id": "kominka-door-itado-01",
+   "group": "家具",
+   "category": "ドア",
+   "model": "assets/models/packs/kominka/models/kominka-door-itado-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-door-itado-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-door-itado-01-top.png",
+   "w": 760,
+   "d": 60,
+   "h": 2000,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "腰付き障子戸",
+   "id": "kominka-door-shoji-01",
+   "group": "家具",
+   "category": "ドア",
+   "model": "assets/models/packs/kominka/models/kominka-door-shoji-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-door-shoji-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-door-shoji-01-top.png",
+   "w": 760,
+   "d": 60,
+   "h": 2000,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "格子戸の玄関",
+   "id": "kominka-entrance-door-01",
+   "group": "家具",
+   "category": "ドア",
+   "model": "assets/models/packs/kominka/models/kominka-entrance-door-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-entrance-door-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-entrance-door-01-top.png",
+   "w": 1700,
+   "d": 120,
+   "h": 2100,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "格子の引き違い窓",
+   "id": "kominka-sliding-window-01",
+   "group": "家具",
+   "category": "窓",
+   "model": "assets/models/packs/kominka/models/kominka-sliding-window-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-sliding-window-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-sliding-window-01-top.png",
+   "w": 1600,
+   "d": 180,
+   "h": 1100,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "出格子窓",
+   "id": "kominka-casement-window-01",
+   "group": "家具",
+   "category": "窓",
+   "model": "assets/models/packs/kominka/models/kominka-casement-window-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-casement-window-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-casement-window-01-top.png",
+   "w": 1200,
+   "d": 350,
+   "h": 1100,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "丸窓",
+   "id": "kominka-round-window-01",
+   "group": "家具",
+   "category": "窓",
+   "model": "assets/models/packs/kominka/models/kominka-round-window-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-round-window-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-round-window-01-top.png",
+   "w": 900,
+   "d": 150,
+   "h": 900,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "bamboo",
+     "label": "竹",
+     "default": "#83714d"
+    },
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "縁側のガラス戸",
+   "id": "kominka-engawa-glass-door-01",
+   "group": "家具",
+   "category": "窓",
+   "model": "assets/models/packs/kominka/models/kominka-engawa-glass-door-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-engawa-glass-door-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-engawa-glass-door-01-top.png",
+   "w": 1800,
+   "d": 150,
+   "h": 2000,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "欅の食卓",
+   "kind": "dining-table",
+   "id": "kominka-dining-table-01",
+   "group": "家具",
+   "category": "ダイニングテーブル",
+   "model": "assets/models/packs/kominka/models/kominka-dining-table-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-dining-table-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-dining-table-01-top.png",
+   "w": 1500,
+   "d": 850,
+   "h": 700,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "民芸の椅子",
+   "kind": "chair",
+   "id": "kominka-chair-01",
+   "group": "家具",
+   "category": "チェア",
+   "model": "assets/models/packs/kominka/models/kominka-chair-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-chair-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-chair-01-top.png",
+   "w": 450,
+   "d": 500,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "rush",
+     "label": "い草",
+     "default": "#96956a"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "座椅子",
+   "kind": "chair",
+   "id": "kominka-zaisu-01",
+   "group": "家具",
+   "category": "チェア",
+   "model": "assets/models/packs/kominka/models/kominka-zaisu-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-zaisu-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-zaisu-01-top.png",
+   "w": 450,
+   "d": 550,
+   "h": 450,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "座卓",
+   "kind": "low-table",
+   "id": "kominka-zataku-01",
+   "group": "家具",
+   "category": "ローテーブル",
+   "model": "assets/models/packs/kominka/models/kominka-zataku-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-zataku-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-zataku-01-top.png",
+   "w": 1500,
+   "d": 900,
+   "h": 330,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "木枠の長椅子",
+   "kind": "sofa",
+   "id": "kominka-sofa-01",
+   "group": "家具",
+   "category": "ソファ",
+   "model": "assets/models/packs/kominka/models/kominka-sofa-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-sofa-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-sofa-01-top.png",
+   "w": 1800,
+   "d": 800,
+   "h": 750,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "布団を敷いた和の寝台",
+   "kind": "bed",
+   "id": "kominka-bed-1000-01",
+   "group": "家具",
+   "category": "ベッド",
+   "model": "assets/models/packs/kominka/models/kominka-bed-1000-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-bed-1000-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-bed-1000-01-top.png",
+   "w": 1000,
+   "d": 2100,
+   "h": 400,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "布団を敷いた和の寝台（二人用）",
+   "kind": "bed",
+   "id": "kominka-bed-1400-01",
+   "group": "家具",
+   "category": "ベッド",
+   "model": "assets/models/packs/kominka/models/kominka-bed-1400-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-bed-1400-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-bed-1400-01-top.png",
+   "w": 1400,
+   "d": 2100,
+   "h": 400,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "衣装箪笥",
+   "kind": "chest",
+   "id": "kominka-tansu-01",
+   "group": "家具",
+   "category": "チェスト",
+   "model": "assets/models/packs/kominka/models/kominka-tansu-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-tansu-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-tansu-01-top.png",
+   "w": 900,
+   "d": 450,
+   "h": 1100,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "階段箪笥",
+   "kind": "cabinet",
+   "id": "kominka-kaidan-dansu-01",
+   "group": "家具",
+   "category": "キャビネット",
+   "model": "assets/models/packs/kominka/models/kominka-kaidan-dansu-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kaidan-dansu-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kaidan-dansu-01-top.png",
+   "w": 1800,
+   "d": 450,
+   "h": 1800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "水屋箪笥",
+   "kind": "kitchen-storage",
+   "id": "kominka-mizuya-01",
+   "group": "住設",
+   "category": "キッチン収納",
+   "model": "assets/models/packs/kominka/models/kominka-mizuya-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-mizuya-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-mizuya-01-top.png",
+   "w": 1200,
+   "d": 450,
+   "h": 1800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "仏壇",
+   "kind": "cabinet",
+   "id": "kominka-butsudan-01",
+   "group": "家具",
+   "category": "キャビネット",
+   "model": "assets/models/packs/kominka/models/kominka-butsudan-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-butsudan-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-butsudan-01-top.png",
+   "w": 700,
+   "d": 600,
+   "h": 1500,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "書院机",
+   "kind": "desk",
+   "id": "kominka-desk-01",
+   "group": "家具",
+   "category": "デスク",
+   "model": "assets/models/packs/kominka/models/kominka-desk-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-desk-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-desk-01-top.png",
+   "w": 1200,
+   "d": 600,
+   "h": 720,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "下駄箱",
+   "kind": "shoe-storage",
+   "id": "kominka-shoe-storage-01",
+   "group": "家具",
+   "category": "玄関収納",
+   "model": "assets/models/packs/kominka/models/kominka-shoe-storage-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-shoe-storage-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-shoe-storage-01-top.png",
+   "w": 900,
+   "d": 350,
+   "h": 1000,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "行灯",
+   "kind": "light",
+   "id": "kominka-andon-01",
+   "group": "家具",
+   "category": "照明",
+   "model": "assets/models/packs/kominka/models/kominka-andon-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-andon-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-andon-01-top.png",
+   "w": 300,
+   "d": 300,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "和紙のペンダント照明",
+   "kind": "light",
+   "defaultElevation": 2000,
+   "id": "kominka-pendant-01",
+   "group": "家具",
+   "category": "照明",
+   "model": "assets/models/packs/kominka/models/kominka-pendant-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-pendant-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-pendant-01-top.png",
+   "w": 500,
+   "d": 500,
+   "h": 400,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "bamboo",
+     "label": "竹",
+     "default": "#83714d"
+    },
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    }
+   ]
+  },
+  {
+   "name": "扁額",
+   "kind": "wall-decor",
+   "defaultElevation": 1500,
+   "id": "kominka-hengaku-01",
+   "group": "家具",
+   "category": "壁装飾",
+   "model": "assets/models/packs/kominka/models/kominka-hengaku-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-hengaku-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-hengaku-01-top.png",
+   "w": 1200,
+   "d": 50,
+   "h": 450,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "掛け軸",
+   "kind": "wall-decor",
+   "defaultElevation": 400,
+   "id": "kominka-kakejiku-01",
+   "group": "家具",
+   "category": "壁装飾",
+   "model": "assets/models/packs/kominka/models/kominka-kakejiku-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kakejiku-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kakejiku-01-top.png",
+   "w": 550,
+   "d": 30,
+   "h": 1700,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "衝立",
+   "kind": "decor",
+   "id": "kominka-tsuitate-01",
+   "group": "家具",
+   "category": "小物・装飾",
+   "model": "assets/models/packs/kominka/models/kominka-tsuitate-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-tsuitate-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-tsuitate-01-top.png",
+   "w": 1200,
+   "d": 350,
+   "h": 1200,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "簾",
+   "kind": "roller-screen",
+   "defaultElevation": 400,
+   "id": "kominka-sudare-01",
+   "group": "家具",
+   "category": "ロールスクリーン",
+   "model": "assets/models/packs/kominka/models/kominka-sudare-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-sudare-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-sudare-01-top.png",
+   "w": 1800,
+   "d": 30,
+   "h": 1800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "bamboo",
+     "label": "竹",
+     "default": "#83714d"
+    },
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "花ござ",
+   "kind": "rug",
+   "id": "kominka-hanagoza-01",
+   "group": "家具",
+   "category": "ラグ・カーペット",
+   "model": "assets/models/packs/kominka/models/kominka-hanagoza-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-hanagoza-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-hanagoza-01-top.png",
+   "w": 2000,
+   "d": 2000,
+   "h": 10,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "bamboo",
+     "label": "竹",
+     "default": "#83714d"
+    },
+    {
+     "key": "fabric",
+     "label": "布",
+     "default": "#263c51"
+    },
+    {
+     "key": "rush",
+     "label": "い草",
+     "default": "#96956a"
+    }
+   ]
+  },
+  {
+   "name": "囲炉裏",
+   "kind": "decor",
+   "id": "kominka-irori-01",
+   "group": "家具",
+   "category": "小物・装飾",
+   "model": "assets/models/packs/kominka/models/kominka-irori-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-irori-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-irori-01-top.png",
+   "w": 1200,
+   "d": 1200,
+   "h": 450,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "竈",
+   "kind": "cooktop",
+   "id": "kominka-kamado-01",
+   "group": "住設",
+   "category": "コンロ",
+   "model": "assets/models/packs/kominka/models/kominka-kamado-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kamado-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kamado-01-top.png",
+   "w": 1200,
+   "d": 700,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "plaster",
+     "label": "漆喰",
+     "default": "#d9d2c0"
+    },
+    {
+     "key": "stone",
+     "label": "石",
+     "default": "#85847c"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "研ぎ出しの流し",
+   "kind": "kitchen-sink",
+   "id": "kominka-sink-01",
+   "group": "住設",
+   "category": "シンク",
+   "model": "assets/models/packs/kominka/models/kominka-sink-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-sink-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-sink-01-top.png",
+   "w": 1200,
+   "d": 600,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "brass",
+     "label": "真鍮",
+     "default": "#897247"
+    },
+    {
+     "key": "stone",
+     "label": "石",
+     "default": "#85847c"
+    }
+   ]
+  },
+  {
+   "name": "檜風呂",
+   "kind": "bathtub",
+   "id": "kominka-hinoki-bath-01",
+   "group": "住設",
+   "category": "浴槽",
+   "model": "assets/models/packs/kominka/models/kominka-hinoki-bath-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-hinoki-bath-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-hinoki-bath-01-top.png",
+   "w": 1400,
+   "d": 800,
+   "h": 600,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "copper",
+     "label": "銅",
+     "default": "#805344"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "石灯籠",
+   "kind": "garden-equipment",
+   "id": "kominka-ishidoro-01",
+   "group": "外構",
+   "category": "屋外設備",
+   "model": "assets/models/packs/kominka/models/kominka-ishidoro-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-ishidoro-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-ishidoro-01-top.png",
+   "w": 600,
+   "d": 600,
+   "h": 1500,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "stone",
+     "label": "石",
+     "default": "#85847c"
+    }
+   ]
+  },
+  {
+   "name": "人力車",
+   "id": "kominka-rickshaw-01",
+   "group": "外構",
+   "category": "車",
+   "model": "assets/models/packs/kominka/models/kominka-rickshaw-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-rickshaw-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-rickshaw-01-top.png",
+   "w": 1100,
+   "d": 2600,
+   "h": 1650,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "cushion",
+     "label": "座布団",
+     "default": "#823b32"
+    },
+    {
+     "key": "lacquer",
+     "label": "漆塗り",
+     "default": "#222320"
+    },
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "濡れ縁",
+   "id": "kominka-engawa-bench-1800-01",
+   "group": "外構",
+   "kind": "deck",
+   "category": "デッキ・テラス",
+   "model": "assets/models/packs/kominka/models/kominka-engawa-bench-1800-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-engawa-bench-1800-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-engawa-bench-1800-01-top.png",
+   "w": 1800,
+   "d": 600,
+   "h": 450,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "濡れ縁（長い）",
+   "id": "kominka-engawa-bench-2600-01",
+   "group": "外構",
+   "kind": "deck",
+   "category": "デッキ・テラス",
+   "model": "assets/models/packs/kominka/models/kominka-engawa-bench-2600-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-engawa-bench-2600-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-engawa-bench-2600-01-top.png",
+   "w": 2600,
+   "d": 900,
+   "h": 450,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "木の門柱",
+   "id": "kominka-gate-post-01",
+   "group": "外構",
+   "kind": "gate-post",
+   "category": "門柱・ポスト",
+   "model": "assets/models/packs/kominka/models/kominka-gate-post-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-gate-post-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-gate-post-01-top.png",
+   "w": 400,
+   "d": 200,
+   "h": 1400,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "木の調理台 450",
+   "id": "kominka-kitchen-counter-450-01",
+   "group": "住設",
+   "kind": "kitchen-storage",
+   "category": "キッチン収納",
+   "model": "assets/models/packs/kominka/models/kominka-kitchen-counter-450-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kitchen-counter-450-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kitchen-counter-450-01-top.png",
+   "w": 450,
+   "d": 600,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "木の調理台 600",
+   "id": "kominka-kitchen-counter-600-01",
+   "group": "住設",
+   "kind": "kitchen-storage",
+   "category": "キッチン収納",
+   "model": "assets/models/packs/kominka/models/kominka-kitchen-counter-600-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kitchen-counter-600-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kitchen-counter-600-01-top.png",
+   "w": 600,
+   "d": 600,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "木の調理台 900",
+   "id": "kominka-kitchen-counter-900-01",
+   "group": "住設",
+   "kind": "kitchen-storage",
+   "category": "キッチン収納",
+   "model": "assets/models/packs/kominka/models/kominka-kitchen-counter-900-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kitchen-counter-900-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kitchen-counter-900-01-top.png",
+   "w": 900,
+   "d": 600,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "土間の作業台",
+   "id": "kominka-kitchen-worktable-01",
+   "group": "住設",
+   "kind": "kitchen-storage",
+   "category": "キッチン収納",
+   "model": "assets/models/packs/kominka/models/kominka-kitchen-worktable-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kitchen-worktable-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kitchen-worktable-01-top.png",
+   "w": 2100,
+   "d": 900,
+   "h": 850,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "一口の竈",
+   "id": "kominka-kamado-single-01",
+   "group": "住設",
+   "kind": "cooktop",
+   "category": "コンロ",
+   "model": "assets/models/packs/kominka/models/kominka-kamado-single-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-kamado-single-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-kamado-single-01-top.png",
+   "w": 750,
+   "d": 650,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "plaster",
+     "label": "漆喰",
+     "default": "#d9d2c0"
+    },
+    {
+     "key": "stone",
+     "label": "石",
+     "default": "#85847c"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "煙出しの覆い",
+   "id": "kominka-smoke-hood-01",
+   "group": "住設",
+   "kind": "range-hood",
+   "defaultElevation": 1500,
+   "category": "レンジフード",
+   "model": "assets/models/packs/kominka/models/kominka-smoke-hood-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-smoke-hood-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-smoke-hood-01-top.png",
+   "w": 900,
+   "d": 600,
+   "h": 700,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "copper",
+     "label": "銅",
+     "default": "#805344"
+    },
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "木の冷蔵庫",
+   "id": "kominka-icebox-01",
+   "group": "住設",
+   "kind": "refrigerator",
+   "category": "冷蔵庫",
+   "model": "assets/models/packs/kominka/models/kominka-icebox-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-icebox-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-icebox-01-top.png",
+   "w": 700,
+   "d": 650,
+   "h": 1700,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "brass",
+     "label": "真鍮",
+     "default": "#897247"
+    },
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "研ぎ出しの流し 900",
+   "id": "kominka-sink-900-01",
+   "group": "住設",
+   "kind": "kitchen-sink",
+   "category": "シンク",
+   "model": "assets/models/packs/kominka/models/kominka-sink-900-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-sink-900-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-sink-900-01-top.png",
+   "w": 900,
+   "d": 600,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "brass",
+     "label": "真鍮",
+     "default": "#897247"
+    },
+    {
+     "key": "stone",
+     "label": "石",
+     "default": "#85847c"
+    }
+   ]
+  },
+  {
+   "name": "茶箪笥（低い）",
+   "id": "kominka-chadansu-1500-01",
+   "group": "家具",
+   "kind": "cabinet",
+   "category": "キャビネット",
+   "model": "assets/models/packs/kominka/models/kominka-chadansu-1500-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-chadansu-1500-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-chadansu-1500-01-top.png",
+   "w": 1500,
+   "d": 450,
+   "h": 650,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "茶箪笥",
+   "id": "kominka-chadansu-900-01",
+   "group": "家具",
+   "kind": "cabinet",
+   "category": "キャビネット",
+   "model": "assets/models/packs/kominka/models/kominka-chadansu-900-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-chadansu-900-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-chadansu-900-01-top.png",
+   "w": 900,
+   "d": 400,
+   "h": 900,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "襖の衣装戸棚",
+   "id": "kominka-oshiire-01",
+   "group": "家具",
+   "kind": "closet",
+   "category": "クローゼット",
+   "model": "assets/models/packs/kominka/models/kominka-oshiire-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-oshiire-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-oshiire-01-top.png",
+   "w": 1000,
+   "d": 580,
+   "h": 1900,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "paper",
+     "label": "和紙",
+     "default": "#ded8c6"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "花台",
+   "id": "kominka-hanadai-01",
+   "group": "家具",
+   "kind": "low-table",
+   "category": "ローテーブル",
+   "model": "assets/models/packs/kominka/models/kominka-hanadai-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-hanadai-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-hanadai-01-top.png",
+   "w": 460,
+   "d": 460,
+   "h": 400,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "盆栽",
+   "id": "kominka-bonsai-01",
+   "group": "家具",
+   "kind": "plant",
+   "category": "観葉植物",
+   "model": "assets/models/packs/kominka/models/kominka-bonsai-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-bonsai-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-bonsai-01-top.png",
+   "w": 600,
+   "d": 450,
+   "h": 700,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "bark",
+     "label": "幹",
+     "default": "#4c382a"
+    },
+    {
+     "key": "clay",
+     "label": "鉢",
+     "default": "#625249"
+    },
+    {
+     "key": "foliage",
+     "label": "松葉",
+     "default": "#354b35"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "麻のカーテン（長い）",
+   "id": "kominka-curtain-long-01",
+   "group": "家具",
+   "kind": "curtain",
+   "defaultElevation": 0,
+   "category": "カーテン",
+   "model": "assets/models/packs/kominka/models/kominka-curtain-long-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-curtain-long-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-curtain-long-01-top.png",
+   "w": 1300,
+   "d": 150,
+   "h": 2200,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "indigo",
+     "label": "藍の縞",
+     "default": "#263c51"
+    },
+    {
+     "key": "linen",
+     "label": "麻布",
+     "default": "#d1c6af"
+    },
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "麻のカーテン（短い）",
+   "id": "kominka-curtain-short-01",
+   "group": "家具",
+   "kind": "curtain",
+   "defaultElevation": 1000,
+   "category": "カーテン",
+   "model": "assets/models/packs/kominka/models/kominka-curtain-short-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-curtain-short-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-curtain-short-01-top.png",
+   "w": 900,
+   "d": 150,
+   "h": 1200,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "indigo",
+     "label": "藍の縞",
+     "default": "#263c51"
+    },
+    {
+     "key": "linen",
+     "label": "麻布",
+     "default": "#d1c6af"
+    },
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "陶器の手洗い鉢の洗面台",
+   "id": "kominka-washstand-01",
+   "group": "住設",
+   "kind": "vanity",
+   "category": "洗面化粧台",
+   "model": "assets/models/packs/kominka/models/kominka-washstand-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-washstand-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-washstand-01-top.png",
+   "w": 700,
+   "d": 450,
+   "h": 850,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "brass",
+     "label": "真鍮",
+     "default": "#897247"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "小さな手洗い",
+   "id": "kominka-washstand-small-01",
+   "group": "住設",
+   "kind": "vanity",
+   "category": "洗面化粧台",
+   "model": "assets/models/packs/kominka/models/kominka-washstand-small-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-washstand-small-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-washstand-small-01-top.png",
+   "w": 500,
+   "d": 400,
+   "h": 800,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "brass",
+     "label": "真鍮",
+     "default": "#897247"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "木の蓋の便器",
+   "id": "kominka-toilet-01",
+   "group": "住設",
+   "kind": "toilet",
+   "category": "便器",
+   "model": "assets/models/packs/kominka/models/kominka-toilet-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-toilet-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-toilet-01-top.png",
+   "w": 420,
+   "d": 650,
+   "h": 1600,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "brass",
+     "label": "真鍮",
+     "default": "#897247"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "真鍮のシャワー",
+   "id": "kominka-shower-01",
+   "group": "住設",
+   "kind": "shower",
+   "category": "シャワー・水栓",
+   "model": "assets/models/packs/kominka/models/kominka-shower-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-shower-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-shower-01-top.png",
+   "w": 300,
+   "d": 450,
+   "h": 2000,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "brass",
+     "label": "真鍮",
+     "default": "#897247"
+    },
+    {
+     "key": "copper",
+     "label": "銅",
+     "default": "#805344"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "たらいと洗濯板",
+   "id": "kominka-tarai-01",
+   "group": "住設",
+   "kind": "laundry",
+   "category": "洗濯・物干し",
+   "model": "assets/models/packs/kominka/models/kominka-tarai-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-tarai-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-tarai-01-top.png",
+   "w": 900,
+   "d": 500,
+   "h": 600,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "copper",
+     "label": "銅",
+     "default": "#805344"
+    },
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {
+   "name": "竹竿の物干し",
+   "id": "kominka-monohoshi-01",
+   "group": "住設",
+   "kind": "laundry",
+   "defaultElevation": 1700,
+   "category": "洗濯・物干し",
+   "model": "assets/models/packs/kominka/models/kominka-monohoshi-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-monohoshi-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-monohoshi-01-top.png",
+   "w": 1100,
+   "d": 80,
+   "h": 300,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "bamboo",
+     "label": "竹",
+     "default": "#83714d"
+    },
+    {
+     "key": "indigo",
+     "label": "藍の縞",
+     "default": "#263c51"
+    },
+    {
+     "key": "linen",
+     "label": "麻布",
+     "default": "#d1c6af"
+    },
+    {
+     "key": "metal",
+     "label": "金物",
+     "default": "#282a29"
+    }
+   ]
+  },
+  {
+   "name": "木格子のエアコン覆い",
+   "id": "kominka-ac-cover-01",
+   "group": "家具",
+   "kind": "hvac",
+   "defaultElevation": 1950,
+   "category": "空調",
+   "model": "assets/models/packs/kominka/models/kominka-ac-cover-01.glb",
+   "thumb": "assets/models/packs/kominka/previews/kominka-ac-cover-01-thumb.png",
+   "top": "assets/models/packs/kominka/previews/kominka-ac-cover-01-top.png",
+   "w": 850,
+   "d": 300,
+   "h": 320,
+   "provenance": "original",
+   "finishChannels": [
+    {
+     "key": "wood",
+     "label": "木部",
+     "default": "#5c412b"
+    }
+   ]
+  },
+  {"id":"kominka-kitchen-run-2560-01","name":"一体型の台所（古民家）","group":"住設","kind":"cooktop","category":"コンロ","w":2560,"d":650,"h":850,"defaultElevation":0,"provenance":"original","model":"assets/models/packs/kominka/models/kominka-kitchen-run-2560-01.glb","thumb":"assets/models/packs/kominka/previews/kominka-kitchen-run-2560-01-thumb.png","top":"assets/models/packs/kominka/previews/kominka-kitchen-run-2560-01-top.png","finishChannels":[{"key":"wood","label":"木部","default":"#5c412b"},{"key":"stone","label":"石","default":"#85847c"},{"key":"plaster","label":"漆喰","default":"#d9d2c0"},{"key":"metal","label":"金物","default":"#282a29"}]}
+ ]
+}

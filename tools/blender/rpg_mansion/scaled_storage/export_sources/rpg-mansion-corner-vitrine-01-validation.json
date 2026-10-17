@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-corner-vitrine-01",
+  "dimensions_mm": [
+    699.999988079071,
+    699.999988079071,
+    1850.000023841858
+  ],
+  "bounds_m": [
+    [
+      -0.3499999940395355,
+      -0.3499999940395355,
+      0.0
+    ],
+    [
+      0.3499999940395355,
+      0.3499999940395355,
+      1.850000023841858
+    ]
+  ],
+  "triangles": 1620,
+  "uv": {
+    "meters_per_uv": 6.026511002455695,
+    "min": 5.153693265535679,
+    "max": 7.282656069247849,
+    "p05": 5.309061675598086,
+    "p95": 7.0231786808584165,
+    "total_triangles": 1620,
+    "valid_triangles": 1620,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood": "wood",
+    "Mansion walnut mouldings": "wood",
+    "Mansion clear antique glazing": "glass",
+    "Mansion patinated brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 72028,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "e0399c46fd72dc3fd15cec2efe9061f7d68953216dafcd80ba79e71bcb896e46",
+  "sourceSha256": "deaa9ad6d2ad491699f3a754b0d4f5ea38b287d20a34ab06baec8193a822a510",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "2f07ee64a548591e5f24775778106773cf36c8cbbdbe4e609096e3b8a2de544d",
+    "authoredDataSignature": "abc1cecbde79bd904d542c0eb68c070490ef26568d028c45ce84f724aaed659c",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

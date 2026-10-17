@@ -1,0 +1,145 @@
+{
+  "model": "rpg-mansion-kitchen-single-door-300-01",
+  "dimensions_mm": [
+    300.00001192092896,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.15000000596046448,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.15000000596046448,
+      0.32499998807907104,
+      0.8500000238418579
+    ]
+  ],
+  "triangles": 1192,
+  "uv": {
+    "meters_per_uv": 2.728600118676786,
+    "min": 2.3082903444684346,
+    "max": 3.4911064125857605,
+    "p05": 2.445826175012341,
+    "p95": 3.2512814645226227,
+    "total_triangles": 1192,
+    "valid_triangles": 1192,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 55140,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "c31085a04519058452e9b180fb5a09f1623f71bf0e029ef45723fac60c680c4c",
+  "source_sha256": "faf67f2c2126b939258ae0f0a3dadc61ab5899f59d34f428acebfcbf1e61f07a",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.001"
+    ],
+    "corrected_polygons": 26,
+    "geometry_normals_material_signature": "e1cf5bcc8236e2f2f41cdc9d7662e38c65a9e39abe6e11e4dce60ed112c3f46a",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 2.728600118676786,
+      "min": 2.3082903444684346,
+      "max": 3.4911064125857605,
+      "p05": 2.445826175012341,
+      "p95": 3.2512814645226227,
+      "total_triangles": 1192,
+      "valid_triangles": 1192,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 133926,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    300.00001192092896,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.15000000596046448,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.15000000596046448,
+      0.8500000238418579,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 1192,
+    "valid_triangles": 1192,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 2.445846659918642,
+    "p95": 3.2512814788844646,
+    "p95_p05": 1.3293071606511155,
+    "median": 2.7286001840800678
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-single-door-300-01.glb",
+      "sha256": "c31085a04519058452e9b180fb5a09f1623f71bf0e029ef45723fac60c680c4c",
+      "bytes": 55140
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-single-door-300-01.blend",
+      "sha256": "faf67f2c2126b939258ae0f0a3dadc61ab5899f59d34f428acebfcbf1e61f07a",
+      "bytes": 133926
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-single-door-300-01-thumb.png",
+      "sha256": "8d7c1e646f07e98d770044b6a5d199465c54b4f143ff444b078a222eb830c9d4",
+      "bytes": 221410
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-single-door-300-01-top.png",
+      "sha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49",
+      "bytes": 201116
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-front.png",
+      "sha256": "dc36664aa6ea6f5c19bd0c59c82e8658e50d028fb8648b52f5de7ab60ace7c93",
+      "bytes": 491710
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-rear.png",
+      "sha256": "57dc227a813c5fec6875d76c590bfb0258c2aca377e712bf8965e6c97cf57779",
+      "bytes": 470171
+    }
+  }
+}

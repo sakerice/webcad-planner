@@ -1,0 +1,122 @@
+{
+  "model": "rpg-mansion-narrow-roller-screen-01",
+  "dimensions_mm": [
+    699.999988079071,
+    146.80762588977814,
+    1258.373737335205
+  ],
+  "bounds_m": [
+    [
+      -0.3499999940395355,
+      -0.07340381294488907,
+      0.0
+    ],
+    [
+      0.3499999940395355,
+      0.07340381294488907,
+      1.258373737335205
+    ]
+  ],
+  "triangles": 708,
+  "uv": {
+    "meters_per_uv": 1.595589983264726,
+    "min": 1.5917381522282152,
+    "max": 1.5999788501638341,
+    "p05": 1.5948663528923728,
+    "p95": 1.5965659728240433,
+    "total_triangles": 708,
+    "valid_triangles": 708,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Antique brass hardware": "metal",
+    "Oatmeal woven linen": "fabric",
+    "Oiled blind timber": "wood",
+    "Cotton support tape": "cord"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "datums": {
+    "constructionFamily": "roller-fabric-screen",
+    "countingClass": "new-construction",
+    "coreConstructionCount": 1,
+    "variantOf": null,
+    "staticDisplayState": "closed/deployed",
+    "host": "narrow-qa-fixture",
+    "installation": {
+      "mount": "interior-wall",
+      "wallContactPlaneBlenderY": 0.0,
+      "attachmentAboveApertureMm": 60,
+      "defaultBottomElevationMm": 1033.626,
+      "originalFloorDatumM": 0,
+      "proofRotationBlenderZDegrees": 180,
+      "proofWallPlaneY": 0.12,
+      "nominalClothBaselineMm": 1027,
+      "wallContactPlaneCanonicalBlenderY": 0.07340381294488907
+    },
+    "fit": {
+      "apertureWidthMm": 640,
+      "coverWidthMm": 700,
+      "sourceRule": "screen: within200, width+0..100",
+      "widthSurplusMm": 60,
+      "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+      "fabricCoverageWidthMm": 662,
+      "fabricCoverageRangeMm": [
+        1070,
+        2260
+      ],
+      "fixtureApertureMm": {
+        "width": 640,
+        "bottom": 1100,
+        "top": 2200
+      },
+      "topAboveApertureMm": 60,
+      "measuredHardwareEnvelopeHeightRangeMm": [
+        1033.626,
+        2292.0
+      ]
+    },
+    "constructionDetails": "Cloth-wrapped roller and continuous tangent drop, axle ends, two wall-supported cheeks, weighted hem and sewn pull tab. Narrow utility-window QA fixture is excluded from products.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.07340381294488907,
+      -1.0336263179779053
+    ],
+    "originalInstalledBoundsBlenderM": [
+      [
+        -0.3499999940395355,
+        -0.14680762588977814,
+        1.0336263179779053
+      ],
+      [
+        0.3499999940395355,
+        0.0,
+        2.2920000553131104
+      ]
+    ],
+    "defaultElevationMm": 1033.626
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0015749716594655177,
+    1.9907765818061307e-05,
+    4.229714249959219e-07,
+    0.00013166788812668528,
+    4.2281317291781216e-07,
+    2.5739218306360576e-06,
+    0.00011287938590006284,
+    1.9910191137266036e-05,
+    0.001242331152297993,
+    4.2409374145790855e-07,
+    0.00013558529841854275,
+    4.2371599799177306e-07,
+    6.996618897877243e-06,
+    0.00011288320820312946,
+    6.9971514070251375e-06
+  ],
+  "triangle_budget": 6000,
+  "glb_bytes": 51120
+}

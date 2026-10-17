@@ -1,0 +1,147 @@
+{
+  "model": "rpg-mansion-kitchen-three-drawer-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.32499998807907104,
+      0.8500000238418579
+    ]
+  ],
+  "triangles": 2240,
+  "uv": {
+    "meters_per_uv": 4.370017273724233,
+    "min": 3.9419956144465336,
+    "max": 5.5697874312173115,
+    "p05": 4.073703964134034,
+    "p95": 5.332562011983432,
+    "total_triangles": 2240,
+    "valid_triangles": 2240,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 97788,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "4b9822bd5ece8d612789f97a49f8689934cd83518945bcb88eb6827cae61dc76",
+  "source_sha256": "d98b2bd9cc1f00dd91eeb9a421a769623e01e76b6a5127f8425735289e55ebc3",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.003",
+      "Curved brass drawer pull.004",
+      "Curved brass drawer pull.005"
+    ],
+    "corrected_polygons": 78,
+    "geometry_normals_material_signature": "4f1cfa05d196951ffce6c0582cabe466093cde7036e6046547d561b0d5e297fc",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 4.370017273724233,
+      "min": 3.9419956144465336,
+      "max": 5.5697874312173115,
+      "p05": 4.073703964134034,
+      "p95": 5.332562011983432,
+      "total_triangles": 2240,
+      "valid_triangles": 2240,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 163847,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.44999998807907104,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.44999998807907104,
+      0.8500000238418579,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 2240,
+    "valid_triangles": 2240,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 4.073703982763063,
+    "p95": 5.332670785579388,
+    "p95_p05": 1.3090471983588772,
+    "median": 4.370017345969462
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-three-drawer-900-01.glb",
+      "sha256": "4b9822bd5ece8d612789f97a49f8689934cd83518945bcb88eb6827cae61dc76",
+      "bytes": 97788
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-three-drawer-900-01.blend",
+      "sha256": "d98b2bd9cc1f00dd91eeb9a421a769623e01e76b6a5127f8425735289e55ebc3",
+      "bytes": 163847
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-900-01-thumb.png",
+      "sha256": "09fd2b8b7207bc785300b97dbe7232c59440a5fc2edde0df6ce96e91767bb218",
+      "bytes": 283266
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-900-01-top.png",
+      "sha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8",
+      "bytes": 208481
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-front.png",
+      "sha256": "707c2440e0f8d096c438151e76718c6b5b9f53bb913f3a1a2133ef81a8c956d5",
+      "bytes": 724317
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-rear.png",
+      "sha256": "fc4df01875e57be36a9caa2e13e84bc30deb587fef4a54dcfbf56dd86c24c1fe",
+      "bytes": 659010
+    }
+  }
+}

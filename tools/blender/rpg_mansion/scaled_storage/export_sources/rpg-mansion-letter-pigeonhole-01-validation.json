@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-letter-pigeonhole-01",
+  "dimensions_mm": [
+    1200.0000476837158,
+    280.0000011920929,
+    1389.9999856948853
+  ],
+  "bounds_m": [
+    [
+      -0.6000000238418579,
+      -0.14000000059604645,
+      0.0
+    ],
+    [
+      0.6000000238418579,
+      0.14000000059604645,
+      1.3899999856948853
+    ]
+  ],
+  "triangles": 2084,
+  "uv": {
+    "meters_per_uv": 5.307679507937088,
+    "min": 4.842489898441097,
+    "max": 6.828512074363425,
+    "p05": 4.921573542448937,
+    "p95": 6.663638524048462,
+    "total_triangles": 2084,
+    "valid_triangles": 2084,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood": "wood",
+    "Mansion walnut mouldings": "wood",
+    "Mansion walnut veneered fields": "wood",
+    "Mansion patinated brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 93480,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "1df799c9309ff9c2185d71a1852d2504521b4f863691d3bf5a52cf84adc9eb0e",
+  "sourceSha256": "e150f012c6e7641d6e66c056ebaad1ebb4855de7d68583f04e181d5d5f0b720a",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "ab6c662fb78dbbf64a5bd91588f3c7b373d31bf6948c238d4bc89c17d7cb9178",
+    "authoredDataSignature": "d1bd917fc76b6e58829a14e4a35b1fcb69918688e25126176f16c12ec2fc43b9",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

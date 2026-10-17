@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-apothecary-chest-01",
+  "dimensions_mm": [
+    874.0000128746033,
+    469.0000116825104,
+    1059.000015258789
+  ],
+  "bounds_m": [
+    [
+      -0.43700000643730164,
+      -0.2345000058412552,
+      0.0
+    ],
+    [
+      0.43700000643730164,
+      0.2345000058412552,
+      1.059000015258789
+    ]
+  ],
+  "triangles": 3780,
+  "uv": {
+    "meters_per_uv": 5.609044612877618,
+    "min": 4.951752766395499,
+    "max": 7.3615679501095075,
+    "p05": 5.304949506127716,
+    "p95": 7.1823277921486,
+    "total_triangles": 3780,
+    "valid_triangles": 3780,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.010": "wood",
+    "Mansion walnut mouldings.010": "wood",
+    "Mansion walnut veneered fields.009": "wood",
+    "Mansion patinated brass.010": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 183684,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "19dc63e5d5b365f58bbd6aae7d5d69743b0935f4283966c9827fee9bf33897e7",
+  "sourceSha256": "2c673df44c2d602e9a3324d91fec63a7c1c8a4ddd1152f66559c475412dba1f7",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "6f2ea7dc3934eb2e9fc77d1f32ececb5ac6555465c01419c7687fb55057b1e76",
+    "authoredDataSignature": "cbe6c91b07113ea6794cd83c020c5af45f6359ce5905162863ce60cc307c1aeb",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-oval-pedestal-cabinet-01",
+  "dimensions_mm": [
+    316.0000145435333,
+    266.00000262260437,
+    763.9999985694885
+  ],
+  "bounds_m": [
+    [
+      -0.15800000727176666,
+      -0.13300000131130219,
+      0.0
+    ],
+    [
+      0.15800000727176666,
+      0.13300000131130219,
+      0.7639999985694885
+    ]
+  ],
+  "triangles": 808,
+  "uv": {
+    "meters_per_uv": 1.2841333744145196,
+    "min": 1.0701051046943741,
+    "max": 1.5278993361454842,
+    "p05": 1.1833751319951524,
+    "p95": 1.42107877598665,
+    "total_triangles": 808,
+    "valid_triangles": 808,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut mouldings.009": "wood",
+    "Mansion walnut heartwood.009": "wood",
+    "Mansion walnut veneered fields.008": "wood",
+    "Mansion patinated brass.009": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 35760,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "253d4d8dfea9dc0b6db3b0e109160f88932a787b502a13c907b4bfa8a7c76677",
+  "sourceSha256": "4c1a79b68ad2b5f24d648fa35031e43d8d054f303f2424f15842e284156c4214",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "e7c9cc24a0fe6874b6c053e8ed3b91306ecbcd21a5c1b9f946a538e17b5f9a26",
+    "authoredDataSignature": "c25b6ee04960ddcb943cb32f287c144b70e74bf17eacb0f58dba16973f06dc5a",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

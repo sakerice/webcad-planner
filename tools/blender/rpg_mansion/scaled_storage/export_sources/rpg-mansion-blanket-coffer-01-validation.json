@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-blanket-coffer-01",
+  "dimensions_mm": [
+    1100.000023841858,
+    600.0000238418579,
+    600.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.550000011920929,
+      -0.30000001192092896,
+      0.0
+    ],
+    [
+      0.550000011920929,
+      0.30000001192092896,
+      0.6000000238418579
+    ]
+  ],
+  "triangles": 1808,
+  "uv": {
+    "meters_per_uv": 4.345326772298668,
+    "min": 3.2511241047235906,
+    "max": 5.029299935185757,
+    "p05": 3.700154812143225,
+    "p95": 4.91018714377576,
+    "total_triangles": 1808,
+    "valid_triangles": 1808,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.011": "wood",
+    "Mansion walnut veneered fields.010": "wood",
+    "Mansion walnut mouldings.011": "wood",
+    "Mansion patinated brass.011": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 79044,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "e720cfdcb9e3d55c878aeb78f2ea240952ca42e7d02955221d7ca0d94712d756",
+  "sourceSha256": "28bebd052b6991c5921dd0ad40107ff4f9646ce3dc96d84c44af5225da55d1c7",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "20fffa1a2f2226c530324638a041b321f56afee583ca7c2cadf58e8b1aff34d9",
+    "authoredDataSignature": "d364daebe16880e0b53e638fae4bea4bba778db2fe8fdf7fb19a03aca3efdbde",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

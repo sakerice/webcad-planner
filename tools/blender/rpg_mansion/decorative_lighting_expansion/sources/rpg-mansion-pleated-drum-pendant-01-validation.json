@@ -1,0 +1,234 @@
+{
+  "model": "rpg-mansion-pleated-drum-pendant-01",
+  "dimensions_mm": [
+    630.9471130371094,
+    630.9471130371094,
+    740.0000095367432
+  ],
+  "bounds_m": [
+    [
+      -0.3154735565185547,
+      -0.3154735565185547,
+      0.0
+    ],
+    [
+      0.3154735565185547,
+      0.3154735565185547,
+      0.7400000095367432
+    ]
+  ],
+  "triangles": 3096,
+  "uv": {
+    "meters_per_uv": 2.340386191766748,
+    "min": 2.3137815275165945,
+    "max": 2.366060390859141,
+    "p05": 2.3390535634228042,
+    "p95": 2.3411959501013877,
+    "total_triangles": 3096,
+    "valid_triangles": 3096,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Antique brass structure": "metal",
+    "Bronzed iron structure": "metal",
+    "Warm woven shade fabric": "shade",
+    "Porcelain socket insulator": "ceramic",
+    "Opal bulb glass static appearance": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 218912,
+  "datums": {
+    "cavityRays": [
+      {
+        "part": "Suspended drum pleated fabric shell",
+        "originOriginalM": [
+          0,
+          0,
+          -0.02
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "rangeM": [
+          null,
+          null
+        ]
+      }
+    ],
+    "supportProbes": [
+      {
+        "parts": [
+          "Drum sloping suspension stay 0",
+          "Suspended drum upper rim"
+        ],
+        "pointOriginalM": [
+          0.308,
+          0.0,
+          0.266
+        ]
+      },
+      {
+        "parts": [
+          "Drum sloping suspension stay 0",
+          "Drum three-stay joining boss"
+        ],
+        "pointOriginalM": [
+          0.023,
+          0.0,
+          0.527
+        ]
+      },
+      {
+        "parts": [
+          "Drum sloping suspension stay 1",
+          "Suspended drum upper rim"
+        ],
+        "pointOriginalM": [
+          -0.15399999999999994,
+          0.2667358243656071,
+          0.266
+        ]
+      },
+      {
+        "parts": [
+          "Drum sloping suspension stay 1",
+          "Drum three-stay joining boss"
+        ],
+        "pointOriginalM": [
+          -0.011499999999999995,
+          0.01991858428704209,
+          0.527
+        ]
+      },
+      {
+        "parts": [
+          "Drum sloping suspension stay 2",
+          "Suspended drum upper rim"
+        ],
+        "pointOriginalM": [
+          -0.15400000000000014,
+          -0.266735824365607,
+          0.266
+        ]
+      },
+      {
+        "parts": [
+          "Drum sloping suspension stay 2",
+          "Drum three-stay joining boss"
+        ],
+        "pointOriginalM": [
+          -0.01150000000000001,
+          -0.01991858428704208,
+          0.527
+        ]
+      },
+      {
+        "parts": [
+          "Drum central suspension rod",
+          "Drum pendant ceiling canopy"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.71
+        ]
+      },
+      {
+        "parts": [
+          "Drum central suspension rod",
+          "Drum three-stay joining boss"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.525
+        ]
+      },
+      {
+        "parts": [
+          "Drum interior socket stem",
+          "Drum three-stay joining boss"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.504
+        ]
+      },
+      {
+        "parts": [
+          "Drum interior socket stem",
+          "Drum porcelain socket"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.205
+        ]
+      },
+      {
+        "parts": [
+          "Drum porcelain socket",
+          "Drum opal bulb"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.183
+        ]
+      }
+    ],
+    "installation": {
+      "mount": "ceiling-rods",
+      "defaultElevationMm": 1960,
+      "note": "Original static decorative fixture with geometric support; no configured runtime light or physical certification.",
+      "ceilingContactPlaneBlenderZ": 0.74,
+      "ceilingPlaneMm": 2700
+    },
+    "bulb": {
+      "materialEmissionStrength": 0.3,
+      "runtimeLightObjects": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.3154735565185547,
+        -0.3154735565185547,
+        0.0
+      ],
+      [
+        0.3154735565185547,
+        0.3154735565185547,
+        0.7400000095367432
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.001324774525566378,
+    6.612769556113562e-05,
+    0.00023521680714111426,
+    0.0026041213765590023,
+    2.8393936429912014e-05,
+    2.8393439601851836e-05,
+    2.8393461017609915e-05,
+    0.0001700510474999343,
+    4.888957024225723e-05,
+    8.732817461994576e-05,
+    0.0002505131646435288,
+    8.732888090889908e-05
+  ],
+  "source_sha256": "769fcc312bf422a83bc62fce69e94e84117761b9fe43f8ec36757adfa56c2a9c",
+  "glb_sha256": "a47c33ebb57c5e993cd68dc41550618bced4dca8df4f8920a2383d1bdc29ceae"
+}

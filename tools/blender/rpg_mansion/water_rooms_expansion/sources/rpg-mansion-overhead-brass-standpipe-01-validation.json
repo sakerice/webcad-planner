@@ -1,0 +1,97 @@
+{
+  "model": "rpg-mansion-overhead-brass-standpipe-01",
+  "dimensions_mm": [
+    347.9999899864197,
+    644.9999809265137,
+    2260.9450817108154
+  ],
+  "bounds_m": [
+    [
+      -0.17399999499320984,
+      -0.32249999046325684,
+      0.0
+    ],
+    [
+      0.17399999499320984,
+      0.32249999046325684,
+      2.2609450817108154
+    ]
+  ],
+  "triangles": 1380,
+  "uv": {
+    "meters_per_uv": 2.1111562693967976,
+    "min": 2.104585411404267,
+    "max": 2.1161760817035487,
+    "p05": 2.110705417960341,
+    "p95": 2.11143656626428,
+    "total_triangles": 1380,
+    "valid_triangles": 1380,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Aged polished brass": "metal",
+    "Ivory fired porcelain": "ceramic"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 90468,
+  "datums": {
+    "installation": {
+      "mount": "floor-flange-and-wall-braces",
+      "floorPlaneY": 0,
+      "wallContactPlaneBlenderY": 0.085,
+      "originalLocalAnchorHeightsM": [
+        0.81,
+        1.69
+      ],
+      "wallContactPlaneGltfZ": -0.3224999970197678
+    },
+    "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+    "faucetHeightMm": 1119,
+    "showerHeadHeightMm": 2132,
+    "showerHeadOriginalBlenderM": [
+      0,
+      -0.4,
+      2.132
+    ],
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.23749999701976776,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.17399999499320984,
+        -0.5600000023841858,
+        0.0
+      ],
+      [
+        0.17399999499320984,
+        0.08500000089406967,
+        2.2609450817108154
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0003931159558684764,
+    0.003481707836975545,
+    0.00010189115740407337,
+    4.6451900099479325e-05,
+    0.00010189298003145572,
+    4.645140173427838e-05,
+    0.0005948059248718587,
+    0.00015872347770103562,
+    1.847766225182568e-05,
+    0.0001587222213856876,
+    1.847805621461399e-05,
+    0.0035538393943473543,
+    0.0008366899589115454
+  ],
+  "source_sha256": "5f8c7af33f70e21dbbc1384889a305c5d6ec7cff208eef83d2b785f3d6fd75b6",
+  "glb_sha256": "a045a1fcd34a2e053edaa309d8fe750a8d7a571097cf868a4b02ab247945563c"
+}

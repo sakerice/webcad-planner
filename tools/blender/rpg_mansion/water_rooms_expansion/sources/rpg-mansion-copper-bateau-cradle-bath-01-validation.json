@@ -1,0 +1,96 @@
+{
+  "model": "rpg-mansion-copper-bateau-cradle-bath-01",
+  "dimensions_mm": [
+    1799.9999523162842,
+    759.9999904632568,
+    726.0000109672546
+  ],
+  "bounds_m": [
+    [
+      -0.8999999761581421,
+      -0.3799999952316284,
+      0.0
+    ],
+    [
+      0.8999999761581421,
+      0.3799999952316284,
+      0.7260000109672546
+    ]
+  ],
+  "triangles": 1304,
+  "uv": {
+    "meters_per_uv": 3.8146282311527573,
+    "min": 3.812298706658296,
+    "max": 3.81769074016729,
+    "p05": 3.8140376102250473,
+    "p95": 3.815085940699487,
+    "total_triangles": 1304,
+    "valid_triangles": 1304,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Hand-formed warm copper bath": "metal",
+    "Dark walnut WC seat": "wood",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 95096,
+  "datums": {
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "faucetHeightMm": null,
+    "fixtureNote": "Bath only; a separate supply fixture is required.",
+    "capacityNote": "One bathing occupant. Static design, not ergonomic or plumbing certification.",
+    "rimHeightMm": {
+      "lowSideCrest": 616,
+      "endCrests": 726
+    },
+    "internalFloorHeightMm": 166,
+    "clearBowlMm": {
+      "rimLength": 1710,
+      "rimWidth": 668,
+      "floorLength": 1290,
+      "floorWidth": 375,
+      "lowSideDepth": 450
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.8999999761581421,
+        -0.3799999952316284,
+        0.0
+      ],
+      [
+        0.8999999761581421,
+        0.3799999952316284,
+        0.7260000109672546
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.09712600762820027,
+    0.011408523670584451,
+    0.01140852312306864,
+    0.007930623202507073,
+    0.0002017921033257153,
+    0.00020179135268942144,
+    0.00793062321463367,
+    0.00020179018004758595,
+    0.00020179192506475374,
+    9.557616673797988e-06
+  ],
+  "source_sha256": "23c474f664b27e268eed6a3e40d6145fce3b5732dbf6b2146815833d3fb5a94f",
+  "glb_sha256": "7ec1383a76a98330baa975e3345162bc5e1640027cc062c51dc5124741314ad1"
+}

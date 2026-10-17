@@ -83,6 +83,12 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/utility-wires.js"></script>
 <script src="assets/js/photographic-sky.js"></script>
 <script src="assets/js/asset-catalogue.js"></script>
+<script src="assets/js/asset-sets.js"></script>
+<script src="assets/js/asset-swap.js"></script>
+<script src="assets/js/building-style.js"></script>
+<script src="assets/js/plan-library.js"></script>
+<script src="assets/js/compare-mode.js"></script>
+<script src="assets/js/third-person.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
 <style>
@@ -3196,6 +3202,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" onclick="clearFloor()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg> 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3h13l3 3v15H4ZM8 3v6h8V3M8 21v-8h8v8"/></svg> 保存</button>
+  <button class="tbtn mob-hide" id="plan-library-btn" onclick="PlanLibrary.openList()" title="名前を付けてブラウザに保存したプランの一覧。開く・名前の変更・削除・書き出しができます"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16M4 12h16M4 19h10"/></svg>保存一覧</button>
   <button class="tbtn" id="share-btn" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <!-- 画像AI/動画AIレンダーも、狭い幅でヘッダーから消さない。 -->
@@ -3206,6 +3213,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" id="unity-render-toolbar-btn" onclick="openUnityRenderModal()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h5l2-3h4l2 3h5v14H3ZM16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg> 画像AIレンダー</button>
   <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5h18v15H3ZM3 10h18M7 5l3 5M14 5l3 5M10 13l5 2-5 3Z"/></svg> 動画AIレンダー</button>
   <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 2h10l4 4v16H5ZM15 2v5h4M8 11h8v6H8ZM12 11v6M8 20h8"/></svg> JIS図面</button>
+  <button class="tbtn" id="compare-btn" onclick="CompareMode.openPicker()" title="2つの間取りを左右に並べて見比べます。どちらも編集できます"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h7v16H3zM14 4h7v16h-7z"/></svg>比較</button>
   <button class="tbtn mob-hide" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg>JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
@@ -3250,6 +3258,8 @@ input[type="reset"]:focus-visible{
           <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 17V4M8 8l4-4 4 4M4 16v5h16v-5"/></svg> 保存読込</button>
           <button class="pbtn sec" type="button" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg> JSON保存</button>
           <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> JSON読込</button>
+          <button class="pbtn sec" type="button" onclick="PlanLibrary.openList()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16M4 12h16M4 19h10"/></svg> 保存一覧</button>
+          <button class="pbtn sec" type="button" onclick="CompareMode.openPicker()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h7v16H3zM14 4h7v16h-7z"/></svg> 比較</button>
           <button class="pbtn sec" type="button" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
           <!-- JIS図面もツールバー(mob-hide)にしか無く、768px以下では入口が
                1つも無かった。書き出し系はここに集めるのが既存の並びである。 -->
@@ -3307,6 +3317,10 @@ input[type="reset"]:focus-visible{
       <div class="stool" data-tool="futon_set" onclick="setTool('futon_set')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6ZM8 5h8v4H8ZM6 11h12"/></svg>布団セット</div>
       <div class="stool" data-tool="lattice-screen" onclick="setTool('lattice-screen')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v17H3ZM6 4v17M10 4v17M14 4v17M18 4v17M3 8h18M3 17h18"/></svg>格子柵</div>
       <div id="fmp-furniture"></div>
+    </div>
+    <div class="cat-hdr fmp-props-hdr" onclick="toggleCat(this)" hidden><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14ZM21 21l-5.2-5.2M8 11h6M11 8v6"/></svg>事件・小道具 <span>+</span></div>
+    <div class="cat-body" hidden>
+      <div id="fmp-props"></div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a4 4 0 1 1-2-7 4 4 0 1 1 8 0 4 4 0 1 1-2 7M10 13v8M3 21h18M17 21v-7h4v7"/></svg>庭・外構 <span>+</span></div>
     <div class="cat-body">
@@ -3826,7 +3840,32 @@ var ASSET_TEX_MAP = {
   'galvalume_dark': 'assets/textures/wall_galvalume_dark.jpg',
   'plaster_white':  'assets/textures/wall_plaster_white.jpg',
   'wood_cedar':     'assets/textures/wood_cedar_warm.jpg',
-  'porch_tile':     'assets/textures/porch_tile_gray.jpg'
+  'porch_tile':     'assets/textures/porch_tile_gray.jpg',
+  // 洋館の様式(asset-sets.json の style)。Codex 製、PR #86。法線・粗さも同じ場所にある
+  'mansion_ashlar_stone': 'assets/textures/mansion/mansion_ashlar_stone_diffuse.jpg',
+  'mansion_brick_red': 'assets/textures/mansion/mansion_brick_red_diffuse.jpg',
+  'mansion_slate_roof': 'assets/textures/mansion/mansion_slate_roof_diffuse.jpg',
+  'mansion_damask_wallpaper': 'assets/textures/mansion/mansion_damask_wallpaper_diffuse.jpg',
+  'mansion_white_subway_tile': 'assets/textures/mansion/mansion_white_subway_tile_diffuse.jpg',
+  'mansion_wainscot_panel': 'assets/textures/mansion/mansion_wainscot_panel_diffuse.jpg',
+  'mansion_herringbone_oak': 'assets/textures/mansion/mansion_herringbone_oak_diffuse.jpg',
+  'mansion_marble_checker': 'assets/textures/mansion/mansion_marble_checker_diffuse.jpg',
+  // 古民家の様式。Codex 製、PR #91（茅葺きの作り直しと畳は Claude）。法線・粗さも同じ場所にある
+  'kominka_yakisugi': 'assets/textures/kominka/kominka_yakisugi_diffuse.jpg',
+  'kominka_shikkui': 'assets/textures/kominka/kominka_shikkui_diffuse.jpg',
+  'kominka_juraku': 'assets/textures/kominka/kominka_juraku_diffuse.jpg',
+  'kominka_kayabuki': 'assets/textures/kominka/kominka_kayabuki_diffuse.jpg',
+  'kominka_old_pine_floor': 'assets/textures/kominka/kominka_old_pine_floor_diffuse.jpg',
+  'kominka_doma': 'assets/textures/kominka/kominka_doma_diffuse.jpg',
+  'kominka_tatami': 'assets/textures/kominka/kominka_tatami_diffuse.jpg',
+  // 屋根材(Codex 製、PR #88)。軒先が画像の下、棟が上
+  'roof_kawara_ibushi': 'assets/textures/roof/roof_kawara_ibushi_diffuse.jpg',
+  'roof_s_tile_terracotta': 'assets/textures/roof/roof_s_tile_terracotta_diffuse.jpg',
+  'roof_flat_tile_charcoal': 'assets/textures/roof/roof_flat_tile_charcoal_diffuse.jpg',
+  'roof_colonial_gray': 'assets/textures/roof/roof_colonial_gray_diffuse.jpg',
+  'roof_standing_seam_silver': 'assets/textures/roof/roof_standing_seam_silver_diffuse.jpg',
+  'roof_copper_patina': 'assets/textures/roof/roof_copper_patina_diffuse.jpg',
+  'roof_asphalt_shingle_brown': 'assets/textures/roof/roof_asphalt_shingle_brown_diffuse.jpg'
 };
 // テクスチャ1枚が実世界の何メートルに貼られるか。画像はこの寸法ちょうどの
 // 1タイルとして作ってある(tools/make_interior_textures.py)。ここを間違えると
@@ -3843,7 +3882,32 @@ var TEX_TILE_M = {
   siding:        0.455,   // 窯業系サイディングの働き幅455mm
   galvalume_dark:0.9,     // 立平葺き 働き幅300mm × 3
   wood_cedar:    0.945,   // 杉本実羽目板 働き幅105mm × 9
-  roof_tile:     0.8
+  roof_tile:     0.8,
+  // 洋館の素材(納品の寸法。docs/orders/2026-10-10-codex-mansion-style-assets.md)
+  mansion_ashlar_stone:      1.2,   // 切石 600×300 目地込み
+  mansion_brick_red:         0.86,  // 英国積み12段
+  mansion_slate_roof:        1.2,   // 天然スレート 幅300 見付200
+  mansion_damask_wallpaper:  0.53,  // 壁紙の柄のリピート
+  mansion_white_subway_tile: 0.6,   // 150×75 半ずらし
+  mansion_wainscot_panel:    0.9,   // 腰板(横方向だけ繰り返す)
+  mansion_herringbone_oak:   1.4,
+  mansion_marble_checker:    0.8,   // 400角の市松
+  // 古民家の素材(納品の寸法。docs/orders/2026-10-12-codex-kominka-set.md)
+  kominka_yakisugi: 1.08,   // 焼杉板 働き幅180mm × 6
+  kominka_shikkui: 1.0,
+  kominka_juraku: 1.0,
+  kominka_kayabuki: 1.2,   // 茅葺き 6段
+  kominka_old_pine_floor: 1.8,   // 乱尺の松板
+  kominka_doma: 1.2,
+  kominka_tatami: 1.82,   // 畳 910×1820 を2枚
+  // 屋根材(納品の寸法。働き幅・働き長さを整数個に割り付けた1タイル)
+  roof_kawara_ibushi: 1.06,
+  roof_s_tile_terracotta: 1.08,
+  roof_flat_tile_charcoal: 1.08,
+  roof_colonial_gray: 1.0,
+  roof_standing_seam_silver: 0.909,
+  roof_copper_patina: 0.999,
+  roof_asphalt_shingle_brown: 1.064
 };
 function texTileM(key, fallback){
   var v = key && TEX_TILE_M[key];
@@ -3858,7 +3922,29 @@ var ASSET_TEX_NORMAL = {
   siding:         'assets/textures/wall_siding_normal.jpg',
   galvalume_dark: 'assets/textures/wall_galvalume_dark_normal.jpg',
   wood_cedar:     'assets/textures/wood_cedar_warm_normal.jpg',
-  wood_oak:       'assets/textures/floor_oak_normal.jpg'
+  wood_oak:       'assets/textures/floor_oak_normal.jpg',
+  mansion_ashlar_stone: 'assets/textures/mansion/mansion_ashlar_stone_normal.jpg',
+  mansion_brick_red: 'assets/textures/mansion/mansion_brick_red_normal.jpg',
+  mansion_slate_roof: 'assets/textures/mansion/mansion_slate_roof_normal.jpg',
+  mansion_damask_wallpaper: 'assets/textures/mansion/mansion_damask_wallpaper_normal.jpg',
+  mansion_white_subway_tile: 'assets/textures/mansion/mansion_white_subway_tile_normal.jpg',
+  mansion_wainscot_panel: 'assets/textures/mansion/mansion_wainscot_panel_normal.jpg',
+  mansion_herringbone_oak: 'assets/textures/mansion/mansion_herringbone_oak_normal.jpg',
+  mansion_marble_checker: 'assets/textures/mansion/mansion_marble_checker_normal.jpg',
+  kominka_yakisugi: 'assets/textures/kominka/kominka_yakisugi_normal.jpg',
+  kominka_shikkui: 'assets/textures/kominka/kominka_shikkui_normal.jpg',
+  kominka_juraku: 'assets/textures/kominka/kominka_juraku_normal.jpg',
+  kominka_kayabuki: 'assets/textures/kominka/kominka_kayabuki_normal.jpg',
+  kominka_old_pine_floor: 'assets/textures/kominka/kominka_old_pine_floor_normal.jpg',
+  kominka_doma: 'assets/textures/kominka/kominka_doma_normal.jpg',
+  kominka_tatami: 'assets/textures/kominka/kominka_tatami_normal.jpg',
+  roof_kawara_ibushi: 'assets/textures/roof/roof_kawara_ibushi_normal.jpg',
+  roof_s_tile_terracotta: 'assets/textures/roof/roof_s_tile_terracotta_normal.jpg',
+  roof_flat_tile_charcoal: 'assets/textures/roof/roof_flat_tile_charcoal_normal.jpg',
+  roof_colonial_gray: 'assets/textures/roof/roof_colonial_gray_normal.jpg',
+  roof_standing_seam_silver: 'assets/textures/roof/roof_standing_seam_silver_normal.jpg',
+  roof_copper_patina: 'assets/textures/roof/roof_copper_patina_normal.jpg',
+  roof_asphalt_shingle_brown: 'assets/textures/roof/roof_asphalt_shingle_brown_normal.jpg'
 };
 var _texNormalCache = {};
 function getTextureNormal3D(key){
@@ -3901,8 +3987,25 @@ var FINISH_PROPS = ['finishColors','finishRoughness','finishTextures'];
 var FINISH_TEXTURE_DEPS = {
   texture: function(key){ return cloneRepeatReadyTexture(getTexture3D(key)); },
   normal:  function(key){ var n=getTextureNormal3D(key); return n?cloneRepeatReadyTexture(n):null; },
-  tileM:   function(key,fallback){ return texTileM(key,fallback); }
+  tileM:   function(key,fallback){ return texTileM(key,fallback); },
+  slopeUV: function(mesh){ roofSlopeUVsForMesh(mesh); }
 };
+// 部品の屋根面に、家の屋根と同じ向きの UV を付け直す(roofSlopeUVs)。形は共有のキャッシュなので
+// 写しを作ってから書く。UV は実寸(m)で入れる -- 柄の繰り返しは metresPerUv が測って合わせる。
+function roofSlopeUVsForMesh(mesh){
+  if(!mesh||!mesh.geometry||!mesh.geometry.attributes.position) return;
+  if(mesh.userData&&mesh.userData.roofSlopeUV) return;
+  var g=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone();
+  mesh.updateWorldMatrix(true,false);
+  var pos=g.attributes.position, v=new THREE.Vector3(), world=new Float32Array(pos.count*3);
+  for(var i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos,i).applyMatrix4(mesh.matrixWorld);
+    world[i*3]=v.x; world[i*3+1]=v.y; world[i*3+2]=v.z;
+  }
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(roofSlopeUVs(world,1,1),2));
+  mesh.geometry=g;
+  mesh.userData=Object.assign({},mesh.userData,{roofSlopeUV:true});
+}
 function getTexture3D(key) {
   if (!key) return null;
   if (_texCache[key]) return _texCache[key];
@@ -4173,6 +4276,65 @@ function applyGradeSettings(){
   _gradePass.uniforms.gLift.value=GRADE_LIFT;
   _gradePass.uniforms.gBalance.value.set(GRADE_BALANCE[0],GRADE_BALANCE[1],GRADE_BALANCE[2]);
 }
+// 3D の場面の土台（空・半球光・太陽・環境光・地面）を作り、sc3 / _skyMesh / _gndMesh に入れる。
+// init3D から1度呼ぶほか、比較モードが右の間取り用の2つ目の場面を作るときにも呼ぶ
+// （そのときは全体の変数を右の物に入れ替えた状態で呼ばれる。shared に左の空を渡すと、
+// 空の見た目と環境マップを左と共有し、作り直さない）。
+function createScene3DBase(shared){
+  sc3=new THREE.Scene();
+  sc3.userData.mainScene=true;   // 間取りを描く場面(環境マップ用の一時的な場面と区別する)
+  sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
+  var skyGeo=new THREE.SphereGeometry(900,48,24);
+  _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({
+    map:makeSkyTexture(),
+    side:THREE.BackSide,
+    fog:false,
+    toneMapped:false
+  }));
+  _skyMesh.name='_sky';
+  _skyMesh.renderOrder=-10;
+  sc3.add(_skyMesh);
+
+  var hemi=new THREE.HemisphereLight(0xffffff,0x777777,LIGHT_SETTINGS.hemi);
+  hemi.name='HemiLight';
+  sc3.add(hemi);
+
+  var sun=new THREE.DirectionalLight(0xffffff,LIGHT_SETTINGS.sun);
+  sun.name='SunLight';
+  sun.position.set(100,200,100); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
+  sun.shadow.camera.top=150; sun.shadow.camera.bottom=-150;
+  sun.shadow.bias = -0.00018;
+  sun.shadow.normalBias = 0.018;
+  sun.shadow.radius = 2.1;
+  sc3.add(sun);
+  sc3.add(sun.target);
+  
+  var amb = new THREE.AmbientLight(0xffffff, LIGHT_SETTINGS.ambient);
+  amb.name='AmbientLight';
+  sc3.add(amb);
+  // 環境光はアプリ内の空(makeSkyTexture)から生成する。
+  // 外部HDR(outdoor.hdr)は暖色の色被りがあり、時間帯にも追従しないため不使用
+  if(shared && shared.sky){
+    // 空は左の物と同じジオメトリ・マテリアル(時刻の変化も一緒に効く)。環境マップも同じ物を使う
+    sc3.remove(_skyMesh); _skyMesh.geometry.dispose(); if(_skyMesh.material.map) _skyMesh.material.map.dispose(); _skyMesh.material.dispose();
+    _skyMesh=new THREE.Mesh(shared.sky.geometry,shared.sky.material);
+    _skyMesh.name='_sky'; _skyMesh.renderOrder=-10; sc3.add(_skyMesh);
+    sc3.environment=shared.environment||null;
+    applyLightingToScene(false);
+  }else{
+    refreshEnvironmentFromSky();
+    applyLightingToScene(false);
+    refreshSkyTexture();
+  }
+
+  // Ground – resized in buildLandscape() based on building footprint
+  _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
+    new THREE.MeshStandardMaterial({color:0xd7d5ce,roughness:1.0,metalness:0.0}));
+  _gndMesh.rotation.x=-Math.PI/2; _gndMesh.position.set(4,0,2);
+  _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
+}
 function init3D(){
   if(ren) return;
   if(typeof window.THREE==='undefined'){
@@ -4228,49 +4390,7 @@ function init3D(){
     if(sc3){ rebuild3D(); }
     if(typeof invalidate3D==='function') invalidate3D();
   },false);
-  sc3=new THREE.Scene();
-  sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
-  var skyGeo=new THREE.SphereGeometry(900,48,24);
-  _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({
-    map:makeSkyTexture(),
-    side:THREE.BackSide,
-    fog:false,
-    toneMapped:false
-  }));
-  _skyMesh.name='_sky';
-  _skyMesh.renderOrder=-10;
-  sc3.add(_skyMesh);
-
-  var hemi=new THREE.HemisphereLight(0xffffff,0x777777,LIGHT_SETTINGS.hemi);
-  hemi.name='HemiLight';
-  sc3.add(hemi);
-
-  var sun=new THREE.DirectionalLight(0xffffff,LIGHT_SETTINGS.sun);
-  sun.name='SunLight';
-  sun.position.set(100,200,100); sun.castShadow=true;
-  sun.shadow.mapSize.set(2048,2048);
-  sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
-  sun.shadow.camera.top=150; sun.shadow.camera.bottom=-150;
-  sun.shadow.bias = -0.00018;
-  sun.shadow.normalBias = 0.018;
-  sun.shadow.radius = 2.1;
-  sc3.add(sun);
-  sc3.add(sun.target);
-  
-  var amb = new THREE.AmbientLight(0xffffff, LIGHT_SETTINGS.ambient);
-  amb.name='AmbientLight';
-  sc3.add(amb);
-  // 環境光はアプリ内の空(makeSkyTexture)から生成する。
-  // 外部HDR(outdoor.hdr)は暖色の色被りがあり、時間帯にも追従しないため不使用
-  refreshEnvironmentFromSky();
-  applyLightingToScene(false);
-  refreshSkyTexture();
-
-  // Ground – resized in buildLandscape() based on building footprint
-  _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
-    new THREE.MeshStandardMaterial({color:0xd7d5ce,roughness:1.0,metalness:0.0}));
-  _gndMesh.rotation.x=-Math.PI/2; _gndMesh.position.set(4,0,2);
-  _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
+  createScene3DBase();
 
   camExt=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.1,2000);
   camExt.position.set(12,9,18); camExt.lookAt(4,1,2);
@@ -5833,14 +5953,18 @@ function build3DSetbackRoofSlab(pl,fp,planes){
     var rtc=cloneRepeatReadyTexture(roofTex);
     if(rtc){
       rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping;
-      setTextureRepeatNoDistort(rtc,Wm,Dm,0.8);
+      setTextureRepeatNoDistort(rtc,Wm,Dm,texTileM(ap.texture,0.8));
       applyTextureFlip(rtc,ap);
       matParams.map=rtc;
       matParams.color=0xffffff;
+      var rn=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+      if(rn){ setTextureRepeatNoDistort(rn,Wm,Dm,texTileM(ap.texture,0.8)); applyTextureFlip(rn,ap); matParams.normalMap=rn; }
     }
   }
+  var sheen=roofSurfaceParams(ap);
   var topMat=makeExteriorLightingMaterial({map:matParams.map||null,color:matParams.color,
-    side:THREE.DoubleSide,roughness:0.92,metalness:0.0,envMapIntensity:0.06});
+    side:THREE.DoubleSide,roughness:sheen.roughness,metalness:sheen.metalness,envMapIntensity:sheen.envMapIntensity});
+  if(matParams.normalMap){ topMat.normalMap=matParams.normalMap; topMat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',
     side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   // (t,s) と上下の別からワールド頂点へ。上面はいちばん低い制限面そのもの。
@@ -6397,36 +6521,109 @@ function rebuild3D(quiet){
   });
 }
 
-// グループ直下の「同一マテリアル・同一影設定・同一属性構成」のメッシュを1つに統合し
-// ドローコールを削減する。見た目は不変。グループ単位の選択/移動/表示制御は維持される。
-// GLBモデルはネストしたグループ内にあるため対象外(直下の子のみ統合)
+// グループの中の「見た目が同じマテリアル・同じ影設定・同じ属性構成」のメッシュを1つに統合し、
+// ドローコールを減らす。見た目は不変。グループ単位の選択/移動/表示制御は維持される。
+//
+// 以前は「グループ直下」かつ「同じマテリアルのオブジェクト」だけを対象にしていた。ところが壁の
+// 面・巾木・格子などは、ピースごとに中身の同じマテリアルを作り直しているため uuid が全部違い、
+// 1本の壁が80回近く描かれていた（既定プラン2階建ての外観で、描画の約半分が壁だった）。
+// そこで、マテリアルの中身（種類・色・質感・貼ってある画像とその繰り返し）が同じなら同じと見なし、
+// グループの奥のピースも、グループから見た位置に直して統合する。比較モードで2つの家を
+// 同時に描く余力を作るための最適化（作り直し計画 2-4 / 段階4）。
+//
+// 統合しない物（個別に動かす・差し替える物）:
+//   - userData.noMerge の付いたメッシュと、その付いたグループの下（扉の開閉・引き戸など）
+//   - 内観3Dのカットアウェイで材質を差し替える壁の面（userData.cutawayWall）
+//   - InstancedMesh・SkinnedMesh・マテリアル配列・モーフを持つ物
+//   - 下に挙げた以外の userData を持つメッシュ（後から個別に探して触る処理があるかもしれない）
+var MERGE_SAFE_USERDATA={name:1,b:1,selectRef:1,selectKind:1,interiorFace:1,exteriorFace:1,skirting:1,skirtingWallId:1,skirtingFaceKey:1};
+var MERGE_TEXTURE_SLOTS=['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap','alphaMap','bumpMap','lightMap','specularMap','clearcoatMap','clearcoatNormalMap','clearcoatRoughnessMap','transmissionMap','thicknessMap','sheenColorMap','sheenRoughnessMap','iridescenceMap','anisotropyMap'];
+var MERGE_MATERIAL_PROPS=['type','roughness','metalness','opacity','transparent','side','shadowSide','depthWrite','depthTest','colorWrite','alphaTest','alphaToCoverage','premultipliedAlpha','dithering','polygonOffset','polygonOffsetFactor','polygonOffsetUnits','envMapIntensity','vertexColors','flatShading','wireframe','toneMapped','fog','blending','emissiveIntensity','aoMapIntensity','lightMapIntensity','bumpScale','displacementScale','transmission','thickness','ior','clearcoat','clearcoatRoughness','sheen','sheenRoughness','iridescence','specularIntensity','reflectivity','attenuationDistance','anisotropy','stencilWrite','forceSinglePass','visible'];
+function mergeTextureSignature(t){
+  if(!t) return '-';
+  if(!t.isTexture||!t.source) return 'x'+(t.uuid||'?');
+  return [t.source.uuid,t.repeat.x,t.repeat.y,t.offset.x,t.offset.y,t.rotation,t.center.x,t.center.y,
+    t.flipY,t.wrapS,t.wrapT,t.magFilter,t.minFilter,t.anisotropy,t.colorSpace,t.channel,t.matrixAutoUpdate?1:0].join(',');
+}
+function mergeMaterialSignature(m){
+  if(!m || m.onBeforeCompile && m.onBeforeCompile!==THREE.Material.prototype.onBeforeCompile) return null;
+  if(m.isShaderMaterial || m.customProgramCacheKey!==THREE.Material.prototype.customProgramCacheKey) return null;
+  if(m.clippingPlanes && m.clippingPlanes.length) return null;
+  var parts=MERGE_MATERIAL_PROPS.map(function(k){ return String(m[k]); });
+  ['color','emissive','specularColor','sheenColor','attenuationColor'].forEach(function(k){ parts.push(m[k]&&m[k].isColor?m[k].getHexString():'-'); });
+  parts.push(m.normalScale?m.normalScale.x+':'+m.normalScale.y:'-', m.normalMapType, m.envMap?('e'+m.envMap.uuid):'-');
+  MERGE_TEXTURE_SLOTS.forEach(function(k){ parts.push(mergeTextureSignature(m[k])); });
+  if(m.userData && Object.keys(m.userData).length) parts.push(JSON.stringify(m.userData));
+  if(m.defines && Object.keys(m.defines).length) parts.push(JSON.stringify(m.defines));
+  return parts.join('|');
+}
+function mergeGeometrySignature(g){
+  if(!g || !g.attributes || !g.attributes.position) return null;
+  if(g.morphAttributes && Object.keys(g.morphAttributes).length) return null;
+  return Object.keys(g.attributes).sort().map(function(k){
+    var a=g.attributes[k]; return k+':'+a.itemSize+(a.normalized?'n':'')+(a.isInterleavedBufferAttribute?'i':'')+(a.array&&a.array.constructor.name);
+  }).join(',');
+}
 function mergeGroupMeshes(grp){
   var merge=window.THREE&&THREE.BufferGeometryUtils&&THREE.BufferGeometryUtils.mergeGeometries;
   if(!merge||!grp||!grp.isGroup) return;
   var byKey={};
-  grp.children.forEach(function(o){
-    if(!o.isMesh||!o.geometry||(o.userData&&o.userData.noMerge)) return;
-    if(Array.isArray(o.material)) return;
-    var attrs=Object.keys(o.geometry.attributes).sort().join(',');
-    var key=o.material.uuid+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0)+'|'+attrs+'|'+(o.renderOrder||0);
+  function relMatrix(o){
+    o.updateMatrix();
+    var m=o.matrix.clone(), p=o.parent;
+    while(p && p!==grp){ p.updateMatrix(); m.premultiply(p.matrix); p=p.parent; }
+    return p===grp ? m : null;
+  }
+  function visit(node){
+    node.children.slice().forEach(function(o){
+      if(o.userData && o.userData.noMerge) return;           // この物と、その下は個別に扱う
+      if(o.isMesh) consider(o);
+      if(o.children && o.children.length) visit(o);
+    });
+  }
+  function consider(o){
+    if(o.isInstancedMesh||o.isSkinnedMesh||o.isLine||o.isPoints||Array.isArray(o.material)) return;
+    if(o.children && o.children.length) return;              // 子を持つメッシュは動かさない
+    if(o.visible===false || o.userData.cutawayWall) return;
+    var ud=o.userData||{};
+    for(var k in ud){ if(!MERGE_SAFE_USERDATA[k]) return; }
+    if(o.onBeforeRender!==THREE.Object3D.prototype.onBeforeRender || o.onAfterRender!==THREE.Object3D.prototype.onAfterRender) return;
+    var ms=mergeMaterialSignature(o.material), gs=mergeGeometrySignature(o.geometry);
+    if(!ms||!gs) return;
+    var key=ms+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0)+'|'+gs+'|'+(o.renderOrder||0)+'|'+(o.frustumCulled?1:0)+'|'+o.layers.mask;
     (byKey[key]=byKey[key]||[]).push(o);
-  });
+  }
+  visit(grp);
   Object.keys(byKey).forEach(function(k){
     var list=byKey[k];
     if(list.length<2) return;
-    var geos=list.map(function(o){
-      o.updateMatrix();
-      var g=o.geometry.clone().applyMatrix4(o.matrix);
-      return g.index?g.toNonIndexed():g;
+    var mats=list.map(relMatrix);
+    if(mats.some(function(m){ return !m; })) return;
+    var geos=list.map(function(o,i){
+      var g=o.geometry.clone().applyMatrix4(mats[i]);
+      // 鏡像(負の拡大)を含む位置合わせは面の向きが裏返るので、頂点の並びを戻す
+      if(mats[i].determinant()<0 && g.index){ var ix=g.index.array; for(var t=0;t<ix.length;t+=3){ var tmp=ix[t+1]; ix[t+1]=ix[t+2]; ix[t+2]=tmp; } }
+      g=g.index?g.toNonIndexed():g;
+      if(mats[i].determinant()<0 && !o.geometry.index){
+        var pos=g.attributes.position; // 添字の無い形は、三角形ごとに2点目と3点目を入れ替える
+        Object.keys(g.attributes).forEach(function(name){
+          var a=g.attributes[name], n=a.itemSize, arr=a.array;
+          for(var t=0;t<a.count;t+=3){ for(var c=0;c<n;c++){ var x=arr[(t+1)*n+c]; arr[(t+1)*n+c]=arr[(t+2)*n+c]; arr[(t+2)*n+c]=x; } }
+        });
+      }
+      g.groups=[];
+      return g;
     });
     var merged=merge(geos,false);
     geos.forEach(function(g){ g.dispose(); });
     if(!merged) return;
     var first=list[0];
-    list.forEach(function(o){ grp.remove(o); o.geometry.dispose(); });
+    list.forEach(function(o){ if(o.parent) o.parent.remove(o); o.geometry.dispose(); });
     var m=new THREE.Mesh(merged,first.material);
     m.castShadow=first.castShadow; m.receiveShadow=first.receiveShadow;
     m.renderOrder=first.renderOrder||0;
+    m.frustumCulled=first.frustumCulled;
+    m.layers.mask=first.layers.mask;
     m.userData=Object.assign({},first.userData);
     m.matrixAutoUpdate=false;
     grp.add(m);
@@ -7816,12 +8013,12 @@ function updateRoofAppearance(scope,key,value,floor,noSave){
   else if(!noSave) saveState();
   if(scope==='whole'){
     setTextureSettingValue(s.whole,key,value);
-    if(key==='color'||key==='texture') s.whole.linked=true;
+    if(key==='color'||key==='texture'||key==='sheen') s.whole.linked=true;
   } else if(scope==='floor'){
     s.floors[floor]=s.floors[floor]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
     normalizeTextureOrientationTarget(s.floors[floor]);
     setTextureSettingValue(s.floors[floor],key,value);
-    if(key==='color'||key==='texture'){
+    if(key==='color'||key==='texture'||key==='sheen'){
       s.whole.linked=false;
       s.floors[floor].linked=true;
     }
@@ -7847,13 +8044,36 @@ function resolveRoofAppearance(it){
   var s=ensureRoofAppearance();
   var fl=it.floor||1;
   var fs=normalizeTextureOrientationTarget(s.floors[fl]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false});
-  if(s.whole && s.whole.linked){
-    return appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole);
-  }
-  if(fs.linked){
-    return appearanceWithTextureOrientation(fs.color||'#2a2a30',fs.texture||null,'floor',fs);
-  }
-  return appearanceWithTextureOrientation(it.color||'#2a2a30',it.texture||null,'item',it);
+  var owner=(s.whole && s.whole.linked)?s.whole:(fs.linked?fs:it);
+  var ap=(owner===s.whole)
+    ? appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole)
+    : (owner===fs)
+      ? appearanceWithTextureOrientation(fs.color||'#2a2a30',fs.texture||null,'floor',fs)
+      : appearanceWithTextureOrientation(it.color||'#2a2a30',it.texture||null,'item',it);
+  ap.sheen=(owner&&owner.sheen)||null;
+  return ap;
+}
+
+// 屋根の質感(粗さ・金属感)。素材ごとの既定と、設定欄の「質感」での上書き。
+// 以前はどの屋根も粗さ 0.92・金属感 0 で、ガルバの屋根も紙のように見えた。
+var ROOF_SHEEN_OPTIONS=[
+  ['','素材に合わせる'],['matte','マット'],['satin','半艶'],['metal','金属']
+];
+var ROOF_SHEEN_PARAMS={
+  matte:{roughness:0.92,metalness:0.0,envMapIntensity:0.06},
+  satin:{roughness:0.55,metalness:0.0,envMapIntensity:0.22},
+  metal:{roughness:0.40,metalness:0.55,envMapIntensity:0.42}
+};
+// 素材の既定の質感。載っていない素材(瓦・画像・色だけ)はマット
+var ROOF_TEXTURE_SHEEN={
+  galvalume_dark:'metal',
+  roof_standing_seam_silver:'metal',
+  roof_copper_patina:'satin',
+  mansion_slate_roof:'satin'
+};
+function roofSurfaceParams(ap){
+  var key=(ap&&ap.sheen)||(ap&&ap.texture&&ROOF_TEXTURE_SHEEN[ap.texture])||'matte';
+  return ROOF_SHEEN_PARAMS[key]||ROOF_SHEEN_PARAMS.matte;
 }
 
 function interiorFaceKey(w,face){
@@ -8187,6 +8407,33 @@ function setExteriorDetailValue(key,val){
   DATA.exteriorDetail[key]=val;
   if(ren) rebuild3D();
 }
+// 用意してある素材から選ぶ欄。画像を読み込む欄と並べる(読み込んだ画像は「読み込んだ画像」として出す)。
+// 値は ASSET_TEX_MAP のキーで、設定の texture にそのまま入る。
+var PRESET_WALL_TEXTURES={
+  exterior:[['siding','サイディング'],['plaster','塗り壁'],['plaster_white','塗り壁（白）'],['galvalume_dark','ガルバ（黒）'],
+    ['wood_cedar','杉板'],['mansion_brick_red','赤レンガ（洋館）'],['mansion_ashlar_stone','切石（洋館）'],
+    ['kominka_yakisugi','焼杉板（古民家）'],['kominka_shikkui','白漆喰（古民家）']],
+  interior:[['wall_int','塗り壁'],['plaster_white','塗り壁（白）'],['wood_cedar','杉板'],
+    ['mansion_damask_wallpaper','ダマスク柄の壁紙（洋館）'],['mansion_white_subway_tile','白いタイル（洋館）'],
+    ['kominka_shikkui','白漆喰（古民家）'],['kominka_juraku','聚楽の土壁（古民家）']],
+  roof:[['roof_tile','瓦'],['roof_kawara_ibushi','日本瓦（いぶし銀）'],['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],['roof_flat_tile_charcoal','平板瓦（黒灰）'],['roof_colonial_gray','化粧スレート（コロニアル）'],['roof_standing_seam_silver','ガルバ立平（銀）'],['roof_copper_patina','銅板一文字（緑青）'],['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）'],['kominka_kayabuki','茅葺き（古民家）']]
+};
+function presetTextureSelectHtml(kind,current,call,disabled){
+  var list=PRESET_WALL_TEXTURES[kind]||[];
+  var known=list.some(function(o){return o[0]===current;});
+  var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(disabled?0.45:1)+'"><span style="font-size:10px;color:#cce">素材</span>';
+  html+='<select class="preset-texture-select" aria-label="素材" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'"'+(disabled?' disabled':'')+'>';
+  html+='<option value=""'+(current?'':' selected')+'>素材なし（色だけ）</option>';
+  if(current&&!known) html+='<option value="'+escHtml(current.indexOf('data:')===0?'':current)+'" selected disabled>読み込んだ画像</option>';
+  list.forEach(function(o){ html+='<option value="'+o[0]+'"'+(o[0]===current?' selected':'')+'>'+o[1]+'</option>'; });
+  return html+'</select></div>';
+}
+function roofSheenSelectHtml(current,call){
+  var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#cce">質感</span>';
+  html+='<select class="roof-sheen-select" aria-label="屋根の質感" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'">';
+  ROOF_SHEEN_OPTIONS.forEach(function(o){ html+='<option value="'+o[0]+'"'+((current||'')===o[0]?' selected':'')+'>'+o[1]+'</option>'; });
+  return html+'</select></div>';
+}
 function renderExteriorWallPanel(mode){
   mode=mode||APPEARANCE_PANEL_MODE||'exterior';
   var body=document.getElementById('exterior-wall-panel-body');
@@ -8205,6 +8452,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadInteriorTex(this,\'whole\')">';
   html += '</div>';
+  html += presetTextureSelectHtml('interior',ins.whole.texture,"updateInteriorSetting('whole','texture',VALUE)");
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ins.whole.texture)+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateInteriorSetting(\'whole\',\'textureFlipX\','+(!ins.whole.textureFlipX)+')',
@@ -8231,6 +8479,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadInteriorTex(this,\'floor\','+ifl+')">';
     html += '</div>';
+    html += presetTextureSelectHtml('interior',ifs.texture,"updateInteriorSetting('floor','texture',VALUE,"+ifl+")");
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ifs.texture)+' '+(ifs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'floor\',\'texture\',null,'+ifl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateInteriorSetting(\'floor\',\'textureFlipX\','+(!ifs.textureFlipX)+','+ifl+')',
@@ -8265,6 +8514,8 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
+  html += presetTextureSelectHtml('roof',roof.whole.texture,"updateRoofAppearance('whole','texture',VALUE)");
+  html += roofSheenSelectHtml(roof.whole.sheen,"updateRoofAppearance('whole','sheen',VALUE)");
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateRoofAppearance(\'whole\',\'textureFlipX\','+(!roof.whole.textureFlipX)+')',
@@ -8281,6 +8532,8 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
+    html += presetTextureSelectHtml('roof',rfs.texture,"updateRoofAppearance('floor','texture',VALUE,"+rfl+")");
+    html += roofSheenSelectHtml(rfs.sheen,"updateRoofAppearance('floor','sheen',VALUE,"+rfl+")");
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateRoofAppearance(\'floor\',\'textureFlipX\','+(!rfs.textureFlipX)+','+rfl+')',
@@ -8310,6 +8563,7 @@ function renderExteriorWallPanel(mode){
   html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="finishAppearanceColorInput()" '+(!s.whole.linked?'disabled':'')+'>';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'whole\')" '+(!s.whole.linked?'disabled':'')+'>';
   html += '</div>';
+  html += presetTextureSelectHtml('exterior',s.whole.texture,"updateExteriorSetting('whole','texture',VALUE)",!s.whole.linked);
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(s.whole.texture)+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateExteriorSetting(\'whole\',\'textureFlipX\','+(!s.whole.textureFlipX)+')',
@@ -8327,6 +8581,7 @@ function renderExteriorWallPanel(mode){
     html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
+    html += presetTextureSelectHtml('exterior',fs.texture,"updateExteriorSetting('floor','texture',VALUE,"+fl+")",s.whole.linked||!fs.linked);
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateExteriorSetting(\'floor\',\'textureFlipX\','+(!fs.textureFlipX)+','+fl+')',
@@ -9453,6 +9708,14 @@ function makeFloorSlabMaterial(matFloor){
   if(matFloor && matFloor.color) avg=matFloor.color.getHex();
   return new THREE.MeshStandardMaterial({color:avg,roughness:0.95,metalness:0.0,envMapIntensity:0.04});
 }
+// 窓ガラスの「透過」(奥の景色が少し歪んで透ける表現)。three.js はこれのために、ガラス以外の
+// 物を毎コマもう1回、画面と同じ大きさで描き直す（既定プラン2階建ての外観で描画が2762→1436回）。
+// タッチ端末(iPad)と比較モード(2つの家を描く)では使わず、ふつうの半透明のガラスにする。
+function glassTransmissionEnabled(){
+  var touch=typeof navigator!=='undefined' && (navigator.maxTouchPoints||0)>0;
+  var comparing=typeof CompareMode!=='undefined' && CompareMode.isOn && CompareMode.isOn();
+  return !touch && !comparing;
+}
 function makeWallGlassMaterial(){
   // 昼間の窓は反射が勝って室内が透けにくい実際の見え方に寄せる
   // (不透明度が低すぎると白い内装が透けて「白い箱」に見える)
@@ -9462,7 +9725,7 @@ function makeWallGlassMaterial(){
     opacity:0.52,
     roughness:0.14,        // 低すぎると空テクスチャの雲筋が縞状に映り込む
     metalness:0.0,
-    transmission:0.2,
+    transmission:glassTransmissionEnabled()?0.2:0,
     thickness:0.02,
     envMapIntensity:0.75,
     side:THREE.DoubleSide,
@@ -9718,7 +9981,7 @@ function buildWall3D(w){
       face.rotation.y=rotY+(sp.sign<0?Math.PI:0);
       face.userData.exteriorFace=true;
       markInteriorCutawayCandidate(face,w,sp.sign,0);
-      face.userData.noMerge=true; // カットアウェイで個別に材質差し替えが必要
+      if(face.userData.cutawayWall) face.userData.noMerge=true; // カットアウェイで個別に材質差し替えが必要
       wallGroup.add(face);
     });
   }
@@ -9754,7 +10017,7 @@ function buildWall3D(w){
       );
       face.rotation.y=rotY+(faceInfo.sign<0?Math.PI:0);
       face.userData.interiorFace=true;
-      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); face.userData.noMerge=true; }
+      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); if(face.userData.cutawayWall) face.userData.noMerge=true; }
       wallGroup.add(face);
       addSkirting(yBase,mid,segLen,normalX,normalZ,intOff,faceMat,faceInfo);
     });
@@ -9790,7 +10053,6 @@ function buildWall3D(w){
       z1+dirZ*mid+normalZ*(intOff+SK_T/2)
     );
     mesh.rotation.y=rotY;
-    mesh.userData.noMerge=true;
     mesh.userData.skirting=true;
     // どの壁のどの面の巾木かを持たせる(面単位のON/OFF・色の検証と調査用)
     mesh.userData.skirtingWallId=w.id;
@@ -9912,7 +10174,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*coreA,fy,z1+dirZ*coreA);
     mesh.rotation.y=rotY;
-    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); if(mesh.userData.cutawayWall) mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
     if(extMat&&extSpans.length){
       extSpans.forEach(function(sp){
@@ -9936,7 +10198,7 @@ function buildWall3D(w){
       var face=slopedFaceMesh(aa,bb,yBase,h,wallInteriorFaceOffsetM(w),faceInfo.sign,
         makeInteriorWallMaterial(w,len,faceInfo));
       face.userData.interiorFace=true;
-      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); face.userData.noMerge=true; }
+      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); if(face.userData.cutawayWall) face.userData.noMerge=true; }
       wallGroup.add(face);
     });
   }
@@ -9978,7 +10240,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*coreMid,fy+yBase+h/2,z1+dirZ*coreMid);
     mesh.rotation.y=rotY;
-    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); if(mesh.userData.cutawayWall) mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
     addExteriorFace(coreA,coreB,yBase,h);
     addInteriorFaces(a,b,yBase,h);
@@ -10041,7 +10303,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*a,fy,z1+dirZ*a);
     mesh.rotation.y=rotY;
-    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); if(mesh.userData.cutawayWall) mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
   }
   function addLatticePiece(a,b,yBase,h){
@@ -10060,7 +10322,7 @@ function buildWall3D(w){
         var barLen=Math.min(bw,segLen);
         var bar=new THREE.Mesh(new THREE.BoxGeometry(barLen,h,depth),barMat);
         bar.position.set(x1+dirX*x,fy+yBase+h/2,z1+dirZ*x);
-        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(bar,w,0,0); bar.userData.noMerge=true; } wallGroup.add(bar);
+        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(bar,w,0,0); if(bar.userData.cutawayWall) bar.userData.noMerge=true; } wallGroup.add(bar);
       }
     } else {
       var hpitch=0.22, bh=0.045;
@@ -10069,7 +10331,7 @@ function buildWall3D(w){
         var yy=yBase+(rows===1?h/2:h*j/(rows-1));
         var rail=new THREE.Mesh(new THREE.BoxGeometry(segLen,bh,depth),barMat);
         rail.position.set(x1+dirX*(a+segLen/2),fy+yy,z1+dirZ*(a+segLen/2));
-        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(rail,w,0,0); rail.userData.noMerge=true; } wallGroup.add(rail);
+        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(rail,w,0,0); if(rail.userData.cutawayWall) rail.userData.noMerge=true; } wallGroup.add(rail);
       }
       var postPitch=0.9, pw=0.04;
       var posts=Math.max(2,Math.floor(segLen/postPitch)+1);
@@ -10077,7 +10339,7 @@ function buildWall3D(w){
         var px=a+(posts===1?segLen/2:segLen*k/(posts-1));
         var post=new THREE.Mesh(new THREE.BoxGeometry(pw,h,depth),barMat);
         post.position.set(x1+dirX*px,fy+yBase+h/2,z1+dirZ*px);
-        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(post,w,0,0); post.userData.noMerge=true; } wallGroup.add(post);
+        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(post,w,0,0); if(post.userData.cutawayWall) post.userData.noMerge=true; } wallGroup.add(post);
       }
     }
   }
@@ -10559,20 +10821,29 @@ function buildWinFrames(flFilt){
         var movingX=slideWant?fixedX:(leftOpen?leftPos:rightPos);
         // 引き違い2枚のレールピッチは34mm(戸厚36mmでほぼ密着する実際の納まり)
         addBox(doorLeafMat,fixedX,panelY,-0.019,panelW,panelH,leafT);
-        var slideLeaf=addBox(doorLeafMat,movingX,panelY, 0.019,panelW,panelH,leafT);
+        // 可動戸は戸板と引手をひとつのグループにまとめ、グループごと滑らせる。
+        // (以前は引手を建具グループに直付けしていたため、戸が開いても引手が残った)
+        var slideLeaf=new THREE.Group();
+        slideLeaf.position.set(movingX,0,0);
+        slideLeaf.userData.noMerge=true; // ウォークスルーで動かすため統合しない
+        grp.add(slideLeaf);
+        var slideLeafMesh=new THREE.Mesh(new THREE.BoxGeometry(panelW,panelH,leafT),doorLeafMat);
+        slideLeafMesh.position.set(0,panelY,0.019); slideLeafMesh.castShadow=true; slideLeafMesh.receiveShadow=true;
+        slideLeaf.add(slideLeafMesh);
         // 掘り込み引手: 各戸の召し合わせ側端部から25mm内側、縦長30x100(中心H950)・両面。
         // パネル面より一段暗いグレーで2mm沈んで見える表現
         var pullMat=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
-        function addPull(px0,pz0,edgeDir){
+        function addPull(parent,px0,pz0,edgeDir){
           var hx=px0+edgeDir*(panelW/2-0.025-0.015);
           [-1,1].forEach(function(sside){
-            addBox(pullMat,hx,doorHardwareY(0.95),pz0+sside*(leafT/2-0.001),0.030,0.100,0.004);
+            var pm=new THREE.Mesh(new THREE.BoxGeometry(0.030,0.100,0.004),pullMat);
+            pm.position.set(hx,doorHardwareY(0.95),pz0+sside*(leafT/2-0.001));
+            pm.castShadow=true; pm.receiveShadow=true; parent.add(pm);
           });
         }
         // 固定戸: 召し合わせ側=可動戸側 / 可動戸: 召し合わせ側=固定戸側
-        addPull(fixedX,-0.019,(movingX>=fixedX)?1:-1);
-        addPull(movingX, 0.019,(fixedX>=movingX)?1:-1);
-        slideLeaf.userData.noMerge=true; // ウォークスルーで動かすため統合しない
+        addPull(grp,fixedX,-0.019,(movingX>=fixedX)?1:-1);
+        addPull(slideLeaf,0, 0.019,(fixedX>=movingX)?1:-1);
         _doorAnims.push({it:it,grp:grp,slideMesh:slideLeaf,openX:fixedX,
           closedX:(leftOpen?leftPos:rightPos),
           initiallyOpen:slideOpen,_want:slideWant});
@@ -10591,7 +10862,8 @@ function buildWinFrames(flFilt){
           // モデル建具は縦に伸ばしすぎるとGLB内蔵の取手・ノブまで比例して
           // 上に移動してしまう。スラブは実寸2.0mまでの伸縮にとどめ、
           // それを超える分は欄間(上部パネル)で埋めて取手高さを実物どおりに保つ
-          var slabH=Math.min(panelH,2.0);
+          // 玄関ドアの扉板(洋館など)は扉そのものが 2.3m あるので、その高さまで伸ばしてよい
+          var slabH=Math.min(panelH,frontDoor?Math.max(2.0,(openingModel.h||2000)*U):2.0);
           var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,slabH,Math.max((openingModel.d||40)*U,leafT),null);
           var modelLeafWrap=new THREE.Group();
           modelLeafWrap.position.set(leafX,panelBottomGap,0);
@@ -10655,6 +10927,12 @@ function buildWinFrames(flFilt){
             });
           }
         }
+        // 回転軸の中身(戸板・取っ手・丁番)は建具グループ側の統合から外す。
+        // 外さないと取っ手が統合されて回転軸の外へ付け替えられ、扉だけが回って
+        // 取っ手が壁に残る(比較モードで統合がサブグループまで降りるようになってから)。
+        // ドローコールは回転軸の中だけで統合して保つ。
+        pivot.userData.noMerge=true;
+        mergeGroupMeshes(pivot);
         grp.add(pivot);
         // ウォークスルーの接近自動開閉用に登録
         _doorAnims.push({it:it,grp:grp,pivot:pivot,openY:doorOpenY,
@@ -11737,6 +12015,34 @@ function roofPolygonOutlineMm(it){
   });
 }
 // 結合屋根のメッシュ。build3DRoofItem から parts があるときだけ呼ばれる。
+// 屋根の面の柄の向き。三角形ごとに、その面の流れ(水上→水下)に沿って貼る。
+// 以前は真上からの投影(u=x/W, v=z/D)で、棟が東西の屋根でしか瓦の段が軒と平行に
+// ならなかった(棟が南北の屋根・寄棟の妻側の面では、段が軒と直交した)。勾配の分だけ
+// 柄が流れ方向に伸びてもいた。
+//   u … 軒と平行な向きの長さ   v … 流れに沿った実長(水上へ増える = 画像の上が棟)
+// 返す値はこれまでと同じく W・D で割った値(テクスチャの繰り返しは W/柄, D/柄 のまま)。
+// 水平な面(陸屋根)と垂直な面は従来の真上からの投影のまま -- 既存の陸屋根は変わらない。
+function roofSlopeUVs(verts,W,D){
+  var uvs=[], i, k;
+  for(i=0;i+8<verts.length;i+=9){
+    var ax=verts[i],ay=verts[i+1],az=verts[i+2];
+    var ux=verts[i+3]-ax,uy=verts[i+4]-ay,uz=verts[i+5]-az;
+    var vx=verts[i+6]-ax,vy=verts[i+7]-ay,vz=verts[i+8]-az;
+    var nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    var nl=Math.hypot(nx,ny,nz)||1; nx/=nl; ny/=nl; nz/=nl;
+    if(ny<0){ nx=-nx; ny=-ny; nz=-nz; }
+    var hl=Math.hypot(nx,nz);
+    for(k=0;k<3;k++){
+      var x=verts[i+k*3], z=verts[i+k*3+2];
+      if(ny>0.999||ny<0.05||hl<1e-6){ uvs.push((x+W/2)/W,(z+D/2)/D); continue; }
+      var sx=nx/hl, sz=nz/hl;                    // 水下の向き(平面)
+      var along=x*(-sz)+z*sx;                    // 軒と平行
+      var up=-(x*sx+z*sz)/ny;                    // 流れに沿った実長
+      uvs.push(along/W, up/D);
+    }
+  }
+  return uvs;
+}
 function build3DRoofPolygon(grp,it,mat,edgeMat,skirtMat,W,D){
   var m=roofPolygonModel(it);
   if(!m) return false;
@@ -11791,9 +12097,7 @@ function build3DRoofPolygon(grp,it,mat,edgeMat,skirtMat,W,D){
     var geo=new THREE.BufferGeometry();
     var verts=new Float32Array(points);
     geo.setAttribute('position',new THREE.BufferAttribute(verts,3));
-    var uvs=[];
-    for(var ui=0;ui<verts.length;ui+=3) uvs.push((verts[ui]+W/2)/W,(verts[ui+2]+D/2)/D);
-    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(roofSlopeUVs(verts,W,D),2));
     geo.computeVertexNormals();
     var mesh=new THREE.Mesh(geo,material);
     mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
@@ -11882,9 +12186,10 @@ function build3DRoofGapCap(H,run){
   var ap=resolveRoofAppearance(H);
   var roofTex=ap.texture?getTexture3D(ap.texture):null, rtc=roofTex?cloneRepeatReadyTexture(roofTex):null;
   if(rtc){ rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping; rtc.repeat.set(1,1); applyTextureFlip(rtc,ap); }
-  var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:0.92,metalness:0,envMapIntensity:0.06});
+  var sheen=roofSurfaceParams(ap);
+  var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:sheen.roughness,metalness:sheen.metalness,envMapIntensity:sheen.envMapIntensity});
   var edgeMat=makeExteriorLightingMaterial({color:H.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
-  var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=0.8;
+  var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=texTileM(ap.texture,0.8);
   var topV=[], topUV=[], topI=[], edV=[], edI=[], k;
   for(k=0;k<run.pts.length;k++){
     var p=run.pts[k];
@@ -11940,20 +12245,24 @@ function build3DRoofItem(grp,it,w3,d3){
     var rtc=cloneRepeatReadyTexture(roofTex);
     if(rtc){
       rtc.wrapS = rtc.wrapT = THREE.RepeatWrapping;
-      setTextureRepeatNoDistort(rtc,W,D,0.8);
+      setTextureRepeatNoDistort(rtc,W,D,texTileM(ap.texture,0.8));
       applyTextureFlip(rtc,ap);
       matParams.map=rtc;
+      var rn=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+      if(rn){ setTextureRepeatNoDistort(rn,W,D,texTileM(ap.texture,0.8)); applyTextureFlip(rn,ap); matParams.normalMap=rn; }
       if(ap.texture) matParams.color=0xffffff;
     }
   }
+  var sheen=roofSurfaceParams(ap);   // 既定はマット(暗色でもピアノブラック化しない)
   var mat=makeExteriorLightingMaterial({
     map:matParams.map||null,
     color:matParams.color||ap.color||'#2a2a30',
     side:THREE.DoubleSide,
-    roughness:0.92,       // 屋根材はマット(暗色でもピアノブラック化しない)
-    metalness:0.0,
-    envMapIntensity:0.06
+    roughness:sheen.roughness,
+    metalness:sheen.metalness,
+    envMapIntensity:sheen.envMapIntensity
   });
+  if(matParams.normalMap){ mat.normalMap=matParams.normalMap; mat.normalScale=new THREE.Vector2(0.9,0.9); }
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   var skirtMat=makeExteriorLightingMaterial({color:'#d8d5ce',side:THREE.DoubleSide,roughness:0.88,envMapIntensity:0.12});
   // 結合済み(L字・コの字)の屋根は多角形の経路へ。矩形1枚のときはここを通らないので、
@@ -11964,11 +12273,7 @@ function build3DRoofItem(grp,it,w3,d3){
     var geo=new THREE.BufferGeometry();
     var verts=new Float32Array(points);
     geo.setAttribute('position',new THREE.BufferAttribute(verts,3));
-    var uvs=[];
-    for(var ui=0; ui<verts.length; ui+=3){
-      uvs.push((verts[ui]+W/2)/W, (verts[ui+2]+D/2)/D);
-    }
-    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(roofSlopeUVs(verts,W,D),2));
     geo.computeVertexNormals();
     var mesh=new THREE.Mesh(geo,material||mat);
     mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
@@ -12652,7 +12957,10 @@ function buildItem3D(it){
   var h=getItemHeightValue(it)*U, col=it.color||getItemCol(it.type);
   if(isOpeningItemType(it.type)) return;
   var grp = new THREE.Group();
-  grp.position.set((it.x+it.w/2)*U, fy+(it.elev||0)*U, (it.y+it.d/2)*U);
+  // カタログの物の高さ(elev)は床の仕上げ面から測る(ROOM_FLOOR_FINISH_LIFT_M の注記)。
+  // 血痕(厚さ1mm・高さ1mm)は仕上げ面の1mm上に乗り、面と重なってちらつかない
+  var elevM=(it.elev||0)*U+(isFmpItemType(it.type)?ROOM_FLOOR_FINISH_LIFT_M:0);
+  grp.position.set((it.x+it.w/2)*U, fy+elevM, (it.y+it.d/2)*U);
   grp.rotation.y = -it.rot*Math.PI/180;
   grp.scale.set(it.flipX?-1:1, 1, it.flipY?-1:1);
   if(isFmpItemType(it.type)){
@@ -14877,7 +15185,7 @@ function getGltfLoader(){
   return _gltfLoader;
 }
 // GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
-var MODEL_ASSET_VER = 13;
+var MODEL_ASSET_VER = 14;
 var _gltfRebuildTimer=null;
 var _gltfRebuildBatchStartedAt=0;
 function scheduleGltfRebuild3D(){
@@ -15763,7 +16071,12 @@ function polyAreaAbs(poly){
 var FLOOR_PBR_STEM = {
   wood_floor: 'floor_wood',
   wood_oak:   'floor_oak',
-  tile_floor: 'floor_tile'
+  tile_floor: 'floor_tile',
+  mansion_herringbone_oak: 'mansion/mansion_herringbone_oak',
+  mansion_marble_checker:  'mansion/mansion_marble_checker',
+  kominka_old_pine_floor:  'kominka/kominka_old_pine_floor',
+  kominka_doma:            'kominka/kominka_doma',
+  kominka_tatami:          'kominka/kominka_tatami'
 };
 // 床の仕上げは3つ組(床材・カラー・テクスチャ)。天井・家具と同じ並び。
 //   r.floorMaterial … 床材のキー(FLOOR_PBR_STEM)。無ければ部屋名から自動
@@ -15841,6 +16154,10 @@ function stairwellHolesForRoom(r,stairQuadsCache){
   });
   return holes;
 }
+// 床の仕上げ面は、床の高さ(roomFloorTopY)より 4mm 上に貼る(スラブの天端と重ねると
+// ちらつくため)。**床に置く物はこの面に立てる。** 血痕・割れたガラスのような厚さ数mmの物は、
+// 床の高さに置くと仕上げ面の下に埋まって見えなくなった(buildItem3D)。
+var ROOM_FLOOR_FINISH_LIFT_M=0.004;
 // 部屋の床(スラブ本体・仕上げ面)を、階段の穴があれば THREE.Shape+holes で、
 // なければ従来通りの単純な Box/Plane で生成する
 function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
@@ -15856,7 +16173,7 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
     }
     var slab=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matFloor);
     slab.rotation.x=-Math.PI/2;
-    slab.position.set(rcx,floorY+0.004,rcz);
+    slab.position.set(rcx,floorY+ROOM_FLOOR_FINISH_LIFT_M,rcz);
     slab.receiveShadow=true;
     out.slab=slab;
     return out;
@@ -15906,7 +16223,7 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   var flatGeo=new THREE.ShapeGeometry(outline);
   flatGeo.rotateX(-Math.PI/2);
   var slab=new THREE.Mesh(flatGeo,matFloor);
-  slab.position.y=floorY+0.004;
+  slab.position.y=floorY+ROOM_FLOOR_FINISH_LIFT_M;
   slab.receiveShadow=true;
   out.slab=slab;
   return out;
@@ -15937,7 +16254,7 @@ function buildSkipDeckMeshes(r,matFloor,deckM,yBottom,yTop,holes){
     mark3DSelectable(body,r,'room'); sc3.add(body);
     var face=new THREE.Mesh(new THREE.PlaneGeometry(w3,d3),matFloor);
     face.rotation.x=-Math.PI/2;
-    face.position.set(cx,yTop+0.004,cz);
+    face.position.set(cx,yTop+ROOM_FLOOR_FINISH_LIFT_M,cz);
     face.receiveShadow=true;
     mark3DSelectable(face,r,'room'); sc3.add(face);
   });
@@ -16711,9 +17028,15 @@ function applyInteriorLightBudget(cam){
   // 光の数は一定なので、ここで作ったものがどの階でもそのまま使える。これが無いと、
   // 初めて2階へ上がった瞬間に、2階の材質のシェーダーを作るため数秒止まった(実測 8.6秒)。
   // compileAsync は隠れている物の材質も作る(three.js r169)。
-  if(!L.precompiled&&ren&&typeof ren.compileAsync==='function'){
+  //
+  // compileAsync ではなく compile を使う。compileAsync は「作り終えたか」を setTimeout で
+  // 何度も確かめるが、その間にモデルの読み込みで 3D が作り直されて材質が捨てられると、
+  // 捨てられた材質を確かめに行って three.js の中で例外になる(isReady of undefined)。
+  // setTimeout の中なので .catch では拾えず、確かめる処理ごと止まっていた。
+  // 作り終えたかを待つ必要は無い(結果を使っていない)。シェーダーの作成を始めるのは compile で同じ。
+  if(!L.precompiled&&ren&&typeof ren.compile==='function'){
     L.precompiled=true;
-    try{ ren.compileAsync(sc3,cam).catch(function(){}); }catch(e){}
+    try{ ren.compile(sc3,cam); }catch(e){}
   }
 }
 function render3DNow(){
@@ -16796,7 +17119,10 @@ function stairLocalProgress(it,xMm,zMm,marginMm){
   var ly=-dx*Math.sin(r)+dy*Math.cos(r);
   if(it.flipX) lx=-lx;
   if(it.flipY) ly=-ly;
-  if(Math.abs(lx)>it.w/2+margin || Math.abs(ly)>it.d/2+margin) return null;
+  // 直進階段は、上り下りの向き(ly)にだけ余白を足す。横(lx)にも足すと、外壁に接した階段の上から
+  // 壁の中まで入り込め、降りた所で壁にめり込んだ(そこから外壁を抜けて家の外へ出られた)
+  var marginX=(it.type==='stair-corner')?margin:0;
+  if(Math.abs(lx)>it.w/2+marginX || Math.abs(ly)>it.d/2+margin) return null;
   var t;
   if(it.type==='stair-corner'){
     // 廻り階段: 内側隅(ローカル右下 w/2,d/2)まわりの角度で進行率を出す。
@@ -16894,7 +17220,35 @@ function walkUnderDeckAt(xMm,zMm,floor){
 // 段差の下に空間があり、いま天板より下に居る(curOff)なら、下の床を返す --
 // 段差の天端を足元にすると、ハーフ収納のような段差の下の空間へ歩いて入れない
 // (1.8m を一度に上る段差として止められていた。利用者の報告)。
+// 家の外(1階でどの部屋にも入っていない所)の足元の高さ(1階の床天端からのm)。いまの足元から一段
+// (WALK_MAX_STEP_UP_M)以内で上がれる面のうち、真下でいちばん上の面に立つ。地面・敷地・基礎・
+// 外階段・スロープ・ポーチ(ブロックで描かれることが多い)など、1階の外に描いてある物が対象。
+// 外に出ても床の高さのまま歩き、地面から 60cm 浮いていた(三人称で見えて報告された)。
+// 一段より高い物(車・塀・庇)には乗らない。部屋の中、2階以上、何も描いていない所は null(今までどおり床の高さ)。
+var _walkOutdoorMeshes=null, _walkOutdoorFor=null, _walkOutdoorN=-1, _walkDownRay=null;
+function walkOutdoorGroundOff(xMm,zMm,floor,curOff){
+  if(floor!==1 || !sc3 || roomAtPointOnFloor(1,xMm,zMm)) return null;
+  if(_walkOutdoorFor!==sc3 || _walkOutdoorN!==sc3.children.length){
+    _walkOutdoorMeshes=[];
+    if(window._gndMesh) _walkOutdoorMeshes.push(_gndMesh);
+    sc3.children.forEach(function(root){
+      var ud=root.userData||{}, ref=ud.selectRef;
+      if(ud._thirdPerson || !ref || ud.selectKind!=='item' || (ref.floor||1)!==1) return;
+      if(isOpeningItemType(ref.type) || isLightItemType(ref.type)) return;
+      root.traverse(function(o){ if(o.isMesh && !o.isInstancedMesh) _walkOutdoorMeshes.push(o); });
+    });
+    _walkOutdoorFor=sc3; _walkOutdoorN=sc3.children.length;
+  }
+  if(!_walkDownRay){ _walkDownRay=new THREE.Raycaster(); _walkDownRay.layers.enableAll(); }
+  var top=floorTopY(1), from=top+((curOff===undefined||curOff===null)?0:curOff)+WALK_MAX_STEP_UP_M+0.02;
+  _walkDownRay.set(new THREE.Vector3(xMm*U,from,zMm*U),new THREE.Vector3(0,-1,0));
+  _walkDownRay.near=0; _walkDownRay.far=from-top+2;
+  var hits=_walkDownRay.intersectObjects(_walkOutdoorMeshes,false);
+  return hits.length?hits[0].point.y-top:null;
+}
 function walkFlatGroundAt(xMm,zMm,floor,curOff){
+  var outdoor=(typeof walkOutdoorGroundOff==='function')?walkOutdoorGroundOff(xMm,zMm,floor,curOff):null;
+  if(outdoor!==null) return outdoor;
   var y=roomFloorAt(floor,xMm,zMm)-floorTopY(floor);
   var l=walkFloorLandingGroundAt(xMm,zMm,floor);
   var up=(l!==null&&l>y)?l:y;
@@ -16979,7 +17333,8 @@ function walkUpdateGround(snap){
   // 現実に無いし、乗れてしまうとスキップフロアの縁を歩いただけで壁を抜けたように
   // 上へ出る。テレポート(snap)は免除する -- スポーン地点は段差の上のこともある。
   var target=walkFlatGroundAt(xMm,zMm,fl,prevOff);
-  if(!snap && target-prevOff>WALK_MAX_STEP_UP_M) return;
+  var cameIn=fl===1 && prevOff<-0.05 && roomAtPointOnFloor(1,xMm,zMm);   // 外(地面)から部屋に入った
+  if(!snap && !cameIn && target-prevOff>WALK_MAX_STEP_UP_M) return;
   WALK.groundOff=target;
 }
 // 立ち位置が塞がっているか。walkBlockedAt は**壁しか見ない**ので、
@@ -17400,12 +17755,26 @@ function walkWallVerticalRangeM(w){
 }
 function buildWalkCollisionCache(floor){
   // 3D で一時的に非表示にした壁も、以前どおりぶつかる(見えなくしても壁はある)。
-  _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
+  // **上下の階の壁も入れる。** どの壁に当たるかは高さ(体の範囲にかかるか)で決まるので、階で絞る必要はない。
+  // いまの階の壁だけを見ていたため、階段の上端で足元が上の階の床近くまで上がると、いまの階の外壁は
+  // 「またげる段差」になり、体にかかっている上の階の外壁は階が違うので見ず、外壁を越えて家の外へ出られた(報告された)。
+  _walkCollWalls=DATA.walls.filter(function(w){return Math.abs((w.floor||1)-floor)<=1;}).map(function(w){
     var vr=walkWallVerticalRangeM(w);
     return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w),
-      bottomY:vr.bottom, topY:vr.top};
+      bottomY:vr.bottom, topY:vr.top, otherFloor:(w.floor||1)!==floor};
   });
   _walkCollFloor=floor;
+}
+// 壁が体にかかるか。足元+一段より低い壁は跨げ、頭より上の壁はくぐれる。
+// **上の階の壁は、胸の高さ(WALK_OTHER_FLOOR_WALL_REACH_M)より下まで来ているときだけ**ぶつかる。
+// 頭の上まで見ると、上下に重ねた階段の途中で、真上の階の壁(階段の頭上を空けるために床を上げた
+// 収納の壁など)に頭が数cmかかっただけで止まり、上の階へ上がれなかった(利用者のプランで報告された)。
+// 階段を上りきる所では足元が上の階の床に近づくので、上の階の外壁は今までどおり体を止める。
+var WALK_OTHER_FLOOR_WALL_REACH_M=1.2;
+function walkWallHitsBody(w,feet){
+  if(w.topY===undefined) return true;
+  var reach=w.otherFloor?WALK_OTHER_FLOOR_WALL_REACH_M:WALK_BODY_HEIGHT_M;
+  return w.topY>feet+WALK_MAX_STEP_UP_M && w.bottomY<feet+reach;
 }
 // 歩いている人の体が占める高さ(ワールドm)。足元から頭まで。
 var WALK_BODY_HEIGHT_M=1.7;
@@ -17419,10 +17788,9 @@ function walkBlockedAt(xMm,zMm,floor,feetY){
   if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
   var walls=_walkCollWalls;
   var feet=(feetY!==undefined)?feetY:floorTopY(floor)+((WALK&&WALK.groundOff)||0);
-  var head=feet+WALK_BODY_HEIGHT_M;
   for(var i=0;i<walls.length;i++){
     var w=walls[i];
-    if(w.topY!==undefined&&(w.topY<=feet+WALK_MAX_STEP_UP_M||w.bottomY>=head)) continue;
+    if(!walkWallHitsBody(w,feet)) continue;
     var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
     if(len2<1) continue;
     var t=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len2;
@@ -17437,6 +17805,66 @@ function walkBlockedAt(xMm,zMm,floor,feetY){
   }
   return false;
 }
+// (xMm,zMm) がいちばん深くめり込んでいる壁と、その深さ(mm)・壁のどちら側か。めり込んでいなければ null。
+// 判定の条件(高さ・ドアの開口)は walkBlockedAt と同じ。
+function walkWallPenetration(xMm,zMm,floor){
+  if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
+  var feet=floorTopY(floor)+((WALK&&WALK.groundOff)||0), best=null;
+  for(var i=0;i<_walkCollWalls.length;i++){
+    var w=_walkCollWalls[i];
+    if(!walkWallHitsBody(w,feet)) continue;
+    var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
+    if(len2<1) continue;
+    var t=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len2, tc=Math.max(0,Math.min(1,t));
+    var dist=Math.hypot(xMm-(w.x1+tc*dx),zMm-(w.y1+tc*dy));
+    var depth=w.thick/2+WALK_PLAYER_RADIUS_MM-dist;
+    if(depth<=0) continue;
+    var alongMm=tc*Math.sqrt(len2), pad=WALK_PLAYER_RADIUS_MM*0.3;
+    if(w.gaps.some(function(g){return alongMm>=g.a-pad && alongMm<=g.b+pad;})) continue;
+    if(!best||depth>best.depth) best={depth:depth, wall:w, side:((xMm-w.x1)*dy-(zMm-w.y1)*dx)>=0?1:-1};
+  }
+  return best;
+}
+// (ax,az)→(bx,bz) の一歩が、体の高さにかかる壁の芯を横切るか(ドアの開口は除く)
+function walkCrossesWall(ax,az,bx,bz,floor){
+  if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
+  var feet=floorTopY(floor)+((WALK&&WALK.groundOff)||0);
+  function side(px,pz,w){ return (px-w.x1)*(w.y2-w.y1)-(pz-w.y1)*(w.x2-w.x1); }
+  for(var i=0;i<_walkCollWalls.length;i++){
+    var w=_walkCollWalls[i];
+    if(!walkWallHitsBody(w,feet)) continue;
+    var s1=side(ax,az,w), s2=side(bx,bz,w);
+    if((s1>0)===(s2>0)) continue;                         // 芯の同じ側にいる
+    // 一歩の線分と壁の線分が交わるか(壁の向きで見て、両端が一歩の両側にあるか)
+    var dx=bx-ax, dz=bz-az;
+    var e1=(w.x1-ax)*dz-(w.y1-az)*dx, e2=(w.x2-ax)*dz-(w.y2-az)*dx;
+    if((e1>0)===(e2>0)) continue;
+    var len=Math.hypot(w.x2-w.x1,w.y2-w.y1);
+    var tt=Math.abs(s1)/(Math.abs(s1)+Math.abs(s2)||1);
+    var cx=ax+dx*tt, cz=az+dz*tt;
+    var along=((cx-w.x1)*(w.x2-w.x1)+(cz-w.y1)*(w.y2-w.y1))/Math.max(1,len);
+    if(w.gaps.some(function(g){return along>=g.a && along<=g.b;})) continue;
+    return true;
+  }
+  return false;
+}
+// 壁にめり込んだ位置から動いてよい行き先か。めり込みが浅くなり、かつ壁の芯の向こうへ越えない方向だけ通す。
+// 以前は「めり込んだらどの方向にも動ける」で、階段の上から外壁にめり込んだあと、そのまま外壁を
+// 突き抜けて家の外の空中へ歩き出せた(報告された)。入ってきた側へは必ず戻れるので、詰むことはない。
+function walkUnstickAllows(cx,cz,tx,tz,floor){
+  var pen=walkWallPenetration(cx,cz,floor);
+  if(!pen) return true;                         // 壁以外(段差など)で塞がれているときは今までどおり
+  var w=pen.wall, dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
+  var t=((tx-w.x1)*dx+(tz-w.y1)*dy)/len2, tc=Math.max(0,Math.min(1,t));
+  var distT=Math.hypot(tx-(w.x1+tc*dx),tz-(w.y1+tc*dy));
+  var sideT=((tx-w.x1)*dy-(tz-w.y1)*dx)>=0?1:-1;
+  return sideT===pen.side && (w.thick/2+WALK_PLAYER_RADIUS_MM-distT)<pen.depth;
+}
+// 足元と踏み面の高さの差がこの範囲なら、その階段の上に居るとみなす。
+// 上側(踏み面が足元より高い)は、床から階段へ乗り移れる高さ(walkUpdateGround の 0.45m)と同じ。
+// これより広いと、階段の下を低い側へ歩いたとき、頭上の踏み面に「乗った」ことになって壁を素通りした。
+// 下側は、廻り階段の内回りで1歩の高さの変化に足元の追従(1歩 0.3m まで)が遅れるので、一段より広めに取る
+var WALK_STAIR_STEP_ON_M=0.45, WALK_STAIR_TREAD_TOL_M=0.6;
 var _lastWalkTick=0;
 function updateWalkMode(now){
   if(!isWalkView()||!WALK.active) return false;
@@ -17456,18 +17884,28 @@ function updateWalkMode(now){
     // 階段面では階段室まわり（階段下の低壁・勾配壁を含む）の壁判定を使わない。従来は足元高さ0.4m以上を
     // 条件にしていたため、総上昇約0.5mのコーナー3段では曲がり切る直前まで
     // 壁に衝突していた。高さではなく実際の階段フットプリントで判定する。
-    var stairHere=walkStairSampleAt(WALK.x/U,WALK.z/U,WALK.floor,0);
+    // 「階段の上に居る」は、平面で階段の範囲に入っているだけでなく、足元がその踏み面の高さにあること。
+    // 平面だけで見ていたため、階段の下の部屋(階段下のトイレ・収納)や、上下に重ねた階段の
+    // 上の階段の下(下の階段を上りきった所)まで「階段の上」とされ、壁を素通りしたり、
+    // 階段の範囲から出られなくなったりした(利用者のプランで報告された)。
+    var gNow=WALK.groundOff||0;
+    function onTread(s){ return s && s.offM-gNow<=WALK_STAIR_STEP_ON_M && gNow-s.offM<=WALK_STAIR_TREAD_TOL_M ? s : null; }
+    var stairHere=onTread(walkStairSampleAt(WALK.x/U,WALK.z/U,WALK.floor,0));
     function stepBlocked(txM,tzM){
       // 入口の120mm手前から階段側へ乗り移れるようにし、乗った後は同じ余白内へ
       // 誘導する。コーナーから直階段へ接続する境界も両方の判定が重なるため連続する。
-      var stairTarget=walkStairSampleAt(txM,tzM,WALK.floor,120);
-      if(stairHere || stairTarget) return !stairTarget;
+      var stairTarget=onTread(walkStairSampleAt(txM,tzM,WALK.floor,120));
+      // 階段の上でも、壁の芯を横切る動きだけは止める。階段の端が外壁に接していると、余白(120mm)の分だけ
+      // 壁の芯の向こうへ出られ、そこから家の外へ抜けた(報告された)。端に寄って歩くことは今までどおりできる
+      if(stairHere || stairTarget) return !stairTarget || walkCrossesWall(WALK.x/U,WALK.z/U,txM,tzM,WALK.floor);
       if(walkBlockedAt(txM,tzM,WALK.floor)) return true;
       // 段差の壁。階段の上に居ない状態で、登れない高さの床へは踏み出せない。
       if(walkLevelStairGroundAt(WALK.x/U,WALK.z/U,WALK.floor,0)===null &&
          walkLevelStairGroundAt(txM,tzM,WALK.floor,120)===null){
         var here=floorTopY(WALK.floor)+(WALK.groundOff||0);
-        if(floorTopY(WALK.floor)+walkFlatGroundAt(txM,tzM,WALK.floor,WALK.groundOff||0)-here>WALK_MAX_STEP_UP_M) return true;
+        // 外から部屋へ入るときは、床との段差があっても入れる(外階段の無い出入り口から出ると戻れなくなる)
+        var entering=WALK.floor===1 && !roomAtPointOnFloor(1,WALK.x/U,WALK.z/U) && roomAtPointOnFloor(1,txM,tzM);
+        if(!entering && floorTopY(WALK.floor)+walkFlatGroundAt(txM,tzM,WALK.floor,WALK.groundOff||0)-here>WALK_MAX_STEP_UP_M) return true;
       }
       return false;
     }
@@ -17479,7 +17917,10 @@ function updateWalkMode(now){
     var stuckHere=stepBlocked(WALK.x/U,WALK.z/U);
     // 壁への軸別スライド: 斜めに壁へ突っ込んでも、通れる軸方向にはそのまま進める
     if(stuckHere){
-      WALK.x=nx; WALK.z=nz;
+      // めり込んでいる壁の、入ってきた側へ浅くなる向きにだけ動く(壁を突き抜けさせない)
+      if(walkUnstickAllows(WALK.x/U,WALK.z/U,nx/U,nz/U,WALK.floor)){ WALK.x=nx; WALK.z=nz; }
+      else if(walkUnstickAllows(WALK.x/U,WALK.z/U,nx/U,WALK.z/U,WALK.floor)){ WALK.x=nx; }
+      else if(walkUnstickAllows(WALK.x/U,WALK.z/U,WALK.x/U,nz/U,WALK.floor)){ WALK.z=nz; }
     } else if(!stepBlocked(nx/U,nz/U)){
       WALK.x=nx; WALK.z=nz;
     } else if(!stepBlocked(nx/U,WALK.z/U)){
@@ -17614,8 +18055,10 @@ function setDynamicResolution(low){
     if(composer.setPixelRatio) composer.setPixelRatio(r);
     composer.setSize(wrap.clientWidth,wrap.clientHeight);
   }
-  // 操作中は重いパス(N8AO / Bloom)も止める。静止したら元の品質へ戻る
-  if(_n8aoPass) _n8aoPass.enabled=!low;
+  // 操作中も N8AO(部屋の隅や家具の下の陰影)は止めない。止めると歩くたびに陰影が消え、止まると現れて
+  // ちらついて見え、質も低く見えた(利用者の指摘)。操作中は AO だけ半分の解像度で計算する
+  // (実測 1280x820・解像度1.2: AOなし 34ms / 半分の解像度のAO 33ms で、重さは変わらない)。Bloom は止める
+  if(_n8aoPass){ _n8aoPass.enabled=true; if(_n8aoPass.configuration.halfRes!==low) _n8aoPass.configuration.halfRes=low; }
   if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night')&&!low;
 }
 function loop3D(){
@@ -17888,6 +18331,7 @@ function setTool(t){
 }
 function canApplyOpeningPresetToItem(it,preset){
   if(!it||!preset) return false;
+  if(preset.kind==='door' && preset.baseType==='door-front') return it.type==='door-front';
   if(preset.kind==='door' && !(isInteriorSwingDoorType(it.type)||it.type==='door-fold'||it.type==='door-fold-w')) return false;
   if(preset.kind==='window' && !isWindowLikeType(it.type)) return false;
   return true;
@@ -18224,6 +18668,7 @@ canvas.addEventListener('mouseup',function(){
   }
   var wasDragging=DRAG.active;
   DRAG.active=false; DRAG.group=null; ST._snapState=null;
+  if(wasDragging) snapMovedCeilingLightsToAttachSurface();   // 別の部屋・軒下へ動かした照明を取付面へ
   if(wasDragging) updateProps();
   if(ren)build3D();
   if(wasDragging) queueSharedSync(80);
@@ -19275,7 +19720,14 @@ function exportPlan(){
   ensureHeightDefaults();
   syncExteriorWallSettings();
   captureViewState();
-  downloadJsonFile(JSON.stringify(DATA,null,2),'plan.json');
+  downloadJsonFile(JSON.stringify(DATA,null,2),planExportFileName());
+}
+// 書き出すファイルの名前。プランに名前があれば「名前_日付.json」、無ければ従来どおり plan.json
+function planExportFileName(){
+  var name=String((DATA&&DATA.planName)||'').trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_');
+  if(!name) return 'plan.json';
+  var d=new Date(), p=function(n){return (n<10?'0':'')+n;};
+  return name+'_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'.json';
 }
 async function savePlanToStorage(){
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
@@ -22105,10 +22557,49 @@ function snapOutdoorCeilingFixturesToRoof(){
   if(moved) console.info('[WebCAD] 軒下の天井付け器具 '+moved+'個を屋根の下面へ寄せ直しました');
   return moved;
 }
+// 天井付けの照明を、読み込みのたびに取付面（部屋の天井仕上げ面・軒下なら屋根の下面）へ寄せる。
+//
+// 上の2つの寄せ直しは「1度だけ」走る作りで、済んだ印をプランに書く。ところが既定プランは
+// 生成し直されることがあり、印だけが残って高さが古い値に戻った（軒下のダウンライトが
+// 屋根から 750mm 浮いた）。利用者のプランでも、天井高を変えた後に置いた照明が古い既定値の
+// まま残ることがある。印に頼らず、照明は毎回取付面に付ける。
+//
+// ダウンライトは埋込なので必ず取付面。直付け(シーリング)・スポットは、取付面より
+// LIGHT_ATTACH_TOLERANCE_MM を超えて下げてある物は意図した吊り下げとみなして触らない。
+// 天井裏に埋まっている物(取付面より上)は常に下ろす。上に天井も屋根も無い物は触らない。
+var LIGHT_ATTACH_TOLERANCE_MM=300;
+function snapCeilingLightToAttachSurface(it){
+  if(!it||!isLightItemType(it.type)) return false;
+  var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+  if(topOff===undefined) return false;
+  var want=ceilingAttachElevationMm(it);
+  if(want===null||!isFinite(want)) return false;
+  want-=topOff;
+  var cur=Number(it.elev)||0, drop=want-cur;        // 正なら取付面より下に浮いている
+  if(Math.abs(drop)<=1) return false;
+  if(it.type!=='light-down'&&drop>LIGHT_ATTACH_TOLERANCE_MM) return false;
+  it.elev=want;
+  return true;
+}
+function snapCeilingLightsToAttachSurface(){
+  if(!DATA||!DATA.items) return 0;
+  var moved=0;
+  DATA.items.forEach(function(it){ if(snapCeilingLightToAttachSurface(it)) moved++; });
+  if(moved) console.info('[WebCAD] 天井付けの照明 '+moved+'個を取付面へ寄せました');
+  return moved;
+}
+// 平面図で照明を別の部屋（天井高の違う部屋・軒下）へ動かしたとき、動かした物だけ寄せ直す
+function snapMovedCeilingLightsToAttachSurface(){
+  var list=[];
+  if(ST&&ST.selected) list.push(ST.selected);
+  if(ST&&ST.multiSelected&&ST.multiSelected.length) list=list.concat(ST.multiSelected);
+  return list.filter(snapCeilingLightToAttachSurface).length;
+}
 function normalizeLegacyFurnitureItems(){
   if(!DATA||!DATA.items) return;
   snapCeilingFixturesToCeiling();
   snapOutdoorCeilingFixturesToRoof();
+  snapCeilingLightsToAttachSurface();
   DATA.items=DATA.items.filter(function(it){return it && it.type!=='tv';});
   if(ST && ST.selected && ST.selected.type==='tv') ST.selected=null;
   DATA.items.forEach(function(it){
@@ -24556,5 +25047,9 @@ updateMobileShiftButton();
 })();
 </script>
 <script src="assets/js/ceiling-designer.js"></script>
+<script>
+// 性能の測定(?bench=1)のときだけ読む。普段は読まない。
+if(/[?&]bench=1\b/.test(location.search)){var s=document.createElement('script');s.src='assets/js/perf-bench.js';document.body.appendChild(s);}
+</script>
 </body>
 </html>

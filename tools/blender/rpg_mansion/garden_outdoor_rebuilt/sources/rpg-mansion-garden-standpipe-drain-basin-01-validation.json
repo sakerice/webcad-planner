@@ -1,0 +1,122 @@
+{
+  "model": "rpg-mansion-garden-standpipe-drain-basin-01",
+  "dimensions_mm": [
+    639.9999856948853,
+    785.0000262260437,
+    990.0000095367432
+  ],
+  "bounds_m": [
+    [
+      -0.3199999928474426,
+      -0.39250001311302185,
+      0.0
+    ],
+    [
+      0.3199999928474426,
+      0.39250001311302185,
+      0.9900000095367432
+    ]
+  ],
+  "triangles": 1208,
+  "uv": {
+    "meters_per_uv": 2.1887655244365023,
+    "min": 2.1869248411345317,
+    "max": 2.190681623666019,
+    "p05": 2.188395864170885,
+    "p95": 2.1889929023707264,
+    "total_triangles": 1208,
+    "valid_triangles": 1208,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Warm carved limestone": "stone",
+    "Garden charcoal iron": "metal",
+    "Weathered brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 83840,
+  "datums": {
+    "cavity": {
+      "rimHeightM": 0.271,
+      "internalFloorM": 0.086,
+      "samplePointsBlenderXY": [
+        [
+          0,
+          -0.13
+        ],
+        [
+          -0.12,
+          -0.2
+        ],
+        [
+          0.12,
+          -0.2
+        ]
+      ],
+      "tapOutletM": [
+        0,
+        -0.002,
+        0.718
+      ],
+      "tapOutletDirection": [
+        0,
+        -0.790415,
+        -0.612571
+      ],
+      "note": "Actual open hollow basin; outlet projects downward into the basin. Static plumbing, no fluid simulation."
+    },
+    "installation": {
+      "mount": "ground",
+      "note": "Common stone foundation carries hollow basin and separate cast standpipe."
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.032499998807907104,
+      -0.0
+    ],
+    "originalBoundsM": [
+      [
+        -0.3199999928474426,
+        -0.42500001192092896,
+        0.0
+      ],
+      [
+        0.3199999928474426,
+        0.36000001430511475,
+        0.9900000095367432
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0056346623737842565,
+    0.00022517132667114007,
+    0.00022517162112004974,
+    0.00022517212043264096,
+    0.00022619788410338518,
+    7.129250707293976e-05,
+    9.16409711256468e-06,
+    6.924013689513226e-06,
+    1.2383805975938838e-05,
+    1.238385933296134e-05,
+    1.2383893287430201e-05,
+    1.2384009702752033e-05,
+    1.2383878735514976e-05,
+    1.2383859332961345e-05,
+    1.2384150371265905e-05,
+    3.840026329271495e-05,
+    3.839998195568718e-05,
+    3.788998545436092e-06,
+    0.02577945682148068,
+    0.02995214375763074,
+    0.002714904274095413
+  ],
+  "source_sha256": "aefc5e0de5b9499ef6154ef16c9c047cbab20d2289030352fd1988cdb8d422fa",
+  "glb_sha256": "54334c39c913db7b6fdafb6dca4f2636c31a76b75b1db97fe29837d3bfe3b97d",
+  "authoring_sha256": "650117f1e409e65aeb725795a921c37e88b8eb0742474322909761c67793d1c5"
+}

@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-map-flatfile-01",
+  "dimensions_mm": [
+    1366.0000562667847,
+    514.9999856948853,
+    934.0000152587891
+  ],
+  "bounds_m": [
+    [
+      -0.6830000281333923,
+      -0.2574999928474426,
+      0.0
+    ],
+    [
+      0.6830000281333923,
+      0.2574999928474426,
+      0.9340000152587891
+    ]
+  ],
+  "triangles": 3764,
+  "uv": {
+    "meters_per_uv": 7.348562621924008,
+    "min": 6.838238505474105,
+    "max": 9.649424265288427,
+    "p05": 6.960154354926862,
+    "p95": 9.221455046022857,
+    "total_triangles": 3764,
+    "valid_triangles": 3764,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood": "wood",
+    "Mansion walnut mouldings": "wood",
+    "Mansion walnut veneered fields": "wood",
+    "Mansion patinated brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 177160,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "47497152cb337042d55cf3a85430b10e08b67ccdcaec275f7f1602f096129ce8",
+  "sourceSha256": "dca84c64308345a98a322be851e12791a1067b4b7a913f039842e6cdb6c6a31a",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "7c99460cf17566d423ccf714ba1bd3b82f984e82730754b17ac4c4328cde46ac",
+    "authoredDataSignature": "0f1a37fa3616b029e1534458e95a3ebd12f461e35151425232c73e88d801c4e3",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "model": "kominka-shower-01",
+  "dimensions_mm": [
+    300.00001192092896,
+    449.99998807907104,
+    2000.0
+  ],
+  "bounds_m": [
+    [
+      -0.15000000596046448,
+      -0.22499999403953552,
+      0.0
+    ],
+    [
+      0.15000000596046448,
+      0.22499999403953552,
+      2.0
+    ]
+  ],
+  "triangles": 3888,
+  "uv": {
+    "meters_per_uv": 2.237153667558637,
+    "min": 2.021054378596579,
+    "max": 2.749206657650688,
+    "p05": 2.117854762036342,
+    "p95": 2.444886262508172,
+    "total_triangles": 3888,
+    "valid_triangles": 3888,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Kominka_brass": "brass",
+    "Kominka_ink": null,
+    "Kominka_hinoki": "wood",
+    "Kominka_dark": "wood",
+    "Kominka_copper": "copper"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 165408
+}

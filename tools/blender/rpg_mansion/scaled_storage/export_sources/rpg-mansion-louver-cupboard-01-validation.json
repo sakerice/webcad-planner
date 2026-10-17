@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-louver-cupboard-01",
+  "dimensions_mm": [
+    829.9999833106995,
+    400.0000059604645,
+    1139.9999856948853
+  ],
+  "bounds_m": [
+    [
+      -0.41499999165534973,
+      -0.20000000298023224,
+      0.0
+    ],
+    [
+      0.41499999165534973,
+      0.20000000298023224,
+      1.1399999856948853
+    ]
+  ],
+  "triangles": 2788,
+  "uv": {
+    "meters_per_uv": 5.070143825260268,
+    "min": 4.6803644120753605,
+    "max": 6.6172114576248084,
+    "p05": 4.772493357624018,
+    "p95": 5.975715084404689,
+    "total_triangles": 2788,
+    "valid_triangles": 2788,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.004": "wood",
+    "Mansion walnut mouldings.004": "wood",
+    "Mansion walnut veneered fields.004": "wood",
+    "Mansion patinated brass.004": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 127432,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "457b08db71f07840ba17338e7a2bbc1b0b5ed1f75486ab4533212c424c333220",
+  "sourceSha256": "c837e5fd5582bbdf1c52569a14c3168aa4931b4db083f288e455bc43ff68ee8e",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "15b6878abace2c4c67a4301fe4732fdc04f91cd7e9d07bc21f51274dd0711d70",
+    "authoredDataSignature": "7f347c2f88d9da37c09e38bdf61d0a5a0a61349e6dc3cd10430554ad6910618a",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

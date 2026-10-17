@@ -1,0 +1,139 @@
+{
+  "model": "rpg-mansion-garden-braced-oak-gate-leaf-01",
+  "dimensions_mm": [
+    1205.0000429153442,
+    135.00000536441803,
+    1250.0
+  ],
+  "bounds_m": [
+    [
+      -0.6025000214576721,
+      -0.06750000268220901,
+      0.0
+    ],
+    [
+      0.6025000214576721,
+      0.06750000268220901,
+      1.25
+    ]
+  ],
+  "triangles": 1644,
+  "uv": {
+    "meters_per_uv": 2.8633964840482857,
+    "min": 2.8572951272218803,
+    "max": 2.8701558281647186,
+    "p05": 2.861987353567954,
+    "p95": 2.8651867156752924,
+    "total_triangles": 1644,
+    "valid_triangles": 1644,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Oiled garden oak": "wood",
+    "Weathered brass": "metal",
+    "Garden charcoal iron": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 118960,
+  "datums": {
+    "defaultElevationMm": 100,
+    "installation": {
+      "mount": "gate-hinges",
+      "groundClearanceMm": 100,
+      "pinAxisConstructionBlenderXY": [
+        0,
+        0
+      ],
+      "collarBottomConstructionMm": [
+        362,
+        1162
+      ],
+      "collarTopConstructionMm": [
+        405,
+        1205
+      ],
+      "collarInnerRadiusMm": 12,
+      "collarOuterRadiusMm": 21,
+      "acceptedPinRadiusMm": 11,
+      "nominalRadialClearanceMm": 1,
+      "acceptedPinArmBearingHeightsMm": [
+        362,
+        1162
+      ],
+      "latchAxisConstructionBlenderM": [
+        1.17,
+        -0.045,
+        1.17
+      ],
+      "note": "Closed static gate. Integral hollow collars bear on the accepted pier pin arms. Ground aperture is measured between supports; no animation, native gate linking or certified swing envelope."
+    },
+    "nativeEditableParts": 39,
+    "bottomCenterTranslationBlenderM": [
+      -0.5814999938011169,
+      0.013499999418854713,
+      -0.10000000149011612
+    ],
+    "originalBoundsM": [
+      [
+        -0.020999999716877937,
+        -0.08100000023841858,
+        0.10000000149011612
+      ],
+      [
+        1.184000015258789,
+        0.05400000140070915,
+        1.350000023841858
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0026578850506571903,
+    0.002657886299147094,
+    0.0026578840642296577,
+    0.002657885197821249,
+    0.002657885104220862,
+    0.0026578873441470328,
+    0.002657885449167452,
+    0.0026578827332741635,
+    0.0022500016105671725,
+    3.9664695757816545e-05,
+    3.9663260016216846e-05,
+    1.7226084310095767e-05,
+    7.110654553343922e-05,
+    1.722610068100039e-05,
+    7.110743608033469e-05,
+    2.2607184746448255e-07,
+    2.2617083080452482e-07,
+    2.2602993491697512e-07,
+    2.2631494781914314e-07,
+    6.785588103260416e-07,
+    6.787803386032461e-07,
+    1.0180958914437123e-06,
+    1.0182258165514217e-06,
+    6.787729868544078e-07,
+    6.788418810780663e-07,
+    1.0182226333199638e-06,
+    1.0181876935651726e-06,
+    6.787162381745763e-07,
+    6.788280491794767e-07,
+    1.0182524950626735e-06,
+    1.0182599983939627e-06,
+    6.095726333417888e-05,
+    1.0151318141045827e-05,
+    0.0059972249227972325,
+    2.5472118068137126e-06,
+    0.00599721782118993,
+    0.008457706298295934,
+    0.00845770557589276,
+    0.0026578861300758185
+  ],
+  "source_sha256": "16ac7c824d0049f05b4b73e9a9735ca2b38aec7cfeb1ef0e95e2cdc7dde7d816",
+  "glb_sha256": "6f24e6b1b3adc5aef8d21e03d348cf3c2f40675b9e8e954886a40eeef50d539f",
+  "authoring_sha256": "6ea86ad1c5c16e340710acd8d2c400780367f715ae1bb6076e61f4ed0b669ec9"
+}

@@ -1,0 +1,91 @@
+{
+  "model": "rpg-mansion-garden-horizontal-board-fence-01",
+  "dimensions_mm": [
+    1820.0000524520874,
+    104.00000214576721,
+    1404.9999713897705
+  ],
+  "bounds_m": [
+    [
+      -0.9100000262260437,
+      -0.052000001072883606,
+      0.0
+    ],
+    [
+      0.9100000262260437,
+      0.052000001072883606,
+      1.4049999713897705
+    ]
+  ],
+  "triangles": 348,
+  "uv": {
+    "meters_per_uv": 3.5022841706205283,
+    "min": 3.5000879037231543,
+    "max": 3.505809254275743,
+    "p05": 3.500893538354247,
+    "p95": 3.50403070750395,
+    "total_triangles": 348,
+    "valid_triangles": 348,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Oiled garden oak": "wood"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 28312,
+  "datums": {
+    "installation": {
+      "mount": "ground",
+      "modulePitchM": 1.82,
+      "joinBoundaryX": [
+        -0.91,
+        0.91
+      ],
+      "postDepthM": 0.104,
+      "apexHeightM": 1.405,
+      "note": "Half-posts pair at straight joints. Outer free ends need terminal half-post accessories; right-angle joints need the 103 mm corner adapter. Static hand assembly, no automatic snapping."
+    },
+    "construction": "Six broad solid boards carried on three vertical battens and two rear rails.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "originalBoundsM": [
+      [
+        -0.9100000262260437,
+        -0.052000001072883606,
+        0.0
+      ],
+      [
+        0.9100000262260437,
+        0.052000001072883606,
+        1.4049999713897705
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.014057708820449951,
+    0.01405770667616224,
+    0.014057701742890007,
+    0.00745493130913625,
+    0.007454932473289467,
+    0.0017315978523887077,
+    0.0017315999793936498,
+    0.0017316006463564317,
+    0.014057713800625038,
+    0.004374719229720844,
+    0.004374717352523779,
+    0.014057709400932577,
+    0.01405771010144008
+  ],
+  "source_sha256": "5f1b22ee9f41948684cebba20f83236da0bb63b5cd2543c5c52c1d86a43692cc",
+  "glb_sha256": "6d699c28f84f2479f1f5405bc633417a892a5c3879a27c1b4b37ac1ec6180e1f",
+  "authoring_sha256": "46a634cc1f175940f2a58d181ad280f25a676761183c1392534ae5a4a29ea8c9"
+}

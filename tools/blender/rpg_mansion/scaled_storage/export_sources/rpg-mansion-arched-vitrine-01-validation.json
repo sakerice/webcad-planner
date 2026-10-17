@@ -1,0 +1,56 @@
+{
+  "model": "rpg-mansion-arched-vitrine-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    419.99998688697815,
+    1899.999976158142
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.20999999344348907,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.20999999344348907,
+      1.899999976158142
+    ]
+  ],
+  "triangles": 3932,
+  "uv": {
+    "meters_per_uv": 8.9195777601884,
+    "min": 7.1354496253919155,
+    "max": 10.617883985995652,
+    "p05": 7.657315372302307,
+    "p95": 10.449025769306973,
+    "total_triangles": 3932,
+    "valid_triangles": 3932,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.001": "wood",
+    "Mansion walnut mouldings.001": "wood",
+    "Mansion patinated brass.001": "metal",
+    "Mansion walnut veneered fields.001": "wood",
+    "Mansion clear antique glazing": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 176372,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "a7d05673697d92bdf0a72751e06b0a42e00222f4fdfca42aed90afbd6d17552d",
+  "sourceSha256": "260082b86b4dc70741c85557293012018bf02063e7baeccfcb5d75b71e5c4b6b",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "1c3e97c6b0b4a481fff1c99b086155d965c9887fdde32bbf75d4f9449b87413b",
+    "authoredDataSignature": "0f56aed4b1fdedf1a460724fb663510dbb89b576e43fa10aa98a2e4086153e6c",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

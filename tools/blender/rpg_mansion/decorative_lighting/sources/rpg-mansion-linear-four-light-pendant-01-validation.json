@@ -1,0 +1,114 @@
+{
+  "model": "rpg-mansion-linear-four-light-pendant-01",
+  "dimensions_mm": [
+    1399.999976158142,
+    254.1334629058838,
+    600.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.699999988079071,
+      -0.1270667314529419,
+      0.0
+    ],
+    [
+      0.699999988079071,
+      0.1270667314529419,
+      0.6000000238418579
+    ]
+  ],
+  "triangles": 5952,
+  "uv": {
+    "meters_per_uv": 3.5394254802420333,
+    "min": 3.4548949216468725,
+    "max": 3.597519055005664,
+    "p05": 3.5373360188566934,
+    "p95": 3.541032887502617,
+    "total_triangles": 5952,
+    "valid_triangles": 5952,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Bronzed iron structure": "metal",
+    "Antique brass structure": "metal",
+    "Porcelain socket insulator": "ceramic",
+    "Ivory enamel spun metal shades": "shade",
+    "Opal bulb glass static appearance": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 403232,
+  "datums": {
+    "installation": {
+      "mount": "ceiling-rods",
+      "ceilingContactPlaneBlenderZ": 0.6,
+      "defaultElevationMm": 2100,
+      "ceilingPlaneMm": 2700,
+      "note": "Fixture bottom 2100mm and canopy top 2700mm. No automatic ceiling following or native illumination."
+    },
+    "shade": {
+      "construction": "four distinct downward-open spun shells with 3mm nominal sheet separation",
+      "openingDiameterMm": 246,
+      "minimumAuthoredSheetThicknessMm": 2
+    },
+    "bulb": {
+      "type": "four mesh opal bulbs",
+      "materialEmissionStrength": 0.3,
+      "runtimeLightObjects": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.699999988079071,
+        -0.1270667314529419,
+        0.0
+      ],
+      [
+        0.699999988079071,
+        0.1270667314529419,
+        0.6000000238418579
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.00038264010115085495,
+    0.0003826411119026337,
+    0.0001882142306515918,
+    0.00011132231926088328,
+    6.854306583174245e-05,
+    2.6929712419132557e-05,
+    0.00038264111190263367,
+    0.00018821422822627257,
+    0.00011132221665851225,
+    6.854303657632955e-05,
+    2.6929725644701343e-05,
+    0.00018821428657345152,
+    0.000382640101150855,
+    0.00011132232653684089,
+    6.854306280009345e-05,
+    2.6929712400184755e-05,
+    0.005016913723617713,
+    2.2435219307226365e-05,
+    8.133698279758997e-05,
+    3.5715042846125776e-05,
+    2.2435219383017593e-05,
+    8.13369973495052e-05,
+    0.0001882142817228131,
+    3.571505466955689e-05,
+    0.0029765658096039256,
+    0.00011132220744987838,
+    6.854301596111631e-05,
+    2.692968750276729e-05
+  ],
+  "source_sha256": "a8cf49e0aa62d2d36eda2eece08396be4fc7c3762ba68980de8d02ae31447684",
+  "glb_sha256": "52637361d4802565a00a514b5ba49fe2d500316eb4020eb8d17e10c7b52c686a"
+}

@@ -1,0 +1,100 @@
+{
+  "model": "rpg-mansion-tankless-flushometer-wc-01",
+  "dimensions_mm": [
+    432.0000112056732,
+    796.4999675750732,
+    981.9999933242798
+  ],
+  "bounds_m": [
+    [
+      -0.2160000056028366,
+      -0.3982499837875366,
+      0.0
+    ],
+    [
+      0.2160000056028366,
+      0.3982499837875366,
+      0.9819999933242798
+    ]
+  ],
+  "triangles": 2104,
+  "uv": {
+    "meters_per_uv": 2.233006386133421,
+    "min": 2.2306332464145577,
+    "max": 2.2370762296185873,
+    "p05": 2.232502141415862,
+    "p95": 2.233320160955871,
+    "total_triangles": 2104,
+    "valid_triangles": 2104,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Ivory fired porcelain": "ceramic",
+    "Dark walnut WC seat": "wood",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 146640,
+  "datums": {
+    "installation": {
+      "mount": "floor-with-wall-service-inlet",
+      "floorPlaneY": 0,
+      "wallContactPlaneBlenderY": 0.424,
+      "serviceInletOriginalBlenderM": [
+        0,
+        0.424,
+        0.895
+      ],
+      "wallContactPlaneGltfZ": -0.39825000369548796
+    },
+    "capacityNote": "Static representation only; not working plumbing or engineering certification.",
+    "seatHeightMm": 451,
+    "bowlRimHeightMm": 410,
+    "clearBowlMm": {
+      "rimWidth": 297,
+      "rimDepth": 442,
+      "depth": 150
+    },
+    "faucetHeightMm": null,
+    "mechanismNote": "No storage tank. Static exposed flushometer valve and direct bowl feed; no working flushing mechanism.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.025749996304512024,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.2160000056028366,
+        -0.3725000023841858,
+        0.0
+      ],
+      [
+        0.2160000056028366,
+        0.42399999499320984,
+        0.9819999933242798
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.02519020825073189,
+    3.944307400161051e-05,
+    3.944213297775906e-05,
+    0.0008603771546352353,
+    0.0010478347505037768,
+    0.0034112564428217715,
+    0.0003346097940569356,
+    0.00023282407164515456,
+    2.9640816251230734e-05,
+    1.599693071815031e-05,
+    8.875012544725297e-05,
+    8.875018753921417e-05
+  ],
+  "source_sha256": "fcf6293ef24659802abad5db49f5a409cea128593a86b4361dc45615cdd731c6",
+  "glb_sha256": "66b4bde5035958b98b1d4feabe9da263a705bafc081d0348b7230468fe28233e"
+}

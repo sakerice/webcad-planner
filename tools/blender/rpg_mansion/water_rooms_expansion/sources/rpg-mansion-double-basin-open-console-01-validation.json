@@ -1,0 +1,113 @@
+{
+  "model": "rpg-mansion-double-basin-open-console-01",
+  "dimensions_mm": [
+    1440.000057220459,
+    600.0000238418579,
+    1039.8770570755005
+  ],
+  "bounds_m": [
+    [
+      -0.7200000286102295,
+      -0.30000001192092896,
+      0.0
+    ],
+    [
+      0.7200000286102295,
+      0.30000001192092896,
+      1.0398770570755005
+    ]
+  ],
+  "triangles": 3692,
+  "uv": {
+    "meters_per_uv": 5.014185143267479,
+    "min": 5.00364922772979,
+    "max": 5.023912034541437,
+    "p05": 5.012750465558564,
+    "p95": 5.015329070522632,
+    "total_triangles": 3692,
+    "valid_triangles": 3692,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Bronzed cast iron brackets": "metal",
+    "Dark walnut WC seat": "wood",
+    "Honed limestone vanity top": "stone",
+    "Ivory fired porcelain": "ceramic",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 250740,
+  "datums": {
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "capacityNote": "Static handwashing furniture; no working plumbing or ergonomic certification.",
+    "rimHeightMm": 839,
+    "faucetHeightMm": 1040,
+    "clearBowlMm": {
+      "perBasinRimWidth": 460,
+      "perBasinRimDepth": 340,
+      "depth": 118
+    },
+    "basinCount": 2,
+    "capacityGroup": "double-basin layout; counted for open-console construction and two actual separate basins, not a recolour",
+    "plumbingNote": "Static paired exposed traps. Rear outlets require a separate service connection.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.7200000286102295,
+        -0.30000001192092896,
+        0.0
+      ],
+      [
+        0.7200000286102295,
+        0.30000001192092896,
+        1.0398770570755005
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.001193668940383456,
+    0.006814900743052021,
+    0.0011936653313568968,
+    0.0011936631582708892,
+    6.63846195910386e-06,
+    0.0011936667672974486,
+    5.336738710563317e-05,
+    0.0018918224183532097,
+    3.534063580445945e-06,
+    0.0018918420149323842,
+    5.336201381093512e-05,
+    0.0006685383947721375,
+    0.0006685511179966853,
+    0.028245916473679245,
+    3.5349057725397866e-06,
+    4.349825273190313e-05,
+    0.007788325647197781,
+    0.00016362788070978238,
+    0.00042526384500736947,
+    0.007788326348115031,
+    0.0068148572748896186,
+    6.6371334194551995e-06,
+    5.3357890768287085e-05,
+    3.536718092315519e-06,
+    5.33538962675569e-05,
+    3.5387589984263015e-06,
+    4.349763063752711e-05,
+    0.00016362855282636699,
+    0.00042525530049412435
+  ],
+  "source_sha256": "1f399049b6e588d9cf298b70d40d5034dbb7db0147102d53a3e20757a035d67a",
+  "glb_sha256": "eeaea0882826f8c365c3a0f92ab386534e04e461f7a8a3a69463aba9c1655e28"
+}

@@ -1,0 +1,157 @@
+// 比較モード（2つの間取りを左右に並べて、どちらも編集する）を、実物のページで通す。
+//
+// 見るもの: 3つの選び方で右が開く／右を本当にクリック・キー操作して編集しても左は変わらない／Undo は側ごと／
+// 右の「保存」は前回のプランの枠（左の物）を上書きせずブラウザの一覧へ入れる／名前がファイル名になる／
+// 保存していない右をやめるときにたずねる／3D では編集中の側だけ／比較をやめると元の1画面。
+import assert from 'node:assert/strict';
+
+const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
+const APP = process.env.APP_URL || 'http://localhost:8932/';
+const browser = await chromium.launch();
+try {
+  const context = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto(APP + '?preset=2f');
+  await page.waitForSelector('#compare-btn', { timeout: 60000 });
+  await page.waitForTimeout(800);
+  const count = () => page.evaluate(() => ({ items: DATA.items.length, walls: DATA.walls.length, hist: HISTORY.length }));
+  const left0 = await count();
+
+  // 選ぶ画面に3つの選び方が出る。「今のプランを複製」で始める
+  await page.click('#compare-btn');
+  const choices = await page.locator('.compare-choice strong').allTextContents();
+  assert.deepEqual(choices, ['今のプランを複製', 'JSON ファイルを開く', 'ブラウザに保存したプラン']);
+  await page.click('.compare-choice >> nth=0');
+  await page.waitForSelector('#c2d-peer');
+  assert.equal(await page.evaluate(() => CompareMode.activeSide()), 0);
+
+  // 右の図面をクリックすると右が編集中になる（本物の図面と描くだけの図面が入れ替わる）
+  const peer = await page.locator('#c2d-peer').boundingBox();
+  await page.mouse.click(peer.x + peer.width / 2, peer.y + peer.height * 0.4);
+  assert.equal(await page.evaluate(() => CompareMode.activeSide()), 1);
+  const c2d = await page.locator('#c2d').boundingBox();
+  assert.ok(Math.abs(c2d.x - peer.x) < 2, '右を押しても本物の図面が右へ移っていない');
+
+  // 右で家具を1つ選んで Delete（画面の座標で選ぶ）
+  const target = await page.evaluate(() => {
+    const it = DATA.items.find((i) => i.floor === ST.floor && i.type === 'car') || DATA.items.find((i) => i.floor === ST.floor && i.w > 800 && i.d > 800 && !/site|foundation|road|neighbor/.test(i.type));
+    const r = canvas.getBoundingClientRect(), p = w2c(it.x + it.w / 2, it.y + it.d / 2);
+    return { id: it.id, x: r.left + p.cx, y: r.top + p.cy };
+  });
+  await page.mouse.click(target.x, target.y);
+  const picked = await page.evaluate(() => ST.selected && ST.selected.id);
+  assert.equal(picked, target.id, '右の図面で家具を選べない');
+  await page.keyboard.press('Delete');
+  const right1 = await count();
+  assert.equal(right1.items, left0.items - 1);
+  assert.equal(await page.evaluate(() => CompareMode.isDirty(1)), true);
+
+  // 左は変わっていない。Undo は側ごと
+  await page.evaluate(() => CompareMode.activate(0));
+  assert.deepEqual(await count(), left0, '右の編集が左に混ざった');
+  await page.evaluate(() => CompareMode.activate(1));
+  await page.evaluate(() => undoAction());
+  assert.equal((await count()).items, left0.items, '右の Undo が効かない');
+  await page.evaluate(() => { saveState(); DATA.items.pop(); draw2d(); });
+
+  // 名前を付ける（Undo できる操作として入る）。右の「保存」はブラウザの一覧へ入れ、前回のプランの枠（左の物）は触らない
+  await page.fill('.compare-frame >> nth=1 >> .compare-name', 'LDK拡張案');
+  await page.press('.compare-frame >> nth=1 >> .compare-name', 'Enter');
+  assert.equal(await page.evaluate(() => DATA.planName), 'LDK拡張案');
+  assert.match(await page.locator('.compare-frame >> nth=1 >> .compare-saved').textContent(), /まだ保存していません/);
+  const stored0 = await page.evaluate(async () => JSON.stringify(await StorageAdapter.load()));
+  await page.click('#save-btn');
+  await page.waitForSelector('.plan-library-name-input');
+  assert.equal(await page.inputValue('.plan-library-name-input'), 'LDK拡張案');
+  await page.press('.plan-library-name-input', 'Enter');
+  await page.waitForFunction(() => PLAN_LIBRARY_ID);
+  assert.equal(await page.evaluate(async () => JSON.stringify(await StorageAdapter.load())), stored0, '右の保存が前回のプランの枠を上書きした');
+  assert.equal(await page.evaluate(() => CompareMode.isDirty(1)), false, '保存したのに未保存のまま');
+  assert.match(await page.locator('.compare-frame >> nth=1 >> .compare-saved').textContent(), /一覧「LDK拡張案」に保存済み/);
+  const libRows = await page.evaluate(async () => (await PlanLibrary.list()).map((r) => r.name));
+  assert.deepEqual(libRows, ['LDK拡張案']);
+  // 書き出すファイル名は「名前_日付.json」
+  const dl = page.waitForEvent('download');
+  await page.evaluate(() => exportPlan());
+  const file = await dl;
+  assert.match(file.suggestedFilename(), /^LDK拡張案_\d{8}\.json$/);
+
+  // 3D も左右に並ぶ。右の半分を押すと右が編集中になる（以後の操作は右の間取りに効く）
+  await page.evaluate(() => CompareMode.activate(0));
+  await page.evaluate(() => setView('3d-ext'));
+  // 家具のモデルの読み込みは待たない（画面の無いブラウザでは遅い）。壁・屋根が描かれれば足りる
+  await page.waitForFunction(() => window.ren && window.sc3, null, { timeout: 60000 });
+  await page.waitForTimeout(3000);
+  const both = await page.evaluate(() => {
+    render3DNow();
+    // 左右それぞれの半分に家が描かれている（地の色一色ではない）
+    const c = ren.domElement, w = c.width, h = c.height, g = document.createElement('canvas'); g.width = w; g.height = h;
+    const x = g.getContext('2d'); render3DNow(); x.drawImage(c, 0, 0);
+    const a = document.getElementById('canvas-area').getBoundingClientRect(), pr = w / c.clientWidth;
+    const frames = [...document.querySelectorAll('.compare-frame')].map((f) => f.getBoundingClientRect());
+    return frames.map((r) => {
+      const d = x.getImageData(Math.round((r.left - a.left + r.width * 0.2) * pr), Math.round(h * 0.3), Math.round(r.width * 0.6 * pr), Math.round(h * 0.4)).data;
+      const seen = new Set(); for (let i = 0; i < d.length; i += 4 * 97) seen.add((d[i] >> 4) + ',' + (d[i + 1] >> 4) + ',' + (d[i + 2] >> 4));
+      return seen.size;
+    });
+  });
+  assert.ok(both[0] > 20 && both[1] > 20, '左右の 3D のどちらかが描かれていない: ' + both.join(','));
+  const rightHalf = await page.evaluate(() => {
+    const frames = [...document.querySelectorAll('.compare-frame')].map((f) => f.getBoundingClientRect());
+    return { x: frames[1].left + frames[1].width / 2, y: frames[1].top + frames[1].height / 2 };
+  });
+  // 組み立て中の「準備中」の覆いの上では図面に届かない。画面の無いブラウザでは家具のモデルが届くたびに
+  // 組み立て直しで覆いが出るので、覆いが無いときに押せるまで数回試す
+  let hit = '-';
+  for (let t = 0; t < 20 && (await page.evaluate(() => CompareMode.activeSide())) !== 1; t++) {
+    await page.waitForFunction(() => { const l = document.getElementById('app-loading'); return !l || !l.classList.contains('show'); }, null, { timeout: 120000 });
+    hit = await page.evaluate((p) => { const e = document.elementFromPoint(p.x, p.y); return e ? e.tagName + '#' + e.id : '-'; }, rightHalf);
+    if (hit.startsWith('CANVAS')) await page.mouse.click(rightHalf.x, rightHalf.y);
+    else await page.waitForTimeout(500);
+  }
+  assert.equal(await page.evaluate(() => CompareMode.activeSide()), 1, '3D で右を押しても右が編集中にならない（押した所: ' + hit + '）');
+  const pick = await page.evaluate(() => ({ name: DATA.planName }));
+  assert.equal(pick.name, 'LDK拡張案', '右を押したのに左の間取りが編集中のまま');
+  await page.evaluate(() => setView('2d'));
+  assert.equal(await page.locator('#c2d-peer').isVisible(), true);
+
+  // 保存していない右をやめるときはたずねる。「続ける」で残り、「保存せずにやめる」で1画面へ
+  await page.evaluate(() => { saveState(); DATA.items.pop(); draw2d(); });
+  await page.click('.compare-stop');
+  await page.waitForSelector('#compare-modal');
+  await page.click('#compare-modal button:has-text("比較を続ける")');
+  assert.equal(await page.evaluate(() => CompareMode.isOn()), true);
+  await page.click('.compare-stop');
+  await page.click('#compare-modal button:has-text("保存せずにやめる")');
+  const after = await page.evaluate(() => ({ on: CompareMode.isOn(), peer: !!document.getElementById('c2d-peer'),
+    width: canvas.width, area: document.getElementById('canvas-area').clientWidth, items: DATA.items.length }));
+  assert.deepEqual(after, { on: false, peer: false, width: after.area, area: after.area, items: left0.items });
+
+  // ブラウザに保存したプラン・JSON ファイルからも右に開ける
+  await page.evaluate(() => savePlanToStorage());
+  await page.waitForTimeout(500);
+  await page.click('#compare-btn');
+  await page.click('.compare-choice >> nth=2');
+  await page.waitForSelector('.plan-library-row');
+  assert.deepEqual(await page.locator('.plan-library-name').allTextContents(), ['前回のプラン', 'LDK拡張案']);
+  await page.click('.plan-library-row >> nth=1 >> button:has-text("右に開く")');
+  await page.waitForSelector('#c2d-peer');
+  assert.match(await page.locator('.compare-frame >> nth=1 >> .compare-saved').textContent(), /一覧「LDK拡張案」/);
+  await page.evaluate(() => CompareMode.stop());
+  await page.click('#compare-btn');
+  const chooser = page.waitForEvent('filechooser');
+  await page.click('.compare-choice >> nth=1');
+  await (await chooser).setFiles(await file.path());
+  await page.waitForSelector('#c2d-peer');
+  await page.evaluate(() => CompareMode.activate(1));
+  assert.equal(await page.evaluate(() => DATA.planName), 'LDK拡張案');
+  await page.evaluate(() => CompareMode.stop());
+
+  assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
+  console.log('比較モード: 3つの開き方・左右の独立した編集と Undo・右の一覧への保存・やめるときの確認・3D の扱いが通った');
+} finally {
+  await browser.close();
+}
