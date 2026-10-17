@@ -622,7 +622,7 @@ function pageHint(hint, index, total) {
 //
 // 見出し(「2階平面図」など)から階を判断させているが、書かれていない図面も
 // ある。同じ階が2つ来たら、ページの並び順を正とする。
-function mergeFloors(pages) {
+export function mergeFloors(pages) {
   const out = [];
   const used = new Set();
   pages.forEach((page, i) => {

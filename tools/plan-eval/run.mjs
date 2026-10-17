@@ -12,7 +12,7 @@
 //
 // 出力: tools/plan-eval/out/<図面>/<名前>.json（取り込んだ間取り・使用量・時間）と
 //       同じ名前の .txt（点数の内訳）。out/ はコミットしない。
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -63,9 +63,18 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   page.on('dialog', (d) => d.accept());   // 取り込みの確認（いまの間取りを外す）に「はい」
   const started = new Map();
+  // 送った入力と、ページごとの答えを残す。エージェントに同じ入力を渡したり、
+  // 見直しの前後を AI を呼ばずに採点し直したりするため（--inputs / --pages）。
+  const capture = { boxes: [], images: null, hint: '', pagesRead: null, pagesRevised: null };
+  const findIndex = new Map();
   page.on('request', (req) => {
     const p = new URL(req.url()).pathname;
-    if (p.startsWith('/api/ai/')) started.set(req, Date.now());
+    if (!p.startsWith('/api/ai/')) return;
+    started.set(req, Date.now());
+    if (p.endsWith('/find-plan')) findIndex.set(req, findIndex.size);
+    if (p.endsWith('/import-plan')) {
+      try { const b = JSON.parse(req.postData() || '{}'); capture.images = b.images || [b.image]; capture.hint = b.hint || ''; } catch (e) { /* 残せなくても測定は続ける */ }
+    }
   });
   page.on('response', async (res) => {
     const req = res.request();
@@ -73,6 +82,10 @@ try {
     const path = new URL(req.url()).pathname;
     let body = null;
     try { body = await res.json(); } catch (e) { body = null; }
+    if (path.endsWith('/find-plan') && findIndex.has(req)) capture.boxes[findIndex.get(req)] = body ? body.box : null;
+    if (body && Array.isArray(body.pages) && body.plan) {
+      if (body.revised) capture.pagesRevised = body.pages; else capture.pagesRead = body.pages;
+    }
     calls.push({
       path, status: res.status(), ms: Date.now() - started.get(req),
       usage: body && body.usage || null, pending: Boolean(body && body.pending),
@@ -83,6 +96,10 @@ try {
   // 空回し（--fake）: AI を呼ばず、正解をそのまま「読み取り結果」として返す。
   // 費用をかけずに、画面の操作・取り込み・採点までの配線を確かめるため。満点に近くなるはず。
   if (args.includes('--fake')) await fakeAi(page, truth);
+  // 再生（--pages <ページごとの答え.json>）: AI を呼ばず、残しておいた答え（またはエージェントの
+  // 答え）を Worker と同じ処理で間取りに組み立てて返す。図面の切り出し位置は --inputs の
+  // 測定で残したものを使い、同じ画像から読んだことにする。
+  if (opt('pages')) await replayAi(page, readPages(opt('pages')), opt('inputs'));
 
   await page.goto(process.env.APP_URL || 'http://localhost:8787/');
   await page.waitForFunction(() => window.ST && window.DATA, null, { polling: 200, timeout: 60000 });
@@ -138,6 +155,17 @@ try {
   const dir = join(HERE, 'out', fixtureName);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, label + '.json'), JSON.stringify(result, null, 1));
+  if (capture.images && !opt('pages') && !args.includes('--fake')) {
+    const inDir = join(dir, label + '-inputs');
+    mkdirSync(inDir, { recursive: true });
+    capture.images.forEach((url, i) => {
+      const m = /^data:([^;]+);base64,(.*)$/.exec(url || '');
+      if (m) writeFileSync(join(inDir, `page-${i + 1}.${m[1].split('/')[1].replace('jpeg', 'jpg')}`), Buffer.from(m[2], 'base64'));
+    });
+    writeFileSync(join(inDir, 'inputs.json'), JSON.stringify({ boxes: capture.boxes, hint: capture.hint }, null, 1));
+    if (capture.pagesRead) writeFileSync(join(inDir, 'pages-read.json'), JSON.stringify(capture.pagesRead));
+    if (capture.pagesRevised) writeFileSync(join(inDir, 'pages-revised.json'), JSON.stringify(capture.pagesRevised));
+  }
   const head = `${label}  ${provider} ${model}  読み取り ${result.seconds.read}秒  費用の目安 ${result.costJpy == null ? '-' : '¥' + result.costJpy}`
     + `  見直し ${result.review}  入力 ${usage.inputTokens || 0} / 出力 ${usage.outputTokens || 0} トークン`;
   writeFileSync(join(dir, label + '.txt'), head + '\n' + formatReport(score) + '\n');
@@ -173,4 +201,34 @@ async function fakeAi(page, plan) {
     }
     return route.fulfill({ status: 404, body: '{}' });
   });
+}
+
+// 残しておいた（またはエージェントが書いた）ページごとの答えを、Worker と同じ関数で
+// 間取りに組み立てて返す。見直しは行わない（見直しの有無で比べ方がずれないよう、
+// 比べるときは API 側も見直し前の答え pages-read.json で採点し直す）。
+async function replayAi(page, pages, inputsDir) {
+  const { finishImportedPlan, mergeFloors } = await import(new URL('../../worker/routes-ai.mjs', import.meta.url).href);
+  const boxes = inputsDir ? JSON.parse(readFileSync(join(inputsDir, 'inputs.json'), 'utf8')).boxes : [];
+  let nth = 0;
+  const reply = (body) => ({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+  await page.route('**/api/ai/**', async (route) => {
+    const p = new URL(route.request().url()).pathname;
+    if (p.endsWith('/quota')) return route.fulfill(reply({ left: null, counted: false }));
+    if (p.endsWith('/find-plan')) return route.fulfill(reply({ box: boxes[nth++] || null }));
+    if (p.endsWith('/finish-plan')) return route.fulfill(reply({ rooms: [], picks: [], missing: [], reads: [] }));
+    if (p.endsWith('/import-plan')) {
+      const res = finishImportedPlan(pages.length === 1 ? pages[0] : { floors: mergeFloors(pages) },
+        { calls: pages.length }, { pages, revise: { skipAll: true } });
+      return route.fulfill({ status: res.status, contentType: 'application/json', body: await res.text() });
+    }
+    return route.fulfill({ status: 404, body: '{}' });
+  });
+}
+
+// ページごとの答え。1つの JSON（配列）か、エージェントが書いた answer-N.json の入ったフォルダ。
+function readPages(path) {
+  if (!statSync(path).isDirectory()) return JSON.parse(readFileSync(path, 'utf8'));
+  return readdirSync(path).filter((f) => /^answer-\d+\.json$/.test(f))
+    .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]))
+    .map((f) => JSON.parse(readFileSync(join(path, f), 'utf8')));
 }
