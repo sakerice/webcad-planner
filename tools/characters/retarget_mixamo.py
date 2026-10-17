@@ -2,7 +2,13 @@
 #
 # 使い方（Blender をヘッドレスで回す）:
 #   /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/characters/retarget_mixamo.py -- \
-#     <人物.glb> <書き出し先.glb> Idle=<待機.fbx> Walking=<歩き.fbx> Sitting=<座り.fbx> ...
+#     <人物.glb> <書き出し先.glb> Idle=<待機.fbx> Walking=<歩き.fbx> Sitting=<座り.fbx>@knees ...
+#
+# 動きの後ろに付ける補正（座り姿用。いくつでも重ねられる。中身は下の各関数）:
+#   @face  腰の向きを正面（-Y）へ戻す（体ごと横を向く動きを、座面の向きに合わせる）
+#   @legs  腿をほぼ水平に、すねを垂直に下ろす（床座り用の、膝が胸に近い姿勢を椅子の座り方にする）
+#   @knees 膝とつま先をそろえる
+#   @hands 手を腿の上に寄せる（膝に手を置く動きで、膝をそろえたとき手だけ外に残らないように）
 #
 # Meshy の骨は Mixamo と同じ名前（mixamorig:Hips など）だが、休み姿勢（骨の向き）が違う。
 # そこで骨ごとに、休み姿勢の骨の方向を動き側にそろえたうえで「休み姿勢からの回転の差（ワールド空間）」を移す。腰の位置は、腰の高さの比で縮めて移す。
@@ -15,6 +21,10 @@ from mathutils import Matrix, Vector, Quaternion
 argv = sys.argv[sys.argv.index('--') + 1:]
 SRC, DST = argv[0], argv[1]
 CLIPS = [a.split('=', 1) for a in argv[2:]]
+OPTS = {}
+for c in CLIPS:
+    c[1], *opt = c[1].split('@')
+    OPTS[c[0]] = set(opt)
 DROP = {'Chair_Sit_Idle_M', 'Chair_Sit_Idle_F'}
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -44,6 +54,73 @@ def order(arm):
     return out
 
 
+def head_w(arm, n):
+    return arm.matrix_world @ arm.pose.bones[n].head
+
+
+def aim(arm, n, tip, target):
+    """骨 n を付け根まわりに回し、tip（その骨より先の点・ワールド）を target の方向へ向ける"""
+    pb = arm.pose.bones[n]
+    head = head_w(arm, n)
+    q = (tip - head).rotation_difference(target - head)
+    m = Matrix.Translation(head) @ q.to_matrix().to_4x4() @ Matrix.Translation(-head) @ (arm.matrix_world @ pb.matrix)
+    pb.matrix = arm.matrix_world.inverted() @ m
+    bpy.context.view_layer.update()
+
+
+# Mixamo の座り姿は膝が肩幅ほど開き、手もその膝に置く（男女どちらにも使う作り）。
+# 長いスカートの女性では脚を組めない（布が裂ける）ので、膝とつま先を寄せてそろえ、手を腿の上へ寄せる。
+# 横方向はワールドの X（人物は -Y を向いて座る）。寄せた先の幅は人物の腿・すねの太さに合わせた値
+KNEE_HALF, ANKLE_HALF, HAND_HALF = 0.06, 0.065, 0.07
+SIDES = ('Left', 'Right')
+
+
+def face_front(arm):
+    """左右の脚の付け根を結ぶ線がワールドの X と平行になるよう、腰を縦軸まわりに回す"""
+    l, r = head_w(arm, 'mixamorig:LeftUpLeg'), head_w(arm, 'mixamorig:RightUpLeg')
+    lat = Vector((l.x - r.x, l.y - r.y, 0))
+    want = Vector((1, 0, 0)) * (1 if (tgt_rest_lat.x >= 0) else -1)
+    q = lat.rotation_difference(want)
+    hip = head_w(arm, 'mixamorig:Hips')
+    pb = arm.pose.bones['mixamorig:Hips']
+    m = Matrix.Translation(hip) @ q.to_matrix().to_4x4() @ Matrix.Translation(-hip) @ (arm.matrix_world @ pb.matrix)
+    pb.matrix = arm.matrix_world.inverted() @ m
+    bpy.context.view_layer.update()
+
+
+# 椅子の座り方: 腿は前へ、膝が付け根より少し下（THIGH_DROP）。すねは真下より少し前（SHIN_FWD）
+THIGH_DROP, SHIN_FWD = 0.12, 0.08
+
+
+def chair_legs(arm):
+    for side in SIDES:
+        up, leg, foot = (f'mixamorig:{side}{b}' for b in ('UpLeg', 'Leg', 'Foot'))
+        h, knee = head_w(arm, up), head_w(arm, leg)
+        aim(arm, up, knee, h + Vector((knee.x - h.x, -1, -THIGH_DROP)))
+        knee, ankle = head_w(arm, leg), head_w(arm, foot)
+        aim(arm, leg, ankle, knee + Vector((0, -SHIN_FWD, -1)))
+
+
+def knees_together(arm):
+    cx = head_w(arm, 'mixamorig:Hips').x
+    for side in SIDES:
+        up, leg, foot = (f'mixamorig:{side}{b}' for b in ('UpLeg', 'Leg', 'Foot'))
+        knee = head_w(arm, leg)
+        sgn = 1 if knee.x > cx else -1
+        aim(arm, up, knee, Vector((cx + sgn * KNEE_HALF, knee.y, knee.z)))
+        ankle = head_w(arm, foot)
+        aim(arm, leg, ankle, Vector((cx + sgn * ANKLE_HALF, ankle.y, ankle.z)))
+
+
+def hands_on_lap(arm):
+    cx = head_w(arm, 'mixamorig:Hips').x
+    for side in SIDES:
+        fore, hand = f'mixamorig:{side}ForeArm', f'mixamorig:{side}Hand'
+        h = head_w(arm, hand)
+        sgn = 1 if h.x > cx else -1
+        aim(arm, fore, h, Vector((cx + sgn * HAND_HALF, h.y, h.z)))
+
+
 tgt.animation_data_create()
 tgt.animation_data.action = None
 for pb in tgt.pose.bones:
@@ -51,6 +128,7 @@ for pb in tgt.pose.bones:
 bpy.context.view_layer.update()
 tgt_names = order(tgt)
 tgt_rest = {n: rest_world(tgt, n) for n in tgt_names}
+tgt_rest_lat = tgt_rest['mixamorig:LeftUpLeg'].translation - tgt_rest['mixamorig:RightUpLeg'].translation
 
 for clip_name, fbx in CLIPS:
     before = set(bpy.context.scene.objects)
@@ -96,6 +174,15 @@ for clip_name, fbx in CLIPS:
             m = Matrix.Translation(loc) @ rot.to_matrix().to_4x4()
             pb.matrix = tw_inv @ m
             bpy.context.view_layer.update()
+        opts = OPTS[clip_name]
+        if 'face' in opts:
+            face_front(tgt)
+        if 'legs' in opts:
+            chair_legs(tgt)
+        if 'knees' in opts:
+            knees_together(tgt)
+        if 'hands' in opts:
+            hands_on_lap(tgt)
         for n in tgt_names:
             pb = tgt.pose.bones[n]
             pb.keyframe_insert('rotation_quaternion', frame=f - f0)

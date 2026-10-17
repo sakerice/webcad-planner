@@ -1,7 +1,7 @@
 // 三人称のウォークスルー（third-person.js）を実物のページで通す。
 //
-// 見るもの: ?tps=1 が無ければ切り替えは出ず、一人称のカメラは今までどおり目の位置／
-// ?tps=1 で三人称にすると、人物が足元に立ち、カメラは人物の後ろのいつも同じ距離（向きは一人称と同じ）／
+// 見るもの: ?tps=0 なら切り替えは出ず、一人称のカメラは今までどおり目の位置／
+// 何も付けなければ切り替えが出て、三人称にすると、人物が足元に立ち、カメラは人物の後ろのいつも同じ距離（向きは一人称と同じ）／
 // 切り替えは十字キーの上の横長のボタン／下キーはカメラの向きのまま、人物がカメラの方を向いて手前へ歩いてくる／一人称に戻すと人物は消える。
 import assert from 'node:assert/strict';
 
@@ -39,16 +39,17 @@ try {
   }
   const eye = () => ({ x: WALK.x, z: WALK.z, y: walkEyeY(), cx: camExt.position.x, cy: camExt.position.y, cz: camExt.position.z });
 
-  // 隠しスイッチが無いとき: 切り替えは出ず、カメラは目の位置
-  const p1 = await open('');
-  assert.equal(await p1.locator('#walk-tps-toggle').count(), 0, '?tps=1 が無いのに切り替えが出た');
+  // ?tps=0（三人称を出さない逃げ道）: 切り替えは出ず、カメラは目の位置
+  const p1 = await open('&tps=0');
+  assert.equal(await p1.locator('#walk-tps-toggle').count(), 0, '?tps=0 なのに切り替えが出た');
   const e1 = await p1.evaluate(eye);
   assert.ok(Math.hypot(e1.cx - e1.x, e1.cz - e1.z) < 1e-6 && Math.abs(e1.cy - e1.y) < 1e-6, '一人称のカメラが目の位置にない');
   // 画面の無いブラウザでは、3D のページを続けて開くと後の方が動かなくなるので、ブラウザごと開き直す
   await browser.close(); browser = await launch();
 
-  // 隠しスイッチあり: 三人称にすると、人物の後ろから見る
-  const p2 = await open('&tps=1');
+  // 何も付けない: 切り替えが出て、始めは一人称。三人称にすると、人物の後ろから見る
+  const p2 = await open('');
+  assert.equal(await p2.evaluate(() => ThirdPerson.isOn()), false, '始めから三人称になっている（始めは一人称）');
   await pressToggle(p2);
   const t = await p2.evaluate(() => {
     let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; });
@@ -84,8 +85,13 @@ try {
   assert.ok(turn.moved < 1e-9 || Math.abs(Math.abs(turn.face) - Math.PI) < 1e-6, '人物がカメラの方を向いていない: ' + JSON.stringify(turn));
   assert.ok(Math.abs(t.yaw) < 1e-6, 'カメラの向きが一人称と違う');
   // カメラと人物の間の壁は見えなくするだけで、当たり判定は残す（消した壁を通り抜けて外へ出られない）
-  const hiddenWall = await p2.evaluate(() => {
+  // 間の壁はパッと消さず、薄くしてから消す（0.25秒）。置いた直後は薄くなり始めた所で、まだ消えきっていない
+  const hiddenWall = await p2.evaluate(async () => {
     WALK.x = 7.28; WALK.z = 3.4; WALK.yaw = Math.PI / 2; walkApplyCamera();
+    await new Promise((res) => setTimeout(res, 60)); walkApplyCamera();
+    let fading = 0, gone = 0;
+    sc3.traverse((o) => { if (o.isMesh && o.userData._tpsFadeOrig) { const m = Array.isArray(o.material) ? o.material[0] : o.material; if (m.opacity > 0.05 && m.opacity < 0.95) fading++; } if (o.userData._tpsLayers !== undefined) gone++; });
+    for (let i = 0; i < 8; i++) { await new Promise((res) => setTimeout(res, 60)); walkApplyCamera(); }
     const walls = new Set();
     sc3.traverse((o) => { if (o.userData._tpsLayers !== undefined && o.userData.selectKind === 'wall' && DATA.walls.includes(o.userData.selectRef)) walls.add(o.userData.selectRef); });
     const w = [...walls][0];
@@ -93,10 +99,11 @@ try {
     // 開口（ドア）の位置を避けて、壁の上の点を探す
     for (let t = 0.1; t <= 0.9; t += 0.05) {
       const x = w.x1 + (w.x2 - w.x1) * t, y = w.y1 + (w.y2 - w.y1) * t;
-      if (walkBlockedAt(x, y, WALK.floor)) return {count: walls.size, blocked: true};
+      if (walkBlockedAt(x, y, WALK.floor)) return {count: walls.size, blocked: true, fading, gone};
     }
-    return {count: walls.size, blocked: false};
+    return {count: walls.size, blocked: false, fading, gone};
   });
+  assert.ok(hiddenWall.fading > 0 && hiddenWall.gone === 0, '間の壁がパッと消えた（薄くなる途中が無い）: ' + JSON.stringify(hiddenWall));
   assert.ok(hiddenWall.count > 0, 'カメラと人物の間の壁が消えていない');
   assert.equal(hiddenWall.blocked, true, '見えなくした壁の当たり判定が無くなっている');
   // 座る: ソファの前に来ると「ソファに座る」が出て、押すと座面の上に座る。歩く操作をすると立ち上がる
@@ -107,6 +114,7 @@ try {
     WALK.x = cx + fx * 1.0; WALK.z = cz + fy * 1.0; walkApplyCamera();
     const btn = document.getElementById('walk-sit-toggle');
     const label = btn.style.display !== 'none' ? btn.textContent : '';
+    const yawBefore = WALK.yaw;
     btn.click();
     // 座る動きは時間で進む。描画の回り(requestAnimationFrame)は窓が裏にあると止まるので、ここで時間を置いて進める
     for (let i = 0; i < 8; i++) { await new Promise((res) => setTimeout(res, 100)); walkApplyCamera(); }
@@ -118,22 +126,49 @@ try {
     const fwd = Math.max(sofa.d * 0.1, sofa.d / 2 - 140) / 1000, sx = cx + fx * fwd, sz = cz + fy * fwd;   // 浅めに腰掛ける（前の縁から 140mm）
     const off = Math.hypot(hp.x - sx, hp.z - sz);
     // 座ったまま左右キー: 立ち上がらず、カメラだけが回る（人物は座った向きのまま）
-    const yaw0 = WALK.yaw;
+    // 座ってもカメラの向きは変わらない（人物だけが家具の正面を向く）
+    const camKept = Math.abs(WALK.yaw - yawBefore) < 1e-9;
+    const yaw0 = WALK.yaw, body0 = f.rotation.y;
     WALK.keys.left = true; let t = performance.now();
     for (let i = 0; i < 5; i++) { t += 50; updateWalkMode(t); }
     WALK.keys.left = false;
     walkApplyCamera();
     const turned = {stillSeated: ThirdPerson.seated() === sofa, dyaw: WALK.yaw - yaw0,
-      facing: Math.atan2(Math.sin(f.rotation.y - yaw0), Math.cos(f.rotation.y - yaw0))};
+      facing: Math.atan2(Math.sin(f.rotation.y - body0), Math.cos(f.rotation.y - body0))};
     WALK.keys.fwd = true; updateWalkMode(performance.now()); WALK.keys.fwd = false;
-    return {label, label2, seated, off, hipsFound: !!hips, after: !!ThirdPerson.seated(), turned};
+    return {label, label2, seated, off, hipsFound: !!hips, after: !!ThirdPerson.seated(), turned, camKept};
   });
   assert.equal(sit.label, 'ソファに座る', 'ソファの前で「ソファに座る」が出ない');
   assert.ok(sit.seated && sit.label2 === '立ち上がる', '押しても座らない: ' + JSON.stringify(sit));
   assert.ok(!sit.hipsFound || sit.off < 0.08, '腰が座面の上にない: ' + sit.off);
+  assert.ok(sit.camKept, '座ったらカメラの向きが変わった（人物の背中側へ回り込んだ）');
   assert.ok(sit.turned.stillSeated && sit.turned.dyaw > 0.1, '座ったまま左右キーでカメラが回らない: ' + JSON.stringify(sit.turned));
   assert.ok(Math.abs(sit.turned.facing) < 1e-6, 'カメラを回したら、座っている人物まで回った: ' + JSON.stringify(sit.turned));
   assert.equal(sit.after, false, '前へ歩く操作で立ち上がらない');
+  // 座った足が床にめり込まない。座面の高さは家具ごとに違い、低い座面では足が床の下へ入っていた（利用者の指摘）。
+  // プランの座れる家具すべてに座らせ、足先がその階の床より上にあるかを見る
+  const feet = await p2.evaluate(async () => {
+    const out = [];
+    for (const it of DATA.items.filter((i) => { const f = getFmpItem(i.type); return f && (f.kind === 'sofa' || f.kind === 'chair'); })) {
+      ST.floor = it.floor; WALK.floor = it.floor; _walkCollFloor = null;
+      const r = (it.rot || 0) * Math.PI / 180, cx = (it.x + it.w / 2) / 1000, cz = (it.y + it.d / 2) / 1000;
+      WALK.x = cx - Math.sin(r) * 0.9; WALK.z = cz + Math.cos(r) * 0.9; walkUpdateGround(true);
+      let t = performance.now(); for (let i = 0; i < 3; i++) { t += 50; updateWalkMode(t); walkApplyCamera(); }
+      const btn = document.getElementById('walk-sit-toggle');
+      if (btn.style.display === 'none') continue;
+      btn.click();
+      for (let i = 0; i < 12; i++) { await new Promise((res) => setTimeout(res, 60)); walkApplyCamera(); }
+      let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; });
+      f.updateMatrixWorld(true);
+      let low = Infinity; const v = new THREE.Vector3();
+      f.traverse((o) => { if (o.isBone && /(Foot|ToeBase|Toe_End)$/.test(o.name)) low = Math.min(low, o.getWorldPosition(v).y); });
+      out.push({ type: it.type, floor: it.floor, above: +(low - floorTopY(it.floor)).toFixed(3) });
+      ThirdPerson.standUp(); for (let i = 0; i < 8; i++) { await new Promise((res) => setTimeout(res, 60)); walkApplyCamera(); }
+    }
+    return out;
+  });
+  assert.ok(feet.length >= 2, '座れる家具に座れない: ' + JSON.stringify(feet));
+  assert.deepEqual(feet.filter((x) => x.above < -0.005), [], '座った足が床にめり込んでいる');
   // 人物は女性だけ（男性はリリースの範囲から外した）。もう1回押すと一人称に戻る（人物は消え、カメラは目の位置に戻る）
   assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-02a');
   await pressToggle(p2);
@@ -142,7 +177,7 @@ try {
   assert.equal(await p2.evaluate(() => getComputedStyle(document.getElementById('walk-height-toggle')).visibility), 'visible', '一人称に戻しても立ち／座り視点の切り替えが出ない');
 
   assert.deepEqual(errors, [], 'ページで例外: ' + errors.join(' / '));
-  console.log('三人称のウォークスルー: 隠しスイッチ・人物の位置・決まった距離のカメラ（間の壁は見た目だけ消し、隠れた部分はシルエット）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（座ったままカメラを回す）・一人称へ戻す、が通った');
+  console.log('三人称のウォークスルー: 切り替えの表示（?tps=0 で出さない）・人物の位置・決まった距離のカメラ（間の壁は薄くしてから見た目だけ消し、隠れた部分はシルエット）・ボタンの位置・下キーでカメラの方へ歩く・ソファに座る（カメラは回り込まない・座ったままカメラを回す・どの席でも足が床の上）・一人称へ戻す、が通った');
 } finally {
   await browser.close();
 }

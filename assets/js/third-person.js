@@ -1,5 +1,5 @@
-// 三人称のウォークスルー（作り直し計画 段階5）。完成までは隠しスイッチの裏に置く:
-// URL に ?tps=1 を付けたときだけ、ウォークスルーの操作盤に「一人称／三人称」の切り替えが出る。
+// 三人称のウォークスルー（作り直し計画 段階5）。ウォークスルーの操作盤に「一人称／三人称」の切り替えが出る
+// （始めは一人称）。URL に ?tps=0 を付けると切り替えを出さない（不具合が出たときの逃げ道）。
 //
 // 一人称のウォークスルーには手を入れない。歩く位置・向き・当たり判定は WALK（一人称と同じ物）を
 // そのまま使い、カメラの置き場所だけを「人物の後ろ」に替える（walkApplyCamera の後ろに足す）。
@@ -13,7 +13,7 @@
 // - 下キー: カメラの向きはそのままで、人物がカメラの方へ向き直り、体の前をカメラに向けて手前へ歩いてくる
 //   （カメラは同じ距離を保って下がる）。上キーで奥へ歩くと、また背中を向ける
 var ThirdPerson = (function(){
-  var enabled = /[?&]tps=1\b/.test(location.search);
+  var enabled = !/[?&]tps=0\b/.test(location.search);
   var on = false;                      // 三人称で歩いているか
   var DIST = 2.4, HEAD = 1.55, NEAR_PAD = 0.35, TURN_RATE = Math.PI / 0.45;
   var figure = null, parts = null, phase = 0, lastX = null, lastZ = null;
@@ -30,7 +30,9 @@ var ThirdPerson = (function(){
   // それでも隠れた部分（線から外れた低い家具など）は、人物を単色のシルエットで描く。
   // 4つの方式（消すだけ／シルエットだけ／壁だけ消してシルエット／両方）を撮り比べ、利用者が「両方」に決めた（2026-10-15）。
   // シルエットだけでは、カメラが人物の後ろの決まった距離にあるため壁の外に出て、画面が壁の裏側でふさがる
-  var SILHOUETTE_COLOR = 0x4f7fd0;
+  // シルエットは白っぽい一色（濃い青は人物より目立った — 利用者の指摘）。
+  // 半透明にはしない: 体の部品が重なる所ほど濃く塗り重なり、スカートの中の脚などの形が透けて見えた（利用者の指摘）
+  var SILHOUETTE_COLOR = 0xdce6f6;
   // 試し: URL に &tpshide=0 を付けると、壁・家具を消さずシルエットだけで見せる（利用者が試したいと言った形）
   var HIDE_BETWEEN = !/[?&]tpshide=0\b/.test(location.search);
   var bodyOff = 0, bodyTarget = 0, lastBodyAt = 0;
@@ -80,7 +82,7 @@ var ThirdPerson = (function(){
   var _silMat = null;
   function silhouetteMaterial(){
     if(_silMat) return _silMat;
-    _silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false});
+_silMat = new THREE.MeshBasicMaterial({color:SILHOUETTE_COLOR, depthFunc:THREE.GreaterDepth, depthWrite:false, fog:false});
     return _silMat;
   }
   function toonify(root){
@@ -124,7 +126,11 @@ var ThirdPerson = (function(){
     if(actions.idle) actions.idle.play();
     if(actions.sit){ actions.sit.play(); actions.sit.setEffectiveWeight(0); }
     bones = {};
-    figure.traverse(function(o){ if(o.isBone){ if(/Hips$/.test(o.name)) bones.hips = o; else if(/Head$/.test(o.name)) bones.head = o; } });
+    figure.traverse(function(o){ if(o.isBone){
+      if(/Hips$/.test(o.name)) bones.hips = o; else if(/Head$/.test(o.name)) bones.head = o;
+      else if(/(Left|Right)UpLeg$/.test(o.name)) bones[RegExp.$1 === 'Left' ? 'upL' : 'upR'] = o;
+      else if(/(Left|Right)(Foot|ToeBase|Toe_End)$/.test(o.name)) (bones.feet = bones.feet || {})[o.name] = o;
+    } });
     if(actions.walk){ actions.walk.play(); actions.walk.setEffectiveWeight(actions.idle ? 0 : 1); }
     mixer.update(0);
     parts = null;
@@ -172,16 +178,60 @@ var ThirdPerson = (function(){
     sc3.traverse(function(o){ if(o.isLight && o.shadow && o.shadow.camera) o.shadow.camera.layers.enable(HIDDEN_LAYER); });
     return walls;
   }
-  function setHidden(list){
-    hidden.forEach(function(root){
-      if(list.indexOf(root) >= 0) return;
-      root.traverse(function(o){ if(o.userData._tpsLayers !== undefined){ o.layers.mask = o.userData._tpsLayers; delete o.userData._tpsLayers; } });
+  // 間に入った物は、パッと消さずに薄くしてから消す（戻すときも薄い所から戻す。利用者の要望）。
+  // 薄くする間だけ、その物の材質を透ける写しに差し替え、消えきったら描かない層へ移して元の材質に戻す。
+  // 光線は消している物にも当たるので、薄くしている途中でも「間にある」ままでいられる
+  var FADE_TIME = 0.25, fades = [], lastFadeAt = 0;
+  function fadeMaterials(root, on){
+    root.traverse(function(o){
+      if(!o.isMesh) return;
+      if(on && !o.userData._tpsFadeOrig){
+        var orig = o.material;
+        var mk = function(m){ var c = m.clone(); c.transparent = true; c.depthWrite = false; c.userData._tpsFadeBase = m.opacity; return c; };
+        o.userData._tpsFadeOrig = orig;
+        o.material = Array.isArray(orig) ? orig.map(mk) : mk(orig);
+      } else if(!on && o.userData._tpsFadeOrig){
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){ m.dispose(); });
+        o.material = o.userData._tpsFadeOrig;
+        delete o.userData._tpsFadeOrig;
+      }
     });
+  }
+  function fadeOpacity(root, k){
+    root.traverse(function(o){
+      if(!o.isMesh || !o.userData._tpsFadeOrig) return;
+      (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){ m.opacity = m.userData._tpsFadeBase * k; });
+    });
+  }
+  function layerHide(root, on){
+    root.traverse(function(o){
+      if(on && o.userData._tpsLayers === undefined){ o.userData._tpsLayers = o.layers.mask; o.layers.set(HIDDEN_LAYER); }
+      else if(!on && o.userData._tpsLayers !== undefined){ o.layers.mask = o.userData._tpsLayers; delete o.userData._tpsLayers; }
+    });
+  }
+  // list: いま間にある物。now を渡さなければ、すぐに全部を元へ戻す（三人称を切ったとき）
+  function setHidden(list, now){
+    if(now === undefined){
+      fades.forEach(function(f){ layerHide(f.root, false); fadeMaterials(f.root, false); });
+      fades = []; hidden = []; lastFadeAt = 0;
+      return;
+    }
+    var dt = lastFadeAt ? Math.min(0.1, (now - lastFadeAt) / 1000) : 0; lastFadeAt = now;
     list.forEach(function(root){
-      if(hidden.indexOf(root) >= 0) return;
-      root.traverse(function(o){ if(o.userData._tpsLayers === undefined){ o.userData._tpsLayers = o.layers.mask; o.layers.set(HIDDEN_LAYER); } });
+      if(fades.some(function(f){ return f.root === root; })) return;
+      fades.push({root:root, k:1});
+      fadeMaterials(root, true);
     });
-    hidden = list;
+    fades = fades.filter(function(f){
+      var want = list.indexOf(f.root) >= 0 ? 0 : 1, was = f.k;
+      if(want < f.k) f.k = Math.max(0, f.k - dt / FADE_TIME); else if(want > f.k) f.k = Math.min(1, f.k + dt / FADE_TIME);
+      if(f.k > 0 && was === 0) layerHide(f.root, false);           // 消えきっていた物を戻し始める
+      fadeOpacity(f.root, f.k);
+      if(f.k === 0 && was > 0) layerHide(f.root, true);            // 消えきった
+      if(f.k === 1 && want === 1){ fadeMaterials(f.root, false); return false; }   // 戻りきった
+      return true;
+    });
+    hidden = fades.map(function(f){ return f.root; });
   }
   var hiddenInst = {}, ZERO = null;
   // 戻すときは、階の間引き(applyWalkCulling)が消している物は消したままにする
@@ -227,7 +277,7 @@ var ThirdPerson = (function(){
         if(list.indexOf(op) < 0 && boxes.some(function(bx){ return bx.containsPoint(_ctr); })) list.push(op);
       });
     }
-    setHidden(list);
+    setHidden(list, performance.now());
     // まとめ描きの家具: 当たった家具（の全部品）を大きさ0にする。どの番号がどの家具かは instanceRefs に書いてある
     // 消している家具は大きさ0で光線が当たらないので、当てる間だけ元の位置へ戻しておく（画面に送り直しはしない）
     var _q = new THREE.Matrix4();
@@ -298,7 +348,9 @@ var ThirdPerson = (function(){
   function sitDown(){
     if(!near || !on) return;
     seat = lastSeat = near; seatTop(seat);
-    WALK.yaw = seat.yaw; WALK.pitch = Math.min(WALK.pitch || 0, 0);   // 座った向き（家具の正面）を見る
+    // カメラの向きは変えない。人物だけが家具の正面を向いて座る（座った姿が見える）。
+    // 以前はカメラを家具の正面へ向け、毎回人物の背中側へ回り込んでいた（利用者の指摘）。
+    // 座った向きの景色は、座ったまま左右キーでカメラを回して見る
     bodyOff = bodyTarget = 0;
     updateSitButton();
     if(typeof walkApplyCamera === 'function') walkApplyCamera();
@@ -381,6 +433,7 @@ var ThirdPerson = (function(){
         figure.position.z += (from.z - hp.z) * k;
         var wantY = figure.position.y + (from.top + HIP_ABOVE_SEAT - hp.y);
         figure.position.y += (Math.max(from.floorY - 0.05, wantY) - figure.position.y) * k;
+        liftFeetAboveFloor(from.floorY);
       }
     } else if(parts){
       if(moved > 0.0005){ phase += moved * 4.2; } else { phase *= 0.8; }
@@ -409,6 +462,37 @@ var ThirdPerson = (function(){
     camExt.rotation.order = 'YXZ';
     camExt.rotation.set(pitch, WALK.yaw, 0);
     hideBetween(head, camExt.position);
+  }
+  // 座った足が床にめり込むなら、膝を上げて（腿を付け根まわりに起こして）足を床の上へ出す。
+  // 座面の高さは家具ごとに違い、腰は座面に合わせて置くので、低い座面ほど足が床の下へ入る（利用者の指摘）
+  var FOOT_CLEAR = 0.02, LIFT_MAX = 0.9;
+  function footLowY(side){
+    var low = Infinity, v = new THREE.Vector3();
+    Object.keys(bones.feet || {}).forEach(function(n){ if(n.indexOf(side) >= 0) low = Math.min(low, bones.feet[n].getWorldPosition(v).y); });
+    return low;
+  }
+  function liftFeetAboveFloor(floorY){
+    var axis = new THREE.Vector3(1, 0, 0).applyQuaternion(figure.quaternion);   // 人物の左右の向き
+    [['Left', bones.upL], ['Right', bones.upR]].forEach(function(e){
+      var up = e[1]; if(!up || !up.parent) return;
+      figure.updateMatrixWorld(true);
+      var d = floorY + FOOT_CLEAR - footLowY(e[0]);
+      if(!(d > 0)) return;
+      // 付け根から足先までの長さで角度を見積もり、上がる向きへ回す（向きは試して決める）
+      var hip = up.getWorldPosition(new THREE.Vector3()), reach = Math.max(0.3, hip.y - footLowY(e[0]));
+      var ang = Math.min(LIFT_MAX, Math.asin(Math.min(1, d / reach)) * 1.3), base = up.quaternion.clone(), best = null;
+      [ang, -ang].forEach(function(a){
+        var pq = up.parent.getWorldQuaternion(new THREE.Quaternion());
+        var wq = new THREE.Quaternion().setFromAxisAngle(axis, a).multiply(pq.clone().multiply(base));
+        up.quaternion.copy(pq.invert().multiply(wq));
+        up.updateMatrixWorld(true);
+        var y = footLowY(e[0]);
+        if(!best || y > best.y) best = {y: y, q: up.quaternion.clone()};
+        up.quaternion.copy(base);
+      });
+      up.quaternion.copy(best.q);
+    });
+    figure.updateMatrixWorld(true);
   }
   function attachTo(scene){
     if(!figure || !on) return;
