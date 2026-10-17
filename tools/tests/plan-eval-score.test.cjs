@@ -116,3 +116,62 @@ test('正解に無い階を読んだら知らせる', () => {
   p.walls.push({ x1: 0, y1: 0, x2: 1000, y2: 0, floor: 4 });
   assert.deepEqual(scorePlan(truth, p).extraFloors, [4]);
 });
+
+// ── 2026-10-18 追加: 扉の向き・階段の向き・家具・設備・外構 ─────────────
+test('開き戸の吊り元を逆にすると、建具の「開く向き」だけが下がる', () => {
+  const p = clone(truth);
+  const d = p.items.find((x) => x.floor === 1 && x.type === 'door-swing' && x.memo && x.memo.startsWith('洋室'));
+  d.flipX = !d.flipX;
+  const o = scorePlan(truth, p).floors[0].openings;
+  assert.equal(o.count, 1);
+  assert.ok(o.swing < 1 && o.swing > 0.8);
+});
+
+test('開き戸を開く側だけ逆にしても半分は残る（吊り元は合っている）', () => {
+  const p = clone(truth);
+  const d = p.items.find((x) => x.floor === 3 && x.type === 'door-swing');
+  d.flipY = !d.flipY;
+  const o = scorePlan(truth, p).floors[2].openings;
+  assert.equal(o.swing, 1 - 0.5 / o.swingCount);
+});
+
+test('壁を逆向きに描いても、扉の向きは方角で比べるので下がらない', () => {
+  const p = clone(truth);
+  for (const w of p.walls) { [w.x1, w.x2] = [w.x2, w.x1]; [w.y1, w.y2] = [w.y2, w.y1]; }
+  for (const it of p.items) if (/^door-(swing|front|fold)/.test(it.type)) { it.flipX = !it.flipX; it.flipY = !it.flipY; }
+  assert.equal(scorePlan(truth, p).total, 100);
+});
+
+test('階段の上る向きを逆にすると、階段の「上る向き」が下がる', () => {
+  const p = clone(truth);
+  p.items.find((x) => x.floor === 1 && x.type === 'stair').rot = 270;
+  const s = scorePlan(truth, p).floors[0].stairs;
+  assert.equal(s.count, 1);
+  assert.equal(s.direction, 0.5);
+});
+
+test('家具の向きを逆にすると正面の向きが下がり、無くすと数と位置も下がる', () => {
+  const turned = clone(truth), gone = clone(truth);
+  turned.items.find((x) => x.type === 'sofa').rot += 180;
+  const a = scorePlan(truth, turned).floors[1].furniture;
+  assert.equal(a.count, 1);
+  assert.ok(a.facing < 1);
+  gone.items = gone.items.filter((x) => x.type !== 'sofa');
+  const b = scorePlan(truth, gone).floors[1].furniture;
+  assert.ok(b.count < 1 && b.position < 1);
+});
+
+test('同じ種類なら別のモデルでも当たり（ソファは fmp-Sofa01 でもよい）', () => {
+  const p = clone(truth);
+  const s = p.items.find((x) => x.type === 'sofa');
+  s.type = 'fmp-Sofa01';
+  assert.equal(scorePlan(truth, p).floors[1].furniture.count, 1);
+});
+
+test('家具の無い読み取りは家具0点だが、骨組みの点は変わらない', () => {
+  const p = clone(truth);
+  p.items = p.items.filter((x) => !(require('../plan-eval/score.cjs').objectClass(x.type) || {}).group);
+  const r = scorePlan(truth, p);
+  assert.equal(r.furniture, 0);
+  assert.equal(r.core, 100);
+});

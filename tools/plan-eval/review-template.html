@@ -7,7 +7,7 @@
 :root {
   --bg: #f3f4f1; --panel: #ffffff; --ink: #1d2320; --muted: #66706b; --line: #d9ddd8;
   --accent: #2f5d50; --accent-ink: #ffffff; --sel: #f2b705;
-  --wall: #d23c2c; --room: #2f5fb3; --win: #17924a; --door: #e07b00; --pin: #8a2be2;
+  --wall: #d23c2c; --room: #2f5fb3; --win: #17924a; --door: #e07b00; --pin: #8a2be2; --fur: #8a5a2b; --ext: #0f8b8d; --stair: #4b5563;
   --open: #b45309; --done: #1f7a4d; --ask: #2f5fb3;
   --font-ui: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
   --font-num: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
@@ -45,7 +45,7 @@ aside { display: grid; gap: 12px; min-width: 0; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
 .card h2 { font-size: 13px; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; font-weight: 500; }
 .kind { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; color: #fff; margin-right: 6px; }
-.k-wall { background: var(--wall); } .k-room { background: var(--room); } .k-window { background: var(--win); } .k-door { background: var(--door); } .k-point { background: var(--pin); } .k-other { background: #777; }
+.k-wall { background: var(--wall); } .k-room { background: var(--room); } .k-window { background: var(--win); } .k-door { background: var(--door); } .k-point { background: var(--pin); } .k-other { background: #777; } .k-furniture, .k-fixtures { background: var(--fur); } .k-exterior { background: var(--ext); } .k-stairs { background: var(--stair); }
 dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 8px 0 0; font-size: 13px; }
 dt { color: var(--muted); } dd { margin: 0; font-family: var(--font-num); font-size: 12.5px; overflow-wrap: anywhere; }
 dd.text { font-family: var(--font-ui); font-size: 13px; }
@@ -82,7 +82,9 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
       <div class="seg" id="floors" role="group" aria-label="階"></div>
       <label class="chk"><input type="checkbox" id="lay-wall" checked><i style="background:var(--wall)"></i>壁</label>
       <label class="chk"><input type="checkbox" id="lay-room" checked><i style="background:var(--room)"></i>部屋</label>
-      <label class="chk"><input type="checkbox" id="lay-open" checked><i style="background:var(--win)"></i>建具</label>
+      <label class="chk"><input type="checkbox" id="lay-open" checked><i style="background:var(--win)"></i>建具・階段</label>
+      <label class="chk"><input type="checkbox" id="lay-fur" checked><i style="background:var(--fur)"></i>家具・設備</label>
+      <label class="chk"><input type="checkbox" id="lay-ext" checked><i style="background:var(--ext)"></i>外構</label>
       <label class="chk"><input type="checkbox" id="lay-text" checked>文字</label>
       <span class="spacer"></span>
       <button class="iconbtn" id="zin" aria-label="拡大">＋</button>
@@ -117,7 +119,9 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
       <h2>色の見方</h2>
       <div class="legend">
         <span><i class="kind k-wall">壁</i>芯の位置</span><span><i class="kind k-room">部屋</i>名前と面積</span>
-        <span><i class="kind k-window">窓</i></span><span><i class="kind k-door">扉</i></span><span><i class="kind k-point">番号</i>コメント</span>
+        <span><i class="kind k-window">窓</i></span><span><i class="kind k-door">扉</i>弧＝開く側、黒丸＝吊り元</span>
+        <span><i class="kind k-stairs">階段</i>矢印＝上る向き</span><span><i class="kind k-furniture">家具・設備</i>三角＝正面</span>
+        <span><i class="kind k-exterior">外構</i></span><span><i class="kind k-point">番号</i>コメント</span>
       </div>
     </div>
   </aside>
@@ -131,7 +135,12 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
   const SVGNS = 'http://www.w3.org/2000/svg';
   const TYPE_JA = { window: '窓', 'window-door': '掃き出し窓', 'door-swing': '開き戸', 'door-swing-s': '開き戸(小)',
     'door-slide': '引違い戸', 'door-slide-s': '片引き戸', 'door-fold': '折戸', 'door-opening': '開口（建具なし）',
-    'door-front': '玄関ドア', stair: '階段', 'stair-corner': '階段の廻り部', balcony: 'バルコニー' };
+    'door-front': '玄関ドア', stair: '階段（直進部）', 'stair-corner': '階段（廻り部）', balcony: 'バルコニー', ramp: 'スロープ' };
+  const KIND_JA = { bed: 'ベッド', sofa: 'ソファ', chair: '椅子', 'dining-table': 'ダイニングテーブル', 'low-table': 'ローテーブル',
+    tv: 'テレビ', refrigerator: '冷蔵庫', 'kitchen-storage': 'キッチン収納', 'kitchen-unit': 'キッチン', laundry: '洗濯機',
+    vanity: '洗面台', bathtub: '浴槽', toilet: '便器', 'shoe-storage': '靴・ベンチ収納', deck: 'デッキ・テラス', ramp: 'スロープ', balcony: 'バルコニー' };
+  const GROUP_JA = { wall: '壁', room: '部屋', window: '窓', door: '扉', stairs: '階段', fixtures: '設備', furniture: '家具', exterior: '外構', other: 'その他' };
+  function dirJa(v) { if (!v) return '-'; return Math.abs(v[0]) > Math.abs(v[1]) ? (v[0] > 0 ? '東' : '西') : (v[1] > 0 ? '南' : '北'); }
   const state = { floor: D.pages[0].floor, sel: null, comments: [], zoom: 1, cx: null, cy: null, focusComment: null };
   const $ = (id) => document.getElementById(id);
   const fmt = (v) => Math.round(v).toLocaleString('ja-JP');
@@ -142,9 +151,8 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
   D.plan.walls.forEach((w) => els.push({ id: 'w' + w.id, kind: 'wall', floor: w.floor, raw: w }));
   D.plan.rooms.forEach((r) => els.push({ id: String(r.id), kind: 'room', floor: r.floor, raw: r }));
   D.plan.items.forEach((it) => {
-    const t = String(it.type || '');
-    const kind = t.startsWith('window') ? 'window' : t.startsWith('door-') ? 'door' : 'other';
-    els.push({ id: 'i' + it.id, kind, floor: it.floor, raw: it });
+    const g = (it.note && it.note.group) || 'other';
+    els.push({ id: 'i' + it.id, kind: g, floor: it.floor, raw: it });
   });
   const byId = new Map(els.map((e) => [e.id, e]));
 
@@ -169,6 +177,7 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
       return (r.memo ? r.memo : (isOuter(r) ? '外壁' : '壁')) + '（' + fmt(len) + 'mm）';
     }
     if (e.kind === 'room') return r.n || '(名前なし)';
+    if (['furniture', 'fixtures', 'exterior'].includes(e.kind)) return r.memo || KIND_JA[r.note.kind] || r.type;
     return (TYPE_JA[r.type] || r.type) + (r.memo ? '・' + r.memo : '');
   }
   function isOuter(w) {
@@ -188,10 +197,20 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
       out.push(['範囲', fmt(r.x) + ', ' + fmt(r.y) + ' 〜 ' + fmt(r.x + r.w) + ', ' + fmt(r.y + r.d)]);
       out.push(['大きさ', fmt(r.w) + ' × ' + fmt(r.d) + ' mm']);
       out.push(['面積', area.toFixed(2) + ' ㎡（' + (area / 1.62).toFixed(1) + '帖）' + (parts.length > 1 ? '・長方形' + parts.length + 'つで1室' : '')]);
+    } else if (['furniture', 'fixtures', 'exterior'].includes(e.kind)) {
+      const b = itemBox(r);
+      out.push(['種類', (KIND_JA[r.note.kind] || r.note.kind) + '（' + r.type + '）'], ['中心', fmt(b.cx) + ', ' + fmt(b.cy)]);
+      out.push(['大きさ', fmt(r.w) + ' × ' + fmt(r.d) + ' mm（幅 × 奥行き）']);
+      if (e.kind !== 'exterior' || r.type === 'ramp') out.push([r.type === 'ramp' ? '上る向き' : '正面', dirJa(r.note.front) + 'を向く']);
+    } else if (e.kind === 'stairs') {
+      const b = itemBox(r);
+      out.push(['種類', (TYPE_JA[r.type] || r.type)], ['中心', fmt(b.cx) + ', ' + fmt(b.cy)]);
+      out.push([r.type === 'stair-corner' ? '抜ける向き' : '上る向き', dirJa(r.note.stairDir)]);
     } else {
       const b = itemBox(r);
       out.push(['種類', (TYPE_JA[r.type] || r.type) + '（' + r.type + '）'], ['中心', fmt(b.cx) + ', ' + fmt(b.cy)]);
-      out.push(['幅', fmt(r.w) + ' mm'], ['載る壁', (Math.round((r.rot || 0) / 90) % 2) ? '南北の壁' : '東西の壁']);
+      out.push(['幅', fmt(r.w) + ' mm']);
+      if (r.note && r.note.swing) out.push(['吊り元', dirJa(r.note.swing.hinge) + 'の端'], ['開く側', dirJa(r.note.swing.opens) + '側']);
     }
     if (r.memo) out.push(['説明', r.memo, 'text']);
     out.push(['番号', e.id]);
@@ -217,6 +236,8 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
     state.cy = Math.min(Math.max(state.cy, vh / 2), H - vh / 2);
     svg.setAttribute('viewBox', [state.cx - vw / 2, state.cy - vh / 2, vw, vh].join(' '));
     svg.textContent = '';
+    const defs = node('defs', {}, svg), mk = node('marker', { id: 'arrow', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 5, markerHeight: 5, orient: 'auto-start-reverse' }, defs);
+    node('path', { d: 'M0,0 L10,5 L0,10 Z', fill: 'var(--stair)' }, mk);
     node('image', { href: pg.image, x: 0, y: 0, width: W, height: H, opacity: 0.55 }, svg);
     const fs = 15 / Math.sqrt(state.zoom);
     const mine = els.filter((e) => e.floor === state.floor);
@@ -248,12 +269,51 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
         t.textContent = fmt(Math.hypot(r.x2 - r.x1, r.y2 - r.y1));
       }
     }
+    const objLayer = (k) => (k === 'furniture' || k === 'fixtures') ? layer('lay-fur') : k === 'exterior' ? layer('lay-ext') : layer('lay-open');
+    for (const e of mine.filter((e) => ['furniture', 'fixtures', 'exterior', 'stairs'].includes(e.kind) && objLayer(e.kind))) {
+      const r = e.raw, b = itemBox(r), a = toPx(pg, b.cx - b.w / 2, b.cy - b.d / 2), c = toPx(pg, b.cx + b.w / 2, b.cy + b.d / 2);
+      const col = e.kind === 'exterior' ? 'var(--ext)' : e.kind === 'stairs' ? 'var(--stair)' : 'var(--fur)';
+      const on = e.id === selId;
+      const g = node('g', { 'data-id': e.id, style: 'cursor:pointer' }, svg);
+      node('rect', { x: a[0], y: a[1], width: c[0] - a[0], height: c[1] - a[1], fill: col, 'fill-opacity': on ? 0.35 : 0.12,
+        stroke: on ? 'var(--sel)' : col, 'stroke-width': on ? 4 : 2, 'stroke-dasharray': e.kind === 'exterior' ? '8 5' : '' }, g);
+      const m = toPx(pg, b.cx, b.cy), half = Math.min(c[0] - a[0], c[1] - a[1]) / 2;
+      const v = e.kind === 'stairs' ? r.note.stairDir : r.note.front;
+      if (v && (e.kind !== 'exterior' || r.type === 'ramp')) {
+        if (e.kind === 'stairs' || r.type === 'ramp') {
+          const L = Math.max(c[0] - a[0], c[1] - a[1]) * 0.38, tip = [m[0] + v[0] * L, m[1] + v[1] * L], tail = [m[0] - v[0] * L, m[1] - v[1] * L];
+          node('line', { x1: tail[0], y1: tail[1], x2: tip[0], y2: tip[1], stroke: col, 'stroke-width': 3, 'marker-end': 'url(#arrow)', style: 'pointer-events:none' }, g);
+        } else {
+          // 正面の辺の中央に三角。
+          const hw = (c[0] - a[0]) / 2, hh = (c[1] - a[1]) / 2;
+          const f = [m[0] + v[0] * hw, m[1] + v[1] * hh], s2 = 7, px = -v[1], py = v[0];
+          node('path', { d: `M${f[0] + v[0] * s2},${f[1] + v[1] * s2} L${f[0] + px * s2},${f[1] + py * s2} L${f[0] - px * s2},${f[1] - py * s2} Z`, fill: col, style: 'pointer-events:none' }, g);
+        }
+      }
+      if (layer('lay-text') && (state.zoom >= 1.5 || e.kind === 'exterior')) {
+        const t = node('text', { x: m[0], y: m[1] + fs * 0.3, 'text-anchor': 'middle', 'font-size': fs * 0.7, fill: col,
+          'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 3, style: 'pointer-events:none' }, g);
+        t.textContent = (KIND_JA[r.note.kind] || TYPE_JA[r.type] || '').slice(0, 8);
+      }
+      void half;
+    }
     if (layer('lay-open')) for (const e of mine.filter((e) => e.kind === 'window' || e.kind === 'door' || e.kind === 'other')) {
       const b = itemBox(e.raw), a = toPx(pg, b.cx - b.w / 2, b.cy - b.d / 2), c = toPx(pg, b.cx + b.w / 2, b.cy + b.d / 2);
       const col = e.kind === 'window' ? 'var(--win)' : e.kind === 'door' ? 'var(--door)' : '#888';
       const g = node('g', { 'data-id': e.id, style: 'cursor:pointer' }, svg);
       node('rect', { x: a[0], y: a[1], width: Math.max(4, c[0] - a[0]), height: Math.max(4, c[1] - a[1]), fill: col, 'fill-opacity': e.id === selId ? 0.45 : 0.18,
         stroke: e.id === selId ? 'var(--sel)' : col, 'stroke-width': e.id === selId ? 4 : 2.5 }, g);
+      const sw = e.raw.note && e.raw.note.swing;
+      if (sw) {
+        // 扉の弧: 吊り元から、開いた扉の先までの四分円。黒丸が吊り元。
+        const W = e.raw.w, h = [b.cx + sw.hinge[0] * W / 2, b.cy + sw.hinge[1] * W / 2];
+        const shut = [h[0] - sw.hinge[0] * W, h[1] - sw.hinge[1] * W], open = [h[0] + sw.opens[0] * W, h[1] + sw.opens[1] * W];
+        const H = toPx(pg, h[0], h[1]), S = toPx(pg, shut[0], shut[1]), O = toPx(pg, open[0], open[1]);
+        const R = Math.hypot(S[0] - H[0], S[1] - H[1]);
+        const cross = (S[0] - H[0]) * (O[1] - H[1]) - (S[1] - H[1]) * (O[0] - H[0]);
+        node('path', { d: `M${H[0]},${H[1]} L${O[0]},${O[1]} A${R},${R} 0 0 ${cross > 0 ? 0 : 1} ${S[0]},${S[1]}`, fill: 'none', stroke: col, 'stroke-width': 2, style: 'pointer-events:none' }, g);
+        node('circle', { cx: H[0], cy: H[1], r: 4, fill: '#111', style: 'pointer-events:none' }, g);
+      }
       if (layer('lay-text') && e.kind !== 'other') {
         const t = node('text', { x: (a[0] + c[0]) / 2, y: a[1] - 4, 'text-anchor': 'middle', 'font-size': fs * 0.75, fill: col,
           'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 3, style: 'pointer-events:none' }, g);
@@ -289,7 +349,7 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
       box.appendChild(b);
     }
   }
-  ['lay-wall', 'lay-room', 'lay-open', 'lay-text'].forEach((id) => $(id).addEventListener('change', render));
+  ['lay-wall', 'lay-room', 'lay-open', 'lay-fur', 'lay-ext', 'lay-text'].forEach((id) => $(id).addEventListener('change', render));
   $('zin').addEventListener('click', () => { state.zoom = Math.min(6, state.zoom * 1.5); render(); });
   $('zout').addEventListener('click', () => { state.zoom = Math.max(1, state.zoom / 1.5); render(); });
   $('zfit').addEventListener('click', () => { state.zoom = 1; state.cx = null; render(); });
@@ -333,7 +393,7 @@ ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); 
       addProp(props, '階', e.floor + '階');
     } else {
       kindEl.className = 'kind k-' + e.kind;
-      kindEl.textContent = { wall: '壁', room: '部屋', window: '窓', door: '扉', other: 'その他' }[e.kind];
+      kindEl.textContent = GROUP_JA[e.kind] || 'その他';
       $('d-title').textContent = titleOf(e);
       for (const [k, v, cls] of propsOf(e)) addProp(props, k, v, cls);
     }

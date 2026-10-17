@@ -56,6 +56,12 @@ def main():
         url, size = page_image(pdf, tight)
         pages.append({"floor": pg["floor"], "image": url, "size": list(size),
                       "originPx": [ox - x0, oy - y0], "mmPerPx": pg["mmPerPx"]})
+    # 向き（扉の吊り元・開く側、階段の上る向き、家具の正面）は採点と同じ計算で付ける。
+    notes = json.loads(subprocess.run(
+        ["node", "-e", "const s=require(process.argv[1]);const p=require(process.argv[2]);"
+         "process.stdout.write(JSON.stringify(s.annotate(p)))",
+         os.path.join(HERE, "score.cjs"), os.path.abspath(os.path.join(ROOT, fx["truth"]))],
+        check=True, capture_output=True, text=True).stdout)
     keep = lambda o, keys: {k: o[k] for k in keys if k in o}
     data = {
         "fixture": name,
@@ -64,7 +70,8 @@ def main():
         "plan": {
             "walls": [keep(w, ("id", "x1", "y1", "x2", "y2", "floor", "memo")) for w in plan["walls"]],
             "rooms": [keep(r, ("id", "x", "y", "w", "d", "floor", "n", "memo")) for r in plan["rooms"]],
-            "items": [keep(i, ("id", "type", "x", "y", "w", "d", "rot", "floor", "memo")) for i in plan["items"]],
+            "items": [dict(keep(i, ("id", "type", "x", "y", "w", "d", "rot", "floor", "memo", "face")),
+                           note=notes.get(str(i["id"]), {})) for i in plan["items"]],
         },
     }
     # </script> で JSON が途切れないようにする。
