@@ -20,6 +20,7 @@ import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
+import { anthropicConfig, generate as anthropicGenerate } from "./anthropic.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
@@ -181,10 +182,14 @@ function locateProvider(env) {
 // Astra だけが、L字の部屋を長方形2つで表し、廻り階段を直進部分に接して置いた。
 // どちらも他の2つでは指示を変えても出なかったもので、**モデルの世代の差**。
 // 思考トークンは gpt-5 の1/10（1,552 対 15,360）で、迷わずに答えている。
+//
+// Claude（AI_IMPORT_PROVIDER=anthropic）は、点数で今の OpenAI と比べてから
+// 既定にする（tools/plan-eval/）。それまでは名指ししたときだけ使う。
 function importProvider(env) {
   const want = (env && env.AI_IMPORT_PROVIDER) || "";
   const openai = openaiConfig(env);
   if (want === "vertex") return { kind: "vertex" };
+  if (want === "anthropic") return { kind: "anthropic", config: anthropicConfig(env) };
   if (want === "openai" || openai.configured) {
     return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
   }
@@ -393,6 +398,12 @@ async function aiRevisePlan(payload, env, deps, request) {
 // 読み取りと見直しで同じ手続きを二度書かないため、ここに1つだけ置く。
 function resolveImportProvider(env) {
   const provider = importProvider(env);
+  if (provider.kind === "anthropic" && !provider.config.configured) {
+    return { error: json({
+      error: "ai_not_configured",
+      message: "AI の鍵がこの環境に設定されていません。 wrangler secret put ANTHROPIC_API_KEY で設定してください。",
+    }, 503) };
+  }
   if (provider.kind !== "vertex") return provider;
   const config = vertexConfig(env);
   if (!config.configured) {
@@ -418,6 +429,10 @@ function askForPlan(provider, { system, text, images, docs, fetchImpl }) {
   const common = { system, docs: docs || [planKnowledge(), planSpec()], text, images, fetchImpl };
   if (provider.kind === "openai") {
     return openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
+  }
+  // 出力の形の書き方は OpenAI と同じ JSON Schema（項目はすべて必須、余分な項目は不可）。
+  if (provider.kind === "anthropic") {
+    return anthropicGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
   }
   return generate({ ...common, config: provider.config, responseSchema: PLAN_RESPONSE_SCHEMA });
 }
@@ -625,6 +640,10 @@ function mergeFloors(pages) {
 
 function sumUsage(results) {
   const keys = ["inputTokens", "answerTokens", "thoughtTokens", "outputTokens", "totalTokens"];
+  // 使い回し（prompt caching）の内訳は、それを返す提供元（Claude）のときだけ載せる。
+  for (const k of ["cacheWriteTokens", "cacheReadTokens"]) {
+    if (results.some((r) => r.usage && k in r.usage)) keys.push(k);
+  }
   const out = { calls: results.length };
   for (const k of keys) {
     out[k] = results.reduce((n, r) => n + Number((r.usage && r.usage[k]) || 0), 0);
