@@ -132,6 +132,8 @@ try {
   if (!got.ok) throw new Error('読み取りに失敗: ' + got.status);
   await page.locator('#plan-import-apply').click();
   await page.waitForFunction(() => !document.querySelector('#plan-import-modal.show'), null, { timeout: 30000 });
+  // アプリにそのまま読み込める形（「JSON を読み込む」で開ける）。人が 2D・3D で見て確かめるため。
+  const appJson = await page.evaluate(() => JSON.stringify(DATA));
   const plan = await page.evaluate(() => JSON.parse(JSON.stringify({
     walls: DATA.walls, rooms: DATA.rooms,
     items: DATA.items.filter((it) => it && it.type !== 'foundation' && it.type !== 'roof'),
@@ -155,6 +157,7 @@ try {
   const dir = join(HERE, 'out', fixtureName);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, label + '.json'), JSON.stringify(result, null, 1));
+  writeFileSync(join(dir, label + '-app.json'), appJson);
   if (capture.images && !opt('pages') && !args.includes('--fake')) {
     const inDir = join(dir, label + '-inputs');
     mkdirSync(inDir, { recursive: true });
