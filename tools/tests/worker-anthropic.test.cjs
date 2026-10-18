@@ -69,15 +69,59 @@ test('ANTHROPIC_MODEL と ANTHROPIC_EFFORT で比べる相手を替えられる'
   assert.equal(body.output_config.effort, 'medium');
 });
 
-test('名指ししなければ、Claude のキーがあっても今までどおり OpenAI へ行く', async () => {
+test('名指しが無ければ、Claude の鍵がある環境では Claude を使う（2026-10-19 決定）', async () => {
   let url = null;
   await callAi('/api/ai/import-plan', { image: PNG },
     { ANTHROPIC_API_KEY: 'sk-ant', OPENAI_API_KEY: 'sk-oa' },
-    async (req) => {
-      url = req.url;
-      return new Response(JSON.stringify({ id: 'resp_1', status: 'queued' }), { status: 200 });
-    });
+    async (req) => { url = req.url; return claudeReply(PAGE); });
+  assert.match(url, /api\.anthropic\.com/);
+});
+
+test('Claude の鍵が無ければ、これまでどおり OpenAI へ行く（鍵を入れる前でも止まらない）', async () => {
+  let url = null;
+  await callAi('/api/ai/import-plan', { image: PNG }, { OPENAI_API_KEY: 'sk-oa' }, async (req) => {
+    url = req.url;
+    return new Response(JSON.stringify({ id: 'resp_1', status: 'queued' }), { status: 200 });
+  });
   assert.match(url, /api\.openai\.com/);
+});
+
+// ── 短い指示の読み取り（/api/ai/read-plan） ─────────────────────────────
+const SSE = 'event: message_start\ndata: {"type":"message_start","message":{"usage":{"input_tokens":10}}}\n\n'
+  + 'event: content_block_delta\ndata: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"{}"}}\n\n';
+
+test('read-plan: 全ページを1回で送り、答えを読み解かずにそのまま流す', async () => {
+  let body = null, calls = 0;
+  const res = await callAi('/api/ai/read-plan', { images: [PNG, PNG, PNG], hint: '3階建て' }, ENV, async (req) => {
+    calls++;
+    body = JSON.parse(await req.text());
+    return new Response(SSE, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+  });
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get('content-type'), /text\/event-stream/);
+  assert.equal(await res.text(), SSE, '中身を変えずに流す');
+  assert.equal(calls, 1, 'ページごとに分けない（階の位置合わせを AI に任せる）');
+  assert.equal(body.messages[0].content.filter((c) => c.type === 'image').length, 3);
+  assert.equal(body.stream, true);
+  assert.equal(body.output_config.effort, 'medium', '既定の考える深さは medium');
+  assert.equal(body.output_config.format.type, 'json_schema');
+  assert.deepEqual(body.thinking, { type: 'adaptive', display: 'summarized' }, '考えている内容の要約を画面に出す');
+  assert.match(body.messages[0].content.at(-1).text, /3階建て/, '利用者の補足を渡す');
+});
+
+test('read-plan: Claude の鍵が無い・別の提供元を名指ししている環境では 404（画面はこれまでの読み取りへ戻る）', async () => {
+  let called = false;
+  const f = async () => { called = true; return new Response(SSE); };
+  assert.equal((await callAi('/api/ai/read-plan', { image: PNG }, { OPENAI_API_KEY: 'k' }, f)).status, 404);
+  assert.equal((await callAi('/api/ai/read-plan', { image: PNG }, { ANTHROPIC_API_KEY: 'k', AI_IMPORT_PROVIDER: 'openai' }, f)).status, 404);
+  assert.equal(called, false);
+});
+
+test('read-plan: Anthropic のエラーは 502 にして、本文もキーも流さない', async () => {
+  const res = await callAi('/api/ai/read-plan', { image: PNG }, ENV, async () => new Response(
+    JSON.stringify({ type: 'error', error: { type: 'overloaded_error', message: 'Overloaded' } }), { status: 529 }));
+  assert.equal(res.status, 502);
+  assert.ok(!(await res.text()).includes('sk-ant-secret'));
 });
 
 test('出力の形を JSON Schema で強制し、仕様書までを使い回しの範囲にする', async () => {

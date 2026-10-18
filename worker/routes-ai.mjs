@@ -20,7 +20,8 @@ import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
-import { anthropicConfig, generate as anthropicGenerate } from "./anthropic.mjs";
+import { anthropicConfig, generate as anthropicGenerate, startStream } from "./anthropic.mjs";
+import { FREE_SYSTEM, FREE_SCHEMA, buildFreePrompt } from "./plan-free.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
@@ -88,6 +89,7 @@ export async function handleAi(request, env, url, deps = {}) {
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
   if (url.pathname === "/api/ai/finish-plan") return aiFinishPlan(payload, env, deps);
+  if (url.pathname === "/api/ai/read-plan") return aiReadPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps);
@@ -190,6 +192,9 @@ function importProvider(env) {
   const openai = openaiConfig(env);
   if (want === "vertex") return { kind: "vertex" };
   if (want === "anthropic") return { kind: "anthropic", config: anthropicConfig(env) };
+  // 名指しが無く、Claude の鍵が入っていれば Claude を使う（2026-10-19 利用者決定）。
+  // 鍵が無い環境では、これまでどおり OpenAI → Vertex の順に落ちる。
+  if (!want && anthropicConfig(env).configured) return { kind: "anthropic", config: anthropicConfig(env) };
   if (want === "openai" || openai.configured) {
     return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
   }
@@ -322,6 +327,50 @@ async function aiImportPlan(payload, env, deps, request) {
     // アプリが組み立てたあとの形では、本人に自分の答えとして見せられない。
     { pages: pages.list, revise: await reviseAdvice(pages.list, env, deps) },
   ), env, deps, { images, pages: pages.list });
+}
+
+// ── 間取り図 → house-planner のデータ（短い指示・Claude） ───────────────
+//
+// 手順で縛らず、house-planner で設定できる項目を渡して作らせる（worker/plan-free.mjs）。
+// 全ページを1回で渡す（階どうしの位置合わせを AI に任せるため）。答えは少しずつ届く形で
+// 画面へそのまま流し、画面が進み具合を出しながら組み立てる。
+//
+// Claude の鍵が無い環境では 404 を返す。画面はそれを見て、これまでの読み取り（import-plan）に戻る。
+async function aiReadPlan(payload, env, deps, request) {
+  const want = (env && env.AI_IMPORT_PROVIDER) || "";
+  const config = anthropicConfig(env);
+  if (!config.configured || (want && want !== "anthropic")) {
+    return json({ error: "not_available", message: "この環境では短い指示の読み取りを使いません。" }, 404);
+  }
+  const raw = Array.isArray(payload && payload.images) && payload.images.length
+    ? payload.images.slice(0, MAX_PAGES) : [payload && payload.image];
+  const images = [];
+  for (let i = 0; i < raw.length; i++) {
+    const one = readImage(raw[i], raw.length > 1 ? `images[${i}]` : "image");
+    if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
+    images.push(one);
+  }
+  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+
+  const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
+  if (!quota.ok) {
+    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
+  }
+
+  const started = await startStream({
+    // 考える深さは medium が既定（2026-10-19 実測: high と点数は変わらず 222秒→181秒）。
+    config: { ...config, effort: (env && env.ANTHROPIC_EFFORT) || "medium", schema: FREE_SCHEMA },
+    system: FREE_SYSTEM,
+    text: buildFreePrompt({ pages: images.length, hint }),
+    images,
+    maxOutputTokens: 64000,
+    fetchImpl: deps.fetchImpl,
+  });
+  if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
+  return new Response(started.body, {
+    status: 200,
+    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", "x-plan-pages": String(images.length) },
+  });
 }
 
 // ── 自分の答えを見直させる ───────────────────────────────────────────

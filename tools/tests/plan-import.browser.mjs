@@ -90,6 +90,9 @@ try {
   await page.evaluate(() => {
     window.__sentBody = null;
     window.fetch = async (url, opts) => {
+      // この検査は、これまでの読み取り（import-plan）の流れを見る。短い指示の経路（read-plan）は
+      // 使えない環境として断る（その流れは plan-import-stream.browser.mjs が見る）。
+      if (String(url).includes('/api/ai/read-plan')) return new Response('{"error":"not_available"}', { status: 404 });
       // **読み取りの本文だけを覚える。** 取り込みの前後には位置探しや
       // 仕上げの問い合わせも飛ぶので、最後の1件を覚えると別の本文になる。
       if (String(url).includes('/api/ai/import-plan')) window.__sentBody = JSON.parse(opts.body);
@@ -161,7 +164,7 @@ try {
 
   // ── 鍵が無いときの案内 ────────────────────────────────────────────
   await page.evaluate(() => {
-    window.fetch = async () => new Response(
+    window.fetch = async (url) => String(url).includes('/api/ai/read-plan') ? new Response('{}', { status: 404 }) : new Response(
       JSON.stringify({ error: 'ai_not_configured', message: 'x' }),
       { status: 503, headers: { 'content-type': 'application/json' } });
   });
@@ -194,6 +197,9 @@ try {
   // PDFが複数ページなら各ページが各階になる。壁が階ごとに入ることを見る。
   await page.evaluate(() => {
     window.fetch = async (url, opts) => {
+      // この検査は、これまでの読み取り（import-plan）の流れを見る。短い指示の経路（read-plan）は
+      // 使えない環境として断る（その流れは plan-import-stream.browser.mjs が見る）。
+      if (String(url).includes('/api/ai/read-plan')) return new Response('{"error":"not_available"}', { status: 404 });
       // **読み取りの本文だけを覚える。** 取り込みの前後には位置探しや
       // 仕上げの問い合わせも飛ぶので、最後の1件を覚えると別の本文になる。
       if (String(url).includes('/api/ai/import-plan')) window.__sentBody = JSON.parse(opts.body);

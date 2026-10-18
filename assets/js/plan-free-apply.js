@@ -1,0 +1,153 @@
+// 短い指示（worker/plan-free.mjs）で読み取った答えを、取り込みの形（plan-import.js が受ける形）に直す。
+//
+// 答えは方角（N/E/S/W）で向きを書いてくる。アプリは向きを rot・flipX・flipY で持ち、建具は
+// 吸い付く壁の向きを基準に左右を決める（assets/js/draw-2d.js）。その翻訳をここ1か所で行う。
+// 画面（取り込み）と、読み取りを測る道具（tools/plan-eval/free-answer.mjs）が同じこれを使う。
+//
+// 返す形: { walls:[{x1,y1,x2,y2,floor,thick}], rooms:[{x,y,w,d,floor,n}],
+//           items:[{type, x, y（中心）, w, d, rot, floor, extra:{flipX,...}}], notes:[] }
+// items の x,y は**中心**（取り込みの決まり。角へ直すのは plan-import.js の toAppObjects）。
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PlanFreeApply = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var DIR = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
+  var ROT = { N: 0, E: 90, S: 180, W: 270 };
+  // 直進階段は +d へ上る。上る方角 → rot。
+  var STAIR_ROT = { S: 0, W: 90, N: 180, E: 270 };
+  var DEPTH = { window: 150, 'window-door': 180, 'door-slide': 150, 'door-slide-s': 150, 'door-fold': 420,
+    'door-opening': 160, 'door-front': 200 };
+  // 種類 → アプリの type。
+  //   水まわりと外構の床・段は、これまでの取り込みと同じ組み込みの type（設備の差し替えや段数の
+  //   計算がこの type を前提にしている）。
+  //   家具はカタログのモデル。**組み込みの家具（sofa・tv など）は使わない。** 読み込み時に
+  //   カタログへ置き換えられ、寸法が既定に戻り、テレビは消される（index.html の
+  //   normalizeLegacyFurnitureItems）。
+  var BUILTIN = { bathtub: 'bath', toilet: 'toilet', vanity: 'sink', 'kitchen-unit': 'kitchen',
+    ramp: 'ramp', balcony: 'balcony', 'exterior-stair': 'exterior-stair', deck: 'original-terrace-tile' };
+  // 正面の向きの決まりが分かっているカタログだけを使う（rot+180 の側が正面、modelFacingVersion 1）。
+  var CATALOG_PREFIX = /^(fmp-|im0261-|original-)/;
+  // 窓・扉は壁の上にしか無い。これより壁から離れた答えは捨てる（アプリは 400mm 以内の壁に
+  // 吸い付けるので、残すと別の壁に穴が開く）。
+  var OPENING_MAX_OFF_WALL_MM = 250;
+
+  function num(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+
+  // tags: { 品番: {kind, confidence, review} }（assets/models/tags.json の items）
+  function typeForKind(kind, w, tags) {
+    if (BUILTIN[kind]) return BUILTIN[kind];
+    var best = null;
+    Object.keys(tags || {}).forEach(function (id) {
+      var v = tags[id];
+      if (!v || v.kind !== kind || v.review || !CATALOG_PREFIX.test(id)) return;
+      if (!best || (v.confidence || 0) > best.c) best = { id: id, c: v.confidence || 0 };
+    });
+    return best ? best.id : null;
+  }
+
+  function nearestWall(walls, cx, cy) {
+    var best = null;
+    walls.forEach(function (w) {
+      var L = Math.hypot(w.x2 - w.x1, w.y2 - w.y1);
+      if (L < 1) return;
+      var ux = (w.x2 - w.x1) / L, uy = (w.y2 - w.y1) / L;
+      var t = Math.max(0, Math.min(L, (cx - w.x1) * ux + (cy - w.y1) * uy));
+      var d = Math.hypot(cx - w.x1 - ux * t, cy - w.y1 - uy * t);
+      if (!best || d < best.d) best = { d: d, ux: ux, uy: uy };
+    });
+    return best;
+  }
+
+  function toImportPlan(answer, tags) {
+    var plan = { walls: [], rooms: [], items: [], notes: [] };
+    ((answer && answer.notes) || []).forEach(function (n) { plan.notes.push(String(n)); });
+    ((answer && answer.floors) || []).forEach(function (f) {
+      var floor = num(f.floor) || 1;
+      var walls = (f.walls || []).map(function (w) {
+        return { x1: num(w.x1), y1: num(w.y1), x2: num(w.x2), y2: num(w.y2), floor: floor, thick: 120 };
+      }).filter(function (w) { return Math.hypot(w.x2 - w.x1, w.y2 - w.y1) >= 1; });
+      plan.walls = plan.walls.concat(walls);
+
+      (f.rooms || []).forEach(function (r) {
+        (r.parts || []).forEach(function (p) {
+          var x0 = Math.min(num(p.x0), num(p.x1)), y0 = Math.min(num(p.y0), num(p.y1));
+          var w = Math.abs(num(p.x1) - num(p.x0)), d = Math.abs(num(p.y1) - num(p.y0));
+          if (w < 1 || d < 1) return;
+          plan.rooms.push({ x: x0, y: y0, w: w, d: d, floor: floor, n: String(r.name || '') });
+        });
+      });
+
+      (f.openings || []).forEach(function (o) {
+        var t = String(o.type || ''), width = num(o.width) || 780;
+        var near = nearestWall(walls, num(o.x), num(o.y));
+        if (!near || near.d > OPENING_MAX_OFF_WALL_MM) return;
+        var vertical = Math.abs(near.uy) > Math.abs(near.ux);
+        var depth = (t === 'door-swing') ? width : (DEPTH[t] || 150);
+        var extra = {};
+        if (/^door-|^window-door/.test(t)) { extra.doorOpenState = 'closed'; extra.doorHeight = t === 'door-front' ? 2330 : 2000; }
+        if (o.hinge && DIR[o.hinge]) extra.flipX = DIR[o.hinge][0] * near.ux + DIR[o.hinge][1] * near.uy > 0;
+        if (o.opens && DIR[o.opens]) {
+          // 進行方向の右手（画面で時計回りに90°）= (-uy, ux)。開き戸は flipY=false で右手側へ開き、
+          // 折戸は山形が逆側に出る。
+          var right = DIR[o.opens][0] * -near.uy + DIR[o.opens][1] * near.ux > 0;
+          extra.flipY = t.indexOf('door-fold') === 0 ? right : !right;
+        }
+        plan.items.push({ type: t, x: num(o.x), y: num(o.y), w: width, d: depth, rot: vertical ? 90 : 0, floor: floor, extra: extra });
+      });
+
+      (f.stairs || []).forEach(function (s) {
+        var width = num(s.width) || 910;
+        if (s.type === 'stair-corner') {
+          // +d 辺から入り +w 辺へ抜ける。入る辺に +d を向け、抜ける向きが逆なら flipX。
+          var rot = STAIR_ROT[DIR[s.enter] ? s.enter : 'S'];
+          var th = rot * Math.PI / 180, ex = [Math.cos(th), Math.sin(th)];
+          var want = DIR[s.exit] || ex;
+          plan.items.push({ type: 'stair-corner', x: num(s.x), y: num(s.y), w: width, d: width, rot: rot, floor: floor,
+            extra: { flipX: ex[0] * want[0] + ex[1] * want[1] < 0 } });
+        } else {
+          plan.items.push({ type: 'stair', x: num(s.x), y: num(s.y), w: width, d: num(s.length) || 2730,
+            rot: STAIR_ROT[DIR[s.up] ? s.up : 'S'], floor: floor, extra: {} });
+        }
+      });
+
+      (f.objects || []).forEach(function (o) {
+        var w = num(o.w) || 600, d = num(o.d) || 600;
+        var type = typeForKind(String(o.kind || ''), w, tags);
+        if (!type) return;
+        // 正面の向き → rot。カタログのモデルは rot+180 の側が正面（modelFacingVersion 1。
+        // tools/lint_plan.py の _front_dir と同じ決まり）。印を付けておかないと、読み込み時に
+        // 古い保存の向きとみなされて 180° 回される。
+        var rot = ROT[o.face] != null ? ROT[o.face] : 0;
+        var extra = {};
+        if (CATALOG_PREFIX.test(type)) { rot += 180; extra.modelFacingVersion = 1; extra.modelFrontAxis = '+Z'; }
+        plan.items.push({ type: type, x: num(o.x), y: num(o.y), w: w, d: d, rot: rot % 360, floor: floor, extra: extra });
+      });
+    });
+    return plan;
+  }
+
+  // 書き出し途中の答え（JSON の頭の部分）から、どこまで作ったかを数える。画面の進み具合に使う。
+  function progressOf(partial) {
+    var s = String(partial || '');
+    var floorMatch = s.match(/"floor"\s*:\s*(\d+)/g) || [];
+    var floor = floorMatch.length ? Number(floorMatch[floorMatch.length - 1].replace(/\D/g, '')) : 0;
+    var count = function (re) { return (s.match(re) || []).length; };
+    var sections = ['walls', 'rooms', 'openings', 'stairs', 'objects'];
+    var at = -1, now = '';
+    sections.forEach(function (k) {
+      var i = s.lastIndexOf('"' + k + '"');
+      if (i > at) { at = i; now = k; }
+    });
+    return {
+      floor: floor, section: now,
+      walls: count(/"y2"\s*:/g),          // 壁だけが y2 を持つ（部屋の長方形は x0,y0,x1,y1）
+      rooms: count(/"name"\s*:/g),
+      openings: count(/"hinge"\s*:/g),
+      objects: count(/"face"\s*:/g),
+    };
+  }
+
+  return { toImportPlan: toImportPlan, progressOf: progressOf, typeForKind: typeForKind };
+}));

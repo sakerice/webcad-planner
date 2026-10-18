@@ -360,6 +360,30 @@
     setStatus('読み取っています… 図面1枚で30秒ほどかかります。');
 
     var hint = ($('plan-import-hint') && $('plan-import-hint').value) || '';
+    // 短い指示で読む経路（Claude）を先に試す。使えない環境（鍵が無い）では、これまでの読み取りへ戻る。
+    readPlanStream(images, hint).then(function (r) {
+      if (r && r.unavailable) return runLegacyPlanImport(images, hint);
+      ST.busy = false;
+      showProgress(false);
+      if (!r || r.status !== 200) {
+        show('plan-import-step2', true);
+        showPlanImportError(r ? r.status : 0, r ? r.body : null); syncPlanImportButtons(); showQuota(); return;
+      }
+      ST.result = r.body;
+      renderPlanImportResult(r.body);
+      syncPlanImportButtons();
+      showQuota();
+    }).catch(function () {
+      ST.busy = false;
+      showProgress(false);
+      setStatus('サーバに接続できませんでした。通信の状態を確かめて、もう一度お試しください。');
+      syncPlanImportButtons();
+      showQuota();
+    });
+  }
+
+  // これまでの読み取り（手順で縛った指示を1ページずつ。OpenAI / Vertex）。Claude の鍵が無い環境で使う。
+  function runLegacyPlanImport(images, hint) {
     fetch('/api/ai/import-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -408,6 +432,131 @@
   var JOB_TIMEOUT_MS = 15 * 60 * 1000;
 
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  // ── 短い指示での読み取り（Claude、答えを少しずつ受け取る） ────────────
+  //
+  // Worker は Anthropic の返事（SSE）を読み解かずにそのまま流してくる。ここで読み、
+  //   考えている間  … 目安の時間に対する経過と、考えている内容の要約
+  //   書き出し中    … 何階の何を、いくつ作ったか
+  // を出す。答えを少しずつ受け取っても、費用はまとめて受け取るときと同じ。
+  //
+  // 目安の時間は図面の枚数から出す（2026-10-19 実測: 3枚で約3分、ほとんどが考えている時間）。
+  var READ_SECONDS_PER_PAGE = 60;
+  var ANSWER_CHARS_PER_PAGE = 2800;
+
+  // 読み取り中は、図面を囲む欄をたたんで進み具合を見える位置に出す。図面のプレビューが
+  // 大きいと、進み具合がダイアログの下に押し出されて「何も起きていない」ように見える。
+  function showProgress(on) {
+    var box = $('plan-import-progress');
+    if (!box) return;
+    box.hidden = !on;
+    if (on) {
+      show('plan-import-step2', false);
+      if (box.scrollIntoView) box.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function renderProgress(p) {
+    var elapsed = Math.round((Date.now() - p.started) / 1000);
+    var estimate = Math.max(30, p.pages * READ_SECONDS_PER_PAGE);
+    var mmss = function (sec) { return Math.floor(sec / 60) + '分' + String(sec % 60).padStart(2, '0') + '秒'; };
+    var fill, phase;
+    if (!p.answer) {
+      phase = '図面を読み、間取りを考えています';
+      // 考えている間は目安の 7 割までしか進めない。書き出しに入ってから残りを埋める。
+      fill = Math.min(70, 70 * elapsed / (estimate * 0.7));
+    } else {
+      var made = (typeof PlanFreeApply !== 'undefined') ? PlanFreeApply.progressOf(p.answer) : null;
+      var SECTION = { walls: '壁', rooms: '部屋', openings: '窓・扉', stairs: '階段', objects: '家具・設備' };
+      phase = made && made.floor ? made.floor + '階の' + (SECTION[made.section] || '間取り') + 'を置いています' : '間取りを書き出しています';
+      fill = 70 + Math.min(28, 28 * p.answer.length / (p.pages * ANSWER_CHARS_PER_PAGE));
+      if (made) {
+        $('plan-import-progress-made').textContent = '作ったもの: 壁 ' + made.walls + ' / 部屋 ' + made.rooms
+          + ' / 窓・扉 ' + made.openings + ' / 家具・設備 ' + made.objects;
+      }
+    }
+    $('plan-import-progress-phase').textContent = phase;
+    $('plan-import-progress-time').textContent = '経過 ' + mmss(elapsed) + '（目安 ' + mmss(estimate) + '）';
+    $('plan-import-progress-fill').style.width = fill.toFixed(1) + '%';
+    var thought = String(p.thought || '').trim().split(/\n+/).filter(Boolean).pop() || '';
+    $('plan-import-progress-thought').textContent = thought ? 'AIのメモ: ' + thought.slice(-160) : '';
+  }
+
+  // 1つの SSE の出来事（data: {...}）を読み、進み具合に足す。
+  function takeStreamEvent(p, data) {
+    var ev;
+    try { ev = JSON.parse(data); } catch (e) { return; }
+    if (ev.type === 'content_block_delta' && ev.delta) {
+      if (ev.delta.type === 'thinking_delta') p.thought += ev.delta.thinking || '';
+      else if (ev.delta.type === 'text_delta') p.answer += ev.delta.text || '';
+    } else if (ev.type === 'message_start' && ev.message && ev.message.usage) {
+      p.usage.inputTokens = (ev.message.usage.input_tokens || 0) + (ev.message.usage.cache_read_input_tokens || 0)
+        + (ev.message.usage.cache_creation_input_tokens || 0);
+    } else if (ev.type === 'message_delta') {
+      if (ev.usage) p.usage.outputTokens = ev.usage.output_tokens || 0;
+      if (ev.delta && ev.delta.stop_reason) p.stopReason = ev.delta.stop_reason;
+    } else if (ev.type === 'error') {
+      p.error = (ev.error && ev.error.message) || 'AI 側で失敗しました。';
+    }
+  }
+
+  function readPlanStream(images, hint) {
+    return fetch('/api/ai/read-plan', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ images: images, hint: hint }),
+    }).then(function (res) {
+      if (res.status === 404) return { unavailable: true };
+      if (!res.ok || !res.body) return readReply(res);
+      var p = { started: Date.now(), pages: images.length, thought: '', answer: '', usage: { calls: 1 }, stopReason: '', error: '' };
+      setStatus('');
+      showProgress(true);
+      renderProgress(p);
+      var timer = setInterval(function () { renderProgress(p); }, 500);
+      var reader = res.body.getReader(), decoder = new TextDecoder(), buf = '';
+      function pump() {
+        return reader.read().then(function (chunk) {
+          if (chunk.done) return;
+          buf += decoder.decode(chunk.value, { stream: true });
+          var cut;
+          while ((cut = buf.indexOf('\n\n')) >= 0) {
+            var block = buf.slice(0, cut); buf = buf.slice(cut + 2);
+            block.split('\n').forEach(function (line) {
+              if (line.indexOf('data:') === 0) takeStreamEvent(p, line.slice(5).trim());
+            });
+          }
+          return pump();
+        });
+      }
+      return pump().then(function () {
+        clearInterval(timer);
+        return finishPlanStream(p);
+      }, function (e) { clearInterval(timer); throw e; });
+    });
+  }
+
+  // 届ききった答えを、取り込みの形（renderPlanImportResult が受ける形）にする。
+  function finishPlanStream(p) {
+    if (p.error) return { status: 502, body: { error: 'ai_upstream_error', message: p.error } };
+    if (p.stopReason === 'refusal') return { status: 502, body: { error: 'ai_upstream_error', message: 'AI がこの図面の読み取りを断りました。' } };
+    var answer;
+    try { answer = JSON.parse(p.answer); } catch (e) {
+      return { status: 502, body: { error: 'ai_bad_response', message: p.stopReason === 'max_tokens'
+        ? '図面が大きく、答えが途中で切れました。ページを分けて読み取ってください。'
+        : 'AI の返事を読めませんでした。もう一度お試しください。' } };
+    }
+    var tags = (typeof CATALOGUE_TAGS !== 'undefined' && CATALOGUE_TAGS && CATALOGUE_TAGS.items) || {};
+    var plan = PlanFreeApply.toImportPlan(answer, tags);
+    if (!plan.walls.length) {
+      return { status: 422, body: { error: 'ai_invalid_plan', message: '図面から壁を読み取れませんでした。平面図のページか確かめてください。' } };
+    }
+    var summary = (typeof PlanSchema !== 'undefined' && PlanSchema.summarize) ? PlanSchema.summarize(plan)
+      : { walls: plan.walls.length, rooms: plan.rooms.length, items: plan.items.length };
+    return { status: 200, body: {
+      plan: plan, summary: summary, marks: [], warnings: [], notes: plan.notes.slice(0, 20),
+      usage: Object.assign({ rates: { in: 4, out: 20 } }, p.usage), freeRead: true, seconds: Math.round((Date.now() - p.started) / 1000),
+    } };
+  }
 
   // 受付番号が入っていなければ、そのまま返す（Vertex は投げた通信で答えが返る）。
   function waitForJobs(first, opts) {
@@ -629,7 +778,8 @@
     var head = $('plan-import-summary');
     if (head) {
       head.textContent = '壁 ' + (s.walls || 0) + ' / 部屋 ' + (s.rooms || 0) +
-        ' / 開口・階段 ' + (s.items || 0) + '（階 ' + ((s.floors || []).join('・') || '-') + '）';
+        (body.freeRead ? ' / 建具・階段・家具など ' : ' / 開口・階段 ') + (s.items || 0) + '（階 ' + ((s.floors || []).join('・') || '-') + '）'
+        + (body.seconds ? '　読み取り ' + body.seconds + '秒' : '');
     }
     var list = $('plan-import-rooms');
     if (list) {
@@ -649,7 +799,9 @@
       if (u && u.inputTokens) {
         // 単価は gpt-6-astra（$10 / $50 per 1M）。$1=¥150 と置いた概算。
         // **モデルを替えたらここも替える。** 実際より安く見えるのが一番まずい。
-        var yen = (u.inputTokens / 1e6 * 10 + u.outputTokens / 1e6 * 50) * 150;
+        // 短い指示の読み取り（Claude Opus 5.5）は $4 / $20 per 1M。
+        var rate = u.rates || { in: 10, out: 50 };
+        var yen = (u.inputTokens / 1e6 * rate.in + u.outputTokens / 1e6 * rate.out) * 150;
         cost.textContent = 'この読み取りの費用: 約 ' + yen.toFixed(1) + '円'
           + '（入力 ' + u.inputTokens + ' / 出力 ' + u.outputTokens
           + (u.thoughtTokens ? '（うち思考 ' + u.thoughtTokens + '）' : '') + ' トークン）';
@@ -753,6 +905,11 @@
         if (d == null) d = sz.d;
       }
       var made = mkItem(it.type, it.x - w / 2, it.y - d / 2, it.rot || 0, it.floor || 1, it.w, it.d);
+      // 短い指示の読み取りは、扉の吊り元・開く側（flipX/flipY）、閉じた状態、モデルの正面軸などを
+      // extra に持ってくる（assets/js/plan-free-apply.js）。mkItem の既定値の上に重ねる。
+      if (it.extra && typeof it.extra === 'object') {
+        Object.keys(it.extra).forEach(function (k) { made[k] = it.extra[k]; });
+      }
       out.items.push(made);
     });
     return out;

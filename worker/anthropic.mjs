@@ -80,6 +80,41 @@ export function buildRequest({ config, system, text, docs, image, images, maxOut
   return body;
 }
 
+// 答えを少しずつ受け取る形（ストリーミング）で投げ、Anthropic の返事（SSE）をそのまま返す。
+//
+// **ここでは読み解かない。** Worker の CPU 時間には上限がある（無料プランで1リクエスト10ms）。
+// 数千の小さな出来事を JSON として読むと上限に触れうるので、届いたバイトを画面へ流すだけにし、
+// 読み解くのは画面側（assets/js/plan-import.js）に任せる。費用は答えをまとめて受け取るときと同じ。
+//
+// 考えている内容の要約（thinking の display: summarized）も流す。画面に「作っている内容」として出す。
+export async function startStream({
+  config, system, text, docs, image, images, maxOutputTokens = 32000, fetchImpl = fetch,
+}) {
+  if (!config || !config.apiKey) {
+    return { ok: false, status: 503, message: "Anthropic のキーがこの環境に設定されていません。" };
+  }
+  const body = buildRequest({ config, system, text, docs, image, images, maxOutputTokens });
+  body.stream = true;
+  body.thinking = { type: "adaptive", display: "summarized" };
+  let response;
+  try {
+    response = await fetchImpl(new Request(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "x-api-key": config.apiKey,
+        "anthropic-version": API_VERSION,
+        "anthropic-beta": FALLBACK_BETA,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }));
+  } catch (e) {
+    return { ok: false, status: 502, message: "Anthropic へ届きませんでした: " + (e && e.message ? e.message : e) };
+  }
+  if (!response.ok) return { ok: false, status: response.status, message: safeReason(await response.text()) };
+  return { ok: true, body: response.body };
+}
+
 export async function generate({
   config, system, text, docs, image, images, maxOutputTokens = 32000, fetchImpl = fetch,
 }) {

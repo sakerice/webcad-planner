@@ -283,6 +283,14 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #plan-import-modal.show{display:flex}
 /* 囲む操作をするので、指のスクロールに持っていかれないようにする */
 .plan-import-canvas{display:block;width:100%;height:auto;max-height:52dvh;object-fit:contain;background:#0f172a;border:1px solid #24385f;border-radius:6px;cursor:crosshair;touch-action:none}
+/* 読み取りの進み具合。AIが考えている間は目安の時間に対する経過、書き出しに入ったら作った数を出す */
+.plan-import-progress{display:grid;gap:6px;margin-top:8px;padding:10px;background:#0b1226;border:1px solid #24385f;border-radius:6px}
+.plan-import-progress[hidden]{display:none}
+.plan-import-progress-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#dfe6f5;font-weight:600}
+.plan-import-progress-head span:last-child{font-variant-numeric:tabular-nums;color:#aab4c8;font-weight:400}
+.plan-import-progress-bar{height:6px;border-radius:3px;background:#1c2a48;overflow:hidden}
+.plan-import-progress-bar i{display:block;height:100%;width:0;background:#4f8cff;transition:width .6s ease}
+.plan-import-progress-thought{color:#8f9bb3;font-size:12px;line-height:1.5;max-height:3em;overflow:hidden}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
 /* JIS図面出力モーダル: 印刷プレビューなので常に白背景・ダイアログchromeのみ既存モーダル配色を踏襲 */
@@ -3566,6 +3574,12 @@ input[type="reset"]:focus-visible{
     </div>
 
     <div id="plan-import-status" class="unity-render-status"></div>
+    <div id="plan-import-progress" class="plan-import-progress" hidden aria-live="polite">
+      <div class="plan-import-progress-head"><span id="plan-import-progress-phase"></span><span id="plan-import-progress-time"></span></div>
+      <div class="plan-import-progress-bar"><i id="plan-import-progress-fill"></i></div>
+      <div id="plan-import-progress-made" class="airx-source-note"></div>
+      <div id="plan-import-progress-thought" class="plan-import-progress-thought"></div>
+    </div>
 
     <div id="plan-import-step3" style="display:none">
       <div class="ph">3. できた下書き</div>
@@ -3793,6 +3807,7 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/room-program.js"></script>
 <script src="assets/js/plan-check.js"></script>
 <script src="assets/js/plan-finish.js"></script>
+<script src="assets/js/plan-free-apply.js"></script>
 <script src="assets/js/plan-import.js"></script>
 <script>
 // ───── 3D ENGINE ─────
