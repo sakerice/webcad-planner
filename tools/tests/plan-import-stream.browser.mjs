@@ -179,6 +179,21 @@ try {
   assert.equal(placed.sofa.modelFacingVersion, 1);
   assert.equal(((placed.sofa.rot % 360) + 360) % 360, 0, '正面が南');
   assert.equal(placed.sofa.w, 1800, '寸法は図面の読み取りのまま（既定に戻さない）');
+  // 3Dを一度も開かずに読み取ると、見直し用の撮影が3Dの準備を先に済ませてしまう。そのあとも
+  // 内観3D・外観3Dが映ること（2026-10-20 利用者の報告: 取り込んだあと内観3Dが出ない）。
+  const views = await page.evaluate(async () => {
+    const out = {};
+    for (const v of ['3d-int', '3d-ext']) {
+      setView(v);
+      await new Promise((r) => setTimeout(r, 300));
+      out[v] = { scene: Boolean(sc3), walls: sc3 ? sc3.children.length : 0, isInt, w: ren.domElement.width };
+    }
+    setView('2d');
+    return out;
+  });
+  assert.ok(views['3d-int'].scene && views['3d-int'].isInt, '内観3Dの場面がある: ' + JSON.stringify(views));
+  assert.ok(views['3d-ext'].scene && !views['3d-ext'].isInt, '外観3Dの場面がある: ' + JSON.stringify(views));
+  assert.ok(views['3d-int'].w > 0, '3Dの描画の大きさが0でない');
   assert.deepEqual(errors, []);
   await page.close();
 

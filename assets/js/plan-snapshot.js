@@ -55,6 +55,16 @@ var PlanSnapshot = (function () {
   // 返り値: { plans: [{floor, url}], views: [{name, url}] }。撮れなければ null。
   function capture(plan) {
     if (!available() || !plan) return null;
+    // 3Dをまだ一度も開いていなければ、いまの間取りの3Dの場面をここで用意してから入れ替える。
+    // 入れ替えたあとで用意すると、元へ戻すときに「場面が無い」状態まで戻してしまい、描画の準備は
+    // 済んだ扱いのまま場面が二度と作られず、外観3D・内観3Dが何も映らなくなる（2026-10-20 利用者の報告）。
+    // 平面図を見ている間は3Dの枠が隠れていて大きさが0になるため、見えない形で一時的に広げて作る。
+    if (typeof THREE !== 'undefined' && typeof ren !== 'undefined' && !ren) {
+      var wrap = document.getElementById('c3d-wrap');
+      var was = wrap ? { display: wrap.style.display, visibility: wrap.style.visibility } : null;
+      if (wrap) { wrap.style.visibility = 'hidden'; wrap.style.display = 'block'; }
+      try { init3D(); } finally { if (wrap) { wrap.style.display = was.display; wrap.style.visibility = was.visibility; } }
+    }
     var keep = {}, view = {};
     GLOBALS.forEach(function (k) { keep[k] = window[k]; });
     VIEW_KEYS.forEach(function (k) { view[k] = ST[k]; });
@@ -80,7 +90,6 @@ var PlanSnapshot = (function () {
       });
 
       if (typeof THREE !== 'undefined') {
-        if (typeof ren === 'undefined' || !ren) init3D();
         if (typeof ren !== 'undefined' && ren && camExt) {
           createScene3DBase({});
           tempScene = sc3;
