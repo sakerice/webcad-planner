@@ -100,6 +100,9 @@ try {
   // 答え）を Worker と同じ処理で間取りに組み立てて返す。図面の切り出し位置は --inputs の
   // 測定で残したものを使い、同じ画像から読んだことにする。
   if (opt('pages')) await replayAi(page, readPages(opt('pages')), opt('inputs'));
+  // 再生（--stream-answer <答え.json>）: 短い指示の読み取り（read-plan）に、保存しておいた答えを
+  // Anthropic の返事（SSE）の形で流す。画面の組み立て〜取り込みを、AI を呼ばずに本物どおり通す。
+  if (opt('stream-answer')) await replayStream(page, readFileSync(opt('stream-answer'), 'utf8'), opt('inputs'));
 
   await page.goto(process.env.APP_URL || 'http://localhost:8787/');
   await page.waitForFunction(() => window.ST && window.DATA, null, { polling: 200, timeout: 60000 });
@@ -115,6 +118,19 @@ try {
   null, { polling: 500, timeout: 5 * 60 * 1000 });
   const tRead = Date.now();
   await page.locator('#plan-import-run').click();
+  // 進み具合の画面を撮る（--shots <フォルダ>）。考えている途中と、書き出しの途中の2枚。
+  const shotsDir = opt('shots');
+  if (shotsDir) {
+    mkdirSync(shotsDir, { recursive: true });
+    const card = page.locator('#plan-import-modal .unity-render-card');
+    try {
+      await page.waitForFunction(() => /AIのメモ/.test((document.getElementById('plan-import-progress-thought') || {}).textContent || ''), null, { timeout: 180000 });
+      await card.screenshot({ path: join(shotsDir, 'progress-thinking.png') });
+      await page.waitForFunction(() => /階の/.test((document.getElementById('plan-import-progress-phase') || {}).textContent || ''), null, { timeout: 600000 });
+      await page.waitForTimeout(4000);
+      await card.screenshot({ path: join(shotsDir, 'progress-writing.png') });
+    } catch (e) { /* 撮れなくても測定は続ける */ }
+  }
   await page.waitForFunction(() => !PlanImport.state.busy, null, { polling: 1000, timeout: 30 * 60 * 1000 });
   const tDone = Date.now();
   const got = await page.evaluate(() => {
@@ -123,6 +139,8 @@ try {
       ok: Boolean(r && r.plan),
       status: document.getElementById('plan-import-status').textContent,
       reviewSkipped: Boolean(r && r.reviewSkipped),
+      usage: (r && r.usage) || null,
+      freeRead: Boolean(r && r.freeRead),
       reviewNote: (r && r.reviewNote) || '',
       revised: Boolean(r && r.revised),
       notes: (r && r.notes) || [],
@@ -143,6 +161,8 @@ try {
   const reads = calls.filter((c) => c.hasPlan && c.usage);
   const usage = {};
   for (const c of reads) for (const [k, v] of Object.entries(c.usage)) usage[k] = (usage[k] || 0) + Number(v || 0);
+  // 短い指示の読み取りは答えを少しずつ受け取るので、使用量は画面が組み立てた結果の側にある。
+  if (!reads.length && got.usage) for (const [k, v] of Object.entries(got.usage)) if (typeof v === 'number') usage[k] = v;
   const score = scorePlan(truth, plan);
   result = {
     fixture: fixtureName, label, provider, model, at: new Date().toISOString(),
@@ -234,4 +254,21 @@ function readPages(path) {
   return readdirSync(path).filter((f) => /^answer-\d+\.json$/.test(f))
     .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]))
     .map((f) => JSON.parse(readFileSync(join(path, f), 'utf8')));
+}
+
+async function replayStream(page, answerText, inputsDir) {
+  const boxes = inputsDir ? JSON.parse(readFileSync(join(inputsDir, 'inputs.json'), 'utf8')).boxes : [];
+  let nth = 0;
+  const ev = (o) => 'event: ' + o.type + '\ndata: ' + JSON.stringify(o) + '\n\n';
+  let body = ev({ type: 'message_start', message: { usage: { input_tokens: 0 } } });
+  for (let i = 0; i < answerText.length; i += 200) body += ev({ type: 'content_block_delta', index: 1, delta: { type: 'text_delta', text: answerText.slice(i, i + 200) } });
+  body += ev({ type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 0 } });
+  await page.route('**/api/ai/**', async (route) => {
+    const p = new URL(route.request().url()).pathname;
+    const reply = (b) => ({ status: 200, contentType: 'application/json', body: JSON.stringify(b) });
+    if (p.endsWith('/quota')) return route.fulfill(reply({ left: null, counted: false }));
+    if (p.endsWith('/find-plan')) return route.fulfill(reply({ box: boxes[nth++] || null }));
+    if (p.endsWith('/read-plan')) return route.fulfill({ status: 200, contentType: 'text/event-stream', body });
+    return route.fulfill({ status: 404, body: '{}' });
+  });
 }

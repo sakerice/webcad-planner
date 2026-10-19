@@ -875,6 +875,7 @@
     var out = { walls: [], rooms: [], items: [] };
     (plan.walls || []).forEach(function (w) {
       var made = mkWall(w.x1, w.y1, w.x2, w.y2, w.floor || 1, w.thick);
+      if (w.wallStyle) made.wallStyle = w.wallStyle;   // 手すり壁（balcony-fence）など
       out.walls.push(made);
     });
     (plan.rooms || []).forEach(function (r) {

@@ -57,4 +57,5 @@ for i in $(seq 1 120); do
 done
 curl -sf -o /dev/null --max-time 2 "http://localhost:$PORT/" || { echo "手元の Worker が起動しなかった:"; tail -30 "$LOG"; exit 1; }
 
-APP_URL="http://localhost:$PORT/" node tools/plan-eval/run.mjs "$FIXTURE" "$LABEL" --provider "$PROVIDER" --model "$MODEL"
+APP_URL="http://localhost:$PORT/" node tools/plan-eval/run.mjs "$FIXTURE" "$LABEL" --provider "$PROVIDER" --model "$MODEL" \
+  --shots "tools/plan-eval/out/$FIXTURE/$LABEL-shots"

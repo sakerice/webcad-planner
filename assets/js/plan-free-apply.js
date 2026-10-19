@@ -25,8 +25,23 @@
   //   家具はカタログのモデル。**組み込みの家具（sofa・tv など）は使わない。** 読み込み時に
   //   カタログへ置き換えられ、寸法が既定に戻り、テレビは消される（index.html の
   //   normalizeLegacyFurnitureItems）。
-  var BUILTIN = { bathtub: 'bath', toilet: 'toilet', vanity: 'sink', 'kitchen-unit': 'kitchen',
-    ramp: 'ramp', balcony: 'balcony', 'exterior-stair': 'exterior-stair', deck: 'original-terrace-tile' };
+  // 水まわりも組み込みの type は使わない。読み込み時に fmp- のモデルへ置き換えられ、そのとき
+  // 正面の向きの決まりが変わって逆を向く（2026-10-19 実測: 便器がすべて逆向き）。
+  var BUILTIN = { ramp: 'ramp', balcony: 'balcony', 'exterior-stair': 'exterior-stair' };
+  // 種類ごとの既定のモデル。アプリの既定（app-constants.js の LEGACY_FMP_TYPE_MAP）と同じものを使う。
+  // キッチンだけは既定が収納棚（fmp-CabinetA01）なので、I型のシステムキッチンにする。
+  var DEFAULT_MODEL = {
+    bathtub: 'fmp-BathTub01', toilet: 'fmp-Toilet01', vanity: 'fmp-WashBasin01', 'kitchen-unit': 'original-kitchen-i2550',
+    refrigerator: 'fmp-Refrigerator01', sofa: 'fmp-Sofa01', 'dining-table': 'original-table', bed: 'fmp-Bed01',
+    closet: 'fmp-Closet01', laundry: 'original-washer-drum', 'shoe-storage': 'original-shoe-counter',
+    chair: 'fmp-Chair01', 'low-table': 'fmp-Table33', 'kitchen-storage': 'fmp-CabinetA01', deck: 'original-terrace-tile',
+    // 分類表で確信度だけで選ぶと、赤い枠の棚のような癖のあるモデルが当たる（2026-10-19 実測）。
+    // よく出る種類は、色の癖の無いものを決めておく。
+    cooktop: 'fmp-GasStove01', 'range-hood': 'fmp-KitchenExhaust01', 'cooking-appliance': 'fmp-KitchenOven01',
+    'kitchen-sink': 'fmp-CabinetA_Sink', shower: 'fmp-ShowerSystem01', desk: 'original-desk', 'counter-table': 'fmp-Table31',
+    cabinet: 'original-sideboard', chest: 'fmp-Drawer01', shelf: 'im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural',
+    tv: 'im0261-Tv-MEGA_PACK_tv-electronic-101085_frame', 'gate-post': 'original-mailbox', 'garden-plant': 'fmp-GardenTree01',
+  };
   // 正面の向きの決まりが分かっているカタログだけを使う（rot+180 の側が正面、modelFacingVersion 1）。
   var CATALOG_PREFIX = /^(fmp-|im0261-|original-)/;
   // 窓・扉は壁の上にしか無い。これより壁から離れた答えは捨てる（アプリは 400mm 以内の壁に
@@ -38,11 +53,14 @@
   // tags: { 品番: {kind, confidence, review} }（assets/models/tags.json の items）
   function typeForKind(kind, w, tags) {
     if (BUILTIN[kind]) return BUILTIN[kind];
+    if (DEFAULT_MODEL[kind]) return DEFAULT_MODEL[kind];
+    // 既定の無い種類は、分類表で種類の確信度（confidence.kind）がいちばん高いモデル。
     var best = null;
     Object.keys(tags || {}).forEach(function (id) {
       var v = tags[id];
       if (!v || v.kind !== kind || v.review || !CATALOG_PREFIX.test(id)) return;
-      if (!best || (v.confidence || 0) > best.c) best = { id: id, c: v.confidence || 0 };
+      var c = Number(v.confidence && v.confidence.kind) || 0;
+      if (!best || c > best.c) best = { id: id, c: c };
     });
     return best ? best.id : null;
   }
@@ -66,7 +84,11 @@
     ((answer && answer.floors) || []).forEach(function (f) {
       var floor = num(f.floor) || 1;
       var walls = (f.walls || []).map(function (w) {
-        return { x1: num(w.x1), y1: num(w.y1), x2: num(w.x2), y2: num(w.y2), floor: floor, thick: 120 };
+        var wall = { x1: num(w.x1), y1: num(w.y1), x2: num(w.x2), y2: num(w.y2), floor: floor, thick: 120 };
+        // 手すり壁・腰壁は、アプリの壁の種類「バルコニーフェンス」（床から1100mm＋笠木）で建てる。
+        // 普通の壁として建てると、バルコニーが天井まで壁で囲まれた箱になる（2026-10-19 実測）。
+        if (w.style === 'balcony-fence') wall.wallStyle = 'balcony-fence';
+        return wall;
       }).filter(function (w) { return Math.hypot(w.x2 - w.x1, w.y2 - w.y1) >= 1; });
       plan.walls = plan.walls.concat(walls);
 
@@ -149,5 +171,5 @@
     };
   }
 
-  return { toImportPlan: toImportPlan, progressOf: progressOf, typeForKind: typeForKind };
+  return { toImportPlan: toImportPlan, progressOf: progressOf, typeForKind: typeForKind, DEFAULT_MODEL: DEFAULT_MODEL };
 }));

@@ -51,7 +51,8 @@ export function freeSpec() {
     "すべての階で同じ原点を使う。上の階は、下の階とどう重なっているか（階段が上下でつながる位置など）を図面から判断して置く。",
     "方角は N / E / S / W で書く。",
     "",
-    "- walls（壁）: 芯の線分 x1,y1,x2,y2。外壁・間仕切り・腰壁など、図面に壁として描かれたもの。",
+    "- walls（壁）: 芯の線分 x1,y1,x2,y2。外壁・間仕切りなど、図面に壁として描かれたもの。",
+    "  style は solid（天井まで立つ普通の壁）か balcony-fence（バルコニーの手すり壁・階段まわりの腰壁など、床から1.1m前後の低い壁）。",
     "- rooms（部屋）: 名前と、床を表す長方形の組 parts（L字なら長方形2つ）。名前は図面の表記どおり。書かれていなければ描かれた設備から判断した一般的な名前。",
     "- openings（窓・扉）: x,y は中心、width は開口の幅。type は次のどれか:",
     ...OPENINGS.map((o) => `    ${o.type} = ${o.ja}（${o.what}）`),
@@ -85,7 +86,7 @@ export const FREE_SCHEMA = obj({
     type: "array",
     items: obj({
       floor: { type: "integer" },
-      walls: { type: "array", items: obj({ x1: n, y1: n, x2: n, y2: n }) },
+      walls: { type: "array", items: obj({ x1: n, y1: n, x2: n, y2: n, style: { type: "string", enum: ["solid", "balcony-fence"] } }) },
       rooms: { type: "array", items: obj({ name: { type: "string" }, parts: { type: "array", items: obj({ x0: n, y0: n, x1: n, y1: n }) } }) },
       openings: { type: "array", items: obj({ type: { type: "string", enum: OPENINGS.map((o) => o.type) }, x: n, y: n, width: n, hinge: dir, opens: dir }) },
       stairs: { type: "array", items: obj({ type: { type: "string", enum: ["stair", "stair-corner"] }, x: n, y: n, width: n, length: { anyOf: [n, { type: "null" }] }, up: dir, enter: dir, exit: dir }) },

@@ -25,7 +25,7 @@ function truthAsAnswer() {
     const items = truth.items.filter(on);
     return {
       floor: f,
-      walls: truth.walls.filter(on).map(({ x1, y1, x2, y2 }) => ({ x1, y1, x2, y2 })),
+      walls: truth.walls.filter(on).map(({ x1, y1, x2, y2, wallStyle }) => ({ x1, y1, x2, y2, style: wallStyle || "solid" })),
       rooms: Object.entries(groups).map(([name, parts]) => ({ name, parts })),
       openings: items.filter((i) => /^(window|door-)/.test(i.type)).map((i) => ({ type: i.type, x: i.x + i.w / 2, y: i.y + i.d / 2, width: i.w, hinge: i.hinge || null, opens: i.opens || null })),
       stairs: items.filter((i) => /^stair/.test(i.type)).map((i) => i.type === 'stair'
@@ -72,4 +72,30 @@ test('書き出し途中の答えから、何階の何をいくつ作ったか�
   assert.equal(g.walls, 2, '部屋の長方形を壁と数えない');
   assert.equal(g.rooms, 1);
   assert.equal(g.openings, 1);
+});
+
+test('既定のモデルはカタログに実在し、分類表でもその種類になっている', () => {
+  const tags = (require(join(ROOT, 'assets', 'models', 'tags.json')).items);
+  for (const [kind, id] of Object.entries(PlanFreeApply.DEFAULT_MODEL)) {
+    assert.ok(tags[id], `${id} が分類表に無い`);
+    assert.equal(tags[id].kind, kind, `${id} は ${kind} ではない`);
+  }
+});
+
+test('家具・設備はカタログのモデルで置き、正面の決まり（rot+180・modelFacingVersion 1）を付ける', () => {
+  const p = PlanFreeApply.toImportPlan({ floors: [{ floor: 1, walls: [{ x1: 0, y1: 0, x2: 3000, y2: 0 }],
+    objects: [{ kind: 'toilet', x: 500, y: 400, w: 380, d: 680, face: 'W' }, { kind: 'ramp', x: 2000, y: 400, w: 1000, d: 2000, face: 'S' }] }] }, {});
+  const [toilet, ramp] = p.items;
+  assert.equal(toilet.type, 'fmp-Toilet01', '組み込みの toilet は使わない（読み込みで置き換えられ向きが逆になる）');
+  assert.equal(toilet.rot, 90, '正面が西 → rot 270 + 180');
+  assert.equal(toilet.extra.modelFacingVersion, 1);
+  assert.equal(ramp.type, 'ramp', 'スロープは組み込みのまま');
+  assert.equal(ramp.rot, 180);
+});
+
+test('手すり壁（style: balcony-fence）はアプリのバルコニーフェンスの壁として建てる', () => {
+  const p = PlanFreeApply.toImportPlan({ floors: [{ floor: 2, walls: [
+    { x1: 0, y1: 0, x2: 3000, y2: 0, style: 'solid' }, { x1: 0, y1: 1000, x2: 3000, y2: 1000, style: 'balcony-fence' },
+  ] }] }, {});
+  assert.deepEqual(p.walls.map((w) => w.wallStyle || 'solid'), ['solid', 'balcony-fence']);
 });
