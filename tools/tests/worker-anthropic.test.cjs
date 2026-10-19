@@ -195,3 +195,32 @@ test('見直し（revise-plan）も Claude で通る', async () => {
   assert.equal(res.status, 200);
   assert.equal((await res.json()).revised, true);
 });
+
+// ── 組み立てた家を見せて直させる（/api/ai/review-plan-3d） ─────────────
+test('review-plan-3d: 元の図面と撮った画像を1回で送り、前回の答えと事実を渡し、答えを流す', async () => {
+  let body = null;
+  const res = await callAi('/api/ai/review-plan-3d', {
+    images: [PNG, PNG],
+    shots: [{ label: '1階 平面図', image: PNG }, { label: '外観3D 南から', image: 'data:image/jpeg;base64,/9j/4AAQ' }],
+    answer: { floors: [{ floor: 1, walls: [] }] },
+    facts: ['屋根を答えていません。'],
+  }, ENV, async (req) => { body = JSON.parse(await req.text()); return new Response(SSE, { status: 200 }); });
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), SSE);
+  const content = body.messages[0].content;
+  assert.equal(content.filter((c) => c.type === 'image').length, 4, '元の図面2枚＋撮った2枚');
+  const text = content.at(-1).text;
+  assert.match(text, /最初の2枚が元の間取り図/);
+  assert.match(text, /3枚目=1階 平面図、4枚目=外観3D 南から/);
+  assert.match(text, /屋根を答えていません/);
+  assert.match(text, /"floors"/, '前回の答えを渡す');
+  assert.equal(body.output_config.format.type, 'json_schema');
+});
+
+test('review-plan-3d: 撮った画像が無い・鍵が無いときは送らない', async () => {
+  let called = false;
+  const f = async () => { called = true; return new Response(SSE); };
+  assert.equal((await callAi('/api/ai/review-plan-3d', { images: [PNG], shots: [] }, ENV, f)).status, 400);
+  assert.equal((await callAi('/api/ai/review-plan-3d', { images: [PNG], shots: [{ image: PNG }] }, { OPENAI_API_KEY: 'k' }, f)).status, 404);
+  assert.equal(called, false);
+});

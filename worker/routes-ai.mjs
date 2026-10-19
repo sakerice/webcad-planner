@@ -21,7 +21,7 @@ import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
 import { anthropicConfig, generate as anthropicGenerate, startStream } from "./anthropic.mjs";
-import { FREE_SYSTEM, FREE_SCHEMA, buildFreePrompt } from "./plan-free.mjs";
+import { FREE_SYSTEM, FREE_SCHEMA, buildFreePrompt, FREE_REVIEW_SYSTEM, buildFreeReviewPrompt } from "./plan-free.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
@@ -90,6 +90,7 @@ export async function handleAi(request, env, url, deps = {}) {
 
   if (url.pathname === "/api/ai/finish-plan") return aiFinishPlan(payload, env, deps);
   if (url.pathname === "/api/ai/read-plan") return aiReadPlan(payload, env, deps, request);
+  if (url.pathname === "/api/ai/review-plan-3d") return aiReviewPlan3d(payload, env, deps, request);
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps);
@@ -370,6 +371,60 @@ async function aiReadPlan(payload, env, deps, request) {
   return new Response(started.body, {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", "x-plan-pages": String(images.length) },
+  });
+}
+
+// ── 組み立てた家を見せて直させる（短い指示・Claude） ───────────────────
+//
+// 画面が、最初の答えを組み立てた家の平面図と外観3Dを撮って送ってくる。元の図面と一緒に渡し、
+// AI 自身に見比べて直させる。直し方は指定しない（worker/plan-free.mjs）。
+// 答えは read-plan と同じく、読み解かずに画面へ流す。
+const MAX_REVIEW_SHOTS = 10;
+const MAX_REVIEW_ANSWER_CHARS = 200 * 1024;
+async function aiReviewPlan3d(payload, env, deps, request) {
+  const want = (env && env.AI_IMPORT_PROVIDER) || "";
+  const config = anthropicConfig(env);
+  if (!config.configured || (want && want !== "anthropic")) {
+    return json({ error: "not_available", message: "この環境では見直しを使いません。" }, 404);
+  }
+  const rawPages = Array.isArray(payload && payload.images) ? payload.images.slice(0, MAX_PAGES) : [];
+  const rawShots = Array.isArray(payload && payload.shots) ? payload.shots.slice(0, MAX_REVIEW_SHOTS) : [];
+  if (!rawPages.length || !rawShots.length) return json({ error: "invalid_request", message: "images と shots が要る" }, 400);
+  const images = [];
+  for (let i = 0; i < rawPages.length; i++) {
+    const one = readImage(rawPages[i], `images[${i}]`);
+    if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
+    images.push(one);
+  }
+  const labels = [];
+  for (let i = 0; i < rawShots.length; i++) {
+    const shot = rawShots[i] || {};
+    const one = readImage(shot.image, `shots[${i}]`);
+    if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
+    images.push(one);
+    labels.push(String(shot.label || "").slice(0, 40));
+  }
+  const answerText = JSON.stringify((payload && payload.answer) || null);
+  if (answerText.length > MAX_REVIEW_ANSWER_CHARS) return json({ error: "invalid_request", message: "answer が大きすぎる" }, 400);
+  const facts = (Array.isArray(payload && payload.facts) ? payload.facts : []).slice(0, 30).map((f) => String(f).slice(0, 200));
+  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+
+  const quota = await takeQuota(request, env, rawPages.length * COST_REVISE_PAGE);
+  if (!quota.ok) {
+    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
+  }
+  const started = await startStream({
+    config: { ...config, effort: (env && env.ANTHROPIC_EFFORT) || "medium", schema: FREE_SCHEMA },
+    system: FREE_REVIEW_SYSTEM,
+    text: buildFreeReviewPrompt({ pages: rawPages.length, shots: labels, answer: JSON.parse(answerText), facts, hint }),
+    images,
+    maxOutputTokens: 64000,
+    fetchImpl: deps.fetchImpl,
+  });
+  if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
+  return new Response(started.body, {
+    status: 200,
+    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
   });
 }
 

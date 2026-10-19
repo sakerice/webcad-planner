@@ -78,8 +78,11 @@
     return best;
   }
 
-  function toImportPlan(answer, tags) {
-    var plan = { walls: [], rooms: [], items: [], notes: [] };
+  // options.keepOffWall: 壁の上に無い窓・扉も残す（見直しの前。AI に事実として伝えるため）。
+  // 既定（見直しのあと）は置かず、置かなかったことを notes に書く。黙って消さない。
+  function toImportPlan(answer, tags, options) {
+    options = options || {};
+    var plan = { walls: [], rooms: [], items: [], notes: [], offWall: [] };
     ((answer && answer.notes) || []).forEach(function (n) { plan.notes.push(String(n)); });
     ((answer && answer.floors) || []).forEach(function (f) {
       var floor = num(f.floor) || 1;
@@ -104,7 +107,11 @@
       (f.openings || []).forEach(function (o) {
         var t = String(o.type || ''), width = num(o.width) || 780;
         var near = nearestWall(walls, num(o.x), num(o.y));
-        if (!near || near.d > OPENING_MAX_OFF_WALL_MM) return;
+        if (!near || near.d > OPENING_MAX_OFF_WALL_MM) {
+          plan.offWall.push({ floor: floor, type: t, x: Math.round(num(o.x)), y: Math.round(num(o.y)), d: near ? Math.round(near.d) : null });
+          if (!options.keepOffWall) return;
+          near = near || { ux: 1, uy: 0, d: 0 };
+        }
         var vertical = Math.abs(near.uy) > Math.abs(near.ux);
         var depth = (t === 'door-swing') ? width : (DEPTH[t] || 150);
         var extra = {};
@@ -134,6 +141,26 @@
         }
       });
 
+      // 屋根: 載る階 f の上 → アプリの屋根は floor=f+1（plan-structure.js と同じ決まり）。
+      // 切妻は棟が x 方向（gable）か y 方向（gable-y）。片流れ（mono）は rot=0 で低い側が北。
+      // 東・西が低いときは 90°・270°回し、幅と奥行きを入れ替えて同じ範囲を覆う。
+      (f.roofs || []).forEach(function (r) {
+        var x0 = Math.min(num(r.x0), num(r.x1)), y0 = Math.min(num(r.y0), num(r.y1));
+        var w = Math.abs(num(r.x1) - num(r.x0)), d = Math.abs(num(r.y1) - num(r.y0));
+        if (w < 100 || d < 100) return;
+        var on = num(r.floor) || floor;
+        var shape = String(r.shape || 'flat');
+        var roofType = shape === 'gable' ? (r.ridge === 'NS' ? 'gable-y' : 'gable') : shape === 'hip' ? 'hip' : shape === 'mono' ? 'mono' : 'flat';
+        var rot = 0, iw = w, id = d, extra = { roofType: roofType, pitch: Math.max(5, Math.min(60, num(r.pitch) || (roofType === 'flat' ? 5 : 25))) };
+        if (roofType === 'flat') extra.roofThickness = 260;
+        if (roofType === 'mono') {
+          var low = DIR[r.low] ? r.low : 'N';
+          if (low === 'S') rot = 180;
+          if (low === 'E' || low === 'W') { rot = low === 'E' ? 90 : 270; iw = d; id = w; }
+        }
+        plan.items.push({ type: 'roof', x: x0 + w / 2, y: y0 + d / 2, w: iw, d: id, rot: rot, floor: on + 1, extra: extra });
+      });
+
       (f.objects || []).forEach(function (o) {
         var w = num(o.w) || 600, d = num(o.d) || 600;
         var type = typeForKind(String(o.kind || ''), w, tags);
@@ -147,7 +174,38 @@
         plan.items.push({ type: type, x: num(o.x), y: num(o.y), w: w, d: d, rot: rot % 360, floor: floor, extra: extra });
       });
     });
+    if (!options.keepOffWall && plan.offWall.length) {
+      plan.notes.push('壁の上に無い窓・扉を ' + plan.offWall.length + ' 件置きませんでした（'
+        + plan.offWall.map(function (o) { return o.floor + '階 (' + o.x + ', ' + o.y + ')'; }).join('、') + '）。');
+    }
     return plan;
+  }
+
+  // 組み立てた結果について、機械で分かる事実。見直しのときに AI へ伝える（直し方は AI に任せる）。
+  function factsOf(plan, answer) {
+    var facts = [];
+    plan.offWall.forEach(function (o) {
+      facts.push(o.floor + '階の ' + o.type + '（中心 ' + o.x + ', ' + o.y + '）は壁の上にありません'
+        + (o.d != null ? '（いちばん近い壁まで ' + o.d + 'mm）' : '') + '。アプリは窓・扉を壁から 400mm 以内でしか置けません。');
+    });
+    var hasRoof = ((answer && answer.floors) || []).some(function (f) { return (f.roofs || []).length; });
+    if (!hasRoof) facts.push('屋根を答えていません。このままだと、いちばん上の階に平らな屋根が1枚だけ作られます。');
+    // 階ごとの壁の外形から外れた家具・設備（外構は除く）。
+    var EXTERIOR = { ramp: 1, balcony: 1, deck: 1, 'exterior-stair': 1, 'gate-post': 1, 'garden-plant': 1, 'garden-equipment': 1, fence: 1 };
+    ((answer && answer.floors) || []).forEach(function (f) {
+      var ws = f.walls || [];
+      if (!ws.length) return;
+      var xs = [], ys = [];
+      ws.forEach(function (w) { xs.push(num(w.x1), num(w.x2)); ys.push(num(w.y1), num(w.y2)); });
+      var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+      (f.objects || []).forEach(function (o) {
+        if (EXTERIOR[o.kind]) return;
+        if (num(o.x) < x0 || num(o.x) > x1 || num(o.y) < y0 || num(o.y) > y1) {
+          facts.push((f.floor || 1) + '階の ' + o.kind + '（中心 ' + Math.round(num(o.x)) + ', ' + Math.round(num(o.y)) + '）は、その階の壁の外側にあります。');
+        }
+      });
+    });
+    return facts;
   }
 
   // 書き出し途中の答え（JSON の頭の部分）から、どこまで作ったかを数える。画面の進み具合に使う。
@@ -156,7 +214,7 @@
     var floorMatch = s.match(/"floor"\s*:\s*(\d+)/g) || [];
     var floor = floorMatch.length ? Number(floorMatch[floorMatch.length - 1].replace(/\D/g, '')) : 0;
     var count = function (re) { return (s.match(re) || []).length; };
-    var sections = ['walls', 'rooms', 'openings', 'stairs', 'objects'];
+    var sections = ['walls', 'rooms', 'openings', 'stairs', 'roofs', 'objects'];
     var at = -1, now = '';
     sections.forEach(function (k) {
       var i = s.lastIndexOf('"' + k + '"');
@@ -171,5 +229,5 @@
     };
   }
 
-  return { toImportPlan: toImportPlan, progressOf: progressOf, typeForKind: typeForKind, DEFAULT_MODEL: DEFAULT_MODEL };
+  return { factsOf: factsOf, toImportPlan: toImportPlan, progressOf: progressOf, typeForKind: typeForKind, DEFAULT_MODEL: DEFAULT_MODEL };
 }));

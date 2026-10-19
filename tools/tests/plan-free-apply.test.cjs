@@ -99,3 +99,28 @@ test('手すり壁（style: balcony-fence）はアプリのバルコニーフェ
   ] }] }, {});
   assert.deepEqual(p.walls.map((w) => w.wallStyle || 'solid'), ['solid', 'balcony-fence']);
 });
+
+test('屋根: 載る階の上に置き（アプリの floor は +1）、形と向きを翻訳する', () => {
+  const p = PlanFreeApply.toImportPlan({ floors: [{ floor: 2, walls: [{ x1: 0, y1: 0, x2: 4000, y2: 0 }], roofs: [
+    { floor: 2, x0: 0, y0: 0, x1: 4000, y1: 2000, shape: 'gable', ridge: 'NS', low: null, pitch: 30 },
+    { floor: 2, x0: 0, y0: 2000, x1: 4000, y1: 3000, shape: 'mono', ridge: null, low: 'E', pitch: null },
+  ] }] }, {});
+  const [gable, mono] = p.items;
+  assert.equal(gable.type, 'roof');
+  assert.equal(gable.floor, 3, '2階の上に載る屋根はアプリでは floor=3');
+  assert.equal(gable.extra.roofType, 'gable-y', '棟が南北の切妻');
+  assert.equal(mono.extra.roofType, 'mono');
+  assert.equal(mono.rot, 90, '東が低い片流れ');
+  assert.deepEqual([mono.w, mono.d], [1000, 4000], '回したぶん幅と奥行きを入れ替えて同じ範囲を覆う');
+});
+
+test('壁の上に無い窓・扉: 見直しの前は残して事実にし、あとは置かずに説明を書く', () => {
+  const answer = { floors: [{ floor: 1, walls: [{ x1: 0, y1: 0, x2: 3000, y2: 0 }],
+    openings: [{ type: 'door-opening', x: 1500, y: 900, width: 800 }] }] };
+  const draft = PlanFreeApply.toImportPlan(answer, {}, { keepOffWall: true });
+  assert.equal(draft.items.length, 1);
+  assert.ok(PlanFreeApply.factsOf(draft, answer).some((f) => /壁の上にありません/.test(f)));
+  const final = PlanFreeApply.toImportPlan(answer, {});
+  assert.equal(final.items.length, 0);
+  assert.match(final.notes.join(''), /壁の上に無い窓・扉を 1 件置きませんでした/);
+});

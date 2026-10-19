@@ -43,7 +43,10 @@ try {
       for (const k of Object.keys(st)) if (!['type', 'x', 'y', 'w', 'd', 'rot', 'floor'].includes(k)) it[k] = st[k];
       return it;
     });
-    const data = { walls, rooms: p.rooms || [], items: (p.items || []).filter((i) => i.type !== 'foundation' && i.type !== 'roof').concat(made) };
+    // 読み取りが屋根を答えていればそれを使い、壁から作る屋根は答えが無いときだけ（取り込みと同じ）。
+    const hasRoof = (p.items || []).some((i) => i.type === 'roof' && !i._structure);
+    const own = (p.items || []).filter((i) => i.type !== 'foundation' && (hasRoof || i.type !== 'roof'));
+    const data = { walls, rooms: p.rooms || [], items: own.concat(made.filter((m) => !hasRoof || m.type !== 'roof')) };
     const dt = new DataTransfer();
     dt.items.add(new File([JSON.stringify(data)], 'plan.json', { type: 'application/json' }));
     const inp = document.getElementById('import-file');

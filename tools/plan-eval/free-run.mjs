@@ -67,6 +67,39 @@ ${buildFreePrompt({ pages: pages.length })}
   writeFileSync(join(outDir, 'brief.md'), brief);
   writeFileSync(join(outDir, 'schema.json'), JSON.stringify(FREE_SCHEMA, null, 1));
   console.log(join(outDir, 'brief.md'));
+} else if (mode === 'review-brief') {
+  // 見直しの依頼書（エージェント用）: free-run.mjs review-brief <入力のフォルダ> <前回の答え.json> <snapshot の出力先> <出力先>
+  const [inDir, answerPath, shotDir, outDir] = pos.map((p) => resolve(p));
+  mkdirSync(outDir, { recursive: true });
+  const { FREE_REVIEW_SYSTEM, buildFreeReviewPrompt } = await import(join(ROOT, 'worker', 'plan-free.mjs'));
+  const pages = pagesIn(inDir);
+  const shots = JSON.parse(readFileSync(join(shotDir, 'shots.json'), 'utf8'));
+  const facts = JSON.parse(readFileSync(join(shotDir, 'facts.json'), 'utf8'));
+  const answer = JSON.parse(readFileSync(answerPath, 'utf8'));
+  const all = pages.concat(shots.map((s) => s.file));
+  const brief = `# 間取り図の読み取りの見直し（API の代わりに答える）
+
+あなたは、住宅設計アプリが Claude API に送る1回の依頼の受け手の代わりをする。
+下の「system」と「依頼」を API に送られたものとしてそのまま受け取り、その答えだけを返す。
+
+- 添付画像（Read で開く。この順で API に添付される）:
+${all.map((p, i) => `  ${i + 1}枚目: \`${p}\``).join('\n')}
+- 答えの形: \`${join(outDir, 'schema.json')}\` の JSON Schema に厳密に従う
+- 答えの書き先: \`${join(outDir, 'answer.json')}\`（Write で JSON だけを書く）
+
+画像は Read で見るだけにする。ほかのツールは使わず、ほかのファイルも読まない。
+
+## system
+
+${FREE_REVIEW_SYSTEM}
+
+## 依頼
+
+${buildFreeReviewPrompt({ pages: pages.length, shots: shots.map((s) => s.label), answer, facts })}
+`;
+  writeFileSync(join(outDir, 'brief.md'), brief);
+  writeFileSync(join(outDir, 'schema.json'), JSON.stringify(FREE_SCHEMA, null, 1));
+  console.log(join(outDir, 'brief.md'));
 } else if (mode === 'api') {
   const [inDir, outDir] = pos.map((p) => resolve(p));
   mkdirSync(outDir, { recursive: true });

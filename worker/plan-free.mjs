@@ -61,6 +61,10 @@ export function freeSpec() {
     "- stairs（階段）: その階から上の階へ上るものとして、上る起点の階に置く（いちばん上の階には置かない）。",
     "    直進部は type stair: x,y は中心、width は幅、length は上る方向の長さ、up は上っていく方角。",
     "    曲がる部分は type stair-corner: x,y は中心、width は一辺、enter は入ってくる辺の方角、exit は抜けていく方角。",
+    "- roofs（屋根）: その階の上に載る屋根。floor は屋根が載る階（3階建ての最上部なら 3、3階が載っていない2階の部分を覆う下屋なら 2）。",
+    "    x0,y0,x1,y1 は軒の出を含む屋根の外形の長方形。shape は flat（陸屋根）/ gable（切妻）/ hip（寄棟）/ mono（片流れ）。",
+    "    ridge は切妻・寄棟の棟の向き（EW＝東西に通る / NS＝南北に通る）、low は片流れの低い側の方角、pitch は勾配（度）。使わない欄は null。",
+    "    図面に屋根伏の線が描かれていればそれに従う。描かれていなくても、外気に面する床の上（どの階の上も、上の階が載っていない部分も）は屋根で覆う。",
     "- objects（家具・設備・外構）: kind、x,y は中心、w は正面から見た幅、d は奥行き、face は正面が向く方角（ベッドは足元の方角）。kind は次のどれか:",
     "    " + OBJECT_KINDS.map(kindLine).join(", "),
     ...EXTERIOR_KINDS.map((e) => `    ${e.kind} = ${e.what}`),
@@ -91,8 +95,33 @@ export const FREE_SCHEMA = obj({
       rooms: { type: "array", items: obj({ name: { type: "string" }, parts: { type: "array", items: obj({ x0: n, y0: n, x1: n, y1: n }) } }) },
       openings: { type: "array", items: obj({ type: { type: "string", enum: OPENINGS.map((o) => o.type) }, x: n, y: n, width: n, hinge: dir, opens: dir }) },
       stairs: { type: "array", items: obj({ type: { type: "string", enum: ["stair", "stair-corner"] }, x: n, y: n, width: n, length: { anyOf: [n, { type: "null" }] }, up: dir, enter: dir, exit: dir }) },
+      roofs: { type: "array", items: obj({ floor: { type: "integer" }, x0: n, y0: n, x1: n, y1: n,
+        shape: { type: "string", enum: ["flat", "gable", "hip", "mono"] },
+        ridge: { anyOf: [{ type: "string", enum: ["EW", "NS"] }, { type: "null" }] }, low: dir,
+        pitch: { anyOf: [n, { type: "null" }] } }) },
       objects: { type: "array", items: obj({ kind: { type: "string", enum: [...OBJECT_KINDS, ...EXTERIOR_KINDS.map((e) => e.kind)] }, x: n, y: n, w: n, d: n, face: dir }) },
     }),
   },
   notes: { type: "array", items: { type: "string" } },
 });
+
+// ── 見直し ───────────────────────────────────────────────────────────
+//
+// 最初の答えをアプリが組み立てた家の平面図と外観3Dを、元の図面と一緒に渡し、AI 自身に見比べて
+// 直させる。**直し方は指定しない。** 機械で分かった事実（壁の上に無い窓など）は伝えるが、
+// どう直すかは AI に任せる。
+export const FREE_REVIEW_SYSTEM = FREE_SYSTEM;
+
+export function buildFreeReviewPrompt({ pages = 1, shots = [], answer = null, facts = [], hint = "" } = {}) {
+  return [
+    `添付の画像は、最初の${pages}枚が元の間取り図、続く${shots.length}枚が、あなたの前回の答えを house-planner で組み立てた結果です。`,
+    "組み立てた結果: " + shots.map((s, i) => `${pages + i + 1}枚目=${s}`).join("、") + "。",
+    "元の図面と見比べ、図面と違うところ、3Dで見て不自然なところ（屋根が無い・バルコニーや手すりがおかしい・物の向きが逆・壁や外へはみ出す・上の階の載り方が違う など）があれば直し、答え全体を同じ形で答え直してください。直すところが無ければ前回と同じ答えにしてください。",
+    "家具の3Dモデルは読み込み途中で写っていないことがあります。写っていないだけの家具は消さないでください。",
+    "notes には、直したことを日本語で短く書いてください。",
+    facts.length ? "\n## 組み立てたときに機械で分かったこと\n" + facts.map((f) => "- " + f).join("\n") : "",
+    "\n## 前回の答え\n" + JSON.stringify(answer),
+    "\n" + freeSpec(),
+    hint ? `\n## 利用者の補足（図面についての説明）\n${String(hint).slice(0, 500)}` : "",
+  ].join("\n");
+}

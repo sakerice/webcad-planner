@@ -456,31 +456,42 @@
     }
   }
 
+  // 段階: 1 読み取り → 2 組み立てた家を3Dで見せて見直し。目安の時間は両方を合わせて出す。
+  var STAGE_LABEL = { read: '1/2 読み取り', review: '2/2 3Dで見直し' };
+
   function renderProgress(p) {
     var elapsed = Math.round((Date.now() - p.started) / 1000);
-    var estimate = Math.max(30, p.pages * READ_SECONDS_PER_PAGE);
+    var estimate = Math.max(30, p.pages * READ_SECONDS_PER_PAGE) * (p.withReview ? 2 : 1);
     var mmss = function (sec) { return Math.floor(sec / 60) + '分' + String(sec % 60).padStart(2, '0') + '秒'; };
+    var stageElapsed = Math.round((Date.now() - p.stageStarted) / 1000);
+    var stageEstimate = Math.max(30, p.pages * READ_SECONDS_PER_PAGE);
+    var base = p.stage === 'review' ? 50 : 0, span = p.withReview ? 50 : 100;
     var fill, phase;
-    if (!p.answer) {
-      phase = '図面を読み、間取りを考えています';
-      // 考えている間は目安の 7 割までしか進めない。書き出しに入ってから残りを埋める。
-      fill = Math.min(70, 70 * elapsed / (estimate * 0.7));
+    if (p.stage === 'capture') {
+      phase = '読み取った家を組み立てて、平面図と3Dを撮っています';
+      fill = 50;
+    } else if (!p.answer) {
+      phase = p.stage === 'review' ? '組み立てた家を図面と見比べています' : '図面を読み、間取りを考えています';
+      // 考えている間は、その段階の目安の 7 割までしか進めない。書き出しに入ってから残りを埋める。
+      fill = base + Math.min(0.7, 0.7 * stageElapsed / (stageEstimate * 0.7)) * span;
     } else {
       var made = (typeof PlanFreeApply !== 'undefined') ? PlanFreeApply.progressOf(p.answer) : null;
-      var SECTION = { walls: '壁', rooms: '部屋', openings: '窓・扉', stairs: '階段', objects: '家具・設備' };
-      phase = made && made.floor ? made.floor + '階の' + (SECTION[made.section] || '間取り') + 'を置いています' : '間取りを書き出しています';
-      fill = 70 + Math.min(28, 28 * p.answer.length / (p.pages * ANSWER_CHARS_PER_PAGE));
+      var SECTION = { walls: '壁', rooms: '部屋', openings: '窓・扉', stairs: '階段', roofs: '屋根', objects: '家具・設備' };
+      var verb = p.stage === 'review' ? 'を直しています' : 'を置いています';
+      phase = made && made.floor ? made.floor + '階の' + (SECTION[made.section] || '間取り') + verb : '間取りを書き出しています';
+      fill = base + (0.7 + Math.min(0.28, 0.28 * p.answer.length / (p.pages * ANSWER_CHARS_PER_PAGE))) * span;
       if (made) {
-        $('plan-import-progress-made').textContent = '作ったもの: 壁 ' + made.walls + ' / 部屋 ' + made.rooms
+        $('plan-import-progress-made').textContent = (p.stage === 'review' ? '直したあとの数: ' : '作ったもの: ') + '壁 ' + made.walls + ' / 部屋 ' + made.rooms
           + ' / 窓・扉 ' + made.openings + ' / 家具・設備 ' + made.objects;
       }
     }
+    if (p.withReview) phase = STAGE_LABEL[p.stage === 'capture' ? 'review' : p.stage] + '：' + phase;
     $('plan-import-progress-phase').textContent = phase;
     $('plan-import-progress-time').textContent = '経過 ' + mmss(elapsed) + '（目安 ' + mmss(estimate) + '）';
-    $('plan-import-progress-fill').style.width = fill.toFixed(1) + '%';
+    $('plan-import-progress-fill').style.width = Math.min(99, fill).toFixed(1) + '%';
     var thought = String(p.thought || '').trim().split(/\n+/).filter(Boolean).pop() || '';
     // 利用者に見せる文は日本語だけ。考えの要約が英語で来たときは出さない（2026-10-19 実測で英語が来た）。
-    if (!/[\u3040-\u30ff\u4e00-\u9fff]/.test(thought)) thought = '';
+    if (!/[぀-ヿ一-鿿]/.test(thought)) thought = '';
     $('plan-import-progress-thought').textContent = thought ? 'AIのメモ: ' + thought.slice(-160) : '';
   }
 
@@ -492,29 +503,30 @@
       if (ev.delta.type === 'thinking_delta') p.thought += ev.delta.thinking || '';
       else if (ev.delta.type === 'text_delta') p.answer += ev.delta.text || '';
     } else if (ev.type === 'message_start' && ev.message && ev.message.usage) {
-      p.usage.inputTokens = (ev.message.usage.input_tokens || 0) + (ev.message.usage.cache_read_input_tokens || 0)
+      p.usage.inputTokens += (ev.message.usage.input_tokens || 0) + (ev.message.usage.cache_read_input_tokens || 0)
         + (ev.message.usage.cache_creation_input_tokens || 0);
     } else if (ev.type === 'message_delta') {
-      if (ev.usage) p.usage.outputTokens = ev.usage.output_tokens || 0;
+      if (ev.usage) p.stageOutput = ev.usage.output_tokens || 0;
       if (ev.delta && ev.delta.stop_reason) p.stopReason = ev.delta.stop_reason;
     } else if (ev.type === 'error') {
       p.error = (ev.error && ev.error.message) || 'AI 側で失敗しました。';
     }
   }
 
-  function readPlanStream(images, hint) {
-    return fetch('/api/ai/read-plan', {
+  // 1回分の問い合わせを、答えが届ききるまで読む。
+  //   { unavailable: true }  … この環境では使えない（404）
+  //   { status, body }       … Worker が断った・失敗した
+  //   { answer }             … 届いた答え（JSON として読めたもの）
+  //   { error }              … 届いたが読めなかった
+  function streamAnswer(url, payload, p) {
+    return fetch(url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ images: images, hint: hint }),
+      body: JSON.stringify(payload),
     }).then(function (res) {
       if (res.status === 404) return { unavailable: true };
       if (!res.ok || !res.body) return readReply(res);
-      var p = { started: Date.now(), pages: images.length, thought: '', answer: '', usage: { calls: 1 }, stopReason: '', error: '' };
-      setStatus('');
-      showProgress(true);
-      renderProgress(p);
-      var timer = setInterval(function () { renderProgress(p); }, 500);
+      p.thought = ''; p.answer = ''; p.stopReason = ''; p.error = ''; p.stageOutput = 0;
       var reader = res.body.getReader(), decoder = new TextDecoder(), buf = '';
       function pump() {
         return reader.read().then(function (chunk) {
@@ -531,32 +543,96 @@
         });
       }
       return pump().then(function () {
-        clearInterval(timer);
-        return finishPlanStream(p);
-      }, function (e) { clearInterval(timer); throw e; });
+        p.usage.outputTokens += p.stageOutput;
+        if (p.error) return { error: p.error };
+        if (p.stopReason === 'refusal') return { error: 'AI がこの図面の読み取りを断りました。' };
+        try { return { answer: JSON.parse(p.answer) }; } catch (e) {
+          return { error: p.stopReason === 'max_tokens'
+            ? '図面が大きく、答えが途中で切れました。ページを分けて読み取ってください。'
+            : 'AI の返事を読めませんでした。もう一度お試しください。' };
+        }
+      });
     });
   }
 
+  function catalogueTags() {
+    return (typeof CATALOGUE_TAGS !== 'undefined' && CATALOGUE_TAGS && CATALOGUE_TAGS.items) || {};
+  }
+
+  // 答えを、取り込んだときと同じ形（基礎・屋根まで）に組み立てる。3Dで撮るため。
+  function assembleForSnapshot(importPlan) {
+    var read = toAppObjects(importPlan);
+    var made = structureItems(read.walls, null);
+    if (read.items.some(function (it) { return it.type === 'roof'; })) made = made.filter(function (st) { return st.type !== 'roof'; });
+    return { walls: read.walls, rooms: read.rooms, items: read.items.concat(made) };
+  }
+
+  function readPlanStream(images, hint) {
+    var withReview = typeof PlanSnapshot !== 'undefined' && PlanSnapshot.available();
+    var p = { started: Date.now(), stageStarted: Date.now(), stage: 'read', withReview: withReview, pages: images.length,
+      thought: '', answer: '', usage: { calls: 0, inputTokens: 0, outputTokens: 0 }, stopReason: '', error: '', stageOutput: 0 };
+    var timer = null;
+    var startUi = function () {
+      if (timer) return;
+      setStatus('');
+      showProgress(true);
+      renderProgress(p);
+      timer = setInterval(function () { renderProgress(p); }, 500);
+    };
+    var stop = function () { if (timer) { clearInterval(timer); timer = null; } };
+    startUi();
+    return streamAnswer('/api/ai/read-plan', { images: images, hint: hint }, p).then(function (r) {
+      if (r.unavailable || r.status) {
+        stop();
+        // この環境では使えない・断られた: 進み具合を閉じ、図面の欄を戻す（これまでの読み取りやり直しに備える）。
+        showProgress(false);
+        show('plan-import-step2', true);
+        return r;
+      }
+      p.usage.calls++;
+      if (r.error) { stop(); return { status: 502, body: { error: 'ai_bad_response', message: r.error } }; }
+      var first = r.answer;
+      if (!withReview) { stop(); return finishPlanStream(p, first, { reviewNote: '' }); }
+
+      // ── 2. 組み立てた家を撮って、AI 自身に見直させる ──────────────────
+      p.stage = 'capture'; p.stageStarted = Date.now(); renderProgress(p);
+      var tags = catalogueTags();
+      var draft = PlanFreeApply.toImportPlan(first, tags, { keepOffWall: true });
+      var facts = PlanFreeApply.factsOf(draft, first);
+      var shots = null;
+      try { shots = PlanSnapshot.capture(assembleForSnapshot(draft)); } catch (e) { shots = null; }
+      var list = shots ? shots.plans.map(function (s) { return { label: s.floor + '階 平面図', image: s.url }; })
+        .concat(shots.views.map(function (s) { return { label: '外観3D ' + s.name, image: s.url }; })) : [];
+      if (!list.length) { stop(); return finishPlanStream(p, first, { reviewNote: '組み立てた家を撮れなかったので、見直しは行いませんでした。' }); }
+      p.stage = 'review'; p.stageStarted = Date.now(); renderProgress(p);
+      return streamAnswer('/api/ai/review-plan-3d', { images: images, shots: list, answer: first, facts: facts, hint: hint }, p)
+        .then(function (r2) {
+          stop();
+          if (r2.answer) { p.usage.calls++; return finishPlanStream(p, r2.answer, { reviewed: true, facts: facts }); }
+          if (r2.status !== 429) p.usage.calls += r2.error ? 1 : 0;
+          return finishPlanStream(p, first, { reviewNote: '3Dでの見直しは行えませんでした（読み取った結果をそのまま出しています）。' });
+        }, function () {
+          stop();
+          return finishPlanStream(p, first, { reviewNote: '3Dでの見直しは行えませんでした（読み取った結果をそのまま出しています）。' });
+        });
+    }, function (e) { stop(); throw e; });
+  }
+
   // 届ききった答えを、取り込みの形（renderPlanImportResult が受ける形）にする。
-  function finishPlanStream(p) {
-    if (p.error) return { status: 502, body: { error: 'ai_upstream_error', message: p.error } };
-    if (p.stopReason === 'refusal') return { status: 502, body: { error: 'ai_upstream_error', message: 'AI がこの図面の読み取りを断りました。' } };
-    var answer;
-    try { answer = JSON.parse(p.answer); } catch (e) {
-      return { status: 502, body: { error: 'ai_bad_response', message: p.stopReason === 'max_tokens'
-        ? '図面が大きく、答えが途中で切れました。ページを分けて読み取ってください。'
-        : 'AI の返事を読めませんでした。もう一度お試しください。' } };
-    }
-    var tags = (typeof CATALOGUE_TAGS !== 'undefined' && CATALOGUE_TAGS && CATALOGUE_TAGS.items) || {};
-    var plan = PlanFreeApply.toImportPlan(answer, tags);
+  function finishPlanStream(p, answer, extra) {
+    var plan = PlanFreeApply.toImportPlan(answer, catalogueTags());
     if (!plan.walls.length) {
       return { status: 422, body: { error: 'ai_invalid_plan', message: '図面から壁を読み取れませんでした。平面図のページか確かめてください。' } };
     }
     var summary = (typeof PlanSchema !== 'undefined' && PlanSchema.summarize) ? PlanSchema.summarize(plan)
       : { walls: plan.walls.length, rooms: plan.rooms.length, items: plan.items.length };
+    var notes = plan.notes.slice(0, 20);
+    if (extra && extra.reviewed) notes.unshift('AIが、組み立てた家の平面図と外観3Dを図面と見比べて見直しました。');
+    if (extra && extra.reviewNote) notes.unshift(extra.reviewNote);
     return { status: 200, body: {
-      plan: plan, summary: summary, marks: [], warnings: [], notes: plan.notes.slice(0, 20),
+      plan: plan, summary: summary, marks: [], warnings: [], notes: notes,
       usage: Object.assign({ rates: { in: 4, out: 20 } }, p.usage), freeRead: true, seconds: Math.round((Date.now() - p.started) / 1000),
+      reviewed: Boolean(extra && extra.reviewed),
     } };
   }
 
@@ -1073,7 +1149,11 @@
       // まとめて外形を取ると、2棟をまたぐ1枚の基礎と1枚の屋根になる。
       DATA.walls = (base.walls || []).concat(read.walls);
       DATA.rooms = (base.rooms || []).concat(read.rooms);
-      DATA.items = (base.items || []).concat(read.items, structureItems(read.walls, null));
+      var besideStruct = structureItems(read.walls, null);
+      if (read.items.some(function (it) { return it.type === 'roof'; })) {
+        besideStruct = besideStruct.filter(function (st) { return st.type !== 'roof'; });
+      }
+      DATA.items = (base.items || []).concat(read.items, besideStruct);
     } else {
       // 空いている階に入れる。読み取った階に在るのは、壁から決まる基礎・屋根
       // だけなので、それはここで作り直す（階が増えれば屋根の載る位置も変わる）。
@@ -1083,6 +1163,11 @@
       DATA.walls = (base.walls || []).concat(read.walls);
       DATA.rooms = (base.rooms || []).concat(read.rooms);
       var made = structureItems(DATA.walls, readFloors);
+      // 読み取りが屋根を答えたときは、それを使う（階ごとの屋根・下屋・形）。壁から作る屋根は
+      // 答えが無いときの代わり（いちばん上の階に平らな屋根を1枚）。
+      if (read.items.some(function (it) { return it.type === 'roof'; })) {
+        made = made.filter(function (st) { return st.type !== 'roof'; });
+      }
       DATA.items = keepItems.filter(function (it) {
         return !made.some(function (st) {
           return it && it.type === st.type && (Number(it.floor) || 1) === (Number(st.floor) || 1);
