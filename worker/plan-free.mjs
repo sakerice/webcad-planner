@@ -57,13 +57,13 @@ export function freeSpec() {
     "- rooms（部屋）: 名前と、床を表す長方形の組 parts（L字なら長方形2つ）。名前は図面の表記どおり。書かれていなければ描かれた設備から判断した一般的な名前。",
     "- openings（窓・扉）: x,y は中心、width は開口の幅。type は次のどれか:",
     ...OPENINGS.map((o) => `    ${o.type} = ${o.ja}（${o.what}）`),
-    "  開き戸・玄関ドア・折戸は hinge（吊り元＝丁番のある端の方角）と opens（扉が開いていく側の方角）を書く。ほかは null。",
+    "  開き戸・玄関ドア・折戸は hinge（吊り元＝丁番のある端の方角）と opens（扉が開いていく側の方角）を書く。ほかは none。",
     "- stairs（階段）: その階から上の階へ上るものとして、上る起点の階に置く（いちばん上の階には置かない）。",
     "    直進部は type stair: x,y は中心、width は幅、length は上る方向の長さ、up は上っていく方角。",
     "    曲がる部分は type stair-corner: x,y は中心、width は一辺、enter は入ってくる辺の方角、exit は抜けていく方角。",
     "- roofs（屋根）: その階の上に載る屋根。floor は屋根が載る階（3階建ての最上部なら 3、3階が載っていない2階の部分を覆う下屋なら 2）。",
     "    x0,y0,x1,y1 は軒の出を含む屋根の外形の長方形。shape は flat（陸屋根）/ gable（切妻）/ hip（寄棟）/ mono（片流れ）。",
-    "    ridge は切妻・寄棟の棟の向き（EW＝東西に通る / NS＝南北に通る）、low は片流れの低い側の方角、pitch は勾配（度）。使わない欄は null。",
+    "    ridge は切妻・寄棟の棟の向き（EW＝東西に通る / NS＝南北に通る）、low は片流れの低い側の方角、pitch は勾配（度）。使わない欄は none（勾配は 0）。",
     "    図面に屋根伏の線が描かれていればそれに従う。描かれていなくても、外気に面する床の上（どの階の上も、上の階が載っていない部分も）は屋根で覆う。",
     "- objects（家具・設備・外構）: kind、x,y は中心、w は正面から見た幅、d は奥行き、face は正面が向く方角（ベッドは足元の方角）。kind は次のどれか:",
     "    " + OBJECT_KINDS.map(kindLine).join(", "),
@@ -83,8 +83,12 @@ export function buildFreePrompt({ pages = 1, hint = "" } = {}) {
 }
 
 // ── 答えの形 ─────────────────────────────────────────────────────────
+// 答えの形は小さく保つ。Claude の構造化出力は、形を文法に変えてから使う。選択肢の多い enum や
+// anyOf（null を許す欄）が重なると「文法が大きすぎる」で断られる（2026-10-19 実測、屋根を足した時点）。
+// そこで「無し」は none / 0 で表し、家具の種類は文字列にして一覧は指示文で渡す（知らない種類は
+// 取り込みで無視される）。
 const n = { type: "number" };
-const dir = { anyOf: [{ type: "string", enum: DIRS }, { type: "null" }] };
+const dir = { type: "string", enum: [...DIRS, "none"] };
 const obj = (properties) => ({ type: "object", properties, required: Object.keys(properties), additionalProperties: false });
 export const FREE_SCHEMA = obj({
   floors: {
@@ -94,12 +98,11 @@ export const FREE_SCHEMA = obj({
       walls: { type: "array", items: obj({ x1: n, y1: n, x2: n, y2: n, style: { type: "string", enum: ["solid", "balcony-fence"] } }) },
       rooms: { type: "array", items: obj({ name: { type: "string" }, parts: { type: "array", items: obj({ x0: n, y0: n, x1: n, y1: n }) } }) },
       openings: { type: "array", items: obj({ type: { type: "string", enum: OPENINGS.map((o) => o.type) }, x: n, y: n, width: n, hinge: dir, opens: dir }) },
-      stairs: { type: "array", items: obj({ type: { type: "string", enum: ["stair", "stair-corner"] }, x: n, y: n, width: n, length: { anyOf: [n, { type: "null" }] }, up: dir, enter: dir, exit: dir }) },
+      stairs: { type: "array", items: obj({ type: { type: "string", enum: ["stair", "stair-corner"] }, x: n, y: n, width: n, length: n, up: dir, enter: dir, exit: dir }) },
       roofs: { type: "array", items: obj({ floor: { type: "integer" }, x0: n, y0: n, x1: n, y1: n,
         shape: { type: "string", enum: ["flat", "gable", "hip", "mono"] },
-        ridge: { anyOf: [{ type: "string", enum: ["EW", "NS"] }, { type: "null" }] }, low: dir,
-        pitch: { anyOf: [n, { type: "null" }] } }) },
-      objects: { type: "array", items: obj({ kind: { type: "string", enum: [...OBJECT_KINDS, ...EXTERIOR_KINDS.map((e) => e.kind)] }, x: n, y: n, w: n, d: n, face: dir }) },
+        ridge: { type: "string", enum: ["EW", "NS", "none"] }, low: dir, pitch: n }) },
+      objects: { type: "array", items: obj({ kind: { type: "string" }, x: n, y: n, w: n, d: n, face: dir }) },
     }),
   },
   notes: { type: "array", items: { type: "string" } },
