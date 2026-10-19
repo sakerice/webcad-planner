@@ -149,6 +149,7 @@ try {
   });
   if (!got.ok) throw new Error('読み取りに失敗: ' + got.status);
   await page.locator('#plan-import-apply').click();
+  if (await page.locator('#plan-import-confirm:not([hidden])').count()) await page.locator('#plan-import-confirm-yes').click();
   await page.waitForFunction(() => !document.querySelector('#plan-import-modal.show'), null, { timeout: 30000 });
   // アプリにそのまま読み込める形（「JSON を読み込む」で開ける）。人が 2D・3D で見て確かめるため。
   const appJson = await page.evaluate(() => JSON.stringify(DATA));

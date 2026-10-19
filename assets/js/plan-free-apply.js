@@ -82,7 +82,8 @@
   // 既定（見直しのあと）は置かず、置かなかったことを notes に書く。黙って消さない。
   function toImportPlan(answer, tags, options) {
     options = options || {};
-    var plan = { walls: [], rooms: [], items: [], notes: [], offWall: [] };
+    // notes は AI が書いた作業メモ（測定・開発用）、userNotes は利用者に見せてよい文だけ。
+    var plan = { walls: [], rooms: [], items: [], notes: [], userNotes: [], offWall: [] };
     ((answer && answer.notes) || []).forEach(function (n) { plan.notes.push(String(n)); });
     ((answer && answer.floors) || []).forEach(function (f) {
       var floor = num(f.floor) || 1;
@@ -175,8 +176,10 @@
       });
     });
     if (!options.keepOffWall && plan.offWall.length) {
-      plan.notes.push('壁の上に無い窓・扉を ' + plan.offWall.length + ' 件置きませんでした（'
-        + plan.offWall.map(function (o) { return o.floor + '階 (' + o.x + ', ' + o.y + ')'; }).join('、') + '）。');
+      var floorsOff = [];
+      plan.offWall.forEach(function (o) { if (floorsOff.indexOf(o.floor) < 0) floorsOff.push(o.floor); });
+      plan.userNotes.push('位置を確かめられなかった窓・扉が ' + plan.offWall.length + ' か所あります（'
+        + floorsOff.sort().map(function (f) { return f + '階'; }).join('・') + '）。必要なら手で足してください。');
     }
     return plan;
   }

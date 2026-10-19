@@ -290,6 +290,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .plan-import-progress-head span:last-child{font-variant-numeric:tabular-nums;color:#aab4c8;font-weight:400}
 .plan-import-progress-bar{height:6px;border-radius:3px;background:#1c2a48;overflow:hidden}
 .plan-import-progress-bar i{display:block;height:100%;width:0;background:#4f8cff;transition:width .6s ease}
+.plan-import-confirm{display:grid;gap:8px;margin-top:8px;padding:10px;border:1px solid #4f8cff;border-radius:6px;background:rgba(79,140,255,0.08);font-weight:600}
+.plan-import-confirm[hidden]{display:none}
 .plan-import-progress-thought{color:#8f9bb3;font-size:12px;line-height:1.5;max-height:3em;overflow:hidden}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
@@ -3588,6 +3590,13 @@ input[type="reset"]:focus-visible{
       <div id="plan-import-rooms" class="unity-render-cmd"></div>
       <div class="ph">AIが直したこと・読めなかったこと</div>
       <div id="plan-import-notes" class="unity-render-cmd"></div>
+      <div id="plan-import-confirm" class="plan-import-confirm" hidden>
+        <div id="plan-import-confirm-text"></div>
+        <div class="unity-render-actions">
+          <button id="plan-import-confirm-yes" class="pbtn" style="width:auto;padding:7px 14px" onclick="applyPlanImport('confirmed')">取り込む</button>
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="cancelPlanImportApply()">やめる</button>
+        </div>
+      </div>
       <div class="unity-render-actions">
         <button id="plan-import-apply" class="pbtn" style="width:auto;padding:7px 14px" onclick="applyPlanImport()">この下書きを取り込む</button>
       </div>

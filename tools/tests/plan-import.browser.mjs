@@ -9,6 +9,17 @@
 // 覗いて確かめる。
 import assert from 'node:assert/strict';
 
+// 取り込む: ボタンを押し、確認が出たら画面の中の「取り込む」を押して、閉じるまで待つ。
+// （確認はブラウザの窓ではなくダイアログの中に出る。取り込みは画面を描かせてから行う）
+async function applyAndConfirm(page) {
+  await page.locator('#plan-import-apply').click();
+  if (await page.locator('#plan-import-confirm:not([hidden])').count()) {
+    await page.locator('#plan-import-confirm-yes').click();
+  }
+  await page.waitForFunction(() => !document.querySelector('#plan-import-modal.show'), null, { timeout: 10000 });
+}
+
+
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 const browser = await chromium.launch();
@@ -132,13 +143,11 @@ try {
   assert.match(rooms, /約3\.0帖/, '帖数の換算が合っていない');
   assert.match(await page.locator('#plan-import-notes').textContent(), /読めなかった/);
   // 1回いくらかかったかは毎回見せる（使う側からは費用が見えないので）
-  assert.match(await page.locator('#plan-import-cost').textContent(), /費用: 約 .*円/,
-    '費用が表示されていない');
+  // 費用・トークン数は利用者の画面に出さない（開発の都合の情報）。
+  assert.equal((await page.locator('#plan-import-cost').textContent()).trim(), '', '費用を出している');
 
   // ── 取り込む ──────────────────────────────────────────────────────
-  page.on('dialog', (d) => d.accept());
-  await page.locator('#plan-import-apply').click();
-  await page.waitForSelector('#plan-import-modal.show', { state: 'detached', timeout: 5000 }).catch(() => {});
+  await applyAndConfirm(page);
   const after = await page.evaluate(() => ({
     open: document.getElementById('plan-import-modal').classList.contains('show'),
     walls: DATA.walls.length,
@@ -239,7 +248,7 @@ try {
   assert.equal(pdfSent.pages, 1, '送ったページ数が合わない');
   assert.match(await page.locator('#plan-import-summary').textContent(), /階 1・2/, '階の表示が出ていない');
 
-  await page.locator('#plan-import-apply').click();
+  await applyAndConfirm(page);
   const floors = await page.evaluate(() => ({
     walls: DATA.walls.length,
     byFloor: [1, 2].map((f) => DATA.rooms.filter((r) => r.floor === f).map((r) => r.n)),
@@ -267,7 +276,8 @@ try {
       rooms: [{ floor: 2, x: 0, y: 0, w: 5460, d: 3640, n: '子供室' }],
       items: [],
     } };
-    applyPlanImport();
+    // 確認（ダイアログの中に出る）を済ませた後の組み立てを、直接呼ぶ。ここで見るのは組み立ての中身。
+    applyPlanImport('go');
   });
   const kept = await page.evaluate(() => ({
     floor1: DATA.rooms.filter((r) => (r.floor || 1) === 1).map((r) => r.n),

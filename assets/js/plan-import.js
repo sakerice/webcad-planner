@@ -68,7 +68,8 @@
       if (!q || !q.counted || q.left === null || q.left === undefined) { box.style.display = 'none'; return; }
       box.style.display = '';
       box.textContent = q.left > 0
-        ? '本日あと ' + q.left + ' 回 読み取れます（1日に ひとり ' + q.perUser + ' 回まで／全体 ' + q.total + ' 回まで）'
+        // 使う人に要るのは「あと何回できるか」だけ。上限の内訳（ひとり・全体）は運営側の事情なので出さない。
+        ? '本日あと ' + q.left + ' 回 読み取れます'
         : '本日ぶんの読み取りを使い切りました。明日またお試しください。';
       var run = $('plan-import-run');
       if (run && q.left <= 0) run.disabled = true;
@@ -626,9 +627,9 @@
     }
     var summary = (typeof PlanSchema !== 'undefined' && PlanSchema.summarize) ? PlanSchema.summarize(plan)
       : { walls: plan.walls.length, rooms: plan.rooms.length, items: plan.items.length };
-    var notes = plan.notes.slice(0, 20);
-    if (extra && extra.reviewed) notes.unshift('AIが、組み立てた家の平面図と外観3Dを図面と見比べて見直しました。');
-    if (extra && extra.reviewNote) notes.unshift(extra.reviewNote);
+    // 利用者に見せるのは、利用者が知って役に立つことだけ（AI の作業メモや、見直しの成否は出さない）。
+    var notes = plan.userNotes.slice(0, 20);
+    if (extra && extra.reviewed) notes.unshift('立体にして図面と見比べ、整えました。');
     return { status: 200, body: {
       plan: plan, summary: summary, marks: [], warnings: [], notes: notes,
       usage: Object.assign({ rates: { in: 4, out: 20 } }, p.usage), freeRead: true, seconds: Math.round((Date.now() - p.started) / 1000),
@@ -851,13 +852,14 @@
   }
 
   function renderPlanImportResult(body) {
+    // 新しい下書きのたびに、取り込みのボタンを出し直し、前の確認は閉じる。
+    hideApplyConfirm();
     var s = body.summary || {};
     setStatus('下書きができました。取り込んだあと、手で直して仕上げてください。');
     var head = $('plan-import-summary');
     if (head) {
       head.textContent = '壁 ' + (s.walls || 0) + ' / 部屋 ' + (s.rooms || 0) +
-        (body.freeRead ? ' / 建具・階段・家具など ' : ' / 開口・階段 ') + (s.items || 0) + '（階 ' + ((s.floors || []).join('・') || '-') + '）'
-        + (body.seconds ? '　読み取り ' + body.seconds + '秒' : '');
+        (body.freeRead ? ' / 建具・階段・家具など ' : ' / 開口・階段 ') + (s.items || 0) + '（階 ' + ((s.floors || []).join('・') || '-') + '）';
     }
     var list = $('plan-import-rooms');
     if (list) {
@@ -871,22 +873,10 @@
     }
     // 1回いくらかかったかを、毎回その場で見せる。推定ではなく実測の
     // トークン数から出す。費用は使う側からは見えないので、見えるようにする。
+    // 費用・トークン数は利用者の画面に出さない（利用者にとって必要の無い、開発の都合の情報）。
+    // 測定に要る値は body.usage に残してある。
     var cost = $('plan-import-cost');
-    if (cost) {
-      var u = body.usage;
-      if (u && u.inputTokens) {
-        // 単価は gpt-6-astra（$10 / $50 per 1M）。$1=¥150 と置いた概算。
-        // **モデルを替えたらここも替える。** 実際より安く見えるのが一番まずい。
-        // 短い指示の読み取り（Claude Opus 5.5）は $4 / $20 per 1M。
-        var rate = u.rates || { in: 10, out: 50 };
-        var yen = (u.inputTokens / 1e6 * rate.in + u.outputTokens / 1e6 * rate.out) * 150;
-        cost.textContent = 'この読み取りの費用: 約 ' + yen.toFixed(1) + '円'
-          + '（入力 ' + u.inputTokens + ' / 出力 ' + u.outputTokens
-          + (u.thoughtTokens ? '（うち思考 ' + u.thoughtTokens + '）' : '') + ' トークン）';
-      } else {
-        cost.textContent = '';
-      }
-    }
+    if (cost) cost.textContent = '';
     var notes = $('plan-import-notes');
     if (notes) {
       var lines = [];
@@ -899,9 +889,7 @@
       // **省いたことも書く。** 費用を見せている以上、払わなかった理由も
       // 見えているべきである。黙って省くと、見直しが動かなくなったのか
       // 省いたのかが、使う側から区別できない。
-      if (body.reviewSkipped) {
-        lines.push('・読み取りの辻褄が合っていたので、見直しは省きました（その分の費用と時間はかかっていません）。');
-      }
+      // 見直しを省いたことは利用者に関係が無いので出さない。
       // 仕上げの見通し。**取り込む前に、このあと何が起きるかを出す。**
       if (body.finish) {
         var swaps = (body.finish.picks || []).length;
@@ -999,6 +987,9 @@
     var seen = [];
     for (var i = 0; i < arguments.length; i++) {
       (arguments[i] || []).forEach(function (o) {
+        // 屋根は「その下の階の上」に載る物で、floor は1つ上の数になる（3階建ての屋根は 4）。
+        // 階として数えると、確認の文に無い「4階」が出る。
+        if (o && o.type === 'roof') return;
         var f = Number(o && o.floor) || 1;
         if (seen.indexOf(f) < 0) seen.push(f);
       });
@@ -1104,7 +1095,26 @@
       (typeof HISTORY === 'undefined' || !HISTORY || !HISTORY.length);
   }
 
-  function applyPlanImport() {
+  // 取り込みの確認は、ダイアログの中に出す。ブラウザの確認の窓（confirm）は、アプリに埋め込まれた
+  // 画面などで表示されずに「いいえ」が返ることがあり、押しても何も起きないように見えた（2026-10-19）。
+  function showApplyConfirm(text) {
+    var box = $('plan-import-confirm');
+    if (!box) return;
+    $('plan-import-confirm-text').textContent = text;
+    box.hidden = false;
+    show('plan-import-apply', false);
+    if (box.scrollIntoView) box.scrollIntoView({ block: 'nearest' });
+  }
+  function hideApplyConfirm() {
+    var box = $('plan-import-confirm');
+    if (box) box.hidden = true;
+    show('plan-import-apply', true);
+  }
+  function cancelPlanImportApply() { hideApplyConfirm(); }
+
+  // mode: 省略（押したとき）→ 確認が要れば確認を出す。'confirmed'（確認で「取り込む」）→
+  // 「取り込んでいます」を出して画面を描かせてから 'go' で組み立てる。
+  function applyPlanImport(mode) {
     if (!ST.result || !ST.result.plan) return;
     if (typeof DATA === 'undefined' || !DATA) return;
     // 水まわりの既定モデルを、部屋に合うものへ差し替えてから組み立てる。
@@ -1131,7 +1141,16 @@
             + '読み取った下書きをその右隣に建てます。よろしいですか？'
             + '（見比べて、要らないほうを消してください）'
           : '読み取った下書き（' + floorLabel(readFloors) + '）を、いまの間取りに足します。よろしいですか？';
-      if (!confirm(ask)) return;
+      if (mode !== 'confirmed' && mode !== 'go') { showApplyConfirm(ask); return; }
+    }
+    if (mode !== 'go') {
+      // 組み立てと3Dの作り直しには時間がかかることがある。先に何が起きているかを出し、
+      // 画面が描かれてから組み立てる（黙って止まって見えないように）。
+      hideApplyConfirm();
+      show('plan-import-apply', false);
+      setStatus('下書きを取り込んでいます…');
+      setTimeout(function () { applyPlanImport('go'); }, 30);
+      return;
     }
 
     // 取り消せるようにしてから触る。**丸ごと差し替えていた頃は、取り込みが
@@ -1237,6 +1256,7 @@
   root.planImportSelectAll = planImportSelectAll;
   root.runPlanImport = runPlanImport;
   root.applyPlanImport = applyPlanImport;
+  root.cancelPlanImportApply = cancelPlanImportApply;
   // 検査から中身を覗くため
   root.PlanImport = {
     state: ST,

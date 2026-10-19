@@ -122,5 +122,6 @@ test('壁の上に無い窓・扉: 見直しの前は残して事実にし、あ
   assert.ok(PlanFreeApply.factsOf(draft, answer).some((f) => /壁の上にありません/.test(f)));
   const final = PlanFreeApply.toImportPlan(answer, {});
   assert.equal(final.items.length, 0);
-  assert.match(final.notes.join(''), /壁の上に無い窓・扉を 1 件置きませんでした/);
+  assert.match(final.userNotes.join(''), /位置を確かめられなかった窓・扉が 1 か所あります（1階）/);
+  assert.ok(!/\d{3,}/.test(final.userNotes.join('')), '利用者に見せる文に座標を出さない');
 });

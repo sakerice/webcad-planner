@@ -146,10 +146,19 @@ try {
   assert.equal(review.first, 4);
   assert.ok(review.facts.some((f) => /屋根を答えていません/.test(f)), '機械で分かった事実を伝える');
   const notes = await page.textContent('#plan-import-notes');
-  assert.match(notes, /外観3Dを図面と見比べて見直しました/);
-  assert.match(notes, /屋根を足しました/);
+  assert.match(notes, /立体にして図面と見比べ、整えました/);
+  assert.ok(!/屋根を足しました/.test(notes), 'AI の作業メモは利用者に見せない');
+  const shown = await page.evaluate(() => document.getElementById('plan-import-modal').innerText);
+  assert.ok(!/円|トークン|秒）|\(\d+, \d+\)/.test(shown.replace(/経過 .*）/g, '')), '費用・トークン数・座標を出さない: ' + shown);
 
+  // 取り込みの確認はダイアログの中に出る（ブラウザの確認の窓は、埋め込まれた画面では出ずに
+  // 「いいえ」が返り、押しても何も起きないように見えた）。「取り込んでいます」を出してから組み立てる。
   await page.locator('#plan-import-apply').click();
+  await page.waitForSelector('#plan-import-confirm:not([hidden])', { timeout: 5000 });
+  assert.match(await page.textContent('#plan-import-confirm-text'), /読み取った下書き（1階）/, '確認の文に無い階を出さない');
+  await page.evaluate(() => { window.confirm = () => { throw new Error('confirm を使っている'); }; });
+  await page.locator('#plan-import-confirm-yes').click();
+  assert.match(await page.textContent('#plan-import-status'), /取り込んでいます/, '取り込み中に何が起きているかを出す');
   await page.waitForFunction(() => !document.querySelector('#plan-import-modal.show'), null, { timeout: 10000 });
   const placed = await page.evaluate(() => ({
     door: DATA.items.find((i) => i.type === 'door-swing'),
