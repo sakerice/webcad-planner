@@ -479,6 +479,8 @@
     $('plan-import-progress-time').textContent = '経過 ' + mmss(elapsed) + '（目安 ' + mmss(estimate) + '）';
     $('plan-import-progress-fill').style.width = fill.toFixed(1) + '%';
     var thought = String(p.thought || '').trim().split(/\n+/).filter(Boolean).pop() || '';
+    // 利用者に見せる文は日本語だけ。考えの要約が英語で来たときは出さない（2026-10-19 実測で英語が来た）。
+    if (!/[\u3040-\u30ff\u4e00-\u9fff]/.test(thought)) thought = '';
     $('plan-import-progress-thought').textContent = thought ? 'AIのメモ: ' + thought.slice(-160) : '';
   }
 
