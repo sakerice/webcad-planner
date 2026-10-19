@@ -3555,13 +3555,17 @@ input[type="reset"]:focus-visible{
     <div id="plan-import-step2" style="display:none">
       <!-- 囲む操作は**任意**。何もせずそのまま読み取れる。紙面の一部にしか
            図面が写っていない画像のときだけ、囲むと精度が上がる。
-           PDF はそのまま送るので、この枠ごと出さない。 -->
+           PDF は図面の位置を AI が探して、その範囲を囲んだ状態で出す（ずれていれば直せる）。 -->
       <div id="plan-import-crop">
         <div class="ph">2. 図面の部分を囲む（任意）</div>
+        <div id="plan-import-pages" class="unity-render-actions" style="display:none">
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportPage(-1)">前のページ</button>
+          <span id="plan-import-page-label" class="airx-source-note"></span>
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportPage(1)">次のページ</button>
+        </div>
         <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
         <div class="unity-render-actions">
           <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
-          <span id="plan-import-crop-size" class="airx-source-note"></span>
         </div>
       </div>
       <div class="unity-render-config">
@@ -3816,6 +3820,7 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/room-program.js"></script>
 <script src="assets/js/plan-check.js"></script>
 <script src="assets/js/plan-finish.js"></script>
+<script src="assets/js/plan-settable.js"></script>
 <script src="assets/js/plan-free-apply.js"></script>
 <script src="assets/js/plan-snapshot.js"></script>
 <script src="assets/js/plan-import.js"></script>

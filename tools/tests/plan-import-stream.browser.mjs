@@ -22,13 +22,16 @@ const ANSWER = {
       { x1: 0, y1: 0, x2: 3640, y2: 0 }, { x1: 3640, y1: 0, x2: 3640, y2: 2730 },
       { x1: 3640, y1: 2730, x2: 0, y2: 2730 }, { x1: 0, y1: 2730, x2: 0, y2: 0 },
     ],
-    rooms: [{ name: '洋室', parts: [{ x0: 0, y0: 0, x1: 3640, y1: 2730 }] }],
+    rooms: [{ name: '洋室', parts: [{ x0: 0, y0: 0, x1: 3640, y1: 2730 }], set: 'ceilingHeight=2500' }],
     openings: [
       { type: 'door-swing', x: 1000, y: 2730, width: 780, hinge: 'E', opens: 'N' },
       { type: 'window', x: 1820, y: 0, width: 1650, hinge: null, opens: null },
     ],
     stairs: [],
-    objects: [{ kind: 'sofa', x: 1820, y: 600, w: 1800, d: 850, face: 'S' }],
+    objects: [{ kind: 'sofa', x: 1820, y: 600, w: 1800, d: 850, face: 'S' },
+      { kind: 'car', x: 5500, y: 1500, w: 1800, d: 4700, face: 'S', set: '' },
+      { kind: 'site', x: 4000, y: 1500, w: 10000, d: 8000, face: 'S', set: 'surface=gravel' },
+      { kind: 'site-zone', x: 5500, y: 1500, w: 2700, d: 5000, face: 'none', set: 'name=駐車スペース; surface=concrete' }],
   }],
   notes: [],
 };
@@ -165,7 +168,14 @@ try {
     sofa: DATA.items.find((i) => i.kind === 'sofa' || /sofa/i.test(i.type)),
     walls: DATA.walls.length,
     roofs: DATA.items.filter((i) => i.type === 'roof').map((i) => i.roofType),
+    car: DATA.items.some((i) => i.type === 'car'),
+    sites: DATA.items.filter((i) => i.type === 'site-rect').map((i) => ({ surface: i.siteSurface, zones: (i.siteZones || []).map((z) => z.name) })),
+    ceiling: DATA.rooms[0] && DATA.rooms[0].ceiling,
   }));
+  // 設定パネルの項目・外構も入る（2026-10-20 利用者の指摘: 車などの外構が置けていない）。
+  assert.ok(placed.car, '車が置かれる');
+  assert.deepEqual(placed.sites, [{ surface: 'gravel', zones: ['駐車スペース'] }], '敷地は1つ、駐車スペースの区画つき');
+  assert.deepEqual(placed.ceiling, { type: 'flat', heightMm: 2500 }, '天井高が入る');
   assert.deepEqual(placed.roofs, ['gable'], '見直しで足した屋根を使い、壁から作る平らな屋根は重ねない');
   assert.equal(placed.walls, 4);
   assert.ok(placed.door, '開き戸が入っている');

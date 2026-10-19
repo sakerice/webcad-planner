@@ -4,21 +4,22 @@
 // 吸い付く壁の向きを基準に左右を決める（assets/js/draw-2d.js）。その翻訳をここ1か所で行う。
 // 画面（取り込み）と、読み取りを測る道具（tools/plan-eval/free-answer.mjs）が同じこれを使う。
 //
-// 返す形: { walls:[{x1,y1,x2,y2,floor,thick}], rooms:[{x,y,w,d,floor,n}],
-//           items:[{type, x, y（中心）, w, d, rot, floor, extra:{flipX,...}}], notes:[] }
+// 返す形: { walls:[{x1,y1,x2,y2,floor,thick,extra}], rooms:[{x,y,w,d,floor,n,extra}],
+//           items:[{type, x, y（中心）, w, d, rot, floor, extra:{flipX,...}}], site, notes:[] }
 // items の x,y は**中心**（取り込みの決まり。角へ直すのは plan-import.js の toAppObjects）。
+// 設定パネルの項目（set）・外構の種類・建具の種類は assets/js/plan-settable.js の表に従う。
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.PlanFreeApply = factory();
-}(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./plan-settable.js'));
+  else root.PlanFreeApply = factory(root.PlanSettable);
+}(typeof self !== 'undefined' ? self : this, function (PlanSettable) {
   'use strict';
 
   var DIR = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
   var ROT = { N: 0, E: 90, S: 180, W: 270 };
   // 直進階段は +d へ上る。上る方角 → rot。
   var STAIR_ROT = { S: 0, W: 90, N: 180, E: 270 };
-  var DEPTH = { window: 150, 'window-door': 180, 'door-slide': 150, 'door-slide-s': 150, 'door-fold': 420,
-    'door-opening': 160, 'door-front': 200 };
+  var DEPTH = {};
+  PlanSettable.OPENINGS.forEach(function (o) { DEPTH[o.type] = o.d; });
   // 種類 → アプリの type。
   //   水まわりと外構の床・段は、これまでの取り込みと同じ組み込みの type（設備の差し替えや段数の
   //   計算がこの type を前提にしている）。
@@ -27,7 +28,7 @@
   //   normalizeLegacyFurnitureItems）。
   // 水まわりも組み込みの type は使わない。読み込み時に fmp- のモデルへ置き換えられ、そのとき
   // 正面の向きの決まりが変わって逆を向く（2026-10-19 実測: 便器がすべて逆向き）。
-  var BUILTIN = { ramp: 'ramp', balcony: 'balcony', 'exterior-stair': 'exterior-stair' };
+  //   外構の組み込みの種類（車・フェンス・スロープなど）は PlanSettable.EXTERIOR が kind → type を決める。
   // 種類ごとの既定のモデル。アプリの既定（app-constants.js の LEGACY_FMP_TYPE_MAP）と同じものを使う。
   // キッチンだけは既定が収納棚（fmp-CabinetA01）なので、I型のシステムキッチンにする。
   var DEFAULT_MODEL = {
@@ -52,7 +53,8 @@
 
   // tags: { 品番: {kind, confidence, review} }（assets/models/tags.json の items）
   function typeForKind(kind, w, tags) {
-    if (BUILTIN[kind]) return BUILTIN[kind];
+    var ext = PlanSettable.exteriorByKind(kind);
+    if (ext) return ext.type;
     if (DEFAULT_MODEL[kind]) return DEFAULT_MODEL[kind];
     // 既定の無い種類は、分類表で種類の確信度（confidence.kind）がいちばん高いモデル。
     var best = null;
@@ -83,7 +85,9 @@
   function toImportPlan(answer, tags, options) {
     options = options || {};
     // notes は AI が書いた作業メモ（測定・開発用）、userNotes は利用者に見せてよい文だけ。
-    var plan = { walls: [], rooms: [], items: [], notes: [], userNotes: [], offWall: [] };
+    // dropped: アプリに置けなかった種類（測定と検査で見る。黙って捨てたものを数えるため）。
+    var plan = { walls: [], rooms: [], items: [], site: null, notes: [], userNotes: [], offWall: [], dropped: [] };
+    var siteParts = [];
     ((answer && answer.notes) || []).forEach(function (n) { plan.notes.push(String(n)); });
     ((answer && answer.floors) || []).forEach(function (f) {
       var floor = num(f.floor) || 1;
@@ -92,16 +96,20 @@
         // 手すり壁・腰壁は、アプリの壁の種類「バルコニーフェンス」（床から1100mm＋笠木）で建てる。
         // 普通の壁として建てると、バルコニーが天井まで壁で囲まれた箱になる（2026-10-19 実測）。
         if (w.style === 'balcony-fence') wall.wallStyle = 'balcony-fence';
+        var set = PlanSettable.applySettings('wall', null, w.set, {});
+        if (set.thick) wall.thick = set.thick;
+        if (set.wallHeight) wall.extra = { wallHeight: set.wallHeight };
         return wall;
       }).filter(function (w) { return Math.hypot(w.x2 - w.x1, w.y2 - w.y1) >= 1; });
       plan.walls = plan.walls.concat(walls);
 
       (f.rooms || []).forEach(function (r) {
+        var roomSet = PlanSettable.applySettings('room', null, r.set, {}, { floor: floor });
         (r.parts || []).forEach(function (p) {
           var x0 = Math.min(num(p.x0), num(p.x1)), y0 = Math.min(num(p.y0), num(p.y1));
           var w = Math.abs(num(p.x1) - num(p.x0)), d = Math.abs(num(p.y1) - num(p.y0));
           if (w < 1 || d < 1) return;
-          plan.rooms.push({ x: x0, y: y0, w: w, d: d, floor: floor, n: String(r.name || '') });
+          plan.rooms.push({ x: x0, y: y0, w: w, d: d, floor: floor, n: String(r.name || ''), extra: JSON.parse(JSON.stringify(roomSet)) });
         });
       });
 
@@ -115,8 +123,9 @@
         }
         var vertical = Math.abs(near.uy) > Math.abs(near.ux);
         var depth = (t === 'door-swing') ? width : (DEPTH[t] || 150);
-        var extra = {};
-        if (/^door-|^window-door/.test(t)) { extra.doorOpenState = 'closed'; extra.doorHeight = t === 'door-front' ? 2330 : 2000; }
+        // 扉は閉じた状態で置く（開いた扉が並ぶと間取りが読みにくい）。高さなどは set から。
+        var extra = PlanSettable.applySettings('opening', t, o.set, {});
+        if (/^door-|^window-door/.test(t)) extra.doorOpenState = 'closed';
         if (o.hinge && DIR[o.hinge]) extra.flipX = DIR[o.hinge][0] * near.ux + DIR[o.hinge][1] * near.uy > 0;
         if (o.opens && DIR[o.opens]) {
           // 進行方向の右手（画面で時計回りに90°）= (-uy, ux)。開き戸は flipY=false で右手側へ開き、
@@ -134,11 +143,12 @@
           var rot = STAIR_ROT[DIR[s.enter] ? s.enter : 'S'];
           var th = rot * Math.PI / 180, ex = [Math.cos(th), Math.sin(th)];
           var want = DIR[s.exit] || ex;
-          plan.items.push({ type: 'stair-corner', x: num(s.x), y: num(s.y), w: width, d: width, rot: rot, floor: floor,
-            extra: { flipX: ex[0] * want[0] + ex[1] * want[1] < 0 } });
+          var cornerExtra = PlanSettable.applySettings('stair', 'stair-corner', s.set, {});
+          cornerExtra.flipX = ex[0] * want[0] + ex[1] * want[1] < 0;
+          plan.items.push({ type: 'stair-corner', x: num(s.x), y: num(s.y), w: width, d: width, rot: rot, floor: floor, extra: cornerExtra });
         } else {
           plan.items.push({ type: 'stair', x: num(s.x), y: num(s.y), w: width, d: num(s.length) || 2730,
-            rot: STAIR_ROT[DIR[s.up] ? s.up : 'S'], floor: floor, extra: {} });
+            rot: STAIR_ROT[DIR[s.up] ? s.up : 'S'], floor: floor, extra: PlanSettable.applySettings('stair', 'stair', s.set, {}) });
         }
       });
 
@@ -164,17 +174,22 @@
 
       (f.objects || []).forEach(function (o) {
         var w = num(o.w) || 600, d = num(o.d) || 600;
-        var type = typeForKind(String(o.kind || ''), w, tags);
-        if (!type) return;
+        var kind = String(o.kind || '');
+        // 敷地と区画はまとめて1つの敷地にする（下の siteOf）。
+        if (kind === 'site' || kind === 'site-zone') { siteParts.push({ kind: kind, x: num(o.x), y: num(o.y), w: w, d: d, set: o.set }); return; }
+        var type = typeForKind(kind, w, tags);
+        if (!type) { plan.dropped.push(kind); return; }
         // 正面の向き → rot。カタログのモデルは rot+180 の側が正面（modelFacingVersion 1。
         // tools/lint_plan.py の _front_dir と同じ決まり）。印を付けておかないと、読み込み時に
         // 古い保存の向きとみなされて 180° 回される。
         var rot = ROT[o.face] != null ? ROT[o.face] : 0;
-        var extra = {};
+        var extra = PlanSettable.applySettings('object', kind, o.set, {});
         if (CATALOG_PREFIX.test(type)) { rot += 180; extra.modelFacingVersion = 1; extra.modelFrontAxis = '+Z'; }
+        else if ((PlanSettable.exteriorByKind(kind) || {}).front180) rot += 180;
         plan.items.push({ type: type, x: num(o.x), y: num(o.y), w: w, d: d, rot: rot % 360, floor: floor, extra: extra });
       });
     });
+    plan.site = siteOf(siteParts);
     if (!options.keepOffWall && plan.offWall.length) {
       var floorsOff = [];
       plan.offWall.forEach(function (o) { if (floorsOff.indexOf(o.floor) < 0) floorsOff.push(o.floor); });
@@ -184,6 +199,30 @@
     return plan;
   }
 
+  // 敷地（kind site）と区画（kind site-zone）から、アプリの敷地を1つ作る。区画は敷地の左上を
+  // 原点に持つ（アプリの siteZones の決まり）。敷地が無く区画だけなら、区画を包む範囲を敷地にする。
+  function siteOf(parts) {
+    if (!parts.length) return null;
+    var box = function (p) { return { x0: p.x - p.w / 2, y0: p.y - p.d / 2, x1: p.x + p.w / 2, y1: p.y + p.d / 2 }; };
+    var site = parts.filter(function (p) { return p.kind === 'site' && p.w >= 1000 && p.d >= 1000; })[0];
+    var zones = parts.filter(function (p) { return p.kind === 'site-zone' && p.w >= 100 && p.d >= 100; });
+    var b = site ? box(site) : null;
+    if (!b) {
+      if (!zones.length) return null;
+      b = zones.map(box).reduce(function (a, z) {
+        return { x0: Math.min(a.x0, z.x0), y0: Math.min(a.y0, z.y0), x1: Math.max(a.x1, z.x1), y1: Math.max(a.y1, z.y1) };
+      });
+    }
+    var siteSet = site ? PlanSettable.applySettings('object', 'site', site.set, {}) : {};
+    return {
+      x: b.x0, y: b.y0, w: b.x1 - b.x0, d: b.y1 - b.y0, surface: siteSet.surface || 'grass',
+      zones: zones.map(function (z) {
+        var zs = PlanSettable.applySettings('object', 'site-zone', z.set, {}), zb = box(z);
+        return { name: zs.name || '', x: zb.x0 - b.x0, y: zb.y0 - b.y0, w: z.w, d: z.d, surface: zs.surface || 'concrete' };
+      }),
+    };
+  }
+
   // 組み立てた結果について、機械で分かる事実。見直しのときに AI へ伝える（直し方は AI に任せる）。
   function factsOf(plan, answer) {
     var facts = [];
@@ -191,10 +230,14 @@
       facts.push(o.floor + '階の ' + o.type + '（中心 ' + o.x + ', ' + o.y + '）は壁の上にありません'
         + (o.d != null ? '（いちばん近い壁まで ' + o.d + 'mm）' : '') + '。アプリは窓・扉を壁から 400mm 以内でしか置けません。');
     });
+    (plan.dropped || []).forEach(function (k) {
+      facts.push('objects の kind「' + k + '」は house-planner に置けないため、置いていません。一覧にある kind を使ってください。');
+    });
     var hasRoof = ((answer && answer.floors) || []).some(function (f) { return (f.roofs || []).length; });
     if (!hasRoof) facts.push('屋根を答えていません。このままだと、いちばん上の階に平らな屋根が1枚だけ作られます。');
     // 階ごとの壁の外形から外れた家具・設備（外構は除く）。
-    var EXTERIOR = { ramp: 1, balcony: 1, deck: 1, 'exterior-stair': 1, 'gate-post': 1, 'garden-plant': 1, 'garden-equipment': 1, fence: 1 };
+    var EXTERIOR = { deck: 1, 'gate-post': 1, 'garden-plant': 1, 'garden-equipment': 1 };
+    PlanSettable.EXTERIOR.forEach(function (e) { EXTERIOR[e.kind] = 1; });
     ((answer && answer.floors) || []).forEach(function (f) {
       var ws = f.walls || [];
       if (!ws.length) return;

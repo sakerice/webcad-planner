@@ -32,7 +32,8 @@
 
   var ST = {
     image: null,        // 読み込んだ画像 (Image)
-    pages: null,        // PDFを選んだとき、ページごとの画像 (data URL の配列)
+    pages: null,        // PDFを選んだとき、ページごとの画像 (data URL の配列。ページ全体)
+    pdf: null,          // PDFを選んだとき {data, previews: [Image], boxes: [{x0,y0,x1,y1} ページに対する割合], page}
     fileName: '',
     crop: null,         // 切り出し範囲 {x,y,w,h} 画像の画素で
     drag: null,         // 囲んでいる最中の状態
@@ -82,7 +83,7 @@
   }
 
   function resetPlanImport() {
-    ST.image = null; ST.pages = null; ST.fileName = '';
+    ST.image = null; ST.pages = null; ST.pdf = null; ST.fileName = '';
     ST.crop = null; ST.drag = null; ST.result = null; ST.busy = false;
     var f = $('plan-import-file'); if (f) f.value = '';
     show('plan-import-step2', false);
@@ -133,7 +134,7 @@
     if (file.type === 'application/pdf' || /\.pdf$/i.test(ST.fileName)) {
       var pdfReader = new FileReader();
       pdfReader.onload = function (e) {
-        ST.image = null; ST.crop = null; ST.result = null; ST.pages = null;
+        ST.image = null; ST.crop = null; ST.result = null; ST.pages = null; ST.pdf = null;
         setStatus('PDFを開いています…');
         if (typeof PdfPages === 'undefined' || !PdfPages) {
           setStatus('PDFを開く部品がありません。画像にしてからお試しください。');
@@ -153,34 +154,28 @@
             return pages;
           });
         }).then(function (pages) {
-          if (!pages || !pages.length) return [];
-          // ページごとに、図面の部分だけを高い解像度で描き直す。
-          //
-          // 位置はまとめて聞く。順番に聞くと、1ページぶんの待ちがページ数だけ
-          // 積み上がる。描き直しはこちらの処理なので、聞き終えてから順に行う。
+          if (!pages || !pages.length) return;
+          // ページごとに図面の位置を AI に聞き、その範囲を最初から選んだ状態で見せる。
+          // 利用者は何もしなくてよい。位置がずれていたときだけ囲み直せる（2026-10-20 利用者の要望:
+          // PDF でも読み取る範囲が見えて、直せること）。位置はまとめて聞く。順番に聞くと、
+          // 1ページぶんの待ちがページ数だけ積み上がる。
           setStatus('図面の位置を探しています…');
-          var out = pages.slice();
           return Promise.all(pages.map(function (page, i) {
             return locate((smalls && smalls[i]) || page);
           })).then(function (boxes) {
-            var next = function (i) {
-              if (i >= pages.length) return out;
-              if (!boxes[i]) return next(i + 1);
-              setStatus('図面を切り出しています… ' + (i + 1) + ' / ' + pages.length + 'ページ');
-              return PdfPages.renderRegion(pdfData, i + 1, boxes[i], { maxPx: MAX_SEND_PX })
-                .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })
-                .catch(function () { return next(i + 1); });
-            };
-            return Promise.resolve(next(0));
+            return Promise.all((smalls || pages).map(loadImage)).then(function (previews) {
+              ST.pages = pages;
+              ST.pdf = { data: pdfData, previews: previews, boxes: boxes.map(function (b) { return b || FULL_PAGE; }), page: 0 };
+              show('plan-import-step2', true);
+              show('plan-import-crop', true);
+              show('plan-import-step3', false);
+              showPdfPage(0);
+              setStatus(pages.length > 1
+                ? pages.length + 'ページを読み取ります。図面の部分を囲んであります。ずれていたら囲み直してください（ページは「次のページ」で切り替え）。'
+                : '図面の部分を囲んであります。ずれていたら囲み直してください。');
+              syncPlanImportButtons();
+            });
           });
-        }).then(function (pages) {
-          if (!pages || !pages.length) return;
-          ST.pages = pages;
-          show('plan-import-step2', true);
-          show('plan-import-crop', false);
-          show('plan-import-step3', false);
-          setStatus(pages.length + 'ページを読み取ります。');
-          syncPlanImportButtons();
         }).catch(function (err) {
           setStatus('PDFを開けませんでした: ' + (err && err.message ? err.message : err));
           syncPlanImportButtons();
@@ -199,7 +194,7 @@
     reader.onload = function (e) {
       var img = new Image();
       img.onload = function () {
-        ST.image = img; ST.pages = null;
+        ST.image = img; ST.pages = null; ST.pdf = null;
         // 最初は全体を選んでおく。狭めるのは利用者の任意。
         ST.crop = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
         ST.result = null;
@@ -220,6 +215,64 @@
 
   // ── 2. 図面の部分を囲む ────────────────────────────────────────────
   // プレビューの表示倍率。画像の画素 → 画面の画素。
+  var FULL_PAGE = { x0: 0, y0: 0, x1: 1, y1: 1 };
+
+  function loadImage(url) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  // PDF のいま見ているページを囲む画面に出す。囲みはページに対する割合で覚えておき、
+  // 画面の画素（ST.crop）とはここで行き来する。
+  function showPdfPage(i) {
+    var pdf = ST.pdf;
+    if (!pdf) return;
+    savePdfCrop();
+    pdf.page = Math.max(0, Math.min(pdf.previews.length - 1, i));
+    var img = pdf.previews[pdf.page], b = pdf.boxes[pdf.page];
+    ST.image = img;
+    ST.crop = { x: b.x0 * img.naturalWidth, y: b.y0 * img.naturalHeight, w: (b.x1 - b.x0) * img.naturalWidth, h: (b.y1 - b.y0) * img.naturalHeight };
+    var nav = $('plan-import-pages');
+    if (nav) {
+      nav.style.display = pdf.previews.length > 1 ? '' : 'none';
+      var label = $('plan-import-page-label');
+      if (label) label.textContent = (pdf.page + 1) + ' / ' + pdf.previews.length + 'ページ';
+    }
+    drawPlanImportPreview();
+  }
+
+  function savePdfCrop() {
+    var pdf = ST.pdf;
+    if (!pdf || !ST.image || !ST.crop || ST.image !== pdf.previews[pdf.page]) return;
+    var W = ST.image.naturalWidth, H = ST.image.naturalHeight, r = ST.crop;
+    pdf.boxes[pdf.page] = { x0: r.x / W, y0: r.y / H, x1: (r.x + r.w) / W, y1: (r.y + r.h) / H };
+  }
+
+  function planImportPage(step) {
+    if (ST.pdf) showPdfPage(ST.pdf.page + step);
+  }
+
+  // 送る画像。PDF は囲んだ範囲をページから高い解像度で描き直す（ページ全体ならそのまま）。
+  // 画像は囲んだ範囲を切り出す（囲んでいなければ全体）。
+  function imagesToSend() {
+    if (!ST.pdf) { var one = croppedDataUrl(); return Promise.resolve(one ? [one] : []); }
+    savePdfCrop();
+    var pdf = ST.pdf, out = ST.pages.slice();
+    var next = function (i) {
+      if (i >= out.length) return out;
+      var b = pdf.boxes[i];
+      if ((b.x1 - b.x0) * (b.y1 - b.y0) > 0.97) return next(i + 1);
+      return PdfPages.renderRegion(pdf.data, i + 1, b, { maxPx: MAX_SEND_PX })
+        .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })
+        .catch(function () { return next(i + 1); });
+    };
+    return Promise.resolve(next(0));
+  }
+
   function previewScale() {
     if (!ST.image) return 1;
     var long = Math.max(ST.image.naturalWidth, ST.image.naturalHeight);
@@ -307,6 +360,7 @@
       ST.crop = { x: ST.drag.x, y: ST.drag.y, w: ST.drag.w, h: ST.drag.h };
     }
     ST.drag = null;
+    savePdfCrop();
     drawPlanImportPreview();
     syncPlanImportButtons();
   }
@@ -314,6 +368,7 @@
   function planImportSelectAll() {
     if (!ST.image) return;
     ST.crop = { x: 0, y: 0, w: ST.image.naturalWidth, h: ST.image.naturalHeight };
+    savePdfCrop();
     drawPlanImportPreview();
     syncPlanImportButtons();
   }
@@ -341,28 +396,24 @@
     if (run) run.disabled = (!ST.image && !ST.pages) || ST.busy;
     var apply = $('plan-import-apply');
     if (apply) apply.disabled = !ST.result || ST.busy;
-    var size = $('plan-import-crop-size');
-    if (size && ST.crop) {
-      var scale = Math.min(1, MAX_SEND_PX / Math.max(ST.crop.w, ST.crop.h));
-      size.textContent = '送る範囲: ' + Math.round(ST.crop.w) + '×' + Math.round(ST.crop.h) +
-        ' 画素 → ' + Math.round(ST.crop.w * scale) + '×' + Math.round(ST.crop.h * scale) + ' に縮めて送信';
-    }
   }
 
   // ── 3. 読み取る ────────────────────────────────────────────────────
   function runPlanImport() {
-    if (ST.busy) return;
-    // PDFはページごとの画像、画像は切り出して(囲んでいなければ全体を)送る。
-    var images = ST.pages || (function () { var one = croppedDataUrl(); return one ? [one] : []; }());
-    if (!images.length) return;
+    if (ST.busy || (!ST.image && !ST.pages)) return;
     ST.busy = true; ST.result = null;
     show('plan-import-step3', false);
     syncPlanImportButtons();
-    setStatus('読み取っています… 図面1枚で30秒ほどかかります。');
+    setStatus('読み取りの準備をしています…');
 
     var hint = ($('plan-import-hint') && $('plan-import-hint').value) || '';
+    var images = null;
     // 短い指示で読む経路（Claude）を先に試す。使えない環境（鍵が無い）では、これまでの読み取りへ戻る。
-    readPlanStream(images, hint).then(function (r) {
+    imagesToSend().then(function (list) {
+      images = list;
+      if (!images.length) return { status: 0 };
+      return readPlanStream(images, hint);
+    }).then(function (r) {
       if (r && r.unavailable) return runLegacyPlanImport(images, hint);
       ST.busy = false;
       showProgress(false);
@@ -942,6 +993,7 @@
     (plan.walls || []).forEach(function (w) {
       var made = mkWall(w.x1, w.y1, w.x2, w.y2, w.floor || 1, w.thick);
       if (w.wallStyle) made.wallStyle = w.wallStyle;   // 手すり壁（balcony-fence）など
+      mergeExtra(made, w.extra);                        // 壁の高さなど（assets/js/plan-settable.js の項目）
       out.walls.push(made);
     });
     (plan.rooms || []).forEach(function (r) {
@@ -954,8 +1006,17 @@
       // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
       // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
       if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;
+      mergeExtra(made, r.extra);                        // 床材・天井高・吹抜け
       out.rooms.push(made);
     });
+    // 敷地（境界・地面・駐車スペースなどの区画）。図面に描かれていたときだけ。
+    if (plan.site) {
+      var s = plan.site;
+      var site = mkItem('site-rect', s.x, s.y, 0, 1, s.w, s.d);
+      site.name = '敷地境界（土地全体）'; site.siteBoundary = true; site.siteSurface = s.surface;
+      site.siteZones = (s.zones || []).map(function (z) { return { name: z.name, x: z.x, y: z.y, w: z.w, d: z.d, surface: z.surface }; });
+      out.items.push(site);
+    }
     // 構造部材（基礎・屋根）はここでは作らない。**いまの間取りと合わせた
     // 壁から決まる**ので、階を差し替えたあと withStructure で作る。
     (plan.items || []).forEach(function (it) {
@@ -974,12 +1035,14 @@
       var made = mkItem(it.type, it.x - w / 2, it.y - d / 2, it.rot || 0, it.floor || 1, it.w, it.d);
       // 短い指示の読み取りは、扉の吊り元・開く側（flipX/flipY）、閉じた状態、モデルの正面軸などを
       // extra に持ってくる（assets/js/plan-free-apply.js）。mkItem の既定値の上に重ねる。
-      if (it.extra && typeof it.extra === 'object') {
-        Object.keys(it.extra).forEach(function (k) { made[k] = it.extra[k]; });
-      }
+      mergeExtra(made, it.extra);
       out.items.push(made);
     });
     return out;
+  }
+
+  function mergeExtra(made, extra) {
+    if (extra && typeof extra === 'object') Object.keys(extra).forEach(function (k) { made[k] = extra[k]; });
   }
 
   // その間取りに出てくる階。
@@ -989,7 +1052,8 @@
       (arguments[i] || []).forEach(function (o) {
         // 屋根は「その下の階の上」に載る物で、floor は1つ上の数になる（3階建ての屋根は 4）。
         // 階として数えると、確認の文に無い「4階」が出る。
-        if (o && o.type === 'roof') return;
+        // 敷地も階の物ではない（1階として数えると、2階だけ読んだときに確認の文へ「1階」が出る）。
+        if (o && (o.type === 'roof' || o.type === 'site-rect')) return;
         var f = Number(o && o.floor) || 1;
         if (seen.indexOf(f) < 0) seen.push(f);
       });
@@ -1032,7 +1096,7 @@
   // 形や勾配は手で直せるが、どこに載るかは壁が決める。
   function isDerivedStructure(o) { return !!o && (o.type === 'foundation' || o.type === 'roof'); }
 
-  // 敷地と周辺（道路・隣家・電柱）。平面図には描かれていない。
+  // 敷地と周辺（道路・隣家・電柱）。間取りの階の中身ではない（敷地は読み取りが答えることもある）。
   function isSiteOrContext(o) {
     return !!o && (o.type === 'site-rect' ||
       (typeof isContextExteriorItemType === 'function' && isContextExteriorItemType(o.type)));
@@ -1131,6 +1195,10 @@
     var fresh = isUntouchedDefault();
     var base = fresh ? { walls: [], rooms: [], items: [] } : DATA;
     var beside = hasWorkOnFloors(base, readFloors);
+    // 敷地はひとつ。いまの間取りに敷地があれば、そちらを残す（利用者が整えた外構を消さない）。
+    if ((base.items || []).some(function (o) { return o && o.type === 'site-rect'; })) {
+      read.items = read.items.filter(function (o) { return o.type !== 'site-rect'; });
+    }
 
     // 何が起きるのかを、押す前に言う。
     if ((DATA.walls || []).length || (DATA.rooms || []).length) {
@@ -1254,6 +1322,7 @@
   root.planImportMove = planImportMove;
   root.planImportUp = planImportUp;
   root.planImportSelectAll = planImportSelectAll;
+  root.planImportPage = planImportPage;
   root.runPlanImport = runPlanImport;
   root.applyPlanImport = applyPlanImport;
   root.cancelPlanImportApply = cancelPlanImportApply;
@@ -1261,6 +1330,7 @@
   root.PlanImport = {
     state: ST,
     croppedDataUrl: croppedDataUrl,
+    imagesToSend: imagesToSend,
     toAppObjects: toAppObjects,
     showPlanImportError: showPlanImportError,
     showQuota: showQuota,

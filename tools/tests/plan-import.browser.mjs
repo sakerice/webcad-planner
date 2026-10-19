@@ -84,7 +84,8 @@ try {
   const crop = await page.evaluate(() => PlanImport.state.crop);
   assert.ok(Math.abs(crop.x - 30) < 6 && Math.abs(crop.y - 30) < 6, '囲んだ位置がずれている: ' + JSON.stringify(crop));
   assert.ok(Math.abs(crop.w - 230) < 8 && Math.abs(crop.h - 190) < 8, '囲んだ大きさがずれている: ' + JSON.stringify(crop));
-  assert.match(await page.locator('#plan-import-crop-size').textContent(), /送る範囲/);
+  // 送る画素数のような作り手の都合は画面に出さない。
+  assert.equal(await page.locator('#plan-import-crop-size').count(), 0);
 
   // ── 送る中身：囲んだ範囲だけであること ──────────────────────────────
   const sent = await page.evaluate(async () => {
@@ -183,11 +184,20 @@ try {
     () => /まだAIの読み取りを使えません/.test(document.getElementById('plan-import-status').textContent),
     null, { timeout: 10000 });
 
-  // ── PDF はそのまま送る（囲む操作を出さない） ──────────────────────
+  // ── PDF: 図面の位置を AI が探し、その範囲を囲んだ状態で見せる ──────────
   //
-  // PDFはベクターなので、ブラウザで画像に変換するよりAI側で開いたほうが
-  // 寸法の文字がはっきり読める。実測でもPDF直送が最良だった。
-  await page.evaluate(() => { resetPlanImport(); });
+  // 何もしなくても読み取れる。位置がずれていれば囲み直せて、囲んだ範囲が送られる
+  // （2026-10-20 利用者の要望。以前は PDF だと範囲が見えず、直せなかった）。
+  await page.evaluate(() => {
+    resetPlanImport();
+    window.__realFetch = window.__realFetch || window.fetch;
+    window.fetch = async (url, opts) => {
+      if (String(url).includes('/api/ai/find-plan')) {
+        return new Response(JSON.stringify({ box: { x0: 0.1, y0: 0.2, x1: 0.6, y1: 0.7 } }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      return window.__realFetch(url, opts);
+    };
+  });
   // 本物の(最小の)PDF。pdf.js が実際に開けるものでないと、ページを画像に
   // する経路をまったく通らない。
   const pdfBytes = Buffer.from('JVBERi0xLjQKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj4KZW5kb2JqCjMgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvTWVkaWFCb3ggWzAgMCA1OTUgODQyXSAvQ29udGVudHMgNCAwIFIgL1Jlc291cmNlcyA8PCA+PiA+PgplbmRvYmoKNCAwIG9iago8PCAvTGVuZ3RoIDU1ID4+CnN0cmVhbQoyIHcgMCAwIDAgUkcgMTAwIDMwMCA0MDAgNDAwIHJlIFMgMTUwIDM1MCBtIDQ1MCAzNTAgbCBTCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDUKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNTggMDAwMDAgbiAKMDAwMDAwMDExNSAwMDAwMCBuIAowMDAwMDAwMjE5IDAwMDAwIG4gCnRyYWlsZXIKPDwgL1NpemUgNSAvUm9vdCAxIDAgUiA+PgpzdGFydHhyZWYKMzI0CiUlRU9GCg==', 'base64');
@@ -196,10 +206,29 @@ try {
   });
   await page.waitForFunction(() => PlanImport.state.pages && PlanImport.state.pages.length > 0,
     null, { timeout: 30000 });
-  assert.equal(await page.locator('#plan-import-crop').isVisible(), false,
-    'PDFなのに囲む操作を出している（利用者に不要な手間をかけている）');
-  assert.match(await page.locator('#plan-import-status').textContent(), /ページを読み取ります/);
+  await page.waitForFunction(() => PlanImport.state.pdf, null, { timeout: 10000 });
+  assert.equal(await page.locator('#plan-import-crop').isVisible(), true, 'PDFで読み取る範囲が見えない');
+  assert.match(await page.locator('#plan-import-status').textContent(), /囲んであります/);
   assert.equal(await page.locator('#plan-import-run').isDisabled(), false, 'PDFで読み取りボタンが押せない');
+  const pdfCrop = await page.evaluate(() => {
+    const st = PlanImport.state, W = st.image.naturalWidth, H = st.image.naturalHeight;
+    return { x: st.crop.x / W, y: st.crop.y / H, w: st.crop.w / W, h: st.crop.h / H };
+  });
+  assert.ok(Math.abs(pdfCrop.x - 0.1) < 0.01 && Math.abs(pdfCrop.w - 0.5) < 0.01 && Math.abs(pdfCrop.y - 0.2) < 0.01, '見つけた範囲が囲まれていない: ' + JSON.stringify(pdfCrop));
+  // 囲んだ範囲だけを、ページから描き直して送る（縦横の比が囲みと同じ）。
+  const pdfCropped = await page.evaluate(async () => {
+    const [url] = await PlanImport.imagesToSend();
+    const img = new Image();
+    await new Promise((r) => { img.onload = r; img.src = url; });
+    return { ratio: img.naturalWidth / img.naturalHeight, long: Math.max(img.naturalWidth, img.naturalHeight), max: PlanImport.MAX_SEND_PX };
+  });
+  const pageRatio = 595 / 842;
+  assert.ok(Math.abs(pdfCropped.ratio - pageRatio) < 0.02, '囲んだ範囲で送っていない: ' + JSON.stringify(pdfCropped));
+  assert.equal(pdfCropped.long, pdfCropped.max, '高い解像度で描き直していない');
+  // 「全体に戻す」でページ全体を送る。
+  await page.locator('#plan-import-crop button', { hasText: '全体に戻す' }).click();
+  assert.deepEqual(await page.evaluate(() => PlanImport.state.pdf.boxes[0]), { x0: 0, y0: 0, x1: 1, y1: 1 });
+  await page.evaluate(() => { window.fetch = window.__realFetch; });
 
   // ── 複数階の取り込み ────────────────────────────────────────────────
   //

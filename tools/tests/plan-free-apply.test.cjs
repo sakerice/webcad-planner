@@ -125,3 +125,54 @@ test('壁の上に無い窓・扉: 見直しの前は残して事実にし、あ
   assert.match(final.userNotes.join(''), /位置を確かめられなかった窓・扉が 1 か所あります（1階）/);
   assert.ok(!/\d{3,}/.test(final.userNotes.join('')), '利用者に見せる文に座標を出さない');
 });
+
+// ── 設定パネルの項目と外構（assets/js/plan-settable.js の表） ─────────────
+const box = [{ x1: 0, y1: 0, x2: 9100, y2: 0, style: 'solid' }, { x1: 9100, y1: 0, x2: 9100, y2: 7280, style: 'solid' },
+  { x1: 9100, y1: 7280, x2: 0, y2: 7280, style: 'solid' }, { x1: 0, y1: 7280, x2: 0, y2: 0, style: 'solid', set: 'thick=150; wallHeight=2400' }];
+
+test('設定パネルの項目（set）を、範囲と選択肢を確かめて入れる', () => {
+  const plan = PlanFreeApply.toImportPlan({ floors: [{ floor: 1, walls: box,
+    rooms: [{ name: 'LDK', parts: [{ x0: 0, y0: 0, x1: 5000, y1: 4000 }], set: 'ceilingHeight=2500; floorMaterial=wood_oak' },
+      { name: '吹抜け', parts: [{ x0: 5000, y0: 0, x1: 9100, y1: 4000 }], set: 'void=yes' }],
+    openings: [{ type: 'window', x: 2000, y: 0, width: 1690, hinge: 'none', opens: 'none', set: 'windowKind=fix; windowSill=1200; windowHeight=500; doorHeight=2000' },
+      { type: 'door-swing', x: 9100, y: 3000, width: 780, hinge: 'N', opens: 'W', set: 'doorHeight=2200' }],
+    stairs: [{ type: 'stair', x: 1000, y: 6000, width: 910, length: 2730, up: 'N', enter: 'none', exit: 'none', set: 'stairRail=right' }],
+    roofs: [], objects: [] }] }, {});
+  const wall = plan.walls[3];
+  assert.equal(wall.thick, 150);
+  assert.deepEqual(wall.extra, { wallHeight: 2400 });
+  assert.deepEqual(plan.rooms[0].extra, { ceiling: { type: 'flat', heightMm: 2500 }, floorMaterial: 'wood_oak' });
+  assert.deepEqual(plan.rooms[1].extra, { ceiling: { type: 'void', toFloor: 2 } });
+  const win = plan.items.find((i) => i.type === 'window');
+  assert.deepEqual([win.extra.windowKind, win.extra.windowSill, win.extra.windowHeight, win.extra.doorHeight], ['fix', 1200, 500, undefined], '窓に扉の高さは入れない');
+  assert.equal(plan.items.find((i) => i.type === 'door-swing').extra.doorHeight, 2200);
+  assert.equal(plan.items.find((i) => i.type === 'stair').extra.stairRail, 'right');
+});
+
+test('外構: 車・フェンス・敷地と駐車スペースを置く（フェンスを黙って捨てない）', () => {
+  const plan = PlanFreeApply.toImportPlan({ floors: [{ floor: 1, walls: box, rooms: [], openings: [], stairs: [], roofs: [], objects: [
+    { kind: 'car', x: 11000, y: 3000, w: 1800, d: 4700, face: 'S', set: '' },
+    { kind: 'fence', x: 4550, y: -1500, w: 9100, d: 100, face: 'N', set: 'fenceHeight=1200; fencePattern=horizontal' },
+    { kind: 'site', x: 6000, y: 3000, w: 16000, d: 12000, face: 'S', set: 'surface=gravel' },
+    { kind: 'site-zone', x: 11000, y: 3000, w: 2700, d: 5000, face: 'none', set: 'name=駐車スペース; surface=concrete_brush' },
+  ] }] }, {});
+  const car = plan.items.find((i) => i.type === 'car');
+  assert.ok(car, '車が置かれる');
+  assert.equal(car.rot, 0, '車は rot=0 で前が南（2Dの絵と3Dのモデルで確かめた向き）');
+  assert.equal(car.extra.modelFacingVersion, undefined, '組み込みの種類にカタログの向きの印を付けない');
+  const fence = plan.items.find((i) => i.type === 'wood-fence');
+  assert.ok(fence, 'フェンスは組み込みのフェンスで置く');
+  assert.deepEqual([fence.extra.fenceHeight, fence.extra.fencePattern], [1200, 'horizontal']);
+  assert.deepEqual(plan.dropped, []);
+  assert.deepEqual(plan.site, { x: -2000, y: -3000, w: 16000, d: 12000, surface: 'gravel',
+    zones: [{ name: '駐車スペース', x: 11650, y: 3500, w: 2700, d: 5000, surface: 'concrete_brush' }] });
+  assert.ok(!plan.items.some((i) => i.type === 'site-rect'), '敷地は items ではなく site で返す（取り込みが1つにまとめる）');
+});
+
+test('置けない種類は捨てたことを数え、見直しで AI に伝える', () => {
+  const answer = { floors: [{ floor: 1, walls: box, rooms: [], openings: [], stairs: [], roofs: [], objects: [
+    { kind: 'spaceship', x: 1000, y: 1000, w: 600, d: 600, face: 'N', set: '' }] }] };
+  const plan = PlanFreeApply.toImportPlan(answer, {});
+  assert.deepEqual(plan.dropped, ['spaceship']);
+  assert.ok(PlanFreeApply.factsOf(plan, answer).some((f) => /spaceship/.test(f)));
+});
