@@ -224,3 +224,12 @@ test('review-plan-3d: 撮った画像が無い・鍵が無いときは送らな�
   assert.equal((await callAi('/api/ai/review-plan-3d', { images: [PNG], shots: [{ image: PNG }] }, { OPENAI_API_KEY: 'k' }, f)).status, 404);
   assert.equal(called, false);
 });
+
+test('read-plan: Claude が受け取れない大きさの画像は、送る前に理由をつけて断る（何度試しても通らないため）', async () => {
+  let called = false;
+  const big = 'data:image/png;base64,' + 'A'.repeat(5 * 1024 * 1024 + 4);
+  const res = await callAi('/api/ai/read-plan', { images: [big] }, ENV, async () => { called = true; return new Response(SSE); });
+  assert.equal(res.status, 413);
+  assert.equal((await res.json()).error, 'image_too_large');
+  assert.equal(called, false, 'AI に送らない（回数も使わない）');
+});

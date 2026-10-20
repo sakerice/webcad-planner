@@ -86,7 +86,9 @@
     options = options || {};
     // notes は AI が書いた作業メモ（測定・開発用）、userNotes は利用者に見せてよい文だけ。
     // dropped: アプリに置けなかった種類（測定と検査で見る。黙って捨てたものを数えるため）。
-    var plan = { walls: [], rooms: [], items: [], site: null, notes: [], userNotes: [], offWall: [], dropped: [] };
+    // rejected: 使えない値だったため入れなかった設定（項目=値）。
+    var plan = { walls: [], rooms: [], items: [], site: null, notes: [], userNotes: [], offWall: [], dropped: [], rejected: [] };
+    var ctx = { rejected: plan.rejected };
     var siteParts = [];
     ((answer && answer.notes) || []).forEach(function (n) { plan.notes.push(String(n)); });
     ((answer && answer.floors) || []).forEach(function (f) {
@@ -96,7 +98,7 @@
         // 手すり壁・腰壁は、アプリの壁の種類「バルコニーフェンス」（床から1100mm＋笠木）で建てる。
         // 普通の壁として建てると、バルコニーが天井まで壁で囲まれた箱になる（2026-10-19 実測）。
         if (w.style === 'balcony-fence') wall.wallStyle = 'balcony-fence';
-        var set = PlanSettable.applySettings('wall', null, w.set, {});
+        var set = PlanSettable.applySettings('wall', null, w.set, {}, ctx);
         if (set.thick) wall.thick = set.thick;
         if (set.wallHeight) wall.extra = { wallHeight: set.wallHeight };
         return wall;
@@ -104,7 +106,7 @@
       plan.walls = plan.walls.concat(walls);
 
       (f.rooms || []).forEach(function (r) {
-        var roomSet = PlanSettable.applySettings('room', null, r.set, {}, { floor: floor });
+        var roomSet = PlanSettable.applySettings('room', null, r.set, {}, { floor: floor, rejected: ctx.rejected });
         (r.parts || []).forEach(function (p) {
           var x0 = Math.min(num(p.x0), num(p.x1)), y0 = Math.min(num(p.y0), num(p.y1));
           var w = Math.abs(num(p.x1) - num(p.x0)), d = Math.abs(num(p.y1) - num(p.y0));
@@ -122,9 +124,10 @@
           near = near || { ux: 1, uy: 0, d: 0 };
         }
         var vertical = Math.abs(near.uy) > Math.abs(near.ux);
-        var depth = (t === 'door-swing') ? width : (DEPTH[t] || 150);
+        // 開き戸は奥行きが扉の幅と同じ（表で d を持たない種類）。
+        var depth = DEPTH[t] == null ? width : DEPTH[t];
         // 扉は閉じた状態で置く（開いた扉が並ぶと間取りが読みにくい）。高さなどは set から。
-        var extra = PlanSettable.applySettings('opening', t, o.set, {});
+        var extra = PlanSettable.applySettings('opening', t, o.set, {}, ctx);
         if (/^door-|^window-door/.test(t)) extra.doorOpenState = 'closed';
         if (o.hinge && DIR[o.hinge]) extra.flipX = DIR[o.hinge][0] * near.ux + DIR[o.hinge][1] * near.uy > 0;
         if (o.opens && DIR[o.opens]) {
@@ -143,12 +146,12 @@
           var rot = STAIR_ROT[DIR[s.enter] ? s.enter : 'S'];
           var th = rot * Math.PI / 180, ex = [Math.cos(th), Math.sin(th)];
           var want = DIR[s.exit] || ex;
-          var cornerExtra = PlanSettable.applySettings('stair', 'stair-corner', s.set, {});
+          var cornerExtra = PlanSettable.applySettings('stair', 'stair-corner', s.set, {}, ctx);
           cornerExtra.flipX = ex[0] * want[0] + ex[1] * want[1] < 0;
           plan.items.push({ type: 'stair-corner', x: num(s.x), y: num(s.y), w: width, d: width, rot: rot, floor: floor, extra: cornerExtra });
         } else {
           plan.items.push({ type: 'stair', x: num(s.x), y: num(s.y), w: width, d: num(s.length) || 2730,
-            rot: STAIR_ROT[DIR[s.up] ? s.up : 'S'], floor: floor, extra: PlanSettable.applySettings('stair', 'stair', s.set, {}) });
+            rot: STAIR_ROT[DIR[s.up] ? s.up : 'S'], floor: floor, extra: PlanSettable.applySettings('stair', 'stair', s.set, {}, ctx) });
         }
       });
 
@@ -158,7 +161,7 @@
       (f.roofs || []).forEach(function (r) {
         var x0 = Math.min(num(r.x0), num(r.x1)), y0 = Math.min(num(r.y0), num(r.y1));
         var w = Math.abs(num(r.x1) - num(r.x0)), d = Math.abs(num(r.y1) - num(r.y0));
-        if (w < 100 || d < 100) return;
+        if (w < 100 || d < 100) { plan.dropped.push('roof'); return; }
         var on = num(r.floor) || floor;
         var shape = String(r.shape || 'flat');
         var roofType = shape === 'gable' ? (r.ridge === 'NS' ? 'gable-y' : 'gable') : shape === 'hip' ? 'hip' : shape === 'mono' ? 'mono' : 'flat';
@@ -183,13 +186,16 @@
         // tools/lint_plan.py の _front_dir と同じ決まり）。印を付けておかないと、読み込み時に
         // 古い保存の向きとみなされて 180° 回される。
         var rot = ROT[o.face] != null ? ROT[o.face] : 0;
-        var extra = PlanSettable.applySettings('object', kind, o.set, {});
+        var extra = PlanSettable.applySettings('object', kind, o.set, {}, ctx);
         if (CATALOG_PREFIX.test(type)) { rot += 180; extra.modelFacingVersion = 1; extra.modelFrontAxis = '+Z'; }
         else if ((PlanSettable.exteriorByKind(kind) || {}).front180) rot += 180;
         plan.items.push({ type: type, x: num(o.x), y: num(o.y), w: w, d: d, rot: rot % 360, floor: floor, extra: extra });
       });
     });
     plan.site = siteOf(siteParts);
+    if (!options.keepOffWall && plan.dropped.length) {
+      plan.userNotes.push('読み取った物のうち ' + plan.dropped.length + ' 点は、house-planner で表せない形だったため置いていません。');
+    }
     if (!options.keepOffWall && plan.offWall.length) {
       var floorsOff = [];
       plan.offWall.forEach(function (o) { if (floorsOff.indexOf(o.floor) < 0) floorsOff.push(o.floor); });
@@ -231,7 +237,11 @@
         + (o.d != null ? '（いちばん近い壁まで ' + o.d + 'mm）' : '') + '。アプリは窓・扉を壁から 400mm 以内でしか置けません。');
     });
     (plan.dropped || []).forEach(function (k) {
-      facts.push('objects の kind「' + k + '」は house-planner に置けないため、置いていません。一覧にある kind を使ってください。');
+      facts.push(k === 'roof' ? '大きさが 100mm 未満の屋根があり、置いていません。'
+        : 'objects の kind「' + k + '」は house-planner に置けないため、置いていません。一覧にある kind を使ってください。');
+    });
+    (plan.rejected || []).forEach(function (kv) {
+      facts.push('set の「' + kv + '」は、項目名か値が一覧に無いため使っていません。');
     });
     var hasRoof = ((answer && answer.floors) || []).some(function (f) { return (f.roofs || []).length; });
     if (!hasRoof) facts.push('屋根を答えていません。このままだと、いちばん上の階に平らな屋根が1枚だけ作られます。');
@@ -257,8 +267,9 @@
   // 書き出し途中の答え（JSON の頭の部分）から、どこまで作ったかを数える。画面の進み具合に使う。
   function progressOf(partial) {
     var s = String(partial || '');
-    var floorMatch = s.match(/"floor"\s*:\s*(\d+)/g) || [];
-    var floor = floorMatch.length ? Number(floorMatch[floorMatch.length - 1].replace(/\D/g, '')) : 0;
+    // 階の始まり（"floor": n の直後に "walls"）だけを数える。屋根の floor（載る階）を拾うと階を取り違える。
+    var floorMatch = s.match(/"floor"\s*:\s*(\d+)\s*,\s*"walls"/g) || [];
+    var floor = floorMatch.length ? Number(/(\d+)/.exec(floorMatch[floorMatch.length - 1])[1]) : 0;
     var count = function (re) { return (s.match(re) || []).length; };
     var sections = ['walls', 'rooms', 'openings', 'stairs', 'roofs', 'objects'];
     var at = -1, now = '';

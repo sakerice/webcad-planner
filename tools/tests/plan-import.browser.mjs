@@ -230,6 +230,21 @@ try {
   assert.deepEqual(await page.evaluate(() => PlanImport.state.pdf.boxes[0]), { x0: 0, y0: 0, x1: 1, y1: 1 });
   await page.evaluate(() => { window.fetch = window.__realFetch; });
 
+  // 色の多い大きな画像（スキャン・写真）は、AI が受け取れる大きさに縮めてから送る。
+  const fitted = await page.evaluate(async () => {
+    const c = document.createElement('canvas'); c.width = 3000; c.height = 2200;
+    const g = c.getContext('2d'), im = g.createImageData(c.width, c.height);
+    for (let i = 0; i < im.data.length; i++) im.data[i] = (i % 4 === 3) ? 255 : (Math.random() * 256) | 0;
+    g.putImageData(im, 0, 0);
+    const big = c.toDataURL('image/png');
+    const small = await PlanImport.fitForAi(big);
+    const line = 'data:image/png;base64,iVBORw0KGgo=';
+    return { big: big.length, small: small.length, jpeg: small.startsWith('data:image/jpeg'), same: (await PlanImport.fitForAi(line)) === line };
+  });
+  assert.ok(fitted.big > 3.5 * 1024 * 1024, '検査の画像が小さすぎる: ' + fitted.big);
+  assert.ok(fitted.small <= 3.5 * 1024 * 1024 && fitted.jpeg, '大きな画像を縮めていない: ' + JSON.stringify(fitted));
+  assert.ok(fitted.same, '小さい画像はそのまま送る');
+
   // ── 複数階の取り込み ────────────────────────────────────────────────
   //
   // PDFが複数ページなら各ページが各階になる。壁が階ごとに入ることを見る。

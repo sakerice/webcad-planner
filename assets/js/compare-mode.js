@@ -521,5 +521,12 @@ var CompareMode = (function(){
   api.start = start; api.stop = stop; api.requestStop = requestStop; api.openPicker = openPicker;
   api.activate = activate; api.isOn = function(){ return on; }; api.activeSide = function(){ return active; };
   api.isDirty = isDirty; api.setPlanName = setPlanName;
+  // 別のプランを一時的に組み立てる部品（plan-snapshot.js）が、同じ一覧と初期値で入れ替えるため。
+  // 一覧を写すと、ここに項目が増えたときに向こうだけ漏れる。
+  api.swapGlobals = function(){ return GLOBALS.slice(); };
+  api.freshWorkspace = function(){
+    return Object.assign(freshSceneState(), {DATA:null, HISTORY:[], REDO_HISTORY:[], DIRTY:false, nextId:window.nextId,
+      PLAN_LIBRARY_ID:null, PLAN_SAVE_INFO:null});
+  };
   return api;
 })();

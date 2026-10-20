@@ -66,7 +66,8 @@ try {
     const parts = [
       ev({ type: 'message_start', message: { usage: { input_tokens: 6000 } } }),
       ev({ type: 'content_block_start', index: 0, content_block: { type: 'thinking' } }),
-      ev({ type: 'content_block_delta', index: 0, delta: { type: 'thinking_delta', thinking: '外形の寸法 3,640 × 2,730 を確かめています。' } }),
+      ev({ type: 'content_block_delta', index: 0, delta: { type: 'thinking_delta', thinking: '外形の寸法を確かめています。\n' } }),
+      ev({ type: 'content_block_delta', index: 0, delta: { type: 'thinking_delta', thinking: '壁の芯は (0, 0) から (3640, 0) です。' } }),
     ];
     // 答えは細かく刻んで流す（書き出しの途中を画面が数える）。
     for (let i = 0; i < text.length; i += 40) {
@@ -117,6 +118,7 @@ try {
   assert.match(thinking.phase, /^1\/2 読み取り/, '何段目かを出す');
   assert.match(thinking.time, /経過 .*目安 2分00秒/, '図面1枚の目安は、読み取り1分＋見直し1分');
   assert.match(thinking.thought, /外形の寸法/);
+  assert.ok(!/3640/.test(thinking.thought), '座標や寸法の数字が並ぶメモは出さない');
 
   await page.evaluate(() => { window.__streamGate.released = 1; });
   await page.waitForFunction(() => /階の/.test(document.getElementById('plan-import-progress-phase').textContent), null, { timeout: 5000 });
@@ -193,14 +195,24 @@ try {
   // 内観3D・外観3Dが映ること（2026-10-20 利用者の報告: 取り込んだあと内観3Dが出ない）。
   const views = await page.evaluate(async () => {
     const out = {};
+    // 撮影の直後の環境光。取り込みは3Dを作り直して環境光も作り直すので、取り込まずに閉じた場合と
+    // 同じ状態（撮っただけ）で確かめる。
+    setView('3d-ext');
+    await new Promise((r) => setTimeout(r, 300));
+    PlanSnapshot.capture({ walls: DATA.walls, rooms: DATA.rooms, items: [] });
+    out.envAfterShot = typeof _envRT !== 'undefined' && !!_envRT && !!sc3 && sc3.environment === _envRT.texture;
     for (const v of ['3d-int', '3d-ext']) {
       setView(v);
       await new Promise((r) => setTimeout(r, 300));
       out[v] = { scene: Boolean(sc3), walls: sc3 ? sc3.children.length : 0, isInt, w: ren.domElement.width };
     }
+    // 見直し用の撮影が、本物の場面の環境光（反射・間接光）の素を捨てていないこと（捨てると3Dが暗くなる）。
+    out.env = Boolean(sc3.environment) && typeof _envRT !== 'undefined' && _envRT && sc3.environment === _envRT.texture;
     setView('2d');
     return out;
   });
+  assert.ok(views.envAfterShot, '撮影のあとも本物の3Dの環境光が生きている: ' + JSON.stringify(views));
+  assert.ok(views.env, '取り込みのあとも3Dの環境光が生きている');
   assert.ok(views['3d-int'].scene && views['3d-int'].isInt, '内観3Dの場面がある: ' + JSON.stringify(views));
   assert.ok(views['3d-ext'].scene && !views['3d-ext'].isInt, '外観3Dの場面がある: ' + JSON.stringify(views));
   assert.ok(views['3d-int'].w > 0, '3Dの描画の大きさが0でない');

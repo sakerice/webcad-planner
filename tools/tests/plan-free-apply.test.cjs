@@ -176,3 +176,21 @@ test('置けない種類は捨てたことを数え、見直しで AI に伝え�
   assert.deepEqual(plan.dropped, ['spaceship']);
   assert.ok(PlanFreeApply.factsOf(plan, answer).some((f) => /spaceship/.test(f)));
 });
+
+test('置けなかった物は利用者に件数を伝え、使えなかった設定は見直しで AI に伝える', () => {
+  const answer = { floors: [{ floor: 1, walls: box, rooms: [{ name: '洋室', parts: [{ x0: 0, y0: 0, x1: 3000, y1: 3000 }], set: 'ceilingHeight=2400mm; floorMaterial=marble' }],
+    openings: [], stairs: [], roofs: [{ floor: 1, x0: 0, y0: 0, x1: 50, y1: 50, shape: 'flat', ridge: 'none', low: 'none', pitch: 0 }],
+    objects: [{ kind: 'spaceship', x: 1000, y: 1000, w: 600, d: 600, face: 'N', set: '' }] }] };
+  const plan = PlanFreeApply.toImportPlan(answer, {});
+  assert.deepEqual(plan.rooms[0].extra, { ceiling: { type: 'flat', heightMm: 2400 } }, '単位付きの数も読む');
+  assert.deepEqual(plan.rejected, ['floorMaterial=marble']);
+  assert.ok(plan.userNotes.some((n) => /2 点は/.test(n)), '置けなかった件数を利用者に伝える: ' + plan.userNotes.join(' / '));
+  assert.ok(!plan.userNotes.some((n) => /spaceship|roof|kind/.test(n)), '利用者向けの文に内部の名前を出さない');
+  const facts = PlanFreeApply.factsOf(plan, answer);
+  assert.ok(facts.some((f) => /floorMaterial=marble/.test(f)));
+});
+
+test('進み具合の階は、屋根の floor（載る階）と取り違えない', () => {
+  const partial = '{"floors":[{"floor":2,"walls":[],"rooms":[],"openings":[],"stairs":[],"roofs":[{"floor":3,"x0":0';
+  assert.equal(PlanFreeApply.progressOf(partial).floor, 2);
+});

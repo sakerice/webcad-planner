@@ -165,7 +165,7 @@
           })).then(function (boxes) {
             return Promise.all((smalls || pages).map(loadImage)).then(function (previews) {
               ST.pages = pages;
-              ST.pdf = { data: pdfData, previews: previews, boxes: boxes.map(function (b) { return b || FULL_PAGE; }), page: 0 };
+              ST.pdf = { data: pdfData, previews: previews, boxes: boxes.map(function (b) { return b ? { x0: b.x0, y0: b.y0, x1: b.x1, y1: b.y1 } : FULL_PAGE; }), page: 0 };
               show('plan-import-step2', true);
               show('plan-import-crop', true);
               show('plan-import-step3', false);
@@ -256,9 +256,35 @@
     if (ST.pdf) showPdfPage(ST.pdf.page + step);
   }
 
+  // AI が受け取れる大きさに収める（Claude は1枚あたり約5MB・1回の送信全体で約32MB まで。
+  // 超えると断られ、何度試しても通らない）。色の多いスキャンや写真の PNG は大きくなるので、
+  // 上限を超えるものだけ JPEG にし、それでも大きければ縮める。線画の PNG はほとんど小さいまま。
+  // 1枚あたりの上限は、最大8ページと見直しの撮影を足しても全体の上限に収まる大きさにしてある。
+  var MAX_SEND_B64 = 3.5 * 1024 * 1024;
+  function fitForAi(url) {
+    if (String(url).length <= MAX_SEND_B64) return Promise.resolve(url);
+    return loadImage(url).then(function (img) {
+      var encode = function (scale) {
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        var g = c.getContext('2d');
+        g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(img, 0, 0, c.width, c.height);
+        return c.toDataURL('image/jpeg', 0.9);
+      };
+      var scale = 1, out = encode(scale);
+      while (out.length > MAX_SEND_B64 && scale > 0.3) { scale *= 0.8; out = encode(scale); }
+      return out;
+    }).catch(function () { return url; });
+  }
+
   // 送る画像。PDF は囲んだ範囲をページから高い解像度で描き直す（ページ全体ならそのまま）。
-  // 画像は囲んだ範囲を切り出す（囲んでいなければ全体）。
+  // 画像は囲んだ範囲を切り出す（囲んでいなければ全体）。どちらも AI が受け取れる大きさに収める。
   function imagesToSend() {
+    return collectImages().then(function (list) { return Promise.all(list.map(fitForAi)); });
+  }
+  function collectImages() {
     if (!ST.pdf) { var one = croppedDataUrl(); return Promise.resolve(one ? [one] : []); }
     savePdfCrop();
     var pdf = ST.pdf, out = ST.pages.slice();
@@ -411,7 +437,7 @@
     // 短い指示で読む経路（Claude）を先に試す。使えない環境（鍵が無い）では、これまでの読み取りへ戻る。
     imagesToSend().then(function (list) {
       images = list;
-      if (!images.length) return { status: 0 };
+      if (!images.length) return { status: 400, body: { error: 'no_image' } };
       return readPlanStream(images, hint);
     }).then(function (r) {
       if (r && r.unavailable) return runLegacyPlanImport(images, hint);
@@ -541,9 +567,10 @@
     $('plan-import-progress-phase').textContent = phase;
     $('plan-import-progress-time').textContent = '経過 ' + mmss(elapsed) + '（目安 ' + mmss(estimate) + '）';
     $('plan-import-progress-fill').style.width = Math.min(99, fill).toFixed(1) + '%';
-    var thought = String(p.thought || '').trim().split(/\n+/).filter(Boolean).pop() || '';
-    // 利用者に見せる文は日本語だけ。考えの要約が英語で来たときは出さない（2026-10-19 実測で英語が来た）。
-    if (!/[぀-ヿ一-鿿]/.test(thought)) thought = '';
+    // 利用者に見せるのは、日本語で、座標や寸法の数字が並んでいない行だけ（作業の様子が伝わればよく、
+    // 数字の列は利用者の役に立たない）。考えの要約が英語で来ることもある（2026-10-19 実測）。
+    var shown = function (line) { return /[぀-ヿ一-鿿]/.test(line) && (line.match(/\d+/g) || []).length < 2; };
+    var thought = String(p.thought || '').trim().split(/\n+/).filter(shown).pop() || '';
     $('plan-import-progress-thought').textContent = thought ? 'AIのメモ: ' + thought.slice(-160) : '';
   }
 
@@ -569,7 +596,7 @@
   //   { unavailable: true }  … この環境では使えない（404）
   //   { status, body }       … Worker が断った・失敗した
   //   { answer }             … 届いた答え（JSON として読めたもの）
-  //   { error }              … 届いたが読めなかった
+  //   { error, code }        … 届いたが読めなかった（code で次の一手の文面を分ける。showPlanImportError）
   function streamAnswer(url, payload, p) {
     return fetch(url, {
       method: 'POST',
@@ -596,12 +623,11 @@
       }
       return pump().then(function () {
         p.usage.outputTokens += p.stageOutput;
-        if (p.error) return { error: p.error };
-        if (p.stopReason === 'refusal') return { error: 'AI がこの図面の読み取りを断りました。' };
+        // 途中で AI 側が止まった（混雑など）・断った・答えが切れた・読めなかった、は次の一手が違う。
+        if (p.error) return { error: p.error, code: 'ai_upstream_error' };
+        if (p.stopReason === 'refusal') return { error: 'refused', code: 'ai_refused' };
         try { return { answer: JSON.parse(p.answer) }; } catch (e) {
-          return { error: p.stopReason === 'max_tokens'
-            ? '図面が大きく、答えが途中で切れました。ページを分けて読み取ってください。'
-            : 'AI の返事を読めませんでした。もう一度お試しください。' };
+          return { error: 'unreadable', code: p.stopReason === 'max_tokens' ? 'ai_truncated' : 'ai_bad_response' };
         }
       });
     });
@@ -642,9 +668,9 @@
         return r;
       }
       p.usage.calls++;
-      if (r.error) { stop(); return { status: 502, body: { error: 'ai_bad_response', message: r.error } }; }
+      if (r.error) { stop(); return { status: 502, body: { error: r.code || 'ai_bad_response' } }; }
       var first = r.answer;
-      if (!withReview) { stop(); return finishPlanStream(p, first, { reviewNote: '' }); }
+      if (!withReview) { stop(); return finishPlanStream(p, first, { review: 'off' }); }
 
       // ── 2. 組み立てた家を撮って、AI 自身に見直させる ──────────────────
       p.stage = 'capture'; p.stageStarted = Date.now(); renderProgress(p);
@@ -655,17 +681,17 @@
       try { shots = PlanSnapshot.capture(assembleForSnapshot(draft)); } catch (e) { shots = null; }
       var list = shots ? shots.plans.map(function (s) { return { label: s.floor + '階 平面図', image: s.url }; })
         .concat(shots.views.map(function (s) { return { label: '外観3D ' + s.name, image: s.url }; })) : [];
-      if (!list.length) { stop(); return finishPlanStream(p, first, { reviewNote: '組み立てた家を撮れなかったので、見直しは行いませんでした。' }); }
+      if (!list.length) { stop(); return finishPlanStream(p, first, { review: 'failed' }); }
       p.stage = 'review'; p.stageStarted = Date.now(); renderProgress(p);
       return streamAnswer('/api/ai/review-plan-3d', { images: images, shots: list, answer: first, facts: facts, hint: hint }, p)
         .then(function (r2) {
           stop();
-          if (r2.answer) { p.usage.calls++; return finishPlanStream(p, r2.answer, { reviewed: true, facts: facts }); }
+          if (r2.answer) { p.usage.calls++; return finishPlanStream(p, r2.answer, { review: 'done' }); }
           if (r2.status !== 429) p.usage.calls += r2.error ? 1 : 0;
-          return finishPlanStream(p, first, { reviewNote: '3Dでの見直しは行えませんでした（読み取った結果をそのまま出しています）。' });
+          return finishPlanStream(p, first, { review: 'failed' });
         }, function () {
           stop();
-          return finishPlanStream(p, first, { reviewNote: '3Dでの見直しは行えませんでした（読み取った結果をそのまま出しています）。' });
+          return finishPlanStream(p, first, { review: 'failed' });
         });
     }, function (e) { stop(); throw e; });
   }
@@ -679,12 +705,13 @@
     var summary = (typeof PlanSchema !== 'undefined' && PlanSchema.summarize) ? PlanSchema.summarize(plan)
       : { walls: plan.walls.length, rooms: plan.rooms.length, items: plan.items.length };
     // 利用者に見せるのは、利用者が知って役に立つことだけ（AI の作業メモや、見直しの成否は出さない）。
+    // 見直しの成否（review: done / failed / off）は測る道具（tools/plan-eval/run.mjs）のためで、画面には出さない。
+    var review = (extra && extra.review) || 'off';
     var notes = plan.userNotes.slice(0, 20);
-    if (extra && extra.reviewed) notes.unshift('立体にして図面と見比べ、整えました。');
+    if (review === 'done') notes.unshift('立体にして図面と見比べ、整えました。');
     return { status: 200, body: {
       plan: plan, summary: summary, marks: [], warnings: [], notes: notes,
-      usage: Object.assign({ rates: { in: 4, out: 20 } }, p.usage), freeRead: true, seconds: Math.round((Date.now() - p.started) / 1000),
-      reviewed: Boolean(extra && extra.reviewed),
+      usage: p.usage, freeRead: true, review: review,
     } };
   }
 
@@ -868,9 +895,13 @@
       ai_model_not_japan_resident: 'AIの設定が正しくないため実行しませんでした。管理者にお伝えください。',
       ai_invalid_plan: 'AIは読み取りましたが、そのままでは使えない形でした。',
       ai_bad_response: 'AIが間取りとして答えられませんでした。',
+      ai_truncated: '図面の情報が多く、AIの答えが途中で切れました。ページを分けて読み取ってください。',
+      ai_refused: 'AIがこの図面の読み取りを断りました。間取り図のページか確かめてください。',
       ai_upstream_error: 'AI側でエラーが起きました。少し待ってからもう一度お試しください。',
       ai_quota_exceeded: '',   // message をそのまま出す（残り回数を含むため）
       invalid_request: '送った画像に問題がありました。',
+      no_image: '読み取る範囲がありません。図面の部分を囲み直してください。',
+      image_too_large: '図面の画像が大きすぎます。ページ数を減らすか、図面の部分だけを囲んでからお試しください。',
     };
     var byStatus = {
       500: 'サーバ側でエラーが起きました。少し待ってからもう一度お試しください。',
@@ -1331,6 +1362,7 @@
     state: ST,
     croppedDataUrl: croppedDataUrl,
     imagesToSend: imagesToSend,
+    fitForAi: fitForAi,
     toAppObjects: toAppObjects,
     showPlanImportError: showPlanImportError,
     showQuota: showQuota,

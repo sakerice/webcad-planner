@@ -13,23 +13,9 @@
 // （相手に送られうるため）。家具の3Dモデルは読み込みが非同期なので、初めて使うモデルは
 // 箱や欠けとして写ることがある。
 var PlanSnapshot = (function () {
-  var GLOBALS = ['DATA', 'HISTORY', 'REDO_HISTORY', 'DIRTY', 'nextId', 'PLAN_LIBRARY_ID', 'PLAN_SAVE_INFO',
-    'sc3', '_skyMesh', '_gndMesh', '_doorAnims', '_fmpInstancePools', '_downspoutRegistry',
-    '_activeInteriorShadowLightCount', '_lightBudget', '_cutawayViewKey', '_walkCollWalls', '_walkCollFloor',
-    '_walkCullApplied', '_walkCullAt', '_setbackRoofCache', '_setbackRoomRoofsCache', '_roofCeilingExtentCache',
-    '_wallOutsideGridCache', '_stairLinkCache', '_roofPolygonModelCache', '_roofPolygonModelCacheN', '_setbackBuildingBox'];
+  // 入れ替える全体の変数とその初期値は、比較モードと同じもの（compare-mode.js が持つ一覧）を使う。
   var VIEW_KEYS = ['floor', 'zoom', 'panX', 'panY', 'selected', 'multiSelected', 'selectAll', 'view'];
   var SHOT_W = 960, SHOT_H = 640;
-
-  function fresh() {
-    return { DATA: null, HISTORY: [], REDO_HISTORY: [], DIRTY: false, nextId: window.nextId, PLAN_LIBRARY_ID: null, PLAN_SAVE_INFO: null,
-      sc3: null, _skyMesh: null, _gndMesh: null, _doorAnims: [], _fmpInstancePools: {}, _downspoutRegistry: [],
-      _activeInteriorShadowLightCount: 0,
-      _lightBudget: { list: null, x: NaN, y: NaN, z: NaN, at: 0, culled: false, dummies: null, sig: '', precompiled: false },
-      _cutawayViewKey: '', _walkCollWalls: null, _walkCollFloor: null, _walkCullApplied: false, _walkCullAt: 0,
-      _setbackRoofCache: null, _setbackRoomRoofsCache: {}, _roofCeilingExtentCache: {}, _wallOutsideGridCache: {},
-      _stairLinkCache: {}, _roofPolygonModelCache: {}, _roofPolygonModelCacheN: 0, _setbackBuildingBox: null };
-  }
 
   function syncPlanGlobals() {
     resetHeightGlobalsForPlanLoad();
@@ -38,14 +24,15 @@ var PlanSnapshot = (function () {
   }
 
   function available() {
-    return typeof DATA !== 'undefined' && typeof capturePlan2dDataUrl === 'function'
+    return typeof DATA !== 'undefined' && typeof capturePlan2dDataUrl === 'function' && typeof CompareMode !== 'undefined'
       && !(typeof SHARED !== 'undefined' && SHARED && SHARED.roomId);
   }
 
-  function disposeScene(sc) {
+  // sharedSky: いまの間取りの空（一時の場面と形・質感を共有している。捨てると本物の空が消える）。
+  function disposeScene(sc, sharedSky) {
     if (!sc) return;
     sc.traverse(function (o) {
-      if (o.geometry) o.geometry.dispose();
+      if (o.geometry && !(sharedSky && o.geometry === sharedSky.geometry)) o.geometry.dispose();
       if (o.isLight && o.shadow && o.shadow.map) { o.shadow.map.dispose(); o.shadow.map = null; }
     });
     sc.clear();
@@ -65,6 +52,7 @@ var PlanSnapshot = (function () {
       if (wrap) { wrap.style.visibility = 'hidden'; wrap.style.display = 'block'; }
       try { init3D(); } finally { if (wrap) { wrap.style.display = was.display; wrap.style.visibility = was.visibility; } }
     }
+    var GLOBALS = CompareMode.swapGlobals();
     var keep = {}, view = {};
     GLOBALS.forEach(function (k) { keep[k] = window[k]; });
     VIEW_KEYS.forEach(function (k) { view[k] = ST[k]; });
@@ -75,7 +63,7 @@ var PlanSnapshot = (function () {
     var out = { plans: [], views: [] };
     var tempScene = null;
     try {
-      var f = fresh();
+      var f = CompareMode.freshWorkspace();
       Object.keys(f).forEach(function (k) { window[k] = f[k]; });
       DATA = JSON.parse(JSON.stringify(plan));
       ST.selected = null; ST.multiSelected = []; ST.selectAll = false;
@@ -91,7 +79,9 @@ var PlanSnapshot = (function () {
 
       if (typeof THREE !== 'undefined') {
         if (typeof ren !== 'undefined' && ren && camExt) {
-          createScene3DBase({});
+          // 空と環境光（反射・間接光）は、いまの間取りの物を共有する。作り直すと、環境光の作り直しが
+          // 本物の場面の環境光の素（_envRT）を捨ててしまい、読み取りのあと3Dの反射と間接光が消える。
+          createScene3DBase({ sky: keep._skyMesh, environment: keep.sc3 && keep.sc3.environment });
           tempScene = sc3;
           ST.view = 'ext'; window.isInt = false;
           build3D();
@@ -130,7 +120,7 @@ var PlanSnapshot = (function () {
       if (renSize && typeof ren !== 'undefined' && ren) { ren.setPixelRatio(renRatio); ren.setSize(renSize.x, renSize.y, false); }
       if (cam && camExt) { camExt.position.copy(cam.pos); camExt.aspect = cam.aspect; camExt.updateProjectionMatrix(); }
       if (target && orbit) { orbit.target.copy(target); orbit.update(); }
-      disposeScene(tempScene);
+      disposeScene(tempScene, keep._skyMesh);
       if (typeof invalidate3D === 'function') invalidate3D();
       if (typeof draw2d === 'function') draw2d();
     }

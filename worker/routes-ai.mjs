@@ -74,6 +74,20 @@ const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
 const MAX_HINT_CHARS = 500;
 const MAX_AI_REQUEST_BYTES = MAX_IMAGE_BYTES * 4 + 256 * 1024;
+// Claude が受け取れる画像の大きさ（1枚あたり約5MB・1回の送信全体で約32MB）。超えると断られ、
+// 何度試しても通らない。送る前にこちらで断り、利用者に次の一手（ページを減らす・囲む）を伝える。
+// 画面側（assets/js/plan-import.js の fitForAi）は、これに収まるよう縮めてから送っている。
+const CLAUDE_MAX_IMAGE_B64 = 5 * 1024 * 1024;
+const CLAUDE_MAX_TOTAL_B64 = 30 * 1024 * 1024;
+function claudeImagesTooLarge(images) {
+  let total = 0;
+  for (const im of images) {
+    if (im.base64.length > CLAUDE_MAX_IMAGE_B64) return true;
+    total += im.base64.length;
+  }
+  return total > CLAUDE_MAX_TOTAL_B64;
+}
+const IMAGE_TOO_LARGE = { error: "image_too_large", message: "図面の画像が大きすぎます。" };
 
 export function handlesAi(pathname) {
   return pathname.startsWith("/api/ai/");
@@ -186,8 +200,9 @@ function locateProvider(env) {
 // どちらも他の2つでは指示を変えても出なかったもので、**モデルの世代の差**。
 // 思考トークンは gpt-5 の1/10（1,552 対 15,360）で、迷わずに答えている。
 //
-// Claude（AI_IMPORT_PROVIDER=anthropic）は、点数で今の OpenAI と比べてから
-// 既定にする（tools/plan-eval/）。それまでは名指ししたときだけ使う。
+// Claude は鍵が入っていれば既定（2026-10-19、tools/plan-eval/ で比べてから切り替えた）。
+// 画面は短い指示の読み取り（read-plan）を使うので、ここ（これまでの読み取り）の Claude は
+// 測る道具で旧指示と比べるときだけ通る。
 function importProvider(env) {
   const want = (env && env.AI_IMPORT_PROVIDER) || "";
   const openai = openaiConfig(env);
@@ -352,6 +367,7 @@ async function aiReadPlan(payload, env, deps, request) {
     images.push(one);
   }
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
   const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
   if (!quota.ok) {
@@ -370,7 +386,7 @@ async function aiReadPlan(payload, env, deps, request) {
   if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
   return new Response(started.body, {
     status: 200,
-    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", "x-plan-pages": String(images.length) },
+    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
   });
 }
 
@@ -408,8 +424,10 @@ async function aiReviewPlan3d(payload, env, deps, request) {
   if (answerText.length > MAX_REVIEW_ANSWER_CHARS) return json({ error: "invalid_request", message: "answer が大きすぎる" }, 400);
   const facts = (Array.isArray(payload && payload.facts) ? payload.facts : []).slice(0, 30).map((f) => String(f).slice(0, 200));
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
-  const quota = await takeQuota(request, env, rawPages.length * COST_REVISE_PAGE);
+  // 撮った画像（最大10枚）も入力になるので、1枚1点で足して数える。
+  const quota = await takeQuota(request, env, rawPages.length * COST_REVISE_PAGE + rawShots.length);
   if (!quota.ok) {
     return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
   }

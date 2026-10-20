@@ -156,7 +156,7 @@
     updateSelectedLightKind: '照明は図面に描かれない', lightShape: '照明', lightAim: '照明', lightColor: '照明', lightIntensity: '照明',
     lightRange: '照明', lightAngle: '照明', lightCastShadow: '照明', cove: '間接照明', coveColor: '間接照明', coveGap: '間接照明',
     coveIntensity: '間接照明', updateSelectedNoteText: 'メモ', updateSelectedRulerLength: '定規', extLen: '定規',
-    updateWalkRouteSpeed: '歩く道筋', name: '任意ブロックの名前', customHeight: '任意ブロック', columnHeight: '柱は図面から読み取りにくい',
+    updateWalkRouteSpeed: '歩く道筋', name: '任意ブロックの名前（区画の名前は SETTINGS.object の name で渡している）', customHeight: '任意ブロック', columnHeight: '柱は図面から読み取りにくい',
     shelfHeight: '造作棚の細部', shelfCount: '造作棚の細部', shelfSides: '造作棚の細部',
     updateSelectedKitchenVariant: 'キッチンの構成はモデル選び', updateSelectedKitchenDishwasher: 'キッチンの構成はモデル選び',
   };
@@ -180,7 +180,8 @@
     stair: '階段は stairs として渡している', 'stair-corner': '階段は stairs として渡している',
   };
 
-  function num(v) { var n = Number(v); return isFinite(n) ? n : null; }
+  // 「2400mm」のように単位が付いていても先頭の数を読む。
+  function num(v) { var n = parseFloat(String(v).replace(/[，,]/g, '')); return isFinite(n) ? n : null; }
 
   function settingsFor(part, type) {
     return (SETTINGS[part] || []).filter(function (s) { return !s.for || s.for.indexOf(type) >= 0; });
@@ -196,25 +197,27 @@
   }
 
   // 答えの set を、範囲・選択肢を確かめてから out に書く。知らない項目と
-  // 範囲外の選択肢は捨てる（黙って変な値を入れない）。数は範囲の端に寄せる。
+  // 範囲外の選択肢は入れない（変な値を入れない）。数は範囲の端に寄せる。
+  // 入れなかった項目は ctx.rejected に「項目=値」で残す（黙って捨てない。見直しで AI に伝える）。
   // 部屋の天井（ceilingHeight / void）は、アプリの形 ceiling:{type, …} に直す。
   function applySettings(part, type, set, out, ctx) {
     var defs = settingsFor(part, type);
     parseSet(set).forEach(function (kv) {
       var def = null;
       for (var i = 0; i < defs.length; i++) if (defs[i].key === String(kv && kv.key)) def = defs[i];
-      if (!def) return;
+      var reject = function () { if (ctx && ctx.rejected) ctx.rejected.push(String(kv && kv.key) + '=' + String(kv && kv.value)); };
+      if (!def) { reject(); return; }
       var value;
       if (def.num) {
         var n = num(kv.value);
-        if (n == null) return;
+        if (n == null) { reject(); return; }
         value = Math.max(def.num[0], Math.min(def.num[1], Math.round(n)));
       } else if (def.text) {
         value = String(kv.value).slice(0, def.text);
-        if (!value) return;
+        if (!value) { reject(); return; }
       } else {
         value = String(kv.value);
-        if (!def.choices.some(function (c) { return c[0] === value; })) return;
+        if (!def.choices.some(function (c) { return c[0] === value; })) { reject(); return; }
       }
       if (part === 'room' && def.key === 'ceilingHeight') { if (!out.ceiling) out.ceiling = { type: 'flat', heightMm: value }; return; }
       if (part === 'room' && def.key === 'void') { out.ceiling = { type: 'void', toFloor: ((ctx && ctx.floor) || 1) + 1 }; return; }
