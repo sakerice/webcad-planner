@@ -1,0 +1,12 @@
+{
+  "madori-3f": {
+    "pdf": "tools/tests/fixtures/madori-3f.pdf",
+    "truth": "tools/plan-eval/truth/madori-3f.json",
+    "note": "3階建て 7280×4095。各ページが各階。正解は寸法線から起こしたもの（make_madori_3f.py）",
+    "pages": [
+      { "page": 1, "floor": 1, "dpi": 300, "crop": [700, 1250, 1450, 950], "originPx": [200, 92], "mmPerPx": [8.465, 8.443] },
+      { "page": 2, "floor": 2, "dpi": 300, "crop": [700, 1250, 1450, 950], "originPx": [200, 92], "mmPerPx": [8.465, 8.443] },
+      { "page": 3, "floor": 3, "dpi": 300, "crop": [700, 1250, 1450, 950], "originPx": [200, 92], "mmPerPx": [8.465, 8.443] }
+    ]
+  }
+}

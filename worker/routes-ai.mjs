@@ -20,6 +20,8 @@ import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
+import { anthropicConfig, generate as anthropicGenerate, startStream } from "./anthropic.mjs";
+import { FREE_SYSTEM, FREE_SCHEMA, buildFreePrompt, FREE_REVIEW_SYSTEM, buildFreeReviewPrompt } from "./plan-free.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
@@ -72,6 +74,20 @@ const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
 const MAX_HINT_CHARS = 500;
 const MAX_AI_REQUEST_BYTES = MAX_IMAGE_BYTES * 4 + 256 * 1024;
+// Claude が受け取れる画像の大きさ（1枚あたり約5MB・1回の送信全体で約32MB）。超えると断られ、
+// 何度試しても通らない。送る前にこちらで断り、利用者に次の一手（ページを減らす・囲む）を伝える。
+// 画面側（assets/js/plan-import.js の fitForAi）は、これに収まるよう縮めてから送っている。
+const CLAUDE_MAX_IMAGE_B64 = 5 * 1024 * 1024;
+const CLAUDE_MAX_TOTAL_B64 = 30 * 1024 * 1024;
+function claudeImagesTooLarge(images) {
+  let total = 0;
+  for (const im of images) {
+    if (im.base64.length > CLAUDE_MAX_IMAGE_B64) return true;
+    total += im.base64.length;
+  }
+  return total > CLAUDE_MAX_TOTAL_B64;
+}
+const IMAGE_TOO_LARGE = { error: "image_too_large", message: "図面の画像が大きすぎます。" };
 
 export function handlesAi(pathname) {
   return pathname.startsWith("/api/ai/");
@@ -87,6 +103,8 @@ export async function handleAi(request, env, url, deps = {}) {
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
   if (url.pathname === "/api/ai/finish-plan") return aiFinishPlan(payload, env, deps);
+  if (url.pathname === "/api/ai/read-plan") return aiReadPlan(payload, env, deps, request);
+  if (url.pathname === "/api/ai/review-plan-3d") return aiReviewPlan3d(payload, env, deps, request);
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps);
@@ -181,10 +199,18 @@ function locateProvider(env) {
 // Astra だけが、L字の部屋を長方形2つで表し、廻り階段を直進部分に接して置いた。
 // どちらも他の2つでは指示を変えても出なかったもので、**モデルの世代の差**。
 // 思考トークンは gpt-5 の1/10（1,552 対 15,360）で、迷わずに答えている。
+//
+// Claude は鍵が入っていれば既定（2026-10-19、tools/plan-eval/ で比べてから切り替えた）。
+// 画面は短い指示の読み取り（read-plan）を使うので、ここ（これまでの読み取り）の Claude は
+// 測る道具で旧指示と比べるときだけ通る。
 function importProvider(env) {
   const want = (env && env.AI_IMPORT_PROVIDER) || "";
   const openai = openaiConfig(env);
   if (want === "vertex") return { kind: "vertex" };
+  if (want === "anthropic") return { kind: "anthropic", config: anthropicConfig(env) };
+  // 名指しが無く、Claude の鍵が入っていれば Claude を使う（2026-10-19 利用者決定）。
+  // 鍵が無い環境では、これまでどおり OpenAI → Vertex の順に落ちる。
+  if (!want && anthropicConfig(env).configured) return { kind: "anthropic", config: anthropicConfig(env) };
   if (want === "openai" || openai.configured) {
     return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
   }
@@ -319,6 +345,107 @@ async function aiImportPlan(payload, env, deps, request) {
   ), env, deps, { images, pages: pages.list });
 }
 
+// ── 間取り図 → house-planner のデータ（短い指示・Claude） ───────────────
+//
+// 手順で縛らず、house-planner で設定できる項目を渡して作らせる（worker/plan-free.mjs）。
+// 全ページを1回で渡す（階どうしの位置合わせを AI に任せるため）。答えは少しずつ届く形で
+// 画面へそのまま流し、画面が進み具合を出しながら組み立てる。
+//
+// Claude の鍵が無い環境では 404 を返す。画面はそれを見て、これまでの読み取り（import-plan）に戻る。
+async function aiReadPlan(payload, env, deps, request) {
+  const want = (env && env.AI_IMPORT_PROVIDER) || "";
+  const config = anthropicConfig(env);
+  if (!config.configured || (want && want !== "anthropic")) {
+    return json({ error: "not_available", message: "この環境では短い指示の読み取りを使いません。" }, 404);
+  }
+  const raw = Array.isArray(payload && payload.images) && payload.images.length
+    ? payload.images.slice(0, MAX_PAGES) : [payload && payload.image];
+  const images = [];
+  for (let i = 0; i < raw.length; i++) {
+    const one = readImage(raw[i], raw.length > 1 ? `images[${i}]` : "image");
+    if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
+    images.push(one);
+  }
+  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
+
+  const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
+  if (!quota.ok) {
+    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
+  }
+
+  const started = await startStream({
+    // 考える深さは medium が既定（2026-10-19 実測: high と点数は変わらず 222秒→181秒）。
+    config: { ...config, effort: (env && env.ANTHROPIC_EFFORT) || "medium", schema: FREE_SCHEMA },
+    system: FREE_SYSTEM,
+    text: buildFreePrompt({ pages: images.length, hint }),
+    images,
+    maxOutputTokens: 64000,
+    fetchImpl: deps.fetchImpl,
+  });
+  if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
+  return new Response(started.body, {
+    status: 200,
+    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+  });
+}
+
+// ── 組み立てた家を見せて直させる（短い指示・Claude） ───────────────────
+//
+// 画面が、最初の答えを組み立てた家の平面図と外観3Dを撮って送ってくる。元の図面と一緒に渡し、
+// AI 自身に見比べて直させる。直し方は指定しない（worker/plan-free.mjs）。
+// 答えは read-plan と同じく、読み解かずに画面へ流す。
+const MAX_REVIEW_SHOTS = 10;
+const MAX_REVIEW_ANSWER_CHARS = 200 * 1024;
+async function aiReviewPlan3d(payload, env, deps, request) {
+  const want = (env && env.AI_IMPORT_PROVIDER) || "";
+  const config = anthropicConfig(env);
+  if (!config.configured || (want && want !== "anthropic")) {
+    return json({ error: "not_available", message: "この環境では見直しを使いません。" }, 404);
+  }
+  const rawPages = Array.isArray(payload && payload.images) ? payload.images.slice(0, MAX_PAGES) : [];
+  const rawShots = Array.isArray(payload && payload.shots) ? payload.shots.slice(0, MAX_REVIEW_SHOTS) : [];
+  if (!rawPages.length || !rawShots.length) return json({ error: "invalid_request", message: "images と shots が要る" }, 400);
+  const images = [];
+  for (let i = 0; i < rawPages.length; i++) {
+    const one = readImage(rawPages[i], `images[${i}]`);
+    if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
+    images.push(one);
+  }
+  const labels = [];
+  for (let i = 0; i < rawShots.length; i++) {
+    const shot = rawShots[i] || {};
+    const one = readImage(shot.image, `shots[${i}]`);
+    if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
+    images.push(one);
+    labels.push(String(shot.label || "").slice(0, 40));
+  }
+  const answerText = JSON.stringify((payload && payload.answer) || null);
+  if (answerText.length > MAX_REVIEW_ANSWER_CHARS) return json({ error: "invalid_request", message: "answer が大きすぎる" }, 400);
+  const facts = (Array.isArray(payload && payload.facts) ? payload.facts : []).slice(0, 30).map((f) => String(f).slice(0, 200));
+  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
+
+  // 撮った画像（最大10枚）も入力になるので、1枚1点で足して数える。
+  const quota = await takeQuota(request, env, rawPages.length * COST_REVISE_PAGE + rawShots.length);
+  if (!quota.ok) {
+    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
+  }
+  const started = await startStream({
+    config: { ...config, effort: (env && env.ANTHROPIC_EFFORT) || "medium", schema: FREE_SCHEMA },
+    system: FREE_REVIEW_SYSTEM,
+    text: buildFreeReviewPrompt({ pages: rawPages.length, shots: labels, answer: JSON.parse(answerText), facts, hint }),
+    images,
+    maxOutputTokens: 64000,
+    fetchImpl: deps.fetchImpl,
+  });
+  if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
+  return new Response(started.body, {
+    status: 200,
+    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+  });
+}
+
 // ── 自分の答えを見直させる ───────────────────────────────────────────
 //
 // 読み取りの直後に、画面が「答えを平面図として描き直した絵」を作って送ってくる。
@@ -393,6 +520,12 @@ async function aiRevisePlan(payload, env, deps, request) {
 // 読み取りと見直しで同じ手続きを二度書かないため、ここに1つだけ置く。
 function resolveImportProvider(env) {
   const provider = importProvider(env);
+  if (provider.kind === "anthropic" && !provider.config.configured) {
+    return { error: json({
+      error: "ai_not_configured",
+      message: "AI の鍵がこの環境に設定されていません。 wrangler secret put ANTHROPIC_API_KEY で設定してください。",
+    }, 503) };
+  }
   if (provider.kind !== "vertex") return provider;
   const config = vertexConfig(env);
   if (!config.configured) {
@@ -418,6 +551,10 @@ function askForPlan(provider, { system, text, images, docs, fetchImpl }) {
   const common = { system, docs: docs || [planKnowledge(), planSpec()], text, images, fetchImpl };
   if (provider.kind === "openai") {
     return openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
+  }
+  // 出力の形の書き方は OpenAI と同じ JSON Schema（項目はすべて必須、余分な項目は不可）。
+  if (provider.kind === "anthropic") {
+    return anthropicGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
   }
   return generate({ ...common, config: provider.config, responseSchema: PLAN_RESPONSE_SCHEMA });
 }
@@ -607,7 +744,7 @@ function pageHint(hint, index, total) {
 //
 // 見出し(「2階平面図」など)から階を判断させているが、書かれていない図面も
 // ある。同じ階が2つ来たら、ページの並び順を正とする。
-function mergeFloors(pages) {
+export function mergeFloors(pages) {
   const out = [];
   const used = new Set();
   pages.forEach((page, i) => {
@@ -625,6 +762,10 @@ function mergeFloors(pages) {
 
 function sumUsage(results) {
   const keys = ["inputTokens", "answerTokens", "thoughtTokens", "outputTokens", "totalTokens"];
+  // 使い回し（prompt caching）の内訳は、それを返す提供元（Claude）のときだけ載せる。
+  for (const k of ["cacheWriteTokens", "cacheReadTokens"]) {
+    if (results.some((r) => r.usage && k in r.usage)) keys.push(k);
+  }
   const out = { calls: results.length };
   for (const k of keys) {
     out[k] = results.reduce((n, r) => n + Number((r.usage && r.usage[k]) || 0), 0);

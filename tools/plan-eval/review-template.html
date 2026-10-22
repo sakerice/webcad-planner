@@ -1,0 +1,485 @@
+<title>正解プランの確認</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 製図台: 図面が主役。右に「選んだものの設定」と「コメント」の作業欄。色は要素の種類だけに使う */
+:root {
+  --bg: #f3f4f1; --panel: #ffffff; --ink: #1d2320; --muted: #66706b; --line: #d9ddd8;
+  --accent: #2f5d50; --accent-ink: #ffffff; --sel: #f2b705;
+  --wall: #d23c2c; --room: #2f5fb3; --win: #17924a; --door: #e07b00; --pin: #8a2be2; --fur: #8a5a2b; --ext: #0f8b8d; --stair: #4b5563;
+  --open: #b45309; --done: #1f7a4d; --ask: #2f5fb3;
+  --font-ui: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161a18; --panel: #1f2421; --ink: #e6ebe7; --muted: #9aa49f; --line: #333b37;
+  --accent: #6fb39c; --accent-ink: #0f1311; --open: #f0a24a; --done: #5fcf97; --ask: #8db3f0; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #161a18; --panel: #1f2421; --ink: #e6ebe7; --muted: #9aa49f; --line: #333b37;
+  --accent: #6fb39c; --accent-ink: #0f1311; --open: #f0a24a; --done: #5fcf97; --ask: #8db3f0; color-scheme: dark }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px; box-sizing: border-box; }
+* { box-sizing: border-box; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 10px; }
+h1 { font-size: 18px; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); font-size: 13px; }
+.app { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 12px; align-items: start; }
+@media (max-width: 900px) { .app { grid-template-columns: minmax(0, 1fr); } }
+.board { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--ink); padding: 5px 12px; font: inherit; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.chk { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.chk i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.spacer { flex: 1; }
+.iconbtn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 3px 10px; font: inherit; cursor: pointer; }
+button:focus-visible, textarea:focus-visible { outline: 2px solid var(--sel); outline-offset: 1px; }
+.stage { position: relative; touch-action: none; cursor: crosshair; background: #fff; }
+.stage svg { display: block; width: 100%; height: auto; user-select: none; }
+.hint { padding: 6px 10px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
+aside { display: grid; gap: 12px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
+.card h2 { font-size: 13px; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; font-weight: 500; }
+.kind { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; color: #fff; margin-right: 6px; }
+.k-wall { background: var(--wall); } .k-room { background: var(--room); } .k-window { background: var(--win); } .k-door { background: var(--door); } .k-point { background: var(--pin); } .k-other { background: #777; } .k-furniture, .k-fixtures { background: var(--fur); } .k-exterior { background: var(--ext); } .k-stairs { background: var(--stair); }
+dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 8px 0 0; font-size: 13px; }
+dt { color: var(--muted); } dd { margin: 0; font-family: var(--font-num); font-size: 12.5px; overflow-wrap: anywhere; }
+dd.text { font-family: var(--font-ui); font-size: 13px; }
+textarea { width: 100%; min-height: 72px; resize: vertical; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin-top: 10px; }
+.row { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.primary { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px; padding: 7px 14px; font: inherit; font-weight: 500; cursor: pointer; }
+.primary:disabled { opacity: .5; cursor: default; }
+.note { font-size: 12px; color: var(--muted); }
+.empty { color: var(--muted); font-size: 13px; }
+ol.comments { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ol.comments li { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; cursor: pointer; }
+ol.comments li.on { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); }
+.chead { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.num { font-family: var(--font-num); font-weight: 500; color: var(--pin); }
+.status { font-size: 11px; padding: 0 6px; border-radius: 999px; border: 1px solid currentColor; }
+.s-open { color: var(--open); } .s-done { color: var(--done); } .s-ask { color: var(--ask); }
+.ctext { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.reply { margin: 6px 0 0; padding: 6px 8px; background: var(--bg); border-radius: 4px; font-size: 13px; white-space: pre-wrap; }
+.reply b { font-weight: 500; color: var(--accent); }
+.linkish { background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .pinpulse { animation: pulse 1.2s ease-out 1; } }
+@keyframes pulse { from { r: 22; opacity: .2; } to { r: 11; opacity: 1; } }
+</style>
+
+<header>
+  <h1>正解プランの確認</h1>
+  <span class="sub" id="sub"></span>
+</header>
+
+<div class="app">
+  <section class="board">
+    <div class="toolbar">
+      <div class="seg" id="floors" role="group" aria-label="階"></div>
+      <label class="chk"><input type="checkbox" id="lay-wall" checked><i style="background:var(--wall)"></i>壁</label>
+      <label class="chk"><input type="checkbox" id="lay-room" checked><i style="background:var(--room)"></i>部屋</label>
+      <label class="chk"><input type="checkbox" id="lay-open" checked><i style="background:var(--win)"></i>建具・階段</label>
+      <label class="chk"><input type="checkbox" id="lay-fur" checked><i style="background:var(--fur)"></i>家具・設備</label>
+      <label class="chk"><input type="checkbox" id="lay-ext" checked><i style="background:var(--ext)"></i>外構</label>
+      <label class="chk"><input type="checkbox" id="lay-text" checked>文字</label>
+      <span class="spacer"></span>
+      <button class="iconbtn" id="zin" aria-label="拡大">＋</button>
+      <button class="iconbtn" id="zout" aria-label="縮小">−</button>
+      <button class="iconbtn" id="zfit">全体</button>
+    </div>
+    <div class="stage" id="stage"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="hint">要素を押すと設定が右に出ます。何も無い場所を押すと「その場所」へのコメントになります（足りない壁・扉の指摘に）。拡大中はドラッグで移動。</div>
+  </section>
+
+  <aside>
+    <div class="card" id="detail">
+      <h2>選んだもの</h2>
+      <p class="empty" id="detail-empty">図面の壁・部屋・建具を押してください。</p>
+      <div id="detail-body" hidden>
+        <div><span class="kind" id="d-kind"></span><b id="d-title"></b></div>
+        <dl id="d-props"></dl>
+        <label for="c-text" class="note" style="display:block;margin-top:10px">ここへのコメント</label>
+        <textarea id="c-text" placeholder="例: この壁は無い／扉は引き戸／部屋名は「洗面所」"></textarea>
+        <div class="row">
+          <button class="primary" id="c-save" disabled>コメントを置く</button>
+          <span class="note" id="c-msg"></span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 id="list-title">コメント</h2>
+      <ol class="comments" id="list"></ol>
+      <p class="empty" id="list-empty">まだコメントはありません。図面を押して置いてください。</p>
+    </div>
+    <div class="card">
+      <h2>色の見方</h2>
+      <div class="legend">
+        <span><i class="kind k-wall">壁</i>芯の位置</span><span><i class="kind k-room">部屋</i>名前と面積</span>
+        <span><i class="kind k-window">窓</i></span><span><i class="kind k-door">扉</i>弧＝開く側、黒丸＝吊り元</span>
+        <span><i class="kind k-stairs">階段</i>矢印＝上る向き</span><span><i class="kind k-furniture">家具・設備</i>三角＝正面</span>
+        <span><i class="kind k-exterior">外構</i></span><span><i class="kind k-point">番号</i>コメント</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function () {
+  'use strict';
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const TYPE_JA = { window: '窓', 'window-door': '掃き出し窓', 'door-swing': '開き戸', 'door-swing-s': '開き戸(小)',
+    'door-slide': '引違い戸', 'door-slide-s': '片引き戸', 'door-fold': '折戸', 'door-opening': '開口（建具なし）',
+    'door-front': '玄関ドア', stair: '階段（直進部）', 'stair-corner': '階段（廻り部）', balcony: 'バルコニー', ramp: 'スロープ' };
+  const KIND_JA = { bed: 'ベッド', sofa: 'ソファ', chair: '椅子', 'dining-table': 'ダイニングテーブル', 'low-table': 'ローテーブル',
+    tv: 'テレビ', refrigerator: '冷蔵庫', 'kitchen-storage': 'キッチン収納', 'kitchen-unit': 'キッチン', laundry: '洗濯機',
+    vanity: '洗面台', bathtub: '浴槽', toilet: '便器', 'shoe-storage': '靴・ベンチ収納', deck: 'デッキ・テラス', ramp: 'スロープ', balcony: 'バルコニー' };
+  const GROUP_JA = { wall: '壁', room: '部屋', window: '窓', door: '扉', stairs: '階段', fixtures: '設備', furniture: '家具', exterior: '外構', other: 'その他' };
+  function dirJa(v) { if (!v) return '-'; return Math.abs(v[0]) > Math.abs(v[1]) ? (v[0] > 0 ? '東' : '西') : (v[1] > 0 ? '南' : '北'); }
+  const state = { floor: D.pages[0].floor, sel: null, comments: [], zoom: 1, cx: null, cy: null, focusComment: null };
+  const $ = (id) => document.getElementById(id);
+  const fmt = (v) => Math.round(v).toLocaleString('ja-JP');
+  $('sub').textContent = D.subtitle;
+
+  // ── 要素の一覧（id で引けるように）──────────────────────────
+  const els = [];
+  D.plan.walls.forEach((w) => els.push({ id: 'w' + w.id, kind: 'wall', floor: w.floor, raw: w }));
+  D.plan.rooms.forEach((r) => els.push({ id: String(r.id), kind: 'room', floor: r.floor, raw: r }));
+  D.plan.items.forEach((it) => {
+    const g = (it.note && it.note.group) || 'other';
+    els.push({ id: 'i' + it.id, kind: g, floor: it.floor, raw: it });
+  });
+  const byId = new Map(els.map((e) => [e.id, e]));
+
+  function pageOf(f) { return D.pages.find((p) => p.floor === f); }
+  function toPx(pg, x, y) { return [pg.originPx[0] + x / pg.mmPerPx[0], pg.originPx[1] + y / pg.mmPerPx[1]]; }
+  function toMm(pg, px, py) { return [(px - pg.originPx[0]) * pg.mmPerPx[0], (py - pg.originPx[1]) * pg.mmPerPx[1]]; }
+  function itemBox(it) {
+    let w = it.w, d = it.d; const cx = it.x + w / 2, cy = it.y + d / 2;
+    if (Math.round((it.rot || 0) / 90) % 2) [w, d] = [d, w];
+    return { cx, cy, w, d };
+  }
+  function centerOf(e) {
+    const r = e.raw;
+    if (e.kind === 'wall') return [(r.x1 + r.x2) / 2, (r.y1 + r.y2) / 2];
+    if (e.kind === 'room') return [r.x + r.w / 2, r.y + r.d / 2];
+    const b = itemBox(r); return [b.cx, b.cy];
+  }
+  function titleOf(e) {
+    const r = e.raw;
+    if (e.kind === 'wall') {
+      const len = Math.hypot(r.x2 - r.x1, r.y2 - r.y1);
+      return (r.memo ? r.memo : (isOuter(r) ? '外壁' : '壁')) + '（' + fmt(len) + 'mm）';
+    }
+    if (e.kind === 'room') return r.n || '(名前なし)';
+    if (['furniture', 'fixtures', 'exterior'].includes(e.kind)) return r.memo || KIND_JA[r.note.kind] || r.type;
+    return (TYPE_JA[r.type] || r.type) + (r.memo ? '・' + r.memo : '');
+  }
+  function isOuter(w) {
+    const ws = D.plan.walls.filter((o) => o.floor === w.floor);
+    const xs = ws.flatMap((o) => [o.x1, o.x2]), ys = ws.flatMap((o) => [o.y1, o.y2]);
+    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    return (w.x1 === w.x2 && (w.x1 === x0 || w.x1 === x1)) || (w.y1 === w.y2 && (w.y1 === y0 || w.y1 === y1));
+  }
+  function propsOf(e) {
+    const r = e.raw, out = [];
+    if (e.kind === 'wall') {
+      out.push(['始点', fmt(r.x1) + ', ' + fmt(r.y1)], ['終点', fmt(r.x2) + ', ' + fmt(r.y2)]);
+      out.push(['長さ', fmt(Math.hypot(r.x2 - r.x1, r.y2 - r.y1)) + ' mm'], ['向き', r.x1 === r.x2 ? '南北' : r.y1 === r.y2 ? '東西' : '斜め']);
+    } else if (e.kind === 'room') {
+      const parts = D.plan.rooms.filter((o) => o.floor === r.floor && o.n === r.n);
+      const area = parts.reduce((n, o) => n + o.w * o.d, 0) / 1e6;
+      out.push(['範囲', fmt(r.x) + ', ' + fmt(r.y) + ' 〜 ' + fmt(r.x + r.w) + ', ' + fmt(r.y + r.d)]);
+      out.push(['大きさ', fmt(r.w) + ' × ' + fmt(r.d) + ' mm']);
+      out.push(['面積', area.toFixed(2) + ' ㎡（' + (area / 1.62).toFixed(1) + '帖）' + (parts.length > 1 ? '・長方形' + parts.length + 'つで1室' : '')]);
+    } else if (['furniture', 'fixtures', 'exterior'].includes(e.kind)) {
+      const b = itemBox(r);
+      out.push(['種類', (KIND_JA[r.note.kind] || r.note.kind) + '（' + r.type + '）'], ['中心', fmt(b.cx) + ', ' + fmt(b.cy)]);
+      out.push(['大きさ', fmt(r.w) + ' × ' + fmt(r.d) + ' mm（幅 × 奥行き）']);
+      if (e.kind !== 'exterior' || r.type === 'ramp') out.push([r.type === 'ramp' ? '上る向き' : '正面', dirJa(r.note.front) + 'を向く']);
+    } else if (e.kind === 'stairs') {
+      const b = itemBox(r);
+      out.push(['種類', (TYPE_JA[r.type] || r.type)], ['中心', fmt(b.cx) + ', ' + fmt(b.cy)]);
+      out.push([r.type === 'stair-corner' ? '抜ける向き' : '上る向き', dirJa(r.note.stairDir)]);
+    } else {
+      const b = itemBox(r);
+      out.push(['種類', (TYPE_JA[r.type] || r.type) + '（' + r.type + '）'], ['中心', fmt(b.cx) + ', ' + fmt(b.cy)]);
+      out.push(['幅', fmt(r.w) + ' mm']);
+      if (r.note && r.note.swing) out.push(['吊り元', dirJa(r.note.swing.hinge) + 'の端'], ['開く側', dirJa(r.note.swing.opens) + '側']);
+    }
+    if (r.memo) out.push(['説明', r.memo, 'text']);
+    out.push(['番号', e.id]);
+    return out;
+  }
+
+  // ── 描画 ─────────────────────────────────────────────────────
+  const svg = $('svg');
+  function node(tag, attrs, parent) {
+    const n = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function layer(id) { return $(id).checked; }
+
+  function render() {
+    const pg = pageOf(state.floor);
+    const W = pg.size[0], H = pg.size[1];
+    if (state.cx == null) { state.cx = W / 2; state.cy = H / 2; }
+    const vw = W / state.zoom, vh = H / state.zoom;
+    state.cx = Math.min(Math.max(state.cx, vw / 2), W - vw / 2);
+    state.cy = Math.min(Math.max(state.cy, vh / 2), H - vh / 2);
+    svg.setAttribute('viewBox', [state.cx - vw / 2, state.cy - vh / 2, vw, vh].join(' '));
+    svg.textContent = '';
+    const defs = node('defs', {}, svg), mk = node('marker', { id: 'arrow', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 5, markerHeight: 5, orient: 'auto-start-reverse' }, defs);
+    node('path', { d: 'M0,0 L10,5 L0,10 Z', fill: 'var(--stair)' }, mk);
+    node('image', { href: pg.image, x: 0, y: 0, width: W, height: H, opacity: 0.55 }, svg);
+    const fs = 15 / Math.sqrt(state.zoom);
+    const mine = els.filter((e) => e.floor === state.floor);
+    const selId = state.sel && state.sel.id;
+
+    if (layer('lay-room')) for (const e of mine.filter((e) => e.kind === 'room')) {
+      const r = e.raw, a = toPx(pg, r.x, r.y), b = toPx(pg, r.x + r.w, r.y + r.d);
+      const g = node('g', { 'data-id': e.id, style: 'cursor:pointer' }, svg);
+      node('rect', { x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], fill: 'var(--room)', 'fill-opacity': e.id === selId ? 0.28 : 0.08,
+        stroke: e.id === selId ? 'var(--sel)' : 'var(--room)', 'stroke-width': e.id === selId ? 4 : 1.5, 'stroke-dasharray': '6 4' }, g);
+      if (layer('lay-text')) {
+        const t = node('text', { x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, 'text-anchor': 'middle', 'font-size': fs * 1.15, fill: 'var(--room)',
+          'font-weight': 700, 'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 4, style: 'pointer-events:none' }, g);
+        t.textContent = r.n || '?';
+        const t2 = node('text', { x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 + fs * 1.2, 'text-anchor': 'middle', 'font-size': fs * 0.85, fill: 'var(--room)',
+          'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 3, style: 'pointer-events:none;font-family:var(--font-num)' }, g);
+        t2.textContent = (r.w * r.d / 1e6).toFixed(2) + '㎡';
+      }
+    }
+    if (layer('lay-wall')) for (const e of mine.filter((e) => e.kind === 'wall')) {
+      const r = e.raw, a = toPx(pg, r.x1, r.y1), b = toPx(pg, r.x2, r.y2);
+      const g = node('g', { 'data-id': e.id, style: 'cursor:pointer' }, svg);
+      if (e.id === selId) node('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: 'var(--sel)', 'stroke-width': 12, 'stroke-linecap': 'round' }, g);
+      node('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: 'var(--wall)', 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+      node('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: 'transparent', 'stroke-width': 18 }, g);
+      if (layer('lay-text') && state.zoom >= 1.5) {
+        const t = node('text', { x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 - 6, 'text-anchor': 'middle', 'font-size': fs * 0.75, fill: 'var(--wall)',
+          'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 3, style: 'pointer-events:none;font-family:var(--font-num)' }, g);
+        t.textContent = fmt(Math.hypot(r.x2 - r.x1, r.y2 - r.y1));
+      }
+    }
+    const objLayer = (k) => (k === 'furniture' || k === 'fixtures') ? layer('lay-fur') : k === 'exterior' ? layer('lay-ext') : layer('lay-open');
+    for (const e of mine.filter((e) => ['furniture', 'fixtures', 'exterior', 'stairs'].includes(e.kind) && objLayer(e.kind))) {
+      const r = e.raw, b = itemBox(r), a = toPx(pg, b.cx - b.w / 2, b.cy - b.d / 2), c = toPx(pg, b.cx + b.w / 2, b.cy + b.d / 2);
+      const col = e.kind === 'exterior' ? 'var(--ext)' : e.kind === 'stairs' ? 'var(--stair)' : 'var(--fur)';
+      const on = e.id === selId;
+      const g = node('g', { 'data-id': e.id, style: 'cursor:pointer' }, svg);
+      node('rect', { x: a[0], y: a[1], width: c[0] - a[0], height: c[1] - a[1], fill: col, 'fill-opacity': on ? 0.35 : 0.12,
+        stroke: on ? 'var(--sel)' : col, 'stroke-width': on ? 4 : 2, 'stroke-dasharray': e.kind === 'exterior' ? '8 5' : '' }, g);
+      const m = toPx(pg, b.cx, b.cy), half = Math.min(c[0] - a[0], c[1] - a[1]) / 2;
+      const v = e.kind === 'stairs' ? r.note.stairDir : r.note.front;
+      if (v && (e.kind !== 'exterior' || r.type === 'ramp')) {
+        if (e.kind === 'stairs' || r.type === 'ramp') {
+          const L = Math.max(c[0] - a[0], c[1] - a[1]) * 0.38, tip = [m[0] + v[0] * L, m[1] + v[1] * L], tail = [m[0] - v[0] * L, m[1] - v[1] * L];
+          node('line', { x1: tail[0], y1: tail[1], x2: tip[0], y2: tip[1], stroke: col, 'stroke-width': 3, 'marker-end': 'url(#arrow)', style: 'pointer-events:none' }, g);
+        } else {
+          // 正面の辺の中央に三角。
+          const hw = (c[0] - a[0]) / 2, hh = (c[1] - a[1]) / 2;
+          const f = [m[0] + v[0] * hw, m[1] + v[1] * hh], s2 = 7, px = -v[1], py = v[0];
+          node('path', { d: `M${f[0] + v[0] * s2},${f[1] + v[1] * s2} L${f[0] + px * s2},${f[1] + py * s2} L${f[0] - px * s2},${f[1] - py * s2} Z`, fill: col, style: 'pointer-events:none' }, g);
+        }
+      }
+      if (layer('lay-text') && (state.zoom >= 1.5 || e.kind === 'exterior')) {
+        const t = node('text', { x: m[0], y: m[1] + fs * 0.3, 'text-anchor': 'middle', 'font-size': fs * 0.7, fill: col,
+          'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 3, style: 'pointer-events:none' }, g);
+        t.textContent = (KIND_JA[r.note.kind] || TYPE_JA[r.type] || '').slice(0, 8);
+      }
+      void half;
+    }
+    if (layer('lay-open')) for (const e of mine.filter((e) => e.kind === 'window' || e.kind === 'door' || e.kind === 'other')) {
+      const b = itemBox(e.raw), a = toPx(pg, b.cx - b.w / 2, b.cy - b.d / 2), c = toPx(pg, b.cx + b.w / 2, b.cy + b.d / 2);
+      const col = e.kind === 'window' ? 'var(--win)' : e.kind === 'door' ? 'var(--door)' : '#888';
+      const g = node('g', { 'data-id': e.id, style: 'cursor:pointer' }, svg);
+      node('rect', { x: a[0], y: a[1], width: Math.max(4, c[0] - a[0]), height: Math.max(4, c[1] - a[1]), fill: col, 'fill-opacity': e.id === selId ? 0.45 : 0.18,
+        stroke: e.id === selId ? 'var(--sel)' : col, 'stroke-width': e.id === selId ? 4 : 2.5 }, g);
+      const sw = e.raw.note && e.raw.note.swing;
+      if (sw) {
+        // 扉の弧: 吊り元から、開いた扉の先までの四分円。黒丸が吊り元。
+        const W = e.raw.w, h = [b.cx + sw.hinge[0] * W / 2, b.cy + sw.hinge[1] * W / 2];
+        const shut = [h[0] - sw.hinge[0] * W, h[1] - sw.hinge[1] * W], open = [h[0] + sw.opens[0] * W, h[1] + sw.opens[1] * W];
+        const H = toPx(pg, h[0], h[1]), S = toPx(pg, shut[0], shut[1]), O = toPx(pg, open[0], open[1]);
+        const R = Math.hypot(S[0] - H[0], S[1] - H[1]);
+        const cross = (S[0] - H[0]) * (O[1] - H[1]) - (S[1] - H[1]) * (O[0] - H[0]);
+        node('path', { d: `M${H[0]},${H[1]} L${O[0]},${O[1]} A${R},${R} 0 0 ${cross > 0 ? 0 : 1} ${S[0]},${S[1]}`, fill: 'none', stroke: col, 'stroke-width': 2, style: 'pointer-events:none' }, g);
+        node('circle', { cx: H[0], cy: H[1], r: 4, fill: '#111', style: 'pointer-events:none' }, g);
+      }
+      if (layer('lay-text') && e.kind !== 'other') {
+        const t = node('text', { x: (a[0] + c[0]) / 2, y: a[1] - 4, 'text-anchor': 'middle', 'font-size': fs * 0.75, fill: col,
+          'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 3, style: 'pointer-events:none' }, g);
+        t.textContent = (TYPE_JA[e.raw.type] || e.raw.type).replace('（建具なし）', '');
+      }
+    }
+    // コメントの番号
+    state.comments.forEach((c, i) => {
+      if (c.floor !== state.floor) return;
+      const p = toPx(pg, c.xMm, c.yMm);
+      const g = node('g', { 'data-comment': c.id, style: 'cursor:pointer' }, svg);
+      const on = state.focusComment === c.id;
+      node('circle', { cx: p[0], cy: p[1], r: 11 / Math.sqrt(state.zoom) * 1.3, fill: c.status === 'done' ? 'var(--done)' : 'var(--pin)',
+        stroke: on ? 'var(--sel)' : '#fff', 'stroke-width': on ? 4 : 2, class: on ? 'pinpulse' : '' }, g);
+      const t = node('text', { x: p[0], y: p[1] + fs * 0.33, 'text-anchor': 'middle', 'font-size': fs * 0.85, fill: '#fff', 'font-weight': 700,
+        style: 'pointer-events:none;font-family:var(--font-num)' }, g);
+      t.textContent = String(i + 1);
+    });
+    if (state.sel && state.sel.kind === 'point' && state.sel.floor === state.floor) {
+      const p = toPx(pg, state.sel.xMm, state.sel.yMm);
+      node('circle', { cx: p[0], cy: p[1], r: 9, fill: 'none', stroke: 'var(--sel)', 'stroke-width': 4 }, svg);
+    }
+  }
+
+  // ── 階・表示の切り替え ─────────────────────────────────────
+  function renderFloors() {
+    const box = $('floors'); box.textContent = '';
+    for (const pg of D.pages) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = pg.floor + '階';
+      b.setAttribute('aria-pressed', String(pg.floor === state.floor));
+      b.addEventListener('click', () => { state.floor = pg.floor; state.zoom = 1; state.cx = null; renderFloors(); render(); });
+      box.appendChild(b);
+    }
+  }
+  ['lay-wall', 'lay-room', 'lay-open', 'lay-fur', 'lay-ext', 'lay-text'].forEach((id) => $(id).addEventListener('change', render));
+  $('zin').addEventListener('click', () => { state.zoom = Math.min(6, state.zoom * 1.5); render(); });
+  $('zout').addEventListener('click', () => { state.zoom = Math.max(1, state.zoom / 1.5); render(); });
+  $('zfit').addEventListener('click', () => { state.zoom = 1; state.cx = null; render(); });
+
+  // ── 押す・ドラッグする ─────────────────────────────────────
+  let drag = null;
+  function svgPoint(ev) {
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  svg.addEventListener('pointerdown', (ev) => { drag = { x: ev.clientX, y: ev.clientY, cx: state.cx, cy: state.cy, moved: false, target: ev.target }; svg.setPointerCapture(ev.pointerId); });
+  svg.addEventListener('pointermove', (ev) => {
+    if (!drag) return;
+    const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+    if (drag.moved && state.zoom > 1) {
+      const k = svg.viewBox.baseVal.width / svg.getBoundingClientRect().width;
+      state.cx = drag.cx - dx * k; state.cy = drag.cy - dy * k; render();
+    }
+  });
+  svg.addEventListener('pointerup', (ev) => {
+    const d = drag; drag = null;
+    if (!d || d.moved) return;
+    const pin = d.target.closest && d.target.closest('[data-comment]');
+    if (pin) { focusComment(pin.getAttribute('data-comment')); return; }
+    const hit = d.target.closest && d.target.closest('[data-id]');
+    if (hit) { select(byId.get(hit.getAttribute('data-id'))); return; }
+    const p = svgPoint(ev), mm = toMm(pageOf(state.floor), p.x, p.y);
+    select({ id: null, kind: 'point', floor: state.floor, xMm: Math.round(mm[0]), yMm: Math.round(mm[1]) });
+  });
+
+  function select(e) {
+    state.sel = e; state.focusComment = null;
+    $('detail-empty').hidden = true; $('detail-body').hidden = false;
+    const kindEl = $('d-kind'), props = $('d-props');
+    props.textContent = '';
+    if (e.kind === 'point') {
+      kindEl.className = 'kind k-point'; kindEl.textContent = '場所';
+      $('d-title').textContent = 'この場所（ここには何も設定されていません）';
+      addProp(props, '位置', fmt(e.xMm) + ', ' + fmt(e.yMm) + ' mm');
+      addProp(props, '階', e.floor + '階');
+    } else {
+      kindEl.className = 'kind k-' + e.kind;
+      kindEl.textContent = GROUP_JA[e.kind] || 'その他';
+      $('d-title').textContent = titleOf(e);
+      for (const [k, v, cls] of propsOf(e)) addProp(props, k, v, cls);
+    }
+    $('c-msg').textContent = '';
+    syncSave();
+    render();
+  }
+  function addProp(dl, k, v, cls) {
+    const dt = document.createElement('dt'); dt.textContent = k;
+    const dd = document.createElement('dd'); dd.textContent = v; if (cls) dd.className = cls;
+    dl.append(dt, dd);
+  }
+
+  // ── コメント（db に保存。Claude が読み出して正解を直す）────────
+  let db = null, store = null;
+  function syncSave() { $('c-save').disabled = !state.sel || !$('c-text').value.trim() || !store; }
+  $('c-text').addEventListener('input', syncSave);
+  $('c-save').addEventListener('click', async () => {
+    const e = state.sel, text = $('c-text').value.trim();
+    if (!e || !text || !store) return;
+    const [xMm, yMm] = e.kind === 'point' ? [e.xMm, e.yMm] : centerOf(e);
+    const body = {
+      fixture: D.fixture, floor: e.floor, kind: e.kind, elementId: e.id || null,
+      label: e.kind === 'point' ? '場所 ' + fmt(xMm) + ', ' + fmt(yMm) : titleOf(e),
+      xMm: Math.round(xMm), yMm: Math.round(yMm), text, status: 'open', at: new Date().toISOString(),
+    };
+    $('c-save').disabled = true; $('c-msg').textContent = '保存しています…';
+    try {
+      await store.add(body);
+      $('c-text').value = ''; $('c-msg').textContent = '置きました';
+    } catch (err) {
+      $('c-msg').textContent = '保存できませんでした（' + ((err && err.code) || 'エラー') + '）。もう一度押してください。';
+    }
+    syncSave();
+  });
+
+  function focusComment(id) {
+    const c = state.comments.find((x) => x.id === id);
+    if (!c) return;
+    state.focusComment = id;
+    if (c.floor !== state.floor) { state.floor = c.floor; state.zoom = 1; state.cx = null; renderFloors(); }
+    if (c.elementId && byId.has(c.elementId)) { const keep = id; select(byId.get(c.elementId)); state.focusComment = keep; }
+    renderList(); render();
+  }
+
+  const STATUS = { open: ['未対応', 's-open'], done: ['反映済み', 's-done'], ask: ['質問あり', 's-ask'] };
+  function renderList() {
+    const list = $('list'); list.textContent = '';
+    $('list-empty').hidden = state.comments.length > 0;
+    $('list-title').textContent = 'コメント（' + state.comments.length + '）';
+    state.comments.forEach((c, i) => {
+      const li = document.createElement('li');
+      if (state.focusComment === c.id) li.className = 'on';
+      const head = document.createElement('div'); head.className = 'chead';
+      const n = document.createElement('span'); n.className = 'num'; n.textContent = '#' + (i + 1);
+      const st = STATUS[c.status] || STATUS.open;
+      const s = document.createElement('span'); s.className = 'status ' + st[1]; s.textContent = st[0];
+      const where = document.createElement('span'); where.textContent = c.floor + '階・' + (c.label || '');
+      head.append(n, s, where);
+      const p = document.createElement('p'); p.className = 'ctext'; p.textContent = c.text;
+      li.append(head, p);
+      if (c.reply) { const r = document.createElement('p'); r.className = 'reply'; const b = document.createElement('b'); b.textContent = 'Claude: '; r.append(b, document.createTextNode(c.reply)); li.appendChild(r); }
+      const row = document.createElement('div'); row.className = 'row';
+      const del = document.createElement('button'); del.className = 'linkish'; del.type = 'button'; del.textContent = '消す';
+      let armed = false;
+      del.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        if (!armed) { armed = true; del.textContent = 'もう一度押すと消えます'; return; }
+        try { await store.doc(c.id).delete(); } catch (err) { del.textContent = '消せませんでした'; }
+      });
+      if (store) row.appendChild(del);
+      li.appendChild(row);
+      li.addEventListener('click', () => focusComment(c.id));
+      list.appendChild(li);
+    });
+  }
+
+  renderFloors(); render(); renderList();
+  (async () => {
+    try { db = window.claude && await window.claude.use('db'); } catch (e) { db = null; }
+    if (!db) { $('c-msg').textContent = 'コメントの保存は、claude.ai にサインインして開いたときに使えます。'; return; }
+    store = db.collection('comments');
+    store.orderBy('at').onSnapshot((snap) => {
+      state.comments = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((c) => c.fixture === D.fixture);
+      renderList(); render(); syncSave();
+    }, (err) => { $('c-msg').textContent = 'コメントを読み込めませんでした（' + (err && err.code) + '）。開き直してください。'; });
+  })();
+})();
+</script>

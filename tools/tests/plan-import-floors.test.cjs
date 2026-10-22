@@ -88,7 +88,8 @@ function readSecondFloor() {
 function importInto(plan, read) {
   global.DATA = plan;
   global.PlanImport.state.result = { plan: read };
-  global.applyPlanImport();
+  // 確認（ダイアログの中に出る）を済ませた後の組み立てを、直接呼ぶ。ここで見るのは組み立ての中身。
+  global.applyPlanImport('go');
   return global.DATA;
 }
 

@@ -283,6 +283,16 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #plan-import-modal.show{display:flex}
 /* 囲む操作をするので、指のスクロールに持っていかれないようにする */
 .plan-import-canvas{display:block;width:100%;height:auto;max-height:52dvh;object-fit:contain;background:#0f172a;border:1px solid #24385f;border-radius:6px;cursor:crosshair;touch-action:none}
+/* 読み取りの進み具合。AIが考えている間は目安の時間に対する経過、書き出しに入ったら作った数を出す */
+.plan-import-progress{display:grid;gap:6px;margin-top:8px;padding:10px;background:#0b1226;border:1px solid #24385f;border-radius:6px}
+.plan-import-progress[hidden]{display:none}
+.plan-import-progress-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#dfe6f5;font-weight:600}
+.plan-import-progress-head span:last-child{font-variant-numeric:tabular-nums;color:#aab4c8;font-weight:400}
+.plan-import-progress-bar{height:6px;border-radius:3px;background:#1c2a48;overflow:hidden}
+.plan-import-progress-bar i{display:block;height:100%;width:0;background:#4f8cff;transition:width .6s ease}
+.plan-import-confirm{display:grid;gap:8px;margin-top:8px;padding:10px;border:1px solid #4f8cff;border-radius:6px;background:rgba(79,140,255,0.08);font-weight:600}
+.plan-import-confirm[hidden]{display:none}
+.plan-import-progress-thought{color:#8f9bb3;font-size:12px;line-height:1.5;max-height:3em;overflow:hidden}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
 /* JIS図面出力モーダル: 印刷プレビューなので常に白背景・ダイアログchromeのみ既存モーダル配色を踏襲 */
@@ -3545,13 +3555,17 @@ input[type="reset"]:focus-visible{
     <div id="plan-import-step2" style="display:none">
       <!-- 囲む操作は**任意**。何もせずそのまま読み取れる。紙面の一部にしか
            図面が写っていない画像のときだけ、囲むと精度が上がる。
-           PDF はそのまま送るので、この枠ごと出さない。 -->
+           PDF は図面の位置を AI が探して、その範囲を囲んだ状態で出す（ずれていれば直せる）。 -->
       <div id="plan-import-crop">
         <div class="ph">2. 図面の部分を囲む（任意）</div>
+        <div id="plan-import-pages" class="unity-render-actions" style="display:none">
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportPage(-1)">前のページ</button>
+          <span id="plan-import-page-label" class="airx-source-note"></span>
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportPage(1)">次のページ</button>
+        </div>
         <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
         <div class="unity-render-actions">
           <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
-          <span id="plan-import-crop-size" class="airx-source-note"></span>
         </div>
       </div>
       <div class="unity-render-config">
@@ -3566,6 +3580,12 @@ input[type="reset"]:focus-visible{
     </div>
 
     <div id="plan-import-status" class="unity-render-status"></div>
+    <div id="plan-import-progress" class="plan-import-progress" hidden aria-live="polite">
+      <div class="plan-import-progress-head"><span id="plan-import-progress-phase"></span><span id="plan-import-progress-time"></span></div>
+      <div class="plan-import-progress-bar"><i id="plan-import-progress-fill"></i></div>
+      <div id="plan-import-progress-made" class="airx-source-note"></div>
+      <div id="plan-import-progress-thought" class="plan-import-progress-thought"></div>
+    </div>
 
     <div id="plan-import-step3" style="display:none">
       <div class="ph">3. できた下書き</div>
@@ -3574,6 +3594,13 @@ input[type="reset"]:focus-visible{
       <div id="plan-import-rooms" class="unity-render-cmd"></div>
       <div class="ph">AIが直したこと・読めなかったこと</div>
       <div id="plan-import-notes" class="unity-render-cmd"></div>
+      <div id="plan-import-confirm" class="plan-import-confirm" hidden>
+        <div id="plan-import-confirm-text"></div>
+        <div class="unity-render-actions">
+          <button id="plan-import-confirm-yes" class="pbtn" style="width:auto;padding:7px 14px" onclick="applyPlanImport('confirmed')">取り込む</button>
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="cancelPlanImportApply()">やめる</button>
+        </div>
+      </div>
       <div class="unity-render-actions">
         <button id="plan-import-apply" class="pbtn" style="width:auto;padding:7px 14px" onclick="applyPlanImport()">この下書きを取り込む</button>
       </div>
@@ -3793,6 +3820,9 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/room-program.js"></script>
 <script src="assets/js/plan-check.js"></script>
 <script src="assets/js/plan-finish.js"></script>
+<script src="assets/js/plan-settable.js"></script>
+<script src="assets/js/plan-free-apply.js"></script>
+<script src="assets/js/plan-snapshot.js"></script>
 <script src="assets/js/plan-import.js"></script>
 <script>
 // ───── 3D ENGINE ─────

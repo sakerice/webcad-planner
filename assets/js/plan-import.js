@@ -32,7 +32,8 @@
 
   var ST = {
     image: null,        // 読み込んだ画像 (Image)
-    pages: null,        // PDFを選んだとき、ページごとの画像 (data URL の配列)
+    pages: null,        // PDFを選んだとき、ページごとの画像 (data URL の配列。ページ全体)
+    pdf: null,          // PDFを選んだとき {data, previews: [Image], boxes: [{x0,y0,x1,y1} ページに対する割合], page}
     fileName: '',
     crop: null,         // 切り出し範囲 {x,y,w,h} 画像の画素で
     drag: null,         // 囲んでいる最中の状態
@@ -68,7 +69,8 @@
       if (!q || !q.counted || q.left === null || q.left === undefined) { box.style.display = 'none'; return; }
       box.style.display = '';
       box.textContent = q.left > 0
-        ? '本日あと ' + q.left + ' 回 読み取れます（1日に ひとり ' + q.perUser + ' 回まで／全体 ' + q.total + ' 回まで）'
+        // 使う人に要るのは「あと何回できるか」だけ。上限の内訳（ひとり・全体）は運営側の事情なので出さない。
+        ? '本日あと ' + q.left + ' 回 読み取れます'
         : '本日ぶんの読み取りを使い切りました。明日またお試しください。';
       var run = $('plan-import-run');
       if (run && q.left <= 0) run.disabled = true;
@@ -81,7 +83,7 @@
   }
 
   function resetPlanImport() {
-    ST.image = null; ST.pages = null; ST.fileName = '';
+    ST.image = null; ST.pages = null; ST.pdf = null; ST.fileName = '';
     ST.crop = null; ST.drag = null; ST.result = null; ST.busy = false;
     var f = $('plan-import-file'); if (f) f.value = '';
     show('plan-import-step2', false);
@@ -132,7 +134,7 @@
     if (file.type === 'application/pdf' || /\.pdf$/i.test(ST.fileName)) {
       var pdfReader = new FileReader();
       pdfReader.onload = function (e) {
-        ST.image = null; ST.crop = null; ST.result = null; ST.pages = null;
+        ST.image = null; ST.crop = null; ST.result = null; ST.pages = null; ST.pdf = null;
         setStatus('PDFを開いています…');
         if (typeof PdfPages === 'undefined' || !PdfPages) {
           setStatus('PDFを開く部品がありません。画像にしてからお試しください。');
@@ -152,34 +154,28 @@
             return pages;
           });
         }).then(function (pages) {
-          if (!pages || !pages.length) return [];
-          // ページごとに、図面の部分だけを高い解像度で描き直す。
-          //
-          // 位置はまとめて聞く。順番に聞くと、1ページぶんの待ちがページ数だけ
-          // 積み上がる。描き直しはこちらの処理なので、聞き終えてから順に行う。
+          if (!pages || !pages.length) return;
+          // ページごとに図面の位置を AI に聞き、その範囲を最初から選んだ状態で見せる。
+          // 利用者は何もしなくてよい。位置がずれていたときだけ囲み直せる（2026-10-20 利用者の要望:
+          // PDF でも読み取る範囲が見えて、直せること）。位置はまとめて聞く。順番に聞くと、
+          // 1ページぶんの待ちがページ数だけ積み上がる。
           setStatus('図面の位置を探しています…');
-          var out = pages.slice();
           return Promise.all(pages.map(function (page, i) {
             return locate((smalls && smalls[i]) || page);
           })).then(function (boxes) {
-            var next = function (i) {
-              if (i >= pages.length) return out;
-              if (!boxes[i]) return next(i + 1);
-              setStatus('図面を切り出しています… ' + (i + 1) + ' / ' + pages.length + 'ページ');
-              return PdfPages.renderRegion(pdfData, i + 1, boxes[i], { maxPx: MAX_SEND_PX })
-                .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })
-                .catch(function () { return next(i + 1); });
-            };
-            return Promise.resolve(next(0));
+            return Promise.all((smalls || pages).map(loadImage)).then(function (previews) {
+              ST.pages = pages;
+              ST.pdf = { data: pdfData, previews: previews, boxes: boxes.map(function (b) { return b ? { x0: b.x0, y0: b.y0, x1: b.x1, y1: b.y1 } : FULL_PAGE; }), page: 0 };
+              show('plan-import-step2', true);
+              show('plan-import-crop', true);
+              show('plan-import-step3', false);
+              showPdfPage(0);
+              setStatus(pages.length > 1
+                ? pages.length + 'ページを読み取ります。図面の部分を囲んであります。ずれていたら囲み直してください（ページは「次のページ」で切り替え）。'
+                : '図面の部分を囲んであります。ずれていたら囲み直してください。');
+              syncPlanImportButtons();
+            });
           });
-        }).then(function (pages) {
-          if (!pages || !pages.length) return;
-          ST.pages = pages;
-          show('plan-import-step2', true);
-          show('plan-import-crop', false);
-          show('plan-import-step3', false);
-          setStatus(pages.length + 'ページを読み取ります。');
-          syncPlanImportButtons();
         }).catch(function (err) {
           setStatus('PDFを開けませんでした: ' + (err && err.message ? err.message : err));
           syncPlanImportButtons();
@@ -198,7 +194,7 @@
     reader.onload = function (e) {
       var img = new Image();
       img.onload = function () {
-        ST.image = img; ST.pages = null;
+        ST.image = img; ST.pages = null; ST.pdf = null;
         // 最初は全体を選んでおく。狭めるのは利用者の任意。
         ST.crop = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
         ST.result = null;
@@ -219,6 +215,90 @@
 
   // ── 2. 図面の部分を囲む ────────────────────────────────────────────
   // プレビューの表示倍率。画像の画素 → 画面の画素。
+  var FULL_PAGE = { x0: 0, y0: 0, x1: 1, y1: 1 };
+
+  function loadImage(url) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  // PDF のいま見ているページを囲む画面に出す。囲みはページに対する割合で覚えておき、
+  // 画面の画素（ST.crop）とはここで行き来する。
+  function showPdfPage(i) {
+    var pdf = ST.pdf;
+    if (!pdf) return;
+    savePdfCrop();
+    pdf.page = Math.max(0, Math.min(pdf.previews.length - 1, i));
+    var img = pdf.previews[pdf.page], b = pdf.boxes[pdf.page];
+    ST.image = img;
+    ST.crop = { x: b.x0 * img.naturalWidth, y: b.y0 * img.naturalHeight, w: (b.x1 - b.x0) * img.naturalWidth, h: (b.y1 - b.y0) * img.naturalHeight };
+    var nav = $('plan-import-pages');
+    if (nav) {
+      nav.style.display = pdf.previews.length > 1 ? '' : 'none';
+      var label = $('plan-import-page-label');
+      if (label) label.textContent = (pdf.page + 1) + ' / ' + pdf.previews.length + 'ページ';
+    }
+    drawPlanImportPreview();
+  }
+
+  function savePdfCrop() {
+    var pdf = ST.pdf;
+    if (!pdf || !ST.image || !ST.crop || ST.image !== pdf.previews[pdf.page]) return;
+    var W = ST.image.naturalWidth, H = ST.image.naturalHeight, r = ST.crop;
+    pdf.boxes[pdf.page] = { x0: r.x / W, y0: r.y / H, x1: (r.x + r.w) / W, y1: (r.y + r.h) / H };
+  }
+
+  function planImportPage(step) {
+    if (ST.pdf) showPdfPage(ST.pdf.page + step);
+  }
+
+  // AI が受け取れる大きさに収める（Claude は1枚あたり約5MB・1回の送信全体で約32MB まで。
+  // 超えると断られ、何度試しても通らない）。色の多いスキャンや写真の PNG は大きくなるので、
+  // 上限を超えるものだけ JPEG にし、それでも大きければ縮める。線画の PNG はほとんど小さいまま。
+  // 1枚あたりの上限は、最大8ページと見直しの撮影を足しても全体の上限に収まる大きさにしてある。
+  var MAX_SEND_B64 = 3.5 * 1024 * 1024;
+  function fitForAi(url) {
+    if (String(url).length <= MAX_SEND_B64) return Promise.resolve(url);
+    return loadImage(url).then(function (img) {
+      var encode = function (scale) {
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        var g = c.getContext('2d');
+        g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(img, 0, 0, c.width, c.height);
+        return c.toDataURL('image/jpeg', 0.9);
+      };
+      var scale = 1, out = encode(scale);
+      while (out.length > MAX_SEND_B64 && scale > 0.3) { scale *= 0.8; out = encode(scale); }
+      return out;
+    }).catch(function () { return url; });
+  }
+
+  // 送る画像。PDF は囲んだ範囲をページから高い解像度で描き直す（ページ全体ならそのまま）。
+  // 画像は囲んだ範囲を切り出す（囲んでいなければ全体）。どちらも AI が受け取れる大きさに収める。
+  function imagesToSend() {
+    return collectImages().then(function (list) { return Promise.all(list.map(fitForAi)); });
+  }
+  function collectImages() {
+    if (!ST.pdf) { var one = croppedDataUrl(); return Promise.resolve(one ? [one] : []); }
+    savePdfCrop();
+    var pdf = ST.pdf, out = ST.pages.slice();
+    var next = function (i) {
+      if (i >= out.length) return out;
+      var b = pdf.boxes[i];
+      if ((b.x1 - b.x0) * (b.y1 - b.y0) > 0.97) return next(i + 1);
+      return PdfPages.renderRegion(pdf.data, i + 1, b, { maxPx: MAX_SEND_PX })
+        .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })
+        .catch(function () { return next(i + 1); });
+    };
+    return Promise.resolve(next(0));
+  }
+
   function previewScale() {
     if (!ST.image) return 1;
     var long = Math.max(ST.image.naturalWidth, ST.image.naturalHeight);
@@ -306,6 +386,7 @@
       ST.crop = { x: ST.drag.x, y: ST.drag.y, w: ST.drag.w, h: ST.drag.h };
     }
     ST.drag = null;
+    savePdfCrop();
     drawPlanImportPreview();
     syncPlanImportButtons();
   }
@@ -313,6 +394,7 @@
   function planImportSelectAll() {
     if (!ST.image) return;
     ST.crop = { x: 0, y: 0, w: ST.image.naturalWidth, h: ST.image.naturalHeight };
+    savePdfCrop();
     drawPlanImportPreview();
     syncPlanImportButtons();
   }
@@ -340,26 +422,46 @@
     if (run) run.disabled = (!ST.image && !ST.pages) || ST.busy;
     var apply = $('plan-import-apply');
     if (apply) apply.disabled = !ST.result || ST.busy;
-    var size = $('plan-import-crop-size');
-    if (size && ST.crop) {
-      var scale = Math.min(1, MAX_SEND_PX / Math.max(ST.crop.w, ST.crop.h));
-      size.textContent = '送る範囲: ' + Math.round(ST.crop.w) + '×' + Math.round(ST.crop.h) +
-        ' 画素 → ' + Math.round(ST.crop.w * scale) + '×' + Math.round(ST.crop.h * scale) + ' に縮めて送信';
-    }
   }
 
   // ── 3. 読み取る ────────────────────────────────────────────────────
   function runPlanImport() {
-    if (ST.busy) return;
-    // PDFはページごとの画像、画像は切り出して(囲んでいなければ全体を)送る。
-    var images = ST.pages || (function () { var one = croppedDataUrl(); return one ? [one] : []; }());
-    if (!images.length) return;
+    if (ST.busy || (!ST.image && !ST.pages)) return;
     ST.busy = true; ST.result = null;
     show('plan-import-step3', false);
     syncPlanImportButtons();
-    setStatus('読み取っています… 図面1枚で30秒ほどかかります。');
+    setStatus('読み取りの準備をしています…');
 
     var hint = ($('plan-import-hint') && $('plan-import-hint').value) || '';
+    var images = null;
+    // 短い指示で読む経路（Claude）を先に試す。使えない環境（鍵が無い）では、これまでの読み取りへ戻る。
+    imagesToSend().then(function (list) {
+      images = list;
+      if (!images.length) return { status: 400, body: { error: 'no_image' } };
+      return readPlanStream(images, hint);
+    }).then(function (r) {
+      if (r && r.unavailable) return runLegacyPlanImport(images, hint);
+      ST.busy = false;
+      showProgress(false);
+      if (!r || r.status !== 200) {
+        show('plan-import-step2', true);
+        showPlanImportError(r ? r.status : 0, r ? r.body : null); syncPlanImportButtons(); showQuota(); return;
+      }
+      ST.result = r.body;
+      renderPlanImportResult(r.body);
+      syncPlanImportButtons();
+      showQuota();
+    }).catch(function () {
+      ST.busy = false;
+      showProgress(false);
+      setStatus('サーバに接続できませんでした。通信の状態を確かめて、もう一度お試しください。');
+      syncPlanImportButtons();
+      showQuota();
+    });
+  }
+
+  // これまでの読み取り（手順で縛った指示を1ページずつ。OpenAI / Vertex）。Claude の鍵が無い環境で使う。
+  function runLegacyPlanImport(images, hint) {
     fetch('/api/ai/import-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -408,6 +510,210 @@
   var JOB_TIMEOUT_MS = 15 * 60 * 1000;
 
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  // ── 短い指示での読み取り（Claude、答えを少しずつ受け取る） ────────────
+  //
+  // Worker は Anthropic の返事（SSE）を読み解かずにそのまま流してくる。ここで読み、
+  //   考えている間  … 目安の時間に対する経過と、考えている内容の要約
+  //   書き出し中    … 何階の何を、いくつ作ったか
+  // を出す。答えを少しずつ受け取っても、費用はまとめて受け取るときと同じ。
+  //
+  // 目安の時間は図面の枚数から出す（2026-10-19 実測: 3枚で約3分、ほとんどが考えている時間）。
+  var READ_SECONDS_PER_PAGE = 60;
+  var ANSWER_CHARS_PER_PAGE = 2800;
+
+  // 読み取り中は、図面を囲む欄をたたんで進み具合を見える位置に出す。図面のプレビューが
+  // 大きいと、進み具合がダイアログの下に押し出されて「何も起きていない」ように見える。
+  function showProgress(on) {
+    var box = $('plan-import-progress');
+    if (!box) return;
+    box.hidden = !on;
+    if (on) {
+      show('plan-import-step2', false);
+      if (box.scrollIntoView) box.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  // 段階: 1 読み取り → 2 組み立てた家を3Dで見せて見直し。目安の時間は両方を合わせて出す。
+  var STAGE_LABEL = { read: '1/2 読み取り', review: '2/2 3Dで見直し' };
+
+  function renderProgress(p) {
+    var elapsed = Math.round((Date.now() - p.started) / 1000);
+    var estimate = Math.max(30, p.pages * READ_SECONDS_PER_PAGE) * (p.withReview ? 2 : 1);
+    var mmss = function (sec) { return Math.floor(sec / 60) + '分' + String(sec % 60).padStart(2, '0') + '秒'; };
+    var stageElapsed = Math.round((Date.now() - p.stageStarted) / 1000);
+    var stageEstimate = Math.max(30, p.pages * READ_SECONDS_PER_PAGE);
+    var base = p.stage === 'review' ? 50 : 0, span = p.withReview ? 50 : 100;
+    var fill, phase;
+    if (p.stage === 'capture') {
+      phase = '読み取った家を組み立てて、平面図と3Dを撮っています';
+      fill = 50;
+    } else if (!p.answer) {
+      phase = p.stage === 'review' ? '組み立てた家を図面と見比べています' : '図面を読み、間取りを考えています';
+      // 考えている間は、その段階の目安の 7 割までしか進めない。書き出しに入ってから残りを埋める。
+      fill = base + Math.min(0.7, 0.7 * stageElapsed / (stageEstimate * 0.7)) * span;
+    } else {
+      var made = (typeof PlanFreeApply !== 'undefined') ? PlanFreeApply.progressOf(p.answer) : null;
+      var SECTION = { walls: '壁', rooms: '部屋', openings: '窓・扉', stairs: '階段', roofs: '屋根', objects: '家具・設備' };
+      var verb = p.stage === 'review' ? 'を直しています' : 'を置いています';
+      phase = made && made.floor ? made.floor + '階の' + (SECTION[made.section] || '間取り') + verb : '間取りを書き出しています';
+      fill = base + (0.7 + Math.min(0.28, 0.28 * p.answer.length / (p.pages * ANSWER_CHARS_PER_PAGE))) * span;
+      if (made) {
+        $('plan-import-progress-made').textContent = (p.stage === 'review' ? '直したあとの数: ' : '作ったもの: ') + '壁 ' + made.walls + ' / 部屋 ' + made.rooms
+          + ' / 窓・扉 ' + made.openings + ' / 家具・設備 ' + made.objects;
+      }
+    }
+    if (p.withReview) phase = STAGE_LABEL[p.stage === 'capture' ? 'review' : p.stage] + '：' + phase;
+    $('plan-import-progress-phase').textContent = phase;
+    $('plan-import-progress-time').textContent = '経過 ' + mmss(elapsed) + '（目安 ' + mmss(estimate) + '）';
+    $('plan-import-progress-fill').style.width = Math.min(99, fill).toFixed(1) + '%';
+    // 利用者に見せるのは、日本語で、座標や寸法の数字が並んでいない行だけ（作業の様子が伝わればよく、
+    // 数字の列は利用者の役に立たない）。考えの要約が英語で来ることもある（2026-10-19 実測）。
+    var shown = function (line) { return /[぀-ヿ一-鿿]/.test(line) && (line.match(/\d+/g) || []).length < 2; };
+    var thought = String(p.thought || '').trim().split(/\n+/).filter(shown).pop() || '';
+    $('plan-import-progress-thought').textContent = thought ? 'AIのメモ: ' + thought.slice(-160) : '';
+  }
+
+  // 1つの SSE の出来事（data: {...}）を読み、進み具合に足す。
+  function takeStreamEvent(p, data) {
+    var ev;
+    try { ev = JSON.parse(data); } catch (e) { return; }
+    if (ev.type === 'content_block_delta' && ev.delta) {
+      if (ev.delta.type === 'thinking_delta') p.thought += ev.delta.thinking || '';
+      else if (ev.delta.type === 'text_delta') p.answer += ev.delta.text || '';
+    } else if (ev.type === 'message_start' && ev.message && ev.message.usage) {
+      p.usage.inputTokens += (ev.message.usage.input_tokens || 0) + (ev.message.usage.cache_read_input_tokens || 0)
+        + (ev.message.usage.cache_creation_input_tokens || 0);
+    } else if (ev.type === 'message_delta') {
+      if (ev.usage) p.stageOutput = ev.usage.output_tokens || 0;
+      if (ev.delta && ev.delta.stop_reason) p.stopReason = ev.delta.stop_reason;
+    } else if (ev.type === 'error') {
+      p.error = (ev.error && ev.error.message) || 'AI 側で失敗しました。';
+    }
+  }
+
+  // 1回分の問い合わせを、答えが届ききるまで読む。
+  //   { unavailable: true }  … この環境では使えない（404）
+  //   { status, body }       … Worker が断った・失敗した
+  //   { answer }             … 届いた答え（JSON として読めたもの）
+  //   { error, code }        … 届いたが読めなかった（code で次の一手の文面を分ける。showPlanImportError）
+  function streamAnswer(url, payload, p) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).then(function (res) {
+      if (res.status === 404) return { unavailable: true };
+      if (!res.ok || !res.body) return readReply(res);
+      p.thought = ''; p.answer = ''; p.stopReason = ''; p.error = ''; p.stageOutput = 0;
+      var reader = res.body.getReader(), decoder = new TextDecoder(), buf = '';
+      function pump() {
+        return reader.read().then(function (chunk) {
+          if (chunk.done) return;
+          buf += decoder.decode(chunk.value, { stream: true });
+          var cut;
+          while ((cut = buf.indexOf('\n\n')) >= 0) {
+            var block = buf.slice(0, cut); buf = buf.slice(cut + 2);
+            block.split('\n').forEach(function (line) {
+              if (line.indexOf('data:') === 0) takeStreamEvent(p, line.slice(5).trim());
+            });
+          }
+          return pump();
+        });
+      }
+      return pump().then(function () {
+        p.usage.outputTokens += p.stageOutput;
+        // 途中で AI 側が止まった（混雑など）・断った・答えが切れた・読めなかった、は次の一手が違う。
+        if (p.error) return { error: p.error, code: 'ai_upstream_error' };
+        if (p.stopReason === 'refusal') return { error: 'refused', code: 'ai_refused' };
+        try { return { answer: JSON.parse(p.answer) }; } catch (e) {
+          return { error: 'unreadable', code: p.stopReason === 'max_tokens' ? 'ai_truncated' : 'ai_bad_response' };
+        }
+      });
+    });
+  }
+
+  function catalogueTags() {
+    return (typeof CATALOGUE_TAGS !== 'undefined' && CATALOGUE_TAGS && CATALOGUE_TAGS.items) || {};
+  }
+
+  // 答えを、取り込んだときと同じ形（基礎・屋根まで）に組み立てる。3Dで撮るため。
+  function assembleForSnapshot(importPlan) {
+    var read = toAppObjects(importPlan);
+    var made = structureItems(read.walls, null);
+    if (read.items.some(function (it) { return it.type === 'roof'; })) made = made.filter(function (st) { return st.type !== 'roof'; });
+    return { walls: read.walls, rooms: read.rooms, items: read.items.concat(made) };
+  }
+
+  function readPlanStream(images, hint) {
+    var withReview = typeof PlanSnapshot !== 'undefined' && PlanSnapshot.available();
+    var p = { started: Date.now(), stageStarted: Date.now(), stage: 'read', withReview: withReview, pages: images.length,
+      thought: '', answer: '', usage: { calls: 0, inputTokens: 0, outputTokens: 0 }, stopReason: '', error: '', stageOutput: 0 };
+    var timer = null;
+    var startUi = function () {
+      if (timer) return;
+      setStatus('');
+      showProgress(true);
+      renderProgress(p);
+      timer = setInterval(function () { renderProgress(p); }, 500);
+    };
+    var stop = function () { if (timer) { clearInterval(timer); timer = null; } };
+    startUi();
+    return streamAnswer('/api/ai/read-plan', { images: images, hint: hint }, p).then(function (r) {
+      if (r.unavailable || r.status) {
+        stop();
+        // この環境では使えない・断られた: 進み具合を閉じ、図面の欄を戻す（これまでの読み取りやり直しに備える）。
+        showProgress(false);
+        show('plan-import-step2', true);
+        return r;
+      }
+      p.usage.calls++;
+      if (r.error) { stop(); return { status: 502, body: { error: r.code || 'ai_bad_response' } }; }
+      var first = r.answer;
+      if (!withReview) { stop(); return finishPlanStream(p, first, { review: 'off' }); }
+
+      // ── 2. 組み立てた家を撮って、AI 自身に見直させる ──────────────────
+      p.stage = 'capture'; p.stageStarted = Date.now(); renderProgress(p);
+      var tags = catalogueTags();
+      var draft = PlanFreeApply.toImportPlan(first, tags, { keepOffWall: true });
+      var facts = PlanFreeApply.factsOf(draft, first);
+      var shots = null;
+      try { shots = PlanSnapshot.capture(assembleForSnapshot(draft)); } catch (e) { shots = null; }
+      var list = shots ? shots.plans.map(function (s) { return { label: s.floor + '階 平面図', image: s.url }; })
+        .concat(shots.views.map(function (s) { return { label: '外観3D ' + s.name, image: s.url }; })) : [];
+      if (!list.length) { stop(); return finishPlanStream(p, first, { review: 'failed' }); }
+      p.stage = 'review'; p.stageStarted = Date.now(); renderProgress(p);
+      return streamAnswer('/api/ai/review-plan-3d', { images: images, shots: list, answer: first, facts: facts, hint: hint }, p)
+        .then(function (r2) {
+          stop();
+          if (r2.answer) { p.usage.calls++; return finishPlanStream(p, r2.answer, { review: 'done' }); }
+          if (r2.status !== 429) p.usage.calls += r2.error ? 1 : 0;
+          return finishPlanStream(p, first, { review: 'failed' });
+        }, function () {
+          stop();
+          return finishPlanStream(p, first, { review: 'failed' });
+        });
+    }, function (e) { stop(); throw e; });
+  }
+
+  // 届ききった答えを、取り込みの形（renderPlanImportResult が受ける形）にする。
+  function finishPlanStream(p, answer, extra) {
+    var plan = PlanFreeApply.toImportPlan(answer, catalogueTags());
+    if (!plan.walls.length) {
+      return { status: 422, body: { error: 'ai_invalid_plan', message: '図面から壁を読み取れませんでした。平面図のページか確かめてください。' } };
+    }
+    var summary = (typeof PlanSchema !== 'undefined' && PlanSchema.summarize) ? PlanSchema.summarize(plan)
+      : { walls: plan.walls.length, rooms: plan.rooms.length, items: plan.items.length };
+    // 利用者に見せるのは、利用者が知って役に立つことだけ（AI の作業メモや、見直しの成否は出さない）。
+    // 見直しの成否（review: done / failed / off）は測る道具（tools/plan-eval/run.mjs）のためで、画面には出さない。
+    var review = (extra && extra.review) || 'off';
+    var notes = plan.userNotes.slice(0, 20);
+    if (review === 'done') notes.unshift('立体にして図面と見比べ、整えました。');
+    return { status: 200, body: {
+      plan: plan, summary: summary, marks: [], warnings: [], notes: notes,
+      usage: p.usage, freeRead: true, review: review,
+    } };
+  }
 
   // 受付番号が入っていなければ、そのまま返す（Vertex は投げた通信で答えが返る）。
   function waitForJobs(first, opts) {
@@ -589,9 +895,13 @@
       ai_model_not_japan_resident: 'AIの設定が正しくないため実行しませんでした。管理者にお伝えください。',
       ai_invalid_plan: 'AIは読み取りましたが、そのままでは使えない形でした。',
       ai_bad_response: 'AIが間取りとして答えられませんでした。',
+      ai_truncated: '図面の情報が多く、AIの答えが途中で切れました。ページを分けて読み取ってください。',
+      ai_refused: 'AIがこの図面の読み取りを断りました。間取り図のページか確かめてください。',
       ai_upstream_error: 'AI側でエラーが起きました。少し待ってからもう一度お試しください。',
       ai_quota_exceeded: '',   // message をそのまま出す（残り回数を含むため）
       invalid_request: '送った画像に問題がありました。',
+      no_image: '読み取る範囲がありません。図面の部分を囲み直してください。',
+      image_too_large: '図面の画像が大きすぎます。ページ数を減らすか、図面の部分だけを囲んでからお試しください。',
     };
     var byStatus = {
       500: 'サーバ側でエラーが起きました。少し待ってからもう一度お試しください。',
@@ -624,12 +934,14 @@
   }
 
   function renderPlanImportResult(body) {
+    // 新しい下書きのたびに、取り込みのボタンを出し直し、前の確認は閉じる。
+    hideApplyConfirm();
     var s = body.summary || {};
     setStatus('下書きができました。取り込んだあと、手で直して仕上げてください。');
     var head = $('plan-import-summary');
     if (head) {
       head.textContent = '壁 ' + (s.walls || 0) + ' / 部屋 ' + (s.rooms || 0) +
-        ' / 開口・階段 ' + (s.items || 0) + '（階 ' + ((s.floors || []).join('・') || '-') + '）';
+        (body.freeRead ? ' / 建具・階段・家具など ' : ' / 開口・階段 ') + (s.items || 0) + '（階 ' + ((s.floors || []).join('・') || '-') + '）';
     }
     var list = $('plan-import-rooms');
     if (list) {
@@ -643,20 +955,10 @@
     }
     // 1回いくらかかったかを、毎回その場で見せる。推定ではなく実測の
     // トークン数から出す。費用は使う側からは見えないので、見えるようにする。
+    // 費用・トークン数は利用者の画面に出さない（利用者にとって必要の無い、開発の都合の情報）。
+    // 測定に要る値は body.usage に残してある。
     var cost = $('plan-import-cost');
-    if (cost) {
-      var u = body.usage;
-      if (u && u.inputTokens) {
-        // 単価は gpt-6-astra（$10 / $50 per 1M）。$1=¥150 と置いた概算。
-        // **モデルを替えたらここも替える。** 実際より安く見えるのが一番まずい。
-        var yen = (u.inputTokens / 1e6 * 10 + u.outputTokens / 1e6 * 50) * 150;
-        cost.textContent = 'この読み取りの費用: 約 ' + yen.toFixed(1) + '円'
-          + '（入力 ' + u.inputTokens + ' / 出力 ' + u.outputTokens
-          + (u.thoughtTokens ? '（うち思考 ' + u.thoughtTokens + '）' : '') + ' トークン）';
-      } else {
-        cost.textContent = '';
-      }
-    }
+    if (cost) cost.textContent = '';
     var notes = $('plan-import-notes');
     if (notes) {
       var lines = [];
@@ -669,9 +971,7 @@
       // **省いたことも書く。** 費用を見せている以上、払わなかった理由も
       // 見えているべきである。黙って省くと、見直しが動かなくなったのか
       // 省いたのかが、使う側から区別できない。
-      if (body.reviewSkipped) {
-        lines.push('・読み取りの辻褄が合っていたので、見直しは省きました（その分の費用と時間はかかっていません）。');
-      }
+      // 見直しを省いたことは利用者に関係が無いので出さない。
       // 仕上げの見通し。**取り込む前に、このあと何が起きるかを出す。**
       if (body.finish) {
         var swaps = (body.finish.picks || []).length;
@@ -723,6 +1023,8 @@
     var out = { walls: [], rooms: [], items: [] };
     (plan.walls || []).forEach(function (w) {
       var made = mkWall(w.x1, w.y1, w.x2, w.y2, w.floor || 1, w.thick);
+      if (w.wallStyle) made.wallStyle = w.wallStyle;   // 手すり壁（balcony-fence）など
+      mergeExtra(made, w.extra);                        // 壁の高さなど（assets/js/plan-settable.js の項目）
       out.walls.push(made);
     });
     (plan.rooms || []).forEach(function (r) {
@@ -735,8 +1037,17 @@
       // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
       // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
       if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;
+      mergeExtra(made, r.extra);                        // 床材・天井高・吹抜け
       out.rooms.push(made);
     });
+    // 敷地（境界・地面・駐車スペースなどの区画）。図面に描かれていたときだけ。
+    if (plan.site) {
+      var s = plan.site;
+      var site = mkItem('site-rect', s.x, s.y, 0, 1, s.w, s.d);
+      site.name = '敷地境界（土地全体）'; site.siteBoundary = true; site.siteSurface = s.surface;
+      site.siteZones = (s.zones || []).map(function (z) { return { name: z.name, x: z.x, y: z.y, w: z.w, d: z.d, surface: z.surface }; });
+      out.items.push(site);
+    }
     // 構造部材（基礎・屋根）はここでは作らない。**いまの間取りと合わせた
     // 壁から決まる**ので、階を差し替えたあと withStructure で作る。
     (plan.items || []).forEach(function (it) {
@@ -753,9 +1064,16 @@
         if (d == null) d = sz.d;
       }
       var made = mkItem(it.type, it.x - w / 2, it.y - d / 2, it.rot || 0, it.floor || 1, it.w, it.d);
+      // 短い指示の読み取りは、扉の吊り元・開く側（flipX/flipY）、閉じた状態、モデルの正面軸などを
+      // extra に持ってくる（assets/js/plan-free-apply.js）。mkItem の既定値の上に重ねる。
+      mergeExtra(made, it.extra);
       out.items.push(made);
     });
     return out;
+  }
+
+  function mergeExtra(made, extra) {
+    if (extra && typeof extra === 'object') Object.keys(extra).forEach(function (k) { made[k] = extra[k]; });
   }
 
   // その間取りに出てくる階。
@@ -763,6 +1081,10 @@
     var seen = [];
     for (var i = 0; i < arguments.length; i++) {
       (arguments[i] || []).forEach(function (o) {
+        // 屋根は「その下の階の上」に載る物で、floor は1つ上の数になる（3階建ての屋根は 4）。
+        // 階として数えると、確認の文に無い「4階」が出る。
+        // 敷地も階の物ではない（1階として数えると、2階だけ読んだときに確認の文へ「1階」が出る）。
+        if (o && (o.type === 'roof' || o.type === 'site-rect')) return;
         var f = Number(o && o.floor) || 1;
         if (seen.indexOf(f) < 0) seen.push(f);
       });
@@ -805,7 +1127,7 @@
   // 形や勾配は手で直せるが、どこに載るかは壁が決める。
   function isDerivedStructure(o) { return !!o && (o.type === 'foundation' || o.type === 'roof'); }
 
-  // 敷地と周辺（道路・隣家・電柱）。平面図には描かれていない。
+  // 敷地と周辺（道路・隣家・電柱）。間取りの階の中身ではない（敷地は読み取りが答えることもある）。
   function isSiteOrContext(o) {
     return !!o && (o.type === 'site-rect' ||
       (typeof isContextExteriorItemType === 'function' && isContextExteriorItemType(o.type)));
@@ -868,7 +1190,26 @@
       (typeof HISTORY === 'undefined' || !HISTORY || !HISTORY.length);
   }
 
-  function applyPlanImport() {
+  // 取り込みの確認は、ダイアログの中に出す。ブラウザの確認の窓（confirm）は、アプリに埋め込まれた
+  // 画面などで表示されずに「いいえ」が返ることがあり、押しても何も起きないように見えた（2026-10-19）。
+  function showApplyConfirm(text) {
+    var box = $('plan-import-confirm');
+    if (!box) return;
+    $('plan-import-confirm-text').textContent = text;
+    box.hidden = false;
+    show('plan-import-apply', false);
+    if (box.scrollIntoView) box.scrollIntoView({ block: 'nearest' });
+  }
+  function hideApplyConfirm() {
+    var box = $('plan-import-confirm');
+    if (box) box.hidden = true;
+    show('plan-import-apply', true);
+  }
+  function cancelPlanImportApply() { hideApplyConfirm(); }
+
+  // mode: 省略（押したとき）→ 確認が要れば確認を出す。'confirmed'（確認で「取り込む」）→
+  // 「取り込んでいます」を出して画面を描かせてから 'go' で組み立てる。
+  function applyPlanImport(mode) {
     if (!ST.result || !ST.result.plan) return;
     if (typeof DATA === 'undefined' || !DATA) return;
     // 水まわりの既定モデルを、部屋に合うものへ差し替えてから組み立てる。
@@ -885,6 +1226,10 @@
     var fresh = isUntouchedDefault();
     var base = fresh ? { walls: [], rooms: [], items: [] } : DATA;
     var beside = hasWorkOnFloors(base, readFloors);
+    // 敷地はひとつ。いまの間取りに敷地があれば、そちらを残す（利用者が整えた外構を消さない）。
+    if ((base.items || []).some(function (o) { return o && o.type === 'site-rect'; })) {
+      read.items = read.items.filter(function (o) { return o.type !== 'site-rect'; });
+    }
 
     // 何が起きるのかを、押す前に言う。
     if ((DATA.walls || []).length || (DATA.rooms || []).length) {
@@ -895,7 +1240,16 @@
             + '読み取った下書きをその右隣に建てます。よろしいですか？'
             + '（見比べて、要らないほうを消してください）'
           : '読み取った下書き（' + floorLabel(readFloors) + '）を、いまの間取りに足します。よろしいですか？';
-      if (!confirm(ask)) return;
+      if (mode !== 'confirmed' && mode !== 'go') { showApplyConfirm(ask); return; }
+    }
+    if (mode !== 'go') {
+      // 組み立てと3Dの作り直しには時間がかかることがある。先に何が起きているかを出し、
+      // 画面が描かれてから組み立てる（黙って止まって見えないように）。
+      hideApplyConfirm();
+      show('plan-import-apply', false);
+      setStatus('下書きを取り込んでいます…');
+      setTimeout(function () { applyPlanImport('go'); }, 30);
+      return;
     }
 
     // 取り消せるようにしてから触る。**丸ごと差し替えていた頃は、取り込みが
@@ -913,7 +1267,11 @@
       // まとめて外形を取ると、2棟をまたぐ1枚の基礎と1枚の屋根になる。
       DATA.walls = (base.walls || []).concat(read.walls);
       DATA.rooms = (base.rooms || []).concat(read.rooms);
-      DATA.items = (base.items || []).concat(read.items, structureItems(read.walls, null));
+      var besideStruct = structureItems(read.walls, null);
+      if (read.items.some(function (it) { return it.type === 'roof'; })) {
+        besideStruct = besideStruct.filter(function (st) { return st.type !== 'roof'; });
+      }
+      DATA.items = (base.items || []).concat(read.items, besideStruct);
     } else {
       // 空いている階に入れる。読み取った階に在るのは、壁から決まる基礎・屋根
       // だけなので、それはここで作り直す（階が増えれば屋根の載る位置も変わる）。
@@ -923,6 +1281,11 @@
       DATA.walls = (base.walls || []).concat(read.walls);
       DATA.rooms = (base.rooms || []).concat(read.rooms);
       var made = structureItems(DATA.walls, readFloors);
+      // 読み取りが屋根を答えたときは、それを使う（階ごとの屋根・下屋・形）。壁から作る屋根は
+      // 答えが無いときの代わり（いちばん上の階に平らな屋根を1枚）。
+      if (read.items.some(function (it) { return it.type === 'roof'; })) {
+        made = made.filter(function (st) { return st.type !== 'roof'; });
+      }
       DATA.items = keepItems.filter(function (it) {
         return !made.some(function (st) {
           return it && it.type === st.type && (Number(it.floor) || 1) === (Number(st.floor) || 1);
@@ -990,12 +1353,16 @@
   root.planImportMove = planImportMove;
   root.planImportUp = planImportUp;
   root.planImportSelectAll = planImportSelectAll;
+  root.planImportPage = planImportPage;
   root.runPlanImport = runPlanImport;
   root.applyPlanImport = applyPlanImport;
+  root.cancelPlanImportApply = cancelPlanImportApply;
   // 検査から中身を覗くため
   root.PlanImport = {
     state: ST,
     croppedDataUrl: croppedDataUrl,
+    imagesToSend: imagesToSend,
+    fitForAi: fitForAi,
     toAppObjects: toAppObjects,
     showPlanImportError: showPlanImportError,
     showQuota: showQuota,
