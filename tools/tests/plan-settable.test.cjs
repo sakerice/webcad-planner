@@ -158,3 +158,26 @@ test('set の値は、範囲と選択肢を確かめてから入れる', () => {
   assert.deepEqual(PlanSettable.applySettings('room', null, [{ key: 'void', value: 'yes' }, { key: 'ceilingHeight', value: '2400' }], {}, { floor: 1 }),
     { ceiling: { type: 'void', toFloor: 2 } }, '吹抜けを天井高より優先する');
 });
+
+test('部屋の一般的な設定（ROOM_COMMON）は、表の項目と選択肢だけで書いてあり、AI への説明に出る', async () => {
+  const { buildFreePrompt } = await mod('worker/plan-free.mjs');
+  const text = buildFreePrompt({ pages: 1 });
+  for (const [name, line, values] of PlanSettable.ROOM_COMMON) {
+    assert.ok(text.includes(name + ': ' + line), name + ' の知識が説明に無い');
+    const set = Object.entries(values).map(([k, v]) => k + '=' + v).join('; ');
+    const ctx = { rejected: [] };
+    PlanSettable.applySettings('room', null, set, {}, ctx);
+    assert.deepEqual(ctx.rejected, [], name + ' の設定に、表に無い項目・選択肢がある');
+    for (const kv of set.split('; ')) assert.ok(line.includes(kv), name + ': 説明の文と値（' + kv + '）が食い違う');
+  }
+});
+
+test('土間（floorLevel=doma）は、設定パネルの「玄関土間」と同じ計算で取り込む', () => {
+  assert.deepEqual(PlanSettable.applySettings('room', null, 'floorLevel=doma; floorMaterial=tile_floor', {}), { floorLevel: 'doma', floorMaterial: 'tile_floor' });
+  // 深さは床の厚みで決まる。パネルのプリセットと取り込みが別々に計算すると、片方だけ直したときに食い違う。
+  const constants = read('assets/js/app-constants.js'), imp = read('assets/js/plan-import.js');
+  const panel = constants.slice(constants.indexOf('function selectedRoomFloorHtml'), constants.indexOf('function selectedRoomFloorHtml') + 400);
+  assert.match(panel, /domaFloorRaiseMm\(r\.floor\)/, '設定パネルの玄関土間が domaFloorRaiseMm を使っていない');
+  assert.match(imp, /made\.floorLevel === 'doma'[^\n]*domaFloorRaiseMm\(floor\)/, '取り込みが domaFloorRaiseMm を使っていない');
+  assert.match(imp, /delete made\.floorLevel/, 'アプリの部屋に floorLevel を残さない（保存の形を変えない）');
+});

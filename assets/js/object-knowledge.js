@@ -89,7 +89,7 @@
     },
     vanity: {
       rooms: ['washroom'], mount: 'floor', place: 'against-wall', face: 'into-room',
-      size: { w: [600, 1200], d: [450, 620], what: '間口750 / 900、奥行500' },
+      size: { w: [600, 1200], d: [450, 620], what: '洗面化粧台（下に戸棚、上に鏡）間口750 / 900、奥行500' },
       why: '鏡が上に付く。前に立つので600mm以上の空きが要る',
     },
     toilet: {

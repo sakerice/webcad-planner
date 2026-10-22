@@ -1037,7 +1037,11 @@
       // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
       // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
       if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;
-      mergeExtra(made, r.extra);                        // 床材・天井高・吹抜け
+      mergeExtra(made, r.extra);                        // 床材・天井高・吹抜け・土間
+      // 土間（plan-settable.js の floorLevel=doma）。深さはいまの間取りの床の厚みで決まるので、
+      // 設定パネルの「玄関土間」と同じ計算でここで mm にする。アプリの部屋は floorLevel を持たない。
+      if (made.floorLevel === 'doma' && typeof domaFloorRaiseMm === 'function') made.floorRaiseMm = domaFloorRaiseMm(floor);
+      delete made.floorLevel;
       out.rooms.push(made);
     });
     // 敷地（境界・地面・駐車スペースなどの区画）。図面に描かれていたときだけ。
@@ -1067,9 +1071,21 @@
       // 短い指示の読み取りは、扉の吊り元・開く側（flipX/flipY）、閉じた状態、モデルの正面軸などを
       // extra に持ってくる（assets/js/plan-free-apply.js）。mkItem の既定値の上に重ねる。
       mergeExtra(made, it.extra);
+      // 部屋の中に置いた「地面に置く印」のモデル（洗濯機・物干しなど）は、その部屋の床に載せる。
+      // 印のままだと1階の地面に置かれ、床から下に埋まる（2026-10-23 利用者の指摘「洗濯機の
+      // 高さが潰れる」）。印の意味は app-constants.js の itemPlacedOnFloorExplicitly。
+      var model = (typeof getFmpItem === 'function') ? getFmpItem(made.type) : null;
+      if (model && model.groundLevel && made.baseLevel == null && roomContains(out.rooms, made)) made.baseLevel = 'floor';
       out.items.push(made);
     });
     return out;
+  }
+
+  function roomContains(rooms, it) {
+    var cx = it.x + (it.w || 0) / 2, cy = it.y + (it.d || 0) / 2;
+    return rooms.some(function (r) {
+      return (r.floor || 1) === (it.floor || 1) && cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.d;
+    });
   }
 
   function mergeExtra(made, extra) {

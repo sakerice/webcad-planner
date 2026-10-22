@@ -31,8 +31,11 @@
   //   外構の組み込みの種類（車・フェンス・スロープなど）は PlanSettable.EXTERIOR が kind → type を決める。
   // 種類ごとの既定のモデル。アプリの既定（app-constants.js の LEGACY_FMP_TYPE_MAP）と同じものを使う。
   // キッチンだけは既定が収納棚（fmp-CabinetA01）なので、I型のシステムキッチンにする。
+  // 洗面台も、アプリの既定（fmp-WashBasin01）はカウンターに載せる鉢だけ（高さ264mm）で、
+  // 単独で置くと床に鉢が転がる（2026-10-23 利用者の指摘「洗面台が鉢だけで下の戸棚が無い」）。
+  // 日本の洗面脱衣室の洗面台は、下の戸棚・鉢・鏡が一体の洗面化粧台なので、それにする。
   var DEFAULT_MODEL = {
-    bathtub: 'fmp-BathTub01', toilet: 'fmp-Toilet01', vanity: 'fmp-WashBasin01', 'kitchen-unit': 'original-kitchen-i2550',
+    bathtub: 'fmp-BathTub01', toilet: 'fmp-Toilet01', vanity: 'original-vanity', 'kitchen-unit': 'original-kitchen-i2550',
     refrigerator: 'fmp-Refrigerator01', sofa: 'fmp-Sofa01', 'dining-table': 'original-table', bed: 'fmp-Bed01',
     closet: 'fmp-Closet01', laundry: 'original-washer-drum', 'shoe-storage': 'original-shoe-counter',
     chair: 'fmp-Chair01', 'low-table': 'fmp-Table33', 'kitchen-storage': 'fmp-CabinetA01', deck: 'original-terrace-tile',

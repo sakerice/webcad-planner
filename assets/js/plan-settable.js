@@ -94,6 +94,10 @@
       { key: 'floorMaterial', ja: '床材。書かなければ部屋の名前から決まる', choices: FLOOR_MATERIALS, panel: 'updateSelectedRoomFloorMaterial' },
       { key: 'ceilingHeight', ja: '天井高（mm）。CH=2400 のように書かれていれば', num: [1800, 6000], panel: 'updateSelectedFlatCeilingMm' },
       { key: 'void', ja: '吹抜け（上の階の床が無く、天井が上の階まで抜ける）', choices: [['yes', '吹抜け']], panel: 'updateSelectedCeilingType' },
+      // 床の上下は設定パネルでは mm で入れるが、土間の深さは床の厚みで決まる（app-constants.js の
+      // domaFloorRaiseMm）。mm で答えさせると階の床厚を知らない AI が数字を当てることになるので、
+      // パネルのプリセット「玄関土間」と同じものを選ばせる。
+      { key: 'floorLevel', ja: '床の高さ', choices: [['doma', '土間（床を一段下げ、玄関ドアの外とほぼ同じ高さにする）']], panel: 'updateSelectedRoomFloor' },
     ],
     opening: [
       { key: 'windowKind', ja: '窓の種類', choices: [['sliding', '引違い'], ['casement', 'すべり出し'], ['fix', 'FIX（はめ殺し）']], for: ['window'], panel: 'windowKind' },
@@ -115,6 +119,17 @@
       { key: 'name', ja: '区画の名前（駐車スペース・玄関アプローチなど）', text: 40, for: ['site-zone'], panel: 'updateSiteZone' },
     ],
   };
+
+  // 部屋の種類ごとに、日本の住宅で一般にどう設定するか（AI への知識。決まりではない）。
+  // 項目を渡しただけでは、玄関の土間に床材も床の高さも設定されなかった（2026-10-23 利用者の指摘）。
+  // 図面にそう描かれていないとき（玄関の床が板張りの図など）は図面に従わせる。
+  // [部屋, 一般的な設定]。値は SETTINGS の項目と選択肢で書く（検査が突き合わせる）。
+  var ROOM_COMMON = [
+    ['玄関', '靴を脱ぐ土間と、上がり框から先の床（玄関ホール）は別の部屋に分ける。土間は floorLevel=doma; floorMaterial=tile_floor（古民家の三和土なら kominka_doma）', { floorLevel: 'doma', floorMaterial: 'tile_floor' }],
+    ['土間収納・シューズクローク', '玄関の土間から靴のまま入る収納なら、土間と同じ floorLevel=doma; floorMaterial=tile_floor', { floorLevel: 'doma', floorMaterial: 'tile_floor' }],
+    ['浴室', 'floorMaterial=tile_floor', { floorMaterial: 'tile_floor' }],
+    ['和室', 'floorMaterial=kominka_tatami（畳）', { floorMaterial: 'kominka_tatami' }],
+  ];
 
   // 設定パネルの項目のうち、AI に渡さないものと理由。パネルに項目を足したら、SETTINGS か
   // ここのどちらかに入れる（検査が求める）。理由は「図面から読めない」「位置・形として別に渡している」など。
@@ -144,7 +159,7 @@
     doorOpenState: '取り込みでは閉じた状態に決めている', updateSelectedBaseFloor: '床の段差は自動で載る',
     // 図面にふつう描かれない・別の仕組みで決まる
     wallBand: '壁の設置高さの調整', wallTopShape: '壁の上部の形の調整', wallTopSide: '壁の上部の形の調整',
-    footOffsetMm: '壁の足元の調整', updateSelectedRoomFloor: '床の上下は階の高さから決まる',
+    footOffsetMm: '壁の足元の調整',
     updateSelectedRoomSkipLevel: 'スキップフロアの段差は図面から読み取りにくい',
     updateSelectedSlopedCeiling: '勾配天井は屋根が載れば屋根から決まる', updateSelectedVoidToFloor: '吹抜けは一つ上の階まで',
     updateSelectedRoofHeight: '屋根の高さは勾配から決まる', setSelectedStairTarget: '階段の行き先は上の階',
@@ -239,12 +254,17 @@
       var range = s.num ? s.num[0] + '〜' + s.num[1] : s.text ? '文字' : s.choices.map(function (c) { return c[0] + '=' + c[1]; }).join(' / ');
       rows.push('      ' + s.key + '（' + s.ja + '）: ' + range + (s.for ? '　対象: ' + s.for.join(', ') : ''));
     });
-    return rows.length ? ['    ' + label + ' の set に書ける項目:'].concat(rows) : [];
+    var out = rows.length ? ['    ' + label + ' の set に書ける項目:'].concat(rows) : [];
+    if (part === 'room') {
+      out.push('    日本の住宅で一般的な部屋の設定（図面が違えば図面に従う）:');
+      ROOM_COMMON.forEach(function (c) { out.push('      ' + c[0] + ': ' + c[1]); });
+    }
+    return out;
   }
 
   return {
     OPENINGS: OPENINGS, SWING_TYPES: SWING_TYPES, EXTERIOR: EXTERIOR, SITE: SITE, SETTINGS: SETTINGS,
-    FLOOR_MATERIALS: FLOOR_MATERIALS, SITE_SURFACES: SITE_SURFACES,
+    FLOOR_MATERIALS: FLOOR_MATERIALS, SITE_SURFACES: SITE_SURFACES, ROOM_COMMON: ROOM_COMMON,
     NOT_PASSED: NOT_PASSED, TYPES_NOT_PLACED: TYPES_NOT_PLACED,
     settingsFor: settingsFor, applySettings: applySettings, parseSet: parseSet, exteriorByKind: exteriorByKind, describe: describe,
   };
