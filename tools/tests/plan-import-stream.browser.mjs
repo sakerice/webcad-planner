@@ -8,6 +8,8 @@
 //   - 最初の答えを組み立てた家の平面図と外観3Dを撮り、見直し（review-plan-3d）に送る。
 //     見直した答え（ここでは屋根を足したもの）で下書きができる
 //   - read-plan が使えない環境（404）では、これまでの読み取り（import-plan）に戻る
+//   - 家として当たり前の形で入る（2026-10-23 利用者の指摘）: 玄関の土間は床が一段下がる、
+//     洗濯機は床に立つ（地面に埋まらない）、洗面台は下の戸棚つきの洗面化粧台
 import assert from 'node:assert/strict';
 
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -22,13 +24,16 @@ const ANSWER = {
       { x1: 0, y1: 0, x2: 3640, y2: 0 }, { x1: 3640, y1: 0, x2: 3640, y2: 2730 },
       { x1: 3640, y1: 2730, x2: 0, y2: 2730 }, { x1: 0, y1: 2730, x2: 0, y2: 0 },
     ],
-    rooms: [{ name: '洋室', parts: [{ x0: 0, y0: 0, x1: 3640, y1: 2730 }], set: 'ceilingHeight=2500' }],
+    rooms: [{ name: '洋室', parts: [{ x0: 0, y0: 0, x1: 3640, y1: 2730 }], set: 'ceilingHeight=2500' },
+      { name: '玄関', parts: [{ x0: 2730, y0: 1820, x1: 3640, y1: 2730 }], set: 'floorLevel=doma; floorMaterial=tile_floor' }],
     openings: [
       { type: 'door-swing', x: 1000, y: 2730, width: 780, hinge: 'E', opens: 'N' },
       { type: 'window', x: 1820, y: 0, width: 1650, hinge: null, opens: null },
     ],
     stairs: [],
     objects: [{ kind: 'sofa', x: 1820, y: 600, w: 1800, d: 850, face: 'S' },
+      { kind: 'laundry', x: 400, y: 2300, w: 640, d: 640, face: 'N', set: '' },
+      { kind: 'vanity', x: 1300, y: 2400, w: 750, d: 500, face: 'N', set: '' },
       { kind: 'car', x: 5500, y: 1500, w: 1800, d: 4700, face: 'S', set: '' },
       { kind: 'site', x: 4000, y: 1500, w: 10000, d: 8000, face: 'S', set: 'surface=gravel' },
       { kind: 'site-zone', x: 5500, y: 1500, w: 2700, d: 5000, face: 'none', set: 'name=駐車スペース; surface=concrete' }],
@@ -135,7 +140,7 @@ try {
   await page.waitForSelector('#plan-import-step3', { state: 'visible', timeout: 10000 });
   assert.equal(await page.isHidden('#plan-import-progress'), true, '終わったら進み具合を閉じる');
   const summary = await page.textContent('#plan-import-summary');
-  assert.match(summary, /壁 4 \/ 部屋 1/);
+  assert.match(summary, /壁 4 \/ 部屋 2/);
   // 見直しには、元の図面・組み立てた家の平面図と外観3D・最初の答え・機械で分かった事実を送る。
   const review = await page.evaluate(() => ({
     images: window.__review.images.length,
@@ -173,7 +178,24 @@ try {
     car: DATA.items.some((i) => i.type === 'car'),
     sites: DATA.items.filter((i) => i.type === 'site-rect').map((i) => ({ surface: i.siteSurface, zones: (i.siteZones || []).map((z) => z.name) })),
     ceiling: DATA.rooms[0] && DATA.rooms[0].ceiling,
+    entry: (() => { const r = DATA.rooms.find((x) => x.n === '玄関'); return r && { raise: r.floorRaiseMm, doma: domaFloorRaiseMm(1), material: r.floorMaterial, level: r.floorLevel }; })(),
+    washer: (() => {
+      const w = DATA.items.find((i) => i.type === 'original-washer-drum');
+      const room = DATA.rooms.find((x) => x.n === '洋室');
+      return w && { baseLevel: w.baseLevel, baseMm: Math.round(item3DBaseY(w) / U), roomFloorMm: Math.round(roomFloorTopY(room) / U), groundMm: Math.round(groundYForItem(w) / U) };
+    })(),
+    vanity: DATA.items.filter((i) => (CATALOGUE_TAGS.items[i.type] || {}).kind === 'vanity').map((i) => ({ type: i.type, h: getItemHeightValue(i) })),
   }));
+  // 玄関の土間は、設定パネルの「玄関土間」と同じ深さまで下がる（床の厚みの中、基礎の天端＋20mm）。
+  assert.ok(placed.entry && placed.entry.doma < 0, '新しい間取りでは土間を下げられる: ' + JSON.stringify(placed.entry));
+  assert.deepEqual(placed.entry, { raise: placed.entry.doma, doma: placed.entry.doma, material: 'tile_floor', level: undefined }, '土間の床と仕上げ');
+  // 洗濯機は部屋の床に立つ（カタログの「地面に置く」印のままだと1階の地面に置かれ、床から下に埋まった）。
+  assert.equal(placed.washer.baseLevel, 'floor');
+  assert.equal(placed.washer.baseMm, placed.washer.roomFloorMm, '洗濯機が部屋の床に立つ: ' + JSON.stringify(placed.washer));
+  assert.ok(placed.washer.roomFloorMm - placed.washer.groundMm > 300, '地面と床の差がある間取りで確かめている');
+  // 洗面台は鉢だけでなく、下の戸棚から立つ洗面化粧台。
+  assert.equal(placed.vanity.length, 1);
+  assert.ok(placed.vanity[0].h >= 800, '洗面台が床から立つ高さを持つ: ' + JSON.stringify(placed.vanity));
   // 設定パネルの項目・外構も入る（2026-10-20 利用者の指摘: 車などの外構が置けていない）。
   assert.ok(placed.car, '車が置かれる');
   assert.deepEqual(placed.sites, [{ surface: 'gravel', zones: ['駐車スペース'] }], '敷地は1つ、駐車スペースの区画つき');
