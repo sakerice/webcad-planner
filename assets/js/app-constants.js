@@ -1287,14 +1287,18 @@ function updateSelectedBaseFloor(value){
   }
   markDirty(); updateProps(); draw2d(); if(ren) rebuild3D();
 }
+// 玄関土間の床の上下(mm)。床の厚みの中まで下げて**基礎の天端＋20mm**に置く(床を下げられる
+// いちばん下)。実物の土間は基礎の天端にタイルを張った高さで、玄関ドアの外と
+// ほぼ同じ高さになる。以前の「玄関土間 ＋0mm」は床の構造面のままで、玄関ドアが
+// 外の基礎の天端から床の厚み(180mm)ぶん浮いて見えた(利用者の報告)。
+// 床を下げられない高さモデルでは 0。設定パネルの「玄関土間」と、読み取りの土間
+// (plan-import.js の toAppObjects)が同じこれを使う。
+function domaFloorRaiseMm(floor){
+  return (typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())?-Math.max(0,floorSlabMmForFloor(floor)-20):0;
+}
 function selectedRoomFloorHtml(r){
   var v=roomFloorOffsetMm(r);
-  // 玄関土間は、床の厚みの中まで下げて**基礎の天端＋20mm**に置く(床を下げられる
-  // いちばん下)。実物の土間は基礎の天端にタイルを張った高さで、玄関ドアの外と
-  // ほぼ同じ高さになる。以前の「玄関土間 ＋0mm」は床の構造面のままで、玄関ドアが
-  // 外の基礎の天端から床の厚み(180mm)ぶん浮いて見えた(利用者の報告)。
-  // 床を下げられない高さモデルでは 0。
-  var dirtMm=(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())?-Math.max(0,floorSlabMmForFloor(r.floor)-20):0;
+  var dirtMm=domaFloorRaiseMm(r.floor);
   var dirtLabel=dirtMm<0?'−'+(-dirtMm):'＋0';
   return '<div class="ph" style="margin-top:12px">床の高さ</div>'+
     '<div class="pr"><div class="pl">仕上げ床</div><select class="pi" onchange="if(this.value)updateSelectedRoomFloor(this.value)">'+
@@ -1411,9 +1415,17 @@ function openingAdjacentFloorTopY(it,ignoreSkip){
   }
   return best;
 }
+// カタログのモデルの groundLevel は、モデルごとの「地面に置く」印。洗濯機・物干し・
+// 卓上の小物にも付いていて、そのままでは1階の地面(床より基礎と床の厚みぶん下)に
+// 埋まる。印は保存プランの見た目を変えないよう書き換えず、**置く床を明示した物
+// (baseLevel='floor')だけ**床に載せる。読み取りで部屋の中に置いた物がこれを持つ
+// (plan-import.js の toAppObjects)。
+function itemPlacedOnFloorExplicitly(it){
+  return !!(it&&it.baseLevel==='floor'&&isFmpItemType(it.type)&&!isContextExteriorItemType(it.type));
+}
 function item3DBaseY(it){
   if(!it) return 0;
-  if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)){
+  if((isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)) && !itemPlacedOnFloorExplicitly(it)){
     if(isFloorAwareGroundItemType(it.type)){
       // 部屋の中に置かれたものは、その部屋の床に立つ(段差の上を含む)。
       // 格子柵をスキップフロアの手すりに使うには、地面ではなく床が基準になる。

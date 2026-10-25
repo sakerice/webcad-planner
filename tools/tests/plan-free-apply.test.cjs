@@ -194,3 +194,17 @@ test('進み具合の階は、屋根の floor（載る階）と取り違えな�
   const partial = '{"floors":[{"floor":2,"walls":[],"rooms":[],"openings":[],"stairs":[],"roofs":[{"floor":3,"x0":0';
   assert.equal(PlanFreeApply.progressOf(partial).floor, 2);
 });
+
+test('床に立つ水まわりの設備の既定モデルは、床から立つ高さがある（鉢や受け皿だけのモデルにしない）', () => {
+  // 洗面台の既定が鉢だけのモデル（fmp-WashBasin01、高さ264mm）で、床に鉢が転がっていた（2026-10-23 利用者の指摘）。
+  const manifest = {};
+  for (const f of ['furniture_mega', 'custom']) {
+    const j = require(join(ROOT, 'assets', 'models', f, 'manifest.json'));
+    (Array.isArray(j) ? j : (j.items || j.models || [])).forEach((e) => { manifest[e.id] = e; });
+  }
+  for (const kind of ['vanity', 'toilet', 'laundry', 'kitchen-unit', 'refrigerator']) {
+    const id = PlanFreeApply.DEFAULT_MODEL[kind];
+    assert.ok(manifest[id], kind + ' の既定モデル ' + id + ' がカタログに無い');
+    assert.ok(Number(manifest[id].h) >= 600, kind + ' の既定モデル ' + id + ' の高さが ' + manifest[id].h + 'mm しかない');
+  }
+});
