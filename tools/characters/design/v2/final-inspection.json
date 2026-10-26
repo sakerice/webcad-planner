@@ -1,0 +1,2152 @@
+{
+  "issue": 167,
+  "sourceId": "claude-code:webcad-planner/walk-characters-design-v2-proportion-2026-10-14",
+  "sourceSessionId": "fbf688bf-1ba3-4478-bef4-3ba2070ab0ed",
+  "style_basis_head": "1f1815e5ca7aca53d0893152e9f2926877c05c68",
+  "previous_issue143_head": "e7fb1a30899e40aa35ae44fd0c1983eb567f494c",
+  "style_only_approval": true,
+  "required_head_units": [
+    5.3,
+    5.8
+  ],
+  "three_d_deliverables": false,
+  "designs": [
+    {
+      "id": "walker-male-02a",
+      "intent": "黄色スウェットの在宅カジュアル",
+      "height_cm": 172,
+      "approved_style_source": "candidates/attachment-style-review-20261014/attached-male-a-front.png",
+      "human_approved_scope": "style only, not proportions or these final variants",
+      "front_head_measurement": {
+        "id": "walker-male-02a",
+        "crown_y": 23,
+        "chin_xy": [
+          618,
+          246
+        ],
+        "chin_raw_rgb": [
+          35,
+          9,
+          0
+        ],
+        "sole_y": 1225,
+        "head_height_px": 223,
+        "full_height_px": 1202,
+        "head_units": 5.390134529147982,
+        "a_pose_local_sleeve_degrees": [
+          33.35824239704295,
+          33.02386755579665
+        ],
+        "bbox": [
+          249,
+          23,
+          983,
+          1226
+        ],
+        "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+        "boundary_uncertainty_px": 1
+      },
+      "side_head_measurement": {
+        "id": "walker-male-02a",
+        "view": "side",
+        "crown_y": 14,
+        "chin_xy": [
+          556,
+          240
+        ],
+        "chin_raw_rgb": [
+          83,
+          81,
+          80
+        ],
+        "sole_y": 1225,
+        "head_height_px": 226,
+        "full_height_px": 1211,
+        "head_units": 5.3584070796460175,
+        "head_in_range": true,
+        "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+        "boundary_uncertainty_px": 1
+      },
+      "views": [
+        {
+          "view": "front",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            249,
+            23,
+            983,
+            1226
+          ],
+          "vertical_fill_percent": 95.93301435406698,
+          "head_measurement": {
+            "id": "walker-male-02a",
+            "crown_y": 23,
+            "chin_xy": [
+              618,
+              246
+            ],
+            "chin_raw_rgb": [
+              35,
+              9,
+              0
+            ],
+            "sole_y": 1225,
+            "head_height_px": 223,
+            "full_height_px": 1202,
+            "head_units": 5.390134529147982,
+            "a_pose_local_sleeve_degrees": [
+              33.35824239704295,
+              33.02386755579665
+            ],
+            "bbox": [
+              249,
+              23,
+              983,
+              1226
+            ],
+            "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "side",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            483,
+            14,
+            740,
+            1226
+          ],
+          "vertical_fill_percent": 96.65071770334929,
+          "head_measurement": {
+            "id": "walker-male-02a",
+            "view": "side",
+            "crown_y": 14,
+            "chin_xy": [
+              556,
+              240
+            ],
+            "chin_raw_rgb": [
+              83,
+              81,
+              80
+            ],
+            "sole_y": 1225,
+            "head_height_px": 226,
+            "full_height_px": 1211,
+            "head_units": 5.3584070796460175,
+            "head_in_range": true,
+            "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "back",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            253,
+            11,
+            980,
+            1216
+          ],
+          "vertical_fill_percent": 96.09250398724083,
+          "head_measurement": {
+            "crown_y": 11,
+            "chin_xy": null,
+            "sole_y": 1215,
+            "full_height_px": 1204,
+            "head_units": null,
+            "visible_posterior_hair_boundary_xy": [
+              623,
+              221
+            ],
+            "visible_posterior_hair_boundary_rgb": [
+              54,
+              15,
+              1
+            ],
+            "visible_hair_height_px": 210,
+            "measurement": "Chin is occluded from back; posterior hair/nape boundary is a separate visible landmark, not substituted for chin or a head-unit measurement"
+          }
+        }
+      ],
+      "turnaround_head_measurements": {
+        "front": {
+          "crown_y": 26,
+          "chin_xy": [
+            522,
+            249
+          ],
+          "chin_raw_rgb": [
+            42,
+            17,
+            5
+          ],
+          "sole_y": 1230,
+          "head_height_px": 223,
+          "full_height_px": 1204,
+          "head_units": 5.3991031390134525,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "side": {
+          "crown_y": 26,
+          "chin_xy": [
+            1505,
+            251
+          ],
+          "chin_raw_rgb": [
+            142,
+            143,
+            142
+          ],
+          "sole_y": 1230,
+          "head_height_px": 225,
+          "full_height_px": 1204,
+          "head_units": 5.351111111111111,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "back": {
+          "crown_y": 26,
+          "sole_y": 1230,
+          "full_height_px": 1204,
+          "chin_xy": null,
+          "head_units": null,
+          "measurement": "Back chin not visible; actual panel crown/sole recorded, no inferred chin ratio"
+        }
+      },
+      "a_pose_local_sleeve_degrees": [
+        33.35824239704295,
+        33.02386755579665
+      ]
+    },
+    {
+      "id": "walker-male-02b",
+      "intent": "ミント半袖ハーフジップの軽い在宅服",
+      "height_cm": 172,
+      "approved_style_source": "candidates/attachment-style-review-20261014/attached-male-b-front.png",
+      "human_approved_scope": "style only, not proportions or these final variants",
+      "front_head_measurement": {
+        "id": "walker-male-02b",
+        "crown_y": 16,
+        "chin_xy": [
+          618,
+          232
+        ],
+        "chin_raw_rgb": [
+          60,
+          45,
+          33
+        ],
+        "sole_y": 1225,
+        "head_height_px": 216,
+        "full_height_px": 1209,
+        "head_units": 5.597222222222222,
+        "a_pose_local_sleeve_degrees": [
+          37.1742548335911,
+          37.77568430595466
+        ],
+        "bbox": [
+          154,
+          16,
+          1076,
+          1226
+        ],
+        "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+        "boundary_uncertainty_px": 1
+      },
+      "side_head_measurement": {
+        "id": "walker-male-02b",
+        "view": "side",
+        "crown_y": 5,
+        "chin_xy": [
+          679,
+          218
+        ],
+        "chin_raw_rgb": [
+          60,
+          52,
+          47
+        ],
+        "sole_y": 1224,
+        "head_height_px": 213,
+        "full_height_px": 1219,
+        "head_units": 5.723004694835681,
+        "head_in_range": true,
+        "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+        "boundary_uncertainty_px": 1
+      },
+      "views": [
+        {
+          "view": "front",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            154,
+            16,
+            1076,
+            1226
+          ],
+          "vertical_fill_percent": 96.49122807017544,
+          "head_measurement": {
+            "id": "walker-male-02b",
+            "crown_y": 16,
+            "chin_xy": [
+              618,
+              232
+            ],
+            "chin_raw_rgb": [
+              60,
+              45,
+              33
+            ],
+            "sole_y": 1225,
+            "head_height_px": 216,
+            "full_height_px": 1209,
+            "head_units": 5.597222222222222,
+            "a_pose_local_sleeve_degrees": [
+              37.1742548335911,
+              37.77568430595466
+            ],
+            "bbox": [
+              154,
+              16,
+              1076,
+              1226
+            ],
+            "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "side",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            522,
+            5,
+            756,
+            1225
+          ],
+          "vertical_fill_percent": 97.28867623604465,
+          "head_measurement": {
+            "id": "walker-male-02b",
+            "view": "side",
+            "crown_y": 5,
+            "chin_xy": [
+              679,
+              218
+            ],
+            "chin_raw_rgb": [
+              60,
+              52,
+              47
+            ],
+            "sole_y": 1224,
+            "head_height_px": 213,
+            "full_height_px": 1219,
+            "head_units": 5.723004694835681,
+            "head_in_range": true,
+            "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "back",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            188,
+            9,
+            1051,
+            1215
+          ],
+          "vertical_fill_percent": 96.17224880382776,
+          "head_measurement": {
+            "crown_y": 9,
+            "chin_xy": null,
+            "sole_y": 1214,
+            "full_height_px": 1205,
+            "head_units": null,
+            "visible_posterior_hair_boundary_xy": [
+              620,
+              208
+            ],
+            "visible_posterior_hair_boundary_rgb": [
+              71,
+              50,
+              37
+            ],
+            "visible_hair_height_px": 199,
+            "measurement": "Chin is occluded from back; posterior hair/nape boundary is a separate visible landmark, not substituted for chin or a head-unit measurement"
+          }
+        }
+      ],
+      "turnaround_head_measurements": {
+        "front": {
+          "crown_y": 26,
+          "chin_xy": [
+            523,
+            241
+          ],
+          "chin_raw_rgb": [
+            51,
+            38,
+            27
+          ],
+          "sole_y": 1230,
+          "head_height_px": 215,
+          "full_height_px": 1204,
+          "head_units": 5.6,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "side": {
+          "crown_y": 26,
+          "chin_xy": [
+            1599,
+            236
+          ],
+          "chin_raw_rgb": [
+            39,
+            29,
+            22
+          ],
+          "sole_y": 1230,
+          "head_height_px": 210,
+          "full_height_px": 1204,
+          "head_units": 5.733333333333333,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "back": {
+          "crown_y": 26,
+          "sole_y": 1230,
+          "full_height_px": 1204,
+          "chin_xy": null,
+          "head_units": null,
+          "measurement": "Back chin not visible; actual panel crown/sole recorded, no inferred chin ratio"
+        }
+      },
+      "a_pose_local_sleeve_degrees": [
+        37.1742548335911,
+        37.77568430595466
+      ]
+    },
+    {
+      "id": "walker-male-02c",
+      "intent": "コーラルカーディガンのきれいめ在宅服",
+      "height_cm": 172,
+      "approved_style_source": null,
+      "human_approved_scope": "style only, not proportions or these final variants",
+      "front_head_measurement": {
+        "id": "walker-male-02c",
+        "crown_y": 14,
+        "chin_xy": [
+          618,
+          242
+        ],
+        "chin_raw_rgb": [
+          148,
+          87,
+          64
+        ],
+        "sole_y": 1226,
+        "head_height_px": 228,
+        "full_height_px": 1212,
+        "head_units": 5.315789473684211,
+        "a_pose_local_sleeve_degrees": [
+          31.660751096636602,
+          32.34744349944203
+        ],
+        "bbox": [
+          252,
+          14,
+          975,
+          1227
+        ],
+        "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+        "boundary_uncertainty_px": 1
+      },
+      "side_head_measurement": {
+        "id": "walker-male-02c",
+        "view": "side",
+        "crown_y": 12,
+        "chin_xy": [
+          558,
+          234
+        ],
+        "chin_raw_rgb": [
+          148,
+          142,
+          143
+        ],
+        "sole_y": 1229,
+        "head_height_px": 222,
+        "full_height_px": 1217,
+        "head_units": 5.481981981981982,
+        "head_in_range": true,
+        "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+        "boundary_uncertainty_px": 1
+      },
+      "views": [
+        {
+          "view": "front",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            252,
+            14,
+            975,
+            1227
+          ],
+          "vertical_fill_percent": 96.73046251993621,
+          "head_measurement": {
+            "id": "walker-male-02c",
+            "crown_y": 14,
+            "chin_xy": [
+              618,
+              242
+            ],
+            "chin_raw_rgb": [
+              148,
+              87,
+              64
+            ],
+            "sole_y": 1226,
+            "head_height_px": 228,
+            "full_height_px": 1212,
+            "head_units": 5.315789473684211,
+            "a_pose_local_sleeve_degrees": [
+              31.660751096636602,
+              32.34744349944203
+            ],
+            "bbox": [
+              252,
+              14,
+              975,
+              1227
+            ],
+            "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "side",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            499,
+            12,
+            732,
+            1230
+          ],
+          "vertical_fill_percent": 97.12918660287082,
+          "head_measurement": {
+            "id": "walker-male-02c",
+            "view": "side",
+            "crown_y": 12,
+            "chin_xy": [
+              558,
+              234
+            ],
+            "chin_raw_rgb": [
+              148,
+              142,
+              143
+            ],
+            "sole_y": 1229,
+            "head_height_px": 222,
+            "full_height_px": 1217,
+            "head_units": 5.481981981981982,
+            "head_in_range": true,
+            "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "back",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            252,
+            8,
+            983,
+            1217
+          ],
+          "vertical_fill_percent": 96.41148325358851,
+          "head_measurement": {
+            "crown_y": 8,
+            "chin_xy": null,
+            "sole_y": 1216,
+            "full_height_px": 1208,
+            "head_units": null,
+            "visible_posterior_hair_boundary_xy": [
+              620,
+              229
+            ],
+            "visible_posterior_hair_boundary_rgb": [
+              178,
+              127,
+              108
+            ],
+            "visible_hair_height_px": 221,
+            "measurement": "Chin is occluded from back; posterior hair/nape boundary is a separate visible landmark, not substituted for chin or a head-unit measurement"
+          }
+        }
+      ],
+      "turnaround_head_measurements": {
+        "front": {
+          "crown_y": 26,
+          "chin_xy": [
+            525,
+            252
+          ],
+          "chin_raw_rgb": [
+            143,
+            86,
+            63
+          ],
+          "sole_y": 1230,
+          "head_height_px": 226,
+          "full_height_px": 1204,
+          "head_units": 5.327433628318584,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "side": {
+          "crown_y": 26,
+          "chin_xy": [
+            1501,
+            246
+          ],
+          "chin_raw_rgb": [
+            149,
+            146,
+            145
+          ],
+          "sole_y": 1230,
+          "head_height_px": 220,
+          "full_height_px": 1204,
+          "head_units": 5.472727272727273,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "back": {
+          "crown_y": 26,
+          "sole_y": 1230,
+          "full_height_px": 1204,
+          "chin_xy": null,
+          "head_units": null,
+          "measurement": "Back chin not visible; actual panel crown/sole recorded, no inferred chin ratio"
+        }
+      },
+      "a_pose_local_sleeve_degrees": [
+        31.660751096636602,
+        32.34744349944203
+      ]
+    },
+    {
+      "id": "walker-female-02a",
+      "intent": "緑スウェットと長スカートの在宅服",
+      "height_cm": 160,
+      "approved_style_source": "candidates/attachment-style-review-20261014/attached-female-a-front.png",
+      "human_approved_scope": "style only, not proportions or these final variants",
+      "front_head_measurement": {
+        "id": "walker-female-02a",
+        "crown_y": 15,
+        "chin_xy": [
+          618,
+          227
+        ],
+        "chin_raw_rgb": [
+          55,
+          24,
+          9
+        ],
+        "sole_y": 1223,
+        "head_height_px": 212,
+        "full_height_px": 1208,
+        "head_units": 5.69811320754717,
+        "a_pose_local_sleeve_degrees": [
+          34.99202019855866,
+          34.99202019855866
+        ],
+        "bbox": [
+          218,
+          15,
+          1020,
+          1224
+        ],
+        "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+        "boundary_uncertainty_px": 1
+      },
+      "side_head_measurement": {
+        "id": "walker-female-02a",
+        "view": "side",
+        "crown_y": 15,
+        "chin_xy": [
+          553,
+          227
+        ],
+        "chin_raw_rgb": [
+          100,
+          77,
+          81
+        ],
+        "sole_y": 1228,
+        "head_height_px": 212,
+        "full_height_px": 1213,
+        "head_units": 5.721698113207547,
+        "head_in_range": true,
+        "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+        "boundary_uncertainty_px": 1
+      },
+      "views": [
+        {
+          "view": "front",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            218,
+            15,
+            1020,
+            1224
+          ],
+          "vertical_fill_percent": 96.41148325358851,
+          "head_measurement": {
+            "id": "walker-female-02a",
+            "crown_y": 15,
+            "chin_xy": [
+              618,
+              227
+            ],
+            "chin_raw_rgb": [
+              55,
+              24,
+              9
+            ],
+            "sole_y": 1223,
+            "head_height_px": 212,
+            "full_height_px": 1208,
+            "head_units": 5.69811320754717,
+            "a_pose_local_sleeve_degrees": [
+              34.99202019855866,
+              34.99202019855866
+            ],
+            "bbox": [
+              218,
+              15,
+              1020,
+              1224
+            ],
+            "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "side",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            463,
+            15,
+            795,
+            1229
+          ],
+          "vertical_fill_percent": 96.81020733652312,
+          "head_measurement": {
+            "id": "walker-female-02a",
+            "view": "side",
+            "crown_y": 15,
+            "chin_xy": [
+              553,
+              227
+            ],
+            "chin_raw_rgb": [
+              100,
+              77,
+              81
+            ],
+            "sole_y": 1228,
+            "head_height_px": 212,
+            "full_height_px": 1213,
+            "head_units": 5.721698113207547,
+            "head_in_range": true,
+            "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "back",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            220,
+            21,
+            1024,
+            1219
+          ],
+          "vertical_fill_percent": 95.53429027113238,
+          "head_measurement": {
+            "crown_y": 21,
+            "chin_xy": null,
+            "sole_y": 1218,
+            "full_height_px": 1197,
+            "head_units": null,
+            "visible_posterior_hair_boundary_xy": [
+              621,
+              231
+            ],
+            "visible_posterior_hair_boundary_rgb": [
+              155,
+              106,
+              82
+            ],
+            "visible_hair_height_px": 210,
+            "measurement": "Chin is occluded from back; posterior hair/nape boundary is a separate visible landmark, not substituted for chin or a head-unit measurement"
+          }
+        }
+      ],
+      "turnaround_head_measurements": {
+        "front": {
+          "crown_y": 110,
+          "chin_xy": [
+            519,
+            307
+          ],
+          "chin_raw_rgb": [
+            111,
+            71,
+            52
+          ],
+          "sole_y": 1230,
+          "head_height_px": 197,
+          "full_height_px": 1120,
+          "head_units": 5.685279187817259,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "side": {
+          "crown_y": 110,
+          "chin_xy": [
+            1489,
+            306
+          ],
+          "chin_raw_rgb": [
+            152,
+            139,
+            144
+          ],
+          "sole_y": 1230,
+          "head_height_px": 196,
+          "full_height_px": 1120,
+          "head_units": 5.714285714285714,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "back": {
+          "crown_y": 110,
+          "sole_y": 1230,
+          "full_height_px": 1120,
+          "chin_xy": null,
+          "head_units": null,
+          "measurement": "Back chin not visible; actual panel crown/sole recorded, no inferred chin ratio"
+        }
+      },
+      "a_pose_local_sleeve_degrees": [
+        34.99202019855866,
+        34.99202019855866
+      ]
+    },
+    {
+      "id": "walker-female-02b",
+      "intent": "青ボートネックとワイドパンツのきれいめ在宅服",
+      "height_cm": 160,
+      "approved_style_source": "candidates/attachment-style-review-20261014/attached-female-b-front.png",
+      "human_approved_scope": "style only, not proportions or these final variants",
+      "front_head_measurement": {
+        "id": "walker-female-02b",
+        "crown_y": 19,
+        "chin_xy": [
+          617,
+          229
+        ],
+        "chin_raw_rgb": [
+          41,
+          31,
+          29
+        ],
+        "sole_y": 1228,
+        "head_height_px": 210,
+        "full_height_px": 1209,
+        "head_units": 5.757142857142857,
+        "a_pose_local_sleeve_degrees": [
+          41.455233544405125,
+          42.24991482508759
+        ],
+        "bbox": [
+          169,
+          19,
+          1072,
+          1229
+        ],
+        "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+        "boundary_uncertainty_px": 1
+      },
+      "side_head_measurement": {
+        "id": "walker-female-02b",
+        "view": "side",
+        "crown_y": 21,
+        "chin_xy": [
+          565,
+          239
+        ],
+        "chin_raw_rgb": [
+          128,
+          128,
+          130
+        ],
+        "sole_y": 1227,
+        "head_height_px": 218,
+        "full_height_px": 1206,
+        "head_units": 5.532110091743119,
+        "head_in_range": true,
+        "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+        "boundary_uncertainty_px": 1
+      },
+      "views": [
+        {
+          "view": "front",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            169,
+            19,
+            1072,
+            1229
+          ],
+          "vertical_fill_percent": 96.49122807017544,
+          "head_measurement": {
+            "id": "walker-female-02b",
+            "crown_y": 19,
+            "chin_xy": [
+              617,
+              229
+            ],
+            "chin_raw_rgb": [
+              41,
+              31,
+              29
+            ],
+            "sole_y": 1228,
+            "head_height_px": 210,
+            "full_height_px": 1209,
+            "head_units": 5.757142857142857,
+            "a_pose_local_sleeve_degrees": [
+              41.455233544405125,
+              42.24991482508759
+            ],
+            "bbox": [
+              169,
+              19,
+              1072,
+              1229
+            ],
+            "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "side",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            514,
+            21,
+            758,
+            1228
+          ],
+          "vertical_fill_percent": 96.25199362041467,
+          "head_measurement": {
+            "id": "walker-female-02b",
+            "view": "side",
+            "crown_y": 21,
+            "chin_xy": [
+              565,
+              239
+            ],
+            "chin_raw_rgb": [
+              128,
+              128,
+              130
+            ],
+            "sole_y": 1227,
+            "head_height_px": 218,
+            "full_height_px": 1206,
+            "head_units": 5.532110091743119,
+            "head_in_range": true,
+            "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "back",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            171,
+            18,
+            1073,
+            1218
+          ],
+          "vertical_fill_percent": 95.69377990430623,
+          "head_measurement": {
+            "crown_y": 18,
+            "chin_xy": null,
+            "sole_y": 1217,
+            "full_height_px": 1199,
+            "head_units": null,
+            "visible_posterior_hair_boundary_xy": [
+              610,
+              224
+            ],
+            "visible_posterior_hair_boundary_rgb": [
+              121,
+              86,
+              76
+            ],
+            "visible_hair_height_px": 206,
+            "measurement": "Chin is occluded from back; posterior hair/nape boundary is a separate visible landmark, not substituted for chin or a head-unit measurement"
+          }
+        }
+      ],
+      "turnaround_head_measurements": {
+        "front": {
+          "crown_y": 110,
+          "chin_xy": [
+            516,
+            305
+          ],
+          "chin_raw_rgb": [
+            82,
+            60,
+            55
+          ],
+          "sole_y": 1230,
+          "head_height_px": 195,
+          "full_height_px": 1120,
+          "head_units": 5.743589743589744,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "side": {
+          "crown_y": 110,
+          "chin_xy": [
+            1493,
+            312
+          ],
+          "chin_raw_rgb": [
+            84,
+            82,
+            83
+          ],
+          "sole_y": 1230,
+          "head_height_px": 202,
+          "full_height_px": 1120,
+          "head_units": 5.544554455445544,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "back": {
+          "crown_y": 110,
+          "sole_y": 1230,
+          "full_height_px": 1120,
+          "chin_xy": null,
+          "head_units": null,
+          "measurement": "Back chin not visible; actual panel crown/sole recorded, no inferred chin ratio"
+        }
+      },
+      "a_pose_local_sleeve_degrees": [
+        41.455233544405125,
+        42.24991482508759
+      ]
+    },
+    {
+      "id": "walker-female-02c",
+      "intent": "オートミール半袖ニットとローズパンツの在宅服",
+      "height_cm": 160,
+      "approved_style_source": null,
+      "human_approved_scope": "style only, not proportions or these final variants",
+      "front_head_measurement": {
+        "id": "walker-female-02c",
+        "crown_y": 18,
+        "chin_xy": [
+          623,
+          229
+        ],
+        "chin_raw_rgb": [
+          112,
+          76,
+          59
+        ],
+        "sole_y": 1228,
+        "head_height_px": 211,
+        "full_height_px": 1210,
+        "head_units": 5.734597156398104,
+        "a_pose_local_sleeve_degrees": [
+          30.61138840686757,
+          30.96375653207352
+        ],
+        "bbox": [
+          259,
+          18,
+          990,
+          1229
+        ],
+        "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+        "boundary_uncertainty_px": 1
+      },
+      "side_head_measurement": {
+        "id": "walker-female-02c",
+        "view": "side",
+        "crown_y": 10,
+        "chin_xy": [
+          561,
+          229
+        ],
+        "chin_raw_rgb": [
+          110,
+          69,
+          51
+        ],
+        "sole_y": 1228,
+        "head_height_px": 219,
+        "full_height_px": 1218,
+        "head_units": 5.561643835616438,
+        "head_in_range": true,
+        "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+        "boundary_uncertainty_px": 1
+      },
+      "views": [
+        {
+          "view": "front",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            259,
+            18,
+            990,
+            1229
+          ],
+          "vertical_fill_percent": 96.57097288676236,
+          "head_measurement": {
+            "id": "walker-female-02c",
+            "crown_y": 18,
+            "chin_xy": [
+              623,
+              229
+            ],
+            "chin_raw_rgb": [
+              112,
+              76,
+              59
+            ],
+            "sole_y": 1228,
+            "head_height_px": 211,
+            "full_height_px": 1210,
+            "head_units": 5.734597156398104,
+            "a_pose_local_sleeve_degrees": [
+              30.61138840686757,
+              30.96375653207352
+            ],
+            "bbox": [
+              259,
+              18,
+              990,
+              1229
+            ],
+            "measurement": "Actual pixels in visually inspected visible chin contour; sleeve slope is local2Dedge proxy, not concealed joint angle",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "side",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            515,
+            10,
+            754,
+            1229
+          ],
+          "vertical_fill_percent": 97.20893141945774,
+          "head_measurement": {
+            "id": "walker-female-02c",
+            "view": "side",
+            "crown_y": 10,
+            "chin_xy": [
+              561,
+              229
+            ],
+            "chin_raw_rgb": [
+              110,
+              69,
+              51
+            ],
+            "sole_y": 1228,
+            "head_height_px": 219,
+            "full_height_px": 1218,
+            "head_units": 5.561643835616438,
+            "head_in_range": true,
+            "measurement": "Actual visible profile jaw contour pixel displayed with red marker and visually checked; one-pixel boundary uncertainty",
+            "boundary_uncertainty_px": 1
+          }
+        },
+        {
+          "view": "back",
+          "size": [
+            1254,
+            1254
+          ],
+          "bbox": [
+            258,
+            19,
+            995,
+            1219
+          ],
+          "vertical_fill_percent": 95.69377990430623,
+          "head_measurement": {
+            "crown_y": 19,
+            "chin_xy": null,
+            "sole_y": 1218,
+            "full_height_px": 1199,
+            "head_units": null,
+            "visible_posterior_hair_boundary_xy": [
+              623,
+              216
+            ],
+            "visible_posterior_hair_boundary_rgb": [
+              148,
+              105,
+              81
+            ],
+            "visible_hair_height_px": 197,
+            "measurement": "Chin is occluded from back; posterior hair/nape boundary is a separate visible landmark, not substituted for chin or a head-unit measurement"
+          }
+        }
+      ],
+      "turnaround_head_measurements": {
+        "front": {
+          "crown_y": 110,
+          "chin_xy": [
+            518,
+            305
+          ],
+          "chin_raw_rgb": [
+            107,
+            72,
+            56
+          ],
+          "sole_y": 1230,
+          "head_height_px": 195,
+          "full_height_px": 1120,
+          "head_units": 5.743589743589744,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "side": {
+          "crown_y": 110,
+          "chin_xy": [
+            1492,
+            311
+          ],
+          "chin_raw_rgb": [
+            110,
+            65,
+            45
+          ],
+          "sole_y": 1230,
+          "head_height_px": 201,
+          "full_height_px": 1120,
+          "head_units": 5.5721393034825875,
+          "measurement": "Actual final composed panel crown/sole plus visible chin contour pixel near registered original point, visually checked",
+          "boundary_uncertainty_px": 1
+        },
+        "back": {
+          "crown_y": 110,
+          "sole_y": 1230,
+          "full_height_px": 1120,
+          "chin_xy": null,
+          "head_units": null,
+          "measurement": "Back chin not visible; actual panel crown/sole recorded, no inferred chin ratio"
+        }
+      },
+      "a_pose_local_sleeve_degrees": [
+        30.61138840686757,
+        30.96375653207352
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "file": "walker-male-02a-turnaround.png",
+      "views": [
+        {
+          "input": "walker-male-02a-front.png",
+          "crop": [
+            249,
+            23,
+            983,
+            1226
+          ],
+          "scale": 1.0016638935108153,
+          "xy": [
+            152,
+            26
+          ],
+          "size": [
+            735,
+            1205
+          ]
+        },
+        {
+          "input": "walker-male-02a-side.png",
+          "crop": [
+            483,
+            14,
+            740,
+            1226
+          ],
+          "scale": 0.9942196531791907,
+          "xy": [
+            1432,
+            26
+          ],
+          "size": [
+            256,
+            1205
+          ]
+        },
+        {
+          "input": "walker-male-02a-back.png",
+          "crop": [
+            253,
+            11,
+            980,
+            1216
+          ],
+          "scale": 1.0,
+          "xy": [
+            2236,
+            26
+          ],
+          "size": [
+            727,
+            1205
+          ]
+        }
+      ],
+      "px_per_cm": 7,
+      "column_width": 1040
+    },
+    {
+      "file": "walker-male-02b-turnaround.png",
+      "views": [
+        {
+          "input": "walker-male-02b-front.png",
+          "crop": [
+            154,
+            16,
+            1076,
+            1226
+          ],
+          "scale": 0.9958643507030603,
+          "xy": [
+            61,
+            26
+          ],
+          "size": [
+            918,
+            1205
+          ]
+        },
+        {
+          "input": "walker-male-02b-side.png",
+          "crop": [
+            522,
+            5,
+            756,
+            1225
+          ],
+          "scale": 0.9876948318293683,
+          "xy": [
+            1444,
+            26
+          ],
+          "size": [
+            231,
+            1205
+          ]
+        },
+        {
+          "input": "walker-male-02b-back.png",
+          "crop": [
+            188,
+            9,
+            1051,
+            1215
+          ],
+          "scale": 0.9991701244813278,
+          "xy": [
+            2169,
+            26
+          ],
+          "size": [
+            862,
+            1205
+          ]
+        }
+      ],
+      "px_per_cm": 7,
+      "column_width": 1040
+    },
+    {
+      "file": "walker-male-02c-turnaround.png",
+      "views": [
+        {
+          "input": "walker-male-02c-front.png",
+          "crop": [
+            252,
+            14,
+            975,
+            1227
+          ],
+          "scale": 0.9933993399339934,
+          "xy": [
+            161,
+            26
+          ],
+          "size": [
+            718,
+            1205
+          ]
+        },
+        {
+          "input": "walker-male-02c-side.png",
+          "crop": [
+            499,
+            12,
+            732,
+            1230
+          ],
+          "scale": 0.9893179950698439,
+          "xy": [
+            1444,
+            26
+          ],
+          "size": [
+            231,
+            1205
+          ]
+        },
+        {
+          "input": "walker-male-02c-back.png",
+          "crop": [
+            252,
+            8,
+            983,
+            1217
+          ],
+          "scale": 0.9966887417218543,
+          "xy": [
+            2235,
+            26
+          ],
+          "size": [
+            729,
+            1205
+          ]
+        }
+      ],
+      "px_per_cm": 7,
+      "column_width": 1040
+    },
+    {
+      "file": "walker-female-02a-turnaround.png",
+      "views": [
+        {
+          "input": "walker-female-02a-front.png",
+          "crop": [
+            218,
+            15,
+            1020,
+            1224
+          ],
+          "scale": 0.9271523178807947,
+          "xy": [
+            148,
+            110
+          ],
+          "size": [
+            744,
+            1121
+          ]
+        },
+        {
+          "input": "walker-female-02a-side.png",
+          "crop": [
+            463,
+            15,
+            795,
+            1229
+          ],
+          "scale": 0.9233305853256389,
+          "xy": [
+            1406,
+            110
+          ],
+          "size": [
+            307,
+            1121
+          ]
+        },
+        {
+          "input": "walker-female-02a-back.png",
+          "crop": [
+            220,
+            21,
+            1024,
+            1219
+          ],
+          "scale": 0.935672514619883,
+          "xy": [
+            2224,
+            110
+          ],
+          "size": [
+            752,
+            1121
+          ]
+        }
+      ],
+      "px_per_cm": 7,
+      "column_width": 1040
+    },
+    {
+      "file": "walker-female-02b-turnaround.png",
+      "views": [
+        {
+          "input": "walker-female-02b-front.png",
+          "crop": [
+            169,
+            19,
+            1072,
+            1229
+          ],
+          "scale": 0.9263854425144747,
+          "xy": [
+            101,
+            110
+          ],
+          "size": [
+            837,
+            1121
+          ]
+        },
+        {
+          "input": "walker-female-02b-side.png",
+          "crop": [
+            514,
+            21,
+            758,
+            1228
+          ],
+          "scale": 0.9286898839137645,
+          "xy": [
+            1446,
+            110
+          ],
+          "size": [
+            227,
+            1121
+          ]
+        },
+        {
+          "input": "walker-female-02b-back.png",
+          "crop": [
+            171,
+            18,
+            1073,
+            1218
+          ],
+          "scale": 0.9341117597998332,
+          "xy": [
+            2178,
+            110
+          ],
+          "size": [
+            843,
+            1121
+          ]
+        }
+      ],
+      "px_per_cm": 7,
+      "column_width": 1040
+    },
+    {
+      "file": "walker-female-02c-turnaround.png",
+      "views": [
+        {
+          "input": "walker-female-02c-front.png",
+          "crop": [
+            259,
+            18,
+            990,
+            1229
+          ],
+          "scale": 0.9256198347107438,
+          "xy": [
+            181,
+            110
+          ],
+          "size": [
+            677,
+            1121
+          ]
+        },
+        {
+          "input": "walker-female-02c-side.png",
+          "crop": [
+            515,
+            10,
+            754,
+            1229
+          ],
+          "scale": 0.9195402298850575,
+          "xy": [
+            1450,
+            110
+          ],
+          "size": [
+            220,
+            1121
+          ]
+        },
+        {
+          "input": "walker-female-02c-back.png",
+          "crop": [
+            258,
+            19,
+            995,
+            1219
+          ],
+          "scale": 0.9341117597998332,
+          "xy": [
+            2256,
+            110
+          ],
+          "size": [
+            688,
+            1121
+          ]
+        }
+      ],
+      "px_per_cm": 7,
+      "column_width": 1040
+    },
+    {
+      "file": "lineup.png",
+      "columns": [
+        {
+          "input": "walker-male-02a-front.png",
+          "crop": [
+            249,
+            23,
+            983,
+            1226
+          ],
+          "scale": 0.8585690515806988,
+          "xy": [
+            135,
+            100
+          ],
+          "size": [
+            630,
+            1033
+          ]
+        },
+        {
+          "input": "walker-male-02b-front.png",
+          "crop": [
+            154,
+            16,
+            1076,
+            1226
+          ],
+          "scale": 0.8535980148883374,
+          "xy": [
+            956,
+            100
+          ],
+          "size": [
+            787,
+            1033
+          ]
+        },
+        {
+          "input": "walker-male-02c-front.png",
+          "crop": [
+            252,
+            14,
+            975,
+            1227
+          ],
+          "scale": 0.8514851485148515,
+          "xy": [
+            1942,
+            100
+          ],
+          "size": [
+            616,
+            1033
+          ]
+        },
+        {
+          "input": "walker-female-02a-front.png",
+          "crop": [
+            218,
+            15,
+            1020,
+            1224
+          ],
+          "scale": 0.7947019867549668,
+          "xy": [
+            2831,
+            172
+          ],
+          "size": [
+            637,
+            961
+          ]
+        },
+        {
+          "input": "walker-female-02b-front.png",
+          "crop": [
+            169,
+            19,
+            1072,
+            1229
+          ],
+          "scale": 0.794044665012407,
+          "xy": [
+            3691,
+            172
+          ],
+          "size": [
+            717,
+            961
+          ]
+        },
+        {
+          "input": "walker-female-02c-front.png",
+          "crop": [
+            259,
+            18,
+            990,
+            1229
+          ],
+          "scale": 0.7933884297520661,
+          "xy": [
+            4660,
+            172
+          ],
+          "size": [
+            580,
+            961
+          ]
+        }
+      ],
+      "column_width": 900,
+      "px_per_cm": 6,
+      "sole_y": 1132,
+      "male_full_height_px": 1032,
+      "female_full_height_px": 960
+    }
+  ],
+  "face_comparison": [
+    {
+      "id": "walker-male-02a",
+      "before": "candidates/attachment-style-review-20261014/attached-male-a-front.png",
+      "before_sha256": "433a4d357ca506c299ce31d65e9b60867f9d75c74c50ca9b26ed04867591f3ab",
+      "after": "walker-male-02a-front.png",
+      "crop": [
+        480,
+        0,
+        760,
+        280
+      ],
+      "same_scale": 2,
+      "before_human_approved_style": true
+    },
+    {
+      "id": "walker-male-02b",
+      "before": "candidates/attachment-style-review-20261014/attached-male-b-front.png",
+      "before_sha256": "4b5ff8887a9e8d61b2ccd743be1e7a2875918be8dce73a7e757dbc106af48c6f",
+      "after": "walker-male-02b-front.png",
+      "crop": [
+        480,
+        0,
+        760,
+        280
+      ],
+      "same_scale": 2,
+      "before_human_approved_style": true
+    },
+    {
+      "id": "walker-male-02c",
+      "before": "candidates/superseded-adult-issue143-20261014/walker-male-02c-front.png",
+      "before_sha256": "fe8be16cd61056aab059ba699c474475218645a10a33f909d48a78b0732f4371",
+      "after": "walker-male-02c-front.png",
+      "crop": [
+        480,
+        0,
+        760,
+        280
+      ],
+      "same_scale": 2,
+      "before_human_approved_style": false
+    },
+    {
+      "id": "walker-female-02a",
+      "before": "candidates/attachment-style-review-20261014/attached-female-a-front.png",
+      "before_sha256": "6330b640a201a23074675c120061f5bfc3094d5d702dd51078dc33bf246ac6d6",
+      "after": "walker-female-02a-front.png",
+      "crop": [
+        480,
+        0,
+        760,
+        280
+      ],
+      "same_scale": 2,
+      "before_human_approved_style": true
+    },
+    {
+      "id": "walker-female-02b",
+      "before": "candidates/attachment-style-review-20261014/attached-female-b-front.png",
+      "before_sha256": "eeac2bb30c6df94d3eb4a7a9fd4ca477d631a900135149bc04627fedfb0426a1",
+      "after": "walker-female-02b-front.png",
+      "crop": [
+        480,
+        0,
+        760,
+        280
+      ],
+      "same_scale": 2,
+      "before_human_approved_style": true
+    },
+    {
+      "id": "walker-female-02c",
+      "before": "candidates/superseded-adult-issue143-20261014/walker-female-02c-front.png",
+      "before_sha256": "5e19f809995cf05cf510ebc11b78b29d1edded13ab88982c142010dfdc29d659",
+      "after": "walker-female-02c-front.png",
+      "crop": [
+        480,
+        0,
+        760,
+        280
+      ],
+      "same_scale": 2,
+      "before_human_approved_style": false
+    }
+  ],
+  "operations": [
+    "exact native official output copy",
+    "bbox crop",
+    "isotropic composite scaling",
+    "labels"
+  ],
+  "deliverable_pngs": [
+    {
+      "file": "approved-face-comparison.png",
+      "sha256": "4abd5806289f8f0d2482cf54323005329383b872ad5272b98f904c847285a660",
+      "bytes": 2823477,
+      "size": [
+        3600,
+        1280
+      ]
+    },
+    {
+      "file": "lineup.png",
+      "sha256": "448218c634f616bcd70619e7af28efa906770af69aca5088476bdfba45c39238",
+      "bytes": 3603064,
+      "size": [
+        5400,
+        1280
+      ]
+    },
+    {
+      "file": "walker-female-02a-back.png",
+      "sha256": "e70a062e74db26f44a31d807ac7760b7e3c426b33e4f49c139ddd49c179cdbe8",
+      "bytes": 1544934,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02a-front.png",
+      "sha256": "bf47d2d2a14ca996cb33c106359a22ac5d24f3ede009a99b31f428f661a39032",
+      "bytes": 1392105,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02a-side.png",
+      "sha256": "991477f932eabba444ef6df8e2bc91a1f7626e23d1cd14252b6836088ccd09bc",
+      "bytes": 1512785,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02a-turnaround.png",
+      "sha256": "007baa74aa980dfd779336d9a5e9b208ee05deb827ae9dce25dffd7d18b2065d",
+      "bytes": 1914075,
+      "size": [
+        3120,
+        1280
+      ]
+    },
+    {
+      "file": "walker-female-02b-back.png",
+      "sha256": "5b755e2b20f0bd694f500b2b37ca81cb5b2728cc96a56f00086803571c1b6546",
+      "bytes": 1245975,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02b-front.png",
+      "sha256": "e47337520da062ce1d7dda25e83433b3a65c4b98ea599735770e07d5ab9a2ce3",
+      "bytes": 1334190,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02b-side.png",
+      "sha256": "61d8dbf52daaea39e79288fdb270d4c20249d0c9e924295327a4764f305474d2",
+      "bytes": 1498588,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02b-turnaround.png",
+      "sha256": "7ca68a05b6b9efe04d175451aa79689f28e558077537acf09094de392c22c0c1",
+      "bytes": 1808330,
+      "size": [
+        3120,
+        1280
+      ]
+    },
+    {
+      "file": "walker-female-02c-back.png",
+      "sha256": "f9287259bacc99009ea16cfeed9dab51b07f550e534f84c4035a713c3769a1a3",
+      "bytes": 1225616,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02c-front.png",
+      "sha256": "78641b5366fe40cb4405fa0e3ddcb7306fac59394b91a41069ea3aefbffaff52",
+      "bytes": 1273343,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02c-side.png",
+      "sha256": "8f68f4fd8d7249cf99e65979671a77a7f20ee9b5ebe974e47ff46e936b430e92",
+      "bytes": 1538280,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-female-02c-turnaround.png",
+      "sha256": "82200d2af201159e6f728baaefa772f8719219ac35a39b58ed6ceac350eef4d5",
+      "bytes": 1601650,
+      "size": [
+        3120,
+        1280
+      ]
+    },
+    {
+      "file": "walker-male-02a-back.png",
+      "sha256": "de8c8899adc64dd49fef0b5aa7e2a71abce5769e531f8b4a95d14841f9fc8f39",
+      "bytes": 1338103,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02a-front.png",
+      "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0",
+      "bytes": 1519060,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02a-side.png",
+      "sha256": "75ad7839350dbebe6d87c155870c8ace4cd0a0149b0826e2f5d70a75aa3314b4",
+      "bytes": 1569771,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02a-turnaround.png",
+      "sha256": "8b33ae64e74265fb12e8fb38bac5e869d730979e8a7fbcd2bb0bdf99c570efb0",
+      "bytes": 1953344,
+      "size": [
+        3120,
+        1280
+      ]
+    },
+    {
+      "file": "walker-male-02b-back.png",
+      "sha256": "a722db95aa6d8032444b0f1b7d32d35b61ca33cb5e893a87c97cc64ac15b8ed3",
+      "bytes": 1254514,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02b-front.png",
+      "sha256": "4f58fa903c23b81b42838a8fbf9d2ea65518e16c4e912586d3c1834d6e83185d",
+      "bytes": 1272139,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02b-side.png",
+      "sha256": "8b2363c2290e32521a40d1ac33838c07804f3c19f875d861375362f857174cc2",
+      "bytes": 1533170,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02b-turnaround.png",
+      "sha256": "a37586f073a82c1a3a459102ced37a0a07ef7c27a8b15e82641c388334a61e8a",
+      "bytes": 1994098,
+      "size": [
+        3120,
+        1280
+      ]
+    },
+    {
+      "file": "walker-male-02c-back.png",
+      "sha256": "e8556c829d093d599c04d89f169728e37d458ed043ea0057cc844e29528ca8fd",
+      "bytes": 1235442,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02c-front.png",
+      "sha256": "7ca02267bacb622daea290964c4ae542db9452e990c3855695379e3792fe79e0",
+      "bytes": 1531145,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02c-side.png",
+      "sha256": "f2f2576d1058d873790572f467c011b01b98d8b7e34d9d06de697888d9c008b4",
+      "bytes": 1535199,
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "file": "walker-male-02c-turnaround.png",
+      "sha256": "613b1a4d2136a670bf544b78acbe5df7d29764012f5e5f7658660b77f267c0af",
+      "bytes": 1890135,
+      "size": [
+        3120,
+        1280
+      ]
+    }
+  ],
+  "not_tested": [
+    "hidden back chin/anatomical joint angles",
+    "same exact3Dprojection",
+    "human final selection of revised proportions",
+    "material physics",
+    "3D/rig/animation",
+    "app/browser/real room"
+  ],
+  "library": null
+}

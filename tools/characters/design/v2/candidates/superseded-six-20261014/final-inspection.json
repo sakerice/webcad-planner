@@ -1,0 +1,3770 @@
+{
+  "active_specification": "Human2026-10-14 04:02JST: realistic adult proportions and contemporary college clothes; former5-5.5-head gate withdrawn. Parent approved modern direction, final human approval pending; PR stays Draft.",
+  "pixel_method": "Original1254px PNGs. Coordinates are zero-based. Visible hair crown-to-chin and crown-to-sole distances; hidden skull height cannot be measured. Mask foreground if max(RGB)-min(RGB)>20 or max(RGB)<140. Chin points chosen by visible contour inspection and raw pixel verification.",
+  "layout_method": "Only original image placement, crop of blank margins, isotropic rescaling and labels; no character pixels redrawn. 6px/cm, common sole baseline. Raw singles byte-identical to official imagegen output.",
+  "designs": [
+    {
+      "id": "walker-male-02a",
+      "height_cm": 172,
+      "design_intent": {
+        "id": "walker-male-02a",
+        "sex": "male",
+        "height_cm": 172,
+        "name": "男性a・シャツ",
+        "direction": "普段着/ストリート",
+        "description": "Light skyblue ordinary long-sleeved open button-up shirt with one left chest pocket, white crew-neck tee, charcoal straight ankle pants, plain white slip-on canvas sneakers. Compact short dark-brown side-swept hair. No hat/bag.",
+        "palette": "skin warm peach; hair dark brown; eyes single dark brown; shirt #A9D2FD; tee white; pants #4C4B4A; shoes white/palegray."
+      },
+      "views": [
+        {
+          "view": "front",
+          "file": "walker-male-02a-front.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "63b55a9af46cd66a6dcca1569e70b80c4f3ea17fc43e517858869c25c662d00b",
+          "foreground_bbox_inclusive": [
+            250,
+            15,
+            991,
+            1210
+          ],
+          "crown_y": 15,
+          "sole_y": 1210,
+          "full_height_px": 1195,
+          "frame_fill_fraction": 0.952951,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "side",
+          "file": "walker-male-02a-side.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "b0a19a75a301210b7190634e7b79065a44424d66517d0617ce62801b7d177c24",
+          "foreground_bbox_inclusive": [
+            534,
+            18,
+            737,
+            1202
+          ],
+          "crown_y": 18,
+          "sole_y": 1202,
+          "full_height_px": 1184,
+          "frame_fill_fraction": 0.944179,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "back",
+          "file": "walker-male-02a-back.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "a5ca547b24f14ba656281a16ebd254dd76b05ab7a45d4fd775736db31fe0e058",
+          "foreground_bbox_inclusive": [
+            249,
+            13,
+            990,
+            1198
+          ],
+          "crown_y": 13,
+          "sole_y": 1198,
+          "full_height_px": 1185,
+          "frame_fill_fraction": 0.944976,
+          "chin": "not visible from rear"
+        }
+      ],
+      "visually_displayed_all_views": true,
+      "manual_digits": {
+        "front": [
+          5,
+          5
+        ],
+        "side_near": 5,
+        "side_far": "occluded",
+        "back": [
+          5,
+          5
+        ]
+      },
+      "front_head_measurement": {
+        "crown_y": 15,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          17,
+          20,
+          21
+        ],
+        "sole_y": 1210,
+        "head_height_px": 181,
+        "full_height_px": 1195,
+        "head_units": 6.60221,
+        "not_a_fixed_acceptance_gate": true
+      },
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            396,
+            846
+          ],
+          [
+            319,
+            923
+          ]
+        ],
+        "degrees_from_vertical": [
+          32.6869,
+          32.6869
+        ],
+        "method": "sleeve silhouette slope, not 3D joint angle"
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "reference_hex": "#FEE5CE",
+          "samples": {
+            "front": {
+              "hex": "#FEE5CE",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "side": {
+              "hex": "#FEE4CE",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "back": {
+              "hex": "#FDE5D0",
+              "xy": [
+                315,
+                610
+              ]
+            }
+          }
+        },
+        {
+          "part": "髪",
+          "reference_hex": "#514A47",
+          "samples": {
+            "front": {
+              "hex": "#514A47",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "side": {
+              "hex": "#4B4441",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "back": {
+              "hex": "#4F4843",
+              "xy": [
+                620,
+                85
+              ]
+            }
+          }
+        },
+        {
+          "part": "目・虹彩/瞳の単純形",
+          "reference_hex": "#25201D",
+          "samples": {
+            "front": {
+              "hex": "#25201D",
+              "xy": [
+                595,
+                132
+              ]
+            },
+            "side": {
+              "hex": "#11100E",
+              "xy": [
+                668,
+                128
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "目の白部",
+          "reference_hex": "#FAF9FA",
+          "samples": {
+            "front": {
+              "hex": "#FAF9FA",
+              "xy": [
+                583,
+                125
+              ]
+            },
+            "side": {
+              "hex": "#FDFDFC",
+              "xy": [
+                665,
+                124
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "シャツ本体",
+          "reference_hex": "#A7D3FD",
+          "samples": {
+            "front": {
+              "hex": "#A7D3FD",
+              "xy": [
+                540,
+                391
+              ]
+            },
+            "side": {
+              "hex": "#A7D2FE",
+              "xy": [
+                650,
+                400
+              ]
+            },
+            "back": {
+              "hex": "#A7D2FC",
+              "xy": [
+                620,
+                400
+              ]
+            }
+          }
+        },
+        {
+          "part": "襟",
+          "reference_hex": "#A5D2FD",
+          "samples": {
+            "front": {
+              "hex": "#A5D2FD",
+              "xy": [
+                577,
+                231
+              ]
+            },
+            "side": {
+              "hex": "#A8D1FD",
+              "xy": [
+                607,
+                211
+              ]
+            },
+            "back": {
+              "hex": "#A7D1FC",
+              "xy": [
+                620,
+                205
+              ]
+            }
+          }
+        },
+        {
+          "part": "胸ポケット",
+          "reference_hex": "#A7D3FD",
+          "samples": {
+            "front": {
+              "hex": "#A7D3FD",
+              "xy": [
+                695,
+                350
+              ]
+            },
+            "side": {
+              "hex": null,
+              "xy": null
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "袖口",
+          "reference_hex": "#A7D3FE",
+          "samples": {
+            "front": {
+              "hex": "#A7D3FE",
+              "xy": [
+                323,
+                558
+              ]
+            },
+            "side": {
+              "hex": "#AAD3FD",
+              "xy": [
+                575,
+                560
+              ]
+            },
+            "back": {
+              "hex": "#A9D4FC",
+              "xy": [
+                324,
+                557
+              ]
+            }
+          }
+        },
+        {
+          "part": "Tシャツ",
+          "reference_hex": "#FEFEFE",
+          "samples": {
+            "front": {
+              "hex": "#FEFEFE",
+              "xy": [
+                620,
+                415
+              ]
+            },
+            "side": {
+              "hex": "#FEFDFE",
+              "xy": [
+                684,
+                450
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "パンツ",
+          "reference_hex": "#494948",
+          "samples": {
+            "front": {
+              "hex": "#494948",
+              "xy": [
+                548,
+                895
+              ]
+            },
+            "side": {
+              "hex": "#464646",
+              "xy": [
+                610,
+                895
+              ]
+            },
+            "back": {
+              "hex": "#464645",
+              "xy": [
+                540,
+                895
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴本体",
+          "reference_hex": "#FEFEFE",
+          "samples": {
+            "front": {
+              "hex": "#FEFEFE",
+              "xy": [
+                467,
+                1180
+              ]
+            },
+            "side": {
+              "hex": "#FFFEFE",
+              "xy": [
+                645,
+                1160
+              ]
+            },
+            "back": {
+              "hex": "#FFFFFF",
+              "xy": [
+                520,
+                1156
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴底",
+          "reference_hex": "#E4E3E3",
+          "samples": {
+            "front": {
+              "hex": "#E4E3E3",
+              "xy": [
+                468,
+                1205
+              ]
+            },
+            "side": {
+              "hex": "#E4E4E4",
+              "xy": [
+                650,
+                1196
+              ]
+            },
+            "back": {
+              "hex": "#E2E1E1",
+              "xy": [
+                514,
+                1190
+              ]
+            }
+          }
+        }
+      ],
+      "adult_arm_position_estimate": {
+        "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+        "arms": [
+          {
+            "side": "image-left",
+            "shoulder_xy": [
+              498,
+              270
+            ],
+            "elbow_xy": [
+              405,
+              430
+            ],
+            "wrist_xy": [
+              311,
+              586
+            ],
+            "tip_xy": [
+              269,
+              699
+            ],
+            "upper_arm_px": 185.065,
+            "forearm_px": 182.132,
+            "hand_px": 120.553,
+            "estimated_lowered_wrist_y": 637.197,
+            "estimated_lowered_tip_y": 757.75,
+            "hand_nominal_cm": 17.35
+          },
+          {
+            "side": "image-right",
+            "shoulder_xy": [
+              746,
+              270
+            ],
+            "elbow_xy": [
+              839,
+              430
+            ],
+            "wrist_xy": [
+              933,
+              586
+            ],
+            "tip_xy": [
+              975,
+              699
+            ],
+            "upper_arm_px": 185.065,
+            "forearm_px": 182.132,
+            "hand_px": 120.553,
+            "estimated_lowered_wrist_y": 637.197,
+            "estimated_lowered_tip_y": 757.75,
+            "hand_nominal_cm": 17.35
+          }
+        ],
+        "hip_zone_y_estimated": [
+          610,
+          670
+        ],
+        "knee_y_estimated": 890
+      }
+    },
+    {
+      "id": "walker-male-02b",
+      "height_cm": 172,
+      "design_intent": {
+        "id": "walker-male-02b",
+        "sex": "male",
+        "height_cm": 172,
+        "name": "男性b・軽いアウトドア",
+        "direction": "アウトドア/通学",
+        "description": "Original young adult male college student, age24,172cm. Real ordinary LIGHT SAGE/OLIVE zip windbreaker with a small normal folded collar, open over a WHITE plain crew-neck tee; TAN straight chino trousers; plain DARK CHARCOAL low-top outdoor trainers with PALE GRAY soles. A compact plain MEDIUM GRAY normal backpack lies flush along upper back, two simple fitted gray straps without hanging tails. Short compact nearly-black brown cropped hair, smooth rounded outline, no cap or flyaways. No invented color panels, elbow patches, knee patches, jewelry, logos, slogans, marks or patterns.",
+        "palette": "skin warm peach; hair #393634; eyes dark brown; windbreaker #99AC8A; tee #FFFFFF; chinos #C9B58C; backpack #777C82; trainers #43464A; soles #DADADA."
+      },
+      "views": [
+        {
+          "view": "front",
+          "file": "walker-male-02b-front.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "d2c5c4c61d35e1b1e468f607f46ed1fdd5efbac4330af90773f6b606335f6855",
+          "foreground_bbox_inclusive": [
+            255,
+            14,
+            981,
+            1210
+          ],
+          "crown_y": 14,
+          "sole_y": 1210,
+          "full_height_px": 1196,
+          "frame_fill_fraction": 0.953748,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "side",
+          "file": "walker-male-02b-side.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "119248e47b35515d1bad97d5bb814f7b5bf87bc84a4c84602ff99e804f998aa7",
+          "foreground_bbox_inclusive": [
+            480,
+            14,
+            735,
+            1203
+          ],
+          "crown_y": 14,
+          "sole_y": 1203,
+          "full_height_px": 1189,
+          "frame_fill_fraction": 0.948166,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "back",
+          "file": "walker-male-02b-back.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "610464dec0c1e6acdba1588cdf938a509a1d0b4079ecbdf0888112e35d321e35",
+          "foreground_bbox_inclusive": [
+            258,
+            13,
+            983,
+            1201
+          ],
+          "crown_y": 13,
+          "sole_y": 1201,
+          "full_height_px": 1188,
+          "frame_fill_fraction": 0.947368,
+          "chin": "not visible from rear"
+        }
+      ],
+      "visually_displayed_all_views": true,
+      "manual_digits": {
+        "front": [
+          5,
+          5
+        ],
+        "side_near": 5,
+        "side_far": "occluded",
+        "back": [
+          5,
+          5
+        ]
+      },
+      "front_head_measurement": {
+        "crown_y": 14,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          16,
+          19,
+          18
+        ],
+        "sole_y": 1210,
+        "head_height_px": 182,
+        "full_height_px": 1196,
+        "head_units": 6.571429,
+        "not_a_fixed_acceptance_gate": true
+      },
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            396,
+            843
+          ],
+          [
+            316,
+            922
+          ]
+        ],
+        "degrees_from_vertical": [
+          33.6901,
+          33.3582
+        ],
+        "method": "sleeve silhouette slope, not 3D joint angle"
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "reference_hex": "#FEE4C9",
+          "samples": {
+            "front": {
+              "hex": "#FEE4C9",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "side": {
+              "hex": "#FEE4CB",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "back": {
+              "hex": "#FEE3CA",
+              "xy": [
+                315,
+                610
+              ]
+            }
+          }
+        },
+        {
+          "part": "髪",
+          "reference_hex": "#4B4440",
+          "samples": {
+            "front": {
+              "hex": "#4B4440",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "side": {
+              "hex": "#44403B",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "back": {
+              "hex": "#4D4842",
+              "xy": [
+                620,
+                85
+              ]
+            }
+          }
+        },
+        {
+          "part": "目・虹彩/瞳の単純形",
+          "reference_hex": "#2C2722",
+          "samples": {
+            "front": {
+              "hex": "#2C2722",
+              "xy": [
+                595,
+                132
+              ]
+            },
+            "side": {
+              "hex": "#2D2C27",
+              "xy": [
+                681,
+                123
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "目の白部",
+          "reference_hex": "#F9F9F8",
+          "samples": {
+            "front": {
+              "hex": "#F9F9F8",
+              "xy": [
+                583,
+                125
+              ]
+            },
+            "side": {
+              "hex": "#FEFCFB",
+              "xy": [
+                673,
+                123
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "ジャケット本体",
+          "reference_hex": "#A2AE92",
+          "samples": {
+            "front": {
+              "hex": "#A2AE92",
+              "xy": [
+                551,
+                391
+              ]
+            },
+            "side": {
+              "hex": "#A6B295",
+              "xy": [
+                645,
+                403
+              ]
+            },
+            "back": {
+              "hex": "#A1AC8F",
+              "xy": [
+                530,
+                530
+              ]
+            }
+          }
+        },
+        {
+          "part": "襟",
+          "reference_hex": "#A1AE92",
+          "samples": {
+            "front": {
+              "hex": "#A1AE92",
+              "xy": [
+                576,
+                223
+              ]
+            },
+            "side": {
+              "hex": "#A4B193",
+              "xy": [
+                625,
+                209
+              ]
+            },
+            "back": {
+              "hex": "#A0AC8F",
+              "xy": [
+                620,
+                203
+              ]
+            }
+          }
+        },
+        {
+          "part": "袖口",
+          "reference_hex": "#9FAB90",
+          "samples": {
+            "front": {
+              "hex": "#9FAB90",
+              "xy": [
+                325,
+                555
+              ]
+            },
+            "side": {
+              "hex": "#A7B396",
+              "xy": [
+                555,
+                545
+              ]
+            },
+            "back": {
+              "hex": "#A1AC90",
+              "xy": [
+                325,
+                555
+              ]
+            }
+          }
+        },
+        {
+          "part": "Tシャツ",
+          "reference_hex": "#FFFFFE",
+          "samples": {
+            "front": {
+              "hex": "#FFFFFE",
+              "xy": [
+                620,
+                415
+              ]
+            },
+            "side": {
+              "hex": "#FBFCFC",
+              "xy": [
+                693,
+                441
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "鞄・肩紐",
+          "reference_hex": "#808286",
+          "samples": {
+            "front": {
+              "hex": "#808286",
+              "xy": [
+                543,
+                276
+              ]
+            },
+            "side": {
+              "hex": "#828489",
+              "xy": [
+                638,
+                280
+              ]
+            },
+            "back": {
+              "hex": "#85868A",
+              "xy": [
+                556,
+                245
+              ]
+            }
+          }
+        },
+        {
+          "part": "鞄本体",
+          "reference_hex": "#84868A",
+          "samples": {
+            "front": {
+              "hex": null,
+              "xy": null
+            },
+            "side": {
+              "hex": "#84868A",
+              "xy": [
+                500,
+                360
+              ]
+            },
+            "back": {
+              "hex": "#85878A",
+              "xy": [
+                620,
+                360
+              ]
+            }
+          }
+        },
+        {
+          "part": "チノパンツ",
+          "reference_hex": "#CAB48C",
+          "samples": {
+            "front": {
+              "hex": "#CAB48C",
+              "xy": [
+                548,
+                895
+              ]
+            },
+            "side": {
+              "hex": "#CEB891",
+              "xy": [
+                620,
+                890
+              ]
+            },
+            "back": {
+              "hex": "#CAB38B",
+              "xy": [
+                548,
+                895
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴本体",
+          "reference_hex": "#474748",
+          "samples": {
+            "front": {
+              "hex": "#474748",
+              "xy": [
+                491,
+                1170
+              ]
+            },
+            "side": {
+              "hex": "#4A4B49",
+              "xy": [
+                650,
+                1163
+              ]
+            },
+            "back": {
+              "hex": "#494A49",
+              "xy": [
+                520,
+                1160
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴底",
+          "reference_hex": "#E4E4E4",
+          "samples": {
+            "front": {
+              "hex": "#E4E4E4",
+              "xy": [
+                480,
+                1203
+              ]
+            },
+            "side": {
+              "hex": "#E1E0E1",
+              "xy": [
+                680,
+                1195
+              ]
+            },
+            "back": {
+              "hex": "#E4E4E4",
+              "xy": [
+                520,
+                1195
+              ]
+            }
+          }
+        }
+      ],
+      "adult_arm_position_estimate": {
+        "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+        "arms": [
+          {
+            "side": "image-left",
+            "shoulder_xy": [
+              498,
+              270
+            ],
+            "elbow_xy": [
+              405,
+              430
+            ],
+            "wrist_xy": [
+              321,
+              575
+            ],
+            "tip_xy": [
+              277,
+              693
+            ],
+            "upper_arm_px": 185.065,
+            "forearm_px": 167.574,
+            "hand_px": 125.936,
+            "estimated_lowered_wrist_y": 622.639,
+            "estimated_lowered_tip_y": 748.575,
+            "hand_nominal_cm": 18.11
+          },
+          {
+            "side": "image-right",
+            "shoulder_xy": [
+              746,
+              270
+            ],
+            "elbow_xy": [
+              839,
+              430
+            ],
+            "wrist_xy": [
+              921,
+              575
+            ],
+            "tip_xy": [
+              965,
+              693
+            ],
+            "upper_arm_px": 185.065,
+            "forearm_px": 166.58,
+            "hand_px": 125.936,
+            "estimated_lowered_wrist_y": 621.645,
+            "estimated_lowered_tip_y": 747.582,
+            "hand_nominal_cm": 18.11
+          }
+        ],
+        "hip_zone_y_estimated": [
+          610,
+          670
+        ],
+        "knee_y_estimated": 890
+      }
+    },
+    {
+      "id": "walker-male-02c",
+      "height_cm": 172,
+      "design_intent": {
+        "id": "walker-male-02c",
+        "sex": "male",
+        "height_cm": 172,
+        "name": "男性c・ニット",
+        "direction": "きれいめ/通学",
+        "description": "Original young adult male college student, age24,172cm. Real ordinary OATMEAL/BEIGE crew-neck light knit sweater over a WHITE collared shirt; only the small normal white shirt collar is visible, no large piping or contrast uniform yoke. Plain NAVY straight ankle trousers; simple WARM BROWN rounded loafers with short neutral beige soles and one normal vamp seam. Compact short WARM CHESTNUT hair neatly side-combed, no cap, bag, glasses, jewelry, logos, patterns or invented panels. Knit is smooth solid color without weave/texture/ribbing lines.",
+        "palette": "skin warm peach; hair #6A4B38; eyes dark brown; sweater #DCCBA9; shirt #FFFFFF; trousers #34465F; loafers #6D513D; soles #D2C5AF."
+      },
+      "views": [
+        {
+          "view": "front",
+          "file": "walker-male-02c-front.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "7bc03ef288f1e2d8e72d6f774859c34b3815d6646c6a32bc75f4cf1e1667e199",
+          "foreground_bbox_inclusive": [
+            249,
+            15,
+            989,
+            1210
+          ],
+          "crown_y": 15,
+          "sole_y": 1210,
+          "full_height_px": 1195,
+          "frame_fill_fraction": 0.952951,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "side",
+          "file": "walker-male-02c-side.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "3af210359872e02dc44cbc28af182bd9e6872cea3469b81d865f915aeb3b363e",
+          "foreground_bbox_inclusive": [
+            537,
+            15,
+            723,
+            1203
+          ],
+          "crown_y": 15,
+          "sole_y": 1203,
+          "full_height_px": 1188,
+          "frame_fill_fraction": 0.947368,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "back",
+          "file": "walker-male-02c-back.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "8a54f918f96d5e8a862067825d860b8b5a7f8fda169186351f748d5d1afba8de",
+          "foreground_bbox_inclusive": [
+            250,
+            16,
+            989,
+            1196
+          ],
+          "crown_y": 16,
+          "sole_y": 1196,
+          "full_height_px": 1180,
+          "frame_fill_fraction": 0.940989,
+          "chin": "not visible from rear"
+        }
+      ],
+      "visually_displayed_all_views": true,
+      "manual_digits": {
+        "front": [
+          5,
+          5
+        ],
+        "side_near": 5,
+        "side_far": "occluded",
+        "back": [
+          5,
+          5
+        ]
+      },
+      "front_head_measurement": {
+        "crown_y": 15,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          39,
+          37,
+          29
+        ],
+        "sole_y": 1210,
+        "head_height_px": 182,
+        "full_height_px": 1195,
+        "head_units": 6.565934,
+        "not_a_fixed_acceptance_gate": true
+      },
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            395,
+            845
+          ],
+          [
+            319,
+            921
+          ]
+        ],
+        "degrees_from_vertical": [
+          32.3474,
+          32.3474
+        ],
+        "method": "sleeve silhouette slope, not 3D joint angle"
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "reference_hex": "#FEE4CE",
+          "samples": {
+            "front": {
+              "hex": "#FEE4CE",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "side": {
+              "hex": "#FEE6D2",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "back": {
+              "hex": "#FEE2CE",
+              "xy": [
+                315,
+                610
+              ]
+            }
+          }
+        },
+        {
+          "part": "髪",
+          "reference_hex": "#775944",
+          "samples": {
+            "front": {
+              "hex": "#775944",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "side": {
+              "hex": "#775A45",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "back": {
+              "hex": "#76533D",
+              "xy": [
+                620,
+                85
+              ]
+            }
+          }
+        },
+        {
+          "part": "目・虹彩/瞳の単純形",
+          "reference_hex": "#453424",
+          "samples": {
+            "front": {
+              "hex": "#453424",
+              "xy": [
+                595,
+                132
+              ]
+            },
+            "side": {
+              "hex": "#432F23",
+              "xy": [
+                665,
+                120
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "目の白部",
+          "reference_hex": "#F6F6F6",
+          "samples": {
+            "front": {
+              "hex": "#F6F6F6",
+              "xy": [
+                583,
+                125
+              ]
+            },
+            "side": {
+              "hex": "#FCFDFC",
+              "xy": [
+                660,
+                122
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "ニット本体",
+          "reference_hex": "#E0CEB3",
+          "samples": {
+            "front": {
+              "hex": "#E0CEB3",
+              "xy": [
+                620,
+                400
+              ]
+            },
+            "side": {
+              "hex": "#E3D0B4",
+              "xy": [
+                645,
+                401
+              ]
+            },
+            "back": {
+              "hex": "#E0CCAF",
+              "xy": [
+                620,
+                400
+              ]
+            }
+          }
+        },
+        {
+          "part": "袖口",
+          "reference_hex": "#E0CFB4",
+          "samples": {
+            "front": {
+              "hex": "#E0CFB4",
+              "xy": [
+                318,
+                558
+              ]
+            },
+            "side": {
+              "hex": "#E4D0B4",
+              "xy": [
+                609,
+                546
+              ]
+            },
+            "back": {
+              "hex": "#E0CCAF",
+              "xy": [
+                325,
+                560
+              ]
+            }
+          }
+        },
+        {
+          "part": "シャツ襟",
+          "reference_hex": "#F2F2F2",
+          "samples": {
+            "front": {
+              "hex": "#F2F2F2",
+              "xy": [
+                608,
+                248
+              ]
+            },
+            "side": {
+              "hex": "#FFFFFF",
+              "xy": [
+                612,
+                206
+              ]
+            },
+            "back": {
+              "hex": "#FFFFFF",
+              "xy": [
+                620,
+                204
+              ]
+            }
+          }
+        },
+        {
+          "part": "パンツ",
+          "reference_hex": "#364561",
+          "samples": {
+            "front": {
+              "hex": "#364561",
+              "xy": [
+                548,
+                895
+              ]
+            },
+            "side": {
+              "hex": "#374661",
+              "xy": [
+                610,
+                892
+              ]
+            },
+            "back": {
+              "hex": "#36455F",
+              "xy": [
+                548,
+                895
+              ]
+            }
+          }
+        },
+        {
+          "part": "ローファー本体",
+          "reference_hex": "#71533E",
+          "samples": {
+            "front": {
+              "hex": "#71533E",
+              "xy": [
+                490,
+                1166
+              ]
+            },
+            "side": {
+              "hex": "#5E4433",
+              "xy": [
+                654,
+                1170
+              ]
+            },
+            "back": {
+              "hex": "#76543D",
+              "xy": [
+                520,
+                1167
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴底",
+          "reference_hex": "#DAC7AA",
+          "samples": {
+            "front": {
+              "hex": "#DAC7AA",
+              "xy": [
+                475,
+                1203
+              ]
+            },
+            "side": {
+              "hex": "#DBC5AC",
+              "xy": [
+                654,
+                1198
+              ]
+            },
+            "back": {
+              "hex": "#DDC9AB",
+              "xy": [
+                520,
+                1189
+              ]
+            }
+          }
+        }
+      ],
+      "adult_arm_position_estimate": {
+        "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+        "arms": [
+          {
+            "side": "image-left",
+            "shoulder_xy": [
+              498,
+              270
+            ],
+            "elbow_xy": [
+              405,
+              430
+            ],
+            "wrist_xy": [
+              310,
+              580
+            ],
+            "tip_xy": [
+              270,
+              698
+            ],
+            "upper_arm_px": 185.065,
+            "forearm_px": 177.553,
+            "hand_px": 124.595,
+            "estimated_lowered_wrist_y": 632.618,
+            "estimated_lowered_tip_y": 757.213,
+            "hand_nominal_cm": 17.93
+          },
+          {
+            "side": "image-right",
+            "shoulder_xy": [
+              746,
+              270
+            ],
+            "elbow_xy": [
+              839,
+              430
+            ],
+            "wrist_xy": [
+              932,
+              580
+            ],
+            "tip_xy": [
+              973,
+              698
+            ],
+            "upper_arm_px": 185.065,
+            "forearm_px": 176.491,
+            "hand_px": 124.92,
+            "estimated_lowered_wrist_y": 631.556,
+            "estimated_lowered_tip_y": 756.476,
+            "hand_nominal_cm": 17.98
+          }
+        ],
+        "hip_zone_y_estimated": [
+          610,
+          670
+        ],
+        "knee_y_estimated": 890
+      }
+    },
+    {
+      "id": "walker-female-02a",
+      "height_cm": 160,
+      "design_intent": {
+        "id": "walker-female-02a",
+        "sex": "female",
+        "height_cm": 160,
+        "name": "女性a・パーカー",
+        "direction": "普段着/ストリート",
+        "description": "Original young adult female college student, age24,160cm. Real ordinary soft POWDER LAVENDER pullover hoodie with one normal kangaroo pouch seam and normal cuffs/hem; hood rests close against back. WHITE tee visible only as small ordinary neck edge. CHARCOAL straight ankle trousers; plain IVORY low-top slip-on sneakers with pale gray soles. Compact DARK BROWN chin-length bob, smooth close-to-neck shape, no floating locks. No drawcords, hat, bag, jewelry, graphics, logos, patterned fabric, invented panels or color-matched uniform.",
+        "palette": "skin warm peach; hair #403A37; eyes dark brown; hoodie #C4B7D8; tee #FFFFFF; trousers #4A4A4A; trainers #FAF8F0; soles #D5D5D5."
+      },
+      "views": [
+        {
+          "view": "front",
+          "file": "walker-female-02a-front.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "af66c56de43d7d3cd6ce5274b10f224bebf4c5626ec8dc3084012992d0f54996",
+          "foreground_bbox_inclusive": [
+            286,
+            19,
+            955,
+            1213
+          ],
+          "crown_y": 19,
+          "sole_y": 1213,
+          "full_height_px": 1194,
+          "frame_fill_fraction": 0.952153,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "side",
+          "file": "walker-female-02a-side.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "6ff4c33d0ed57c9ce70a3f0cda1b613d893f0c69bd2044d33fe4d6e34fc0dde0",
+          "foreground_bbox_inclusive": [
+            508,
+            20,
+            736,
+            1207
+          ],
+          "crown_y": 20,
+          "sole_y": 1207,
+          "full_height_px": 1187,
+          "frame_fill_fraction": 0.946571,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "back",
+          "file": "walker-female-02a-back.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "96c17230ef393f86c960b549b50aa371e81562dbfbbaf600ecf009eb5c7d5bb6",
+          "foreground_bbox_inclusive": [
+            287,
+            20,
+            956,
+            1202
+          ],
+          "crown_y": 20,
+          "sole_y": 1202,
+          "full_height_px": 1182,
+          "frame_fill_fraction": 0.942584,
+          "chin": "not visible from rear"
+        }
+      ],
+      "visually_displayed_all_views": true,
+      "manual_digits": {
+        "front": [
+          5,
+          5
+        ],
+        "side_near": 5,
+        "side_far": "occluded",
+        "back": [
+          5,
+          5
+        ]
+      },
+      "front_head_measurement": {
+        "crown_y": 19,
+        "chin_xy": [
+          625,
+          197
+        ],
+        "chin_raw_rgb": [
+          90,
+          88,
+          79
+        ],
+        "sole_y": 1213,
+        "head_height_px": 178,
+        "full_height_px": 1194,
+        "head_units": 6.707865,
+        "not_a_fixed_acceptance_gate": true
+      },
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            417,
+            825
+          ],
+          [
+            342,
+            900
+          ]
+        ],
+        "degrees_from_vertical": [
+          32.0054,
+          32.0054
+        ],
+        "method": "sleeve silhouette slope, not 3D joint angle"
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "reference_hex": "#FEDFC5",
+          "samples": {
+            "front": {
+              "hex": "#FEDFC5",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "side": {
+              "hex": "#FFDDC6",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "back": {
+              "hex": "#FEDEC5",
+              "xy": [
+                315,
+                610
+              ]
+            }
+          }
+        },
+        {
+          "part": "髪",
+          "reference_hex": "#5A4A41",
+          "samples": {
+            "front": {
+              "hex": "#5A4A41",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "side": {
+              "hex": "#605249",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "back": {
+              "hex": "#5C4C42",
+              "xy": [
+                620,
+                85
+              ]
+            }
+          }
+        },
+        {
+          "part": "目・虹彩/瞳の単純形",
+          "reference_hex": "#564335",
+          "samples": {
+            "front": {
+              "hex": "#564335",
+              "xy": [
+                598,
+                132
+              ]
+            },
+            "side": {
+              "hex": "#2D2018",
+              "xy": [
+                664,
+                122
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "目の白部",
+          "reference_hex": "#F7F8F7",
+          "samples": {
+            "front": {
+              "hex": "#F7F8F7",
+              "xy": [
+                587,
+                126
+              ]
+            },
+            "side": {
+              "hex": "#FDFDFB",
+              "xy": [
+                657,
+                126
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "パーカー本体",
+          "reference_hex": "#C9BBD9",
+          "samples": {
+            "front": {
+              "hex": "#C9BBD9",
+              "xy": [
+                620,
+                380
+              ]
+            },
+            "side": {
+              "hex": "#CCBEDC",
+              "xy": [
+                650,
+                400
+              ]
+            },
+            "back": {
+              "hex": "#C8BAD9",
+              "xy": [
+                620,
+                400
+              ]
+            }
+          }
+        },
+        {
+          "part": "フード",
+          "reference_hex": "#C5B6D5",
+          "samples": {
+            "front": {
+              "hex": "#C5B6D5",
+              "xy": [
+                577,
+                231
+              ]
+            },
+            "side": {
+              "hex": "#CBBDDC",
+              "xy": [
+                530,
+                275
+              ]
+            },
+            "back": {
+              "hex": "#C9BDDA",
+              "xy": [
+                620,
+                265
+              ]
+            }
+          }
+        },
+        {
+          "part": "前ポケット",
+          "reference_hex": "#C9BBD9",
+          "samples": {
+            "front": {
+              "hex": "#C9BBD9",
+              "xy": [
+                620,
+                475
+              ]
+            },
+            "side": {
+              "hex": null,
+              "xy": null
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "袖口",
+          "reference_hex": "#C8BBD8",
+          "samples": {
+            "front": {
+              "hex": "#C8BBD8",
+              "xy": [
+                349,
+                543
+              ]
+            },
+            "side": {
+              "hex": "#CBBDDC",
+              "xy": [
+                581,
+                522
+              ]
+            },
+            "back": {
+              "hex": "#C7BAD9",
+              "xy": [
+                350,
+                543
+              ]
+            }
+          }
+        },
+        {
+          "part": "Tシャツ襟",
+          "reference_hex": "#FEFEFE",
+          "samples": {
+            "front": {
+              "hex": "#FEFEFE",
+              "xy": [
+                620,
+                259
+              ]
+            },
+            "side": {
+              "hex": null,
+              "xy": null
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "パンツ",
+          "reference_hex": "#545454",
+          "samples": {
+            "front": {
+              "hex": "#545454",
+              "xy": [
+                548,
+                895
+              ]
+            },
+            "side": {
+              "hex": "#565655",
+              "xy": [
+                610,
+                895
+              ]
+            },
+            "back": {
+              "hex": "#545454",
+              "xy": [
+                548,
+                895
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴本体",
+          "reference_hex": "#FCF9F2",
+          "samples": {
+            "front": {
+              "hex": "#FCF9F2",
+              "xy": [
+                519,
+                1176
+              ]
+            },
+            "side": {
+              "hex": "#FEFAF4",
+              "xy": [
+                650,
+                1160
+              ]
+            },
+            "back": {
+              "hex": "#FCF8F3",
+              "xy": [
+                533,
+                1167
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴底",
+          "reference_hex": "#D4D4D5",
+          "samples": {
+            "front": {
+              "hex": "#D4D4D5",
+              "xy": [
+                511,
+                1205
+              ]
+            },
+            "side": {
+              "hex": "#D4D3D4",
+              "xy": [
+                650,
+                1201
+              ]
+            },
+            "back": {
+              "hex": "#CFCECD",
+              "xy": [
+                533,
+                1197
+              ]
+            }
+          }
+        }
+      ],
+      "adult_arm_position_estimate": {
+        "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+        "arms": [
+          {
+            "side": "image-left",
+            "shoulder_xy": [
+              516,
+              265
+            ],
+            "elbow_xy": [
+              428,
+              414
+            ],
+            "wrist_xy": [
+              341,
+              561
+            ],
+            "tip_xy": [
+              304,
+              672
+            ],
+            "upper_arm_px": 173.046,
+            "forearm_px": 170.816,
+            "hand_px": 117.004,
+            "estimated_lowered_wrist_y": 608.862,
+            "estimated_lowered_tip_y": 725.866,
+            "hand_nominal_cm": 15.68
+          },
+          {
+            "side": "image-right",
+            "shoulder_xy": [
+              730,
+              265
+            ],
+            "elbow_xy": [
+              818,
+              414
+            ],
+            "wrist_xy": [
+              905,
+              561
+            ],
+            "tip_xy": [
+              940,
+              672
+            ],
+            "upper_arm_px": 173.046,
+            "forearm_px": 170.816,
+            "hand_px": 116.387,
+            "estimated_lowered_wrist_y": 608.862,
+            "estimated_lowered_tip_y": 725.249,
+            "hand_nominal_cm": 15.6
+          }
+        ],
+        "hip_zone_y_estimated": [
+          575,
+          655
+        ],
+        "knee_y_estimated": 850
+      }
+    },
+    {
+      "id": "walker-female-02b",
+      "height_cm": 160,
+      "design_intent": {
+        "id": "walker-female-02b",
+        "sex": "female",
+        "height_cm": 160,
+        "name": "女性b・軽いジャケット",
+        "direction": "アウトドア/通学",
+        "description": "Original young adult female college student, age24,160cm. Real ordinary muted MEDIUM DENIM BLUE lightweight zip jacket with a short normal stand collar, open over a WHITE crew-neck tee; BEIGE straight ankle chino pants; plain DARK GRAY low-top outdoor trainers with light gray soles. Small plain MEDIUM GRAY normal backpack hugs upper back, gray straps fitted without loose tails. DARK BROWN hair held in a compact short LOW PONYTAIL close to back of neck, no flying strands or wide tufts. No hat, jewelry, logos, badges, patterns, colored elbow/knee patches or invented uniform seams.",
+        "palette": "skin warm peach; hair #493D35; eyes dark brown; jacket #7198BD; tee #FFFFFF; chinos #D3C2A2; backpack #797E83; trainers #45484B; soles #DADADA."
+      },
+      "views": [
+        {
+          "view": "front",
+          "file": "walker-female-02b-front.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "5d5dadd86bcdf967ca6d34ff6b4e71b25972279a4271c6129ca76c4aa0286044",
+          "foreground_bbox_inclusive": [
+            289,
+            18,
+            953,
+            1213
+          ],
+          "crown_y": 18,
+          "sole_y": 1213,
+          "full_height_px": 1195,
+          "frame_fill_fraction": 0.952951,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "side",
+          "file": "walker-female-02b-side.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "cd96bcac4e97fc9090c497cc8f14b50bf5275d52cdc82af8080866d9c0f10d06",
+          "foreground_bbox_inclusive": [
+            499,
+            21,
+            734,
+            1207
+          ],
+          "crown_y": 21,
+          "sole_y": 1207,
+          "full_height_px": 1186,
+          "frame_fill_fraction": 0.945774,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "back",
+          "file": "walker-female-02b-back.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "1f4a05f7fc092a48074bae781a48a54225dc2ca6068dfce538ce5d5a58c3523e",
+          "foreground_bbox_inclusive": [
+            288,
+            18,
+            955,
+            1195
+          ],
+          "crown_y": 18,
+          "sole_y": 1195,
+          "full_height_px": 1177,
+          "frame_fill_fraction": 0.938596,
+          "chin": "not visible from rear"
+        }
+      ],
+      "visually_displayed_all_views": true,
+      "manual_digits": {
+        "front": [
+          5,
+          5
+        ],
+        "side_near": 5,
+        "side_far": "occluded",
+        "back": [
+          5,
+          5
+        ]
+      },
+      "front_head_measurement": {
+        "crown_y": 18,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          116,
+          108,
+          94
+        ],
+        "sole_y": 1213,
+        "head_height_px": 178,
+        "full_height_px": 1195,
+        "head_units": 6.713483,
+        "not_a_fixed_acceptance_gate": true
+      },
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            416,
+            827
+          ],
+          [
+            344,
+            899
+          ]
+        ],
+        "degrees_from_vertical": [
+          30.9638,
+          30.9638
+        ],
+        "method": "sleeve silhouette slope, not 3D joint angle"
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "reference_hex": "#FEE0C8",
+          "samples": {
+            "front": {
+              "hex": "#FEE0C8",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "side": {
+              "hex": "#FEE0C9",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "back": {
+              "hex": "#FEE1CD",
+              "xy": [
+                315,
+                610
+              ]
+            }
+          }
+        },
+        {
+          "part": "髪",
+          "reference_hex": "#594A40",
+          "samples": {
+            "front": {
+              "hex": "#594A40",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "side": {
+              "hex": "#55463D",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "back": {
+              "hex": "#55473E",
+              "xy": [
+                620,
+                85
+              ]
+            }
+          }
+        },
+        {
+          "part": "目・虹彩/瞳の単純形",
+          "reference_hex": "#503F31",
+          "samples": {
+            "front": {
+              "hex": "#503F31",
+              "xy": [
+                598,
+                132
+              ]
+            },
+            "side": {
+              "hex": "#2D241E",
+              "xy": [
+                666,
+                122
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "目の白部",
+          "reference_hex": "#F7F7F7",
+          "samples": {
+            "front": {
+              "hex": "#F7F7F7",
+              "xy": [
+                587,
+                126
+              ]
+            },
+            "side": {
+              "hex": "#FBFAFA",
+              "xy": [
+                659,
+                119
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "ジャケット本体",
+          "reference_hex": "#7395B6",
+          "samples": {
+            "front": {
+              "hex": "#7395B6",
+              "xy": [
+                552,
+                381
+              ]
+            },
+            "side": {
+              "hex": "#7193B7",
+              "xy": [
+                653,
+                391
+              ]
+            },
+            "back": {
+              "hex": "#6D96BF",
+              "xy": [
+                520,
+                485
+              ]
+            }
+          }
+        },
+        {
+          "part": "襟",
+          "reference_hex": "#7A99B7",
+          "samples": {
+            "front": {
+              "hex": "#7A99B7",
+              "xy": [
+                580,
+                220
+              ]
+            },
+            "side": {
+              "hex": "#6C90B4",
+              "xy": [
+                616,
+                207
+              ]
+            },
+            "back": {
+              "hex": "#6B94BC",
+              "xy": [
+                650,
+                205
+              ]
+            }
+          }
+        },
+        {
+          "part": "袖口",
+          "reference_hex": "#7797B8",
+          "samples": {
+            "front": {
+              "hex": "#7797B8",
+              "xy": [
+                348,
+                534
+              ]
+            },
+            "side": {
+              "hex": "#6C90B5",
+              "xy": [
+                555,
+                515
+              ]
+            },
+            "back": {
+              "hex": "#6D96BF",
+              "xy": [
+                348,
+                534
+              ]
+            }
+          }
+        },
+        {
+          "part": "Tシャツ",
+          "reference_hex": "#FFFFFF",
+          "samples": {
+            "front": {
+              "hex": "#FFFFFF",
+              "xy": [
+                620,
+                345
+              ]
+            },
+            "side": {
+              "hex": "#FDFDFD",
+              "xy": [
+                689,
+                392
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "鞄・肩紐",
+          "reference_hex": "#8D8E8E",
+          "samples": {
+            "front": {
+              "hex": "#8D8E8E",
+              "xy": [
+                543,
+                276
+              ]
+            },
+            "side": {
+              "hex": "#949494",
+              "xy": [
+                633,
+                280
+              ]
+            },
+            "back": {
+              "hex": "#929292",
+              "xy": [
+                557,
+                245
+              ]
+            }
+          }
+        },
+        {
+          "part": "鞄本体",
+          "reference_hex": "#949393",
+          "samples": {
+            "front": {
+              "hex": null,
+              "xy": null
+            },
+            "side": {
+              "hex": "#949393",
+              "xy": [
+                520,
+                330
+              ]
+            },
+            "back": {
+              "hex": "#929393",
+              "xy": [
+                620,
+                355
+              ]
+            }
+          }
+        },
+        {
+          "part": "チノパンツ",
+          "reference_hex": "#DAC7AB",
+          "samples": {
+            "front": {
+              "hex": "#DAC7AB",
+              "xy": [
+                550,
+                895
+              ]
+            },
+            "side": {
+              "hex": "#DDC9AC",
+              "xy": [
+                620,
+                890
+              ]
+            },
+            "back": {
+              "hex": "#DBC6AC",
+              "xy": [
+                550,
+                895
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴本体",
+          "reference_hex": "#5E5D5D",
+          "samples": {
+            "front": {
+              "hex": "#5E5D5D",
+              "xy": [
+                512,
+                1170
+              ]
+            },
+            "side": {
+              "hex": "#5D5D5D",
+              "xy": [
+                650,
+                1170
+              ]
+            },
+            "back": {
+              "hex": "#5D5C5C",
+              "xy": [
+                530,
+                1160
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴底",
+          "reference_hex": "#E2E1E2",
+          "samples": {
+            "front": {
+              "hex": "#E2E1E2",
+              "xy": [
+                512,
+                1205
+              ]
+            },
+            "side": {
+              "hex": "#E1E1E1",
+              "xy": [
+                650,
+                1198
+              ]
+            },
+            "back": {
+              "hex": "#E1E0E0",
+              "xy": [
+                530,
+                1192
+              ]
+            }
+          }
+        }
+      ],
+      "adult_arm_position_estimate": {
+        "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+        "arms": [
+          {
+            "side": "image-left",
+            "shoulder_xy": [
+              516,
+              265
+            ],
+            "elbow_xy": [
+              428,
+              414
+            ],
+            "wrist_xy": [
+              343,
+              547
+            ],
+            "tip_xy": [
+              305,
+              668
+            ],
+            "upper_arm_px": 173.046,
+            "forearm_px": 157.842,
+            "hand_px": 126.827,
+            "estimated_lowered_wrist_y": 595.888,
+            "estimated_lowered_tip_y": 722.715,
+            "hand_nominal_cm": 16.98
+          },
+          {
+            "side": "image-right",
+            "shoulder_xy": [
+              730,
+              265
+            ],
+            "elbow_xy": [
+              818,
+              414
+            ],
+            "wrist_xy": [
+              902,
+              547
+            ],
+            "tip_xy": [
+              940,
+              668
+            ],
+            "upper_arm_px": 173.046,
+            "forearm_px": 157.305,
+            "hand_px": 126.827,
+            "estimated_lowered_wrist_y": 595.352,
+            "estimated_lowered_tip_y": 722.178,
+            "hand_nominal_cm": 16.98
+          }
+        ],
+        "hip_zone_y_estimated": [
+          575,
+          655
+        ],
+        "knee_y_estimated": 850
+      }
+    },
+    {
+      "id": "walker-female-02c",
+      "height_cm": 160,
+      "design_intent": {
+        "id": "walker-female-02c",
+        "sex": "female",
+        "height_cm": 160,
+        "name": "女性c・カーディガン",
+        "direction": "きれいめ/通学",
+        "description": "Ordinary soft coral open cardigan, white plain top, muted indigo narrow above-knee straight skirt, ivory low-heeled loafers. Smooth compact chin-length warm brown bob. No hat/bag.",
+        "palette": "skin warm peach; hair #5E4B3F; eyes single dark brown; cardigan #F89E8B; top white; skirt #465F81; loafers ivory/palegray."
+      },
+      "views": [
+        {
+          "view": "front",
+          "file": "walker-female-02c-front.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "5860422f9a66e89e0f1a53f85342c6c06faefce3a5884a634e1519674ab8c2b5",
+          "foreground_bbox_inclusive": [
+            287,
+            20,
+            955,
+            1211
+          ],
+          "crown_y": 20,
+          "sole_y": 1211,
+          "full_height_px": 1191,
+          "frame_fill_fraction": 0.949761,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "side",
+          "file": "walker-female-02c-side.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "9b5237204faa7038de4c4fe09abe1f8abfdb39a8f9ed7980b29981bab474668c",
+          "foreground_bbox_inclusive": [
+            520,
+            18,
+            733,
+            1197
+          ],
+          "crown_y": 18,
+          "sole_y": 1197,
+          "full_height_px": 1179,
+          "frame_fill_fraction": 0.940191,
+          "chin": "front quantified below; profile inspected visually"
+        },
+        {
+          "view": "back",
+          "file": "walker-female-02c-back.png",
+          "size": [
+            1254,
+            1254
+          ],
+          "sha256": "afbe9bacac51df273dcd7c2b46d8e17b4af5132c02cb91903a99106e7c1706bf",
+          "foreground_bbox_inclusive": [
+            287,
+            19,
+            961,
+            1196
+          ],
+          "crown_y": 19,
+          "sole_y": 1196,
+          "full_height_px": 1177,
+          "frame_fill_fraction": 0.938596,
+          "chin": "not visible from rear"
+        }
+      ],
+      "visually_displayed_all_views": true,
+      "manual_digits": {
+        "front": [
+          5,
+          5
+        ],
+        "side_near": 5,
+        "side_far": "occluded",
+        "back": [
+          5,
+          5
+        ]
+      },
+      "front_head_measurement": {
+        "crown_y": 20,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          113,
+          107,
+          97
+        ],
+        "sole_y": 1211,
+        "head_height_px": 177,
+        "full_height_px": 1191,
+        "head_units": 6.728814,
+        "not_a_fixed_acceptance_gate": true
+      },
+      "a_pose_sleeve_outer_edge": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "edges_x": [
+          [
+            418,
+            824
+          ],
+          [
+            342,
+            899
+          ]
+        ],
+        "degrees_from_vertical": [
+          32.3474,
+          32.0054
+        ],
+        "method": "sleeve silhouette slope, not 3D joint angle"
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "reference_hex": "#FEDDC5",
+          "samples": {
+            "front": {
+              "hex": "#FEDDC5",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "side": {
+              "hex": "#FEE8D8",
+              "xy": [
+                649,
+                165
+              ]
+            },
+            "back": {
+              "hex": "#FEE3CC",
+              "xy": [
+                315,
+                610
+              ]
+            }
+          }
+        },
+        {
+          "part": "髪",
+          "reference_hex": "#655042",
+          "samples": {
+            "front": {
+              "hex": "#655042",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "side": {
+              "hex": "#664F43",
+              "xy": [
+                620,
+                85
+              ]
+            },
+            "back": {
+              "hex": "#634C3E",
+              "xy": [
+                620,
+                85
+              ]
+            }
+          }
+        },
+        {
+          "part": "目・虹彩/瞳の単純形",
+          "reference_hex": "#564436",
+          "samples": {
+            "front": {
+              "hex": "#564436",
+              "xy": [
+                598,
+                132
+              ]
+            },
+            "side": {
+              "hex": "#4A3A2B",
+              "xy": [
+                670,
+                125
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "目の白部",
+          "reference_hex": "#F6F6F5",
+          "samples": {
+            "front": {
+              "hex": "#F6F6F5",
+              "xy": [
+                587,
+                126
+              ]
+            },
+            "side": {
+              "hex": "#F9F9F8",
+              "xy": [
+                662,
+                125
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "カーディガン本体",
+          "reference_hex": "#FB9B86",
+          "samples": {
+            "front": {
+              "hex": "#FB9B86",
+              "xy": [
+                548,
+                386
+              ]
+            },
+            "side": {
+              "hex": "#F9A38D",
+              "xy": [
+                651,
+                392
+              ]
+            },
+            "back": {
+              "hex": "#FB9881",
+              "xy": [
+                620,
+                390
+              ]
+            }
+          }
+        },
+        {
+          "part": "袖口",
+          "reference_hex": "#FA9A86",
+          "samples": {
+            "front": {
+              "hex": "#FA9A86",
+              "xy": [
+                350,
+                543
+              ]
+            },
+            "side": {
+              "hex": "#F79E88",
+              "xy": [
+                613,
+                534
+              ]
+            },
+            "back": {
+              "hex": "#FB9881",
+              "xy": [
+                349,
+                540
+              ]
+            }
+          }
+        },
+        {
+          "part": "トップス",
+          "reference_hex": "#FFFFFF",
+          "samples": {
+            "front": {
+              "hex": "#FFFFFF",
+              "xy": [
+                620,
+                345
+              ]
+            },
+            "side": {
+              "hex": "#F9F9FA",
+              "xy": [
+                689,
+                390
+              ]
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "スカート本体",
+          "reference_hex": "#455F81",
+          "samples": {
+            "front": {
+              "hex": "#455F81",
+              "xy": [
+                557,
+                597
+              ]
+            },
+            "side": {
+              "hex": "#456085",
+              "xy": [
+                650,
+                685
+              ]
+            },
+            "back": {
+              "hex": "#486588",
+              "xy": [
+                557,
+                598
+              ]
+            }
+          }
+        },
+        {
+          "part": "ウエスト",
+          "reference_hex": "#475F80",
+          "samples": {
+            "front": {
+              "hex": "#475F80",
+              "xy": [
+                650,
+                478
+              ]
+            },
+            "side": {
+              "hex": null,
+              "xy": null
+            },
+            "back": {
+              "hex": null,
+              "xy": null
+            }
+          }
+        },
+        {
+          "part": "ローファー本体",
+          "reference_hex": "#FEF9F0",
+          "samples": {
+            "front": {
+              "hex": "#FEF9F0",
+              "xy": [
+                519,
+                1176
+              ]
+            },
+            "side": {
+              "hex": "#FCFCFC",
+              "xy": [
+                650,
+                1156
+              ]
+            },
+            "back": {
+              "hex": "#FEFBF6",
+              "xy": [
+                533,
+                1155
+              ]
+            }
+          }
+        },
+        {
+          "part": "靴底",
+          "reference_hex": "#C4C4C5",
+          "samples": {
+            "front": {
+              "hex": "#C4C4C5",
+              "xy": [
+                511,
+                1206
+              ]
+            },
+            "side": {
+              "hex": "#C0BFC0",
+              "xy": [
+                650,
+                1185
+              ]
+            },
+            "back": {
+              "hex": "#D0CFCF",
+              "xy": [
+                533,
+                1189
+              ]
+            }
+          }
+        }
+      ],
+      "adult_arm_position_estimate": {
+        "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+        "arms": [
+          {
+            "side": "image-left",
+            "shoulder_xy": [
+              516,
+              265
+            ],
+            "elbow_xy": [
+              428,
+              414
+            ],
+            "wrist_xy": [
+              341,
+              561
+            ],
+            "tip_xy": [
+              304,
+              672
+            ],
+            "upper_arm_px": 173.046,
+            "forearm_px": 170.816,
+            "hand_px": 117.004,
+            "estimated_lowered_wrist_y": 608.862,
+            "estimated_lowered_tip_y": 725.866,
+            "hand_nominal_cm": 15.72
+          },
+          {
+            "side": "image-right",
+            "shoulder_xy": [
+              730,
+              265
+            ],
+            "elbow_xy": [
+              818,
+              414
+            ],
+            "wrist_xy": [
+              905,
+              561
+            ],
+            "tip_xy": [
+              940,
+              672
+            ],
+            "upper_arm_px": 173.046,
+            "forearm_px": 170.816,
+            "hand_px": 116.387,
+            "estimated_lowered_wrist_y": 608.862,
+            "estimated_lowered_tip_y": 725.249,
+            "hand_nominal_cm": 15.64
+          }
+        ],
+        "hip_zone_y_estimated": [
+          575,
+          655
+        ],
+        "knee_y_estimated": 850
+      }
+    }
+  ],
+  "layouts": [
+    {
+      "file": "walker-male-02a-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "px_per_cm": 6,
+      "placements": [
+        {
+          "view": "front",
+          "source_crown_y": 15,
+          "source_sole_y": 1210,
+          "source_distance_px": 1195,
+          "uniform_scale": 0.8635983263598327,
+          "placed_xy": [
+            116,
+            100
+          ],
+          "resized_size": [
+            648,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        },
+        {
+          "view": "side",
+          "source_crown_y": 18,
+          "source_sole_y": 1202,
+          "source_distance_px": 1184,
+          "uniform_scale": 0.8716216216216216,
+          "placed_xy": [
+            1228,
+            100
+          ],
+          "resized_size": [
+            185,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        },
+        {
+          "view": "back",
+          "source_crown_y": 13,
+          "source_sole_y": 1198,
+          "source_distance_px": 1185,
+          "uniform_scale": 0.8708860759493671,
+          "placed_xy": [
+            1874,
+            100
+          ],
+          "resized_size": [
+            653,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        }
+      ]
+    },
+    {
+      "file": "lineup.png",
+      "id": "walker-male-02a",
+      "px_per_cm": 6,
+      "source_crown_y": 15,
+      "source_sole_y": 1210,
+      "source_distance_px": 1195,
+      "uniform_scale": 0.8635983263598327,
+      "placed_xy": [
+        26,
+        100
+      ],
+      "resized_size": [
+        648,
+        1033
+      ],
+      "target_crown_y": 100,
+      "target_sole_y": 1132,
+      "target_distance_px": 1032
+    },
+    {
+      "file": "walker-male-02b-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "px_per_cm": 6,
+      "placements": [
+        {
+          "view": "front",
+          "source_crown_y": 14,
+          "source_sole_y": 1210,
+          "source_distance_px": 1196,
+          "uniform_scale": 0.862876254180602,
+          "placed_xy": [
+            123,
+            100
+          ],
+          "resized_size": [
+            634,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        },
+        {
+          "view": "side",
+          "source_crown_y": 14,
+          "source_sole_y": 1203,
+          "source_distance_px": 1189,
+          "uniform_scale": 0.8679562657695542,
+          "placed_xy": [
+            1206,
+            100
+          ],
+          "resized_size": [
+            229,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        },
+        {
+          "view": "back",
+          "source_crown_y": 13,
+          "source_sole_y": 1201,
+          "source_distance_px": 1188,
+          "uniform_scale": 0.8686868686868687,
+          "placed_xy": [
+            1881,
+            100
+          ],
+          "resized_size": [
+            638,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        }
+      ]
+    },
+    {
+      "file": "lineup.png",
+      "id": "walker-male-02b",
+      "px_per_cm": 6,
+      "source_crown_y": 14,
+      "source_sole_y": 1210,
+      "source_distance_px": 1196,
+      "uniform_scale": 0.862876254180602,
+      "placed_xy": [
+        733,
+        100
+      ],
+      "resized_size": [
+        634,
+        1033
+      ],
+      "target_crown_y": 100,
+      "target_sole_y": 1132,
+      "target_distance_px": 1032
+    },
+    {
+      "file": "walker-male-02c-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "px_per_cm": 6,
+      "placements": [
+        {
+          "view": "front",
+          "source_crown_y": 15,
+          "source_sole_y": 1210,
+          "source_distance_px": 1195,
+          "uniform_scale": 0.8635983263598327,
+          "placed_xy": [
+            116,
+            100
+          ],
+          "resized_size": [
+            647,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        },
+        {
+          "view": "side",
+          "source_crown_y": 15,
+          "source_sole_y": 1203,
+          "source_distance_px": 1188,
+          "uniform_scale": 0.8686868686868687,
+          "placed_xy": [
+            1236,
+            100
+          ],
+          "resized_size": [
+            169,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        },
+        {
+          "view": "back",
+          "source_crown_y": 16,
+          "source_sole_y": 1196,
+          "source_distance_px": 1180,
+          "uniform_scale": 0.8745762711864407,
+          "placed_xy": [
+            1873,
+            100
+          ],
+          "resized_size": [
+            654,
+            1033
+          ],
+          "target_crown_y": 100,
+          "target_sole_y": 1132,
+          "target_distance_px": 1032
+        }
+      ]
+    },
+    {
+      "file": "lineup.png",
+      "id": "walker-male-02c",
+      "px_per_cm": 6,
+      "source_crown_y": 15,
+      "source_sole_y": 1210,
+      "source_distance_px": 1195,
+      "uniform_scale": 0.8635983263598327,
+      "placed_xy": [
+        1426,
+        100
+      ],
+      "resized_size": [
+        647,
+        1033
+      ],
+      "target_crown_y": 100,
+      "target_sole_y": 1132,
+      "target_distance_px": 1032
+    },
+    {
+      "file": "walker-female-02a-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "px_per_cm": 6,
+      "placements": [
+        {
+          "view": "front",
+          "source_crown_y": 19,
+          "source_sole_y": 1213,
+          "source_distance_px": 1194,
+          "uniform_scale": 0.8040201005025126,
+          "placed_xy": [
+            168,
+            172
+          ],
+          "resized_size": [
+            545,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        },
+        {
+          "view": "side",
+          "source_crown_y": 20,
+          "source_sole_y": 1207,
+          "source_distance_px": 1187,
+          "uniform_scale": 0.8087615838247684,
+          "placed_xy": [
+            1224,
+            172
+          ],
+          "resized_size": [
+            192,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        },
+        {
+          "view": "back",
+          "source_crown_y": 20,
+          "source_sole_y": 1202,
+          "source_distance_px": 1182,
+          "uniform_scale": 0.8121827411167513,
+          "placed_xy": [
+            1924,
+            172
+          ],
+          "resized_size": [
+            551,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        }
+      ]
+    },
+    {
+      "file": "lineup.png",
+      "id": "walker-female-02a",
+      "px_per_cm": 6,
+      "source_crown_y": 19,
+      "source_sole_y": 1213,
+      "source_distance_px": 1194,
+      "uniform_scale": 0.8040201005025126,
+      "placed_xy": [
+        2178,
+        172
+      ],
+      "resized_size": [
+        545,
+        961
+      ],
+      "target_crown_y": 172,
+      "target_sole_y": 1132,
+      "target_distance_px": 960
+    },
+    {
+      "file": "walker-female-02b-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "px_per_cm": 6,
+      "placements": [
+        {
+          "view": "front",
+          "source_crown_y": 18,
+          "source_sole_y": 1213,
+          "source_distance_px": 1195,
+          "uniform_scale": 0.803347280334728,
+          "placed_xy": [
+            170,
+            172
+          ],
+          "resized_size": [
+            541,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        },
+        {
+          "view": "side",
+          "source_crown_y": 21,
+          "source_sole_y": 1207,
+          "source_distance_px": 1186,
+          "uniform_scale": 0.8094435075885329,
+          "placed_xy": [
+            1221,
+            172
+          ],
+          "resized_size": [
+            198,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        },
+        {
+          "view": "back",
+          "source_crown_y": 18,
+          "source_sole_y": 1195,
+          "source_distance_px": 1177,
+          "uniform_scale": 0.8156329651656754,
+          "placed_xy": [
+            1924,
+            172
+          ],
+          "resized_size": [
+            551,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        }
+      ]
+    },
+    {
+      "file": "lineup.png",
+      "id": "walker-female-02b",
+      "px_per_cm": 6,
+      "source_crown_y": 18,
+      "source_sole_y": 1213,
+      "source_distance_px": 1195,
+      "uniform_scale": 0.803347280334728,
+      "placed_xy": [
+        2880,
+        172
+      ],
+      "resized_size": [
+        541,
+        961
+      ],
+      "target_crown_y": 172,
+      "target_sole_y": 1132,
+      "target_distance_px": 960
+    },
+    {
+      "file": "walker-female-02c-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "px_per_cm": 6,
+      "placements": [
+        {
+          "view": "front",
+          "source_crown_y": 20,
+          "source_sole_y": 1211,
+          "source_distance_px": 1191,
+          "uniform_scale": 0.8060453400503779,
+          "placed_xy": [
+            167,
+            172
+          ],
+          "resized_size": [
+            546,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        },
+        {
+          "view": "side",
+          "source_crown_y": 18,
+          "source_sole_y": 1197,
+          "source_distance_px": 1179,
+          "uniform_scale": 0.8142493638676844,
+          "placed_xy": [
+            1230,
+            172
+          ],
+          "resized_size": [
+            181,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        },
+        {
+          "view": "back",
+          "source_crown_y": 19,
+          "source_sole_y": 1196,
+          "source_distance_px": 1177,
+          "uniform_scale": 0.8156329651656754,
+          "placed_xy": [
+            1922,
+            172
+          ],
+          "resized_size": [
+            557,
+            961
+          ],
+          "target_crown_y": 172,
+          "target_sole_y": 1132,
+          "target_distance_px": 960
+        }
+      ]
+    },
+    {
+      "file": "lineup.png",
+      "id": "walker-female-02c",
+      "px_per_cm": 6,
+      "source_crown_y": 20,
+      "source_sole_y": 1211,
+      "source_distance_px": 1191,
+      "uniform_scale": 0.8060453400503779,
+      "placed_xy": [
+        3577,
+        172
+      ],
+      "resized_size": [
+        546,
+        961
+      ],
+      "target_crown_y": 172,
+      "target_sole_y": 1132,
+      "target_distance_px": 960
+    }
+  ],
+  "unperformed": [
+    "final human approval",
+    "actual lowered-arm pose image/3D/rig/motion (outside image-only scope)",
+    "render tests against actual white-wall/wood/tatami scenes",
+    "strict global flat-region HEX equality (low-amplitude raster variation and antialiasing remain)"
+  ],
+  "remaining_differences": [
+    "AI raster tone variation in fills/background despite flat-cel instructions; visually no designed multistep shading/texture, but strict numerical uniformity is not claimed.",
+    "Side/back vertical framing differs by up to18px (~1.5%); three-view layout uses identical physical-height scale.",
+    "Hand positions vary mildly between profile and front. Side near hand has5 digits; far hand is naturally occluded.",
+    "Male02b rear bag lower edge~478px vs side~488px; corrected from515px. Female02b corrected from471px to~445px vs side~443px.",
+    "Female02c side has faint short ankle anatomical line remaining after targeted cleanup; fabric elbow crease removed."
+  ],
+  "library": {
+    "status": "succeeded",
+    "artifact": "lineup.png",
+    "route": "official current Library skill single local-file fast path, new distinct final lineup; previous failed modern pair batch was neither retried nor switched",
+    "library_file_id": "libfile_c50f1dff50c88191be9e01d40febb5a2",
+    "file_id": "file_00000000a7088206a827efc92becbd99",
+    "file_name": "lineup.png",
+    "path": "/lineup.png",
+    "current_version_number": 0,
+    "library_artifact_type": "image",
+    "file_size_bytes": 3043640,
+    "local_metadata_writeback": "succeeded, official apply-xattrs; ID/version recorded on original Mac PNG",
+    "previous_modern_pair_batch": {
+      "status": "failed before transfer/finalize: Library prepare_uploads is not available",
+      "saved_ids": [],
+      "fallback_taken": false
+    },
+    "final_human_approval": "pending; keep PR103 Draft"
+  },
+  "deliverable_pngs": [
+    {
+      "file": "lineup.png",
+      "size": [
+        4200,
+        1280
+      ],
+      "sha256": "33c62462fe379f65764a0b2fc856bb883c7967020b8421de7047a9d2a658d6b7"
+    },
+    {
+      "file": "walker-female-02a-back.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "96c17230ef393f86c960b549b50aa371e81562dbfbbaf600ecf009eb5c7d5bb6"
+    },
+    {
+      "file": "walker-female-02a-front.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "af66c56de43d7d3cd6ce5274b10f224bebf4c5626ec8dc3084012992d0f54996"
+    },
+    {
+      "file": "walker-female-02a-side.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "6ff4c33d0ed57c9ce70a3f0cda1b613d893f0c69bd2044d33fe4d6e34fc0dde0"
+    },
+    {
+      "file": "walker-female-02a-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "sha256": "f510f76dd01f6819109d3426a4f81dbbb3ab7dd27252c80c025951f02b71b3a9"
+    },
+    {
+      "file": "walker-female-02b-back.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "1f4a05f7fc092a48074bae781a48a54225dc2ca6068dfce538ce5d5a58c3523e"
+    },
+    {
+      "file": "walker-female-02b-front.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "5d5dadd86bcdf967ca6d34ff6b4e71b25972279a4271c6129ca76c4aa0286044"
+    },
+    {
+      "file": "walker-female-02b-side.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "cd96bcac4e97fc9090c497cc8f14b50bf5275d52cdc82af8080866d9c0f10d06"
+    },
+    {
+      "file": "walker-female-02b-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "sha256": "e5a846281b69157e50aa87fd0e4f368f9b1ebf4cfb94be9aee80d4fd8e62513c"
+    },
+    {
+      "file": "walker-female-02c-back.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "afbe9bacac51df273dcd7c2b46d8e17b4af5132c02cb91903a99106e7c1706bf"
+    },
+    {
+      "file": "walker-female-02c-front.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "5860422f9a66e89e0f1a53f85342c6c06faefce3a5884a634e1519674ab8c2b5"
+    },
+    {
+      "file": "walker-female-02c-side.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "9b5237204faa7038de4c4fe09abe1f8abfdb39a8f9ed7980b29981bab474668c"
+    },
+    {
+      "file": "walker-female-02c-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "sha256": "0cd8fe16423e1e3bc3c52b73e0ccb91607bc31b9f17d1b3b134fa5f6d6e5a020"
+    },
+    {
+      "file": "walker-male-02a-back.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "a5ca547b24f14ba656281a16ebd254dd76b05ab7a45d4fd775736db31fe0e058"
+    },
+    {
+      "file": "walker-male-02a-front.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "63b55a9af46cd66a6dcca1569e70b80c4f3ea17fc43e517858869c25c662d00b"
+    },
+    {
+      "file": "walker-male-02a-side.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "b0a19a75a301210b7190634e7b79065a44424d66517d0617ce62801b7d177c24"
+    },
+    {
+      "file": "walker-male-02a-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "sha256": "8a1751ea8f72fdb922b497efa6ff7e38e0646020d8a5d242ed812d5674a6e1f2"
+    },
+    {
+      "file": "walker-male-02b-back.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "610464dec0c1e6acdba1588cdf938a509a1d0b4079ecbdf0888112e35d321e35"
+    },
+    {
+      "file": "walker-male-02b-front.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "d2c5c4c61d35e1b1e468f607f46ed1fdd5efbac4330af90773f6b606335f6855"
+    },
+    {
+      "file": "walker-male-02b-side.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "119248e47b35515d1bad97d5bb814f7b5bf87bc84a4c84602ff99e804f998aa7"
+    },
+    {
+      "file": "walker-male-02b-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "sha256": "d09141a4552567ae56910b527602b97b4f25726178ae7c1d6846f3239e240cd9"
+    },
+    {
+      "file": "walker-male-02c-back.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "8a54f918f96d5e8a862067825d860b8b5a7f8fda169186351f748d5d1afba8de"
+    },
+    {
+      "file": "walker-male-02c-front.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "7bc03ef288f1e2d8e72d6f774859c34b3815d6646c6a32bc75f4cf1e1667e199"
+    },
+    {
+      "file": "walker-male-02c-side.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "3af210359872e02dc44cbc28af182bd9e6872cea3469b81d865f915aeb3b363e"
+    },
+    {
+      "file": "walker-male-02c-turnaround.png",
+      "size": [
+        2640,
+        1280
+      ],
+      "sha256": "fc35249b853f699fbb9d7803e0f19c3bb49fa8dbd29b5c8688c68114bd489406"
+    }
+  ],
+  "lineup_geometry": {
+    "size": [
+      4200,
+      1280
+    ],
+    "male_height_px": 1032,
+    "female_height_px": 960,
+    "height_difference_px": 72,
+    "height_difference_cm": 12,
+    "all_sole_baselines_y": 1132,
+    "male_crown_y": 100,
+    "female_crown_y": 172,
+    "resampling_uncertainty_px": 1,
+    "measured_original_lineup": {
+      "male_crown_sole_y": [
+        [
+          100,
+          1132
+        ],
+        [
+          100,
+          1132
+        ],
+        [
+          100,
+          1132
+        ]
+      ],
+      "female_crown_sole_y": [
+        [
+          172,
+          1132
+        ],
+        [
+          172,
+          1132
+        ],
+        [
+          172,
+          1132
+        ]
+      ],
+      "male_height_px": [
+        1032,
+        1032,
+        1032
+      ],
+      "female_height_px": [
+        960,
+        960,
+        960
+      ],
+      "method": "foreground threshold per700px column; labels excluded by y<1133"
+    }
+  },
+  "all_25_deliverable_PNGs_visually_displayed": true
+}

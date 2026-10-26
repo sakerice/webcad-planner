@@ -1,0 +1,395 @@
+{
+  "parent_direction_approval": "Parent independently fetched/viewed modern male02a/female02c on GitHub; approved direction and continuation to all6. This is not final human approval.",
+  "final_human_approval": "pending; PR103 stays Draft",
+  "all25_visually_displayed": true,
+  "displayed_png_sha256": {
+    "lineup.png": "33c62462fe379f65764a0b2fc856bb883c7967020b8421de7047a9d2a658d6b7",
+    "walker-female-02a-back.png": "96c17230ef393f86c960b549b50aa371e81562dbfbbaf600ecf009eb5c7d5bb6",
+    "walker-female-02a-front.png": "af66c56de43d7d3cd6ce5274b10f224bebf4c5626ec8dc3084012992d0f54996",
+    "walker-female-02a-side.png": "6ff4c33d0ed57c9ce70a3f0cda1b613d893f0c69bd2044d33fe4d6e34fc0dde0",
+    "walker-female-02a-turnaround.png": "f510f76dd01f6819109d3426a4f81dbbb3ab7dd27252c80c025951f02b71b3a9",
+    "walker-female-02b-back.png": "1f4a05f7fc092a48074bae781a48a54225dc2ca6068dfce538ce5d5a58c3523e",
+    "walker-female-02b-front.png": "5d5dadd86bcdf967ca6d34ff6b4e71b25972279a4271c6129ca76c4aa0286044",
+    "walker-female-02b-side.png": "cd96bcac4e97fc9090c497cc8f14b50bf5275d52cdc82af8080866d9c0f10d06",
+    "walker-female-02b-turnaround.png": "e5a846281b69157e50aa87fd0e4f368f9b1ebf4cfb94be9aee80d4fd8e62513c",
+    "walker-female-02c-back.png": "afbe9bacac51df273dcd7c2b46d8e17b4af5132c02cb91903a99106e7c1706bf",
+    "walker-female-02c-front.png": "5860422f9a66e89e0f1a53f85342c6c06faefce3a5884a634e1519674ab8c2b5",
+    "walker-female-02c-side.png": "9b5237204faa7038de4c4fe09abe1f8abfdb39a8f9ed7980b29981bab474668c",
+    "walker-female-02c-turnaround.png": "0cd8fe16423e1e3bc3c52b73e0ccb91607bc31b9f17d1b3b134fa5f6d6e5a020",
+    "walker-male-02a-back.png": "a5ca547b24f14ba656281a16ebd254dd76b05ab7a45d4fd775736db31fe0e058",
+    "walker-male-02a-front.png": "63b55a9af46cd66a6dcca1569e70b80c4f3ea17fc43e517858869c25c662d00b",
+    "walker-male-02a-side.png": "b0a19a75a301210b7190634e7b79065a44424d66517d0617ce62801b7d177c24",
+    "walker-male-02a-turnaround.png": "8a1751ea8f72fdb922b497efa6ff7e38e0646020d8a5d242ed812d5674a6e1f2",
+    "walker-male-02b-back.png": "610464dec0c1e6acdba1588cdf938a509a1d0b4079ecbdf0888112e35d321e35",
+    "walker-male-02b-front.png": "d2c5c4c61d35e1b1e468f607f46ed1fdd5efbac4330af90773f6b606335f6855",
+    "walker-male-02b-side.png": "119248e47b35515d1bad97d5bb814f7b5bf87bc84a4c84602ff99e804f998aa7",
+    "walker-male-02b-turnaround.png": "d09141a4552567ae56910b527602b97b4f25726178ae7c1d6846f3239e240cd9",
+    "walker-male-02c-back.png": "8a54f918f96d5e8a862067825d860b8b5a7f8fda169186351f748d5d1afba8de",
+    "walker-male-02c-front.png": "7bc03ef288f1e2d8e72d6f774859c34b3815d6646c6a32bc75f4cf1e1667e199",
+    "walker-male-02c-side.png": "3af210359872e02dc44cbc28af182bd9e6872cea3469b81d865f915aeb3b363e",
+    "walker-male-02c-turnaround.png": "fc35249b853f699fbb9d7803e0f19c3bb49fa8dbd29b5c8688c68114bd489406"
+  },
+  "manual_arm_estimates": {
+    "walker-male-02a": {
+      "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            498,
+            270
+          ],
+          "elbow_xy": [
+            405,
+            430
+          ],
+          "wrist_xy": [
+            311,
+            586
+          ],
+          "tip_xy": [
+            269,
+            699
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 182.132,
+          "hand_px": 120.553,
+          "estimated_lowered_wrist_y": 637.197,
+          "estimated_lowered_tip_y": 757.75,
+          "hand_nominal_cm": 17.35
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            746,
+            270
+          ],
+          "elbow_xy": [
+            839,
+            430
+          ],
+          "wrist_xy": [
+            933,
+            586
+          ],
+          "tip_xy": [
+            975,
+            699
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 182.132,
+          "hand_px": 120.553,
+          "estimated_lowered_wrist_y": 637.197,
+          "estimated_lowered_tip_y": 757.75,
+          "hand_nominal_cm": 17.35
+        }
+      ],
+      "hip_zone_y_estimated": [
+        610,
+        670
+      ],
+      "knee_y_estimated": 890
+    },
+    "walker-male-02b": {
+      "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            498,
+            270
+          ],
+          "elbow_xy": [
+            405,
+            430
+          ],
+          "wrist_xy": [
+            321,
+            575
+          ],
+          "tip_xy": [
+            277,
+            693
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 167.574,
+          "hand_px": 125.936,
+          "estimated_lowered_wrist_y": 622.639,
+          "estimated_lowered_tip_y": 748.575,
+          "hand_nominal_cm": 18.11
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            746,
+            270
+          ],
+          "elbow_xy": [
+            839,
+            430
+          ],
+          "wrist_xy": [
+            921,
+            575
+          ],
+          "tip_xy": [
+            965,
+            693
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 166.58,
+          "hand_px": 125.936,
+          "estimated_lowered_wrist_y": 621.645,
+          "estimated_lowered_tip_y": 747.582,
+          "hand_nominal_cm": 18.11
+        }
+      ],
+      "hip_zone_y_estimated": [
+        610,
+        670
+      ],
+      "knee_y_estimated": 890
+    },
+    "walker-male-02c": {
+      "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            498,
+            270
+          ],
+          "elbow_xy": [
+            405,
+            430
+          ],
+          "wrist_xy": [
+            310,
+            580
+          ],
+          "tip_xy": [
+            270,
+            698
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 177.553,
+          "hand_px": 124.595,
+          "estimated_lowered_wrist_y": 632.618,
+          "estimated_lowered_tip_y": 757.213,
+          "hand_nominal_cm": 17.93
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            746,
+            270
+          ],
+          "elbow_xy": [
+            839,
+            430
+          ],
+          "wrist_xy": [
+            932,
+            580
+          ],
+          "tip_xy": [
+            973,
+            698
+          ],
+          "upper_arm_px": 185.065,
+          "forearm_px": 176.491,
+          "hand_px": 124.92,
+          "estimated_lowered_wrist_y": 631.556,
+          "estimated_lowered_tip_y": 756.476,
+          "hand_nominal_cm": 17.98
+        }
+      ],
+      "hip_zone_y_estimated": [
+        610,
+        670
+      ],
+      "knee_y_estimated": 890
+    },
+    "walker-female-02a": {
+      "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            516,
+            265
+          ],
+          "elbow_xy": [
+            428,
+            414
+          ],
+          "wrist_xy": [
+            341,
+            561
+          ],
+          "tip_xy": [
+            304,
+            672
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 170.816,
+          "hand_px": 117.004,
+          "estimated_lowered_wrist_y": 608.862,
+          "estimated_lowered_tip_y": 725.866,
+          "hand_nominal_cm": 15.68
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            730,
+            265
+          ],
+          "elbow_xy": [
+            818,
+            414
+          ],
+          "wrist_xy": [
+            905,
+            561
+          ],
+          "tip_xy": [
+            940,
+            672
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 170.816,
+          "hand_px": 116.387,
+          "estimated_lowered_wrist_y": 608.862,
+          "estimated_lowered_tip_y": 725.249,
+          "hand_nominal_cm": 15.6
+        }
+      ],
+      "hip_zone_y_estimated": [
+        575,
+        655
+      ],
+      "knee_y_estimated": 850
+    },
+    "walker-female-02b": {
+      "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            516,
+            265
+          ],
+          "elbow_xy": [
+            428,
+            414
+          ],
+          "wrist_xy": [
+            343,
+            547
+          ],
+          "tip_xy": [
+            305,
+            668
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 157.842,
+          "hand_px": 126.827,
+          "estimated_lowered_wrist_y": 595.888,
+          "estimated_lowered_tip_y": 722.715,
+          "hand_nominal_cm": 16.98
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            730,
+            265
+          ],
+          "elbow_xy": [
+            818,
+            414
+          ],
+          "wrist_xy": [
+            902,
+            547
+          ],
+          "tip_xy": [
+            940,
+            668
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 157.305,
+          "hand_px": 126.827,
+          "estimated_lowered_wrist_y": 595.352,
+          "estimated_lowered_tip_y": 722.178,
+          "hand_nominal_cm": 16.98
+        }
+      ],
+      "hip_zone_y_estimated": [
+        575,
+        655
+      ],
+      "knee_y_estimated": 850
+    },
+    "walker-female-02c": {
+      "method": "Manual approximate2D joint centers under clothes, +/-10px; shared silhouette guide adjusted at wrists/tips. Neutral estimate preserves segment lengths and sums downward from shoulder. Not actual lowered pose/3D/rig verification.",
+      "arms": [
+        {
+          "side": "image-left",
+          "shoulder_xy": [
+            516,
+            265
+          ],
+          "elbow_xy": [
+            428,
+            414
+          ],
+          "wrist_xy": [
+            341,
+            561
+          ],
+          "tip_xy": [
+            304,
+            672
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 170.816,
+          "hand_px": 117.004,
+          "estimated_lowered_wrist_y": 608.862,
+          "estimated_lowered_tip_y": 725.866,
+          "hand_nominal_cm": 15.72
+        },
+        {
+          "side": "image-right",
+          "shoulder_xy": [
+            730,
+            265
+          ],
+          "elbow_xy": [
+            818,
+            414
+          ],
+          "wrist_xy": [
+            905,
+            561
+          ],
+          "tip_xy": [
+            940,
+            672
+          ],
+          "upper_arm_px": 173.046,
+          "forearm_px": 170.816,
+          "hand_px": 116.387,
+          "estimated_lowered_wrist_y": 608.862,
+          "estimated_lowered_tip_y": 725.249,
+          "hand_nominal_cm": 15.64
+        }
+      ],
+      "hip_zone_y_estimated": [
+        575,
+        655
+      ],
+      "knee_y_estimated": 850
+    }
+  },
+  "digits_method": "All18 official generated originals displayed. Front/back: visually count thumb+four fingers in each hand. Side:5 near-hand fingers, far hand occluded; not 3D topology."
+}

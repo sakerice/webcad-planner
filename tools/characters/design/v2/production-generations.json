@@ -1,0 +1,907 @@
+[
+  {
+    "id": "walker-male-02a",
+    "view": "front",
+    "stage": "issue167-proportions-front-v1",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-male-02a-front.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: technical character-design reference, native square at least1254x1254.\nImage1 is the edit target: preserve its same character, wardrobe, palette, accessories and restrained drawing style. Only redraw body proportions under the new specification; no franchise or named-character imitation.\nPrimary request: make this a young adult age24 with approximately5.5 heads total, allowed5.3-5.8. The previous6.5-head proportions are NOT approved. Enlarge head and eyes, shorten legs and neck, make arms/legs/hands slightly broader and shorter. Keep the torso sufficiently long to read the garment. Still an adult at 172cm, not a toddler or extreme super-deformed mascot.\nPractical pixel geometry on a1254-square canvas: whole figure about1200px high from hair crown at y24 to shoe soles at y1224; head from hair crown to bottom of visible chin about218px (chin near y242). Thus fullheight/headheight about5.50. Hair counts in head height. Do not keep the previous small head. Use this geometry without drawing grids, guides, numbers or captions.\nFront orthographic full-body view, face forward, both legs straight, entire figure centered and vertically fills the canvas with small safe margins. A-pose: arms straight down/out at35-40degrees from torso vertical, fingers gently together with4-5 simplified thick fingers, palms turned mildly forward. Maintain shoulder-width stance and both soles on one level. No floor line or ground shadow.\nWardrobe invariants: maleA yellow cropped roomy sweatshirt, visible white tee hem, forest-green wide pants, caramel house mules, pale socks; teal watch on anatomical LEFT wrist, image RIGHT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nStyle invariants: softly elongated round eyes, gentle curved eyelids, small simple nose and closed mouth, soft cheeks/chin, compact hair masses, thin restrained warm outlines, flat broad cell-color shapes with no more than one shadow step. Do not add facial lines or extra shadow steps when enlarging the face. No texture, tiny folds, gradients, glossy highlights, patterns, brands, long free straps or floating hair strands.\nBackground: plain uniform light gray, no scenery, cast shadow, floor or text. Only the one complete front figure. Output must be a native1254x1254or larger square, not a resized smaller raster.",
+    "selected": false,
+    "reason": "Head enlargement insufficient",
+    "official_tool": "image_gen.imagegen",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-0df49923-ed37-442e-9385-82b21c71dc39.png",
+    "repository_output": null,
+    "raw_sha256": "bb0d6a2408f91614c05e04c43af26e34249b47b5418cb0b315ea0dc710d29a03",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02a-front.png",
+        "sha256": "1f5e4e78cbbfc70d0695635904410334918fc87241aef39d868e597dca72af20"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02a",
+    "view": "front",
+    "stage": "issue167-front-retry-v2",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-male-02a-front.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: technical character-design reference, native square at least1254x1254.\nImage1 is the edit target: preserve its same character, wardrobe, palette, accessories and restrained drawing style. Only redraw body proportions under the new specification; no franchise or named-character imitation.\nPrimary request: make this a young adult age24 with approximately5.5 heads total, allowed5.3-5.8. The previous6.5-head proportions are NOT approved. Enlarge head and eyes, shorten legs and neck, make arms/legs/hands slightly broader and shorter. Keep the torso sufficiently long to read the garment. Still an adult at 172cm, not a toddler or extreme super-deformed mascot.\nPractical pixel geometry on a1254-square canvas: whole figure about1200px high from hair crown at y24 to shoe soles at y1224; head from hair crown to bottom of visible chin about218px (chin near y242). Thus fullheight/headheight about5.50. Hair counts in head height. Do not keep the previous small head. Use this geometry without drawing grids, guides, numbers or captions.\nFront orthographic full-body view, face forward, both legs straight, entire figure centered and vertically fills the canvas with small safe margins. A-pose: arms straight down/out at35-40degrees from torso vertical, fingers gently together with4-5 simplified thick fingers, palms turned mildly forward. Maintain shoulder-width stance and both soles on one level. No floor line or ground shadow.\nWardrobe invariants: maleA yellow cropped roomy sweatshirt, visible white tee hem, forest-green wide pants, caramel house mules, pale socks; teal watch on anatomical LEFT wrist, image RIGHT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nStyle invariants: softly elongated round eyes, gentle curved eyelids, small simple nose and closed mouth, soft cheeks/chin, compact hair masses, thin restrained warm outlines, flat broad cell-color shapes with no more than one shadow step. Do not add facial lines or extra shadow steps when enlarging the face. No texture, tiny folds, gradients, glossy highlights, patterns, brands, long free straps or floating hair strands.\nBackground: plain uniform light gray, no scenery, cast shadow, floor or text. Only the one complete front figure. Output must be a native1254x1254or larger square, not a resized smaller raster.\nCRITICAL correction: minimal changes failed. RE-DRAW the entire anatomy, not a slight enlargement of the old face. Make the hair-crown-to-chin head visibly30percent larger than the original reference, with a notably broad round head and larger simple eyes. Shorten the pants/legs by20percent relative to the existing design and redistribute height into the enlarged head and preserved torso. The figure must visibly be5.5-head adult avatar proportions, not6or6.5heads. Hair crown to chin must be18-19percent of whole crown-to-soles height. Please compare that ratio visually before output. Keep face features gentle and stylistically identical, not a baby face.",
+    "selected": false,
+    "reason": "Head too large; about5.2heads",
+    "official_tool": "image_gen.imagegen",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-4d3e6bce-ec71-44ca-b897-c4bdb728522f.png",
+    "repository_output": null,
+    "raw_sha256": "0296542d688ed01d5e9779460fcc34b257fc9407a756317c8b6c203d840d11a1",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02a-front.png",
+        "sha256": "1f5e4e78cbbfc70d0695635904410334918fc87241aef39d868e597dca72af20"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02a",
+    "view": "front",
+    "stage": "issue167-front-retry-v3",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-4d3e6bce-ec71-44ca-b897-c4bdb728522f.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the current large-head version to edit. Preserve this exact character, friendly soft round elongated eyes, restrained facial lines, yellow sweatshirt/white tee hem/forest pants/caramel mules/pale socks/teal anatomical-left watch, thin warm outline, compact hair and broad simple cell shapes. Maintain the full-body front A-pose at35degrees and plain lightgray background. Make a small proportional correction: current hair-crown-to-chin head height is about234px, too large for allowed5.3-5.8heads. REDUCE the entire head/hair/face uniformly by6percent, to about220px high, with hair crown near y15 and chin near y235. Shorten the visible neck by10px. Preserve total crown-to-sole height about1210px, shoes/soles near y1225. Rebalance only the neckline and torso at its top so the lower-body/wardrobe remains unchanged. This yields about5.5heads, adult172cm. Do not revert to the previous6.5-head narrow head. Keep eyes larger and limbs slightly broad. No extra facial detail/shading, no text, shadows, logos, patterns, guides, floor. Native square1254x1254or larger.",
+    "selected": false,
+    "reason": "Within range5.791, refined toward5.5",
+    "official_tool": "image_gen.imagegen",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-4cdb65b3-da1c-4c58-9fe3-a442f6f74afc.png",
+    "repository_output": null,
+    "raw_sha256": "050dea2118f4e25f3dcec95c325192c645c985f0e302d416042807824e560670",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-4d3e6bce-ec71-44ca-b897-c4bdb728522f.png",
+        "sha256": "0296542d688ed01d5e9779460fcc34b257fc9407a756317c8b6c203d840d11a1"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02a",
+    "view": "front",
+    "stage": "issue167-front-refined-v4",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-4cdb65b3-da1c-4c58-9fe3-a442f6f74afc.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 current front is the edit target. Preserve its exact6 clothing colors, yellow sweatshirt, white tee hem, green wide pants, caramel mules/pale socks, teal anatomical-left wristwatch, all wardrobe/accessory sides and broad flat cel shading/thin outlines. Preserve face drawing style and number of lines, elongated round eyes/gentle eyelids/small nose/mouth/soft cheeks/compact hair. Make ONE small anatomy correction: ENLARGE head and hair uniformly by4percent compared to Image1, crown-to-chin from about205px to about213px. Keep crown near y26, chin around y239, soles around y1224, whole figure about1198px. Target5.55-5.65heads, within required5.3-5.8; Image1 is slightly too tall-headed at5.82. Shorten neck5px. No other visual changes. Keep young adult at172cm, same A-pose arms35degrees, palms mildly front and fingers lightly together. Only one front orthographic fullbody on uniform lightgray without floor/shadow/text. Native1254or larger square.",
+    "selected": true,
+    "reason": "Selected; actual5.390",
+    "official_tool": "image_gen.imagegen",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png",
+    "repository_output": "walker-male-02a-front.png",
+    "raw_sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-4cdb65b3-da1c-4c58-9fe3-a442f6f74afc.png",
+        "sha256": "050dea2118f4e25f3dcec95c325192c645c985f0e302d416042807824e560670"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02b",
+    "view": "front",
+    "stage": "issue167-proportions-front-v2-matched",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-male-02b-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: technical character-design reference, native square at least1254x1254.\nImage1 is the edit target: preserve its same character, wardrobe, palette, accessories and restrained drawing style. Only redraw body proportions under the new specification; no franchise or named-character imitation.\nPrimary request: make this a young adult age24 with approximately5.5 heads total, allowed5.3-5.8. The previous6.5-head proportions are NOT approved. Enlarge head and eyes, shorten legs and neck, make arms/legs/hands slightly broader and shorter. Keep the torso sufficiently long to read the garment. Still an adult at 172cm, not a toddler or extreme super-deformed mascot.\nPractical pixel geometry on a1254-square canvas: whole figure about1200px high from hair crown at y24 to shoe soles at y1224; head from hair crown to bottom of visible chin about218px (chin near y242). Thus fullheight/headheight about5.50. Hair counts in head height. Do not keep the previous small head. Use this geometry without drawing grids, guides, numbers or captions.\nFront orthographic full-body view, face forward, both legs straight, entire figure centered and vertically fills the canvas with small safe margins. A-pose: arms straight down/out at35-40degrees from torso vertical, fingers gently together with4-5 simplified thick fingers, palms turned mildly forward. Maintain shoulder-width stance and both soles on one level. No floor line or ground shadow.\nWardrobe invariants: maleB mint half-sleeve half-zip with folded collar, white tee hem, taupe wide pants, navy house mules, pale socks; ochre bracelet on anatomical RIGHT wrist, image LEFT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nStyle invariants: softly elongated round eyes, gentle curved eyelids, small simple nose and closed mouth, soft cheeks/chin, compact hair masses, thin restrained warm outlines, flat broad cell-color shapes with no more than one shadow step. Do not add facial lines or extra shadow steps when enlarging the face. No texture, tiny folds, gradients, glossy highlights, patterns, brands, long free straps or floating hair strands.\nBackground: plain uniform light gray, no scenery, cast shadow, floor or text. Only the one complete front figure. Output must be a native1254x1254or larger square, not a resized smaller raster.\nImage2 is the calibrated new maleA body-proportion reference ONLY (not its clothes or gender). Follow its visibly larger head, shorter legs/neck, broader limbs and adult5.5-head silhouette. Image1 supplies this character's face style, clothing/colors/accessories. REPLACE the long-legged small-head body of Image1 with the proportional arrangement of Image2. Preserve garment shapes and identity while fitting that anatomy. Hair-crown-to-chin must occupy18-19percent of full crown-to-soles height. Do not make a subtle adjustment that leaves6heads. For the female designs preserve feminine soft face/compact brown bob, not male hair/clothes. No extra detail.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-63a7ac22-45bf-4b84-9212-cfaf364199c5.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Replaced after actual pose/head gate",
+    "raw_sha256": "8f0777cd520413423ff77c34721798069ac848976f58b46c475ff1b5d6e066cc",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02b-front.png",
+        "sha256": "71810df05c008d35876049a67cb199abab62e44fbe6de6bb02ef892a21f734b6"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02c",
+    "view": "front",
+    "stage": "issue167-proportions-front-v2-matched",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-male-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: technical character-design reference, native square at least1254x1254.\nImage1 is the edit target: preserve its same character, wardrobe, palette, accessories and restrained drawing style. Only redraw body proportions under the new specification; no franchise or named-character imitation.\nPrimary request: make this a young adult age24 with approximately5.5 heads total, allowed5.3-5.8. The previous6.5-head proportions are NOT approved. Enlarge head and eyes, shorten legs and neck, make arms/legs/hands slightly broader and shorter. Keep the torso sufficiently long to read the garment. Still an adult at 172cm, not a toddler or extreme super-deformed mascot.\nPractical pixel geometry on a1254-square canvas: whole figure about1200px high from hair crown at y24 to shoe soles at y1224; head from hair crown to bottom of visible chin about218px (chin near y242). Thus fullheight/headheight about5.50. Hair counts in head height. Do not keep the previous small head. Use this geometry without drawing grids, guides, numbers or captions.\nFront orthographic full-body view, face forward, both legs straight, entire figure centered and vertically fills the canvas with small safe margins. A-pose: arms straight down/out at35-40degrees from torso vertical, fingers gently together with4-5 simplified thick fingers, palms turned mildly forward. Maintain shoulder-width stance and both soles on one level. No floor line or ground shadow.\nWardrobe invariants: maleC coral open-front cardigan, ivory cotton tee and hem, slate-blue wide pants, gray-taupe house mules and pale socks; no jewelry. Preserve each clothing silhouette and color. Preserve physical accessory side.\nStyle invariants: softly elongated round eyes, gentle curved eyelids, small simple nose and closed mouth, soft cheeks/chin, compact hair masses, thin restrained warm outlines, flat broad cell-color shapes with no more than one shadow step. Do not add facial lines or extra shadow steps when enlarging the face. No texture, tiny folds, gradients, glossy highlights, patterns, brands, long free straps or floating hair strands.\nBackground: plain uniform light gray, no scenery, cast shadow, floor or text. Only the one complete front figure. Output must be a native1254x1254or larger square, not a resized smaller raster.\nImage2 is the calibrated new maleA body-proportion reference ONLY (not its clothes or gender). Follow its visibly larger head, shorter legs/neck, broader limbs and adult5.5-head silhouette. Image1 supplies this character's face style, clothing/colors/accessories. REPLACE the long-legged small-head body of Image1 with the proportional arrangement of Image2. Preserve garment shapes and identity while fitting that anatomy. Hair-crown-to-chin must occupy18-19percent of full crown-to-soles height. Do not make a subtle adjustment that leaves6heads. For the female designs preserve feminine soft face/compact brown bob, not male hair/clothes. No extra detail.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-3c842781-692a-41eb-8fd5-8f4d06b6f53d.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02c-front.png",
+    "reason": "Small-margin edit reverted head proportions too far; restored previously pixel-validated5.315789 native image",
+    "raw_sha256": "7ca02267bacb622daea290964c4ae542db9452e990c3855695379e3792fe79e0",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02c-front.png",
+        "sha256": "fe8be16cd61056aab059ba699c474475218645a10a33f909d48a78b0732f4371"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02a",
+    "view": "front",
+    "stage": "issue167-proportions-front-v2-matched",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-female-02a-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: technical character-design reference, native square at least1254x1254.\nImage1 is the edit target: preserve its same character, wardrobe, palette, accessories and restrained drawing style. Only redraw body proportions under the new specification; no franchise or named-character imitation.\nPrimary request: make this a young adult age24 with approximately5.5 heads total, allowed5.3-5.8. The previous6.5-head proportions are NOT approved. Enlarge head and eyes, shorten legs and neck, make arms/legs/hands slightly broader and shorter. Keep the torso sufficiently long to read the garment. Still an adult at 160cm, not a toddler or extreme super-deformed mascot.\nPractical pixel geometry on a1254-square canvas: whole figure about1200px high from hair crown at y24 to shoe soles at y1224; head from hair crown to bottom of visible chin about218px (chin near y242). Thus fullheight/headheight about5.50. Hair counts in head height. Do not keep the previous small head. Use this geometry without drawing grids, guides, numbers or captions.\nFront orthographic full-body view, face forward, both legs straight, entire figure centered and vertically fills the canvas with small safe margins. A-pose: arms straight down/out at35-40degrees from torso vertical, fingers gently together with4-5 simplified thick fingers, palms turned mildly forward. Maintain shoulder-width stance and both soles on one level. No floor line or ground shadow.\nWardrobe invariants: femaleA forest-green cropped sweatshirt, white tee hem, cream ankle-length skirt with three broad pleat planes, lavender house mules, pale socks; ivory hairclip on anatomical LEFT, image RIGHT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nStyle invariants: softly elongated round eyes, gentle curved eyelids, small simple nose and closed mouth, soft cheeks/chin, compact hair masses, thin restrained warm outlines, flat broad cell-color shapes with no more than one shadow step. Do not add facial lines or extra shadow steps when enlarging the face. No texture, tiny folds, gradients, glossy highlights, patterns, brands, long free straps or floating hair strands.\nBackground: plain uniform light gray, no scenery, cast shadow, floor or text. Only the one complete front figure. Output must be a native1254x1254or larger square, not a resized smaller raster.\nImage2 is the calibrated new maleA body-proportion reference ONLY (not its clothes or gender). Follow its visibly larger head, shorter legs/neck, broader limbs and adult5.5-head silhouette. Image1 supplies this character's face style, clothing/colors/accessories. REPLACE the long-legged small-head body of Image1 with the proportional arrangement of Image2. Preserve garment shapes and identity while fitting that anatomy. Hair-crown-to-chin must occupy18-19percent of full crown-to-soles height. Do not make a subtle adjustment that leaves6heads. For the female designs preserve feminine soft face/compact brown bob, not male hair/clothes. No extra detail.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-aa145fe3-942d-48d5-805c-67d46ce52d5d.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Replaced after actual pose/head gate",
+    "raw_sha256": "03146610d17b5e2b195de25122b8958074215dfbc517ca390a402e58e63edce3",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02a-front.png",
+        "sha256": "7f7b2780707c641a00d2148d77606e5b04cb692b7c43bcee89d5c2128e8f2f32"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02b",
+    "view": "front",
+    "stage": "issue167-proportions-front-v2-matched",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-female-02b-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: technical character-design reference, native square at least1254x1254.\nImage1 is the edit target: preserve its same character, wardrobe, palette, accessories and restrained drawing style. Only redraw body proportions under the new specification; no franchise or named-character imitation.\nPrimary request: make this a young adult age24 with approximately5.5 heads total, allowed5.3-5.8. The previous6.5-head proportions are NOT approved. Enlarge head and eyes, shorten legs and neck, make arms/legs/hands slightly broader and shorter. Keep the torso sufficiently long to read the garment. Still an adult at 160cm, not a toddler or extreme super-deformed mascot.\nPractical pixel geometry on a1254-square canvas: whole figure about1200px high from hair crown at y24 to shoe soles at y1224; head from hair crown to bottom of visible chin about218px (chin near y242). Thus fullheight/headheight about5.50. Hair counts in head height. Do not keep the previous small head. Use this geometry without drawing grids, guides, numbers or captions.\nFront orthographic full-body view, face forward, both legs straight, entire figure centered and vertically fills the canvas with small safe margins. A-pose: arms straight down/out at35-40degrees from torso vertical, fingers gently together with4-5 simplified thick fingers, palms turned mildly forward. Maintain shoulder-width stance and both soles on one level. No floor line or ground shadow.\nWardrobe invariants: femaleB light-blue cropped BOATNECK three-quarter sleeves, charcoal wide pants, taupe-brown house mules, pale socks; round gold flat-disc necklace at front only; no white tee hem and no hairclip. Preserve each clothing silhouette and color. Preserve physical accessory side.\nStyle invariants: softly elongated round eyes, gentle curved eyelids, small simple nose and closed mouth, soft cheeks/chin, compact hair masses, thin restrained warm outlines, flat broad cell-color shapes with no more than one shadow step. Do not add facial lines or extra shadow steps when enlarging the face. No texture, tiny folds, gradients, glossy highlights, patterns, brands, long free straps or floating hair strands.\nBackground: plain uniform light gray, no scenery, cast shadow, floor or text. Only the one complete front figure. Output must be a native1254x1254or larger square, not a resized smaller raster.\nImage2 is the calibrated new maleA body-proportion reference ONLY (not its clothes or gender). Follow its visibly larger head, shorter legs/neck, broader limbs and adult5.5-head silhouette. Image1 supplies this character's face style, clothing/colors/accessories. REPLACE the long-legged small-head body of Image1 with the proportional arrangement of Image2. Preserve garment shapes and identity while fitting that anatomy. Hair-crown-to-chin must occupy18-19percent of full crown-to-soles height. Do not make a subtle adjustment that leaves6heads. For the female designs preserve feminine soft face/compact brown bob, not male hair/clothes. No extra detail.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-aaaaabd3-960c-4e6b-a97c-7e0cb66bee49.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Replaced after actual pose/head gate",
+    "raw_sha256": "272ca4793eb5420b2a722c6f8764f264571a5b6b52d567c8d61300ff92228bf1",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02b-front.png",
+        "sha256": "593aeaa2631f4a401eccb7b34016af9be65bf58f64e5890a7b9dd37002396ec8"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02c",
+    "view": "front",
+    "stage": "issue167-proportions-front-v2-matched",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/walker-female-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: technical character-design reference, native square at least1254x1254.\nImage1 is the edit target: preserve its same character, wardrobe, palette, accessories and restrained drawing style. Only redraw body proportions under the new specification; no franchise or named-character imitation.\nPrimary request: make this a young adult age24 with approximately5.5 heads total, allowed5.3-5.8. The previous6.5-head proportions are NOT approved. Enlarge head and eyes, shorten legs and neck, make arms/legs/hands slightly broader and shorter. Keep the torso sufficiently long to read the garment. Still an adult at 160cm, not a toddler or extreme super-deformed mascot.\nPractical pixel geometry on a1254-square canvas: whole figure about1200px high from hair crown at y24 to shoe soles at y1224; head from hair crown to bottom of visible chin about218px (chin near y242). Thus fullheight/headheight about5.50. Hair counts in head height. Do not keep the previous small head. Use this geometry without drawing grids, guides, numbers or captions.\nFront orthographic full-body view, face forward, both legs straight, entire figure centered and vertically fills the canvas with small safe margins. A-pose: arms straight down/out at35-40degrees from torso vertical, fingers gently together with4-5 simplified thick fingers, palms turned mildly forward. Maintain shoulder-width stance and both soles on one level. No floor line or ground shadow.\nWardrobe invariants: femaleC oatmeal short-sleeve knit polo with folded collar and short V placket, visible white undershirt hem, dusty-rose wide ankle pants, ivory house mules, pale socks; no jewelry. Preserve each clothing silhouette and color. Preserve physical accessory side.\nStyle invariants: softly elongated round eyes, gentle curved eyelids, small simple nose and closed mouth, soft cheeks/chin, compact hair masses, thin restrained warm outlines, flat broad cell-color shapes with no more than one shadow step. Do not add facial lines or extra shadow steps when enlarging the face. No texture, tiny folds, gradients, glossy highlights, patterns, brands, long free straps or floating hair strands.\nBackground: plain uniform light gray, no scenery, cast shadow, floor or text. Only the one complete front figure. Output must be a native1254x1254or larger square, not a resized smaller raster.\nImage2 is the calibrated new maleA body-proportion reference ONLY (not its clothes or gender). Follow its visibly larger head, shorter legs/neck, broader limbs and adult5.5-head silhouette. Image1 supplies this character's face style, clothing/colors/accessories. REPLACE the long-legged small-head body of Image1 with the proportional arrangement of Image2. Preserve garment shapes and identity while fitting that anatomy. Hair-crown-to-chin must occupy18-19percent of full crown-to-soles height. Do not make a subtle adjustment that leaves6heads. For the female designs preserve feminine soft face/compact brown bob, not male hair/clothes. No extra detail.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-9105beda-d846-4d87-8a21-6a57b1b2dca5.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Replaced after actual pose/head gate",
+    "raw_sha256": "1d501c619bf1a25691ef530df45e7f854b8c230201c1cfa7169f8f7253347718",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02c-front.png",
+        "sha256": "5e19f809995cf05cf510ebc11b78b29d1edded13ab88982c142010dfdc29d659"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-67ab2872-60f0-4dc6-ae06-26541b9283ce.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02b",
+    "view": "front",
+    "stage": "issue167-front-pose-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front-before-pose.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. Preserve this exact character, wardrobe silhouettes/colors/accessory physical sides, eyes/hair/soft cheeks/small nose/mouth, same thin outlines and simple cel shadow count. No redesign.\nKeep head and eyes size exactly unchanged: actual5.571heads already correct.\nPreserve fullfigure framing (haircrowny16, chiny233, solesy1225), torso length and width, lowerbody/skirt/pants/shoes proportions and feet positions. Main correction: current arms are too near vertical. ROTATE both whole arms down-and-out so shoulder-to-wrist axis is38degrees from torso vertical. Clear A-pose: almost straight arms, no bent elbows, palms gently forward, fingers lightly gathered. Hands must lie noticeably farther outward AND higher than Image1. On1254square, aim anatomical wrists aboutx220/imageleft andx1020/imageright, y590-620; fingers end aroundy670. Sleeve outer boundary local slopes should also visibly be30-45degrees, not20-28. Do not simply spread fingers or enlarge sleeves while leaving upperarms vertical. Keep all small accessories attached on their existing physical sides. Keep the exact garment neckline/hem lengths. Plain lightgray/no gradients/no floor/no cast shadow/no words/numbers/guides/logos. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-82137fcf-b105-4eda-b153-d6ab37556afd.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02b-front.png",
+    "raw_sha256": "4f58fa903c23b81b42838a8fbf9d2ea65518e16c4e912586d3c1834d6e83185d",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front-before-pose.png",
+        "sha256": "8f0777cd520413423ff77c34721798069ac848976f58b46c475ff1b5d6e066cc"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02a",
+    "view": "front",
+    "stage": "issue167-front-pose-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front-before-pose.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. Preserve this exact character, wardrobe silhouettes/colors/accessory physical sides, eyes/hair/soft cheeks/small nose/mouth, same thin outlines and simple cel shadow count. No redesign.\nALSO enlarge the whole head/hair/face uniformly by11percent: hair-crown-to-chin height198px is too small(actual6.076heads); make it220px, crown near y20, chin near y240, thus5.47heads. Shorten visible neck8px and rebalance upper neckline/torso only. Keep soft adult feminine features and compact bob/ivory hairclip, same eye drawing and facial detail count.\nPreserve fullfigure framing (solesy1223), torso length and width, lowerbody/skirt/pants/shoes proportions and feet positions. Main correction: current arms are too near vertical. ROTATE both whole arms down-and-out so shoulder-to-wrist axis is38degrees from torso vertical. Clear A-pose: almost straight arms, no bent elbows, palms gently forward, fingers lightly gathered. Hands must lie noticeably farther outward AND higher than Image1. On1254square, aim anatomical wrists aboutx220/imageleft andx1020/imageright, y590-620; fingers end aroundy670. Sleeve outer boundary local slopes should also visibly be30-45degrees, not20-28. Do not simply spread fingers or enlarge sleeves while leaving upperarms vertical. Keep all small accessories attached on their existing physical sides. Keep the exact garment neckline/hem lengths. Plain lightgray/no gradients/no floor/no cast shadow/no words/numbers/guides/logos. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-fadbfc18-b4fb-410f-8b1c-9790230220aa.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Refined inward from5.3/5.8boundary for resampled comparison tolerance margin",
+    "raw_sha256": "f348f149bd0187e4f9e8a6920a959bbe10aad36ca554f2c587d2bd63e8fbc7af",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front-before-pose.png",
+        "sha256": "03146610d17b5e2b195de25122b8958074215dfbc517ca390a402e58e63edce3"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02b",
+    "view": "front",
+    "stage": "issue167-front-pose-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-front-before-pose.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. Preserve this exact character, wardrobe silhouettes/colors/accessory physical sides, eyes/hair/soft cheeks/small nose/mouth, same thin outlines and simple cel shadow count. No redesign.\nKeep head and eyes size exactly unchanged: actual5.730heads already correct.\nPreserve fullfigure framing (haircrowny19, chiny230, solesy1228), torso length and width, lowerbody/skirt/pants/shoes proportions and feet positions. Main correction: current arms are too near vertical. ROTATE both whole arms down-and-out so shoulder-to-wrist axis is38degrees from torso vertical. Clear A-pose: almost straight arms, no bent elbows, palms gently forward, fingers lightly gathered. Hands must lie noticeably farther outward AND higher than Image1. On1254square, aim anatomical wrists aboutx220/imageleft andx1020/imageright, y590-620; fingers end aroundy670. Sleeve outer boundary local slopes should also visibly be30-45degrees, not20-28. Do not simply spread fingers or enlarge sleeves while leaving upperarms vertical. Keep all small accessories attached on their existing physical sides. Keep the exact garment neckline/hem lengths. Plain lightgray/no gradients/no floor/no cast shadow/no words/numbers/guides/logos. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-0c1862a4-20ce-443b-8668-2af8181b3c5c.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02b-front.png",
+    "raw_sha256": "e47337520da062ce1d7dda25e83433b3a65c4b98ea599735770e07d5ab9a2ce3",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-front-before-pose.png",
+        "sha256": "272ca4793eb5420b2a722c6f8764f264571a5b6b52d567c8d61300ff92228bf1"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02c",
+    "view": "front",
+    "stage": "issue167-front-pose-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front-before-pose.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. Preserve this exact character, wardrobe silhouettes/colors/accessory physical sides, eyes/hair/soft cheeks/small nose/mouth, same thin outlines and simple cel shadow count. No redesign.\nKeep head and eyes size exactly unchanged: actual5.752heads already correct.\nPreserve fullfigure framing (haircrowny19, chiny229, solesy1227), torso length and width, lowerbody/skirt/pants/shoes proportions and feet positions. Main correction: current arms are too near vertical. ROTATE both whole arms down-and-out so shoulder-to-wrist axis is38degrees from torso vertical. Clear A-pose: almost straight arms, no bent elbows, palms gently forward, fingers lightly gathered. Hands must lie noticeably farther outward AND higher than Image1. On1254square, aim anatomical wrists aboutx220/imageleft andx1020/imageright, y590-620; fingers end aroundy670. Sleeve outer boundary local slopes should also visibly be30-45degrees, not20-28. Do not simply spread fingers or enlarge sleeves while leaving upperarms vertical. Keep all small accessories attached on their existing physical sides. Keep the exact garment neckline/hem lengths. Plain lightgray/no gradients/no floor/no cast shadow/no words/numbers/guides/logos. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-3d104c50-766d-4703-a9f1-a84c53e02491.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "48degree local sleeve angle corrected",
+    "raw_sha256": "e6f04c063dffbb0d72389dca3b51e9f7d3894c3a457601a9cc8d93a80a5122d8",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front-before-pose.png",
+        "sha256": "1d501c619bf1a25691ef530df45e7f854b8c230201c1cfa7169f8f7253347718"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02c",
+    "view": "front",
+    "stage": "issue167-front-final-pose",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front-before-final-pose.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. Keep the head, face, eyes, hair, short neck, torso, garment neckline/hem/colors, pants/legs/shoes and feet positions EXACTLY unchanged. Hair crowny19, chiny229, solesy1227, correct5.752heads. Preserve oatmeal folded-collar half-sleeve polo with short front V, white underhem, dusty-rose wide ankle pants, ivory house mules/pale socks, no accessory. Preserve current simple cell shading/thin outline and no added detail.\nONLY correct A-pose arm angle: both current arm/sleeve local axes are about48degrees from vertical and too wide. Rotate the ENTIRE arms INWARD/DOWNWARD by8degrees around shoulders, to about40degrees from vertical, without bending elbows. Wrists move a little closer to torso and slightly lower. Fingers lightly together4-5 simplified thick fingers, palms mildly forward. Do not change head proportions or shorten sleeves, do not add wrist accessories. Keep orthographic front fullbody on plain uniform lightgray/no floor/shadows/words/guides. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-e3cd96dc-f255-449a-867d-07ed310d46bc.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02c-front.png",
+    "raw_sha256": "78641b5366fe40cb4405fa0e3ddcb7306fac59394b91a41069ea3aefbffaff52",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front-before-final-pose.png",
+        "sha256": "e6f04c063dffbb0d72389dca3b51e9f7d3894c3a457601a9cc8d93a80a5122d8"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02a",
+    "view": "side",
+    "stage": "issue167-low-head-side",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02a-side.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedside view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior side-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 172cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic profile facing imageLEFT, camera seeing the character's anatomicalLEFT side. Show ONLY one visible eye, profile nose and complete visible chin. No three-quarter face or frontview. A-pose stays spread laterally out of torso plane: in this profile projection near arm looks nearvertical because it points partly toward the camera, fingers below cuff at abouty600-700; do not swing arm backward/forward. Same posture and ankle/shoe level as front. Near left wrist displays teal watch. Preserve the low-head body proportions of Image1.\nWardrobe invariants: maleA yellow cropped roomy sweatshirt, visible white tee hem, forest-green wide pants, caramel house mules, pale socks; teal watch on anatomical LEFT wrist, image RIGHT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireside figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-096cbf0e-d148-492e-8a28-22ac67de4543.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "8ab64237fc17cbd595e47579948a74e509495adcac4830e0722c1b9d3ffd3755",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-front.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02a-side.png",
+        "sha256": "055a655deaa5901932781270a154548229b4dec415d73ead91a607b2025c5aa6"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02b",
+    "view": "side",
+    "stage": "issue167-low-head-side",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02b-side.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedside view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior side-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 172cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic profile facing imageRIGHT, camera seeing the character's anatomicalRIGHT side. Show ONLY one visible eye, profile nose and complete visible chin. No three-quarter face or frontview. A-pose stays spread laterally out of torso plane: in this profile projection near arm looks nearvertical because it points partly toward the camera, fingers below cuff at abouty600-700; do not swing arm backward/forward. Same posture and ankle/shoe level as front. Near right wrist displays ochre bracelet. Preserve the low-head body proportions of Image1.\nWardrobe invariants: maleB mint half-sleeve half-zip with folded collar, white tee hem, taupe wide pants, navy house mules, pale socks; ochre bracelet on anatomical RIGHT wrist, image LEFT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireside figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-b99efb4a-a40c-499a-9ef4-5ce31559e31c.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "438e8cd65d75522ad415da8bea435d03307b551182bb76f51b3cd73a63032c79",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front.png",
+        "sha256": "4f58fa903c23b81b42838a8fbf9d2ea65518e16c4e912586d3c1834d6e83185d"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02b-side.png",
+        "sha256": "c8f81cbe42b40f37da8f75ffc1c8e27968b2584b38730f2192f28817a7c77ce1"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02c",
+    "view": "side",
+    "stage": "issue167-low-head-side",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02c-side.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedside view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior side-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 172cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic profile facing imageLEFT, camera seeing the character's anatomicalLEFT side. Show ONLY one visible eye, profile nose and complete visible chin. No three-quarter face or frontview. A-pose stays spread laterally out of torso plane: in this profile projection near arm looks nearvertical because it points partly toward the camera, fingers below cuff at abouty600-700; do not swing arm backward/forward. Same posture and ankle/shoe level as front.  Preserve the low-head body proportions of Image1.\nWardrobe invariants: maleC coral open-front cardigan, ivory cotton tee and hem, slate-blue wide pants, gray-taupe house mules and pale socks; no jewelry. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireside figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-d50b0e9f-a9ed-4cd0-ac62-2eff23d541a0.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "dd4b8d93727990c06c3a024e535c19771628c5942545575f2cdf264e755d18b9",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front.png",
+        "sha256": "7ca02267bacb622daea290964c4ae542db9452e990c3855695379e3792fe79e0"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02c-side.png",
+        "sha256": "2824feb368b75d15cfad95e8a1009534c88f5004af98bc9b56b6e54e6cef8620"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02a",
+    "view": "side",
+    "stage": "issue167-low-head-side",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02a-side.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedside view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior side-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 160cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic profile facing imageLEFT, camera seeing the character's anatomicalLEFT side. Show ONLY one visible eye, profile nose and complete visible chin. No three-quarter face or frontview. A-pose stays spread laterally out of torso plane: in this profile projection near arm looks nearvertical because it points partly toward the camera, fingers below cuff at abouty600-700; do not swing arm backward/forward. Same posture and ankle/shoe level as front. Anatomical-left ivory hairclip is visible in this leftprofile. Preserve the low-head body proportions of Image1.\nWardrobe invariants: femaleA forest-green cropped sweatshirt, white tee hem, cream ankle-length skirt with three broad pleat planes, lavender house mules, pale socks; ivory hairclip on anatomical LEFT, image RIGHT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireside figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-5e59ed87-8da5-4fec-9a0b-ce7b4b9a54e0.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "c924d4f11d10ea09c301a18d9aa00d04f584dbb9455c23daaf5bf7a21d645822",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front.png",
+        "sha256": "bf47d2d2a14ca996cb33c106359a22ac5d24f3ede009a99b31f428f661a39032"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02a-side.png",
+        "sha256": "91e8023eb453614136f7614f68e2d5dbddc673dd72715cdc3ec3e2e85d6ca3ef"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02b",
+    "view": "side",
+    "stage": "issue167-low-head-side",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02b-side.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedside view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior side-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 160cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic profile facing imageLEFT, camera seeing the character's anatomicalLEFT side. Show ONLY one visible eye, profile nose and complete visible chin. No three-quarter face or frontview. A-pose stays spread laterally out of torso plane: in this profile projection near arm looks nearvertical because it points partly toward the camera, fingers below cuff at abouty600-700; do not swing arm backward/forward. Same posture and ankle/shoe level as front.  Preserve the low-head body proportions of Image1.\nWardrobe invariants: femaleB light-blue cropped BOATNECK three-quarter sleeves, charcoal wide pants, taupe-brown house mules, pale socks; round gold flat-disc necklace at front only; no white tee hem and no hairclip. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireside figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-3848c233-b1c7-4ebf-b51b-bf796e548fe6.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "bf7fca99568afc9067ebbdce40a92df33b591138f9aa39e7abadd9ad6ca39ae3",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-front.png",
+        "sha256": "e47337520da062ce1d7dda25e83433b3a65c4b98ea599735770e07d5ab9a2ce3"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02b-side.png",
+        "sha256": "f1af5f2514a61aa8ecee14d1a7f2ce37a45b6f03fcb22c6151d6a79512d8d6eb"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02c",
+    "view": "side",
+    "stage": "issue167-low-head-side",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02c-side.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedside view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior side-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 160cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic profile facing imageLEFT, camera seeing the character's anatomicalLEFT side. Show ONLY one visible eye, profile nose and complete visible chin. No three-quarter face or frontview. A-pose stays spread laterally out of torso plane: in this profile projection near arm looks nearvertical because it points partly toward the camera, fingers below cuff at abouty600-700; do not swing arm backward/forward. Same posture and ankle/shoe level as front.  Preserve the low-head body proportions of Image1.\nWardrobe invariants: femaleC oatmeal short-sleeve knit polo with folded collar and short V placket, visible white undershirt hem, dusty-rose wide ankle pants, ivory house mules, pale socks; no jewelry. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireside figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-8da29d64-b3a3-4957-a237-b16a86b77f8b.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "07f31a87ac02fb521ec6ccf006acd684dcaa424e7b48fac91d51ca56201dce7d",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front.png",
+        "sha256": "78641b5366fe40cb4405fa0e3ddcb7306fac59394b91a41069ea3aefbffaff52"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02c-side.png",
+        "sha256": "11c220c6abb5a6ccf12df0609b1a38f2e6661e1a5d78b6d20100a660db0b0ba1"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02a",
+    "view": "back",
+    "stage": "issue167-low-head-back",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02a-back.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedback view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior back-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 172cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic BACK view, no visible face/eyes or artificial visible chin. Keep full rear hair and actual nape anatomy. Both arms down/out30-45degrees, almoststraight, hands/fingerends at same height and lateralpositions as Image1 front mirrored into rearview. Do not add front features on back (no front zip, Vplacket, cardigan opening, chest pendant). Teal watch is imageLEFT on back.\nWardrobe invariants: maleA yellow cropped roomy sweatshirt, visible white tee hem, forest-green wide pants, caramel house mules, pale socks; teal watch on anatomical LEFT wrist, image RIGHT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireback figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-988bef2f-cb76-4067-a020-2dd73aab185d.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "b827ddd035e333141954a5a3d252cb0ecda14fdb5d0b2ff9bbb380c1baa94024",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-front.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02a-back.png",
+        "sha256": "0b523e2f3dceed4ca1ac46b0fef60c33d4a8c5137a95ed4cc12b4d82b738e18c"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02b",
+    "view": "back",
+    "stage": "issue167-low-head-back",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02b-back.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedback view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior back-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 172cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic BACK view, no visible face/eyes or artificial visible chin. Keep full rear hair and actual nape anatomy. Both arms down/out30-45degrees, almoststraight, hands/fingerends at same height and lateralpositions as Image1 front mirrored into rearview. Do not add front features on back (no front zip, Vplacket, cardigan opening, chest pendant). Ochre bracelet is imageRIGHT on back.\nWardrobe invariants: maleB mint half-sleeve half-zip with folded collar, white tee hem, taupe wide pants, navy house mules, pale socks; ochre bracelet on anatomical RIGHT wrist, image LEFT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireback figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-c4273b71-0600-47c7-959b-0481b4363dfd.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "0851bed8a36fa47ae52a3c59fea34efc86c7ca56e50fc8d211e1ca0ae32a6f22",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front.png",
+        "sha256": "4f58fa903c23b81b42838a8fbf9d2ea65518e16c4e912586d3c1834d6e83185d"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02b-back.png",
+        "sha256": "4210a696ca1bc91cbd5c910c02e68ed047c613e436aaed76d03a7218aea06159"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02c",
+    "view": "back",
+    "stage": "issue167-low-head-back",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02c-back.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedback view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior back-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 172cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic BACK view, no visible face/eyes or artificial visible chin. Keep full rear hair and actual nape anatomy. Both arms down/out30-45degrees, almoststraight, hands/fingerends at same height and lateralpositions as Image1 front mirrored into rearview. Do not add front features on back (no front zip, Vplacket, cardigan opening, chest pendant). \nWardrobe invariants: maleC coral open-front cardigan, ivory cotton tee and hem, slate-blue wide pants, gray-taupe house mules and pale socks; no jewelry. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireback figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-bf820ba6-1123-410e-b860-b65cef436b38.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Head proportion/multiview head size gate correction",
+    "raw_sha256": "9258b136c2095faa4542e27594c3d0a8b6dcc9edb43c45c1f7d3905be2026e78",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front.png",
+        "sha256": "7ca02267bacb622daea290964c4ae542db9452e990c3855695379e3792fe79e0"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-male-02c-back.png",
+        "sha256": "3cb60085c47f6fe6255f4b2fbd337328971eef6457d7fdb47c5fbc57bf8779b7"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02a",
+    "view": "back",
+    "stage": "issue167-low-head-back",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02a-back.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedback view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior back-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 160cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic BACK view, no visible face/eyes or artificial visible chin. Keep full rear hair and actual nape anatomy. Both arms down/out30-45degrees, almoststraight, hands/fingerends at same height and lateralpositions as Image1 front mirrored into rearview. Do not add front features on back (no front zip, Vplacket, cardigan opening, chest pendant). Ivory hairclip is imageLEFT on back.\nWardrobe invariants: femaleA forest-green cropped sweatshirt, white tee hem, cream ankle-length skirt with three broad pleat planes, lavender house mules, pale socks; ivory hairclip on anatomical LEFT, image RIGHT in front. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireback figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-c1939164-2f6a-46c8-a86f-b7ac013f6e0e.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02a-back.png",
+    "raw_sha256": "e70a062e74db26f44a31d807ac7760b7e3c426b33e4f49c139ddd49c179cdbe8",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front.png",
+        "sha256": "bf47d2d2a14ca996cb33c106359a22ac5d24f3ede009a99b31f428f661a39032"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02a-back.png",
+        "sha256": "b24707be07275f4c9ab07f7e138c14d33d193c5adc433cec85e919872af9a8f7"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02b",
+    "view": "back",
+    "stage": "issue167-low-head-back",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02b-back.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedback view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior back-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 160cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic BACK view, no visible face/eyes or artificial visible chin. Keep full rear hair and actual nape anatomy. Both arms down/out30-45degrees, almoststraight, hands/fingerends at same height and lateralpositions as Image1 front mirrored into rearview. Do not add front features on back (no front zip, Vplacket, cardigan opening, chest pendant). No rear gold disc: only very thin necklace chain on nape.\nWardrobe invariants: femaleB light-blue cropped BOATNECK three-quarter sleeves, charcoal wide pants, taupe-brown house mules, pale socks; round gold flat-disc necklace at front only; no white tee hem and no hairclip. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireback figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-a248a1af-ef2c-4f2d-82b1-063f7a104992.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02b-back.png",
+    "raw_sha256": "5b755e2b20f0bd694f500b2b37ca81cb5b2728cc96a56f00086803571c1b6546",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-front.png",
+        "sha256": "e47337520da062ce1d7dda25e83433b3a65c4b98ea599735770e07d5ab9a2ce3"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02b-back.png",
+        "sha256": "2d286b374d933e09ba892d0e85a3b3abba91cd3b2d6426ef85e842efe82ef287"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02c",
+    "view": "back",
+    "stage": "issue167-low-head-back",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02c-back.png"
+    ],
+    "prompt": "Use case: identity-preserve.\nAsset type: native square character reference at least1254x1254.\nImage1 is the authoritative NEW front design with correct5.3-5.8head body proportions and approved drawing style. Transform it into the requestedback view while keeping anatomy/wardrobe/colors/accessories. Image2 is ONLY a prior back-view wardrobe/hair/accessory-position reference; IGNORE its old tall6.5-head anatomy. Do NOT retain the small head or long legs of Image2.\nYoung adult24, 160cm assumed. Approximately5.5heads, allowed5.3-5.8: head from hair-crown to bottomofchin about18-19percentofwhole crown-to-soles height. Large simple eyes/head, short neck/legs, slightly broad short limbs, readable torso. Do not make a toddler. Keep haircrown near20 and solesnear1225 on1254square, visible chin/profile anatomy abouty238-245; NO guides/marks/text.\nProduce a STRICT orthographic BACK view, no visible face/eyes or artificial visible chin. Keep full rear hair and actual nape anatomy. Both arms down/out30-45degrees, almoststraight, hands/fingerends at same height and lateralpositions as Image1 front mirrored into rearview. Do not add front features on back (no front zip, Vplacket, cardigan opening, chest pendant). \nWardrobe invariants: femaleC oatmeal short-sleeve knit polo with folded collar and short V placket, visible white undershirt hem, dusty-rose wide ankle pants, ivory house mules, pale socks; no jewelry. Preserve each clothing silhouette and color. Preserve physical accessory side.\nPreserve same compact hair shape and color, softly elongated round eyes/gentle eyelids/tiny noseandmouth/soft cheeks andchin, thin restrained warmoutline, same facial line count, broad plain flat cel shapes no more than one shadow step. Do not add texture/folds/gradient/gloss/brands/logos/patterns/free long straps/floating scarfends/hairstrands.\nComposition: only one entireback figure, centered, small safemargins, all fingers/shoes visible. Plain uniform lightgray background, no floor/ground/castshadow/scenery/numbers/captions. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-0774d981-ed90-4f59-8dfd-969c3ddd34ec.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02c-back.png",
+    "raw_sha256": "f9287259bacc99009ea16cfeed9dab51b07f550e534f84c4035a713c3769a1a3",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-front.png",
+        "sha256": "78641b5366fe40cb4405fa0e3ddcb7306fac59394b91a41069ea3aefbffaff52"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/superseded-adult-issue143-20261014/walker-female-02c-back.png",
+        "sha256": "15c7b01362084d884eaf7a463b8a29cff44f60b7bc75efde953c7c1fb621ea3b"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02a",
+    "view": "side",
+    "stage": "issue167-profile-head-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-side-before-head-fix.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the current PROFILE edit target. ONLY fix head-to-body proportions. Current profile head is visibly too small, about6-6.3heads. ENLARGE the ENTIRE head including hair, ear, face, single eye uniformly by15percent, keeping hair crown near y20 and increasing hair-crown-to-visible-chin height to approximately218-225px. Visible chin should be near y238-245. Shorten visible neck by10px and rebalance only the top of neck/shoulder connection. Keep total crown-to-sole height about1200px/solesnear1225. Required actualratio5.3-5.8, aim5.5. The head must occupy18-19percent of fullbody crown-to-soles height. Do not achieve this by cropping feet or adding a taller hair spike.\nPreserve this exact young adult172cm character's face drawing style, compact hair shape/color, eye shape/color, gentle lid, tiny nose/mouth, soft chin and existing facial line/shadow count. Preserve Image1's PROFILE direction, garment shapes/palette/hem/sleevelength/neckline/shoes/socks/all physical accessory sides. Do not turn into a front or three-quarter view, show only one eye. Preserve all lower-body and hand positions, simple thick fingers and the existing projectedApose. Do not lengthen legs. Do not add details/texture/folds/gradient/logos/text. Only one complete fullbody on plain lightgray without floor or shadow. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-28adfa48-bc15-475c-b9aa-3b0ebd8bcbff.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02a-side.png",
+    "raw_sha256": "75ad7839350dbebe6d87c155870c8ace4cd0a0149b0826e2f5d70a75aa3314b4",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-side-before-head-fix.png",
+        "sha256": "8ab64237fc17cbd595e47579948a74e509495adcac4830e0722c1b9d3ffd3755"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02b",
+    "view": "side",
+    "stage": "issue167-profile-head-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-side-before-head-fix.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the current PROFILE edit target. ONLY fix head-to-body proportions. Current profile head is visibly too small, about6-6.3heads. ENLARGE the ENTIRE head including hair, ear, face, single eye uniformly by15percent, keeping hair crown near y20 and increasing hair-crown-to-visible-chin height to approximately218-225px. Visible chin should be near y238-245. Shorten visible neck by10px and rebalance only the top of neck/shoulder connection. Keep total crown-to-sole height about1200px/solesnear1225. Required actualratio5.3-5.8, aim5.5. The head must occupy18-19percent of fullbody crown-to-soles height. Do not achieve this by cropping feet or adding a taller hair spike.\nPreserve this exact young adult172cm character's face drawing style, compact hair shape/color, eye shape/color, gentle lid, tiny nose/mouth, soft chin and existing facial line/shadow count. Preserve Image1's PROFILE direction, garment shapes/palette/hem/sleevelength/neckline/shoes/socks/all physical accessory sides. Do not turn into a front or three-quarter view, show only one eye. Preserve all lower-body and hand positions, simple thick fingers and the existing projectedApose. Do not lengthen legs. Do not add details/texture/folds/gradient/logos/text. Only one complete fullbody on plain lightgray without floor or shadow. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-c284be97-1edb-4100-a3cd-1d5e1458505f.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02b-side.png",
+    "raw_sha256": "8b2363c2290e32521a40d1ac33838c07804f3c19f875d861375362f857174cc2",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-side-before-head-fix.png",
+        "sha256": "438e8cd65d75522ad415da8bea435d03307b551182bb76f51b3cd73a63032c79"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02c",
+    "view": "side",
+    "stage": "issue167-profile-head-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-side-before-head-fix.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the current PROFILE edit target. ONLY fix head-to-body proportions. Current profile head is visibly too small, about6-6.3heads. ENLARGE the ENTIRE head including hair, ear, face, single eye uniformly by15percent, keeping hair crown near y20 and increasing hair-crown-to-visible-chin height to approximately218-225px. Visible chin should be near y238-245. Shorten visible neck by10px and rebalance only the top of neck/shoulder connection. Keep total crown-to-sole height about1200px/solesnear1225. Required actualratio5.3-5.8, aim5.5. The head must occupy18-19percent of fullbody crown-to-soles height. Do not achieve this by cropping feet or adding a taller hair spike.\nPreserve this exact young adult172cm character's face drawing style, compact hair shape/color, eye shape/color, gentle lid, tiny nose/mouth, soft chin and existing facial line/shadow count. Preserve Image1's PROFILE direction, garment shapes/palette/hem/sleevelength/neckline/shoes/socks/all physical accessory sides. Do not turn into a front or three-quarter view, show only one eye. Preserve all lower-body and hand positions, simple thick fingers and the existing projectedApose. Do not lengthen legs. Do not add details/texture/folds/gradient/logos/text. Only one complete fullbody on plain lightgray without floor or shadow. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-631a5b82-1d00-4304-8114-92a1c8036cfd.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02c-side.png",
+    "raw_sha256": "f2f2576d1058d873790572f467c011b01b98d8b7e34d9d06de697888d9c008b4",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-side-before-head-fix.png",
+        "sha256": "dd4b8d93727990c06c3a024e535c19771628c5942545575f2cdf264e755d18b9"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02a",
+    "view": "side",
+    "stage": "issue167-profile-head-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-side-before-head-fix.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the current PROFILE edit target. ONLY fix head-to-body proportions. Current profile head is visibly too small, about6-6.3heads. ENLARGE the ENTIRE head including hair, ear, face, single eye uniformly by15percent, keeping hair crown near y20 and increasing hair-crown-to-visible-chin height to approximately218-225px. Visible chin should be near y238-245. Shorten visible neck by10px and rebalance only the top of neck/shoulder connection. Keep total crown-to-sole height about1200px/solesnear1225. Required actualratio5.3-5.8, aim5.5. The head must occupy18-19percent of fullbody crown-to-soles height. Do not achieve this by cropping feet or adding a taller hair spike.\nPreserve this exact young adult160cm character's face drawing style, compact hair shape/color, eye shape/color, gentle lid, tiny nose/mouth, soft chin and existing facial line/shadow count. Preserve Image1's PROFILE direction, garment shapes/palette/hem/sleevelength/neckline/shoes/socks/all physical accessory sides. Do not turn into a front or three-quarter view, show only one eye. Preserve all lower-body and hand positions, simple thick fingers and the existing projectedApose. Do not lengthen legs. Do not add details/texture/folds/gradient/logos/text. Only one complete fullbody on plain lightgray without floor or shadow. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-a5ffe1c5-92b8-4dda-9c9e-f66f1b4514b4.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Refined inward from5.3/5.8boundary for resampled comparison tolerance margin",
+    "raw_sha256": "27ffc2e4e970a2022cbe6182916728f98d81565fc9436e959a4cde4c0f8c3d91",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-side-before-head-fix.png",
+        "sha256": "c924d4f11d10ea09c301a18d9aa00d04f584dbb9455c23daaf5bf7a21d645822"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02b",
+    "view": "side",
+    "stage": "issue167-profile-head-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-side-before-head-fix.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the current PROFILE edit target. ONLY fix head-to-body proportions. Current profile head is visibly too small, about6-6.3heads. ENLARGE the ENTIRE head including hair, ear, face, single eye uniformly by15percent, keeping hair crown near y20 and increasing hair-crown-to-visible-chin height to approximately218-225px. Visible chin should be near y238-245. Shorten visible neck by10px and rebalance only the top of neck/shoulder connection. Keep total crown-to-sole height about1200px/solesnear1225. Required actualratio5.3-5.8, aim5.5. The head must occupy18-19percent of fullbody crown-to-soles height. Do not achieve this by cropping feet or adding a taller hair spike.\nPreserve this exact young adult160cm character's face drawing style, compact hair shape/color, eye shape/color, gentle lid, tiny nose/mouth, soft chin and existing facial line/shadow count. Preserve Image1's PROFILE direction, garment shapes/palette/hem/sleevelength/neckline/shoes/socks/all physical accessory sides. Do not turn into a front or three-quarter view, show only one eye. Preserve all lower-body and hand positions, simple thick fingers and the existing projectedApose. Do not lengthen legs. Do not add details/texture/folds/gradient/logos/text. Only one complete fullbody on plain lightgray without floor or shadow. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-52d94457-5e96-4e8b-b531-02c90a56a864.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02b-side.png",
+    "raw_sha256": "61d8dbf52daaea39e79288fdb270d4c20249d0c9e924295327a4764f305474d2",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02b-side-before-head-fix.png",
+        "sha256": "bf7fca99568afc9067ebbdce40a92df33b591138f9aa39e7abadd9ad6ca39ae3"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02c",
+    "view": "side",
+    "stage": "issue167-profile-head-correction",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-side-before-head-fix.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the current PROFILE edit target. ONLY fix head-to-body proportions. Current profile head is visibly too small, about6-6.3heads. ENLARGE the ENTIRE head including hair, ear, face, single eye uniformly by15percent, keeping hair crown near y20 and increasing hair-crown-to-visible-chin height to approximately218-225px. Visible chin should be near y238-245. Shorten visible neck by10px and rebalance only the top of neck/shoulder connection. Keep total crown-to-sole height about1200px/solesnear1225. Required actualratio5.3-5.8, aim5.5. The head must occupy18-19percent of fullbody crown-to-soles height. Do not achieve this by cropping feet or adding a taller hair spike.\nPreserve this exact young adult160cm character's face drawing style, compact hair shape/color, eye shape/color, gentle lid, tiny nose/mouth, soft chin and existing facial line/shadow count. Preserve Image1's PROFILE direction, garment shapes/palette/hem/sleevelength/neckline/shoes/socks/all physical accessory sides. Do not turn into a front or three-quarter view, show only one eye. Preserve all lower-body and hand positions, simple thick fingers and the existing projectedApose. Do not lengthen legs. Do not add details/texture/folds/gradient/logos/text. Only one complete fullbody on plain lightgray without floor or shadow. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-d05c7089-2c3b-4786-aa2a-9a26f28e3445.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "reason": "Actual side5.907heads outside tolerance",
+    "raw_sha256": "d330edea2f5f4d749cfa87628baf9e2b7030548720fd12a2718a054c4a24ee15",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-side-before-head-fix.png",
+        "sha256": "07f31a87ac02fb521ec6ccf006acd684dcaa424e7b48fac91d51ca56201dce7d"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02a",
+    "view": "back",
+    "stage": "issue167-rear-head-match",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-back-before-head-fix.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-front.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the BACK edit target; Image2 is the authoritative front with correct5.3-5.8head anatomy. Match the rear head volume to the larger front head. ONLY enlarge the entire rear hair/head/ears uniformly by15percent compared to Image1, retaining compact hair shape/color/small number of broad planes. Keep crownnear20, lower visible posterior hair/nape boundary about20px; shorten neck10px and adjust only upper collar/shoulder connection so figure fullheight1200px/solesnear1225 remains. Do not lengthen torso or pants to compensate. Keep a young adult5.5head avatar, not old small-head6.5. Same garment rear silhouette/colors, white undershirt hem, pants/socks/house mules, same physical wrist accessory side, existingApose30-45degrees/fingerends. Do not show face/eyes/chin from rear and do not add any artificial jawline for measurement. No frontzip/pendant/placket on rear. No extra facial/shadow detail, fine folds, texture, gradient, floor, castshadow, words/guides. Only one orthographic fullbody back on plain lightgray. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-455b50e9-c814-4112-a682-18e48965e96c.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02a-back.png",
+    "raw_sha256": "de8c8899adc64dd49fef0b5aa7e2a71abce5769e531f8b4a95d14841f9fc8f39",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-back-before-head-fix.png",
+        "sha256": "b827ddd035e333141954a5a3d252cb0ecda14fdb5d0b2ff9bbb380c1baa94024"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02a-front.png",
+        "sha256": "23875635766c66b25a7d84a97028280f53ad7fa86751c5e1d16557d23467aac0"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02b",
+    "view": "back",
+    "stage": "issue167-rear-head-match",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-back-before-head-fix.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the BACK edit target; Image2 is the authoritative front with correct5.3-5.8head anatomy. Match the rear head volume to the larger front head. ONLY enlarge the entire rear hair/head/ears uniformly by15percent compared to Image1, retaining compact hair shape/color/small number of broad planes. Keep crownnear20, lower visible posterior hair/nape boundary about20px; shorten neck10px and adjust only upper collar/shoulder connection so figure fullheight1200px/solesnear1225 remains. Do not lengthen torso or pants to compensate. Keep a young adult5.5head avatar, not old small-head6.5. Same garment rear silhouette/colors, white undershirt hem, pants/socks/house mules, same physical wrist accessory side, existingApose30-45degrees/fingerends. Do not show face/eyes/chin from rear and do not add any artificial jawline for measurement. No frontzip/pendant/placket on rear. No extra facial/shadow detail, fine folds, texture, gradient, floor, castshadow, words/guides. Only one orthographic fullbody back on plain lightgray. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-13700f83-1c96-4cb6-b310-5daa4cac68ee.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02b-back.png",
+    "raw_sha256": "a722db95aa6d8032444b0f1b7d32d35b61ca33cb5e893a87c97cc64ac15b8ed3",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-back-before-head-fix.png",
+        "sha256": "0851bed8a36fa47ae52a3c59fea34efc86c7ca56e50fc8d211e1ca0ae32a6f22"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02b-front.png",
+        "sha256": "4f58fa903c23b81b42838a8fbf9d2ea65518e16c4e912586d3c1834d6e83185d"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02c",
+    "view": "back",
+    "stage": "issue167-rear-head-match",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-back-before-head-fix.png",
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the BACK edit target; Image2 is the authoritative front with correct5.3-5.8head anatomy. Match the rear head volume to the larger front head. ONLY enlarge the entire rear hair/head/ears uniformly by15percent compared to Image1, retaining compact hair shape/color/small number of broad planes. Keep crownnear20, lower visible posterior hair/nape boundary about20px; shorten neck10px and adjust only upper collar/shoulder connection so figure fullheight1200px/solesnear1225 remains. Do not lengthen torso or pants to compensate. Keep a young adult5.5head avatar, not old small-head6.5. Same garment rear silhouette/colors, white undershirt hem, pants/socks/house mules, same physical wrist accessory side, existingApose30-45degrees/fingerends. Do not show face/eyes/chin from rear and do not add any artificial jawline for measurement. No frontzip/pendant/placket on rear. No extra facial/shadow detail, fine folds, texture, gradient, floor, castshadow, words/guides. Only one orthographic fullbody back on plain lightgray. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-31b50ee6-31e1-4195-a7d5-9ab1b295af6d.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-male-02c-back.png",
+    "raw_sha256": "e8556c829d093d599c04d89f169728e37d458ed043ea0057cc844e29528ca8fd",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-back-before-head-fix.png",
+        "sha256": "9258b136c2095faa4542e27594c3d0a8b6dcc9edb43c45c1f7d3905be2026e78"
+      },
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front.png",
+        "sha256": "7ca02267bacb622daea290964c4ae542db9452e990c3855695379e3792fe79e0"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02c",
+    "view": "side",
+    "stage": "issue167-profile-final-head",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-side-before-final-head.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. Only enlarge entire head/hair/face/ear/single eye uniformly by8percent. Current measured haircrown-to-chin205px, wholebody1211px,5.907heads is slightly outside allowed5.3-5.8. Make head about218px tall, aiming5.55heads. Keep crown near16, chinaround234, solesnear1227. Shorten visible neck5px and move only upper neck attachment to fit enlarged head. Keep the same young adult160cm, compact rounded brown bob, elongated soft round teal eye, gentle lid, tiny nose/mouth and softchin with SAME facial line and shadow count. Preserve strict LEFT-facing orthographic profile, oatmeal folded-collar polo/shortfrontV/white teehem/dustyrose wide ankle pants/ivory house mules/pale socks/nojewelry. Keep ALL torso, garment, hands, lowerbody and shoes positions/shapes/colors unchanged. No taller hair spikes or cropped feet. No extra detail/texture/folds/gradient/logos/text. Fullbody onefigure on plainlightgray without floor/shadow. Native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-1ce16a49-4ed9-4556-a51f-6d7402ba6d5c.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02c-side.png",
+    "raw_sha256": "8f68f4fd8d7249cf99e65979671a77a7f20ee9b5ebe974e47ff46e936b430e92",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02c-side-before-final-head.png",
+        "sha256": "d330edea2f5f4d749cfa87628baf9e2b7030548720fd12a2718a054c4a24ee15"
+      }
+    ]
+  },
+  {
+    "id": "walker-male-02c",
+    "view": "front",
+    "adjust": "REDUCE entire head/hair/face uniformly by2.5percent: currenthead228px, target222-223px; crownnear17/chinnear240. This moves actual5.316heads safely toward5.45, away from tolerance boundary.",
+    "stage": "issue167-head-boundary-margin",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front-before-margin.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. ONLY make a very small head-size correction for tolerance margin. REDUCE entire head/hair/face uniformly by2.5percent: currenthead228px, target222-223px; crownnear17/chinnear240. This moves actual5.316heads safely toward5.45, away from tolerance boundary. Keep total crown-to-soles figure height about1200px/solesnear1225. Rebalance the upper neck attachment only. Preserve exactly this young adult identity/face drawing style, the same softly elongated round eyes/gentle lids/tiny noseandmouth/compacthair/softchin, all colors, same count of facial lines/shadow steps. Preserve ALL torso/clothing/accessories/physical sides, armsApose30-45degrees/fingerpose/hands and lowerbody/shoes/feet positions. Do not redesign garment or add details. Keep this exact front projection; profile must remain strictlyLEFT with one visible eye. No new textures/folds/gradient/labels/floor/shadows. Plain lightgray, one entire figure, native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-21a196fa-b128-4510-b30d-46ff2c05d53e.png",
+    "selected": false,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": null,
+    "raw_sha256": "2688cecf946ff122899aa7fec93e0e4c5d8e3fdf7cd7b8944b9f18ea1f00dbd2",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-male-02c-front-before-margin.png",
+        "sha256": "7ca02267bacb622daea290964c4ae542db9452e990c3855695379e3792fe79e0"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02a",
+    "view": "front",
+    "adjust": "ENLARGE entire head/hair/face uniformly by2.5percent: currenthead208px, target213-214px; crownnear19/chinnear233. This moves actual5.788heads safely toward5.65, away from tolerance boundary.",
+    "stage": "issue167-head-boundary-margin",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front-before-margin.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. ONLY make a very small head-size correction for tolerance margin. ENLARGE entire head/hair/face uniformly by2.5percent: currenthead208px, target213-214px; crownnear19/chinnear233. This moves actual5.788heads safely toward5.65, away from tolerance boundary. Keep total crown-to-soles figure height about1200px/solesnear1225. Rebalance the upper neck attachment only. Preserve exactly this young adult identity/face drawing style, the same softly elongated round eyes/gentle lids/tiny noseandmouth/compacthair/softchin, all colors, same count of facial lines/shadow steps. Preserve ALL torso/clothing/accessories/physical sides, armsApose30-45degrees/fingerpose/hands and lowerbody/shoes/feet positions. Do not redesign garment or add details. Keep this exact front projection; profile must remain strictlyLEFT with one visible eye. No new textures/folds/gradient/labels/floor/shadows. Plain lightgray, one entire figure, native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-f771abb9-9f59-4fef-8e96-b3b6934655a0.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02a-front.png",
+    "raw_sha256": "bf47d2d2a14ca996cb33c106359a22ac5d24f3ede009a99b31f428f661a39032",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-front-before-margin.png",
+        "sha256": "f348f149bd0187e4f9e8a6920a959bbe10aad36ca554f2c587d2bd63e8fbc7af"
+      }
+    ]
+  },
+  {
+    "id": "walker-female-02a",
+    "view": "side",
+    "adjust": "ENLARGE entire head/hair/face/ear/single eye uniformly by2.5percent: currenthead209px, target214-215px; crownnear17/chinnear232. This moves actual5.794heads safely toward5.65, away from tolerance boundary.",
+    "stage": "issue167-head-boundary-margin",
+    "inputs": [
+      "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-side-before-margin.png"
+    ],
+    "prompt": "Use case: identity-preserve. Image1 is the edit target. ONLY make a very small head-size correction for tolerance margin. ENLARGE entire head/hair/face/ear/single eye uniformly by2.5percent: currenthead209px, target214-215px; crownnear17/chinnear232. This moves actual5.794heads safely toward5.65, away from tolerance boundary. Keep total crown-to-soles figure height about1200px/solesnear1225. Rebalance the upper neck attachment only. Preserve exactly this young adult identity/face drawing style, the same softly elongated round eyes/gentle lids/tiny noseandmouth/compacthair/softchin, all colors, same count of facial lines/shadow steps. Preserve ALL torso/clothing/accessories/physical sides, armsApose30-45degrees/fingerpose/hands and lowerbody/shoes/feet positions. Do not redesign garment or add details. Keep this exact side projection; profile must remain strictlyLEFT with one visible eye. No new textures/folds/gradient/labels/floor/shadows. Plain lightgray, one entire figure, native1254or larger square.",
+    "raw_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/generated_images/exec-f9fa6e94-aea3-4a39-9e4a-f7fc6b302cf2.png",
+    "selected": true,
+    "official_tool": "image_gen.imagegen",
+    "repository_output": "walker-female-02a-side.png",
+    "raw_sha256": "991477f932eabba444ef6df8e2bc91a1f7626e23d1cd14252b6836088ccd09bc",
+    "input_snapshots": [
+      {
+        "path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/worktree/tools/characters/design/v2/candidates/proportion-issue167-20261014/walker-female-02a-side-before-margin.png",
+        "sha256": "27ffc2e4e970a2022cbe6182916728f98d81565fc9436e959a4cde4c0f8c3d91"
+      }
+    ]
+  }
+]
