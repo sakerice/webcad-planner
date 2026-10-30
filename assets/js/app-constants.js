@@ -1270,6 +1270,9 @@ function updateSelectedBaseFloor(value){
   var sat=!!(wasOn&&Math.abs((Number(it.elev)||0)-wasOn.top)<=1);
   var targets=[it];
   if(kind==='stair') targets=getConnectedStairParts(it);
+  // 地面に置く印のモデルを室内に置いた物は、選び直しても室内のまま(「自動」で
+  // baseLevel を消したときに、地面へ落ちて床に埋まらないように)。
+  if(itemPlacedOnFloorExplicitly(it)) it.indoor=true;
   targets.forEach(function(o){ delete o.baseRoom; delete o.baseLevel; });
   // つながった部材まで書き換えるので、共同編集の相手へ全部を送る。
   if(targets.length>1&&typeof SHARED!=='undefined'&&SHARED&&SHARED.roomId&&!SHARED.applying&&typeof sharedMarkObjectsDirty==='function')
@@ -1416,12 +1419,14 @@ function openingAdjacentFloorTopY(it,ignoreSkip){
   return best;
 }
 // カタログのモデルの groundLevel は、モデルごとの「地面に置く」印。洗濯機・物干し・
-// 卓上の小物にも付いていて、そのままでは1階の地面(床より基礎と床の厚みぶん下)に
-// 埋まる。印は保存プランの見た目を変えないよう書き換えず、**置く床を明示した物
-// (baseLevel='floor')だけ**床に載せる。読み取りで部屋の中に置いた物がこれを持つ
-// (plan-import.js の toAppObjects)。
+// 壁掛けエアコン・卓上の小物にも付いていて、そのままでは1階の地面(床より基礎と床の
+// 厚みぶん下)に埋まり、2階以上には置けなかった。印は保存プランの見た目を変えない
+// よう書き換えず、**部屋の中に置いた物に it.indoor=true を持たせ**、その物は普通の家具と
+// 同じく部屋の床に載せる(載せる床の選び直しもそのまま効く)。indoor を付けるのは、
+// 手で置いたとき(index.html の placeItem)と読み取り(plan-import.js の toAppObjects)。
+// baseLevel='floor' は indoor より前の読み取り(PR #111)が付けた印で、同じ意味に読む。
 function itemPlacedOnFloorExplicitly(it){
-  return !!(it&&it.baseLevel==='floor'&&isFmpItemType(it.type)&&!isContextExteriorItemType(it.type));
+  return !!(it&&(it.indoor===true||it.baseLevel==='floor')&&isFmpItemType(it.type)&&!isContextExteriorItemType(it.type));
 }
 function item3DBaseY(it){
   if(!it) return 0;

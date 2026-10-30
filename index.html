@@ -18853,10 +18853,15 @@ function placeItem(type,wx,wy){
   var openingPreset=getOpeningModelToolPreset(type);
   var placeType=openingPreset?openingPreset.baseType:type;
   var groundOnly=((getFmpItem(placeType)&&getFmpItem(placeType).groundLevel) || placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || placeType==='gas-heater' || isContextExteriorItemType(placeType));
-  if(groundOnly && ST.floor!==1) return;
+  // 地面に置く印のカタログのモデルでも、部屋の中に置いたらその部屋の床に載せる
+  // (洗濯機・物干し・卓上の小物にも印が付いていて、1階の地面に埋まっていた)。
+  // 印の扱いは app-constants.js の itemPlacedOnFloorExplicitly。
+  var indoor=!!(getFmpItem(placeType)&&getFmpItem(placeType).groundLevel&&roomAtPointOnFloor(ST.floor,wx,wy));
+  if(groundOnly && ST.floor!==1 && !indoor) return;
   saveState();
   var sz=getItemDefaultSize(placeType);
-  var it=mkItem(placeType,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly?1:ST.floor);
+  var it=mkItem(placeType,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly&&!indoor?1:ST.floor);
+  if(indoor) it.indoor=true;
   if(openingPreset && openingPreset.windowKind) it.windowKind=openingPreset.windowKind;
   if(openingPreset){applyOpeningModelToItem(it,openingPreset.openingModel);it.doorFinish=openingPreset.doorFinish||'';}
   // Final dimensions (including opening presets) determine the visual edges used for placement snap.
