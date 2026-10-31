@@ -1075,7 +1075,7 @@
       // 印のままだと1階の地面に置かれ、床から下に埋まる（2026-10-23 利用者の指摘「洗濯機の
       // 高さが潰れる」）。印の意味は app-constants.js の itemPlacedOnFloorExplicitly。
       var model = (typeof getFmpItem === 'function') ? getFmpItem(made.type) : null;
-      if (model && model.groundLevel && made.baseLevel == null && roomContains(out.rooms, made)) made.baseLevel = 'floor';
+      if (model && model.groundLevel && roomContains(out.rooms, made)) made.indoor = true;
       out.items.push(made);
     });
     return out;

@@ -182,7 +182,7 @@ try {
     washer: (() => {
       const w = DATA.items.find((i) => i.type === 'original-washer-drum');
       const room = DATA.rooms.find((x) => x.n === '洋室');
-      return w && { baseLevel: w.baseLevel, baseMm: Math.round(item3DBaseY(w) / U), roomFloorMm: Math.round(roomFloorTopY(room) / U), groundMm: Math.round(groundYForItem(w) / U) };
+      return w && { indoor: w.indoor, baseMm: Math.round(item3DBaseY(w) / U), roomFloorMm: Math.round(roomFloorTopY(room) / U), groundMm: Math.round(groundYForItem(w) / U) };
     })(),
     vanity: DATA.items.filter((i) => (CATALOGUE_TAGS.items[i.type] || {}).kind === 'vanity').map((i) => ({ type: i.type, h: getItemHeightValue(i) })),
   }));
@@ -190,7 +190,7 @@ try {
   assert.ok(placed.entry && placed.entry.doma < 0, '新しい間取りでは土間を下げられる: ' + JSON.stringify(placed.entry));
   assert.deepEqual(placed.entry, { raise: placed.entry.doma, doma: placed.entry.doma, material: 'tile_floor', level: undefined }, '土間の床と仕上げ');
   // 洗濯機は部屋の床に立つ（カタログの「地面に置く」印のままだと1階の地面に置かれ、床から下に埋まった）。
-  assert.equal(placed.washer.baseLevel, 'floor');
+  assert.equal(placed.washer.indoor, true);
   assert.equal(placed.washer.baseMm, placed.washer.roomFloorMm, '洗濯機が部屋の床に立つ: ' + JSON.stringify(placed.washer));
   assert.ok(placed.washer.roomFloorMm - placed.washer.groundMm > 300, '地面と床の差がある間取りで確かめている');
   // 洗面台は鉢だけでなく、下の戸棚から立つ洗面化粧台。
