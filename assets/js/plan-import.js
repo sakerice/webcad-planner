@@ -636,6 +636,11 @@
   function catalogueTags() {
     return (typeof CATALOGUE_TAGS !== 'undefined' && CATALOGUE_TAGS && CATALOGUE_TAGS.items) || {};
   }
+  // カタログの物の高さ（mm）。卓上の物を家具の天板に載せるのに使う（plan-free-apply.js）。
+  function catalogueHeight(type) {
+    var f = typeof getFmpItem === 'function' ? getFmpItem(type) : null;
+    return f && Number(f.h) > 0 ? Number(f.h) : null;
+  }
 
   // 答えを、取り込んだときと同じ形（基礎・屋根まで）に組み立てる。3Dで撮るため。
   function assembleForSnapshot(importPlan) {
@@ -675,7 +680,7 @@
       // ── 2. 組み立てた家を撮って、AI 自身に見直させる ──────────────────
       p.stage = 'capture'; p.stageStarted = Date.now(); renderProgress(p);
       var tags = catalogueTags();
-      var draft = PlanFreeApply.toImportPlan(first, tags, { keepOffWall: true });
+      var draft = PlanFreeApply.toImportPlan(first, tags, { keepOffWall: true, heightOf: catalogueHeight });
       var facts = PlanFreeApply.factsOf(draft, first);
       var shots = null;
       try { shots = PlanSnapshot.capture(assembleForSnapshot(draft)); } catch (e) { shots = null; }
@@ -698,7 +703,7 @@
 
   // 届ききった答えを、取り込みの形（renderPlanImportResult が受ける形）にする。
   function finishPlanStream(p, answer, extra) {
-    var plan = PlanFreeApply.toImportPlan(answer, catalogueTags());
+    var plan = PlanFreeApply.toImportPlan(answer, catalogueTags(), { heightOf: catalogueHeight });
     if (!plan.walls.length) {
       return { status: 422, body: { error: 'ai_invalid_plan', message: '図面から壁を読み取れませんでした。平面図のページか確かめてください。' } };
     }

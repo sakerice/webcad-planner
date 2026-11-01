@@ -256,3 +256,23 @@ test('流し・コンロの無い調理台は引出しの台だけ、調理台�
   assert.ok(run(p).every((i) => /drawer/.test(i.type)));
   assert.equal(p.items.filter((i) => i.type === 'original-kitchen-box-sink900' && !i.extra.kitchenRun).length, 1);
 });
+
+test('食器棚の上に描かれたレンジは、棚の天板に載せる（床に置くと棚の中に埋まる）', async () => {
+  const { heightOf } = await import(pathToFileURL(join(ROOT, 'tools', 'plan-eval', 'free-answer.mjs')).href);
+  const answer = { floors: [{ floor: 1, walls: [{ x1: 0, y1: 0, x2: 4000, y2: 0 }], objects: [
+    { kind: 'kitchen-storage', x: 1000, y: 300, w: 1800, d: 450, face: 'S' },
+    { kind: 'cooking-appliance', x: 600, y: 300, w: 500, d: 400, face: 'S' },
+    { kind: 'cooking-appliance', x: 3000, y: 1500, w: 500, d: 400, face: 'S' },
+    { kind: 'bed', x: 3000, y: 3000, w: 970, d: 1950, face: 'S' },
+  ] }] };
+  const p = PlanFreeApply.toImportPlan(answer, {}, { heightOf });
+  const storage = p.items.find((i) => i.type === PlanFreeApply.DEFAULT_MODEL['kitchen-storage']);
+  const ovens = p.items.filter((i) => i.type === PlanFreeApply.DEFAULT_MODEL['cooking-appliance']);
+  assert.equal(ovens.length, 2);
+  assert.equal(ovens.find((o) => o.x === 600).extra.elev, Math.round(heightOf(storage.type)));
+  // 台の無い所は床のまま（推測で浮かせない）。
+  assert.ok(!ovens.find((o) => o.x === 3000).extra.elev);
+  // 高さが分からなければ載せない。
+  const q = PlanFreeApply.toImportPlan(answer, {});
+  assert.ok(q.items.every((i) => !(i.extra && i.extra.elev)));
+});

@@ -9,9 +9,9 @@
 // items の x,y は**中心**（取り込みの決まり。角へ直すのは plan-import.js の toAppObjects）。
 // 設定パネルの項目（set）・外構の種類・建具の種類は assets/js/plan-settable.js の表に従う。
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./plan-settable.js'));
-  else root.PlanFreeApply = factory(root.PlanSettable);
-}(typeof self !== 'undefined' ? self : this, function (PlanSettable) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./plan-settable.js'), require('./object-knowledge.js'));
+  else root.PlanFreeApply = factory(root.PlanSettable, root.ObjectKnowledge);
+}(typeof self !== 'undefined' ? self : this, function (PlanSettable, ObjectKnowledge) {
   'use strict';
 
   var DIR = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
@@ -143,8 +143,10 @@
       // 調理台の上に無いもの。流し・コンロは単独の台として、家電は今までどおりの物として置く。
       var type = p.kind === 'cooking-appliance' ? typeForKind(p.kind, p.w, tags) : box.type;
       if (!type) return;
-      items.push(catalogItem(type, p.x, p.y, p.kind === 'cooking-appliance' ? p.w : Math.max(p.w, box.w), p.kind === 'cooking-appliance' ? p.d : Math.max(p.d, 600),
-        p.face, floor, PlanSettable.applySettings('object', p.kind, p.set, {}, ctx)));
+      var alone = catalogItem(type, p.x, p.y, p.kind === 'cooking-appliance' ? p.w : Math.max(p.w, box.w), p.kind === 'cooking-appliance' ? p.d : Math.max(p.d, 600),
+        p.face, floor, PlanSettable.applySettings('object', p.kind, p.set, {}, ctx));
+      alone.kind = p.kind;   // 台の上に載せるかを決めるため（toImportPlan が使って消す）
+      items.push(alone);
     });
     units.forEach(function (k) {
       var u = k.u, run = 'kitchen-' + floor + '-' + (k.i + 1);
@@ -154,6 +156,40 @@
       });
     });
     return items;
+  }
+
+  // ── 台の上に載る物 ────────────────────────────────────────────────
+  // 卓上に置く種類（object-knowledge.js の mount 'tabletop'。レンジ・小物）は、答えの位置に
+  // 天板のある家具（食器棚・棚・机など）があれば、その天板の高さに載せる。床に置くと家具の中に
+  // 埋まる（2026-11-02、過去の読み取り9回のうち3回、食器棚の上のレンジが棚の中の床に置かれていた）。
+  // 家具の高さはカタログの値（options.heightOf）。分からなければ載せない（推測の高さで浮かせない）。
+  // 台にするのは天板が平らな家具だけ。ベッド・ソファはカタログの高さがヘッドボード・背もたれの
+  // 上端なので、そこに載せると宙に浮く。
+  var SURFACE_KINDS = { 'kitchen-storage': 1, cabinet: 1, chest: 1, shelf: 1, desk: 1, 'dining-table': 1,
+    'low-table': 1, 'counter-table': 1, 'shoe-storage': 1 };
+  function mountOf(kind) {
+    var k = ObjectKnowledge && ObjectKnowledge.KNOWLEDGE && ObjectKnowledge.KNOWLEDGE[kind];
+    return k ? k.mount : null;
+  }
+  function footprint(it) {
+    var turned = ((Number(it.rot) || 0) % 180) === 90;
+    var hw = (turned ? it.d : it.w) / 2, hd = (turned ? it.w : it.d) / 2;
+    return { x0: it.x - hw, x1: it.x + hw, y0: it.y - hd, y1: it.y + hd };
+  }
+  function restOnFurniture(placed, heightOf) {
+    if (typeof heightOf !== 'function') return;
+    placed.forEach(function (p) {
+      if (mountOf(p.kind) !== 'tabletop' || (p.item.extra && p.item.extra.elev)) return;
+      var top = 0;
+      placed.forEach(function (q) {
+        if (q === p || !SURFACE_KINDS[q.kind]) return;
+        var r = footprint(q.item);
+        if (p.item.x < r.x0 || p.item.x > r.x1 || p.item.y < r.y0 || p.item.y > r.y1) return;
+        var h = Number(heightOf(q.item.type));
+        if (isFinite(h) && h > top) top = h;
+      });
+      if (top > 0) { p.item.extra = p.item.extra || {}; p.item.extra.elev = Math.round(top); }
+    });
   }
 
   function nearestWall(walls, cx, cy) {
@@ -264,7 +300,7 @@
         plan.items.push({ type: 'roof', x: x0 + w / 2, y: y0 + d / 2, w: iw, d: id, rot: rot, floor: on + 1, extra: extra });
       });
 
-      var kitchenParts = [];
+      var kitchenParts = [], placed = [];
       (f.objects || []).forEach(function (o) {
         var w = num(o.w) || 600, d = num(o.d) || 600;
         var kind = String(o.kind || '');
@@ -283,9 +319,15 @@
         else if ((PlanSettable.exteriorByKind(kind) || {}).front180) rot += 180;
         // 天井から下がる物（レンジフード）は、床ではなくその高さに置く。
         if (MOUNT_ELEV_MM[kind]) extra.elev = MOUNT_ELEV_MM[kind];
-        plan.items.push({ type: type, x: num(o.x), y: num(o.y), w: w, d: d, rot: rot % 360, floor: floor, extra: extra });
+        var item = { type: type, x: num(o.x), y: num(o.y), w: w, d: d, rot: rot % 360, floor: floor, extra: extra };
+        plan.items.push(item);
+        placed.push({ kind: kind, item: item });
       });
-      composeKitchens(kitchenParts, floor, tags, ctx).forEach(function (it) { plan.items.push(it); });
+      composeKitchens(kitchenParts, floor, tags, ctx).forEach(function (it) {
+        plan.items.push(it);
+        if (it.kind) { placed.push({ kind: it.kind, item: it }); delete it.kind; }
+      });
+      restOnFurniture(placed, options.heightOf);
     });
     plan.site = siteOf(siteParts);
     if (!options.keepOffWall && plan.dropped.length) {

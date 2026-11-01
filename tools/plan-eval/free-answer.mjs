@@ -10,9 +10,19 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const PlanFreeApply = require('../../assets/js/plan-free-apply.js');
 const TAGS = (() => { const t = require('../../assets/models/tags.json'); return t.items || t; })();
+// カタログの物の高さ（アプリの getFmpItem と同じ一覧から）。卓上の物を家具の天板に載せるのに使う。
+const HEIGHT = (() => {
+  const out = {};
+  for (const m of ['custom', 'furniture_mega', 'interior_model_0_26_1', 'packs/kominka', 'packs/rpg-mansion']) {
+    const list = require(`../../assets/models/${m}/manifest.json`);
+    for (const it of (Array.isArray(list) ? list : list.items || [])) if (it && it.id && Number(it.h) > 0) out[it.id] = Number(it.h);
+  }
+  return out;
+})();
+export const heightOf = (type) => HEIGHT[type] || null;
 
 export function toPlan(answer) {
-  const p = PlanFreeApply.toImportPlan(answer, TAGS);
+  const p = PlanFreeApply.toImportPlan(answer, TAGS, { heightOf });
   let id = 1;
   return {
     walls: p.walls.map((w) => ({ id: id++, ...w })),
