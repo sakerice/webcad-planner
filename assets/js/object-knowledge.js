@@ -41,7 +41,7 @@
     // ── キッチン ────────────────────────────────────────────────
     'kitchen-unit': {
       rooms: ['kitchen', 'ldk'], mount: 'floor', place: 'against-wall', face: 'into-room',
-      size: { w: [1800, 2700], d: [600, 1000], what: '間口2550・奥行650（対面は970）' },
+      size: { w: [1800, 2700], d: [600, 1000], what: '調理台。流し・コンロは含まないので kitchen-sink・cooktop として載る位置に置く。間口2550・奥行650（対面は970）' },
       why: '壁付けか対面。対面は背面に収納を置くので奥行が増える',
     },
     'kitchen-storage': {
@@ -69,7 +69,7 @@
     'kitchen-sink': {
       rooms: ['kitchen', 'ldk'], mount: 'builtin',
       attach: { to: 'kitchen-unit', within: 0, side: 'on' },
-      why: '調理台へ落とし込む。システムキッチンには最初から含まれる',
+      why: '調理台へ落とし込む。取り込みでは調理台を部品の台で組み、この位置に流しの台を入れる',
     },
     refrigerator: {
       rooms: ['kitchen', 'ldk'], mount: 'floor', place: 'against-wall', face: 'into-room',

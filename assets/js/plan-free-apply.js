@@ -70,6 +70,92 @@
     return best ? best.id : null;
   }
 
+  // ── キッチン ──────────────────────────────────────────────────────
+  // AI には調理台（kitchen-unit）・流し・コンロを別々に答えさせている（図面にそう描かれる）。
+  // 以前は調理台に流しとコンロの付いた一体のモデルを使い、別に答えた流し・コンロを床に置いていたため、
+  // 流しやコンロが二重になり、答えた方は調理台の中に埋もれていた（2026-11-01、3つの間取りすべて）。
+  // いまは調理台の範囲を、カタログの部品の台（流し・コンロ・食洗機・引出し）で、答えた位置どおりに埋める。
+  var KITCHEN_PARTS = { 'kitchen-unit': 1, 'kitchen-sink': 1, cooktop: 1, 'cooking-appliance': 1 };
+  var KITCHEN_BOX = {
+    'kitchen-sink': { type: 'original-kitchen-box-sink900', w: 900 },
+    cooktop: { type: 'original-kitchen-box-hob750', w: 750 },
+    'cooking-appliance': { type: 'original-kitchen-box-dishwasher450', w: 450 },
+  };
+  var KITCHEN_DRAWERS = [450, 600, 750, 900];
+  // 天板の高さ（部品の台の高さ）と、床から測った取り付けの高さ。レンジフードは火源から下端まで
+  // 800mm 以上（object-knowledge.js の range-hood）なので、天板 850 + 800。
+  var COUNTER_MM = 850;
+  var MOUNT_ELEV_MM = { 'range-hood': COUNTER_MM + 800 };
+  // 流し・コンロが調理台に「載っている」とみなす、調理台の外形からのはみ出し。
+  var KITCHEN_ON_MM = 150;
+
+  function catalogItem(type, x, y, w, d, face, floor, extra) {
+    var rot = (ROT[face] != null ? ROT[face] : 0) + 180;
+    extra = extra || {};
+    extra.modelFacingVersion = 1; extra.modelFrontAxis = '+Z';
+    return { type: type, x: x, y: y, w: w, d: d, rot: rot % 360, floor: floor, extra: extra };
+  }
+
+  // 調理台の長さ L（中心が 0）の上に、部品 {s: 中心, w: 幅, type} を重ならないよう並べ、
+  // すき間を引出しの台で埋める。返り値は [{a, b, type}]（a〜b が台の範囲）。
+  function layoutCounter(L, fixtures) {
+    var fs = fixtures.slice().sort(function (p, q) { return p.s - q.s; });
+    var total = fs.reduce(function (n, p) { return n + p.w; }, 0);
+    var k = total > L ? L / total : 1;
+    fs.forEach(function (p) { p.w *= k; });
+    var prev = -L / 2;
+    fs.forEach(function (p) { p.a = Math.max(p.s - p.w / 2, prev); prev = p.a + p.w; });
+    for (var i = fs.length - 1; i >= 0; i--) {
+      var limit = i === fs.length - 1 ? L / 2 : fs[i + 1].a;
+      if (fs[i].a + fs[i].w > limit) fs[i].a = limit - fs[i].w;
+    }
+    var segs = fs.map(function (p) { return { a: p.a, b: p.a + p.w, type: p.type }; });
+    var out = [], at = -L / 2;
+    var fill = function (a, b, left, right) {
+      var g = b - a;
+      if (g < 1) return;
+      // 300 未満のすき間は引出しにせず、となりの部品の幅に足す。
+      if (g < 300 && (left || right)) { if (left) left.b = b; else right.a = a; return; }
+      var n = Math.max(1, Math.ceil(g / 900)), step = g / n;
+      var near = KITCHEN_DRAWERS.reduce(function (m, w) { return Math.abs(w - step) < Math.abs(m - step) ? w : m; });
+      for (var j = 0; j < n; j++) out.push({ a: a + j * step, b: a + (j + 1) * step, type: 'original-kitchen-box-drawer' + near });
+    };
+    segs.forEach(function (sg, i) { fill(at, sg.a, i > 0 ? segs[i - 1] : null, sg); at = sg.b; });
+    fill(at, L / 2, segs.length ? segs[segs.length - 1] : null, null);
+    return out.concat(segs).sort(function (p, q) { return p.a - q.a; });
+  }
+
+  function composeKitchens(parts, floor, tags, ctx) {
+    var items = [];
+    var units = parts.filter(function (p) { return p.kind === 'kitchen-unit'; }).map(function (u, i) {
+      var alongX = !(u.face === 'E' || u.face === 'W');
+      var hx = (alongX ? u.w : u.d) / 2, hy = (alongX ? u.d : u.w) / 2;
+      return { u: u, i: i, alongX: alongX, x0: u.x - hx, x1: u.x + hx, y0: u.y - hy, y1: u.y + hy, fixtures: [] };
+    });
+    parts.forEach(function (p) {
+      if (p.kind === 'kitchen-unit') return;
+      var on = null;
+      units.forEach(function (k) {
+        if (!on && p.x >= k.x0 - KITCHEN_ON_MM && p.x <= k.x1 + KITCHEN_ON_MM && p.y >= k.y0 - KITCHEN_ON_MM && p.y <= k.y1 + KITCHEN_ON_MM) on = k;
+      });
+      var box = KITCHEN_BOX[p.kind];
+      if (on) { on.fixtures.push({ s: on.alongX ? p.x - on.u.x : p.y - on.u.y, w: box.w, type: box.type }); return; }
+      // 調理台の上に無いもの。流し・コンロは単独の台として、家電は今までどおりの物として置く。
+      var type = p.kind === 'cooking-appliance' ? typeForKind(p.kind, p.w, tags) : box.type;
+      if (!type) return;
+      items.push(catalogItem(type, p.x, p.y, p.kind === 'cooking-appliance' ? p.w : Math.max(p.w, box.w), p.kind === 'cooking-appliance' ? p.d : Math.max(p.d, 600),
+        p.face, floor, PlanSettable.applySettings('object', p.kind, p.set, {}, ctx)));
+    });
+    units.forEach(function (k) {
+      var u = k.u, run = 'kitchen-' + floor + '-' + (k.i + 1);
+      layoutCounter(u.w, k.fixtures).forEach(function (sg) {
+        var c = (sg.a + sg.b) / 2;
+        items.push(catalogItem(sg.type, k.alongX ? u.x + c : u.x, k.alongX ? u.y : u.y + c, sg.b - sg.a, u.d, u.face, floor, { kitchenRun: run }));
+      });
+    });
+    return items;
+  }
+
   function nearestWall(walls, cx, cy) {
     var best = null;
     walls.forEach(function (w) {
@@ -178,11 +264,14 @@
         plan.items.push({ type: 'roof', x: x0 + w / 2, y: y0 + d / 2, w: iw, d: id, rot: rot, floor: on + 1, extra: extra });
       });
 
+      var kitchenParts = [];
       (f.objects || []).forEach(function (o) {
         var w = num(o.w) || 600, d = num(o.d) || 600;
         var kind = String(o.kind || '');
         // 敷地と区画はまとめて1つの敷地にする（下の siteOf）。
         if (kind === 'site' || kind === 'site-zone') { siteParts.push({ kind: kind, x: num(o.x), y: num(o.y), w: w, d: d, set: o.set }); return; }
+        // 調理台と、その上に載る流し・コンロ・組み込みの家電は、まとめて部品の台で組む（下の composeKitchens）。
+        if (KITCHEN_PARTS[kind]) { kitchenParts.push({ kind: kind, x: num(o.x), y: num(o.y), w: w, d: d, face: o.face, set: o.set }); return; }
         var type = typeForKind(kind, w, tags);
         if (!type) { plan.dropped.push(kind); return; }
         // 正面の向き → rot。カタログのモデルは rot+180 の側が正面（modelFacingVersion 1。
@@ -192,8 +281,11 @@
         var extra = PlanSettable.applySettings('object', kind, o.set, {}, ctx);
         if (CATALOG_PREFIX.test(type)) { rot += 180; extra.modelFacingVersion = 1; extra.modelFrontAxis = '+Z'; }
         else if ((PlanSettable.exteriorByKind(kind) || {}).front180) rot += 180;
+        // 天井から下がる物（レンジフード）は、床ではなくその高さに置く。
+        if (MOUNT_ELEV_MM[kind]) extra.elev = MOUNT_ELEV_MM[kind];
         plan.items.push({ type: type, x: num(o.x), y: num(o.y), w: w, d: d, rot: rot % 360, floor: floor, extra: extra });
       });
+      composeKitchens(kitchenParts, floor, tags, ctx).forEach(function (it) { plan.items.push(it); });
     });
     plan.site = siteOf(siteParts);
     if (!options.keepOffWall && plan.dropped.length) {

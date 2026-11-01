@@ -353,8 +353,25 @@ function frontOf(it) {
   return [Math.sin(th), -Math.cos(th)];
 }
 
+// 部品の台で組んだ調理台（plan-free-apply.js の composeKitchens。kitchenRun が同じ物）は、
+// 1つの調理台として数える。引出しの台は調理台の一部なので数えず、流し・コンロ・食洗機の台はそのまま数える。
+function kitchenRuns(items) {
+  const runs = new Map();
+  for (const it of items) {
+    if (!it.kitchenRun) continue;
+    const r = runs.get(it.kitchenRun) || { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity, first: it };
+    r.x0 = Math.min(r.x0, num(it.x)); r.y0 = Math.min(r.y0, num(it.y));
+    r.x1 = Math.max(r.x1, num(it.x) + num(it.w)); r.y1 = Math.max(r.y1, num(it.y) + num(it.d));
+    runs.set(it.kitchenRun, r);
+  }
+  return [...runs.values()].map((r) => ({ ...r.first, type: 'kitchen', kitchenRun: null, x: r.x0, y: r.y0, w: r.x1 - r.x0, d: r.y1 - r.y0,
+    modelFacingVersion: 0, modelFrontAxis: null, rot: num(r.first.rot) + 180 }));
+}
+
 function objects(items, floor, group, dx, dy) {
-  return (items || []).filter((it) => it && floorOf(it) === floor).map((it) => {
+  const onFloor = (items || []).filter((it) => it && floorOf(it) === floor);
+  const parts = onFloor.filter((it) => !(it.kitchenRun && /drawer/.test(String(it.type)))).concat(kitchenRuns(onFloor));
+  return parts.map((it) => {
     const c = objectClass(it.type);
     if (!c || c.group !== group) return null;
     return { type: it.type, kind: c.kind, cx: num(it.x) + num(it.w) / 2 + dx, cy: num(it.y) + num(it.d) / 2 + dy,
