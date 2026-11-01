@@ -159,17 +159,14 @@ test('set の値は、範囲と選択肢を確かめてから入れる', () => {
     { ceiling: { type: 'void', toFloor: 2 } }, '吹抜けを天井高より優先する');
 });
 
-test('部屋の一般的な設定（ROOM_COMMON）は、表の項目と選択肢だけで書いてあり、AI への説明に出る', async () => {
+test('床材を書かなかったときの説明が、アプリの実際の既定と同じ', async () => {
+  // 「部屋の名前から決まる」と説明していたが、実際は玄関も浴室もフローリングになっていた。
+  // AI は説明を信じて床材を書かず、土間がフローリングのまま下がった（2026-11-01）。
   const { buildFreePrompt } = await mod('worker/plan-free.mjs');
-  const text = buildFreePrompt({ pages: 1 });
-  for (const [name, line, values] of PlanSettable.ROOM_COMMON) {
-    assert.ok(text.includes(name + ': ' + line), name + ' の知識が説明に無い');
-    const set = Object.entries(values).map(([k, v]) => k + '=' + v).join('; ');
-    const ctx = { rejected: [] };
-    PlanSettable.applySettings('room', null, set, {}, ctx);
-    assert.deepEqual(ctx.rejected, [], name + ' の設定に、表に無い項目・選択肢がある');
-    for (const kv of set.split('; ')) assert.ok(line.includes(kv), name + ': 説明の文と値（' + kv + '）が食い違う');
-  }
+  assert.match(buildFreePrompt({ pages: 1 }), /floorMaterial（床材。書かなければフローリング（標準））/);
+  const html = read('index.html');
+  const fn = html.slice(html.indexOf('function makeRoomFloorMaterial'), html.indexOf('function makeRoomFloorMaterial') + 600);
+  assert.match(fn, /roomFloorMaterialKey\(r\)\|\|\(isWet\?'tile_floor':'wood_floor'\)/, 'アプリの既定が変わったら説明も直す');
 });
 
 test('土間（floorLevel=doma）は、設定パネルの「玄関土間」と同じ計算で取り込む', () => {
