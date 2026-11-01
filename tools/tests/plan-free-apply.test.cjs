@@ -208,3 +208,51 @@ test('床に立つ水まわりの設備の既定モデルは、床から立つ�
     assert.ok(Number(manifest[id].h) >= 600, kind + ' の既定モデル ' + id + ' の高さが ' + manifest[id].h + 'mm しかない');
   }
 });
+
+// 調理台（kitchen-unit）と、その上に答えた流し・コンロ。以前は流し・コンロ付きの一体のモデルを置き、
+// 答えた流し・コンロを床に置いていたため、流しやコンロが二重になり、答えた方は調理台に埋もれた（2026-11-01）。
+function kitchenAnswer(face, objects) {
+  return { floors: [{ floor: 1, walls: [{ x1: 0, y1: 0, x2: 6000, y2: 0 }], objects }] };
+}
+const run = (p) => p.items.filter((i) => i.extra && i.extra.kitchenRun);
+
+test('調理台は、答えた位置に流し・コンロの台を入れ、残りを引出しの台で埋める（二重にしない）', () => {
+  const p = PlanFreeApply.toImportPlan(kitchenAnswer('S', [
+    { kind: 'kitchen-unit', x: 2000, y: 325, w: 2550, d: 650, face: 'S' },
+    { kind: 'kitchen-sink', x: 1300, y: 325, w: 750, d: 500, face: 'S' },
+    { kind: 'cooktop', x: 2800, y: 325, w: 600, d: 520, face: 'S' },
+    { kind: 'range-hood', x: 2800, y: 300, w: 750, d: 500, face: 'S' },
+  ]), {});
+  const parts = run(p).sort((a, b) => a.x - b.x);
+  assert.deepEqual(parts.filter((i) => !/drawer/.test(i.type)).map((i) => i.type), ['original-kitchen-box-sink900', 'original-kitchen-box-hob750']);
+  assert.ok(Math.abs(parts.find((i) => /sink/.test(i.type)).x - 1300) <= 150, '流しは答えた位置（端の細いすき間を埋める分だけずれてよい）');
+  assert.ok(Math.abs(parts.find((i) => /hob/.test(i.type)).x - 2800) <= 150, 'コンロは答えた位置');
+  // 台どうしが重ならず、すき間なく調理台の幅を埋める。
+  let at = 2000 - 2550 / 2;
+  for (const i of parts) { assert.ok(Math.abs(i.x - i.w / 2 - at) < 1, '台がすき間なく並ぶ'); at = i.x + i.w / 2; assert.equal(i.d, 650); assert.equal(i.y, 325); }
+  assert.ok(Math.abs(at - (2000 + 2550 / 2)) < 1);
+  assert.equal(new Set(parts.map((i) => i.extra.kitchenRun)).size, 1, '1つの調理台としてまとまる');
+  assert.ok(!p.items.some((i) => /kitchen-i\d|GasStove|CabinetA_Sink/.test(i.type)), '流し・コンロ付きの一体のモデルや床置きの流し・コンロを置かない');
+  const hood = p.items.find((i) => /Exhaust/.test(i.type));
+  assert.ok(hood.extra.elev >= 850 + 800, 'レンジフードは天板から 800mm 以上の高さ');
+});
+
+test('東西を向く調理台は、南北に部品の台を並べる', () => {
+  const p = PlanFreeApply.toImportPlan(kitchenAnswer('W', [
+    { kind: 'kitchen-unit', x: 1000, y: 2000, w: 2200, d: 650, face: 'W' },
+    { kind: 'kitchen-sink', x: 1000, y: 2600, w: 700, d: 500, face: 'W' },
+  ]), {});
+  const parts = run(p);
+  assert.ok(parts.every((i) => i.x === 1000 && i.d === 650), '東西の位置は調理台のまま');
+  assert.ok(Math.abs(parts.find((i) => /sink/.test(i.type)).y - 2600) <= 150);
+  assert.ok(Math.abs(parts.reduce((n, i) => n + i.w, 0) - 2200) < 1);
+});
+
+test('流し・コンロの無い調理台は引出しの台だけ、調理台の外の流しは単独の流しの台', () => {
+  const p = PlanFreeApply.toImportPlan(kitchenAnswer('N', [
+    { kind: 'kitchen-unit', x: 2000, y: 3000, w: 1800, d: 650, face: 'N' },
+    { kind: 'kitchen-sink', x: 5000, y: 300, w: 750, d: 500, face: 'S' },
+  ]), {});
+  assert.ok(run(p).every((i) => /drawer/.test(i.type)));
+  assert.equal(p.items.filter((i) => i.type === 'original-kitchen-box-sink900' && !i.extra.kitchenRun).length, 1);
+});
