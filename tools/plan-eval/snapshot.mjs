@@ -22,7 +22,7 @@ try {
   // 画面の流れ（plan-import.js の readPlanStream）と同じ部品で組み立てて撮る。
   const r = await page.evaluate((answer) => {
     const tags = (CATALOGUE_TAGS && CATALOGUE_TAGS.items) || {};
-    const draft = PlanFreeApply.toImportPlan(answer, tags, { keepOffWall: true });
+    const draft = PlanFreeApply.toImportPlan(answer, tags, { keepOffWall: true, heightOf: (t) => { const f = getFmpItem(t); return f && f.h > 0 ? f.h : null; } });
     const facts = PlanFreeApply.factsOf(draft, answer);
     const app = PlanImport.toAppObjects(draft);
     let made = PlanStructure.structureFor(app.walls);
