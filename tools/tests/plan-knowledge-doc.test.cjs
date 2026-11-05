@@ -14,19 +14,36 @@ const ROOT = join(__dirname, '..', '..');
 const mod = (p) => import(pathToFileURL(join(ROOT, p)).href);
 const kb = async () => (await mod('worker/plan-knowledge.mjs')).planKnowledge();
 
-test('日本の住宅の寸法体系に沿った推定を認めている', async () => {
+test('寸法体系を決めつけず、根拠のある推定だけを認める', async () => {
   const s = await kb();
   assert.match(s, /910mm を基準/);
   assert.match(s, /推定してよい/);
+  assert.match(s, /異なる寸法体系/);
+  assert.match(s, /根拠がある場合だけ/);
 });
 
-test('227.5 を捨てさせないための例がある', async () => {
+test('小数の寸法を捨てない検算を、出典に依存しない架空例で示す', async () => {
   const s = await kb();
   // 実測: この例が無いとき、モデルは 227.5 を読んだうえで「無視しました」と
   // 申告して捨てた。入れれば合計が総寸法と一致するのに、外して不一致にした。
-  assert.match(s, /227\.5/);
-  assert.match(s, /1,137\.5/);
+  // Keep the failure's lesson, not the benchmark's exact answer chain.
+  assert.match(s, /架空/);
+  assert.match(s, /625\.5/);
+  assert.match(s, /丸めたり捨てたりせず/);
   assert.match(s, /一致する/);
+});
+
+test('madori の回答となる寸法列や実座標をモデルに渡さない', async () => {
+  const s = await kb();
+  const spec = (await mod('worker/plan-spec.mjs')).planSpec();
+  assert.ok(!spec.includes('KB置き場'), 'source-specific room name leaked');
+  for (const answer of ['7,280', '2,275 / 227.5 / 1,137.5', '7,052.5', '"y0":1365', '"x1":3185', '"y1":4095']) {
+    assert.ok(!s.includes(answer), 'source-specific answer leaked: ' + answer);
+  }
+  assert.match(s, /x左 < x中 < x右/);
+  assert.match(s, /同じ部屋の parts/);
+  assert.match(s, /入力図面から求めた実際の数値/);
+  assert.equal(625.5 + 874.5 + 1500, 3000);
 });
 
 test('壁と、壁でないものの例がある', async () => {
