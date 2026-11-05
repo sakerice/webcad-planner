@@ -537,6 +537,9 @@ plan.update(review27["metadata"])
 for collection, order in review27["order"].items():
     by_id = {obj["id"]: obj for obj in plan[collection]}
     plan[collection] = [by_id[object_id] for object_id in order]
+# 2026-11 サンプル見直し(台所の向き・玄関とデッキの高さ・アプリに無い区画)。
+from default_plan_review import apply_sample_audit_2f
+apply_sample_audit_2f(plan)
 # 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
 # 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
 # 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。

@@ -113,3 +113,64 @@ def apply_review_25_joints(plan):
     # 当たって開かない」**になっていた(tools/lint_plan.py の is_furniture)。
     items[1130]['customHeight'] = 630
     return plan
+
+
+# ── 2026-11 サンプル見直し ─────────────────────────────────────────────
+# 利用者の指摘(台所の向き・アプリに無い機能・玄関が浮く)を受けた見直し。
+# 方針: 間取りは変えない。**利用者が今の画面で作れる物だけで表す**。
+
+def _drop_site_zones(items):
+    """敷地の「外構仕上げ区画」(siteZones) を外す。
+
+    区画は表示と既存区画の編集はできるが、**利用者が新しく作る・消す手段が無い。**
+    サンプルだけが使える機能はサンプルに出さない。駐車場・駐輪場の土間は、
+    利用者も置ける任意ブロック(コンクリート)で表す。
+    """
+    for it in items:
+        if it['type'] == 'site-rect':
+            it.pop('siteZones', None)
+
+
+def _slab(item_id, name, x, y, w, d, height=10):
+    # 地面に置く薄い土間。2Dでは他の物の下に描く(stack -1)。
+    return {'id': item_id, 'type': 'custom-block', 'x': x, 'y': y, 'w': w, 'd': d,
+            'rot': 0, 'floor': 1, 'flipX': False, 'flipY': False, 'sScale': 1,
+            'sX': 0, 'sY': 0, 'color': '#c8c6c0', 'colorCustom': True,
+            'customHeight': height, 'name': name, 'texture': 'concrete_brush',
+            'elev': 0, 'stack': -1}
+
+
+def apply_sample_audit_2f(plan):
+    items = {obj['id']: obj for obj in plan['items']}
+    # 台所: アイランドの流しが食卓側を向いていた(水栓が奥、引出しが食卓側)。
+    # 調理する人は背面の加熱台との間に立つので、正面を北へ向ける。
+    items[1163]['rot'] = 180
+    # 玄関: 高さモデルv2で玄関土間が630mmになったのに、ポーチは450mmのまま。
+    # ドアの下に約190mmの段が出て、玄関ドアが宙に浮いて見えた。
+    # 3階建てで利用者が決めた納まり(ポーチ630=天端が土間-12mm、段3段で500まで
+    # 上がり最後の1段がポーチ)に揃える。
+    items[1118]['customHeight'] = 630
+    items[1119]['targetHeight'] = 500
+    # テラスのウッドデッキは天端438mmで、居間の床(780mm)より342mm低い。
+    # ただしデッキは束石と束で立つモデルで、高さZで持ち上げると束石が地面から
+    # 浮く。カタログのモデルの高さを変える手段が今のアプリに無いので触らない。
+    # 敷地の区画をやめ、駐車場と駐輪場を任意ブロックの土間で表す。
+    # 敷地は x -910..10465 / y -1820..11375(南が道路)。
+    _drop_site_zones(plan['items'])
+    # 平面図は items の並び順に描くので、土間は先頭(最背面)に入れる。
+    # 末尾に足すと車と自転車が土間の下に隠れる。
+    plan['items'][:0] = [
+        _slab(1300, '駐車場', -790, 8570, 7040, 2805),
+        _slab(1301, '駐輪場', 7825, 9200, 2400, 2055),
+    ]
+    return plan
+
+
+def apply_sample_audit_3f(plan):
+    rooms = {obj['id']: obj for obj in plan['rooms']}
+    # 2階の吹抜リビングと食卓の間の区画。2.0畳に「LDK」と出ていた。
+    rooms['r1070']['n'] = 'リビング'
+    # 前庭の区画(敷地の外構仕上げ)をやめる。アプローチは既に任意ブロックで
+    # 敷いてあるので、見え方は変わらない。
+    _drop_site_zones(plan['items'])
+    return plan

@@ -2184,6 +2184,9 @@ PAIRED_FACING = [
     ('Sofa', 'Tv-MEGA', 8000, 'ソファはテレビを向く'),
     ('Tv-MEGA', 'Sofa', 8000, 'テレビはソファを向く'),
     ('Chair', 'Table', 2500, '椅子は机・食卓を向く'),
+    # アイランドの正面(引出し・流しの手前)は調理する人の側 = 背面の加熱台。
+    # 逆に置くと水栓が食卓側の奥に付き、引出しが食卓へ向く(2026-11 既定プラン)。
+    ('kitchen-island', 'kitchen-cooking', 3000, 'アイランドの作業側は背面の加熱台を向く'),
 ]
 
 
@@ -2644,6 +2647,66 @@ def check43_wide_opening_frontage(data, root=None):
     return out
 
 
+def _entry_floor_mm(data, room):
+    """玄関土間の仕上げ高さ(地面から mm)。アプリの高さモデルv2に合わせる。"""
+    fh = 0.0
+    for it in data['items']:
+        if it.get('type') == 'foundation':
+            v = it.get('foundationHeight')
+            fh = max(fh, float(450 if v is None else v))
+    hd = data.get('heightDefaults') or {}
+    slab = float(hd.get('floorThickness') or 0) if (hd.get('modelVersion') or 0) >= 2 else 0.0
+    return fh + slab + float(room.get('floorRaiseMm') or 0)
+
+
+def check44_porch_height(data):
+    """玄関ポーチの天端が、玄関土間(=玄関ドアの下端)に揃っているか。
+
+    高さモデルが変わって土間が上がったのにポーチが元の高さのままだと、
+    ドアの下に段ができて玄関ドアが宙に浮いて見える(2026-11 既定プラン、
+    約190mm)。ポーチは土間と同じか、水が入らないよう僅かに低い(50mm以内)。
+    """
+    out = []
+    for door in data['items']:
+        if door.get('type') != 'door-front' or door.get('floor', 1) != 1:
+            continue
+        cx, cy = center(door)
+        room = None
+        for r in data['rooms']:
+            if r.get('floor', 1) == 1 and '玄関' in (r.get('n') or '') and \
+                    r['x'] - 300 <= cx <= r['x'] + r['w'] + 300 and \
+                    r['y'] - 300 <= cy <= r['y'] + r['d'] + 300:
+                room = r
+        if room is None:
+            continue
+        doma = _entry_floor_mm(data, room)
+        db = aabb(door)
+        for it in data['items']:
+            if it.get('type') != 'custom-block' or 'ポーチ' not in (it.get('name') or ''):
+                continue
+            if not rects_intersect(aabb(it), db, 50.0):
+                continue
+            top = float(it.get('elev') or 0) + float(it.get('customHeight') or 900)
+            if not (doma - 50.0 <= top <= doma):
+                vio(out, it, 'ポーチの天端%.0fmmが玄関土間%.0fmmと揃っていない(差%.0fmm)。'
+                             'ドアの下に段ができる' % (top, doma, doma - top))
+    return out
+
+
+def check45_unavailable_features(data):
+    """利用者が画面で作れない要素を使っていないか(既定プラン向け)。
+
+    敷地の外構区画(siteZones)は表示と既存区画の編集はできるが、作る・消す
+    手段が無い。サンプルが使うと「そんな機能あったっけ」になる。土間は
+    任意ブロックで表す。
+    """
+    out = []
+    for it in data['items']:
+        if it.get('type') == 'site-rect' and it.get('siteZones'):
+            vio(out, it, '敷地の外構区画(siteZones)は利用者が作れない。'
+                         '任意ブロックなど画面で置ける物で表す')
+    return out
+
 
 CHECKS = [
     ('1. 建具が壁線上に乗っているか', check1_doors_on_walls),
@@ -2689,6 +2752,8 @@ CHECKS = [
     ('41. 開口を横切る壁', check41_wall_across_opening),
     ('42. 建具の片側の前面', check42_door_side_blocked),
     ('43. 広い開口の前面通行帯', check43_wide_opening_frontage),
+    ('44. 玄関ポーチと土間の高さ', check44_porch_height),
+    ('45. 利用者が作れない要素', check45_unavailable_features),
 ]
 
 
