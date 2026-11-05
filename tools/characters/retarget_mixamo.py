@@ -4,6 +4,10 @@
 #   /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/characters/retarget_mixamo.py -- \
 #     <人物.glb> <書き出し先.glb> Idle=<待機.fbx> Walking=<歩き.fbx> Sitting=<座り.fbx>@knees ...
 #
+# 動きの元には、移し替え済みの人物の GLB も使える（<元.glb>#<動きの名前>）。人物を作り直したとき、
+# 前の人物に入っている動き（補正済みの座り姿も）をそのまま新しい人物へ移す:
+#     ... Idle=<前の人物.glb>#Idle Walking=<前の人物.glb>#Walking Sitting=<前の人物.glb>#Sitting
+#
 # 動きの後ろに付ける補正（座り姿用。いくつでも重ねられる。中身は下の各関数）:
 #   @face  腰の向きを正面（-Y）へ戻す（体ごと横を向く動きを、座面の向きに合わせる）
 #   @legs  腿をほぼ水平に、すねを垂直に下ろす（床座り用の、膝が胸に近い姿勢を椅子の座り方にする）
@@ -132,10 +136,24 @@ tgt_rest_lat = tgt_rest['mixamorig:LeftUpLeg'].translation - tgt_rest['mixamorig
 
 for clip_name, fbx in CLIPS:
     before = set(bpy.context.scene.objects)
-    bpy.ops.import_scene.fbx(filepath=fbx, automatic_bone_orientation=False)
+    acts_before = set(bpy.data.actions)
+    if '#' in fbx:   # 移し替え済みの GLB から、名前で動きを選ぶ
+        path, want = fbx.split('#', 1)
+        bpy.ops.import_scene.gltf(filepath=path)
+    else:
+        want = None
+        bpy.ops.import_scene.fbx(filepath=fbx, automatic_bone_orientation=False)
     new = [o for o in bpy.context.scene.objects if o not in before]
     src = next(o for o in new if o.type == 'ARMATURE')
-    src_act = src.animation_data.action
+    src.animation_data_create()
+    if want:
+        src_act = next(a for a in bpy.data.actions if a not in acts_before and a.name.split('_')[0] == want)
+        src.animation_data.action = src_act
+        for tr in list(src.animation_data.nla_tracks):
+            src.animation_data.nla_tracks.remove(tr)
+    else:
+        src_act = src.animation_data.action
+    extra = [a for a in bpy.data.actions if a not in acts_before and a is not src_act]
     f0, f1 = (int(round(v)) for v in src_act.frame_range)
     names = [n for n in tgt_names if n in src.data.bones]
     src_rest = {n: rest_world(src, n) for n in names}
@@ -193,6 +211,9 @@ for clip_name, fbx in CLIPS:
     for o in new:
         bpy.data.objects.remove(o, do_unlink=True)
     bpy.data.actions.remove(src_act)
+    for a in extra:
+        bpy.data.actions.remove(a)
+    act.name = clip_name   # 元の動き（同じ名前）を捨てた後で名前を戻す。三人称は 'Sitting' を名前で探す
     print('clip', clip_name, f1 - f0 + 1, 'frames, hip scale', round(scale, 3))
 
 # 動きを NLA のトラックに並べて、全部を書き出す
