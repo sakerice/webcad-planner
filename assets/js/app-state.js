@@ -176,7 +176,15 @@ function ceilingAttachElevationMm(it){
   var roofs=items.filter(function(o){
     return o&&o.type==='roof'&&!o.hidden3D&&(o.floor||1)>=fl;
   });
-  var under=roofTopLimitAtPlanPoint(roofs,cx,cy);
+  // 取付面は屋根の**板の下面**。roofTopLimitAtPlanPoint は屋根面(壁の頭を押さえる
+  // 高さ)を返すので、それに付けると器具が板の中に埋まって下から見えない
+  // (2階建ての既定プラン、玄関庇のダウンライトが板の中に約80mm埋まっていた)。
+  var under=null;
+  roofs.forEach(function(o){
+    if(!roofCoversPlanPoint(o,cx,cy)) return;
+    var y=roofSlabBottomWorldYAt(o,cx,cy);
+    if(under===null||y<under) under=y;
+  });
   if(under===null) return null;
   return Math.round((under-CEILING_FINISH_M-item3DBaseY(it))/U);
 }
