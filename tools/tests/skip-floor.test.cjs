@@ -67,7 +67,7 @@ const FNS = [
   'roomLevelLabel', 'usesFinishedHeightModel', 'ceilingFinishThicknessM',
   'roomCeilingElevationMm', 'shiftRoomCeilingFixtures', 'followRoomCeiling',
   'ceilingFinishElevationMm', 'ceilingAttachElevationMm', 'ceilingHasStairHoleAt', 'pointInPolyXZ', 'roofTopLimitAtPlanPoint',
-  'roofCoversPlanPoint', 'roofUndersideWorldYAt', 'roofBaseWorldY', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'roofCoversPlanPoint', 'roofUndersideWorldYAt', 'roofSlabBottomWorldYAt', 'roofSlabThickM', 'roofBaseWorldY', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'setbackOutlineCoversLocal', 'wallFullHeightM',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
@@ -1385,9 +1385,12 @@ test('部屋の外でも、上に屋根が架かっていればその下面に�
   assert.equal(g.roomAtPointOnFloor(1, 5490, 1990), null, '部屋の外に置けていない');
   const want = g.ceilingAttachElevationMm(dl);
   assert.notEqual(want, null, '屋根の下なのに取り付け面が出ていない');
-  // 取り付けたときの世界での高さが、屋根の下面(仕上げ12mmぶん下)と一致する。
+  // 取り付けたときの世界での高さが、屋根の**板の下面**(仕上げ12mmぶん下)と一致する。
+  // 屋根面(roofTopLimitAtPlanPoint)に付けると器具が板の中に埋まって見えない。
   const roofs = g.DATA.items.filter((o) => o.type === 'roof');
-  const under = g.roofTopLimitAtPlanPoint(roofs, 5490, 1990);
+  const under = Math.min(...roofs.filter((o) => g.roofCoversPlanPoint(o, 5490, 1990))
+    .map((o) => g.roofSlabBottomWorldYAt(o, 5490, 1990)));
+  assert.ok(under < g.roofTopLimitAtPlanPoint(roofs, 5490, 1990), '板の厚みが取れていない');
   const world = g.item3DBaseY(dl) + want * g.U;
   assert.ok(Math.abs(world - (under - g.CEILING_FINISH_M)) < 0.002,
     '屋根の下面から離れている: ' + Math.round(world / g.U) + ' vs ' + Math.round((under - g.CEILING_FINISH_M) / g.U));
