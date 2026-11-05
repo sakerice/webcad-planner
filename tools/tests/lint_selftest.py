@@ -232,6 +232,32 @@ def break_17(d):
     return d
 
 
+def break_44(d):
+    """玄関ポーチを土間より200mm低くし、ドアの下に段を作る。"""
+    porch = next(i for i in d['items'] if i.get('name') == '玄関ポーチ')
+    porch['customHeight'] = float(porch.get('customHeight') or 450) - 200
+    return d
+
+
+def break_45(d):
+    """敷地に、利用者が作れない外構区画を入れる。"""
+    site = next(i for i in d['items'] if i['type'] == 'site-rect')
+    site['siteZones'] = [{'name': '駐車', 'x': 0, 'y': 0, 'w': 1000, 'd': 1000,
+                          'surface': 'concrete'}]
+    return d
+
+
+def break_39_island(d):
+    """アイランドの正面を、背面の加熱台と逆(食卓側)へ向けて置く。"""
+    base = {'floor': 1, 'flipX': False, 'flipY': False, 'elev': 0,
+            'modelFrontAxis': '+Z', 'modelFacingVersion': 1}
+    d['items'].append(dict(base, id=990001, type='original-kitchen-cooking',
+                           x=20000, y=0, w=2560, d=650, rot=0))
+    d['items'].append(dict(base, id=990002, type='original-kitchen-island',
+                           x=20200, y=1700, w=2100, d=900, rot=0))
+    return d
+
+
 CASES = [
     ('34', break_34, '玄関から居室が見通せる'),
     ('35', break_35, 'トイレの直下が居室'),
@@ -246,6 +272,9 @@ CASES = [
     ('41', break_41, '窓を壁が横切る'),
     ('42', break_42, '玄関ドアの正面が塞がれる'),
     ('43', break_43, '広い開口の正面が塞がれる'),
+    ('39', break_39_island, 'アイランドが加熱台に背を向ける'),
+    ('44', break_44, 'ポーチが玄関土間より低い'),
+    ('45', break_45, '利用者が作れない外構区画'),
 ]
 
 fail = 0

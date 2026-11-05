@@ -538,6 +538,9 @@ for _collection, _order in _review25["order"].items():
 # 掃き出し窓を南の外壁へ戻す(高さの不具合はアプリ側で直した)。
 from default_plan_review import apply_review_25_joints
 apply_review_25_joints(plan)
+# 2026-11 サンプル見直し(台所の向き・玄関とデッキの高さ・アプリに無い区画)。
+from default_plan_review import apply_sample_audit_3f
+apply_sample_audit_3f(plan)
 # 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
 # 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
 # 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。
