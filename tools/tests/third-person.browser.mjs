@@ -169,10 +169,10 @@ try {
   });
   assert.ok(feet.length >= 2, '座れる家具に座れない: ' + JSON.stringify(feet));
   assert.deepEqual(feet.filter((x) => x.above < -0.005), [], '座った足が床にめり込んでいる');
-  // 人物は女性だけ（男性はリリースの範囲から外した）。最初は第3版、もう1回押すと前の版、さらに押すと一人称に戻る（人物は消え、カメラは目の位置に戻る）
-  assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-03t');
-  await pressToggle(p2);
+  // 人物は女性だけ（男性はリリースの範囲から外した）。最初は第2版、もう1回押すと試作の第3版、さらに押すと一人称に戻る（人物は消え、カメラは目の位置に戻る）
   assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-02a');
+  await pressToggle(p2);
+  assert.equal(await p2.evaluate(() => [ThirdPerson.isOn(), ThirdPerson.character()].join()), 'true,walker-female-03t');
   await pressToggle(p2);
   const back = await p2.evaluate(() => { let f = null; sc3.traverse((o) => { if (o.name === '_thirdPersonFigure') f = o; }); return { figure: !!f, d: Math.hypot(camExt.position.x - WALK.x, camExt.position.z - WALK.z) }; });
   assert.deepEqual(back, { figure: false, d: 0 });
