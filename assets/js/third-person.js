@@ -20,8 +20,11 @@ var ThirdPerson = (function(){
   // 人物の GLB（Codex がデザインし Meshy で立体化、動きは Mixamo）。読めなければ仮の人形で歩く。
   // 第2版（5.5頭身前後）の女性 a。男性 b は色の画像のむらが残るため、リリースの範囲から外した（利用者の判断）。
   // 人物を足すときは、この表に足すと切り替えの順番に入る（一人称 → 三人称・各人物 → 一人称）
+  // 第3版の女性 t は Tripo で立体化（同じデザイン画から。髪留めは画像から消して作った — 横向きの絵で髪留めが反対側に描かれ、
+  // 後頭部にも顔のある人形が出たため）。動きは第2版から移している。第2版も切り替えで選べるように残す
   var CHARACTERS = [
-    {id:'walker-female-02a', label:'女性', url:'assets/models/characters/walker-female-02a.glb', height:1.60}
+    {id:'walker-female-03t', label:'女性', url:'assets/models/characters/walker-female-03t.glb', height:1.60},
+    {id:'walker-female-02a', label:'女性（前の版）', url:'assets/models/characters/walker-female-02a.glb', height:1.60}
   ];
   var charIndex = 0, models = {}, mixer = null, actions = null, lastTick = 0, figureFor = null, bones = {};
   var WALK_SPEED = 2.0;                // updateWalkMode の歩く速さ(m/s)。動きの再生の速さをこれに合わせる
