@@ -4,13 +4,21 @@
 # （髪に白い筋が出た）。島の形はそのまま、間を空けて並べ直し、元の画像から色を焼き写す。余白は島の縁の色で埋める。
 # サイトの三人称は色の画像しか使わないので、法線・粗さの画像は外す。
 #
-# 使い方: Blender -b -P tools/characters/rebake_with_margin.py -- <入力.glb> <書き出し先.glb> [画像の大きさ=2048]
+# 島の間にもともと余白があり、その余白が白などで塗られている物（Meshy の書き出し）は、keep を付けて並べ方を変えずに焼き直す。
+# 島の中の色は元のまま、余白だけが島の縁の色で塗り直される（解像度は落ちない）。
+#
+# 並べ直すとき、頭（顔・髪）の島を HEAD_WEIGHT 倍に広げてから詰める。島の間の余白のぶん全体が縮むので、
+# そのままだと顔の解像度が下がる（前の版で約3割下がった）。無地に近いスカートなどの島がそのぶん小さくなる。
+#
+# 使い方: Blender -b -P tools/characters/rebake_with_margin.py -- <入力.glb> <書き出し先.glb> [画像の大きさ=2048] [keep|head=1.6]
 import sys
 import bpy
 
 argv = sys.argv[sys.argv.index('--') + 1:]
 SRC, DST = argv[0], argv[1]
 SIZE = int(argv[2]) if len(argv) > 2 else 2048
+KEEP_LAYOUT = len(argv) > 3 and argv[3] == 'keep'
+HEAD_WEIGHT = next((float(a.split('=')[1]) for a in argv[3:] if a.startswith('head=')), 1.0)
 PACK_MARGIN = 0.003         # 島の間（UV の幅に対する比。2048 で約6画素、1024 で約3画素。広げすぎると島が小さくなり顔がぼやける）
 BAKE_MARGIN = 64            # 島の外を縁の色で埋める幅（画素）
 
@@ -40,11 +48,30 @@ new_uv = me.data.uv_layers.new(name='packed')
 me.data.uv_layers.active = new_uv
 for o in sc.objects: o.select_set(o == me)
 bpy.context.view_layer.objects.active = me
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.uv.select_all(action='SELECT')
-bpy.ops.uv.pack_islands(rotate=True, margin=PACK_MARGIN, shape_method='CONCAVE')
-bpy.ops.object.mode_set(mode='OBJECT')
+if not KEEP_LAYOUT and HEAD_WEIGHT != 1.0:
+    import bmesh
+    from bpy_extras import bmesh_utils
+    bm = bmesh.new(); bm.from_mesh(me.data)
+    uvl = bm.loops.layers.uv['packed']
+    zs = [v.co.z for v in bm.verts]; z0, z1 = min(zs), max(zs)
+    n_head = 0
+    for isl in bmesh_utils.bmesh_linked_uv_islands(bm, uvl):
+        zc = sum(l.vert.co.z for f in isl for l in f.loops) / sum(len(f.loops) for f in isl)
+        if (zc - z0) / (z1 - z0) < 0.80: continue            # 首から上（身長の上2割）だけ
+        loops = [l for f in isl for l in f.loops]
+        cu = sum(l[uvl].uv.x for l in loops) / len(loops); cv = sum(l[uvl].uv.y for l in loops) / len(loops)
+        for l in loops:
+            l[uvl].uv.x = cu + (l[uvl].uv.x - cu) * HEAD_WEIGHT
+            l[uvl].uv.y = cv + (l[uvl].uv.y - cv) * HEAD_WEIGHT
+        n_head += 1
+    bm.to_mesh(me.data); bm.free()
+    print('head islands scaled', n_head, 'x', HEAD_WEIGHT)
+if not KEEP_LAYOUT:          # uv_layers.new は今の UV を写した物になる。keep のときはそのまま使う
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.select_all(action='SELECT')
+    bpy.ops.uv.pack_islands(rotate=True, margin=PACK_MARGIN, shape_method='CONCAVE')
+    bpy.ops.object.mode_set(mode='OBJECT')
 
 # 元の画像を元の UV で読んで光らせ、新しい UV の画像へ焼き写す
 out = bpy.data.images.new(src_img.name + '_packed', SIZE, SIZE, alpha=False)
