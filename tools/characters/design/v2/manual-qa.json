@@ -1,0 +1,30 @@
+{
+  "issue": 167,
+  "displayed": "18selectednative/6completedturnarounds/lineup/facecomparison/profileandrearmarkerQA",
+  "checks": {
+    "native1254": true,
+    "raw_front_side12_head_ratios_in_range": true,
+    "turnaround_front_side12_head_ratios_in_range": true,
+    "back_chin_not_fabricated": true,
+    "clothing_palette_accessory_sides": true,
+    "Apose_front_rear": true,
+    "wholebody_fingers_visible": true,
+    "no_floor_castshadow": true,
+    "approved_style_facecomparison": true
+  },
+  "remaining": [
+    "Independent projections,handandhemoffsetsoftensofpixels",
+    "AAandsmallrastershadevariation;notexactRGBortwovalueguarantee",
+    "No humanapproval of revised proportions",
+    "Backchinoccludednotmeasured"
+  ],
+  "not_tested": [
+    "hidden back chin/anatomical joint angles",
+    "same exact3Dprojection",
+    "human final selection of revised proportions",
+    "material physics",
+    "3D/rig/animation",
+    "app/browser/real room"
+  ],
+  "library": "deferred to parent"
+}
