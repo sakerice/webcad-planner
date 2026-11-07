@@ -35,13 +35,29 @@ const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 
 // 開いた間取りの指紋。位置・寸法は mm に丸める（浮動小数の末尾で落ちないため）。
 // 並び順に意味は無いので、並べ替えてから比べる。
+//
+// 天井付けの照明の高さは、利用者が保存した値ではない。開くたびに取付面(部屋の天井・
+// 軒下なら屋根の板の下面)から計算し直して上書きする(snapCeilingLightsToAttachSurface)。
+// その数値を正解に書くと、屋根や天井の作りを直すたびに「保存データが開けない」と
+// 嘘の指摘が出る(2026-11 の軒下ダウンライトの修正で 80mm ずれて落ちた)。
+// ここで見るのは「取付面に付いて開いたか」だけにし、高さの値の正しさは寄せる仕組みの
+// 検査(skip-floor.test.cjs ほか)に任せる。取付面から外れて開いた照明(吊り下げ・
+// 取付面の無い場所)は、保存した値そのものなので数値のまま比べる。
 function fingerprint() {
   const r = (v) => Math.round(Number(v) || 0);
   const modal = document.getElementById('preset-choice-modal');
+  const elevOf = (i) => {
+    const top = isLightItemType(i.type) ? CEILING_FIXTURE_TOP_MM[i.type] : undefined;
+    if (top !== undefined) {
+      const want = ceilingAttachElevationMm(i);
+      if (want !== null && isFinite(want) && Math.abs((Number(i.elev) || 0) - (want - top)) <= 1) return '取付面';
+    }
+    return r(i.elev);
+  };
   return {
     walls: DATA.walls.map((w) => [w.floor || 1, r(w.x1), r(w.y1), r(w.x2), r(w.y2), r(w.thick)].join(',')).sort(),
     rooms: DATA.rooms.map((m) => [m.floor || 1, m.n || '', r(m.x), r(m.y), r(m.w), r(m.d), (m.pts || []).length].join(',')).sort(),
-    items: DATA.items.map((i) => [i.floor || 1, i.type, r(i.x), r(i.y), r(i.w), r(i.d), r(i.rot), r(i.elev)].join(',')).sort(),
+    items: DATA.items.map((i) => [i.floor || 1, i.type, r(i.x), r(i.y), r(i.w), r(i.d), r(i.rot), elevOf(i)].join(',')).sort(),
     heightDefaults: DATA.heightDefaults || null,
     floors: Object.keys(DATA.floorMetadata || {}).sort(),
     // 開いたあとに間取りの選択画面が残っていないこと（重なって出る不具合の検出）
