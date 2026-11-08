@@ -1,0 +1,37 @@
+{
+  "source": "All selected18 native official images were displayed during generation; all six final turnarounds and lineup displayed",
+  "image_count": 18,
+  "three_d_stopped": true,
+  "checks": {
+    "whole_body": true,
+    "adult_proportions_measured": true,
+    "clear_A_pose_front_and_back": true,
+    "simplified_gathered_fingers": true,
+    "same_hair_clothes_palette": true,
+    "physical_accessory_sides": true,
+    "no_rear_front_plackets_or_pendants": true,
+    "no_logos_patterns_or_free_straps": true,
+    "no_floor_or_cast_shadows": true,
+    "square_native_at_least1024": true
+  },
+  "actual_fixes": [
+    "887px panels discarded and regenerated as native1254px singles",
+    "Pose-only edits made frontal arms clearly spread; measured local sleeve slopes30.6-37.5degrees",
+    "Side/back arm and cuff positions edited to same intended A-pose",
+    "Lineup columns widened to800px to prevent cropped fingertips",
+    "Bracelet/sock/iris colour sample locations corrected"
+  ],
+  "remaining": [
+    "Independent2D projection/hand-height and silhouette differences of tens of pixels",
+    "AA and small raster colour variations, not mathematically two RGB colours per surface or perfectly constant background",
+    "New C and delivered pose variations not separately approved by user; visual basis four images were approved"
+  ],
+  "not_tested": [
+    "same exact3D camera projection",
+    "hidden anatomical joint angle",
+    "3D/rig/animation",
+    "material physics",
+    "app/browser/real-room",
+    "final human selection"
+  ]
+}

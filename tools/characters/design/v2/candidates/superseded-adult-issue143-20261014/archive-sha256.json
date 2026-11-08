@@ -1,0 +1,233 @@
+{
+  "issue": 143,
+  "head": "e7fb1a30899e40aa35ae44fd0c1983eb567f494c",
+  "new_revision_issue": 167,
+  "reason": "Previous6.5head version retained verbatim; user approved style only, not proportions",
+  "files": [
+    {
+      "file": "3d-misstart-preservation.json",
+      "sha256": "de1d874ea64d33abd5cfe4750d5fcd54faae84c19d0e29ec89bfc8c1a72350a5",
+      "bytes": 18582
+    },
+    {
+      "file": "README.md",
+      "sha256": "4816c7b4f9cfa7ee5c21c37f8697ba7d98a9e0699478f51d5eb2f1f8e5243950",
+      "bytes": 9694
+    },
+    {
+      "file": "approved-and-history-preservation.json",
+      "sha256": "a5198812152ede3264a579123cad2a0aefaeb094714a9d7eb97b0febde4cae42",
+      "bytes": 27666
+    },
+    {
+      "file": "assemble_and_inspect.py",
+      "sha256": "0638c2f6fd8e775ac1764137bca4c39421093f5e5da45b2d2076465a643c509d",
+      "bytes": 14999
+    },
+    {
+      "file": "assemble_approved_set.py",
+      "sha256": "6014467b2611da60fdc9721bf20ea9fd7914d56ce43218e7c3d3d791ae8d826b",
+      "bytes": 7845
+    },
+    {
+      "file": "colour-inspection.json",
+      "sha256": "22bb328f0b9f489bf6e5adc34d4eb6efe6023cde8553dd560306a8c9f180ea04",
+      "bytes": 10780
+    },
+    {
+      "file": "final-inspection.json",
+      "sha256": "5eca26cf0b90f19d3c45e30f34b064fc9928477cb92ed25d1af6bc3f47491142",
+      "bytes": 30641
+    },
+    {
+      "file": "handoff-manifest.json",
+      "sha256": "634405b58d76ed95b5ca70d1f7107e58b2d632d063b50328f0f59128bd4a94e8",
+      "bytes": 7988
+    },
+    {
+      "file": "inspect_adult_fronts.py",
+      "sha256": "2491a1101d364a33c4abda96d5e959702c01224423be8b4e94404787a50ad95f",
+      "bytes": 7216
+    },
+    {
+      "file": "inspect_assets.py",
+      "sha256": "04ded23989218f50f183c367ff78c34aec997a085fefa6535af7cb099e1e9aec",
+      "bytes": 7157
+    },
+    {
+      "file": "library-save-status.json",
+      "sha256": "cf36415ad58d3ae815e1f93bf05e828551284c0574d1182b2c3eb49aff25cc2d",
+      "bytes": 1033
+    },
+    {
+      "file": "lineup.png",
+      "sha256": "10690b0ab2f4aaaf7822096d4372f9f9a9d6fac8741a22034156705348eb963f",
+      "bytes": 3374345
+    },
+    {
+      "file": "manual-qa.json",
+      "sha256": "27efe288bdb9098e7ccb8bdb29e9b1f37bf323ad3f416c6315e796772a11a697",
+      "bytes": 1547
+    },
+    {
+      "file": "production-generations.json",
+      "sha256": "28c8134aff6d4dc5d86ecf202694291436d788cc627f2f55b22d69e7c539bb2f",
+      "bytes": 113631
+    },
+    {
+      "file": "verify_deliverables.py",
+      "sha256": "20a56b4cb0e68a646525ee96f991bc9534616f57834869c3fb218fe132c04334",
+      "bytes": 4906
+    },
+    {
+      "file": "walker-female-02a-back.png",
+      "sha256": "b24707be07275f4c9ab07f7e138c14d33d193c5adc433cec85e919872af9a8f7",
+      "bytes": 1305017
+    },
+    {
+      "file": "walker-female-02a-colors.md",
+      "sha256": "d26081926cee0733d923f9688da42c5add7771c2def56fd253236e9527692eb5",
+      "bytes": 805
+    },
+    {
+      "file": "walker-female-02a-front.png",
+      "sha256": "7f7b2780707c641a00d2148d77606e5b04cb692b7c43bcee89d5c2128e8f2f32",
+      "bytes": 1504348
+    },
+    {
+      "file": "walker-female-02a-side.png",
+      "sha256": "91e8023eb453614136f7614f68e2d5dbddc673dd72715cdc3ec3e2e85d6ca3ef",
+      "bytes": 1550590
+    },
+    {
+      "file": "walker-female-02a-turnaround.png",
+      "sha256": "9631e644e65b0c77e98cdf1fb06074ebb96e766266dcc42be2402384ce5f7d89",
+      "bytes": 1789777
+    },
+    {
+      "file": "walker-female-02b-back.png",
+      "sha256": "2d286b374d933e09ba892d0e85a3b3abba91cd3b2d6426ef85e842efe82ef287",
+      "bytes": 1489811
+    },
+    {
+      "file": "walker-female-02b-colors.md",
+      "sha256": "78fa5474e86ba55e15874554d18bff0418d2942794bf6951732cc843df0e23af",
+      "bytes": 735
+    },
+    {
+      "file": "walker-female-02b-front.png",
+      "sha256": "593aeaa2631f4a401eccb7b34016af9be65bf58f64e5890a7b9dd37002396ec8",
+      "bytes": 1433368
+    },
+    {
+      "file": "walker-female-02b-side.png",
+      "sha256": "f1af5f2514a61aa8ecee14d1a7f2ce37a45b6f03fcb22c6151d6a79512d8d6eb",
+      "bytes": 1470785
+    },
+    {
+      "file": "walker-female-02b-turnaround.png",
+      "sha256": "e21054cd6a350d9400e33c81dbb6e95eda942de9e8d81a8f2daf1fa2f615547f",
+      "bytes": 1726472
+    },
+    {
+      "file": "walker-female-02c-back.png",
+      "sha256": "15c7b01362084d884eaf7a463b8a29cff44f60b7bc75efde953c7c1fb621ea3b",
+      "bytes": 1219078
+    },
+    {
+      "file": "walker-female-02c-colors.md",
+      "sha256": "10a6001efd0630a83cc334a7f828e95a62e8d867c137a123fbf829c8b189870f",
+      "bytes": 760
+    },
+    {
+      "file": "walker-female-02c-front.png",
+      "sha256": "5e19f809995cf05cf510ebc11b78b29d1edded13ab88982c142010dfdc29d659",
+      "bytes": 1234864
+    },
+    {
+      "file": "walker-female-02c-side.png",
+      "sha256": "11c220c6abb5a6ccf12df0609b1a38f2e6661e1a5d78b6d20100a660db0b0ba1",
+      "bytes": 1468844
+    },
+    {
+      "file": "walker-female-02c-turnaround.png",
+      "sha256": "aaf3dee1f26f11d4a510bfb2ea5af830405659049a55c24ee77fda2061385461",
+      "bytes": 1484911
+    },
+    {
+      "file": "walker-male-02a-back.png",
+      "sha256": "0b523e2f3dceed4ca1ac46b0fef60c33d4a8c5137a95ed4cc12b4d82b738e18c",
+      "bytes": 1507965
+    },
+    {
+      "file": "walker-male-02a-colors.md",
+      "sha256": "91e4e5817bab18a341d2b20dd1e19ff506bae8a537437ce89de2c2cec15a6aa5",
+      "bytes": 779
+    },
+    {
+      "file": "walker-male-02a-front.png",
+      "sha256": "1f5e4e78cbbfc70d0695635904410334918fc87241aef39d868e597dca72af20",
+      "bytes": 1293847
+    },
+    {
+      "file": "walker-male-02a-side.png",
+      "sha256": "055a655deaa5901932781270a154548229b4dec415d73ead91a607b2025c5aa6",
+      "bytes": 1179526
+    },
+    {
+      "file": "walker-male-02a-turnaround.png",
+      "sha256": "6cacf5df96b6500e67e8b5db00ce8fe10606d1bd1fda98c4052b2d046ceb2f19",
+      "bytes": 1985834
+    },
+    {
+      "file": "walker-male-02b-back.png",
+      "sha256": "4210a696ca1bc91cbd5c910c02e68ed047c613e436aaed76d03a7218aea06159",
+      "bytes": 1210897
+    },
+    {
+      "file": "walker-male-02b-colors.md",
+      "sha256": "3331e13bd6c4c67e9ffa8d559b328c2d344c73a1c40591b57a3570aaaa9f9b33",
+      "bytes": 782
+    },
+    {
+      "file": "walker-male-02b-front.png",
+      "sha256": "71810df05c008d35876049a67cb199abab62e44fbe6de6bb02ef892a21f734b6",
+      "bytes": 1244887
+    },
+    {
+      "file": "walker-male-02b-side.png",
+      "sha256": "c8f81cbe42b40f37da8f75ffc1c8e27968b2584b38730f2192f28817a7c77ce1",
+      "bytes": 1529169
+    },
+    {
+      "file": "walker-male-02b-turnaround.png",
+      "sha256": "8c46993612f8ead8318a4b7c94b08a018a4b50b07b317e2a48a538f6e44ff990",
+      "bytes": 1764738
+    },
+    {
+      "file": "walker-male-02c-back.png",
+      "sha256": "3cb60085c47f6fe6255f4b2fbd337328971eef6457d7fdb47c5fbc57bf8779b7",
+      "bytes": 1510335
+    },
+    {
+      "file": "walker-male-02c-colors.md",
+      "sha256": "7d4a8f6534a5496f8d25cf8419fc1f509803af31a6afb688f4c4f4f54bad70e8",
+      "bytes": 758
+    },
+    {
+      "file": "walker-male-02c-front.png",
+      "sha256": "fe8be16cd61056aab059ba699c474475218645a10a33f909d48a78b0732f4371",
+      "bytes": 1255591
+    },
+    {
+      "file": "walker-male-02c-side.png",
+      "sha256": "2824feb368b75d15cfad95e8a1009534c88f5004af98bc9b56b6e54e6cef8620",
+      "bytes": 1537926
+    },
+    {
+      "file": "walker-male-02c-turnaround.png",
+      "sha256": "1dde632a095ecc4d2fdc2400cf45a9664cd48c2046bbbf88c4dc671a0ee7c558",
+      "bytes": 1965390
+    }
+  ]
+}
