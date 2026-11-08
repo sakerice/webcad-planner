@@ -8,8 +8,10 @@ try {
  await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForSelector('#object-search-input',{state:'attached'});await page.evaluate(()=>{const m=document.getElementById('preset-choice-modal');if(m)m.classList.remove('show');});await page.locator('#bnav-tools').click();
  for(const name of ['薄型機能門柱','一体型機能門柱','二本脚型']) {
   await page.locator('#object-search-input').fill(name);const tile=page.locator('#object-search-results .catalogue-result');assert.equal(await tile.count(),1);await tile.click();
-  await page.evaluate(()=>{ST.floor=1;// 外構の物は家の外に置く。固定の (2000,2000) は既定プランのランドリーの中で、#112 から部屋の物は床に立つので床の高さ(0.78m)になって落ちていた。敷地の角から取り、家の外であることを確かめてから置く。
-const site=DATA.items.find(o=>o.type==="site-rect"),fd=DATA.items.find(o=>o.type==="foundation");const px=site.x+600,py=site.y+600;if(roomAtPointOnFloor(1,px,py)||(fd&&px>=fd.x&&px<=fd.x+fd.w&&py>=fd.y&&py<=fd.y+fd.d))throw new Error("外構を置く場所が家の中: "+px+","+py);placeItem(ST.tool,px,py);document.getElementById('props').classList.add('show','prop-expanded');});
+  await page.evaluate(()=>{ST.floor=1;// 門まわりの物は、門まわりに置く。既定プランの門柱(アプローチの脇)を消し、同じ場所・同じ向きに置く
+// ＝利用者が門柱を別の商品に替える操作。以前は固定の (2000,2000) に置いていたが、そこは既定プランのランドリーの中で、
+// #112 から部屋の中に置いた物は床(0.78m)に立つため、検査の前提が崩れていた。
+if(!window.__gateSpot){const gp=DATA.items.find(o=>/GatePost/.test(o.type));if(!gp)throw new Error("既定プランに門柱が無い");window.__gateSpot={x:gp.x+gp.w/2,y:gp.y+gp.d/2,rot:gp.rot,base:item3DBaseY(gp)};window.__gatePlaced=gp;}if(window.__gatePlaced){ST.selected=window.__gatePlaced;ST.multiSelected=[];delSel();}const s=window.__gateSpot;ST.placingRot=s.rot;placeItem(ST.tool,s.x,s.y);window.__gatePlaced=ST.selected;if(DATA.items.some(o=>/GatePost/.test(o.type)))throw new Error("元の門柱が消えていない");if(item3DBaseY(ST.selected)!==s.base)throw new Error("元の門柱と違う高さに立った: "+item3DBaseY(ST.selected)+" / "+s.base);document.getElementById('props').classList.add('show','prop-expanded');});
   await page.locator('#finish-body').fill('#223344');await page.locator('#finish-panel').fill('#998877');await page.locator('#finish-roughness-panel').selectOption('0.48');
   const state=await page.evaluate(()=>({ground:item3DBaseY(ST.selected),siteSurface:SITE_SURFACE_Y,saved:JSON.parse(serializeDataSnapshot()).items.find(i=>i.id===ST.selected.id)}));// 敷地の面は Z ファイティングを避けるため GL より 12mm 下に描く(SITE_SURFACE_Y)。
   // 門柱はその面に接地するのが正しい。0 を期待していた頃の検査は、
