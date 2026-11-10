@@ -19,7 +19,6 @@ const ROOT_ALLOWED = [
   'AGENTS.md',
   'CLAUDE.md',
   'DESIGN.md',
-  'design.md', // Task 5 で DESIGN.md に改名するため、そのとき消す
   'build.sh',
   'index.html',
   'worker.mjs',
