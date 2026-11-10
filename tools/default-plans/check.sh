@@ -12,7 +12,15 @@ cd "$(dirname "$0")/../.."
 fail=0
 for plan in assets/default_plan.json assets/default_plan_3f.json; do
   echo "== lint_plan.py $plan"
-  python3 tools/lint_plan.py "$plan" | tail -1 || fail=1
+  # パイプにすると tail の終了コードになり、lint の失敗が消える。先に取っておく。
+  if out=$(python3 tools/lint_plan.py "$plan" 2>&1); then
+    echo "$out" | tail -1
+  else
+    code=$?
+    echo "$out" | tail -5
+    echo "lint_plan.py が終了コード $code で終わった: $plan"
+    fail=1
+  fi
 done
 echo "== quality_test.py"
 python3 tools/default-plans/quality_test.py || fail=1
