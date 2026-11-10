@@ -1,6 +1,7 @@
 // Real startup flows, including delayed default fetches and intentional blank saves.
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs');
+// .preset-blank-btn は今は2つある(画像から下書き / 白紙から始める)。このテストが見るのは白紙の方。
 const base=process.env.APP_URL||'http://localhost:8937/';
 (async()=>{const browser=await chromium.launch({channel:'chrome',args:['--use-angle=metal']});const errors=[];
 try{
@@ -11,10 +12,10 @@ try{
   await page.goto(base,{waitUntil:'domcontentloaded'});await page.locator('#preset-choice-modal.show').waitFor();
   assert.equal(await page.locator('.preset-choice-name').first().textContent(),'2階建て 3LDK・吹き抜けとテラス');
   assert.ok(!await page.locator('#preset-choice-modal').innerText().then(s=>s.includes('アイランド')));
-  await page.locator('.preset-blank-btn').scrollIntoViewIfNeeded();
+  await page.locator('.preset-blank-btn',{hasText:'白紙から始める'}).scrollIntoViewIfNeeded();
   fs.mkdirSync('docs/quality-review/default-plans-release',{recursive:true});
   await page.screenshot({path:'docs/quality-review/default-plans-release/dialog-'+width+'.png'});
-  await page.locator('.preset-blank-btn').click();release();await page.waitForTimeout(800);
+  await page.locator('.preset-blank-btn',{hasText:'白紙から始める'}).click();release();await page.waitForTimeout(800);
   assert.deepEqual(await page.evaluate(()=>[DATA.walls.length,DATA.items.length,DATA.rooms.length]),[0,0,0]);
   assert.equal(await page.evaluate(()=>PRESET_CURRENT),'blank');
   await page.evaluate(()=>StorageAdapter.save(DATA));page.on('dialog',d=>d.accept());
@@ -32,7 +33,10 @@ try{
  await page.goto(base,{waitUntil:'domcontentloaded'});await page.locator('.preset-choice-btn').nth(1).click();
  await page.waitForFunction(()=>PRESET_CURRENT==='3f'&&DATA.items.length>0);release();await page.waitForTimeout(800);
  assert.equal(await page.evaluate(()=>PRESET_CURRENT),'3f');await page.close();
- const two=await browser.newPage();await two.goto(base+'?preset=2f');await two.waitForFunction(()=>PRESET_CURRENT==='2f'&&DATA.items.length===176);
+ const two=await browser.newPage();await two.goto(base+'?preset=2f');// 件数は出荷する既定プランそのものと比べる(固定の数だと、プランを直すたびに落ちる)。
+ const shippedCount=await two.evaluate(async()=>(await (await fetch('assets/default_plan.json')).json()).items.length);
+ assert.ok(shippedCount>0);
+ await two.waitForFunction(n=>PRESET_CURRENT==='2f'&&DATA.items.length===n,shippedCount);
  assert.equal(await two.evaluate(()=>DATA.items.some(i=>i.id===1131)),false);await two.close();
  assert.deepEqual(errors,[]);console.log('Both presets selected correctly; no page errors');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
