@@ -29,3 +29,5 @@ jobs:
         run: python -m pip install Pillow numpy
       - name: 単体テスト
         run: sh tools/run_tests.sh
+      - name: 出荷する既定プランの検査
+        run: sh tools/default-plans/check.sh
