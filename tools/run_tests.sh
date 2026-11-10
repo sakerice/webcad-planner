@@ -35,3 +35,4 @@ for d in pv/tools/truth-render pv/tools/fidelity-qa; do
   fi
 done
 echo "exit=$fail"
+exit "$fail"
