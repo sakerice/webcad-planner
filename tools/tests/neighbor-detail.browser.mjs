@@ -1,7 +1,8 @@
 import fs from 'node:fs';
+import {shotDir} from './shot-dir.mjs';
 import assert from 'node:assert/strict';
 const pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');const browser=await (pw.chromium||pw.default.chromium).launch({args:['--use-angle=metal']});
-const dir='docs/quality-review/detail-loop/neighbor-detail-after';fs.mkdirSync(dir,{recursive:true});
+const dir=shotDir('detail-loop','neighbor-detail-after');
 try{
  const page=await browser.newPage();await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-sofa'));await page.evaluate(()=>init3D());
  const result=await page.evaluate(async()=>{

@@ -1,9 +1,9 @@
 // Visual evidence from the real app; run with PLAYWRIGHT_MODULE and APP_URL.
 const fs = require('node:fs');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const out = process.env.REVIEW_DIR || 'docs/quality-review/default-plans-2026-09';
-fs.mkdirSync(out,{recursive:true});
 (async()=>{
+ const {shotDir} = await import(require('node:url').pathToFileURL(require('node:path').join(__dirname,'shot-dir.mjs')).href);
+ const out = shotDir('default-plans-review');
  const browser=await chromium.launch({channel:'chrome',args:['--use-angle=metal']});
  const errors=[];
  try {

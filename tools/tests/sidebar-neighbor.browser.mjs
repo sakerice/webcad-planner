@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {shotDir} from './shot-dir.mjs';
 import fs from 'node:fs';
 // Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
 const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
@@ -25,7 +26,7 @@ try{
   await page.evaluate(()=>{document.getElementById('opening-window-model-tools').closest('.cat-body').classList.add('open');document.querySelector('#opening-window-model-tools .asset-grid').style.display='grid';});
   await page.locator('#opening-window-model-tools .asset-tile').first().scrollIntoViewIfNeeded();
   await page.waitForTimeout(350);
-  fs.mkdirSync('docs/quality-review/sidebar-neighbor',{recursive:true});await page.screenshot({path:`docs/quality-review/sidebar-neighbor/windows-${width}.png`});
+  await page.screenshot({path:`${shotDir('sidebar-neighbor')}/windows-${width}.png`});
   assert.deepEqual(errors,[]);await page.close();
  }
  console.log('PASS desktop/mobile: five unique loaded opening previews, credits outside settings, transparent glazing and recessed curtains, independent ghost materials.');

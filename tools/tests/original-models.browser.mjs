@@ -1,10 +1,11 @@
 import fs from 'node:fs';
+import {shotDir} from './shot-dir.mjs';
 import assert from 'node:assert/strict';
 // Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
 const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const chromium=_pw.chromium||(_pw.default&&_pw.default.chromium);
 const browser=await chromium.launch({args:['--use-angle=metal']});
-const dir='docs/quality-review/original-collection';fs.mkdirSync(dir,{recursive:true});
+const dir=shotDir('original-collection');
 try{
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-sofa'));await page.evaluate(()=>{const m=document.getElementById('preset-choice-modal');if(m)m.classList.remove('show');});await page.evaluate(()=>init3D());
