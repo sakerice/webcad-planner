@@ -1,6 +1,6 @@
 # デフォルト間取りの本番リリース
 
-- 2階建ては受領した plan (25) を内容変更なしで採用。受領原本は `user-plan-25.json`、再生成パッチは `tools/default_plan_2f_review_25.json`。
+- 2階建ては受領した plan (25) を内容変更なしで採用。受領原本は `user-plan-25.json`、再生成パッチは `tools/default-plans/default_plan_2f_review_25.json`。
 - 開始カードは「2階建て 3LDK・吹き抜けとテラス」に変更。「アイランドキッチン」「シンクアイランド」の説明を削除。現行プランから外観サムネイルを再撮影した。
 - 「白紙から始める」を追加。壁・部屋・アイテムが空の状態で開始し、遅延したプリセット読込を無効化。意図的に保存した白紙も復元する。
 - 保存済みプランの復元を優先する。旧デフォルトを開始候補から置き換えるが、ユーザーの保存データは削除しない。
@@ -28,7 +28,7 @@
 
 受領版に残っていた配置検査の指摘9件のうち、設計判断ではなく通り芯からのずれ
 だったものを直した。間取り（部屋の並び・家具・仕上げ）は変えていない。
-変更は `tools/default_plan_2f_review.py` の `apply_joint_fixes` にあり、
+変更は `tools/default-plans/default_plan_2f_review.py` の `apply_joint_fixes` にあり、
 生成スクリプトの最後で当たる。受領原本 `user-plan-25.json` は記録として
 そのまま残し、そこからの差が下記3か所だけであることをテストで押さえている。
 
@@ -49,7 +49,7 @@
 ## 作業三角形と収納率（リリース後）
 
 上記に続けて、間取りとして直せる2件も直した。どちらも
-`tools/default_plan_2f_review.py` に関数として置き、生成スクリプトの最後で当たる。
+`tools/default-plans/default_plan_2f_review.py` に関数として置き、生成スクリプトの最後で当たる。
 
 ### キッチンの作業三角形（指摘36）— `apply_kitchen_triangle`
 
@@ -94,7 +94,7 @@ IHカウンター(2560)はモデルの+x端に、シンク島(2100)は-x端に�
 
 上記のあと、2階建て・3階建てとも手直し版を受領して差し替えた。受領原本は
 `user-plan-26.json` / `user-plan-3f-23.json`、再生成パッチは
-`tools/default_plan_2f_review_26.json` / `tools/default_plan_3f_review_23.json`。
+`tools/default-plans/default_plan_2f_review_26.json` / `tools/default-plans/default_plan_3f_review_23.json`。
 検査結果は `plan26-lint.txt` / `plan3f-23-lint.txt`。
 
 こちらで変えたのは**電子レンジ1167をカタログ寸法(340×351)へ戻した1点だけ**。

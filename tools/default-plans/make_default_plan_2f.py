@@ -32,7 +32,7 @@ COL_SASH = "#1c1c1c"       # サッシ
 COL_DOOR = "#5C4230"       # 玄関ドア(ダークウォールナット)
 COL_FENCE = "#222222"      # 黒格子フェンス
 
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from plan_kit import Plan, load_catalog, wall_setting, finish_cascade, orient_catalog_furniture  # noqa: E402
 
@@ -530,7 +530,7 @@ from default_plan_2f_review import apply_review_26_joints
 apply_review_26_joints(plan)
 # 最新の受領版(review 27)。門柱・車・道路の位置。ここまでの生成結果を土台に
 # 載せるので、上の通り芯の戻しより後に置く(土台が変わると apply_patch_file が
-# 止まる)。差分は tools/make_review_patch.py で作る。
+# 止まる)。差分は tools/default-plans/make_review_patch.py で作る。
 apply_patch_file(plan, "default_plan_2f_review_27.json")
 review27 = json.loads(Path(__file__).with_name("default_plan_2f_review_27.json").read_text())
 plan.update(review27["metadata"])
@@ -550,6 +550,6 @@ from plan_kit import tidy_numbers
 plan["heightDefaults"], plan["floors"] = height_defaults((1, 2, 3))
 with open(out, "w", encoding="utf-8") as f:
     # 出荷するファイルは詰めて書く(配信量)。生成器の出力が出荷物そのものに
-    # なるので、`python3 tools/make_default_plan_2f.py && git diff --exit-code` で
+    # なるので、`python3 tools/default-plans/make_default_plan_2f.py && git diff --exit-code` で
     # 「生成器が出荷物を再現するか」を確かめられる。
     json.dump(tidy_numbers(plan), f, ensure_ascii=False, separators=(",", ":"))

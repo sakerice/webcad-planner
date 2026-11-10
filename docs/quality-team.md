@@ -12,7 +12,7 @@
 | 調査 | research-interior | インテリア(家具・スタイリング・生活感)の定石 |
 | 調査 | research-floorplan | 間取り・動線・寸法の定石 |
 | 調査 | research-color-material | 外装/内装のカラー・素材マネジメント |
-| 実装 | plan-implementer | tools/make_default_plan_2f.py と plan JSON の実装 |
+| 実装 | plan-implementer | tools/default-plans/make_default_plan_2f.py と plan JSON の実装 |
 | 評価 | review-interior-design | インテリアデザイン審査(暮らしの説得力) |
 | 評価 | review-space-design | 空間デザイン審査(3D目線での納まり・見えがかり) |
 | 評価 | review-architecture | 住宅設計審査(寸法・動線・法規感覚・整合) |
@@ -60,7 +60,7 @@
 
 - ラウンドの変更は1コミットにまとめ、レビューで重大指摘が出たら
   そのコミットを revert して再実装する(部分手直しで濁さない)
-- 生成物(assets/default_plan.json)は常に tools/make_default_plan_2f.py から
+- 生成物(assets/default_plan.json)は常に tools/default-plans/make_default_plan_2f.py から
   再生成できる状態を保つ(JSONへの手パッチ禁止)
 
 ## 機械検査 (tools/lint_plan.py) — 全43チェック
@@ -502,7 +502,7 @@ UIからは 部屋 → 天井 → 種類「吹き抜け」→ 抜き先の階、
     吹抜 5400-0-12  = 5388
 
   - `index.html` の `ceilingFinishElevationMm()` … 新規配置の既定値
-  - `tools/make_default_plan_2f.py` の `ceiling_elev()` … 既定プランの生成
+  - `tools/default-plans/make_default_plan_2f.py` の `ceiling_elev()` … 既定プランの生成
   - `tools/lint_plan.py` の `ceiling_finish_mm()` … 上2つの結果を突き合わせる
 
 **照明の elev は「取付面(=天井仕上げ面)」の高さ**であって器具の中心ではない。

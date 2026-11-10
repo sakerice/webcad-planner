@@ -25,9 +25,9 @@
 
 - `before.json`：前回の2階建てデフォルト。
 - `user.json`：受領した plan (23) の原本。
-- `tools/default_plan_2f_review_23.json`：原本との差分。元データ不一致時は適用を停止する。
-- `tools/default_plan_2f_review.py`：ユーザー編集を適用後、上記の物理的な納まりを修正する。
-- `tools/default_plan_site.py`：両プリセットの敷地と仕上げの整理。
+- `tools/default-plans/default_plan_2f_review_23.json`：原本との差分。元データ不一致時は適用を停止する。
+- `tools/default-plans/default_plan_2f_review.py`：ユーザー編集を適用後、上記の物理的な納まりを修正する。
+- `tools/default-plans/default_plan_site.py`：両プリセットの敷地と仕上げの整理。
 
 2階建ては178アイテム・34壁・23室。3階建ては敷地を統合したため172アイテム。新規外部モデルの導入はない。
 

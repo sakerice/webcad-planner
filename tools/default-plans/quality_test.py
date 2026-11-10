@@ -154,12 +154,12 @@ class StorageMeasurement(unittest.TestCase):
 
     def test_reviewed_deletions_survive_regeneration(self):
         import subprocess, tempfile
-        patch = json.loads((ROOT/'tools/default_plan_3f_user_review.json').read_text())
+        patch = json.loads((ROOT/'tools/default-plans/default_plan_3f_user_review.json').read_text())
         removed = {c['before']['id'] for c in patch['collections']['items'] if c['after'] is None}
         self.assertEqual(len(removed), 22)
         with tempfile.TemporaryDirectory() as d:
             out = Path(d)/'plan.json'
-            subprocess.run(['python3', str(ROOT/'tools/make_default_plan_3f.py'), str(out)], check=True, capture_output=True)
+            subprocess.run(['python3', str(ROOT/'tools/default-plans/make_default_plan_3f.py'), str(out)], check=True, capture_output=True)
             plan = json.loads(out.read_text())
             self.assertFalse(removed & {i['id'] for i in plan['items']})
             self.assertEqual(plan, json.loads((ROOT/'assets/default_plan_3f.json').read_text()))
@@ -168,7 +168,7 @@ class StorageMeasurement(unittest.TestCase):
         import subprocess, tempfile
         with tempfile.TemporaryDirectory() as d:
             out = Path(d)/'plan.json'
-            subprocess.run(['python3', str(ROOT/'tools/make_default_plan_2f.py'), str(out)], check=True)
+            subprocess.run(['python3', str(ROOT/'tools/default-plans/make_default_plan_2f.py'), str(out)], check=True)
             plan = json.loads(out.read_text())
         # The point of this one: running the build script must reproduce exactly
         # what ships, so that running it can never silently wipe a hand edit made
@@ -198,7 +198,7 @@ class StorageMeasurement(unittest.TestCase):
         import subprocess, tempfile
         with tempfile.TemporaryDirectory() as d:
             out = Path(d)/'plan.json'
-            subprocess.run(['python3', str(ROOT/'tools/make_default_plan_3f.py'), str(out)], check=True, capture_output=True)
+            subprocess.run(['python3', str(ROOT/'tools/default-plans/make_default_plan_3f.py'), str(out)], check=True, capture_output=True)
             plan = json.loads(out.read_text())
         # Same point as the two-storey one: the build script must reproduce what
         # ships, so running it cannot wipe a hand edit.
@@ -233,7 +233,7 @@ class StorageMeasurement(unittest.TestCase):
     def test_second_review_keeps_added_storage_and_removed_objects(self):
         plan = json.loads((ROOT/'assets/default_plan_3f.json').read_text())
         ids = {i['id'] for i in plan['items']}
-        patch = json.loads((ROOT/'tools/default_plan_3f_review_22.json').read_text())
+        patch = json.loads((ROOT/'tools/default-plans/default_plan_3f_review_22.json').read_text())
         removed = {c['before']['id'] for c in patch['collections']['items'] if c['after'] is None}
         added = {c['after']['id'] for c in patch['collections']['items'] if c['before'] is None}
         self.assertEqual(len(removed), 5)

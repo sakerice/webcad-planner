@@ -28,7 +28,7 @@ COL_DOOR = "#33363A"          # 玄関ドア(杉の帯に落とす黒い矩形)
 COL_FENCE = "#222222"
 COL_SKIRT = "#6B5A48"         # 巾木(木調) — 壁より濃く、床とつなぐ
 
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from plan_kit import Plan, load_catalog, wall_setting, finish_cascade, orient_catalog_furniture  # noqa: E402
 
@@ -521,7 +521,7 @@ for _collection, _order in _review23["order"].items():
     _by_id = {obj["id"]: obj for obj in plan[_collection]}
     plan[_collection] = [_by_id[_object_id] for _object_id in _order]
 # 最新の受領版(review 24)。水まわりの寄せ、外構の作り直し、木部テクスチャの
-# 指定。差分は tools/make_review_patch.py で作る。
+# 指定。差分は tools/default-plans/make_review_patch.py で作る。
 apply_patch_file(plan, "default_plan_3f_review_24.json")
 _review24 = _json.loads(_Path(__file__).with_name("default_plan_3f_review_24.json").read_text())
 plan.update(_review24["metadata"])
@@ -551,7 +551,7 @@ from plan_kit import tidy_numbers
 plan["heightDefaults"], plan["floors"] = height_defaults((1, 2, 3, 4))
 with open(out, "w", encoding="utf-8") as f:
     # 出荷するファイルは詰めて書く(配信量)。生成器の出力が出荷物そのものに
-    # なるので、`python3 tools/make_default_plan_3f.py && git diff --exit-code` で
+    # なるので、`python3 tools/default-plans/make_default_plan_3f.py && git diff --exit-code` で
     # 「生成器が出荷物を再現するか」を確かめられる。
     json.dump(tidy_numbers(plan), f, ensure_ascii=False, separators=(",", ":"))
 print("reviewed layout: %d items" % len(plan["items"]))

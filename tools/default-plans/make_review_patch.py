@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """アプリから書き出した手直し版を、生成器に載せる「受領版」の差分にする。
 
-    python3 tools/make_review_patch.py \
+    python3 tools/default-plans/make_review_patch.py \
         assets/default_plan.json ~/Downloads/plan_2.json \
-        tools/default_plan_2f_review_27.json
+        tools/default-plans/default_plan_2f_review_27.json
 
 ■ なぜ在るのか
   既定プランは生成器(make_default_plan_2f.py / _3f.py)が作る。ユーザーが
