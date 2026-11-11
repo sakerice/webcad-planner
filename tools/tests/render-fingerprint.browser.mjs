@@ -65,13 +65,19 @@ let browser, page;
 const errors = [];
 for (let attempt = 1; ; attempt++) {
   browser = await chromium.launch();
-  page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-  page.on('pageerror', e => errors.push(e.message));
-  await page.goto(process.env.APP_URL || 'http://localhost:8932/');
-  await page.waitForFunction(() => window.ST && window.DATA, null, { polling: 200, timeout: 60000 });
-  await page.waitForSelector('#app-loading', { state: 'hidden', timeout: 60000 });
-  // 取得に失敗して Web フォントが当たっていないときも、ここで落とす(基準と比べても意味が無い)。
-  await page.evaluate(() => document.fonts.ready);
+  try {
+    page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(process.env.APP_URL || 'http://localhost:8932/');
+    await page.waitForFunction(() => window.ST && window.DATA, null, { polling: 200, timeout: 60000 });
+    await page.waitForSelector('#app-loading', { state: 'hidden', timeout: 60000 });
+    // Web フォントの読み込みを待つ。送り幅が 0.5px の格子に乗っている(字形が異常な)起動だけ、ここで見つけて起動し直す。
+    // フォントが取れなかった起動はここでは見つからず、そのまま基準との比較へ進み、そこで落ちる。
+    await page.evaluate(() => document.fonts.ready);
+  } catch (e) {
+    await browser.close();
+    throw e;
+  }
   if (!(await page.evaluate(webFontLooksSnapped))) break;
   await browser.close();
   assert.ok(attempt < 6, 'Web フォントの字形が 6 回起動しても正常にならない(送り幅が 0.5px 格子のまま)。ネットワークかブラウザを確かめる');

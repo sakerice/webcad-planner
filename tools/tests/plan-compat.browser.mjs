@@ -139,6 +139,41 @@ async function waitRestored(page) {
   }
 }
 
+// 保存の復元を、既定プランの取得が終わるまで遅らせる。
+// 今の本番では、起動時の復元が壁の高さ(WALL_H)を引き継ぐ先は、既定プランの取得と復元の
+// どちらが先に終わるかで変わる(取得が先なら 2688、復元が先なら 2400)。見本の正解は
+// 取得が先の場合を記録しているので、順番を固定する。復元は起動処理の最初の
+// indexedDB.open(StorageAdapter.hasData)から始まるので、そこだけを保留する。
+// 保留するのは読み込みごとの最初の1回だけ。保存し直しなど、あとの open は止めない。
+// 製品のコードには触らない。保留は、既定プランの壁が入る(loadPreset の取得後の処理が
+// 終わる)か、15秒たつまで。
+async function holdRestoreUntilPresetFetched(page) {
+  await page.addInitScript(() => {
+    const orig = IDBFactory.prototype.open;
+    let held = false;
+    IDBFactory.prototype.open = function (...args) {
+      if (held) return orig.apply(this, args);
+      held = true;
+      const self = this;
+      let real = null;
+      const fake = { onsuccess: null, onerror: null, onupgradeneeded: null, onblocked: null };
+      Object.defineProperty(fake, 'result', { get: () => (real ? real.result : undefined) });
+      Object.defineProperty(fake, 'error', { get: () => (real ? real.error : null) });
+      const started = Date.now();
+      const go = () => {
+        const ready = window.DATA && DATA.walls && DATA.walls.length > 4 && window._defaultPlanPending === true;
+        if (!ready && Date.now() - started < 15000) { setTimeout(go, 20); return; }
+        real = orig.apply(self, args);
+        ['onsuccess', 'onerror', 'onupgradeneeded', 'onblocked'].forEach((k) => {
+          real[k] = (e) => { if (fake[k]) fake[k].call(fake, e); };
+        });
+      };
+      setTimeout(go, 0);
+      return fake;
+    };
+  });
+}
+
 async function seed(page, route, raw) {
   await page.evaluate(({ route, raw }) => new Promise((resolve, reject) => {
     if (route === 'localStorage') { localStorage.setItem('webcad-plan-v1', raw); resolve(); return; }
@@ -235,6 +270,7 @@ async function openThrough(browser, name, route) {
     await page.goto(APP);
     await waitApp(page);
     await seed(page, route === 'localStorage' ? 'localStorage' : 'idb', raw);
+    await holdRestoreUntilPresetFetched(page);
     await page.reload();
     await waitApp(page);
     let fp = await waitRestored(page);
@@ -254,6 +290,11 @@ async function openThrough(browser, name, route) {
 
 function describeDiff(want, got) {
   const out = [];
+  // 実際の指紋にあって正解に無い項目も差とする（指紋に項目を足して正解を取り直し忘れたとき、比べられないまま通さない）
+  for (const key of Object.keys(got)) {
+    // 値が undefined の項目は、正解(JSON)に書くと消えるので、無いものとして扱う
+    if (!(key in want) && got[key] !== undefined) out.push(`${key}: 正解に無い項目 実際 ${JSON.stringify(got[key])}`);
+  }
   for (const key of Object.keys(want)) {
     const a = want[key], b = got[key];
     if (Array.isArray(a) && Array.isArray(b)) {

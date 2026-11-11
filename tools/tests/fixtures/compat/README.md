@@ -43,6 +43,12 @@
 `shared-patch` は `fields`（`heightDefaults`、`floors` など）を渡さない。そのため `idb` などと違い、階ごとの高さ設定が付かず `floors` も空で開く。
 これは今の `applySharedPatch` の動きの記録で、正しい開き方かどうかを決めたものではない。
 
+## 起動時の復元の高さは取得の順番に依存する
+
+`idb`・`localStorage`・`idb-resave` の3経路の壁の高さ（`WALL_H`）は、今の本番では既定プランの取得と復元の順番に依存する。
+検査は取得が先の場合（`legacy-no-heights` で 2688）を記録している。復元が先に終わると同じ保存が 2400 で開く。
+そのため検査は、起動処理の最初の `indexedDB.open` を、既定プランの壁が入るまで保留して順番をそろえている（`holdRestoreUntilPresetFetched`）。
+
 ## 指紋に入れているもの
 
 壁・部屋・家具の座標と寸法、`heightDefaults`、選択画面、天井付け照明の取付面に付いたか、に加えて、開くときの補完が書き換えた結果を値のまま入れている:
