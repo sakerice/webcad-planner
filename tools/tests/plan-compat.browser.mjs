@@ -27,7 +27,11 @@ const GOLDEN = join(DIR, 'golden.json');
 const APP = process.env.APP_URL || 'http://localhost:8932/';
 const UPDATE = process.env.UPDATE_GOLDEN === '1';
 const FIXTURES = ['saved-2f', 'saved-3f', 'legacy-quirks'];
-const ROUTES = ['idb', 'localStorage', 'json', 'idb-resave'];
+const ROUTES = ['idb', 'localStorage', 'json', 'idb-resave', 'library', 'shared-patch'];
+// 見本の中身に左右されない経路。起動時の選択で出荷物の既定プランを開く。
+// 指紋は fixture でなく出荷物(assets/default_plan*.json)の中身になるので、
+// golden.json の 'default-plan' に「今の main でそう開いた」記録として残す。
+const PRESET_ROUTES = ['preset-2f', 'preset-3f'];
 const STARTUP_PROMPT = /前回保存したプランがあります/;
 
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -98,6 +102,32 @@ async function seed(page, route, raw) {
   }), { route, raw });
 }
 
+// 起動時の間取り選択の画面で、既定プランを選んで開く（choosePresetPlan を本物のボタンから通す）
+async function openPresetThrough(browser, route) {
+  const key = route.replace('preset-', '');
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await context.newPage();
+  const dialogs = [], errors = [];
+  page.on('dialog', (d) => { dialogs.push(d.message()); d.accept(); });
+  page.on('pageerror', (e) => errors.push(e.message));
+  try {
+    await page.goto(APP);
+    await waitApp(page);
+    await page.waitForSelector('#preset-choice-modal.show', { timeout: 20000 });
+    await page.click(`.preset-choice-btn[onclick*="'${key}'"]`);
+    let fp = null;
+    try {
+      await page.waitForFunction((k) => window.DATA && DATA.walls && DATA.walls.length > 4 && window.PRESET_CURRENT === k,
+        key, { timeout: 20000 });
+      await page.waitForTimeout(500);
+      fp = await page.evaluate(fingerprint);
+    } catch (_) { fp = null; }
+    return { fp, dialogs, errors };
+  } finally {
+    await context.close();
+  }
+}
+
 async function openThrough(browser, name, route) {
   const raw = readFileSync(join(DIR, name + '.json'), 'utf8');
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -115,6 +145,39 @@ async function openThrough(browser, name, route) {
       await page.waitForTimeout(500);
       const fp = await page.evaluate(() => (window.DATA !== window.__beforeImport ? null : 'unchanged'));
       return { fp: fp === 'unchanged' ? null : await page.evaluate(fingerprint), dialogs, errors };
+    }
+    if (route === 'library') {
+      // PlanLibrary.put で一覧に保存し、開き直した画面で一覧(openList)の「開く」を押す
+      await page.goto(APP + '?preset=2f');
+      await waitApp(page);
+      await page.evaluate((raw) => PlanLibrary.put({ id: null, name: '互換テスト', plan: JSON.parse(raw), thumb: '' }), raw);
+      await page.reload();
+      await waitApp(page);
+      await page.waitForFunction(() => window.DATA && DATA.walls && DATA.walls.length > 4, null, { timeout: 20000 });
+      await page.waitForTimeout(500);
+      await page.evaluate(() => PlanLibrary.openList());
+      await page.waitForSelector('.plan-library-row', { timeout: 10000 });
+      await page.evaluate(() => window.__beforeLibrary = DATA);
+      await page.click('.plan-library-row:has(.plan-library-name:text-is("互換テスト")) .plan-library-btn.primary');
+      await page.waitForFunction(() => window.DATA !== window.__beforeLibrary, null, { timeout: 20000 }).catch(() => {});
+      await page.waitForTimeout(500);
+      const opened = await page.evaluate(() => window.DATA !== window.__beforeLibrary);
+      return { fp: opened ? await page.evaluate(fingerprint) : null, dialogs, errors };
+    }
+    if (route === 'shared-patch') {
+      // 空のプランに、見本の壁・家具・部屋を丸ごと upserts にした patch を applySharedPatch で当てる
+      await page.goto(APP + '?preset=blank');
+      await waitApp(page);
+      await page.waitForFunction(() => window._defaultPlanPending === false, null, { timeout: 20000 });
+      const applied = await page.evaluate((raw) => {
+        const plan = JSON.parse(raw);
+        const patch = { collections: {}, fields: {} };
+        ['walls', 'items', 'rooms'].forEach((n) => { patch.collections[n] = { upserts: plan[n] || [], removes: [] }; });
+        applySharedPatch(patch, false);
+        return DATA.walls.length;
+      }, raw);
+      await page.waitForTimeout(800);
+      return { fp: applied > 0 ? await page.evaluate(fingerprint) : null, dialogs, errors };
     }
     await page.goto(APP);
     await waitApp(page);
@@ -160,7 +223,10 @@ try {
       const { fp, dialogs, errors } = await openThrough(browser, name, route);
       const problems = [];
       if (!fp) problems.push('開けなかった（既定の間取りのまま）');
-      if (route !== 'json') {
+      if (route === 'library' || route === 'shared-patch') {
+        // 起動時の確認は出ない経路。確認・警告が出たら、それ自体を問題にする
+        if (dialogs.length) problems.push('確認・警告が出た: ' + dialogs.join(' / '));
+      } else if (route !== 'json') {
         const prompts = dialogs.filter((m) => STARTUP_PROMPT.test(m));
         if (prompts.length !== 1) problems.push(`起動時の確認「前回保存したプランがあります」が ${prompts.length} 回`);
         const others = dialogs.filter((m) => !STARTUP_PROMPT.test(m));
@@ -184,6 +250,27 @@ try {
       else console.log(`ok  ${label}`);
     }
   }
+  for (const route of PRESET_ROUTES) {
+    const label = `出荷物の既定プランを ${route} で`;
+    const { fp, dialogs, errors } = await openPresetThrough(browser, route);
+    const problems = [];
+    if (!fp) problems.push('開けなかった');
+    if (dialogs.length) problems.push('確認・警告が出た: ' + dialogs.join(' / '));
+    if (errors.length) problems.push('ページで例外: ' + errors.join(' / '));
+    if (UPDATE) {
+      if (problems.length) throw new Error(`正解を作れない: ${label}: ${problems.join(' / ')}`);
+      (golden['default-plan'] ||= {})[route] = fp;
+      continue;
+    }
+    if (fp) {
+      const want = golden['default-plan'] && golden['default-plan'][route];
+      assert.ok(want, `golden.json に ${label} の正解が無い`);
+      const diff = describeDiff(want, fp);
+      if (diff) problems.push('開いた中身が本番と違う:\n    ' + diff);
+    }
+    if (problems.length) failures.push(`${label}: ${problems.join('\n  ')}`);
+    else console.log(`ok  ${label}`);
+  }
 } finally {
   await browser.close();
 }
@@ -194,5 +281,5 @@ if (UPDATE) {
 } else {
   assert.ok(existsSync(GOLDEN));
   assert.equal(failures.length, 0, '\n' + failures.join('\n'));
-  console.log('既存の保存データ: 3種類 × 4通りの開き方で、本番と同じ中身に開けた');
+  console.log('既存の保存データ: 3種類 × 6通りの開き方と、既定プラン2通りで、本番と同じ中身に開けた');
 }

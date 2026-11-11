@@ -8,7 +8,7 @@
 | `saved-2f.json` | 本番の画面で既定の2階建てを開き、部屋名と家具1点に手を入れて「保存」したもの（IndexedDB に入った文字列そのまま） |
 | `saved-3f.json` | 同じく3階建て |
 | `legacy-quirks.json` | `saved-2f.json` に、長く使われてきた保存に混ざっている古い値を入れたもの: 文字列の壁厚、長さ0の壁、廃止された `tv`、旧カタログの扉、`id` の無い物 |
-| `golden.json` | 本番（main d41e98db）で上の3つを4通り（IndexedDB・localStorage・JSON読込・保存し直し）に開いたときの指紋。テストはこれと突き合わせる |
+| `golden.json` | 上の3つを6通りに開いたときの指紋と、出荷物の既定プランを2通りに開いたときの指紋。テストはこれと突き合わせる。IndexedDB・localStorage・JSON読込・保存し直しの4通りは本番（main d41e98db）で記録した。残りの経路（下の表）は、後述の改修の前の main で記録した |
 | `make_fixtures.mjs` | 見本の作り方。普段は流さない |
 
 ## 更新のしかた
@@ -20,3 +20,23 @@
 
 意図をコミットメッセージに書く。「テストが落ちたから合わせた」で更新してはいけない —
 利用者のプランを開けなくした変更を、検査ごと通すことになる。
+
+## 開き方の経路
+
+| 経路 | 通す製品の関数 |
+|---|---|
+| `idb` | 起動時の `checkStorageOnInit` → `loadPlanFromStorage`（IndexedDB の保存） |
+| `localStorage` | 同上（localStorage の保存） |
+| `json` | 「読込」の `#import-file` |
+| `idb-resave` | `savePlanToStorage` で保存し直してから、もう一度 `idb` で開く |
+| `library` | `PlanLibrary.put` で保存一覧に入れ、`PlanLibrary.openList` の「開く」ボタン（`loadIntoEditor`）で開く |
+| `shared-patch` | 空のプラン（`?preset=blank`）に、見本の壁・家具・部屋を丸ごと `upserts` にした patch を `applySharedPatch` で当てる。patch の `fields` は付けない |
+| `preset-2f` / `preset-3f` | 起動時の間取り選択の画面でボタンを押す（`choosePresetPlan` → `loadPreset`） |
+
+`preset-2f` と `preset-3f` は見本を使わない。開くのは出荷物（`assets/default_plan.json`、`assets/default_plan_3f.json`）なので、
+指紋は golden.json の `default-plan` に「改修前の main でそう開いた」記録として入っている。
+**既定プランの中身を意図して直したときは、この2つの指紋も変わる。** そのときは更新してよいが、
+直した内容と指紋の変化が合っているかを見てから更新する。
+
+`shared-patch` は `fields`（`heightDefaults`、`floors` など）を渡さない。そのため `idb` などと違い、階ごとの高さ設定が付かず `floors` も空で開く。
+これは今の `applySharedPatch` の動きの記録で、正しい開き方かどうかを決めたものではない。
