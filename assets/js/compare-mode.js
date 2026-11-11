@@ -59,12 +59,6 @@ var CompareMode = (function(){
     ensureHeightDefaults();
     if(typeof syncHeightDefaultsUI==='function') syncHeightDefaultsUI();
   }
-  // 読み込んだプランを、ファイルの読込と同じ手順で整える（いま入れ替えてある側に対して呼ぶ）
-  function normalizeLoadedPlan(){
-    resetHeightGlobalsForPlanLoad(); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings();
-    ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults();
-    syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState();
-  }
   function syncChrome(){
     var sel = document.getElementById('floor-sel'); if(sel) sel.value = String(ST.floor);
     var stf = document.getElementById('st-floor'); if(stf) stf.textContent = 'フロア:'+ST.floor+'F';
@@ -318,6 +312,7 @@ var CompareMode = (function(){
       needsBuild:true,
       v:Object.assign({}, panes[0].v, {selected:null, multiSelected:[], selectAll:false, drawing:false, drawPts:[]})};
     on = true; active = 0;
+    // 読み込んだプランを、ファイルの読込と同じ補完で整える（いま入れ替えてある右側に対して呼ぶ）
     withPane(1, function(){ normalizeLoadedPlan(); if(api.syncView){ ST.zoom = panes[0].v.zoom; ST.panX = panes[0].v.panX; ST.panY = panes[0].v.panY; ST.floor = panes[0].v.floor; } });
     syncPlanGlobals();
     window.addEventListener('resize', onResize);

@@ -213,20 +213,18 @@ function loadPreset(attempt,variant){
     DATA.heightDefaults=plan.heightDefaults||{};
     // 方位を持たないプランは 0 度。持っていないものを 0 で埋めない（保存内容が太る）。
     DATA.northDeg=plan.northDeg;
-    syncNorthFromPlan();
-    ensureFloorMetadata();
-    ensureHeightDefaults();
-    syncHeightDefaultsUI();
     if(plan.exteriorDetail) DATA.exteriorDetail=plan.exteriorDetail;
     var maxId=0;
     DATA.items.concat(DATA.walls).forEach(function(o){var n=Number(o.id);if(isFinite(n)&&n>maxId)maxId=n;});
     nextId=Math.max(nextId||1,Math.floor(maxId)+1);
     PRESET_CURRENT=variant;
     clearEditHistory();
-    normalizeLegacyFurnitureItems();
     // 既定間取りが視点(viewState)を持っていればそれを復元する(見せたい構図で
-    // 開くため)。持っていなければ main と同じく間取り全体に合わせて開く
-    if(typeof restoreViewState==='function'&&DATA.viewState){ restoreViewState(); draw2d(); }
+    // 開くため)。持っていなければ main と同じく間取り全体に合わせて開く。
+    // 壁の高さの全体の値(WALL_H)は、今までどおりここでは既定へ戻さない(resetHeights:false)
+    var hasView=!!DATA.viewState;
+    normalizeLoadedPlan({resetHeights:false, restoreView:hasView});
+    if(hasView) draw2d();
     else resetView();
     if(ren) rebuild3D();
   }).catch(function(e){

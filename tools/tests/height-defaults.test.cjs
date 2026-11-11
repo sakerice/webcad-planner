@@ -170,9 +170,12 @@ test('既定値はプランに保存される（保存して開き直すと壁�
   assert.match(html, /function ensureHeightDefaults\(/);
   const body = topLevelFunction('ensureHeightDefaults');
   assert.match(body, /WALL_H=clampWallHeightMm\(hd\.wallHeight\)/);
-  // 読み込み経路で必ず呼ばれる
+  // 読み込み経路で必ず呼ばれる。開くときの補完は normalizeLoadedPlan にまとめてあり、
+  // その本体が ensureHeightDefaults を(options に関係なく)必ず呼ぶ。
+  const normalize = topLevelFunction('normalizeLoadedPlan');
+  assert.match(normalize, /\n  ensureHeightDefaults\(\);/);
   const load = html.slice(html.indexOf('async function loadPlanFromStorage('));
-  assert.match(load.slice(0, 2000), /ensureHeightDefaults\(\);/);
+  assert.match(load.slice(0, 2000), /normalizeLoadedPlan\(/);
 });
 
 // New height semantics are opt-in by data version; legacy cases above remain intact.
@@ -234,9 +237,14 @@ test('壁の高さを持たないプランを読み込むと、既定に戻る�
 test('プランを差し替える経路は、必ず高さの既定を戻してからそろえる', () => {
   // 読み込みの手順は3か所(ファイル取り込み・白紙・共同編集の同期)にある。
   // 1か所でも抜けると「エラーは出ないのに家の高さだけ違う」壊れ方をする。
+  // ファイル取り込みは開くときの補完 normalizeLoadedPlan を既定のまま(resetHeights を切らずに)呼ぶ。
+  // その本体は、高さの既定を戻してから(resetHeightGlobalsForPlanLoad)、そろえる(ensureHeightDefaults)。
+  const normalize = topLevelFunction('normalizeLoadedPlan');
+  const resetAt = normalize.indexOf('resetHeightGlobalsForPlanLoad()'), ensureAt = normalize.indexOf('ensureHeightDefaults()');
+  assert.ok(resetAt >= 0 && ensureAt > resetAt, 'normalizeLoadedPlan が高さの既定を戻してからそろえていない');
   const doImport = html.slice(html.indexOf('function doImport('), html.indexOf('function doImport(') + 1600);
-  assert.match(doImport, /resetHeightGlobalsForPlanLoad\(\)/);
-  assert.match(doImport, /ensureHeightDefaults\(\)/);
+  assert.match(doImport, /normalizeLoadedPlan\(\)/);
+  assert.doesNotMatch(doImport, /resetHeights\s*:\s*false/);
   const blank = html.slice(html.indexOf('function chooseBlankPlan('), html.indexOf('function chooseBlankPlan(') + 1200);
   assert.match(blank, /resetHeightGlobalsForPlanLoad\(\)/);
   assert.match(blank, /ensureHeightDefaults\(\)/);
