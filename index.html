@@ -19825,8 +19825,11 @@ async function loadPlanFromStorage(){
   _defaultPlanPending=false;
   DATA=d;
   try{
-    // 方位の写し・id・外壁/内壁/屋根・階・高さの既定・古い家具・視点をまとめて整える
-    normalizeLoadedPlan();
+    // 方位の写し・id・外壁/内壁/屋根・階・高さの既定・古い家具・視点をまとめて整える。
+    // 壁の高さの全体の値(WALL_H)は、今の本番どおり既定へ戻さない(resetHeights:false)。
+    // 戻すと、高さの既定を持たない古い保存が、今と違う高さ(2400)で開く
+    // (互換テストの legacy-no-heights。今は先に当たっている既定プランの高さを引き継ぐ)。
+    normalizeLoadedPlan({resetHeights:false});
   }catch(e){
     // 復元途中で失敗したら空画面のまま止めず、デフォルトプランに復帰する
     console.error('[WebCAD] saved plan restore failed:', e);

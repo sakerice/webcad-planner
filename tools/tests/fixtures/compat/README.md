@@ -8,7 +8,8 @@
 | `saved-2f.json` | 本番の画面で既定の2階建てを開き、部屋名と家具1点に手を入れて「保存」したもの（IndexedDB に入った文字列そのまま） |
 | `saved-3f.json` | 同じく3階建て |
 | `legacy-quirks.json` | `saved-2f.json` に、長く使われてきた保存に混ざっている古い値を入れたもの: 文字列の壁厚、長さ0の壁、廃止された `tv`、旧カタログの扉、`id` の無い物 |
-| `golden.json` | 上の3つを6通りに開いたときの指紋と、出荷物の既定プランを2通りに開いたときの指紋。テストはこれと突き合わせる。IndexedDB・localStorage・JSON読込・保存し直しの4通りは本番（main d41e98db）で記録した。残りの経路（下の表）は、後述の改修の前の main で記録した |
+| `legacy-no-heights.json` | `saved-2f.json` から `heightDefaults`・`floors`・各壁の `wallHeight` を消したもの。高さの既定を保存するようになる前の古い保存の代わり。開くときに壁の高さの全体の値（`WALL_H`）を既定へ戻すか、先に開いていたプランから引き継ぐかで建つ高さが変わるので、その扱いが今と同じかを見る（2026-11-11 追加。他の3つが全部 `wallHeight:2688` を持っていたため、この差を見落とした）。`ONLY_DERIVED=1 node make_fixtures.mjs` で `saved-2f.json` から作る |
+| `golden.json` | 上の3つを6通りに開いたときの指紋と、出荷物の既定プランを2通りに開いたときの指紋。テストはこれと突き合わせる。IndexedDB・localStorage・JSON読込・保存し直しの4通りは本番（main d41e98db）で記録した。残りの経路（下の表）は、後述の改修の前の main で記録した。`legacy-no-heights` の7通りは、開く経路を `normalizeLoadedPlan` にまとめる前のコード（ef9f8fd7）で記録した |
 | `make_fixtures.mjs` | 見本の作り方。普段は流さない |
 
 ## 更新のしかた

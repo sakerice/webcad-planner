@@ -26,7 +26,7 @@ const DIR = join(HERE, 'fixtures', 'compat');
 const GOLDEN = join(DIR, 'golden.json');
 const APP = process.env.APP_URL || 'http://localhost:8932/';
 const UPDATE = process.env.UPDATE_GOLDEN === '1';
-const FIXTURES = ['saved-2f', 'saved-3f', 'legacy-quirks'];
+const FIXTURES = ['saved-2f', 'saved-3f', 'legacy-quirks', 'legacy-no-heights'];
 const ROUTES = ['idb', 'localStorage', 'json', 'idb-resave', 'library', 'shared-patch', 'shared-patch-fields'];
 // 見本の中身に左右されない経路。起動時の選択で出荷物の既定プランを開く。
 // 指紋は fixture でなく出荷物(assets/default_plan*.json)の中身になるので、
@@ -334,5 +334,5 @@ if (UPDATE) {
 } else {
   assert.ok(existsSync(GOLDEN));
   assert.equal(failures.length, 0, '\n' + failures.join('\n'));
-  console.log('既存の保存データ: 3種類 × 7通りの開き方と、既定プラン2通りで、本番と同じ中身に開けた');
+  console.log('既存の保存データ: ' + FIXTURES.length + '種類 × 7通りの開き方と、既定プラン2通りで、本番と同じ中身に開けた');
 }
