@@ -27,7 +27,7 @@ const GOLDEN = join(DIR, 'golden.json');
 const APP = process.env.APP_URL || 'http://localhost:8932/';
 const UPDATE = process.env.UPDATE_GOLDEN === '1';
 const FIXTURES = ['saved-2f', 'saved-3f', 'legacy-quirks'];
-const ROUTES = ['idb', 'localStorage', 'json', 'idb-resave', 'library', 'shared-patch'];
+const ROUTES = ['idb', 'localStorage', 'json', 'idb-resave', 'library', 'shared-patch', 'shared-patch-fields'];
 // 見本の中身に左右されない経路。起動時の選択で出荷物の既定プランを開く。
 // 指紋は fixture でなく出荷物(assets/default_plan*.json)の中身になるので、
 // golden.json の 'default-plan' に「今の main でそう開いた」記録として残す。
@@ -58,6 +58,55 @@ function fingerprint() {
     }
     return r(i.elev);
   };
+  // 補完が書き換える先を、値のまま見る。
+  function completionFingerprint() {
+    const r = (v) => Math.round(Number(v) || 0);
+    // キーの並びに依存しない文字列にする（経路ごとに作られる順が違っても、中身が同じなら同じ）
+    const stable = (v) => JSON.stringify(v, (k, x) => {
+      if (k === '_texObj') return undefined;
+      if (x && typeof x === 'object' && !Array.isArray(x)) return Object.keys(x).sort().reduce((o, key) => { o[key] = x[key]; return o; }, {});
+      return x;
+    });
+    const hash = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); };
+    const pick = (o, keys) => keys.map((k) => (o[k] === undefined ? '-' : (typeof o[k] === 'number' ? Math.round(o[k] * 100) / 100 : stable(o[k])))).join('|');
+    const sorted = (arr, f) => arr.map(f).sort();
+    const idCheck = (arr) => {
+      const seen = new Set(); let missing = 0, dup = 0;
+      arr.forEach((o) => { if (o.id === undefined || o.id === null || o.id === '') missing++; else if (seen.has(String(o.id))) dup++; else seen.add(String(o.id)); });
+      return { missing, dup };
+    };
+    const cam = (c) => (c ? [c.x, c.y, c.z].map((n) => Math.round(n * 100) / 100) : null);
+    return {
+      // 外壁・内壁・屋根・外構の設定（ensureExteriorWallSettings ほか）
+      exteriorWallSettings: stable(DATA.exteriorWallSettings),
+      interiorWallSettings: stable(DATA.interiorWallSettings),
+      roofAppearance: stable(DATA.roofAppearance),
+      exteriorDetail: stable(DATA.exteriorDetail),
+      // 階のメタデータの値と、階ごとの高さ設定（ensureFloorMetadata / ensureHeightDefaults）
+      floorMetadataValues: stable(DATA.floorMetadata),
+      heightFloors: stable(DATA.floors),
+      wallHeightGlobal: r(WALL_H),
+      // 壁・部屋・家具が補完で受け取る値
+      wallFields: sorted(DATA.walls, (w) => [w.floor || 1, r(w.x1), r(w.y1), r(w.x2), r(w.y2), pick(w, ['id', 'wallHeight', 'color', 'texture', 'wallBand', 'wallStyle', 'wallTopShape', 'wallTopSide'])].join(',')),
+      roomFields: sorted(DATA.rooms, (m) => [m.floor || 1, m.n || '', pick(m, ['id', 'floorRaiseMm', 'ceilingHeight', 'ceilH'])].join(',')),
+      itemFields: sorted(DATA.items, (i) => [i.floor || 1, i.type, r(i.x), r(i.y), pick(i, ['id', 'fmpId', 'openingModel', 'doorHeight', 'doorOpenState', 'windowHeight', 'windowSill', 'color', 'colorCustom', 'modelFacingVersion', 'neighborFacingVersion', 'texture'])].join(',')),
+      // 全フィールドを見る網。上で拾えない書き換えがあっても、これが変わる
+      wallsHash: hash(sorted(DATA.walls, stable).join('\n')),
+      roomsHash: hash(sorted(DATA.rooms, stable).join('\n')),
+      itemsHash: hash(sorted(DATA.items, stable).join('\n')),
+      // id が全部に振られているか・重複が無いか、次に振る番号（ensureObjectIds）
+      ids: { walls: idCheck(DATA.walls), items: idCheck(DATA.items), rooms: idCheck(DATA.rooms) },
+      nextId: typeof nextId === 'number' ? nextId : null,
+      // 方位（syncNorthFromPlan）
+      northDeg: DATA.northDeg === undefined ? null : DATA.northDeg,
+      northDegLight: (typeof LIGHT_SETTINGS !== 'undefined' && LIGHT_SETTINGS) ? LIGHT_SETTINGS.northDeg : null,
+      // 視点（restoreViewState）。保存された値、取り置きの値、開いた直後の2D・3Dの実際の視点
+      viewState: stable(DATA.viewState === undefined ? null : DATA.viewState),
+      camStash: stable(ST._camStash === undefined ? null : ST._camStash),
+      view2d: [Math.round(ST.zoom * 1000) / 1000, r(ST.panX), r(ST.panY)],
+      camera: (typeof camExt !== 'undefined' && camExt && typeof orbit !== 'undefined' && orbit) ? { pos: cam(camExt.position), target: cam(orbit.target) } : null,
+    };
+  }
   return {
     walls: DATA.walls.map((w) => [w.floor || 1, r(w.x1), r(w.y1), r(w.x2), r(w.y2), r(w.thick)].join(',')).sort(),
     rooms: DATA.rooms.map((m) => [m.floor || 1, m.n || '', r(m.x), r(m.y), r(m.w), r(m.d), (m.pts || []).length].join(',')).sort(),
@@ -66,6 +115,9 @@ function fingerprint() {
     floors: Object.keys(DATA.floorMetadata || {}).sort(),
     // 開いたあとに間取りの選択画面が残っていないこと（重なって出る不具合の検出）
     presetChoiceShown: !!(modal && modal.classList.contains('show')),
+    // ここから下は、開くときの補完(ensure*・normalizeLegacyFurnitureItems・syncNorthFromPlan・
+    // restoreViewState)が書き換えた結果そのもの。上の項目は変えず、足すだけにしてある。
+    ...completionFingerprint(),
   };
 }
 
@@ -164,18 +216,19 @@ async function openThrough(browser, name, route) {
       const opened = await page.evaluate(() => window.DATA !== window.__beforeLibrary);
       return { fp: opened ? await page.evaluate(fingerprint) : null, dialogs, errors };
     }
-    if (route === 'shared-patch') {
+    if (route === 'shared-patch' || route === 'shared-patch-fields') {
       // 空のプランに、見本の壁・家具・部屋を丸ごと upserts にした patch を applySharedPatch で当てる
       await page.goto(APP + '?preset=blank');
       await waitApp(page);
       await page.waitForFunction(() => window._defaultPlanPending === false, null, { timeout: 20000 });
-      const applied = await page.evaluate((raw) => {
+      const applied = await page.evaluate(({ raw, withFields }) => {
         const plan = JSON.parse(raw);
-        const patch = { collections: {}, fields: {} };
-        ['walls', 'items', 'rooms'].forEach((n) => { patch.collections[n] = { upserts: plan[n] || [], removes: [] }; });
+        // shared-patch-fields: 送信側の buildSharedPatch がそのまま作る patch（fields は SHARED_FIELDS の全部）
+        const patch = withFields ? buildSharedPatch(plan, null) : { collections: {}, fields: {} };
+        if (!withFields) ['walls', 'items', 'rooms'].forEach((n) => { patch.collections[n] = { upserts: plan[n] || [], removes: [] }; });
         applySharedPatch(patch, false);
         return DATA.walls.length;
-      }, raw);
+      }, { raw, withFields: route === 'shared-patch-fields' });
       await page.waitForTimeout(800);
       return { fp: applied > 0 ? await page.evaluate(fingerprint) : null, dialogs, errors };
     }
@@ -223,7 +276,7 @@ try {
       const { fp, dialogs, errors } = await openThrough(browser, name, route);
       const problems = [];
       if (!fp) problems.push('開けなかった（既定の間取りのまま）');
-      if (route === 'library' || route === 'shared-patch') {
+      if (route === 'library' || route === 'shared-patch' || route === 'shared-patch-fields') {
         // 起動時の確認は出ない経路。確認・警告が出たら、それ自体を問題にする
         if (dialogs.length) problems.push('確認・警告が出た: ' + dialogs.join(' / '));
       } else if (route !== 'json') {
@@ -281,5 +334,5 @@ if (UPDATE) {
 } else {
   assert.ok(existsSync(GOLDEN));
   assert.equal(failures.length, 0, '\n' + failures.join('\n'));
-  console.log('既存の保存データ: 3種類 × 6通りの開き方と、既定プラン2通りで、本番と同じ中身に開けた');
+  console.log('既存の保存データ: 3種類 × 7通りの開き方と、既定プラン2通りで、本番と同じ中身に開けた');
 }

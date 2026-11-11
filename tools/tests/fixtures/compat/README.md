@@ -31,6 +31,7 @@
 | `idb-resave` | `savePlanToStorage` で保存し直してから、もう一度 `idb` で開く |
 | `library` | `PlanLibrary.put` で保存一覧に入れ、`PlanLibrary.openList` の「開く」ボタン（`loadIntoEditor`）で開く |
 | `shared-patch` | 空のプラン（`?preset=blank`）に、見本の壁・家具・部屋を丸ごと `upserts` にした patch を `applySharedPatch` で当てる。patch の `fields` は付けない |
+| `shared-patch-fields` | 上と同じ空のプランに、送信側の `buildSharedPatch(プラン, null)` がそのまま作る patch（`fields` に `SHARED_FIELDS` の全部が入る）を当てる |
 | `preset-2f` / `preset-3f` | 起動時の間取り選択の画面でボタンを押す（`choosePresetPlan` → `loadPreset`） |
 
 `preset-2f` と `preset-3f` は見本を使わない。開くのは出荷物（`assets/default_plan.json`、`assets/default_plan_3f.json`）なので、
@@ -40,3 +41,14 @@
 
 `shared-patch` は `fields`（`heightDefaults`、`floors` など）を渡さない。そのため `idb` などと違い、階ごとの高さ設定が付かず `floors` も空で開く。
 これは今の `applySharedPatch` の動きの記録で、正しい開き方かどうかを決めたものではない。
+
+## 指紋に入れているもの
+
+壁・部屋・家具の座標と寸法、`heightDefaults`、選択画面、天井付け照明の取付面に付いたか、に加えて、開くときの補完が書き換えた結果を値のまま入れている:
+外壁・内壁・屋根・`exteriorDetail` の設定、`floorMetadata` と階ごとの高さ（`DATA.floors`）の値、`WALL_H`、
+壁・部屋・家具の補完対象フィールド、各配列の全フィールドのハッシュ、id の欠け・重複と次に振る番号、方位、
+`viewState`・取り置きの視点・2D の拡大と位置。
+
+視点について。検査は2D表示で開くので、3D のカメラ(`camera`)は null のまま記録されている。3D の実際の視点は見ていない。
+他に覆えていないのは、補完が書き換える画面の入力欄（`syncHeightDefaultsUI`、`syncNorthUi`）。
+実行ごとに揺れた項目は無かったので、外した項目は無い。
