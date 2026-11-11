@@ -41,16 +41,44 @@ const COLS = 24, ROWS = 16, LEVELS = 8;
 // Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
-const browser = await chromium.launch();
-const results = {};
-try {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-  const errors = [];
+// ── Web フォントの状態を確かめてから始める ─────────────────────────────
+//
+// 部屋名の下の「2.0畳 / 3.31㎡」などは、キャンバスに Noto Sans JP(Google Fonts)で
+// 描かれる。ところが **数字と記号(ASCII)の字形の出どころが、ブラウザを起動するたびに
+// 2通りのどちらかに決まり、その起動の間は変わらない**。
+//   正常: 可変フォントの補間された送り幅(100px・太さ400の「2」が 55.532…、
+//         太さ100/300/700 は 53.508/58.964 のような端数付き)
+//   異常: 送り幅が 0.5px の格子に張り付く(同じく 55.540、53.5、59 ちょうど)
+// 異常のときは文字の位置が最大 0.5px ずれ、升目の境目に乗った升 1 つ
+// (2d-floor1 の (16,5) の緑が 223.98 から 224.48 へ)が量子化で隣へ落ちる。
+// 実測では、並列で 12 本ずつ起動した 216 回のうち 7 回(約 3%)が異常だった。
+// 異常になった起動では、fonts.ready の待ち・fonts.load・<link> の差し直しの
+// どれでも戻らなかった。起動し直した直後のブラウザは約 97% 正常なので、**ブラウザごと起動し直す**。
+// (基準は正常な状態で取ってある。異常な状態に基準を合わせない。)
+function webFontLooksSnapped() {
+  const x = document.createElement('canvas').getContext('2d');
+  const adv = (wt) => { x.font = wt + ' 100px "Noto Sans JP",sans-serif'; return x.measureText('2').width; };
+  const onHalfGrid = (w) => Math.abs(w * 2 - Math.round(w * 2)) < 1e-6;
+  return onHalfGrid(adv(100)) && onHalfGrid(adv(700));
+}
+let browser, page;
+const errors = [];
+for (let attempt = 1; ; attempt++) {
+  browser = await chromium.launch();
+  page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   page.on('pageerror', e => errors.push(e.message));
-
   await page.goto(process.env.APP_URL || 'http://localhost:8932/');
   await page.waitForFunction(() => window.ST && window.DATA, null, { polling: 200, timeout: 60000 });
   await page.waitForSelector('#app-loading', { state: 'hidden', timeout: 60000 });
+  // 取得に失敗して Web フォントが当たっていないときも、ここで落とす(基準と比べても意味が無い)。
+  await page.evaluate(() => document.fonts.ready);
+  if (!(await page.evaluate(webFontLooksSnapped))) break;
+  await browser.close();
+  assert.ok(attempt < 6, 'Web フォントの字形が 6 回起動しても正常にならない(送り幅が 0.5px 格子のまま)。ネットワークかブラウザを確かめる');
+  console.warn(`Web フォントの字形が異常な起動だった。ブラウザを起動し直す (${attempt}/5)`);
+}
+const results = {};
+try {
   // 起動時の「はじめる間取りを選んでください」はキャンバスを覆う。
   await page.evaluate(() => { const m = document.getElementById('preset-choice-modal'); if (m) m.classList.remove('show'); });
 
