@@ -46,14 +46,34 @@ function sourceFunction(signature) {
   assert.fail(`"${signature}" の波括弧が閉じていない`);
 }
 
+// アプリ定数(assets/js/app-constants.js)から1行取り出す。
+function sourceConstLine(prefix) {
+  const constPath = join(dirname(indexPath), 'assets', 'js', 'app-constants.js');
+  const hits = readFileSync(constPath, 'utf8').split('\n').filter(l => l.trim().startsWith(prefix));
+  assert.equal(hits.length, 1, `app-constants.js に "${prefix}" で始まる行が ${hits.length} 本ある(1本であるべき)`);
+  return hits[0].trim();
+}
 const SUN_SCALE = sourceLine('var pvSunScale=');
 const INTERIOR_MODE = sourceLine('var interiorMode=(');
-const SUN_INTENSITY = sourceLine('o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*pvSunScale;');
-const SUN_CAST = sourceLine('o.castShadow=!interiorMode;');
+// 内観3Dの太陽は、光の組み直し(76760e5a)で「消灯・影なし」から「弱めた太陽を影付きで」に
+// 変わった。以前の `interiorMode?0:...` と `castShadow=!interiorMode` は無い。守りたいのは
+// 変わらず「スイッチ(PV_INTERIOR_DAYLIGHT)が null のとき採光用の分岐に入らない」ことで、
+// 今は interiorMode が `!PV_INTERIOR_DAYLIGHT` を含むかたちでそれを担う。
+const SUN_INTENSITY = sourceLine('o.intensity=LIGHT_SETTINGS.sun*pvSunScale*(interiorMode?interiorSunScale:1);');
+// 影は常に落とす。`var interiorSunScale=` の直後の行(o.castShadow=true;)を位置で取る。
+const SUN_CAST = LINES[LINES.findIndex(l => l.includes('var interiorSunScale=INTERIOR_SUN_SCALE;')) + 1].trim();
+assert.equal(SUN_CAST, 'o.castShadow=true;', '太陽の castShadow の行が変わった');
+const SUN_SCALE_CONST = sourceConstLine('var INTERIOR_SUN_SCALE');
+const INTERIOR_SUN_SCALE_LINE = SUN_SCALE_CONST;
+sourceLine('var interiorSunScale=INTERIOR_SUN_SCALE;');
 const CEILING_MAT = sourceLine('var matCeiling=');
 const SHADOW_FIT = sourceLine('if(_sunLight && (!isInt');
 
 const CEILING_MAT_FN = sourceFunction('function makeCeilingMaterial()');
+// 天井材質は withCeilingDepthBias(...) で包まれる。天井の編集中(ceilingEditing)にも
+// 天井が作られるので、その判定行も一緒に評価する(テストでは編集中ではない)。
+const CEILING_BIAS_FN = sourceFunction('function withCeilingDepthBias(');
+const CEILING_EDITING = sourceLine('var ceilingEditing=');
 const CENSUS_FN = sourceFunction('function pvCeilingCensus()');
 const NO_COVERED_ROOM_FN = sourceFunction('function pvAssertNoCoveredRoom(');
 // buildRoomCeilingMesh が影の設定と userData を確定させる3つの文。
@@ -91,7 +111,7 @@ const LIGHT_SETTINGS = { sun: 0.78, sunSim: false, timeOfDay: 'day' };
 // applyLightingToScene の SunLight 分岐(sunSim OFF 側)をそのまま評価する。
 function sunBranch({ view, isInt, daylight }) {
   const run = new Function('ST', 'isInt', 'PV_INTERIOR_DAYLIGHT', 'LIGHT_SETTINGS', 'o',
-    `${SUN_SCALE}\n${INTERIOR_MODE}\n${SUN_CAST}\n${SUN_INTENSITY}\n` +
+    `${INTERIOR_SUN_SCALE_LINE}\nvar interiorSunScale=INTERIOR_SUN_SCALE;\n${SUN_SCALE}\n${INTERIOR_MODE}\n${SUN_CAST}\n${SUN_INTENSITY}\n` +
     'return {interiorMode:interiorMode, pvSunScale:pvSunScale, intensity:o.intensity, castShadow:o.castShadow};');
   return run({ view }, isInt, daylight, LIGHT_SETTINGS, {});
 }
@@ -99,7 +119,7 @@ function sunBranch({ view, isInt, daylight }) {
 // buildRooms3D の天井マテリアル生成(makeCeilingMaterial 込み)をそのまま評価する。
 function ceilingMaterial({ isInt, daylight }) {
   const run = new Function('isInt', 'PV_INTERIOR_DAYLIGHT', 'THREE',
-    `${CEILING_MAT_FN}\n${CEILING_MAT}\nreturn matCeiling;`);
+    `${CEILING_BIAS_FN}\n${CEILING_MAT_FN}\n${CEILING_EDITING}\n${CEILING_MAT}\nreturn matCeiling;`);
   return run(isInt, daylight, THREE_STUB);
 }
 
@@ -134,11 +154,13 @@ function shadowFitCalls({ isInt, daylight }) {
   return calls.length;
 }
 
-test('通常の内観3D(スイッチ null): 太陽は消灯・影なし・天井を作らない・影カメラも合わせない', () => {
+test('通常の内観3D(スイッチ null): 太陽は弱めた通常値・採光用の天井も影カメラ合わせもしない', () => {
   const sun = sunBranch({ view: '3d-int', isInt: true, daylight: null });
   assert.equal(sun.interiorMode, true);
-  assert.equal(sun.intensity, 0);
-  assert.equal(sun.castShadow, false);
+  // 通常の内観は INTERIOR_SUN_SCALE で弱めた太陽(PV の採光時は弱めない)。
+  assert.equal(sun.intensity, LIGHT_SETTINGS.sun * 0.55);
+  assert.ok(sun.intensity < LIGHT_SETTINGS.sun);
+  assert.equal(sun.castShadow, true);
   assert.equal(ceilingMaterial({ isInt: true, daylight: null }), null);
   assert.equal(shadowFitCalls({ isInt: true, daylight: null }), 0);
 });
@@ -231,7 +253,8 @@ test('天井はあるのにオクルーダーが0枚なら、その場で例外(
 });
 
 test('スイッチの既定値は null(通常の利用者には無効)', () => {
-  assert.equal(sourceLine('var PV_INTERIOR_DAYLIGHT='), 'var PV_INTERIOR_DAYLIGHT=null;');
+  // 定義は assets/js/app-constants.js に移っている。
+  assert.equal(sourceConstLine('var PV_INTERIOR_DAYLIGHT='), 'var PV_INTERIOR_DAYLIGHT=null;');
 });
 
 test('スイッチを立てるのは PV キャプチャフックの中だけ', () => {

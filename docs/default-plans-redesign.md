@@ -80,7 +80,7 @@
 
 ## モデル・再生成・検証
 
-`tools/make_default_plan_2f.py` と `tools/make_default_plan_3f.py` が再生成元。正面軸の変換は両方の生成器から `orient_catalog_furniture` を呼ぶ。既存保存データへの一括補正はしない。
+`tools/default-plans/make_default_plan_2f.py` と `tools/default-plans/make_default_plan_3f.py` が再生成元。正面軸の変換は両方の生成器から `orient_catalog_furniture` を呼ぶ。既存保存データへの一括補正はしない。
 
 前回追加した9点（開いたリネンカーテン4種、巻き上げスクリーン3種、物干し、家事収納）の生成元は `tools/blender/build_open_window_treatments.py`。編集用.blendは `tools/blender/work/original/`、GLBは `assets/models/original/`、正面・背面・上面は `assets/models/previews-v2/` に保持。
 

@@ -24,6 +24,8 @@ rm -rf dist
 mkdir -p dist/assets/env dist/assets/textures dist/assets/models
 cp index.html dist/
 cp -r assets/. dist/assets/
+# 編集用の元データと macOS のごみは配信しない。
+find dist \( -name '*.blend' -o -name '.DS_Store' \) -delete
 # HTML and its scripts/styles must advance together, even with a warm browser cache.
 python3 tools/version_page_assets.py dist/index.html
 # Only the reviewed, registered original collection belongs in the delivery.
@@ -49,6 +51,8 @@ JSMODELS
 echo "Build complete: dist/"
 ls -lh dist/index.html
 du -sh dist/
+# 編集用ファイルが配信物に混ざっていたらここで止める。
+node tools/check_dist.cjs dist
 check_cloudflare_asset_sizes
 
 # **ここでは配信しない。ビルドするだけ。**

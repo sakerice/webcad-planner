@@ -1,5 +1,5 @@
 #!/bin/sh
-# ブラウザで動かす検査 (tools/tests/*.browser.mjs) をまとめて走らせる。
+# ブラウザで動かす検査 (tools/tests/*.browser.mjs と *.browser.cjs) をまとめて走らせる。
 #
 # tools/run_tests.sh は node:vm の単体検査だけを走らせる。こちらは実物の
 # ブラウザが要るので分けてある。Playwright はこのリポジトリの依存には入って
@@ -72,9 +72,15 @@ echo "検査対象: $APP_URL ($(pwd))"
 
 if [ $# -gt 0 ]; then
   files=""
-  for name in "$@"; do files="$files tools/tests/$name.browser.mjs"; done
+  for name in "$@"; do
+    if [ -f "tools/tests/$name.browser.cjs" ]; then
+      files="$files tools/tests/$name.browser.cjs"
+    else
+      files="$files tools/tests/$name.browser.mjs"
+    fi
+  done
 else
-  files=$(ls tools/tests/*.browser.mjs)
+  files=$(ls tools/tests/*.browser.mjs tools/tests/*.browser.cjs)
 fi
 
 fail=0

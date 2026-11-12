@@ -14,7 +14,11 @@ const { readFileSync, readdirSync } = require('node:fs');
 const { join } = require('node:path');
 
 const HERE = __dirname;
-const FILES = readdirSync(HERE).filter((f) => f.endsWith('.test.cjs'));
+// .test.cjs だけでなく、tools/tests/ の .py と .mjs も対象にする。
+// ブラウザ検査(*.browser.mjs / *.browser.cjs)は実物のアプリを開いて出荷配線を
+// 見るのが仕事なので、既定間取りのファイル名に触れてよい。
+const FILES = readdirSync(HERE).filter((f) =>
+  f.endsWith('.test.cjs') || f.endsWith('.py') || (f.endsWith('.mjs') && !f.endsWith('.browser.mjs')));
 
 test('どのテストも assets/default_plan.json を読み込んでいない', () => {
   const offenders = [];

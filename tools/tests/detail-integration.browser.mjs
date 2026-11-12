@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';import fs from 'node:fs';
+import {shotDir} from './shot-dir.mjs';
 // Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
 const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const chromium=_pw.chromium||(_pw.default&&_pw.default.chromium);const browser=await chromium.launch({args:['--use-angle=metal']});
-const dir='docs/quality-review/detail-loop';
+const dir=shotDir('detail-loop');
 try{const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/Shader Error|VALIDATE_STATUS|WebGLProgram/.test(m.text()))errors.push(m.text());});
  await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForSelector('#object-search-input',{state:'attached'});await page.evaluate(()=>{const m=document.getElementById('preset-choice-modal');if(m)m.classList.remove('show');});await page.locator('#bnav-tools').click();
  await page.locator('#object-search-input').fill('独立ポスト');assert.equal(await page.locator('#object-search-results .catalogue-result').count(),1);await page.locator('#object-search-results .catalogue-result').click();

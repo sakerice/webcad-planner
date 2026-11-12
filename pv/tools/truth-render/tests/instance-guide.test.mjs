@@ -17,7 +17,7 @@
 // 実際の発色は controller がブラウザで再キャプチャして確認する。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -292,9 +292,14 @@ test('legend の色は全インスタンスで一意 — 量子化衝突する i
   assert.ok(!colours.includes('#000000') && !colours.includes('#ffffff'));
 });
 
-test('variant 0 は従来値のまま — 実データ T92 の legend 73 件を1件違わず再現する', () => {
-  const legend = JSON.parse(readFileSync(
-    join(ROOT, 'pv', 'renders', 'T92-ldk-overhead', 'instance-legend.json'), 'utf8')).instances;
+// pv/renders/ は .gitignore された描画の出力置き場で、リポジトリには入らない。
+// 実データがある手元でだけ走らせ、無い環境(CI・新しい clone)では理由つきで飛ばす。
+const T92_LEGEND = join(ROOT, 'pv', 'renders', 'T92-ldk-overhead', 'instance-legend.json');
+test('variant 0 は従来値のまま — 実データ T92 の legend 73 件を1件違わず再現する', {
+  skip: existsSync(T92_LEGEND) ? false
+    : 'pv/renders/T92-ldk-overhead/instance-legend.json が無い(描画の出力で git 管理外。手元で描画すると走る)',
+}, () => {
+  const legend = JSON.parse(readFileSync(T92_LEGEND, 'utf8')).instances;
   assert.equal(legend.length, 73);
   const { hex } = colourFns();
   for (const entry of legend) assert.equal(hex(entry.id), entry.color, `id=${entry.id}`);

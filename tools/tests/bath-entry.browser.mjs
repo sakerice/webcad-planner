@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {shotDir} from './shot-dir.mjs';
 import fs from 'node:fs';
 // Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
 const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
@@ -43,6 +44,6 @@ try{
   }
   return frames;
  });
- fs.mkdirSync('docs/quality-review/detail-loop/entry-storage',{recursive:true});for(const shot of shots)fs.writeFileSync('docs/quality-review/detail-loop/entry-storage/bath-'+shot.name+'.png',Buffer.from(shot.image.split(',')[1],'base64'));
+ const shotOut=shotDir('detail-loop','entry-storage');for(const shot of shots)fs.writeFileSync(shotOut+'/bath-'+shot.name+'.png',Buffer.from(shot.image.split(',')[1],'base64'));
  assert.deepEqual(errors,[]);console.log(JSON.stringify(result,null,2));
 }finally{await browser.close();}

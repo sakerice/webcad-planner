@@ -1,6 +1,7 @@
 import fs from 'node:fs';import assert from 'node:assert/strict';
+import {shotDir} from './shot-dir.mjs';
 const pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');const b=await (pw.chromium||pw.default.chromium).launch({args:['--use-angle=metal']});
-const dir='docs/quality-review/ceiling-designer';fs.mkdirSync(dir,{recursive:true});
+const dir=shotDir('ceiling-designer');
 try{
  const p=await b.newPage({viewport:{width:1440,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(process.env.APP_URL||'http://localhost:8932/');await p.waitForFunction(()=>window.CeilingDesigner);await p.evaluate(()=>{closePresetChoice();setView('2d');window.testRoom=DATA.rooms.find(r=>r.floor===1&&r.w>2800&&r.d>2800&&roomHasCoverAbove(r)&&!roomCeilingProfile(r));if(!testRoom)throw Error('No room');testRoom.ceiling={type:'flat',heightMm:2300};ST.floor=1;resetView();});
  const pose=await p.evaluate(()=>[ST.panX,ST.panY,ST.zoom]);await p.selectOption('#surface-sel','ceiling');assert.deepEqual(await p.evaluate(()=>[ST.panX,ST.panY,ST.zoom]),pose);assert.equal(await p.evaluate(()=>ST.view),'2d');assert.equal(await p.locator('.ceiling-designer').count(),0);

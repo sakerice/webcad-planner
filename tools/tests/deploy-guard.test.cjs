@@ -125,9 +125,13 @@ test('フックが、本番を触るコマンドで実際に確認を出す', ()
 // `gh pr merge` が、そのまま本番の差し替えである。
 test('main へ載せる操作で確認を出し、枝の作業は止めない', () => {
   const hook = join(ROOT, 'tools', 'confirm-deploy.sh');
+  // 宛先を書かない push の判定は、いま居る枝で変わる。検査する側のチェックアウトが
+  // main や detached HEAD でも結果が揺れないよう、枝の名前を決めた作業用リポジトリで走らせる。
+  const work = mkdtempSync(join(tmpdir(), 'branchwork-'));
+  execFileSync('git', ['init', '-q', '-b', 'feature/work', work]);
   const ask = (command) => execFileSync('bash', [hook], {
     input: JSON.stringify({ tool_input: { command } }), encoding: 'utf8',
-    env: { ...process.env, CLAUDE_PROJECT_DIR: ROOT },
+    env: { ...process.env, CLAUDE_PROJECT_DIR: work },
   });
   const blocked = (command) => assert.ok(ask(command).includes('"permissionDecision":"ask"'),
     `本番に出る操作を確認なしで通した: ${command}`);
@@ -151,6 +155,7 @@ test('main へ載せる操作で確認を出し、枝の作業は止めない', 
   allowed('git status');
   allowed('git fetch origin');
   allowed('git merge origin/main');   // main を**取り込む**のは安全
+  rmSync(work, { recursive: true, force: true });
 });
 
 test('main に居るときは、宛先を書かない push でも確認を出す', () => {

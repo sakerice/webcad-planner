@@ -1,8 +1,9 @@
 import fs from 'node:fs';
+import {shotDir} from './shot-dir.mjs';
 import assert from 'node:assert/strict';
 const pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await (pw.chromium||pw.default.chromium).launch({args:['--use-angle=metal']});
-const dir='docs/quality-review/detail-loop/kitchen-system';fs.mkdirSync(dir,{recursive:true});
+const dir=shotDir('detail-loop','kitchen-system');
 try {
  const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.APP_URL||'http://localhost:8932/');
