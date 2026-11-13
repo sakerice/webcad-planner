@@ -3,7 +3,8 @@
 // 今まで assets/js/plan-data.js の mkWall / mkItem と、index.html・plan-import.js の
 // 部屋の作り方に別々に書いてあったものを、1か所に集める。
 // 外の世界(連番、カタログ、階ごとの高さ)は、すべて引数 ctx から呼ぶ。
-// ctx の形は段2の計画書(task-2-brief.md)に書いてある。
+// ctx の形は docs/superpowers/plans/2026-11-13-stage2-factories-patch.md の Task 2 に書いてある。
+// 画面用の実物は assets/js/plan-data.js の planCoreCtx()。
 // 項目を足す順番は保存 JSON の並びになるので、変えてはいけない。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
