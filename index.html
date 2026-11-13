@@ -19825,17 +19825,11 @@ async function loadPlanFromStorage(){
   _defaultPlanPending=false;
   DATA=d;
   try{
-    syncNorthFromPlan();   // 方位はプランの持ち物。写し(LIGHT_SETTINGS)をここで揃える
-    ensureObjectIds();
-    ensureExteriorWallSettings();
-    ensureInteriorWallSettings();
-    ensureRoofAppearance();
-    ensureFloorMetadata();
-    ensureHeightDefaults();
-    syncHeightDefaultsUI();
-    syncExteriorWallSettings();
-    normalizeLegacyFurnitureItems();
-    restoreViewState();
+    // 方位の写し・id・外壁/内壁/屋根・階・高さの既定・古い家具・視点をまとめて整える。
+    // 壁の高さの全体の値(WALL_H)は、今の本番どおり既定へ戻さない(resetHeights:false)。
+    // 戻すと、高さの既定を持たない古い保存が、今と違う高さ(2400)で開く
+    // (互換テストの legacy-no-heights。今は先に当たっている既定プランの高さを引き継ぐ)。
+    normalizeLoadedPlan({resetHeights:false});
   }catch(e){
     // 復元途中で失敗したら空画面のまま止めず、デフォルトプランに復帰する
     console.error('[WebCAD] saved plan restore failed:', e);
@@ -20018,8 +20012,8 @@ function applySharedPatch(patch,isOwn){
       Object.keys(upserts).forEach(function(id){if(!DATA[name].some(function(item){return String(item&&item.id)===id;}))DATA[name].push(upserts[id]);});
     });
     if(patch.fields)Object.keys(patch.fields).forEach(function(key){if(key!=='viewState')DATA[key]=sharedClone(patch.fields[key]);});
-    syncNorthFromPlan();
-    ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();ensureFloorMetadata();ensureHeightDefaults();syncHeightDefaultsUI();syncExteriorWallSettings();normalizeLegacyFurnitureItems();
+    // 編集中に相手の変更を受けるだけなので、高さの既定と視点は動かさない
+    normalizeLoadedPlan({resetHeights:false,restoreView:false});
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
     clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
     if(!isOwn)sharedSchedule3DRefresh();
@@ -22517,7 +22511,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); resetHeightGlobalsForPlanLoad(); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncHeightDefaultsUI(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); normalizeLoadedPlan(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);

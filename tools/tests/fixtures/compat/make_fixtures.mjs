@@ -7,13 +7,23 @@
 //
 //   APP_URL=http://localhost:8791/ PLAYWRIGHT_MODULE=... node tools/tests/fixtures/compat/make_fixtures.mjs
 //
+// ONLY_DERIVED=1 を付けると画面を開かず、手元の saved-2f.json から作る見本
+// (legacy-no-heights.json)だけを書き出す。saved-2f.json などは書き換えない。
+//
 // 作り直してよいのは README.md に書いた場合だけ。
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const APP = process.env.APP_URL || 'http://localhost:8932/';
+if (process.env.ONLY_DERIVED === '1') {
+  const two = JSON.parse(readFileSync(join(HERE, 'saved-2f.json'), 'utf8'));
+  writeFileSync(join(HERE, 'legacy-no-heights.json'), JSON.stringify(withoutHeights(two)));
+  console.log('saved-2f.json から legacy-no-heights.json を書き出した');
+  process.exit(0);  // 画面は要らないので Playwright を読まずに終える
+}
+
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 
@@ -68,6 +78,17 @@ function withLegacyQuirks(plan, legacyDoor) {
   return p;
 }
 
+// 高さの既定を保存するようになる前の保存。heightDefaults・floors と各壁の wallHeight が無い。
+// 開くときの補完が壁の高さの全体の値(WALL_H)をどこから取るか(戻すか・前のプランから
+// 引き継ぐか)で、建つ高さが変わる。
+function withoutHeights(plan) {
+  const p = JSON.parse(JSON.stringify(plan));
+  delete p.heightDefaults;
+  delete p.floors;
+  p.walls.forEach((w) => { delete w.wallHeight; });
+  return p;
+}
+
 const browser = await chromium.launch();
 try {
   const two = await savedString(browser, '2f');
@@ -75,6 +96,7 @@ try {
   writeFileSync(join(HERE, 'saved-2f.json'), two.raw);
   writeFileSync(join(HERE, 'saved-3f.json'), three.raw);
   writeFileSync(join(HERE, 'legacy-quirks.json'), JSON.stringify(withLegacyQuirks(JSON.parse(two.raw), two.legacyDoor)));
+  writeFileSync(join(HERE, 'legacy-no-heights.json'), JSON.stringify(withoutHeights(JSON.parse(two.raw))));
   console.log('見本を書き出した:', HERE, '旧カタログの扉:', two.legacyDoor && two.legacyDoor.id);
 } finally {
   await browser.close();

@@ -68,8 +68,8 @@ var PlanLibrary = (function(){
 
   // 保存の前に、ボタンの「保存」と同じ下ごしらえをする（壁・床の既定値や表示位置をプランへ写す）
   function prepare(){
-    normalizeLegacyFurnitureItems(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings();
-    ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncExteriorWallSettings(); captureViewState();
+    // 保存の直前なので画面(高さの既定・高さの欄・視点)は動かさない
+    normalizeLoadedPlan({resetHeights:false, syncUi:false, restoreView:false}); captureViewState();
   }
   // 一覧に出す縮小画像。平面図を構図を合わせて撮り、小さくする
   function thumbnail(){
@@ -124,9 +124,7 @@ var PlanLibrary = (function(){
   function loadIntoEditor(plan, id, name){
     _defaultPlanPending = false;
     DATA = plan;
-    resetHeightGlobalsForPlanLoad(); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings();
-    ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncHeightDefaultsUI(); syncExteriorWallSettings();
-    normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory();
+    normalizeLoadedPlan(); clearEditHistory();
     if(typeof sharedForceFullSync==='function') sharedForceFullSync();
     PLAN_LIBRARY_ID = id;
     PLAN_SAVE_INFO = id ? {where:'list', name:name, at:Date.now()} : {where:'last', at:null};

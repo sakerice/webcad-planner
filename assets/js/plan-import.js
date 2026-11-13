@@ -1315,15 +1315,10 @@
     }
     // 片引き戸は、壁のある側へ引くように向ける(読み取りは引く向きを持たない)。
     if (typeof orientSlideInDoorsToWalls === 'function') orientSlideInDoorsToWalls(read.items);
-    // 読み込み経路(doImport)と同じ手順で、アプリが期待する既定値をそろえる。
-    if (typeof syncNorthFromPlan === 'function') syncNorthFromPlan();
-    if (typeof ensureObjectIds === 'function') ensureObjectIds();
-    if (typeof ensureExteriorWallSettings === 'function') ensureExteriorWallSettings();
-    if (typeof ensureInteriorWallSettings === 'function') ensureInteriorWallSettings();
-    if (typeof ensureRoofAppearance === 'function') ensureRoofAppearance();
-    if (typeof ensureFloorMetadata === 'function') ensureFloorMetadata();
-    if (typeof syncExteriorWallSettings === 'function') syncExteriorWallSettings();
-    if (typeof normalizeLegacyFurnitureItems === 'function') normalizeLegacyFurnitureItems();
+    // 読み込み経路(doImport)と同じ補完で、アプリが期待する既定値をそろえる。
+    // いまの間取りに階を足す処理なので、既存の階の高さの既定は戻さない。視点は下で
+    // 読み取った階に当て直す(保存時の視点へは戻さない)。
+    if (typeof normalizeLoadedPlan === 'function') normalizeLoadedPlan({ resetHeights: false, restoreView: false });
     if (typeof sharedForceFullSync === 'function') sharedForceFullSync();
     if (typeof markDirty === 'function') markDirty();
     // 読み取った階を開く。**2階の下書きを1階の画面のまま返すと、何も

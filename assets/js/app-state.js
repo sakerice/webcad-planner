@@ -2482,6 +2482,46 @@ function saveState(){
   markDirty();
 }
 
+// プランを開いたときの補完を、1つにまとめたもの。
+//
+// 開く経路(ファイル読み込み・ライブラリ・比較表示など)ごとに ensure* を並べていて、
+// 経路によって順番や抜けが違っていた。順番は、いちばん多くの経路が使っている並びに固定する。
+// 対象はグローバルの DATA。履歴・描画・保存・_defaultPlanPending には触らない。
+//
+// options(すべて省略可): resetHeights(既定 true) / syncUi(既定 true) / restoreView(既定 true)
+// 戻り値: { warnings: string[] } -- PlanSchema.validatePlan が見つけた問題の文。
+// validatePlan の例外は読み込みを止めず警告にする。ensure* の例外は握りつぶさない
+// (呼ぶ側の catch が既定プランに戻す)。
+function normalizeLoadedPlan(options){
+  var o=options||{};
+  var warnings=[];
+  if(o.resetHeights!==false) resetHeightGlobalsForPlanLoad();
+  syncNorthFromPlan();
+  ensureObjectIds();
+  ensureExteriorWallSettings();
+  ensureInteriorWallSettings();
+  ensureRoofAppearance();
+  ensureFloorMetadata();
+  ensureHeightDefaults();
+  if(o.syncUi!==false) syncHeightDefaultsUI();
+  syncExteriorWallSettings();
+  normalizeLegacyFurnitureItems();
+  if(o.restoreView!==false) restoreViewState();
+  if(typeof PlanSchema!=='undefined'&&PlanSchema&&typeof PlanSchema.validatePlan==='function'){
+    try{
+      var res=PlanSchema.validatePlan(DATA);
+      if(Array.isArray(res)) warnings=res.slice();
+      else if(res){
+        warnings=(res.errors||[]).concat(res.warnings||[]);
+      }
+    }catch(ex){
+      warnings.push('形の検査で例外: '+(ex&&ex.message?ex.message:ex));
+    }
+  }
+  if(warnings.length) console.warn('[WebCAD] plan load warnings',warnings);
+  return {warnings:warnings};
+}
+
 function ensureObjectIds(){
   var maxId=0;
   function scanId(v){
