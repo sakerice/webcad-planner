@@ -28,105 +28,49 @@ function explicitFloorMetadata(plan,floor){
 // 斜線制限にも影響しない。レンダー設定に混ざっていると、間取りの設定を
 // そこで変えているように読めてしまう。
 // wallHeight は新規の壁に入れる既定値(階ごと設定があればその階の値)。部屋の天井高ではないので置き換えない。
+// 壁・物・部屋を作る本体は assets/js/plan-core/factories.js にある。
+// ここは、今のグローバル（連番・カタログ・階ごとの高さ）を ctx にして渡す包み。
+// ctx は呼ばれた時点でグローバルを引く（後ろで定義される関数があるため、定義時に束縛しない）。
+function planCoreCtx(){
+  return {
+    newId:function(){ return nextId++; },
+    catalog:{
+      resolveType:function(type){ return bestFmpType(type); },
+      defaultSize:function(type){ return getItemDefaultSize(type); },
+      defaultColor:function(type){ return ICOLORS[type]; },
+      model:function(type){ return isFmpItemType(type) ? getFmpItem(type) : null; },
+      is:function(kind,type){
+        switch(kind){
+          case 'light': return isLightItemType(type);
+          case 'contextExterior': return isContextExteriorItemType(type);
+          case 'windowLike': return isWindowLikeType(type);
+          case 'doorLikeOpening': return isDoorLikeOpeningType(type);
+          case 'doorPanel': return isDoorPanelType(type);
+        }
+        return false;
+      },
+      canSetElevation:function(item){ return canSetItemElevation(item); },
+      applyLightDefaults:function(item){ return ensureLightDefaults(item); },
+      contextExteriorHeight:function(type){ return defaultContextExteriorHeight(type); },
+      contextFloors:function(type){ return defaultContextFloors(type); },
+      constants:{
+        rulerThickness:RULER_THICKNESS_MM,
+        walkRouteThickness:WALK_ROUTE_THICKNESS_MM,
+        walkDefaultSpeed:WALK_DEFAULT_SPEED_MPS
+      }
+    },
+    plan:{
+      wallHeightForFloor:function(floor){ return defaultWallHeightMmForFloor(floor); },
+      floorRaiseForFloor:function(floor){ return newRoomFloorRaiseMm(floor); },
+      foundationHeight:function(){ return foundationHeightMm(); }
+    }
+  };
+}
 function mkWall(x1,y1,x2,y2,floor,thick,color){
-  return {id:nextId++,x1:x1,y1:y1,x2:x2,y2:y2,floor:floor||1,
-    thick:thick||120,color:color||'#888888',texture:null,textureFlipX:false,textureFlipY:false,texScale:1,_texObj:null,
-    wallBand:'full',wallStyle:'solid',wallHeight:defaultWallHeightMmForFloor(floor||1),wallTopShape:'flat',wallTopSide:'both'};
+  return PlanCoreFactories.makeWall({x1:x1,y1:y1,x2:x2,y2:y2,floor:floor,thick:thick,color:color}, planCoreCtx());
 }
 function mkItem(type,x,y,rot,floor,w,d){
-  type=bestFmpType(type);
-  var sz=getItemDefaultSize(type);
-  var item = {id:nextId++,type:type,x:x,y:y,rot:rot||0,floor:floor||1,modelFacingVersion:1,
-    w:w||sz.w,d:d||sz.d,color:ICOLORS[type]||'#ddd',
-    flipX:false, flipY:false, textureFlipX:false, textureFlipY:false, sScale:1, sX:0, sY:0};
-  if(type==='neighbor-house') item.neighborFacingVersion=1;
-  if(type==='wood-fence'){
-    item.fenceHeight=1600;
-    item.fencePattern='horizontal';
-    item.fenceTopStyle='even';
-  }
-  if(type==='lattice-screen'){
-    item.latticeHeight=1600;
-    item.fencePattern='vertical';
-    item.fenceTopStyle='even';
-  }
-  if(type==='foundation'){
-    item.foundationHeight=450;
-  }
-  if(type==='stair-landing'){
-    // 踊り場は段を持たない。並び順は自動判定に任せる。
-    item.w=1820; item.d=910;
-  }
-  if(type==='column'||type==='column-round'){
-    item.columnHeight=2400;
-  }
-  if(type==='shelf-built-in'){
-    item.shelfCount=3;
-    item.shelfHeight=900;
-  }
-  if(type==='exterior-stair'){
-    item.targetHeight=foundationHeightMm()||450;
-    item.accessSteps=3;
-  }
-  if(type==='ramp'){
-    item.targetHeight=foundationHeightMm()||450;
-  }
-  if(type==='site-rect'){
-    item.siteSurface='grass';
-  }
-  if(type==='custom-block'){
-    item.customHeight=900;
-    item.name='任意ブロック';
-    item.colorCustom=true;
-  }
-  if(isLightItemType(type)){
-    ensureLightDefaults(item);
-    item.colorCustom=true;
-  }
-  if(type==='memo'){
-    item.noteText='メモ';
-    item.color='#fff3a6';
-    item.colorCustom=true;
-  }
-  if(type==='ruler'){
-    item.d=RULER_THICKNESS_MM;
-    item.color='#2f80ed';
-    item.colorCustom=true;
-  }
-  if(type==='walk-route'){
-    item.d=WALK_ROUTE_THICKNESS_MM;
-    item.walkSpeed=WALK_DEFAULT_SPEED_MPS;
-    item.color='#10b981';
-    item.colorCustom=true;
-  }
-  if(isContextExteriorItemType(type)){
-    item.contextHeight=defaultContextExteriorHeight(type);
-    if(type==='neighbor-building' || type==='neighbor-house') item.contextFloors=defaultContextFloors(type);
-  }
-  if(isWindowLikeType(type)){
-    item.windowSill=type==='window-door'?0:900;
-    item.windowHeight=type==='window-door'?2100:1200;
-  }
-  if(isDoorLikeOpeningType(type)){
-    item.doorHeight=type==='door-front'?2330:2000;
-    if(isDoorPanelType(type)) item.doorOpenState='open';
-  }
-  if(canSetItemElevation(item)) item.elev=(type==='meter-box')?1600:(type==='fmp-AirConditionerWall01'?2000:0);
-  if(isFmpItemType(type)){
-    item.fmpId=type;
-    if(getFmpItem(type).defaultElevation) item.elev=getFmpItem(type).defaultElevation;
-    item.color=null;
-    item.colorCustom=false;
-  }
-  if(type==='roof'){
-    item.roofType='gable';
-    item.pitch=30;
-    item.color='#2a2a30';
-    item.roofThickness=180;
-    item.roofSkirt=0;
-    item.roofEdgeColor='#3a2f2a';
-  }
-  return item;
+  return PlanCoreFactories.makeItem(type, {x:x,y:y,rot:rot,floor:floor,w:w,d:d}, planCoreCtx());
 }
 
 // ───── PRESET DATA ─────

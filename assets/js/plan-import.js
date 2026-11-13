@@ -1034,11 +1034,7 @@
     });
     (plan.rooms || []).forEach(function (r) {
       var floor = r.floor || 1;
-      var made = {
-        id: 'rm_' + (nextId++), type: 'room', x: r.x, y: r.y, w: r.w, d: r.d, floor: floor,
-        n: r.n || '', floorRaiseMm: newRoomFloorRaiseMm(floor),
-        textureFlipX: false, textureFlipY: false,
-      };
+      var made = PlanCoreFactories.makeRoom({x: r.x, y: r.y, w: r.w, d: r.d, floor: floor, n: r.n || ''}, planCoreCtx());
       // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
       // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
       if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;

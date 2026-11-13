@@ -3805,6 +3805,7 @@ input[type="reset"]:focus-visible{
 <!-- index.html のインライン script から切り出したもの。
      本体より先に、かつ #c2d などの要素より後に読む必要がある
      (トップレベルで document.getElementById を呼ぶ行があるため)。 -->
+<script src="assets/js/plan-core/factories.js"></script>
 <script src="assets/js/app-constants.js"></script>
 <script src="assets/js/app-state.js"></script>
 <script src="assets/js/plan-data.js"></script>
@@ -18843,7 +18844,7 @@ function handleRoomClick(wx,wy){
     var rw=x2-x1, rd=y2-y1;
     if(rw>100 && rd>100){
       saveState();
-      var r={id:'rm_'+Date.now(), type:'room', x:x1, y:y1, w:rw, d:rd, floor:ST.floor, floorRaiseMm:newRoomFloorRaiseMm(ST.floor), textureFlipX:false, textureFlipY:false};
+      var r=PlanCoreFactories.makeRoom({id:'rm_'+Date.now(), x:x1, y:y1, w:rw, d:rd, floor:ST.floor}, planCoreCtx());
       DATA.rooms.push(r);
     }
     ST.drawing=false;ST.drawPts=[];if(ren)build3D();draw2d();
