@@ -19567,6 +19567,9 @@ function restoreHistorySnapshot(snapshot){
   DATA = JSON.parse(snapshot);
   syncNorthFromPlan();
   ensureFloorMetadata();
+  // 壁の高さの全体の値(WALL_H)はプランの外の変数なので、戻したプランの既定から写し直す。
+  // 写さないと、高さの既定を変えて undo しても、新しく引く壁だけ変えた後の高さで建つ。
+  copyPlanWallHeightToGlobal(DATA);syncHeightDefaultsUI();
   ST.selected=null;clearMultiSelection();ST.selectAll=false;DRAG.active=false;
   var props=document.getElementById('props');
   if(props) props.classList.remove('show');

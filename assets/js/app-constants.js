@@ -182,6 +182,15 @@ function clampFloorRaiseMm(v){
   if(!isFinite(n)) return 0;
   return Math.max(0,Math.min(600,Math.round(n)));
 }
+// プランの壁の高さの既定(heightDefaults.wallHeight)を、グローバルの WALL_H へ写す。
+// 写せたら true。プランが値を持たなければ何もしない。undo・redo で戻したプランに使う
+// (欄の補完はしない。補完まで要る開く経路は ensureHeightDefaults を通す)。
+function copyPlanWallHeightToGlobal(plan){
+  var hd=plan&&plan.heightDefaults;
+  if(!hd||!(isFinite(Number(hd.wallHeight))&&Number(hd.wallHeight)>0)) return false;
+  WALL_H=clampWallHeightMm(hd.wallHeight);
+  return true;
+}
 function ensureHeightDefaults(plan){
   plan=plan||(typeof DATA!=='undefined'?DATA:null);
   if(!plan) return null;
@@ -274,6 +283,13 @@ function heightDefaultsChanged(){
   // 共同編集の変更追跡は「選択中の物だけ」を見るので、全部を見直すよう印を付ける。
   // 付けないと、何かを選んだまま高さを変えたとき、付け替えた壁が相手に届かない。
   if(typeof sharedForceFullSync==='function') sharedForceFullSync();
+  // 天井の高さが変わったので、天井付けの照明を新しい取付面へ寄せる。読み直したとき
+  // (normalizeLegacyFurnitureItems)に毎回走るのと同じ関数。ここで寄せないと、変えた直後は
+  // 照明が古い高さに残り、読み直すと動く。共同編集の受け手は差分を当てたあとの補完で寄せるので、
+  // 送り手と受け手で照明の高さが食い違う。同じ補完の中の1度だけの移行や古い家具の置き換えは、
+  // 高さとは関係ないので呼ばない。動いた照明は上の全体の見直しで差分に乗る。
+  // 呼び出し元は先に saveState() を通しているので、undo 1回で高さと照明が一緒に戻る。
+  if(typeof snapCeilingLightsToAttachSurface==='function') snapCeilingLightsToAttachSurface();
   markDirty();
   syncHeightDefaultsUI();
   if(typeof updateProps==='function') updateProps();

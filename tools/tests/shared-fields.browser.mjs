@@ -13,7 +13,8 @@
 //
 // sh tools/run_browser_tests.sh shared-fields
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,10 +24,11 @@ const T = { timeout: 30000 };
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 
-// 高さを持たない古い保存データ(階ごとの高さは切、WALL_H は 2400 で開く)
-const PLAN = readFileSync(join(HERE, 'fixtures', 'compat', 'legacy-no-heights.json'), 'utf8');
+// 見本。既定は高さを持たない古い保存データ(階ごとの高さは切、WALL_H は 2400 で開く)。
+// saved-2f は階ごとの高さが入の保存データ。
+const FIXTURE = (name) => join(HERE, 'fixtures', 'compat', name + '.json');
 
-async function openPage(browser, label, errors) {
+async function openPage(browser, label, errors, file = FIXTURE('legacy-no-heights'), share = true) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(`[${label}] pageerror: ${e.message}`));
@@ -36,9 +38,10 @@ async function openPage(browser, label, errors) {
   await page.waitForFunction(() => window.DATA && DATA.walls && window.ST && window._defaultPlanPending === false, null, T);
   // 「読込」と同じ入口で見本のプランを開く
   await page.evaluate(() => { window.__before = DATA; });
-  await page.setInputFiles('#import-file', join(HERE, 'fixtures', 'compat', 'legacy-no-heights.json'));
+  await page.setInputFiles('#import-file', file);
   await page.waitForFunction(() => window.DATA !== window.__before && DATA.walls.length > 4, null, T);
   await page.waitForTimeout(300);
+  if (!share) return { context, page };
   // ルームに参加中に見せる(上の「細工」)
   await page.evaluate(() => {
     window.queueSharedSync = function () {};
@@ -50,9 +53,9 @@ async function openPage(browser, label, errors) {
   return { context, page };
 }
 
-async function pair(browser, errors) {
-  const a = await openPage(browser, '送り手', errors);
-  const b = await openPage(browser, '受け手', errors);
+async function pair(browser, errors, file) {
+  const a = await openPage(browser, '送り手', errors, file);
+  const b = await openPage(browser, '受け手', errors, file);
   return { a: a.page, b: b.page, close: async () => { await a.context.close(); await b.context.close(); } };
 }
 
@@ -80,15 +83,21 @@ async function carry(a, b) {
 }
 
 const wallHeights = (page) => page.evaluate(() => DATA.walls.map((w) => [String(w.id), w.wallHeight === undefined ? null : w.wallHeight]).sort());
+// 全部の物の高さ(elev)。id → 値
+const itemElevs = (page) => page.evaluate(() => Object.fromEntries(DATA.items.map((i) => [String(i.id), i.elev === undefined ? null : i.elev])));
+function diffElevs(want, got) {
+  const ids = [...new Set([...Object.keys(want), ...Object.keys(got)])];
+  return ids.filter((id) => want[id] !== got[id]).map((id) => `${id}: ${want[id]} / ${got[id]}`);
+}
 
 const results = [];
-async function test(name, fn) {
+async function test(name, fn, file) {
   const errors = [];
   const browser = await chromium.launch();
   let p = null;
   try {
-    p = await pair(browser, errors);
-    await fn({ a: { page: p.a }, b: { page: p.b } });
+    p = await pair(browser, errors, file);
+    await fn({ a: { page: p.a }, b: { page: p.b }, browser, errors });
     assert.deepEqual(errors, [], 'ページでエラーが出た');
     results.push(['ok  ', name]);
   } catch (e) {
@@ -188,6 +197,49 @@ await test('視点は届かない', async ({ a, b }) => {
   await b.page.evaluate(() => applySharedPatch({ collections: {}, fields: { viewState: { twoD: { zoom: 9, panX: 1, panY: 2 } } } }, false));
   assert.equal(await view(b.page), before);
   assert.equal(await b.page.evaluate(() => WALL_H), 2650);
+});
+
+// ── 高さの既定を変えたとき、照明などの物の高さも送り手と受け手でそろう ──
+// 受け手は差分を当てたあとの補完で、天井付けの照明を新しい天井面へ寄せる。送り手も同じ寄せ方を
+// 通さないと、同じ間取りなのに照明の高さだけが食い違う。
+async function elevsAgree(a, b, change) {
+  const before = await itemElevs(a.page);
+  await a.page.evaluate(change);
+  const moved = diffElevs(before, await itemElevs(a.page));
+  assert.ok(moved.length > 0, '高さを変えても送り手で動いた物が無い(照明が古い高さのまま)');
+  assert.ok(await carry(a, b), '差分が出ない');
+  const off = diffElevs(await itemElevs(a.page), await itemElevs(b.page));
+  assert.deepEqual(off, [], `送り手と受け手で物の高さが違う(${off.length}件, 送り手 / 受け手)`);
+  assert.deepEqual(await wallHeights(b.page), await wallHeights(a.page));
+}
+
+await test('高さの既定を変えると、物の高さも送り手と受け手でそろう(古いデータ)', async ({ a, b }) => {
+  await elevsAgree(a, b, () => setDefaultWallHeight(null, 2600));
+});
+
+await test('高さの既定を変えると、物の高さも送り手と受け手でそろう(階ごとの高さが入)', async ({ a, b }) => {
+  await elevsAgree(a, b, () => { setDefaultWallHeight(1, 2800); setDefaultWallHeight(2, 2600); });
+}, FIXTURE('saved-2f'));
+
+// 1人で使うとき: 高さを変えた直後の物の高さが、保存して読み直した後と同じ。undo で両方戻る。
+await test('高さの既定を変えた直後の物の高さは、読み直した後と同じ。undo で戻る', async ({ a, browser, errors }) => {
+  const start = await a.page.evaluate(() => JSON.stringify({ hd: DATA.heightDefaults, WALL_H, items: DATA.items.map((i) => [i.id, i.elev]) }));
+  await a.page.evaluate(() => setDefaultWallHeight(null, 2600));
+  const now = await itemElevs(a.page);
+  const saved = await a.page.evaluate(() => serializeDataSnapshot());
+  const dir = mkdtempSync(join(tmpdir(), 'shared-fields-'));
+  try {
+    const file = join(dir, 'saved.json');
+    writeFileSync(file, saved);
+    const c = await openPage(browser, '読み直し', errors, file, false);
+    try {
+      const off = diffElevs(now, await itemElevs(c.page));
+      assert.deepEqual(off, [], `変えた直後と読み直した後で物の高さが違う(${off.length}件, 直後 / 読み直し)`);
+    } finally { await c.context.close(); }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  await a.page.evaluate(() => undoAction());
+  const back = await a.page.evaluate(() => JSON.stringify({ hd: DATA.heightDefaults, WALL_H, items: DATA.items.map((i) => [i.id, i.elev]) }));
+  assert.equal(back, start, 'undo 1回で、高さの既定と物の高さが元に戻らない');
 });
 
 for (const [s, n] of results) console.log(`${s} ${n}`);
