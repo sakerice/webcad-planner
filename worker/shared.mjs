@@ -4,6 +4,7 @@
 // 同居していた。AIの呼び出しを足すにあたって、鍵を扱う場所と間取りを扱う
 // 場所を混ぜたくないので分けた。
 import PlanSchema from "../assets/js/plan-schema.js";
+import PlanCorePatch from "../assets/js/plan-core/patch.js";
 
 export const ROOM_ID_RE = /^[A-Za-z0-9_-]{22}$/;
 export const RETENTION_MS = 60 * 24 * 60 * 60 * 1000;
@@ -12,7 +13,7 @@ export const AUTO_SAVE_MAX_MS = 30 * 1000;
 export const MAX_PLAN_BYTES = 10 * 1024 * 1024;
 export const MAX_REQUEST_BYTES = MAX_PLAN_BYTES + 128 * 1024;
 export const MAX_JOURNAL_ENTRY_BYTES = 1_500_000;
-export const COLLECTIONS = ["walls", "items", "rooms"];
+export const COLLECTIONS = PlanCorePatch.COLLECTIONS;
 
 export function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -76,25 +77,5 @@ export async function readJsonWithLimit(request, maxBytes = MAX_REQUEST_BYTES) {
   }
 }
 
-export function applyPatch(plan, patch) {
-  for (const name of COLLECTIONS) {
-    if (!Array.isArray(plan[name])) plan[name] = [];
-    const change = patch.collections && patch.collections[name];
-    if (!change) continue;
-    const removed = new Set((change.removes || []).map(String));
-    const upserts = new Map((change.upserts || []).filter(Boolean).map((item) => [String(item.id), item]));
-    plan[name] = plan[name]
-      .filter((item) => !removed.has(String(item && item.id)))
-      .map((item) => upserts.has(String(item && item.id)) ? upserts.get(String(item.id)) : item);
-    const present = new Set(plan[name].map((item) => String(item && item.id)));
-    for (const [id, item] of upserts) {
-      if (!present.has(id)) plan[name].push(item);
-    }
-  }
-  if (patch.fields && typeof patch.fields === "object") {
-    for (const [key, value] of Object.entries(patch.fields)) {
-      if (!COLLECTIONS.includes(key) && key !== "viewState") plan[key] = value;
-    }
-  }
-  return plan;
-}
+// 差分の当て方は画面と同じ1つ(assets/js/plan-core/patch.js)。ここでは名前だけ出し直す。
+export const applyPatch = PlanCorePatch.applyPatch;

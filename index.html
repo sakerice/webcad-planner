@@ -3806,6 +3806,7 @@ input[type="reset"]:focus-visible{
      本体より先に、かつ #c2d などの要素より後に読む必要がある
      (トップレベルで document.getElementById を呼ぶ行があるため)。 -->
 <script src="assets/js/plan-core/factories.js"></script>
+<script src="assets/js/plan-core/patch.js"></script>
 <script src="assets/js/app-constants.js"></script>
 <script src="assets/js/app-state.js"></script>
 <script src="assets/js/plan-data.js"></script>
@@ -19873,9 +19874,8 @@ async function checkStorageOnInit(){
 // プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
 // 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
 var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null};
-// northDeg（敷地の方位）もここに入れる。入れないと、共同編集の相手が方位を回しても
-// 手元には届かず、同じプランを見ているのに斜線制限の向きと立面図の呼称だけが食い違う。
-var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail','floorMetadata','northDeg'];
+// 丸ごと送り合う欄の一覧と、差分の当て方は assets/js/plan-core/patch.js にある（Worker と同じもの）。
+var SHARED_FIELDS=PlanCorePatch.SHARED_FIELDS;
 function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
 function sharedFastSignature(value){
   return JSON.stringify(value,function(k,v){
@@ -19975,7 +19975,7 @@ async function copySharedUrl(){
 }
 function sharedBaselineFrom(plan){
   var base={collections:{},fields:{}};
-  ['walls','items','rooms'].forEach(function(name){
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
     base.collections[name]={};(plan[name]||[]).forEach(function(item){base.collections[name][String(item.id)]=sharedFastSignature(item);});
   });
   SHARED_FIELDS.forEach(function(key){base.fields[key]=sharedFastSignature(plan[key]===undefined?null:plan[key]);});
@@ -19983,7 +19983,7 @@ function sharedBaselineFrom(plan){
 }
 function buildSharedPatch(plan,baseline){
   var patch={collections:{},fields:{}};var changed=false;
-  ['walls','items','rooms'].forEach(function(name){
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
     var before=(baseline&&baseline.collections&&baseline.collections[name])||{};var now={};var byId={};var upserts=[];
     (plan[name]||[]).forEach(function(item){var id=String(item.id);now[id]=true;byId[id]=item;});
     var candidates={};Object.keys(SHARED.dirtyIds[name]||{}).forEach(function(id){candidates[id]=true;});
@@ -20006,13 +20006,7 @@ function applySharedPatch(patch,isOwn){
   if(!patch)return;SHARED.applying=true;
   var selectedName=sharedCollectionNameFor(ST.selected),selectedId=ST.selected&&ST.selected.id!==undefined?String(ST.selected.id):null;
   try{
-    ['walls','items','rooms'].forEach(function(name){
-      if(!Array.isArray(DATA[name]))DATA[name]=[];var change=patch.collections&&patch.collections[name];if(!change)return;
-      var removed={};(change.removes||[]).forEach(function(id){removed[String(id)]=true;});var upserts={};(change.upserts||[]).forEach(function(item){if(item)upserts[String(item.id)]=sharedClone(item);});
-      DATA[name]=DATA[name].filter(function(item){return !removed[String(item&&item.id)];}).map(function(item){return upserts[String(item&&item.id)]||item;});
-      Object.keys(upserts).forEach(function(id){if(!DATA[name].some(function(item){return String(item&&item.id)===id;}))DATA[name].push(upserts[id]);});
-    });
-    if(patch.fields)Object.keys(patch.fields).forEach(function(key){if(key!=='viewState')DATA[key]=sharedClone(patch.fields[key]);});
+    PlanCorePatch.applyPatch(DATA,patch,{clone:sharedClone});
     // 編集中に相手の変更を受けるだけなので、高さの既定と視点は動かさない
     normalizeLoadedPlan({resetHeights:false,restoreView:false});
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;

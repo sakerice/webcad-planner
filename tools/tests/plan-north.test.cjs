@@ -392,6 +392,8 @@ test('19-3(最重要): 平面図の SVG は方位を回しても同一', () => {
 
 const SHARE_FNS = ['sharedFastSignature', 'sharedClone', 'sharedBaselineFrom', 'buildSharedPatch'];
 function withSharing(ctx) {
+  // 共有の欄の一覧と配列の名前は plan-core/patch.js にある(index.html では <script> で先に読む)
+  ctx.PlanCorePatch = require('../../assets/js/plan-core/patch.js');
   vm.runInContext(
     [topLevelVar('SHARED'), topLevelVar('SHARED_FIELDS')]
       .concat(SHARE_FNS.map(topLevelFunction)).join('\n'),
