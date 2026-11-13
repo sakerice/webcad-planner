@@ -10,6 +10,7 @@
 //   - 各種類の mkItem(type,100,200,90,2) と mkItem(type,0,0,0,1,1234,567)
 //     id は呼ぶ前後の nextId の差だけを記録し、物からは除く。項目の並び(Object.keys)も記録
 //   - mkWall(0,0,1000,0) と mkWall(0,0,0,1000,2,90,'#123456')(_texObj は除く)
+//   - 引数を省いた呼び出し(omitted): 5種類の mkItem(type,0,0) と mkItem(type,0,0,0,undefined,500)、mkWall の floor・thick・color 省略
 //   - 基礎(foundation)を1つ置いた状態の exterior-stair と ramp(targetHeight が基礎の高さを引く)
 //   - 階ごとの高さを ON、2階の壁の高さ 2600 での mkWall(0,0,1000,0,2)
 //
@@ -71,6 +72,25 @@ function collect() {
     nextIdDelta.walls.push(w.delta);
   }
 
+  // 引数を省いた呼び出し(rot・floor・w・d が undefined のときの既定)。既存の記録の外に足す。
+  const omitted = { items: {}, walls: [] };
+  const omittedDelta = { items: {}, walls: [] };
+  for (const type of ['bed-s', 'window', 'door-swing', 'roof', 'no-such-type']) {
+    const c = idDelta(() => mkItem(type, 0, 0));
+    const d = idDelta(() => mkItem(type, 0, 0, 0, undefined, 500));
+    const strip = (o) => { const x = Object.assign({}, o); delete x.id; return x; };
+    omitted.items[type] = {
+      c: clean(strip(c.r)), cKeys: Object.keys(strip(c.r)),
+      d: clean(strip(d.r)), dKeys: Object.keys(strip(d.r)),
+    };
+    omittedDelta.items[type] = [c.delta, d.delta];
+  }
+  for (const o of [idDelta(() => mkWall(0, 0, 1000, 0, undefined, undefined, undefined)), idDelta(() => mkWall(0, 0, 1000, 0, 3))]) {
+    const c = Object.assign({}, o.r); delete c.id;
+    omitted.walls.push({ value: clean(c, ['_texObj']), keys: Object.keys(c) });
+    omittedDelta.walls.push(o.delta);
+  }
+
   // 基礎を1つ置いた状態(targetHeight が基礎の高さを引く)。置いたものは後で外す。
   const foundationItems = {};
   const savedItems = DATA.items;
@@ -103,7 +123,7 @@ function collect() {
 
   return {
     counts: { types: types.length, isizes: Object.keys(ISIZES).length, fmpItems: Object.keys(FMP_ITEMS).length, legacy: Object.keys(LEGACY_FMP_TYPE_MAP).length },
-    types, walls, items, foundationItems, perFloorWall, nextIdDelta,
+    types, walls, items, foundationItems, perFloorWall, nextIdDelta, omitted, omittedDelta,
   };
 }
 
@@ -166,6 +186,8 @@ function describeDiff(want, got) {
   cmp('foundationItems', want.foundationItems, got.foundationItems);
   cmp('perFloorWall', want.perFloorWall, got.perFloorWall);
   cmp('nextIdDelta', want.nextIdDelta, got.nextIdDelta);
+  cmp('omitted', want.omitted, got.omitted);
+  cmp('omittedDelta', want.omittedDelta, got.omittedDelta);
   return out.join('\n    ');
 }
 
