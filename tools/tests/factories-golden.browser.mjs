@@ -169,11 +169,17 @@ function describeDiff(want, got) {
   const cmp = (label, a, b) => {
     if (JSON.stringify(a) !== JSON.stringify(b)) out.push(`${label}: 期待 ${JSON.stringify(a)} / 実際 ${JSON.stringify(b)}`);
   };
-  cmp('counts', want.counts, got.counts);
+  // モデルのカタログは増減する。記録と今の両方に在る種類だけを比べ、増えた・減った
+  // 種類では落とさない(落とすと、家具を1つ足すたびにこの検査が赤くなる)。
+  // ただし比べられる種類が大きく減ったら、カタログの読み込みに失敗している。
   const wt = typeList(want.items), gt = typeList(got.items);
-  const missing = wt.filter((t) => !gt.includes(t)), extra = gt.filter((t) => !wt.includes(t));
-  if (missing.length || extra.length) out.push(`種類: 足りない ${JSON.stringify(missing)} / 余分 ${JSON.stringify(extra)}`);
-  for (const t of wt.filter((x) => gt.includes(x))) {
+  const gset = new Set(gt), wset = new Set(wt);
+  const common = wt.filter((t) => gset.has(t));
+  if (common.length < wt.length * 0.9) out.push(`比べられる種類が少なすぎる: 記録 ${wt.length} / 共通 ${common.length}`);
+  describeDiff.skipped = { added: gt.filter((t) => !wset.has(t)).length, removed: wt.length - common.length };
+  for (const key of ['isizes', 'legacy']) cmp('counts.' + key, want.counts[key], got.counts[key]);
+  for (const t of common) {
+    cmp(`nextIdDelta.${t}`, want.nextIdDelta.items[t], got.nextIdDelta.items[t]);
     for (const k of ['a', 'aKeys', 'b', 'bKeys']) {
       if (JSON.stringify(want.items[t][k]) === JSON.stringify(got.items[t][k])) continue;
       if (k.endsWith('Keys')) { out.push(`${t}.${k}: 項目の並び 期待 ${JSON.stringify(want.items[t][k])} / 実際 ${JSON.stringify(got.items[t][k])}`); continue; }
@@ -185,7 +191,9 @@ function describeDiff(want, got) {
   cmp('walls', want.walls, got.walls);
   cmp('foundationItems', want.foundationItems, got.foundationItems);
   cmp('perFloorWall', want.perFloorWall, got.perFloorWall);
-  cmp('nextIdDelta', want.nextIdDelta, got.nextIdDelta);
+  cmp('nextIdDelta.walls', want.nextIdDelta.walls, got.nextIdDelta.walls);
+  cmp('nextIdDelta.foundationItems', want.nextIdDelta.foundationItems, got.nextIdDelta.foundationItems);
+  cmp('nextIdDelta.perFloorWall', want.nextIdDelta.perFloorWall, got.nextIdDelta.perFloorWall);
   cmp('omitted', want.omitted, got.omitted);
   cmp('omittedDelta', want.omittedDelta, got.omittedDelta);
   return out.join('\n    ');
@@ -209,6 +217,8 @@ try {
     const diff = describeDiff(want, data);
     assert.equal(diff, '', '今の出力が正解と違う:\n    ' + diff);
     console.log(`mkWall / mkItem: ${data.counts.types} 種類 × 2通りと、壁・基礎つき・階ごとの高さの出力が、記録と一致した`);
+    const sk = describeDiff.skipped;
+    if (sk.added || sk.removed) console.log(`  (記録の後でカタログに増えた ${sk.added} 種類と、無くなった ${sk.removed} 種類は比べていない。README の手順で記録し直すと比べられる)`);
   }
 } finally {
   await browser.close();
