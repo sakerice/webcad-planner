@@ -142,3 +142,10 @@ test('新しく足した3つの欄は、null が届いたら欄を消す（前�
   assert.ok(!('floors' in plan));
   assert.equal(plan.northDeg, null);
 });
+
+test('upserts の新しい物は、届いた順に末尾へ足す（id の大小で並べ替えない）', () => {
+  const plan = { walls: [{ id: 5 }, { id: 'a' }], items: [], rooms: [] };
+  P.applyPatch(plan, { collections: { walls: { upserts: [{ id: 'z' }, { id: 9 }, { id: 'a', v: 1 }, { id: 2 }], removes: [] } } });
+  assert.deepEqual(plan.walls.map((w) => w.id), [5, 'a', 'z', 9, 2]);
+  assert.equal(plan.walls[1].v, 1, '既にある物はその場で入れ替える');
+});

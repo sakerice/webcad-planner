@@ -296,6 +296,31 @@ await test('同じ家具を両方が変えていたら、受けた値が勝つ(�
   assert.equal(got.resend, false, '受けた値で上書きされた家具を送り返そうとしている');
 });
 
+// 自分が送った差分は、ルームから自分にも戻ってくる(applySharedPatch(patch,true))。
+// 戻ってきても、3D の作り直しを予約せず、未保存の印を付けず、中身も変えない。
+await test('自分の差分が戻ってきても、何も変えない', async ({ a }) => {
+  const r = await a.page.evaluate(() => {
+    const w = DATA.walls[2]; ST.selected = w; saveState(); w.x1 += 150; ST.selected = null;
+    setDefaultWallHeight(null, 2600);
+    // 送ったことにする(sharedSyncNow と同じ順: 差分を作り、追跡を消し、送れたら基準を取る)
+    const patch = JSON.parse(JSON.stringify(buildSharedPatch(DATA, SHARED.baseline)));
+    sharedResetDirtyTracking();
+    SHARED.baseline = sharedBaselineFrom(DATA);
+    clearDirty();
+    SHARED.needs3DRebuild = false;
+    const before = serializeDataSnapshot();
+    let queued = 0; const q = window.queueSharedSync; window.queueSharedSync = function () { queued++; };
+    try { applySharedPatch(patch, true); } finally { window.queueSharedSync = q; }
+    return { hadPatch: !!patch, same: serializeDataSnapshot() === before, needs3D: SHARED.needs3DRebuild, dirty: DIRTY, queued, again: buildSharedPatch(DATA, SHARED.baseline) };
+  });
+  assert.ok(r.hadPatch, '差分が出ない');
+  assert.equal(r.same, true, '自分の差分が戻ってきて、プランの中身が変わった');
+  assert.equal(r.needs3D, false, '3D の作り直しを予約した');
+  assert.equal(r.dirty, false, '未保存の印を付けた');
+  assert.equal(r.queued, 0, '送信を予約した');
+  assert.equal(r.again, null, '送り返す差分ができた');
+});
+
 for (const [s, n] of results) console.log(`${s} ${n}`);
 const failed = results.filter(([s]) => s === 'FAIL').length;
 if (failed) { console.log(`FAIL shared-fields: ${failed}/${results.length}`); process.exit(1); }
