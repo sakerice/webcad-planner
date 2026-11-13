@@ -20011,6 +20011,8 @@ function applySharedPatch(patch,isOwn){
     normalizeLoadedPlan({resetHeights:false,restoreView:false});
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
     clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
+    // 照明パネルの「自動照明」のチェック(DATA.autoRoomLights)も相手の値で描き直す
+    if(typeof syncLightPanelUi==='function')syncLightPanelUi();
     if(!isOwn)sharedSchedule3DRefresh();
     SHARED.baseline=sharedBaselineFrom(DATA);if(!isOwn)markDirtyUiOnly();
   }finally{SHARED.applying=false;}

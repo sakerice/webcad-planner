@@ -270,6 +270,10 @@ function retagWallsToDefaultHeight(floor,oldDefault,newDefault){
   });
 }
 function heightDefaultsChanged(){
+  // 既定値の変更は、選択中の物と関係なく既存の壁・部屋の高さを付け替える。
+  // 共同編集の変更追跡は「選択中の物だけ」を見るので、全部を見直すよう印を付ける。
+  // 付けないと、何かを選んだまま高さを変えたとき、付け替えた壁が相手に届かない。
+  if(typeof sharedForceFullSync==='function') sharedForceFullSync();
   markDirty();
   syncHeightDefaultsUI();
   if(typeof updateProps==='function') updateProps();

@@ -124,3 +124,21 @@ test('画面と Worker が同じ関数を使っている', async () => {
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   assert.ok(html.includes('<script src="assets/js/plan-core/patch.js"></script>'));
 });
+
+test('高さの既定・階ごとの高さ・自動照明の設定も共有する', () => {
+  for (const k of ['heightDefaults', 'floors', 'autoRoomLights']) assert.ok(P.SHARED_FIELDS.includes(k), k);
+  const plan = { walls: [], items: [], rooms: [] };
+  P.applyPatch(plan, { fields: { heightDefaults: { wallHeight: 2600, perFloor: false }, floors: { 2: { wallHeight: 2500 } }, autoRoomLights: false } });
+  assert.deepEqual(plan.heightDefaults, { wallHeight: 2600, perFloor: false });
+  assert.deepEqual(plan.floors, { 2: { wallHeight: 2500 } });
+  assert.equal(plan.autoRoomLights, false);
+});
+
+test('新しく足した3つの欄は、null が届いたら欄を消す（前からある欄は null を書く）', () => {
+  const plan = { walls: [], items: [], rooms: [], autoRoomLights: false, heightDefaults: {}, floors: {}, northDeg: 10 };
+  P.applyPatch(plan, { fields: { autoRoomLights: null, heightDefaults: null, floors: null, northDeg: null } }, { clone: (v) => JSON.parse(JSON.stringify(v)) });
+  assert.ok(!('autoRoomLights' in plan));
+  assert.ok(!('heightDefaults' in plan));
+  assert.ok(!('floors' in plan));
+  assert.equal(plan.northDeg, null);
+});
