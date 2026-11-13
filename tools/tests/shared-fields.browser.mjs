@@ -60,7 +60,8 @@ async function pair(browser, errors, file) {
 }
 
 // 送り手の差分を作り、受け手へ当てる。送り手は送ったことにして基準を進める。
-async function carry(a, b) {
+// echo: 受けた直後に受け手が送り返す差分が無いことまで見るか(受け手に未送信の変更があるときは false)
+async function carry(a, b, echo = true) {
   const patch = await a.page.evaluate(() => {
     const p = buildSharedPatch(DATA, SHARED.baseline);
     SHARED.baseline = sharedBaselineFrom(DATA);
@@ -69,7 +70,8 @@ async function carry(a, b) {
   });
   if (patch) {
     // 受けた直後(3D の作り直しの前)に、受け手から送り返す差分が無く、送信の予約もしていないこと
-    const echo = await b.page.evaluate((p) => {
+    const check = echo;
+    echo = await b.page.evaluate((p) => {
       let queued = 0;
       const q = window.queueSharedSync;
       window.queueSharedSync = function () { queued++; };
@@ -77,7 +79,7 @@ async function carry(a, b) {
       return { queued, again: buildSharedPatch(DATA, SHARED.baseline) };
     }, patch);
     assert.equal(echo.queued, 0, '受けた変更を送り返す予約をした');
-    assert.equal(echo.again, null, '受けた直後に送り返す差分がある: ' + JSON.stringify(echo.again).slice(0, 200));
+    if (check) assert.equal(echo.again, null, '受けた直後に送り返す差分がある: ' + JSON.stringify(echo.again).slice(0, 200));
   }
   return patch;
 }
@@ -240,6 +242,58 @@ await test('高さの既定を変えた直後の物の高さは、読み直し�
   await a.page.evaluate(() => undoAction());
   const back = await a.page.evaluate(() => JSON.stringify({ hd: DATA.heightDefaults, WALL_H, items: DATA.items.map((i) => [i.id, i.elev]) }));
   assert.equal(back, start, 'undo 1回で、高さの既定と物の高さが元に戻らない');
+});
+
+// ── 受け手の未送信の変更が、相手の差分を受けても消えない ──
+// 受け手が家具を動かした直後(まだ送っていない間)に相手の差分を受けても、その家具の変更は
+// 次の送信に残る。前は差分を当てたあとに基準を丸ごと取り直していたので、二度と送られなかった。
+const pickItem = () => DATA.items.find((i) => i.type !== 'site-rect' && !/^light-/.test(i.type) && (i.floor || 1) === 1);
+async function moveItemUnsent(page) {
+  return page.evaluate((pick) => {
+    const it = (0, eval)('(' + pick + ')')();
+    ST.selected = it; saveState(); it.x += 300; ST.selected = null;
+    return String(it.id);
+  }, pickItem.toString());
+}
+async function keptAfter(a, b, senderChange) {
+  const id = await moveItemUnsent(b.page);
+  await a.page.evaluate(senderChange);
+  assert.ok(await carry(a, b, false), '送り手の差分が出ない');
+  const mine = await b.page.evaluate((id) => {
+    const p = buildSharedPatch(DATA, SHARED.baseline);
+    const ups = (p && p.collections.items && p.collections.items.upserts) || [];
+    const sent = ups.find((u) => String(u.id) === id);
+    const now = DATA.items.find((i) => String(i.id) === id);
+    return { sent: sent ? sent.x : null, now: now.x };
+  }, id);
+  assert.notEqual(mine.sent, null, '受け手が動かした家具が、次に送る差分に入っていない');
+  assert.equal(mine.sent, mine.now);
+}
+
+await test('相手の壁の変更を受けても、受け手の未送信の家具の移動は次に送られる', async ({ a, b }) => {
+  await keptAfter(a, b, () => { ST.selected = null; const w = DATA.walls[3]; ST.selected = w; saveState(); w.x1 += 200; ST.selected = null; });
+});
+
+await test('相手の高さの既定の変更を受けても、受け手の未送信の家具の移動は次に送られる', async ({ a, b }) => {
+  await keptAfter(a, b, () => { ST.selected = null; setDefaultWallHeight(null, 2600); });
+});
+
+await test('同じ家具を両方が変えていたら、受けた値が勝つ(送り返さない)', async ({ a, b }) => {
+  const id = await moveItemUnsent(b.page);
+  const sender = await a.page.evaluate((id) => {
+    const it = DATA.items.find((i) => String(i.id) === id);
+    ST.selected = it; saveState(); it.y += 200; ST.selected = null;
+    return { x: it.x, y: it.y };
+  }, id);
+  assert.ok(await carry(a, b, false), '送り手の差分が出ない');
+  const got = await b.page.evaluate((id) => {
+    const it = DATA.items.find((i) => String(i.id) === id);
+    const p = buildSharedPatch(DATA, SHARED.baseline);
+    const ups = (p && p.collections.items && p.collections.items.upserts) || [];
+    return { x: it.x, y: it.y, resend: ups.some((u) => String(u.id) === id) };
+  }, id);
+  assert.deepEqual({ x: got.x, y: got.y }, sender, '受け手の家具が送り手の値になっていない');
+  assert.equal(got.resend, false, '受けた値で上書きされた家具を送り返そうとしている');
 });
 
 for (const [s, n] of results) console.log(`${s} ${n}`);

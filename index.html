@@ -20005,11 +20005,40 @@ function sharedSchedule3DRefresh(){
   clearTimeout(SHARED.rebuildTimer);
   SHARED.rebuildTimer=setTimeout(function(){if(SHARED.needs3DRebuild&&ren){SHARED.needs3DRebuild=false;rebuild3D();}},500);
 }
+// 受けた差分を当てたあとの基準(SHARED.baseline)の更新。
+// 進めるのは、受けた物・欄と、当てたあとの補完(normalizeLoadedPlan)で変わった物・欄だけ。
+// それ以外は動かさないので、受け手のまだ送っていない変更は次の送信に残る。
+// (前は丸ごと取り直していたので、未送信の変更が基準に吸われて二度と送られなかった)
+// 補完で変わった分を進めるのは、補完の結果を相手へ送り返す輪を作らないため。
+// before は差分を当てた直後・補完の前の基準。基準がまだ無いときは丸ごと取る。
+function sharedAdvanceBaseline(patch,before){
+  var after=sharedBaselineFrom(DATA);
+  if(!SHARED.baseline||!before){SHARED.baseline=after;return;}
+  var base=SHARED.baseline;
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
+    var b=base.collections[name]||(base.collections[name]={});
+    var pre=before.collections[name]||{},post=after.collections[name]||{};
+    var touched={};
+    var change=patch&&patch.collections&&patch.collections[name];
+    if(change){
+      (change.removes||[]).forEach(function(id){touched[String(id)]=true;});
+      (change.upserts||[]).forEach(function(item){if(item)touched[String(item.id)]=true;});
+    }
+    Object.keys(pre).forEach(function(id){if(pre[id]!==post[id])touched[id]=true;});
+    Object.keys(post).forEach(function(id){if(pre[id]!==post[id])touched[id]=true;});
+    Object.keys(touched).forEach(function(id){if(post[id]===undefined)delete b[id];else b[id]=post[id];});
+  });
+  var fields=(patch&&patch.fields)||{};
+  Object.keys(after.fields).forEach(function(key){
+    if(Object.prototype.hasOwnProperty.call(fields,key)||before.fields[key]!==after.fields[key])base.fields[key]=after.fields[key];
+  });
+}
 function applySharedPatch(patch,isOwn){
   if(!patch)return;SHARED.applying=true;
   var selectedName=sharedCollectionNameFor(ST.selected),selectedId=ST.selected&&ST.selected.id!==undefined?String(ST.selected.id):null;
   try{
     PlanCorePatch.applyPatch(DATA,patch,{clone:sharedClone});
+    var beforeFix=SHARED.baseline?sharedBaselineFrom(DATA):null;
     // 編集中に相手の変更を受けるだけなので、高さの既定と視点は動かさない
     normalizeLoadedPlan({resetHeights:false,restoreView:false});
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
@@ -20017,7 +20046,7 @@ function applySharedPatch(patch,isOwn){
     // 照明パネルの「自動照明」のチェック(DATA.autoRoomLights)も相手の値で描き直す
     if(typeof syncLightPanelUi==='function')syncLightPanelUi();
     if(!isOwn)sharedSchedule3DRefresh();
-    SHARED.baseline=sharedBaselineFrom(DATA);if(!isOwn)markDirtyUiOnly();
+    sharedAdvanceBaseline(patch,beforeFix);if(!isOwn)markDirtyUiOnly();
   }finally{SHARED.applying=false;}
 }
 function queueSharedSync(delay){
