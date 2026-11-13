@@ -57,6 +57,7 @@ test('makeItem は newId を1回だけ呼ぶ', () => {
   assert.equal(ctx.calls(), 2);
 });
 
+// 本物のカタログでの値は、factories-golden の no-such-type の記録が見ている。
 test('カタログに無い種類は 900×900・#ddd で作り、例外にしない', () => {
   const it = F.makeItem('no-such-type', { x: 5, y: 6 }, makeCtx());
   assert.deepEqual([it.type, it.w, it.d, it.color, it.rot, it.floor], ['no-such-type', 900, 900, '#ddd', 0, 1]);
