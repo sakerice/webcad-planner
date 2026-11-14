@@ -3279,7 +3279,7 @@
     "1,fmp-AirConditionerWall01,-210,3370,800,260,270,2050",
     "1,fmp-BathTub03,-189,-67,1179,535,270,0",
     "1,fmp-BathroomVanity07,1889,-513,682,426,0,0",
-    "1,fmp-CeilingFan01,1220,4260,1200,1200,180,4480",
+    "1,fmp-CeilingFan01,1220,4260,1200,1200,180,4876",
     "1,fmp-GatePost01,7913,9370,400,200,180,0",
     "1,fmp-KitchenExhaust07,4452,-530,610,590,0,1970",
     "1,fmp-Refrigerator02,3420,-520,640,695,0,0",
@@ -3431,9 +3431,9 @@
    ],
    "heightDefaults": {
     "modelVersion": 2,
+    "perFloor": true,
+    "wallHeight": 2688,
     "floorThickness": 180,
-    "perFloor": false,
-    "wallHeight": 2400,
     "floorRaise": 0
    },
    "floors": [
@@ -3447,8 +3447,8 @@
    "roofAppearance": "{\"floors\":{\"1\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"2\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"3\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"4\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false}},\"whole\":{\"color\":\"#2B2B2B\",\"linked\":true,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false}}",
    "exteriorDetail": "{\"gutterColor\":\"#2B2B2B\",\"gutters\":true}",
    "floorMetadataValues": "{\"1\":{\"occupiable\":true,\"role\":\"residential\"},\"2\":{\"occupiable\":true,\"role\":\"residential\"},\"3\":{\"occupiable\":false,\"role\":\"roof\"}}",
-   "heightFloors": "{}",
-   "wallHeightGlobal": 2400,
+   "heightFloors": "{\"1\":{\"floorThickness\":180,\"wallHeight\":2688},\"2\":{\"floorThickness\":180,\"wallHeight\":2508},\"3\":{\"floorThickness\":180,\"wallHeight\":2508}}",
+   "wallHeightGlobal": 2688,
    "wallFields": [
     "1,0,-600,8190,-600,1002|-|\"#888888\"|null|-|-|-|-",
     "1,0,1220,3340,1220,1008|-|\"#888888\"|null|-|-|-|-",
@@ -3692,7 +3692,7 @@
    ],
    "wallsHash": "1e119558",
    "roomsHash": "d81430e",
-   "itemsHash": "e5f50f0b",
+   "itemsHash": "caada017",
    "ids": {
     "walls": {
      "missing": 0,
@@ -7118,7 +7118,7 @@
     "2,fmp-CabinetD02,1890,61,366,519,0,0",
     "2,fmp-CabinetD03,2256,61,364,519,0,0",
     "2,fmp-CabinetD_Sink,426,61,732,519,0,0",
-    "2,fmp-CeilingFan01,610,5850,1200,1200,180,4630",
+    "2,fmp-CeilingFan01,610,5850,1200,1200,180,4846",
     "2,fmp-GasStove07,1968,67,572,507,0,797",
     "2,fmp-KitchenExhaust07,2021,87,466,466,0,1970",
     "2,fmp-Refrigerator02,2003,1983,640,695,90,0",
@@ -7196,9 +7196,9 @@
    ],
    "heightDefaults": {
     "modelVersion": 2,
+    "perFloor": true,
+    "wallHeight": 2688,
     "floorThickness": 180,
-    "perFloor": false,
-    "wallHeight": 2400,
     "floorRaise": 0
    },
    "floors": [
@@ -7213,8 +7213,8 @@
    "roofAppearance": "{\"floors\":{\"1\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"2\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"3\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"4\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false}},\"whole\":{\"color\":\"#2B2B2B\",\"linked\":true,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false}}",
    "exteriorDetail": "{\"gutterColor\":\"#2B2B2B\",\"gutters\":true}",
    "floorMetadataValues": "{\"1\":{\"occupiable\":true,\"role\":\"residential\"},\"2\":{\"occupiable\":true,\"role\":\"residential\"},\"3\":{\"occupiable\":true,\"role\":\"residential\"},\"4\":{\"occupiable\":false,\"role\":\"roof\"}}",
-   "heightFloors": "{}",
-   "wallHeightGlobal": 2400,
+   "heightFloors": "{\"1\":{\"floorThickness\":180,\"wallHeight\":2688},\"2\":{\"floorThickness\":180,\"wallHeight\":2508},\"3\":{\"floorThickness\":180,\"wallHeight\":2508},\"4\":{\"floorThickness\":180,\"wallHeight\":2508}}",
+   "wallHeightGlobal": 2688,
    "wallFields": [
     "1,0,0,5460,0,1002|-|\"#888888\"|null|-|-|-|-",
     "1,0,1820,4550,1820,1010|-|\"#888888\"|null|-|-|-|-",
@@ -7461,7 +7461,7 @@
    ],
    "wallsHash": "2236b223",
    "roomsHash": "bde66dd3",
-   "itemsHash": "c7d95be9",
+   "itemsHash": "e763dd0c",
    "ids": {
     "walls": {
      "missing": 0,
@@ -10795,7 +10795,7 @@
     "1,fmp-AirConditionerWall01,-210,3370,800,260,270,2050",
     "1,fmp-BathTub03,-189,-67,1179,535,270,0",
     "1,fmp-BathroomVanity07,1889,-513,682,426,0,0",
-    "1,fmp-CeilingFan01,1220,4260,1200,1200,180,4480",
+    "1,fmp-CeilingFan01,1220,4260,1200,1200,180,4876",
     "1,fmp-GatePost01,7913,9370,400,200,180,0",
     "1,fmp-KitchenExhaust07,4452,-530,610,590,0,1970",
     "1,fmp-Refrigerator02,3420,-520,640,695,0,0",
@@ -10947,9 +10947,9 @@
    ],
    "heightDefaults": {
     "modelVersion": 2,
+    "perFloor": true,
+    "wallHeight": 2688,
     "floorThickness": 180,
-    "perFloor": false,
-    "wallHeight": 2400,
     "floorRaise": 0
    },
    "floors": [
@@ -10963,8 +10963,8 @@
    "roofAppearance": "{\"floors\":{\"1\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"2\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"3\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false},\"4\":{\"color\":\"#2a2a30\",\"linked\":false,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false}},\"whole\":{\"color\":\"#2B2B2B\",\"linked\":true,\"texture\":null,\"textureFlipX\":false,\"textureFlipY\":false}}",
    "exteriorDetail": "{\"gutterColor\":\"#2B2B2B\",\"gutters\":true}",
    "floorMetadataValues": "{\"1\":{\"occupiable\":true,\"role\":\"residential\"},\"2\":{\"occupiable\":true,\"role\":\"residential\"},\"3\":{\"occupiable\":false,\"role\":\"roof\"}}",
-   "heightFloors": "{}",
-   "wallHeightGlobal": 2400,
+   "heightFloors": "{\"1\":{\"floorThickness\":180,\"wallHeight\":2688},\"2\":{\"floorThickness\":180,\"wallHeight\":2508},\"3\":{\"floorThickness\":180,\"wallHeight\":2508}}",
+   "wallHeightGlobal": 2688,
    "wallFields": [
     "1,0,-600,0,-600,990001|-|\"#888888\"|null|-|-|-|-",
     "1,0,-600,8190,-600,1002|-|\"#888888\"|null|-|-|-|-",
@@ -11210,7 +11210,7 @@
    ],
    "wallsHash": "13c9c741",
    "roomsHash": "d81430e",
-   "itemsHash": "a4f7d03a",
+   "itemsHash": "19f26246",
    "ids": {
     "walls": {
      "missing": 0,
@@ -14508,7 +14508,7 @@
     "1,fmp-AirConditionerWall01,-210,3370,800,260,270,2050",
     "1,fmp-BathTub03,-189,-67,1179,535,270,0",
     "1,fmp-BathroomVanity07,1889,-513,682,426,0,0",
-    "1,fmp-CeilingFan01,1220,4260,1200,1200,180,4480",
+    "1,fmp-CeilingFan01,1220,4260,1200,1200,180,4888",
     "1,fmp-GatePost01,7913,9370,400,200,180,0",
     "1,fmp-KitchenExhaust07,4452,-530,610,590,0,1970",
     "1,fmp-Refrigerator02,3420,-520,640,695,0,0",
@@ -14659,8 +14659,6 @@
     "3,roof,-450,-1050,9090,8180,0,0"
    ],
    "heightDefaults": {
-    "modelVersion": 2,
-    "floorThickness": 180,
     "perFloor": false,
     "wallHeight": 2400,
     "floorRaise": 0
@@ -14921,7 +14919,7 @@
    ],
    "wallsHash": "1f92efdb",
    "roomsHash": "d81430e",
-   "itemsHash": "e5f50f0b",
+   "itemsHash": "1e2d54c5",
    "ids": {
     "walls": {
      "missing": 0,

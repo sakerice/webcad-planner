@@ -34,6 +34,15 @@ global.mkItem = function (type, x, y, rot, floor, w, d) {
 };
 global.getItemDefaultSize = function () { return { w: 800, d: 120 }; };
 global.newRoomFloorRaiseMm = function () { return 0; };
+// 取り込みの部屋作成は PlanCoreFactories.makeRoom(..., planCoreCtx()) を通る。
+// 工場は実物を使い、ctx だけ上の連番と床の高さ関数に結ぶ。
+global.PlanCoreFactories = require(path.join(__dirname, '..', '..', 'assets', 'js', 'plan-core', 'factories.js'));
+global.planCoreCtx = function () {
+  return {
+    newId: function () { return global.nextId++; },
+    plan: { floorRaiseForFloor: function (f) { return global.newRoomFloorRaiseMm(f); } },
+  };
+};
 global.isContextExteriorItemType = function (t) {
   return t === 'road' || t === 'neighbor-house' || t === 'neighbor-building' || t === 'utility-pole';
 };
@@ -114,6 +123,7 @@ assert.deepEqual(DATA.rooms.filter(function (r) { return r.id === 'r1' || r.id =
 const DRAFT_X = 10000 + 3000;
 const drafted = DATA.rooms.filter(function (r) { return r.n === '子供室'; });
 assert.equal(drafted.length, 1, '読み取った部屋が入っていない');
+assert.match(String(drafted[0].id), /^rm_\d+$/, '取り込んだ部屋の id が rm_連番ではない: ' + drafted[0].id);
 assert.equal(drafted[0].x, DRAFT_X, '下書きが隣に建っていない: x=' + drafted[0].x);
 assert.equal(drafted[0].floor, 2, '下書きの階が変わっている');
 // 元の壁は 'a0'…'b3'、下書きの壁は mkWall が振る番号で見分ける

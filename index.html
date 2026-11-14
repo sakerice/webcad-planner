@@ -3805,6 +3805,8 @@ input[type="reset"]:focus-visible{
 <!-- index.html のインライン script から切り出したもの。
      本体より先に、かつ #c2d などの要素より後に読む必要がある
      (トップレベルで document.getElementById を呼ぶ行があるため)。 -->
+<script src="assets/js/plan-core/factories.js"></script>
+<script src="assets/js/plan-core/patch.js"></script>
 <script src="assets/js/app-constants.js"></script>
 <script src="assets/js/app-state.js"></script>
 <script src="assets/js/plan-data.js"></script>
@@ -18843,7 +18845,7 @@ function handleRoomClick(wx,wy){
     var rw=x2-x1, rd=y2-y1;
     if(rw>100 && rd>100){
       saveState();
-      var r={id:'rm_'+Date.now(), type:'room', x:x1, y:y1, w:rw, d:rd, floor:ST.floor, floorRaiseMm:newRoomFloorRaiseMm(ST.floor), textureFlipX:false, textureFlipY:false};
+      var r=PlanCoreFactories.makeRoom({id:'rm_'+Date.now(), x:x1, y:y1, w:rw, d:rd, floor:ST.floor}, planCoreCtx());
       DATA.rooms.push(r);
     }
     ST.drawing=false;ST.drawPts=[];if(ren)build3D();draw2d();
@@ -19565,6 +19567,9 @@ function restoreHistorySnapshot(snapshot){
   DATA = JSON.parse(snapshot);
   syncNorthFromPlan();
   ensureFloorMetadata();
+  // 壁の高さの全体の値(WALL_H)はプランの外の変数なので、戻したプランの既定から写し直す。
+  // 写さないと、高さの既定を変えて undo しても、新しく引く壁だけ変えた後の高さで建つ。
+  copyPlanWallHeightToGlobal(DATA);syncHeightDefaultsUI();
   ST.selected=null;clearMultiSelection();ST.selectAll=false;DRAG.active=false;
   var props=document.getElementById('props');
   if(props) props.classList.remove('show');
@@ -19872,9 +19877,8 @@ async function checkStorageOnInit(){
 // プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
 // 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
 var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null};
-// northDeg（敷地の方位）もここに入れる。入れないと、共同編集の相手が方位を回しても
-// 手元には届かず、同じプランを見ているのに斜線制限の向きと立面図の呼称だけが食い違う。
-var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail','floorMetadata','northDeg'];
+// 丸ごと送り合う欄の一覧と、差分の当て方は assets/js/plan-core/patch.js にある（Worker と同じもの）。
+var SHARED_FIELDS=PlanCorePatch.SHARED_FIELDS;
 function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
 function sharedFastSignature(value){
   return JSON.stringify(value,function(k,v){
@@ -19974,7 +19978,7 @@ async function copySharedUrl(){
 }
 function sharedBaselineFrom(plan){
   var base={collections:{},fields:{}};
-  ['walls','items','rooms'].forEach(function(name){
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
     base.collections[name]={};(plan[name]||[]).forEach(function(item){base.collections[name][String(item.id)]=sharedFastSignature(item);});
   });
   SHARED_FIELDS.forEach(function(key){base.fields[key]=sharedFastSignature(plan[key]===undefined?null:plan[key]);});
@@ -19982,7 +19986,7 @@ function sharedBaselineFrom(plan){
 }
 function buildSharedPatch(plan,baseline){
   var patch={collections:{},fields:{}};var changed=false;
-  ['walls','items','rooms'].forEach(function(name){
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
     var before=(baseline&&baseline.collections&&baseline.collections[name])||{};var now={};var byId={};var upserts=[];
     (plan[name]||[]).forEach(function(item){var id=String(item.id);now[id]=true;byId[id]=item;});
     var candidates={};Object.keys(SHARED.dirtyIds[name]||{}).forEach(function(id){candidates[id]=true;});
@@ -20001,23 +20005,48 @@ function sharedSchedule3DRefresh(){
   clearTimeout(SHARED.rebuildTimer);
   SHARED.rebuildTimer=setTimeout(function(){if(SHARED.needs3DRebuild&&ren){SHARED.needs3DRebuild=false;rebuild3D();}},500);
 }
+// 受けた差分を当てたあとの基準(SHARED.baseline)の更新。
+// 進めるのは、受けた物・欄と、当てたあとの補完(normalizeLoadedPlan)で変わった物・欄だけ。
+// それ以外は動かさないので、受け手のまだ送っていない変更は次の送信に残る。
+// (前は丸ごと取り直していたので、未送信の変更が基準に吸われて二度と送られなかった)
+// 補完で変わった分を進めるのは、補完の結果を相手へ送り返す輪を作らないため。
+// before は差分を当てた直後・補完の前の基準。基準がまだ無いときは丸ごと取る。
+function sharedAdvanceBaseline(patch,before){
+  var after=sharedBaselineFrom(DATA);
+  if(!SHARED.baseline||!before){SHARED.baseline=after;return;}
+  var base=SHARED.baseline;
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
+    var b=base.collections[name]||(base.collections[name]={});
+    var pre=before.collections[name]||{},post=after.collections[name]||{};
+    var touched={};
+    var change=patch&&patch.collections&&patch.collections[name];
+    if(change){
+      (change.removes||[]).forEach(function(id){touched[String(id)]=true;});
+      (change.upserts||[]).forEach(function(item){if(item)touched[String(item.id)]=true;});
+    }
+    Object.keys(pre).forEach(function(id){if(pre[id]!==post[id])touched[id]=true;});
+    Object.keys(post).forEach(function(id){if(pre[id]!==post[id])touched[id]=true;});
+    Object.keys(touched).forEach(function(id){if(post[id]===undefined)delete b[id];else b[id]=post[id];});
+  });
+  var fields=(patch&&patch.fields)||{};
+  Object.keys(after.fields).forEach(function(key){
+    if(Object.prototype.hasOwnProperty.call(fields,key)||before.fields[key]!==after.fields[key])base.fields[key]=after.fields[key];
+  });
+}
 function applySharedPatch(patch,isOwn){
   if(!patch)return;SHARED.applying=true;
   var selectedName=sharedCollectionNameFor(ST.selected),selectedId=ST.selected&&ST.selected.id!==undefined?String(ST.selected.id):null;
   try{
-    ['walls','items','rooms'].forEach(function(name){
-      if(!Array.isArray(DATA[name]))DATA[name]=[];var change=patch.collections&&patch.collections[name];if(!change)return;
-      var removed={};(change.removes||[]).forEach(function(id){removed[String(id)]=true;});var upserts={};(change.upserts||[]).forEach(function(item){if(item)upserts[String(item.id)]=sharedClone(item);});
-      DATA[name]=DATA[name].filter(function(item){return !removed[String(item&&item.id)];}).map(function(item){return upserts[String(item&&item.id)]||item;});
-      Object.keys(upserts).forEach(function(id){if(!DATA[name].some(function(item){return String(item&&item.id)===id;}))DATA[name].push(upserts[id]);});
-    });
-    if(patch.fields)Object.keys(patch.fields).forEach(function(key){if(key!=='viewState')DATA[key]=sharedClone(patch.fields[key]);});
+    PlanCorePatch.applyPatch(DATA,patch,{clone:sharedClone});
+    var beforeFix=SHARED.baseline?sharedBaselineFrom(DATA):null;
     // 編集中に相手の変更を受けるだけなので、高さの既定と視点は動かさない
     normalizeLoadedPlan({resetHeights:false,restoreView:false});
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
     clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
+    // 照明パネルの「自動照明」のチェック(DATA.autoRoomLights)も相手の値で描き直す
+    if(typeof syncLightPanelUi==='function')syncLightPanelUi();
     if(!isOwn)sharedSchedule3DRefresh();
-    SHARED.baseline=sharedBaselineFrom(DATA);if(!isOwn)markDirtyUiOnly();
+    sharedAdvanceBaseline(patch,beforeFix);if(!isOwn)markDirtyUiOnly();
   }finally{SHARED.applying=false;}
 }
 function queueSharedSync(delay){

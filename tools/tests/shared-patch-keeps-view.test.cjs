@@ -45,8 +45,10 @@ function setup() {
     document: { getElementById: () => ({ classList: { remove() {} } }) },
     sharedCollectionNameFor: () => null,
     sharedClone: (v) => JSON.parse(JSON.stringify(v)),
+    // 差分の当て方そのもの(index.html では <script> で先に読む)
+    PlanCorePatch: require('../../assets/js/plan-core/patch.js'),
     clearMultiSelection() {}, clearEditHistory() { calls.push('clearEditHistory'); }, draw2d() {}, updateProps() {},
-    sharedSchedule3DRefresh() {}, sharedBaselineFrom: () => ({}), markDirtyUiOnly() {},
+    sharedSchedule3DRefresh() {}, sharedBaselineFrom: () => ({}), sharedAdvanceBaseline() {}, markDirtyUiOnly() {},
   };
   COMPLETIONS.forEach((n) => { sb[n] = () => { calls.push(n); }; });
   // 本物の restoreViewState と同じく、保存された視点を ST へ写す偽物

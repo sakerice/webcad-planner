@@ -18,7 +18,18 @@ test('entry, living and flush bathroom use their own floors without lifting the 
 test('smaller inset room wins and rooms on another floor cannot lift objects',()=>{const c=context();c.DATA.rooms=[{floor:1,x:0,y:0,w:5000,d:5000,floorRaiseMm:150},{floor:1,x:0,y:0,w:1000,d:1000,floorRaiseMm:0}];assert.equal(c.roomFloorAt(1,500,500),0);assert.equal(c.roomFloorAt(2,500,500),2.7);assert.equal(c.roomFloorAt(1,6000,6000),0);});
 test('default plan raises first-floor interiors while keeping entrance at datum',()=>{const p=JSON.parse(fs.readFileSync('tools/tests/fixtures/raised-floor-plan.json','utf8'));const rooms=p.rooms.filter(r=>r.floor===1);assert.ok(rooms.length>1);for(const r of rooms)assert.equal(r.floorRaiseMm,r.n==='玄関'?0:150,r.n||r.id);assert.ok(rooms.some(r=>r.n==='玄関'));assert.ok(rooms.some(r=>(r.n||'').includes('浴室')));});
 test('new first-floor rooms start with 150mm buildup',()=>{
- assert.match(html,/floor:ST\.floor, floorRaiseMm:newRoomFloorRaiseMm\(ST\.floor\)/);
+ // (a) 2D で部屋を描く所は、makeRoom に今の階を渡し、planCoreCtx() を使う。
+ const draw=html.slice(html.indexOf('function handleRoomClick('));
+ assert.match(draw.slice(0,draw.indexOf('\n}\n')),/PlanCoreFactories\.makeRoom\(\{[^}]*floor:ST\.floor[^}]*\},\s*planCoreCtx\(\)\)/);
+ // (b) planCoreCtx の floorRaiseForFloor は、階ごとの既定 newRoomFloorRaiseMm に結ばれている。
+ const ctxSrc=html.slice(html.indexOf('function planCoreCtx('),html.indexOf('function mkWall('));
+ assert.match(ctxSrc,/floorRaiseForFloor:function\(\w+\)\{\s*return newRoomFloorRaiseMm\(\w+\);?\s*\}/);
+ // (c) 実物の makeRoom は、床の高さを floorRaiseForFloor(floor) の値にする。
+ const F=require('../../assets/js/plan-core/factories.js');
+ const fake={newId:()=>7,plan:{floorRaiseForFloor:f=>f*100+5}};
+ assert.equal(F.makeRoom({x:0,y:0,w:1,d:1,floor:1},fake).floorRaiseMm,105);
+ assert.equal(F.makeRoom({x:0,y:0,w:1,d:1,floor:3},fake).floorRaiseMm,305);
+ assert.equal(F.makeRoom({x:0,y:0,w:1,d:1},fake).floorRaiseMm,105);
  // 既定値を触っていないプランでは 1階=150 / 上階=0 のまま(サイドメニューの
  // 「床の高さ」を設定したときだけその値に従う)。
  const c={DATA:{floors:{},heightDefaults:{}},Number,Math,isFinite,
