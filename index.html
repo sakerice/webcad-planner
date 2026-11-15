@@ -19803,7 +19803,7 @@ async function savePlanToStorage(){
       SHARED.version=Math.max(SHARED.version,Number(result.version||0));
       SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;
       SHARED.savedAt=result.savedAt||Date.now();
-      SHARED.baseline=sharedBaselineFrom(DATA);
+      SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();
       sharedResetDirtyTracking();
       sharedSetStatus('ブラウザとクラウドへ保存しました。');
       renderSharedUi();
@@ -19876,7 +19876,7 @@ async function checkStorageOnInit(){
 // ─── URL共同編集 ───────────────────────────────
 // プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
 // 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
-var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null};
+var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null,echoWait:[],sendEntry:null};
 // 丸ごと送り合う欄の一覧と、差分の当て方は assets/js/plan-core/patch.js にある（Worker と同じもの）。
 var SHARED_FIELDS=PlanCorePatch.SHARED_FIELDS;
 function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
@@ -20024,17 +20024,113 @@ function sharedAdvanceBaseline(patch,before){
       (change.removes||[]).forEach(function(id){touched[String(id)]=true;});
       (change.upserts||[]).forEach(function(item){if(item)touched[String(item.id)]=true;});
     }
-    Object.keys(pre).forEach(function(id){if(pre[id]!==post[id])touched[id]=true;});
-    Object.keys(post).forEach(function(id){if(pre[id]!==post[id])touched[id]=true;});
-    Object.keys(touched).forEach(function(id){if(post[id]===undefined)delete b[id];else b[id]=post[id];});
+    // 補完だけで変わった物のうち、手元に未送信の変更がある物は進めない。進めると、その変更まで
+    // 「共有済み」になって送られない。進めなければ、補完済みの手元の値が次の送信で送られる
+    // (相手も同じ補完をかけるだけなので、送り返しは続かない)。
+    var dirty=SHARED.dirtyIds[name]||{};
+    function byFix(id){if(pre[id]!==post[id]&&!touched[id]&&!dirty[id]&&!SHARED.forceScan)touched[id]=true;}
+    Object.keys(pre).forEach(byFix);Object.keys(post).forEach(byFix);
+    var moved=SHARED.sendEntry&&SHARED.sendEntry.baseMoved.collections[name];
+    Object.keys(touched).forEach(function(id){if(post[id]===undefined)delete b[id];else b[id]=post[id];if(moved)moved[id]=true;});
   });
   var fields=(patch&&patch.fields)||{};
   Object.keys(after.fields).forEach(function(key){
-    if(Object.prototype.hasOwnProperty.call(fields,key)||before.fields[key]!==after.fields[key])base.fields[key]=after.fields[key];
+    if(Object.prototype.hasOwnProperty.call(fields,key)||before.fields[key]!==after.fields[key]){base.fields[key]=after.fields[key];if(SHARED.sendEntry)SHARED.sendEntry.baseMoved.fields[key]=true;}
   });
+}
+// 送った差分ぶんだけ、基準(SHARED.baseline)を進める。
+// 前は応答が返った時点の DATA 全体を基準にしていたので、送っている最中に変えた物まで
+// 「送った」ことになり、相手に届かないままになった。
+// prev は送る直前の基準の値。送ってから応答までの間に相手の差分が触った物・欄(overwritten)と、
+// 基準が丸ごと取り直されて動いた物・欄は、進めない。相手の値が手元にあり、基準もそれに合っているため。
+// (署名が同じかどうかだけで見ると、相手が元の値へ戻した場合を「触っていない」と取り違える)
+function sharedBeginSend(patch){
+  var base=SHARED.baseline||{collections:{},fields:{}};
+  var sent={collections:{},fields:{}};
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
+    var change=patch.collections&&patch.collections[name];if(!change)return;
+    var b=base.collections[name]||(base.collections[name]={});var rec=sent.collections[name]={};
+    (change.upserts||[]).forEach(function(item){var id=String(item.id);rec[id]={prev:b[id],next:sharedFastSignature(item)};});
+    (change.removes||[]).forEach(function(id){id=String(id);rec[id]={prev:b[id],next:undefined};});
+  });
+  Object.keys(patch.fields||{}).forEach(function(key){sent.fields[key]={prev:base.fields[key],next:sharedFastSignature(patch.fields[key])};});
+  // 自分の差分が戻ってくるまでの記録。overwritten は、その間に相手の差分が上書きした物・欄。
+  // baseMoved は、応答までの間に受けたあとの補完(sharedAdvanceBaseline)が基準を動かした物・欄。
+  var entry={json:JSON.stringify(patch),sent:sent,cancelled:false,overwritten:{collections:{walls:{},items:{},rooms:{}},fields:{}},baseMoved:{collections:{walls:{},items:{},rooms:{}},fields:{}}};
+  SHARED.echoWait.push(entry);SHARED.sendEntry=entry;
+  return entry;
+}
+function sharedCommitSend(entry){
+  var base=SHARED.baseline;if(!base||entry.cancelled)return;
+  Object.keys(entry.sent.collections).forEach(function(name){
+    var b=base.collections[name]||(base.collections[name]={});var rec=entry.sent.collections[name];
+    var hit=entry.overwritten.collections[name]||{},moved=entry.baseMoved.collections[name]||{};
+    Object.keys(rec).forEach(function(id){if(hit[id]||moved[id]||b[id]!==rec[id].prev)return;if(rec[id].next===undefined)delete b[id];else b[id]=rec[id].next;});
+  });
+  Object.keys(entry.sent.fields).forEach(function(key){var r=entry.sent.fields[key];if(!entry.overwritten.fields[key]&&!entry.baseMoved.fields[key]&&base.fields[key]===r.prev)base.fields[key]=r.next;});
+}
+// 基準を丸ごと取り直したとき(入室・取り直し・クラウド保存)。戻り待ちの記録を捨て、応答待ちの送信は基準を進めない。
+function sharedForgetSends(){SHARED.echoWait=[];if(SHARED.sendEntry)SHARED.sendEntry.cancelled=true;}
+function sharedAbortSend(entry){var i=SHARED.echoWait.indexOf(entry);if(i>=0)SHARED.echoWait.splice(i,1);}
+// 相手の差分を受けたとき、応答待ち・戻り待ちの自分の差分の記録に、相手が触った物・欄の印を付ける。
+function sharedNoteOverwrites(patch){
+  if(!patch)return;
+  var entries=SHARED.echoWait.slice();
+  if(SHARED.sendEntry&&entries.indexOf(SHARED.sendEntry)<0)entries.push(SHARED.sendEntry);
+  entries.forEach(function(entry){
+    PlanCorePatch.COLLECTIONS.forEach(function(name){
+      var change=patch.collections&&patch.collections[name];if(!change)return;
+      (change.upserts||[]).forEach(function(item){if(item)entry.overwritten.collections[name][String(item.id)]=true;});
+      (change.removes||[]).forEach(function(id){entry.overwritten.collections[name][String(id)]=true;});
+    });
+    Object.keys(patch.fields||{}).forEach(function(key){entry.overwritten.fields[key]=true;});
+  });
+  // 相手が上書きした物は、手元の未送信の変更ごと相手の値になった。「未送信」の印を外す。
+  // (残すと、あとで自分の差分が戻ったときに「送ったあと手元で変えた物」と取り違える)
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
+    var change=patch.collections&&patch.collections[name];if(!change)return;var dirty=SHARED.dirtyIds[name]||{};
+    (change.upserts||[]).forEach(function(item){if(item)delete dirty[String(item.id)];});
+    (change.removes||[]).forEach(function(id){delete dirty[String(id)];});
+  });
+}
+// 自分の差分が戻ってきたとき、手元に当て直す分だけを返す(無ければ null)。
+// 手元には送った時点で入っているので、ふつうは何も当てない。当て直すと、送ったあとに
+// 動かした分が送信時点へ戻り、取り消しの履歴も消える。
+// 当て直すのは、送ってから戻るまでの間に相手の差分が同じ物・欄を上書きした分だけ。
+// ルームでは後に届いた自分の差分が勝っているので、手元もそれに合わせる。ただし次の2つは当て直さない。
+//   - そのあとの自分の送信(まだ戻り待ち)に入っている物・欄。ルームでもそちらが勝つ。
+//   - 送ったあとに手元で変えて、まだ送っていない物。基準だけを戻ってきた値に進めるので、
+//     手元の値は次の送信で送られる。
+// 戻り待ちの記録が無いとき(開き直した直後など)は、手元に入っている保証が無いので全部当てる。
+function sharedOwnEchoRemainder(patch){
+  // 送った中身が同じ記録を探す(送信に失敗したと見えて実は届いていた、などで順番がずれても取り違えない)
+  var json=JSON.stringify(patch),at=-1;
+  for(var i=0;i<SHARED.echoWait.length;i++){if(SHARED.echoWait[i].json===json){at=i;break;}}
+  if(at<0)return patch;
+  var entry=SHARED.echoWait[at];SHARED.echoWait.splice(0,at+1);
+  var later=SHARED.echoWait;
+  function sentLater(name,id){return later.some(function(e){var rec=name===null?e.sent.fields:e.sent.collections[name];return !!(rec&&rec[id]);});}
+  var base=SHARED.baseline;
+  var out={collections:{},fields:{}};var any=false;
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
+    var change=patch.collections&&patch.collections[name];if(!change)return;
+    var hit=entry.overwritten.collections[name]||{};var dirty=SHARED.dirtyIds[name]||{};
+    var b=base&&(base.collections[name]||(base.collections[name]={}));
+    function keep(id,sig){
+      if(!hit[id]||sentLater(name,id))return false;
+      if(dirty[id]&&b){if(sig===undefined)delete b[id];else b[id]=sig;return false;}
+      return true;
+    }
+    var upserts=(change.upserts||[]).filter(function(item){return item&&keep(String(item.id),sharedFastSignature(item));});
+    var removes=(change.removes||[]).filter(function(id){return keep(String(id),undefined);});
+    if(upserts.length||removes.length){out.collections[name]={upserts:upserts,removes:removes};any=true;}
+  });
+  Object.keys(patch.fields||{}).forEach(function(key){if(entry.overwritten.fields[key]&&!sentLater(null,key)){out.fields[key]=patch.fields[key];any=true;}});
+  return any?out:null;
 }
 function applySharedPatch(patch,isOwn){
   if(!patch)return;SHARED.applying=true;
+  if(!isOwn)sharedNoteOverwrites(patch);
   var selectedName=sharedCollectionNameFor(ST.selected),selectedId=ST.selected&&ST.selected.id!==undefined?String(ST.selected.id):null;
   try{
     PlanCorePatch.applyPatch(DATA,patch,{clone:sharedClone});
@@ -20042,7 +20138,12 @@ function applySharedPatch(patch,isOwn){
     // 編集中に相手の変更を受けるだけなので、高さの既定と視点は動かさない
     normalizeLoadedPlan({resetHeights:false,restoreView:false});
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
-    clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
+    // 自分の差分が戻ったときは、取り消しの履歴を消さない(消すと、送るたびに undo できなくなる)。
+    // 当て直す物が無ければ、複数選択もそのまま残す。相手の差分のときは今までどおり両方消す。
+    var ownEmpty=isOwn&&!Object.keys(patch.collections||{}).length&&!Object.keys(patch.fields||{}).length;
+    if(!ownEmpty)clearMultiSelection();
+    if(!isOwn)clearEditHistory();
+    draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
     // 照明パネルの「自動照明」のチェック(DATA.autoRoomLights)も相手の値で描き直す
     if(typeof syncLightPanelUi==='function')syncLightPanelUi();
     if(!isOwn)sharedSchedule3DRefresh();
@@ -20056,14 +20157,15 @@ function queueSharedSync(delay){
 async function sharedSyncNow(){
   if(!SHARED.roomId||SHARED.applying)return;
   if(SHARED.sending){SHARED.pending=true;return SHARED.sendPromise;}
-  var patch=buildSharedPatch(DATA,SHARED.baseline);if(!patch)return;
-  sharedResetDirtyTracking();SHARED.sending=true;
+  // 差分が無ければ、未送信の物も無い。印を消してから抜ける(残すと「保存済み」に戻らず、次の全件の比べ直しも続く)。
+  var patch=buildSharedPatch(DATA,SHARED.baseline);if(!patch){sharedResetDirtyTracking();return;}
+  sharedResetDirtyTracking();SHARED.sending=true;var sendEntry=sharedBeginSend(patch);
   SHARED.sendPromise=(async function(){try{
     var response=await fetch('/api/rooms/'+SHARED.roomId+'/update',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'patch',clientId:sharedClientId(),baseVersion:SHARED.version,patch:patch})});
     if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'同期できませんでした（'+response.status+'）');
-    var result=await response.json();SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;SHARED.baseline=sharedBaselineFrom(DATA);sharedSetStatus('変更を同期しました。操作が止まると自動保存します。');renderSharedUi();
-  }catch(e){SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
-  finally{SHARED.sending=false;if(SHARED.pending||sharedHasTrackedChanges()){SHARED.pending=false;queueSharedSync(600);}}})();
+    var result=await response.json();SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;sharedCommitSend(sendEntry);sharedSetStatus('変更を同期しました。操作が止まると自動保存します。');renderSharedUi();
+  }catch(e){sharedAbortSend(sendEntry);SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
+  finally{SHARED.sending=false;if(SHARED.sendEntry===sendEntry)SHARED.sendEntry=null;if(SHARED.pending||sharedHasTrackedChanges()){SHARED.pending=false;queueSharedSync(600);}}})();
   return SHARED.sendPromise;
 }
 async function flushSharedChanges(){
@@ -20106,7 +20208,13 @@ function connectSharedSocket(){
     if(message.type==='patch'&&Number(message.version||0)>SHARED.version){
       SHARED.version=Number(message.version);SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
       var own=message.clientId===sharedClientId();if(own)SHARED.lastLocalVersion=SHARED.version;
-      applySharedPatch(message.patch,own);renderSharedUi();return;
+      if(own){
+        // 当て直す物が無くても、受けたあとの補完(天井付けの照明を取付面へ寄せる、など)は相手と同じように走らせる。
+        // 走らせないと、相手の画面でだけ補完が効いて、開き直すまで食い違う。
+        var rest=sharedOwnEchoRemainder(message.patch);
+        applySharedPatch(rest||{collections:{},fields:{}},true);if(rest)sharedSchedule3DRefresh();
+      }else applySharedPatch(message.patch,false);
+      renderSharedUi();return;
     }
     if(message.type==='checkpoint'){
       SHARED.version=Math.max(SHARED.version,Number(message.version||0));SHARED.savedAt=message.savedAt||SHARED.savedAt;SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
@@ -20130,7 +20238,7 @@ async function fetchSharedPlan(roomId){
 // resuming=true は「既に参加中のセッションで取り直しただけ」の意味。
 // 生きているソケットを張り直さず、編集中の視点も動かさない。
 function installSharedPlan(loaded,roomId,resuming){
-  _defaultPlanPending=false;DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();
+  _defaultPlanPending=false;DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
   ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
 }
 async function refreshSharedPlan(){
@@ -20170,7 +20278,7 @@ async function createSharedRoom(){
     normalizeLegacyFurnitureItems();ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();captureViewState();
     var response=await fetch('/api/rooms',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;})});
     if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'共同編集ルームを作成できませんでした。');
-    var result=await response.json();SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();history.replaceState(null,'',result.url);connectSharedSocket();clearDirty();renderSharedUi();sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();
+    var result=await response.json();SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();history.replaceState(null,'',result.url);connectSharedSocket();clearDirty();renderSharedUi();sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();
   }catch(e){sharedSetStatus(e.message||'共同編集ルームを作成できませんでした。',true);}
   finally{if(button)button.disabled=false;}
 }
