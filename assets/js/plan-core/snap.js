@@ -29,6 +29,12 @@
   function isFiniteNumber(v) {
     return typeof v === 'number' && Number.isFinite(v);
   }
+  // opts を省いて呼ばれたとき(Worker・Node)の既定。画面の EDGE_SNAP_THRESH・STAIR_SNAP_MM と同じ値。
+  var DEFAULT_EDGE_THRESHOLD = 80;
+  var DEFAULT_STAIR_RADIUS = 250;
+  function numberOr(v, fallback) {
+    return isFiniteNumber(v) ? v : fallback;
+  }
 
   // 回転した矩形の外接の上下左右と中心。x,y は回転前の矩形の北西角。
   function rectSnapBounds(x, y, w, d, rot) {
@@ -112,11 +118,12 @@
   }
 
   // 物の端・中心への吸着。rect: { x, y, w, d, rot }。
-  // opts: { floor, threshold, excludeIds, isAnnotationType?, wallThickness? }
+  // opts: { floor, threshold?(既定 80), excludeIds, isAnnotationType?, wallThickness? }
   // 戻り値は { x, y, snapX, snapXVal, snapY, snapYVal }(画面は snapX.. を補助線の表示に使う)。
   function edgeSnap(rect, plan, opts) {
+    opts = opts || {};
     var x = rect.x, y = rect.y;
-    var thresh = opts.threshold;
+    var thresh = numberOr(opts.threshold, DEFAULT_EDGE_THRESHOLD);
     var cands = edgeCandidates(plan, opts);
     var b = rectSnapBounds(x, y, rect.w, rect.d, rect.rot || 0);
     // 閾値の内なら、辺どうしの吸着がいつも勝つ。
@@ -135,12 +142,17 @@
   // 動かしている階段の部材を、近くの部材の出入り口へ吸い付ける(平面 mm)。
   // 出入り口の辺どうしが向き合い、隙間が radius 以内なら隙間を 0 にし、
   // 辺に沿ったずれも近ければ、中心どうし・片側の端どうしのどちらか近い方にそろえる。
-  // opts: { radius, partEdges(item) → 辺の配列, minSpan?(既定 100), isStairPart? }
+  // opts: { radius?(既定 250), partEdges(item) → 辺の配列, minSpan?(既定 100), isStairPart? }
+  // partEdges には既定が無い(辺の求め方は画面の stairPartEdgesMm が正本)。渡されなければ投げる。
   // 吸い付けば { x, y, score, other }、吸い付かなければ { x, y } を返す。
   function stairSnap(item, x, y, plan, opts) {
+    opts = opts || {};
+    if (typeof opts.partEdges !== 'function') {
+      throw new Error('PlanCoreSnap.stairSnap: opts.partEdges(item) に階段の辺を返す関数を渡してください');
+    }
     var isStair = opts.isStairPart || defaultIsStairPart;
     if (!item || !isStair(item.type)) return { x: x, y: y };
-    var radius = opts.radius;
+    var radius = numberOr(opts.radius, DEFAULT_STAIR_RADIUS);
     var minSpan = opts.minSpan !== undefined ? opts.minSpan : 100;
     var partEdges = opts.partEdges;
     var probe = Object.assign({}, item, { x: x, y: y });
