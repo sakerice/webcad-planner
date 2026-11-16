@@ -107,7 +107,9 @@ function ceilingFinishElevationMm(floor,cx,cy){
 //
 // 天井が動く操作は、段差・床上げ・天井高・天井の種類と複数ある。**どれか1つだけを
 // 直しても、残りで器具が取り残される**ので、書き込む側を1か所に集めてここを通す。
-function shiftRoomCeilingFixtures(room,deltaMm){
+// 戻り値は動かした数。movedIds(省略可)に配列を渡すと、動かした器具の id をそこへ足す
+// (画面の操作の包みが、共同編集で相手に送る物の印に使う)。
+function shiftRoomCeilingFixtures(room,deltaMm,movedIds){
   if(!room||!deltaMm||typeof DATA==='undefined'||!DATA||!DATA.items) return 0;
   var n=0;
   DATA.items.forEach(function(it){
@@ -116,6 +118,7 @@ function shiftRoomCeilingFixtures(room,deltaMm){
     if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==room) return;
     it.elev=(Number(it.elev)||0)+deltaMm;
     n++;
+    if(movedIds) movedIds.push(it.id);
   });
   return n;
 }
@@ -1929,79 +1932,24 @@ function updateSelectedProp(p,v,noSave){
   // ロックが止めるのは削除・移動・寸法/座標変更。3D表示の一時切り替えは
   // 間取りの形を変えないので、ロック中でも通す(UI 側も data-lock-control)。
   // 増やすときは「間取りの形を変えないか」で判断する(ロック中の注記が
-  // 名乗っている範囲を超えない)。関数の中に置くのは、この判定だけを
-  // node:vm で切り出して走らせている検査があるため。
+  // 名乗っている範囲を超えない)。操作の部品(operations.js の LOCK_ALLOWED)も同じ3つを通す。
   var lockAllowed=['locked','hidden3D','vis3D'];
   if(isObjectLocked(ST.selected) && lockAllowed.indexOf(p)<0){ updateProps(); return; }
   var keepColorPickerOpen=isAppearanceColorInputActive() && /color/i.test(p);
   if(keepColorPickerOpen) markAppearanceColorDirty();
   else if(!noSave) saveState();
+  // 値の書き込みと後始末(天井付けの器具の追従・窓の高さ・外壁の設定表・既定へ戻したときの受け口の削除)は
+  // assets/js/plan-core/operations.js の applyProp が、選んだ物そのもの(ctx.targets)に対して行う。
+  var props={};
+  props[p]=(p==='locked')?!!v:v;
+  var res=PlanCoreOperations.applyOperations(DATA,[{op:'setProps',args:{id:ST.selected.id,props:props}}],planOpsCtx({inPlace:true,targets:[ST.selected]}));
+  if(res.errors.length) console.warn('[WebCAD] 設定を変えられませんでした: '+res.errors[0].message);
   if(p==='locked'){
-    setObjectLocked(ST.selected,!!v);
     syncLockBatchUi();
     draw2d();
     if(ren) rebuild3D();
     updateProps();
     return;
-  }
-  // 天井を書き換えると、その部屋の天井付けの器具も一緒に動く。
-  // 平天井・勾配・吹き抜けの切り替えはすべてここ(p==='ceiling')を通る。
-  var ceilBefore=(p==='ceiling')?roomCeilingElevationMm(ST.selected):null;
-  if(p==='color') ST.selected.colorCustom=true;
-  if(isLightItemType(ST.selected.type) && p==='lightColor'){
-    ST.selected.color=v;
-    ST.selected.colorCustom=true;
-  }
-  if(p==='texture'){
-    if(ST.selected._texObj) ST.selected._texObj=null;
-    if(!v){
-      ST.selected.textureFlipX=false;
-      ST.selected.textureFlipY=false;
-    }
-  }
-  if(isWindowLikeType(ST.selected.type) && p==='windowTop'){
-    ST.selected.windowHeight=Number(v)-windowSillMm(ST.selected);
-    normalizeWindowVerticalProps(ST.selected,'windowTop');
-    delete ST.selected.windowTop;
-  } else {
-    ST.selected[p]=v;
-    if(isWindowLikeType(ST.selected.type) && (p==='windowSill'||p==='windowHeight')) normalizeWindowVerticalProps(ST.selected,p);
-  }
-  // 天井を「指定なし」へ戻したときは受け口ごと消す。undefined を残すと保存 JSON
-  // には出ないのにメモリ上のプランは「指定あり」に見え、判定が食い違う。
-  // 天井を書いたときは旧フィールド(ceilingHeight)も消す: HeightModel が
-  // ceiling.heightMm を優先するので、残しても効かない古い値が居座るだけ。
-  if(p==='ceiling'){
-    if(!v) delete ST.selected.ceiling;
-    delete ST.selected.ceilingHeight;
-    if(ceilBefore!==null){
-      var ceilAfter=roomCeilingElevationMm(ST.selected);
-      if(ceilAfter!==null&&ceilAfter!==ceilBefore)
-        shiftRoomCeilingFixtures(ST.selected,ceilAfter-ceilBefore);
-    }
-  }
-  // 斜線制限も同じ扱い: 「未設定」へ戻したら受け口ごと消す。undefined を残すと
-  // 保存 JSON には出ないのにメモリ上のプランは「設定あり」に見える。
-  if(p==='setback' && !v) delete ST.selected.setback;
-  // 階段の行き先・置く高さの基準も同じ扱い。既定へ戻したら受け口ごと消す。
-  // undefined を残すと保存 JSON には出ないのにメモリ上は「設定あり」に見える。
-  if((p==='stairTarget'||p==='baseLevel'||p==='vis3D'||p==='footOffsetMm'||p==='lightAim') && !v) delete ST.selected[p];
-  if(p==='stairTarget' && v!=='level') delete ST.selected.stairTo;
-  // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
-  // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
-  if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;
-  if(p==='floorColor' && !v) delete ST.selected.floorColor;
-  if(p==='stairFloorMaterial' && !v) delete ST.selected.stairFloorMaterial;
-  if(p==='ceilingTexture' && !v){
-    delete ST.selected.ceilingTexture;
-    delete ST.selected.ceilingTextureFlipX;
-    delete ST.selected.ceilingTextureFlipY;
-  }
-  if(isWindowLikeType(ST.selected.type) && (p==='w'||p==='windowHeight'||p==='windowSill'||p==='windowTop')) delete ST.selected.windowStd;
-  if((p==='exteriorColor'||p==='exteriorTexture') && ST.selected.x1!==undefined){
-    var ws=getExteriorWallSetting(ST.selected);
-    if(p==='exteriorColor') ws.color=v||null;
-    if(p==='exteriorTexture') ws.texture=v||null;
   }
   draw2d();
   if(keepColorPickerOpen){

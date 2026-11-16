@@ -22,6 +22,7 @@ const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
 const html = require('./app-source.cjs').appSource();
+const { installOps } = require('./ops-vm.cjs');
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
 // 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
 // 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
@@ -446,6 +447,8 @@ function uiCtx(data) {
     roomHasCoverAbove: function (r) { return !r.__uncovered; }
   });
   vm.runInContext([topLevelVar('CEILING_DEFAULT_COLOR')].concat(UI_FNS.map(topLevelFunction)).join('\n'), ctx);
+  // updateSelectedProp は操作の部品(PlanCoreOperations)と画面の ctx(planOpsCtx)を呼ぶ包みなので、両方を入れる。
+  installOps(ctx);
   return ctx;
 }
 function select(ctx, r) { ctx.ST.selected = r; return r; }

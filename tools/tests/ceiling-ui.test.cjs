@@ -22,6 +22,8 @@ const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
 const html = require('./app-source.cjs').appSource();
+// updateSelectedProp は操作の部品(PlanCoreOperations)と画面の ctx(planOpsCtx)を呼ぶ包みなので、両方を入れる。
+const { installOps } = require('./ops-vm.cjs');
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
 
 // ── index.html からの切り出し（roof-ceiling.test.cjs と同じやり方）────────
@@ -148,6 +150,7 @@ function makeCtx(data) {
     getExteriorWallSetting: function () { return {}; }
   });
   vm.runInContext(VARS.map(topLevelVar).concat(FNS.map(topLevelFunction)).join('\n'), ctx);
+  installOps(ctx);
   return ctx;
 }
 function select(ctx, room) { ctx.ST.selected = room; return room; }
