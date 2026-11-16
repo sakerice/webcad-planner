@@ -36,6 +36,11 @@ function planCoreCtx(){
     newId:function(){ return nextId++; },
     catalog:{
       resolveType:function(type){ return bestFmpType(type); },
+      // 置ける種類か(寸法の表 ISIZES か、モデルのカタログにあるか。旧名は今の名前に直してから見る)。
+      // 種類を確かめるのは AI の写しに当てるときだけで、画面の placeItem は今までどおり確かめない。
+      known:function(type){ var t=bestFmpType(type); return !!(t && (Object.prototype.hasOwnProperty.call(ISIZES,t) || isFmpItemType(t))); },
+      // 知らない種類名に近い候補(名前に含む・含まれるもの、次に先頭の一致が長いもの)を最大 8 つ。
+      suggest:function(type){ return planCoreSuggestTypes(type); },
       defaultSize:function(type){ return getItemDefaultSize(type); },
       defaultColor:function(type){ return ICOLORS[type]; },
       model:function(type){ return isFmpItemType(type) ? getFmpItem(type) : null; },
@@ -65,6 +70,69 @@ function planCoreCtx(){
       foundationHeight:function(){ return foundationHeightMm(); }
     }
   };
+}
+function planCoreSuggestTypes(type){
+  var q=String(type||'').toLowerCase();
+  if(!q) return [];
+  var all=Object.keys(ISIZES).concat(Object.keys(FMP_ITEMS||{}));
+  var scored=[];
+  all.forEach(function(t){
+    var s=t.toLowerCase(), score=0;
+    if(s===q) score=1000;
+    else if(s.indexOf(q)>=0||q.indexOf(s)>=0) score=500-Math.abs(s.length-q.length);
+    else { var n=0; while(n<s.length&&n<q.length&&s[n]===q[n]) n++; score=n>=3?n:0; }
+    if(score>0) scored.push({t:t,score:score});
+  });
+  scored.sort(function(a,b){ return b.score-a.score || (a.t<b.t?-1:a.t>b.t?1:0); });
+  return scored.slice(0,8).map(function(e){ return e.t; });
+}
+// 画面の操作(placeItem・delSel・updateSelectedProp)が PlanCoreOperations.applyOperations に渡す ctx。
+// planCoreCtx に、吸着の設定(ST の今の値)・PlanSettable・画面の後始末(hooks)を足したもの。
+// hooks は DATA とグローバルを読み書きするので、inPlace(plan が DATA そのもの)のときだけ使う。
+// extra(省略可)の項目は上書きで足す(inPlace・targets など)。
+function planOpsCtx(extra){
+  var ctx=planCoreCtx();
+  ctx.roomId=function(){ return 'rm_'+Date.now(); };
+  ctx.settable=typeof PlanSettable!=='undefined'?PlanSettable:undefined;
+  // 画面は設定欄の項目名をそのまま書く(setProps の props)。
+  ctx.allowProps=true;
+  ctx.snap={
+    grid:ST.snap, edges:!!ST.shiftKey, edgeThreshold:EDGE_SNAP_THRESH,
+    stair:true, stairRadius:STAIR_SNAP_MM, stairMinSpan:STAIR_LINK_MIN_SPAN_MM,
+    stairPartEdges:stairPartEdgesMm, isStairPart:isStairPartType,
+    isAnnotationType:isPlanAnnotationType, wallThickness:wallThicknessMm
+  };
+  ctx.hooks={
+    isLocked:function(o){ return isObjectLocked(o); },
+    openingPreset:function(tool){
+      var p=getOpeningModelToolPreset(tool);
+      if(!p) return null;
+      return {
+        type:p.baseType,
+        props:p.windowKind?{windowKind:p.windowKind}:null,
+        apply:function(it){ applyOpeningModelToItem(it,p.openingModel); it.doorFinish=p.doorFinish||''; }
+      };
+    },
+    canPlace:function(type,floor,cx,cy){
+      return (placeGroundOnly(type) && floor!==1 && !placeIndoorAt(type,floor,cx,cy)) ? '地面に置く種類なので、1階にしか置けません' : null;
+    },
+    placeFloor:function(type,floor,cx,cy){
+      var indoor=placeIndoorAt(type,floor,cx,cy);
+      return {floor:placeGroundOnly(type)&&!indoor?1:floor, indoor:indoor};
+    },
+    afterPlace:function(it){ placeAfterSnap(it); },
+    windowSill:function(it){ return windowSillMm(it); },
+    normalizeWindow:function(it,key){ normalizeWindowVerticalProps(it,key); },
+    ceilingElevation:function(room){ return roomCeilingElevationMm(room); },
+    shiftCeilingFixtures:function(room,deltaMm){ var ids=[]; shiftRoomCeilingFixtures(room,deltaMm,ids); return ids; },
+    prop:{
+      exteriorColor:function(w,v){ getExteriorWallSetting(w).color=v||null; },
+      exteriorTexture:function(w,v){ getExteriorWallSetting(w).texture=v||null; }
+    },
+    afterDelete:function(){ syncExteriorWallSettings(); }
+  };
+  if(extra) Object.keys(extra).forEach(function(k){ ctx[k]=extra[k]; });
+  return ctx;
 }
 function mkWall(x1,y1,x2,y2,floor,thick,color){
   return PlanCoreFactories.makeWall({x1:x1,y1:y1,x2:x2,y2:y2,floor:floor,thick:thick,color:color}, planCoreCtx());

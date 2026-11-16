@@ -1241,11 +1241,49 @@ test('柱が部屋・壁メニューから置ける', () => {
   assert.match(html, /column:'角柱','column-round':'円柱'/);
 });
 
+// 画面の placeItem は PlanCoreOperations.applyOperations の placeItem を呼ぶ包みで、柱の段差の扱いは
+// planOpsCtx の hooks.afterPlace(= placeAfterSnap)にある。ここでは操作の部品と placeAfterSnap を
+// 合わせて、段差のある部屋に柱を「置いて」確かめる(関数の本文の文字は見ない)。
 test('段差の上に置いた柱は、足元が段差の下へ下り、高さが段差に合う', () => {
-  const body = sliceFunction('placeItem');
-  assert.match(body, /isColumnType\(it\.type\)/, '柱を置いたときの段差の扱いが無い');
-  assert.match(body, /roomSkipCavityMm\(/);
-  assert.match(body, /baseLevel='under'/);
+  const Ops = require(join(ROOT, 'assets', 'js', 'plan-core', 'operations.js'));
+  // 画面の包みが、置いたあとの後始末を placeAfterSnap に任せていること(この経路を外すと下の確かめが無意味になる)
+  assert.match(sliceFunction('placeItem'), /PlanCoreOperations\.applyOperations\(DATA,\[\{op:'placeItem'/, '画面の placeItem が操作の部品を通っていない');
+  assert.match(sliceFunction('planOpsCtx'), /afterPlace:function\(it\)\{ placeAfterSnap\(it\); \}/, '画面の ctx の afterPlace が placeAfterSnap でない');
+  function place(skip, type) {
+    const g = heights(skipHouse(skip === undefined ? {} : { skip: skip }));
+    g.applyDefaultPlacementElevation = () => null; // 高さ決めはこの検査の対象外
+    vm.runInContext(sliceFunction('placeAfterSnap'), g);
+    let n = 900;
+    const ctx = {
+      inPlace: true, newId: () => ++n,
+      catalog: {
+        resolveType: (t) => t, defaultSize: () => ({ w: 300, d: 300 }), defaultColor: () => undefined, model: () => null,
+        is: () => false, canSetElevation: () => false, applyLightDefaults: () => {}, contextExteriorHeight: () => 0, contextFloors: () => 1,
+        constants: { rulerThickness: 60, walkRouteThickness: 50, walkDefaultSpeed: 1.2 }
+      },
+      plan: { wallHeightForFloor: () => 2400, floorRaiseForFloor: () => 0, foundationHeight: () => 0 },
+      hooks: { afterPlace: (it) => g.placeAfterSnap(it) }
+    };
+    // 段差の上の部屋(x 4000〜7000)の中ほどに置く
+    const r = Ops.applyOperations(g.DATA, [{ op: 'placeItem', args: { type: type, x: 5500, y: 2000, floor: 1 } }], ctx);
+    assert.deepEqual(r.errors, []);
+    return g.DATA.items[g.DATA.items.length - 1];
+  }
+  for (const type of ['column', 'column-round']) {
+    const deep = place(600, type);
+    assert.equal(deep.baseLevel, 'under', type + ': 段差 600 の上の柱の足元が段差の下へ下りていない');
+    assert.equal(deep.columnHeight, 600, type + ': 柱の高さが段差に合っていない');
+    // 床下を空間として作らない浅い段差(SKIP_CAVITY_MIN_MM 未満)と、段差が無い部屋では付けない
+    const flat = place(undefined, type), shallow = place(300, type);
+    assert.equal(flat.baseLevel, undefined, type + ': 段差なしで足元を下ろした');
+    assert.equal(shallow.baseLevel, undefined, type + ': 浅い段差で足元を下ろした');
+    assert.notEqual(flat.columnHeight, 600);
+    assert.equal(shallow.columnHeight, flat.columnHeight, type + ': 浅い段差で柱の高さを変えた');
+  }
+  // 柱でない物には付けない
+  const shelf = place(600, 'shelf-built-in');
+  assert.equal(shelf.baseLevel, undefined, '柱でない物の足元を下ろした');
+  assert.equal(shelf.columnHeight, undefined);
 });
 
 test('柱は3Dで角柱と円柱に描き分ける', () => {

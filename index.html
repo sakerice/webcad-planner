@@ -18835,34 +18835,18 @@ function handleRoomClick(wx,wy){
     ST.drawing=false;ST.drawPts=[];if(ren)build3D();draw2d();
   }
 }
-function placeItem(type,wx,wy){
-  var openingPreset=getOpeningModelToolPreset(type);
-  var placeType=openingPreset?openingPreset.baseType:type;
-  var groundOnly=((getFmpItem(placeType)&&getFmpItem(placeType).groundLevel) || placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || placeType==='gas-heater' || isContextExteriorItemType(placeType));
-  // 地面に置く印のカタログのモデルでも、部屋の中に置いたらその部屋の床に載せる
-  // (洗濯機・物干し・卓上の小物にも印が付いていて、1階の地面に埋まっていた)。
-  // 印の扱いは app-constants.js の itemPlacedOnFloorExplicitly。
-  var indoor=!!(getFmpItem(placeType)&&getFmpItem(placeType).groundLevel&&roomAtPointOnFloor(ST.floor,wx,wy));
-  if(groundOnly && ST.floor!==1 && !indoor) return;
-  saveState();
-  var sz=getItemDefaultSize(placeType);
-  var it=mkItem(placeType,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly&&!indoor?1:ST.floor);
-  if(indoor) it.indoor=true;
-  if(openingPreset && openingPreset.windowKind) it.windowKind=openingPreset.windowKind;
-  if(openingPreset){applyOpeningModelToItem(it,openingPreset.openingModel);it.doorFinish=openingPreset.doorFinish||'';}
-  // Final dimensions (including opening presets) determine the visual edges used for placement snap.
-  it.x=wx-it.w/2; it.y=wy-it.d/2;
-  var gridPlaced=snapRectOriginToGrid(it.x,it.y,it.w,it.d,it.rot||0);
-  it.x=gridPlaced.x; it.y=gridPlaced.y;
-  if(ST.shiftKey){
-    var objectPlaced=applyEdgeSnap(it.x,it.y,it.w,it.d,null,it.rot||0);
-    it.x=objectPlaced.x; it.y=objectPlaced.y;
-  }
-  // 階段の部材は、プレビューで吸い付いて見えた位置にそのまま置く。
-  if(isStairPartType(it.type)){
-    var stairPlaced=stairSnapPosition(it,it.x,it.y);
-    it.x=stairPlaced.x; it.y=stairPlaced.y;
-  }
+// 地面に置く種類か(2階以上では、部屋の中でなければ置けず、置くと1階になる)。
+function placeGroundOnly(placeType){
+  return !!((getFmpItem(placeType)&&getFmpItem(placeType).groundLevel) || placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || placeType==='gas-heater' || isContextExteriorItemType(placeType));
+}
+// 地面に置く印のカタログのモデルでも、部屋の中に置いたらその部屋の床に載せる
+// (洗濯機・物干し・卓上の小物にも印が付いていて、1階の地面に埋まっていた)。
+// 印の扱いは app-constants.js の itemPlacedOnFloorExplicitly。
+function placeIndoorAt(placeType,floor,wx,wy){
+  return !!(getFmpItem(placeType)&&getFmpItem(placeType).groundLevel&&roomAtPointOnFloor(floor,wx,wy));
+}
+// 置いた物の高さを決め、段差の上の柱を段差の下まで伸ばす(吸着のあと、DATA へ足す前)。
+function placeAfterSnap(it){
   applyDefaultPlacementElevation(it);
   // 段差の上に置いた柱は、段差の下を持たせるためのものとみなして、
   // 足元をその階の構造床へ下ろし、高さを段差に合わせる。毎回入力させるものではない。
@@ -18871,7 +18855,19 @@ function placeItem(type,wx,wy){
     var cavity=roomSkipCavityMm(colRoom);
     if(cavity>0){ it.baseLevel='under'; it.columnHeight=cavity; }
   }
-  DATA.items.push(it);ST.placingRot=0;
+}
+// 物を置く。作る中身(開口のプリセット・格子・物の端・階段の吸着・高さ・柱の段差)は
+// assets/js/plan-core/operations.js の placeItem が、planOpsCtx の hooks を使って行う。
+// 置けない(地面に置く種類を2階の屋外に置く)ときは、取り消しの履歴に積む前に戻る。
+function placeItem(type,wx,wy){
+  var openingPreset=getOpeningModelToolPreset(type);
+  var placeType=openingPreset?openingPreset.baseType:type;
+  if(placeGroundOnly(placeType) && ST.floor!==1 && !placeIndoorAt(placeType,ST.floor,wx,wy)) return;
+  saveState();
+  var res=PlanCoreOperations.applyOperations(DATA,[{op:'placeItem',args:{type:type,x:wx,y:wy,rot:ST.placingRot,floor:ST.floor}}],planOpsCtx({inPlace:true}));
+  if(res.errors.length){ console.warn('[WebCAD] 物を置けませんでした: '+res.errors[0].message); return; }
+  var it=DATA.items[DATA.items.length-1];
+  ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
   syncToolUi();
   if(ren)build3D();draw2d();

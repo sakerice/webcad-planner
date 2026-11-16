@@ -27,6 +27,7 @@
 //   ctx.allowProps … setProps の props(アプリの欄名をそのまま書く形)は、これが true のとき(画面の包み)だけ受ける。
 //   ctx.maxFloor   … 受ける階の上限(省けば 4。画面で選べる階は 1〜4)。
 //   写しに当てるとき(inPlace でないとき)は ctx.catalog.known が無いと物を置かない。
+//   種類を known で確かめるのも写しのときだけ(画面は、カタログに無い種類名でも今までどおり置く)。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory(require('./factories.js'), require('./snap.js'));
@@ -454,7 +455,8 @@
     if (isCopy(ctx) && typeof cat.known !== 'function') return fail('この ctx では物を置けません(種類を確かめる ctx.catalog.known がありません)');
     var preset = typeof h.openingPreset === 'function' ? h.openingPreset(a.type) : null;
     var placeType = preset ? preset.type : a.type;
-    if (typeof cat.known === 'function' && !cat.known(placeType)) {
+    // 種類を確かめるのは写しに当てる(AI の)ときだけ。画面(inPlace)は今までどおり、カタログに無い種類名も置く。
+    if (isCopy(ctx) && typeof cat.known === 'function' && !cat.known(placeType)) {
       var cands = typeof cat.suggest === 'function' ? cat.suggest(a.type) : undefined;
       return fail('種類 ' + label(a.type) + ' はカタログにありません', cands);
     }

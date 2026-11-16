@@ -629,6 +629,20 @@ test('写しに当てるとき catalog.known が無ければ placeItem は error
   assert.equal(plan.items[plan.items.length - 1].type, 'sofa');
 });
 
+test('inPlace(画面)では catalog.known が false の種類も今までどおり置く(写しなら errors)', () => {
+  const ctx = makeCtx();
+  ctx.catalog.known = () => false;
+  const plan = basePlan();
+  const r = run(plan, [{ op: 'placeItem', args: { type: 'no-such-type', x: 0, y: 0 } }], ctx);
+  assert.equal(r.errors.length, 1);
+  assert.match(r.errors[0].message, /カタログにありません/);
+  const n = plan.items.length;
+  const r2 = run(plan, [{ op: 'placeItem', args: { type: 'no-such-type', x: 0, y: 0 } }], Object.assign(ctx, { inPlace: true }));
+  assert.deepEqual(r2.errors, []);
+  assert.equal(plan.items.length, n + 1);
+  assert.equal(plan.items[n].type, 'no-such-type');
+});
+
 test('warnings: 天井高が変わったのに器具を動かせなかった', () => {
   const ctx = makeCtx({ allowProps: true, hooks: { ceilingElevation: (room) => (room.ceiling ? room.ceiling.heightMm : 2400) } });
   const r = run(basePlan(), [{ op: 'setProps', args: { id: 'rm_a', props: { ceiling: { type: 'flat', heightMm: 2600 } } } }], ctx);
