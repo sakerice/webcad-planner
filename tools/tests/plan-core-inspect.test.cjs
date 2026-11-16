@@ -107,3 +107,54 @@ test('ブラウザの読み込み順(inspect.js が先)でも、呼んだ時点�
   const r = root.PlanCoreInspect.inspectPlan({ walls: [], rooms: [], items: [] });
   assert.deepEqual(Array.from(r.warnings), ['後から入った形の検査', '後から入った知識の検査']);
 });
+
+test('依存が見つからないとき（ブラウザで読み込み前など）は投げず、errors に1件入れて ok:false', () => {
+  const vm = require('node:vm');
+  const root = {};
+  root.self = root;
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', '..', 'assets/js/plan-core/inspect.js'), 'utf8'), root);
+  const r = root.PlanCoreInspect.inspectPlan({ walls: [], rooms: [], items: [] });
+  assert.equal(r.ok, false);
+  assert.equal(r.errors.length, 1);
+  assert.ok(r.errors[0].includes('検査の部品が読み込まれていない'), r.errors[0]);
+  assert.ok(r.errors[0].includes('PlanSchema') && r.errors[0].includes('PlanCheck') && r.errors[0].includes('PlanStructure'));
+  // 一部だけ無いときも同じ。名前は無いものだけ挙げる
+  root.PlanSchema = { validatePlan: () => ({ ok: true, errors: [], warnings: [] }) };
+  root.PlanStructure = { floorsOverlap: () => ({ ok: true }) };
+  const r2 = root.PlanCoreInspect.inspectPlan({ walls: [], rooms: [], items: [] });
+  assert.equal(r2.ok, false);
+  assert.ok(r2.errors[0].includes('PlanCheck') && !r2.errors[0].includes('PlanSchema'));
+  // deps で形の違う物を渡したときも投げない
+  const r3 = I.inspectPlan(housePlan(), { schema: {} });
+  assert.equal(r3.ok, false);
+  assert.ok(r3.errors[0].includes('PlanSchema'));
+});
+
+test('deps.defaults は knowledgeWarnings の options.defaults にそのまま渡す（省けば渡さない）', () => {
+  const seen = [];
+  const fake = {
+    schema: { validatePlan: () => ({ ok: true, errors: [], warnings: [] }) },
+    check: { knowledgeWarnings: (p, roomTypes, options) => { seen.push(options); return []; } },
+    structure: { floorsOverlap: () => ({ ok: true }) },
+  };
+  const table = { bath: { w: 1600, d: 1600 } };
+  I.inspectPlan({ walls: [], rooms: [], items: [] }, Object.assign({ defaults: table }, fake));
+  I.inspectPlan({ walls: [], rooms: [], items: [] }, fake);
+  assert.equal(seen[0].defaults, table);
+  assert.equal(seen[1], undefined);
+
+  // 本物で: 組み込みの浴槽を既定の 1600×1600 で浴室に置くと、defaults が無ければ寸法の注意が出て、あれば出ない
+  const plan = housePlan();
+  const room = plan.rooms.find((r) => r.n === '浴室');
+  plan.items.push({ id: 99999, type: 'bath', x: room.x + room.w / 2 - 800, y: room.y + room.d / 2 - 800, w: 1600, d: 1600, rot: 0, floor: 1 });
+  assert.equal(I.inspectPlan(plan).warnings.filter((w) => w.includes('1600×1600')).length, 1);
+  assert.deepEqual(I.inspectPlan(plan, { defaults: table }).warnings, []);
+});
+
+test('plan-core/inspect.js はグローバルに触らない', () => {
+  const src = fs.readFileSync(path.join(__dirname, '../../assets/js/plan-core/inspect.js'), 'utf8')
+    .split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
+  for (const w of ['DATA', 'ST.', 'document', 'window.', 'nextId', 'ISIZES', 'READ_DEFAULTS']) {
+    assert.ok(!src.includes(w), w + ' が残っている');
+  }
+});
