@@ -19322,6 +19322,10 @@ function selectedDeleteButtonHtml(){
   return '<button class="pbtn sec" onclick="delSel()">'+
     (n>1?('選択中の'+n+'個を削除'):'この要素を削除')+'</button>';
 }
+// 選んだ物(複数選択・全選択を含む)を消す。ロックした物は消さない。
+// 消す中身は assets/js/plan-core/operations.js の deleteObjects が、選んだ物そのもの(ctx.targets)を
+// 指して行う(id が重なっている・id が無い古いプランでも、今までどおり指した物だけが消える)。
+// 消したあとの外壁の設定表の片付け(syncExteriorWallSettings)は planOpsCtx の hooks.afterDelete。
 function delSel(){
   if(!ST.selected && !ST.selectAll)return;
   if(WALKTHROUGH){
@@ -19332,30 +19336,26 @@ function delSel(){
     );
     if(deletingActiveRoute) stopWalkthrough();
   }
+  var targets;
   if(ST.selectAll){
-    var willDelete=DATA.walls.some(function(w){return w.floor===ST.floor && !isObjectLocked(w);}) ||
-      DATA.rooms.some(function(r){return r.floor===ST.floor && !isObjectLocked(r);}) ||
-      DATA.items.some(function(i){return i.floor===ST.floor && !isObjectLocked(i);});
-    if(!willDelete){ ST.selectAll=false; draw2d(); return; }
-    saveState();
-    DATA.walls=DATA.walls.filter(function(w){return w.floor!==ST.floor || isObjectLocked(w);});
-    DATA.rooms=DATA.rooms.filter(function(r){return r.floor!==ST.floor || isObjectLocked(r);});
-    DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor || isObjectLocked(i);});
-    ST.selectAll=false;
+    var onFloor=function(o){ return o.floor===ST.floor && !isObjectLocked(o); };
+    targets=DATA.walls.filter(onFloor).concat(DATA.rooms.filter(onFloor),DATA.items.filter(onFloor));
+    if(!targets.length){ ST.selectAll=false; draw2d(); return; }
   } else {
     // 複数選択しているときは掴んでいるもの全部を消す。以前は ST.selected の
     // 1つだけを消していたので、3つ選んでも1つしか消えなかった。
-    var targets=explicit2DSelection().filter(function(o){return !isObjectLocked(o);});
+    targets=explicit2DSelection().filter(function(o){return !isObjectLocked(o);});
     if(!targets.length){ updateProps(); draw2d(); return; }
-    saveState();
-    var kept=function(o){ return targets.indexOf(o)<0; };
-    DATA.walls=DATA.walls.filter(kept);
-    DATA.rooms=DATA.rooms.filter(kept);
-    DATA.items=DATA.items.filter(kept);
+  }
+  saveState();
+  var res=PlanCoreOperations.applyOperations(DATA,[{op:'deleteObjects',args:{ids:targets.map(function(o){return o.id;})}}],planOpsCtx({inPlace:true,targets:targets}));
+  if(res.errors.length) console.warn('[WebCAD] 消せませんでした: '+res.errors[0].message);
+  if(ST.selectAll){
+    ST.selectAll=false;
+  } else {
     ST.selected=null;
     clearMultiSelection();
   }
-  syncExteriorWallSettings();
   updateProps();
   if(ren)rebuild3D();draw2d();
 }

@@ -28,6 +28,12 @@
 //   ctx.maxFloor   … 受ける階の上限(省けば 4。画面で選べる階は 1〜4)。
 //   写しに当てるとき(inPlace でないとき)は ctx.catalog.known が無いと物を置かない。
 //   種類を known で確かめるのも写しのときだけ(画面は、カタログに無い種類名でも今までどおり置く)。
+//
+// ctx.targets(inPlace のときだけ): 物そのものの配列。渡されたら、id で探す代わりにその物を使う。
+//   画面の delSel・updateSelectedProp は選んだ物そのものを指して操作する。id が重なっている・id が無い
+//   古いプランでも今と同じに消せる・変えられるように、包みは選んだ物を targets で渡す。
+//   deleteObjects は targets の物すべて(ids は見ない)。setProps・moveObject・rotateObject・resizeRoom・
+//   renameRoom・removeWall は targets の1つめだけ(2つ以上は errors)。inPlace でないのに渡すと errors。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory(require('./factories.js'), require('./snap.js'));
@@ -122,6 +128,21 @@
     if (hits.length > 1) return { error: 'id ' + label(id) + ' の物が ' + hits.length + ' つあり、どれか決められません' };
     return hits[0];
   }
+  // 操作の対象を探す。ctx.targets があればその1つめ(物そのもの)、無ければ id で探す。
+  // targets の物がプランの walls・rooms・items に無ければ coll は null(画面の選択がプランの外の物のとき)。
+  function findTarget(plan, a, ctx) {
+    var targets = ctx && ctx.targets;
+    if (!targets) return findById(plan, a.id);
+    if (targets.length !== 1) return { error: 'この操作では ctx.targets を1つだけ渡してください' };
+    var obj = targets[0];
+    for (var c = 0; c < COLLS.length; c++) {
+      var list = plan[COLLS[c]] || [];
+      var i = list.indexOf(obj);
+      if (i >= 0) return { obj: obj, coll: COLLS[c], index: i };
+    }
+    return { obj: obj, coll: null, index: -1 };
+  }
+  function notInPlan(f) { return f.coll === null ? 'ctx.targets の物がプランの中にありません' : null; }
   function lockedError(obj) {
     return fail('id ' + label(obj.id) + ' はロックされているので変えられません(locked・hidden3D・vis3D だけ変えられます)');
   }
@@ -267,15 +288,15 @@
     rec.change(room.id);
   }
 
-  function findRoom(plan, id) {
-    var f = findById(plan, id);
+  function findRoom(plan, a, ctx) {
+    var f = findTarget(plan, a, ctx);
     if (f.error) return f;
-    if (f.coll !== 'rooms') return { error: 'id ' + label(id) + ' は部屋ではありません' };
+    if (f.coll !== 'rooms') return { error: 'id ' + label(f.coll === null ? a.id : f.obj.id) + ' は部屋ではありません' };
     return f;
   }
 
   function resizeRoom(plan, a, ctx, rec) {
-    var f = findRoom(plan, a.id);
+    var f = findRoom(plan, a, ctx);
     if (f.error) return fail(f.error);
     var r = f.obj;
     if (isLocked(r, ctx)) return lockedError(r);
@@ -298,7 +319,7 @@
   }
 
   function renameRoom(plan, a, ctx, rec) {
-    var f = findRoom(plan, a.id);
+    var f = findRoom(plan, a, ctx);
     if (f.error) return fail(f.error);
     if (typeof a.name !== 'string') return fail('name は文字で渡してください');
     if (isLocked(f.obj, ctx)) return lockedError(f.obj);
@@ -322,9 +343,9 @@
   }
 
   function removeWall(plan, a, ctx, rec) {
-    var f = findById(plan, a.id);
+    var f = findTarget(plan, a, ctx);
     if (f.error) return fail(f.error);
-    if (f.coll !== 'walls') return fail('id ' + label(a.id) + ' は壁ではありません');
+    if (f.coll !== 'walls') return fail(notInPlan(f) || 'id ' + label(a.id) + ' は壁ではありません');
     if (isLocked(f.obj, ctx)) return lockedError(f.obj);
     plan.walls.splice(f.index, 1);
     rec.remove(f.obj.id);
@@ -514,8 +535,9 @@
 
   // ── 動かす・回す ─────────────────────────────────────────────────
   function moveObject(plan, a, ctx, rec) {
-    var f = findById(plan, a.id);
+    var f = findTarget(plan, a, ctx);
     if (f.error) return fail(f.error);
+    if (notInPlan(f)) return fail(notInPlan(f));
     var o = f.obj;
     var byCenter = a.x !== undefined || a.y !== undefined;
     var byDelta = a.dx !== undefined || a.dy !== undefined;
@@ -557,9 +579,10 @@
   // x,y は回転前の矩形の北西角なので、rot を変えるだけで中心は動かない。
   // 写しに当てるときは角度を 0 以上 360 未満にそろえる(inPlace では画面と同じくそろえない)。
   function rotateObject(plan, a, ctx, rec) {
-    var f = findById(plan, a.id);
+    var f = findTarget(plan, a, ctx);
     if (f.error) return fail(f.error);
-    if (f.coll !== 'items') return fail('id ' + label(a.id) + ' は回せる物ではありません(壁と部屋は回せません)');
+    if (notInPlan(f)) return fail(notInPlan(f));
+    if (f.coll !== 'items') return fail('id ' + label(f.obj.id) + ' は回せる物ではありません(壁と部屋は回せません)');
     var hasRot = a.rot !== undefined, hasBy = a.by !== undefined;
     if (hasRot === hasBy) return fail('rot(絶対の角度)か by(足す角度)のどちらか一方を渡してください');
     if (hasRot && !isNum(a.rot)) return fail('rot は数で渡してください');
@@ -574,15 +597,27 @@
 
   // ── 消す ─────────────────────────────────────────────────────────
   function deleteObjects(plan, a, ctx, rec) {
-    if (!Array.isArray(a.ids) || !a.ids.length) return fail('ids は id の配列で渡してください');
     var targets = [];
-    for (var i = 0; i < a.ids.length; i++) {
-      var f = findById(plan, a.ids[i]);
-      if (f.error) return fail(f.error);
-      if (isLocked(f.obj, ctx)) return lockedError(f.obj);
-      if (targets.indexOf(f.obj) < 0) targets.push(f.obj);
+    if (ctx.targets) {
+      // 画面: 選んだ物そのものを消す(id が重なっていても、指した物だけが消える)。
+      for (var t = 0; t < ctx.targets.length; t++) {
+        var o = ctx.targets[t];
+        if (isLocked(o, ctx)) return lockedError(o);
+        if (targets.indexOf(o) < 0) targets.push(o);
+      }
+    } else {
+      if (!Array.isArray(a.ids) || !a.ids.length) return fail('ids は id の配列で渡してください');
+      for (var i = 0; i < a.ids.length; i++) {
+        var f = findById(plan, a.ids[i]);
+        if (f.error) return fail(f.error);
+        if (isLocked(f.obj, ctx)) return lockedError(f.obj);
+        if (targets.indexOf(f.obj) < 0) targets.push(f.obj);
+      }
     }
-    var ids = targets.map(function (o) { return o.id; });
+    // 消したと記録するのは、プランの中にあった物だけ。
+    var ids = targets.filter(function (o) {
+      return COLLS.some(function (coll) { return (plan[coll] || []).indexOf(o) >= 0; });
+    }).map(function (o) { return o.id; });
     COLLS.forEach(function (coll) {
       if (!plan[coll]) return;
       plan[coll] = plan[coll].filter(function (o) { return targets.indexOf(o) < 0; });
@@ -594,7 +629,7 @@
 
   // ── 設定を変える ─────────────────────────────────────────────────
   function setProps(plan, a, ctx, rec) {
-    var f = findById(plan, a.id);
+    var f = findTarget(plan, a, ctx);
     if (f.error) return fail(f.error);
     var hasSet = a.set !== undefined, hasProps = a.props !== undefined;
     if (hasSet === hasProps) return fail('set か props のどちらか一方を渡してください');
@@ -613,6 +648,7 @@
       });
       return;
     }
+    if (notInPlan(f)) return fail(notInPlan(f));
     if (isLocked(o, ctx)) return lockedError(o);
     var warnings = [];
     var rs = resolveSet(a.set, f, ctx, warnings);
@@ -643,6 +679,13 @@
       if (!plan || typeof plan !== 'object') return failure(plan, null, null, 'plan がありません');
       ctx = ctx || {};
       if (ctx.inPlace === true && ops.length !== 1) return failure(plan, null, null, 'inPlace のときは操作を1つだけ渡してください');
+      if (ctx.targets !== undefined) {
+        if (ctx.inPlace !== true) return failure(plan, null, null, 'ctx.targets は inPlace のときだけ使えます');
+        if (!Array.isArray(ctx.targets) || !ctx.targets.length
+          || ctx.targets.some(function (o) { return !o || typeof o !== 'object'; })) {
+          return failure(plan, null, null, 'ctx.targets は物の配列で渡してください');
+        }
+      }
       var target = ctx.inPlace === true ? plan : cloneDeep(plan, new Map());
       var rec = new Recorder();
       for (var i = 0; i < ops.length; i++) {

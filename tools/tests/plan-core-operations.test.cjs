@@ -643,6 +643,112 @@ test('inPlace(画面)では catalog.known が false の種類も今までどお�
   assert.equal(plan.items[n].type, 'no-such-type');
 });
 
+// ── ctx.targets(画面が物そのものを指して操作する)────────────────────
+function dupPlan() {
+  const plan = basePlan();
+  // 古いプランでは id が重なっていることがある(同じ id 10 の物が2つ)。id の無い物もある。
+  plan.items.push({ id: 10, type: 'bed-s', x: 6000, y: 6000, w: 1000, d: 2000, rot: 0, floor: 1 });
+  plan.items.push({ type: 'desk', x: 7000, y: 7000, w: 1000, d: 600, rot: 0, floor: 1 });
+  return plan;
+}
+
+test('ctx.targets: id が重なった物の片方だけを消せる(id で探すと errors になる場面)', () => {
+  const plan = dupPlan();
+  const second = plan.items[7];
+  const byId = run(plan, [{ op: 'deleteObjects', args: { ids: [10] } }], makeCtx({ inPlace: true }));
+  assert.equal(byId.errors.length, 1);
+  assert.match(byId.errors[0].message, /2 つあり/);
+  const first = plan.items[0];
+  const r = run(plan, [{ op: 'deleteObjects', args: { ids: [10] } }], makeCtx({ inPlace: true, targets: [second] }));
+  assert.deepEqual(r.errors, []);
+  assert.equal(plan.items.indexOf(second), -1, '指した物が消えていない');
+  assert.equal(plan.items.indexOf(first), 0, '同じ id のもう片方まで消えた');
+  assert.deepEqual(r.removedIds, [10]);
+});
+
+test('ctx.targets: id の無い物を消せる・変えられる', () => {
+  const plan = dupPlan();
+  const noId = plan.items[8];
+  const s = run(plan, [{ op: 'setProps', args: { props: { color: '#123456' } } }], makeCtx({ inPlace: true, allowProps: true, targets: [noId] }));
+  assert.deepEqual(s.errors, []);
+  assert.equal(noId.color, '#123456');
+  assert.equal(noId.colorCustom, true);
+  const d = run(plan, [{ op: 'deleteObjects', args: {} }], makeCtx({ inPlace: true, targets: [noId] }));
+  assert.deepEqual(d.errors, []);
+  assert.equal(plan.items.indexOf(noId), -1);
+});
+
+test('ctx.targets: 重なった id の片方だけの設定を変え、もう片方は変えない', () => {
+  const plan = dupPlan();
+  const first = plan.items[0], second = plan.items[7];
+  const before = JSON.stringify(first);
+  const r = run(plan, [{ op: 'setProps', args: { id: 10, props: { w: 1200 } } }], makeCtx({ inPlace: true, allowProps: true, targets: [second] }));
+  assert.deepEqual(r.errors, []);
+  assert.equal(second.w, 1200);
+  assert.equal(JSON.stringify(first), before);
+});
+
+test('ctx.targets: ロックした物は targets でも消せない・変えられない(locked・hidden3D・vis3D は変えられる)', () => {
+  const plan = basePlan();
+  const locked = plan.items[1];
+  const before = JSON.stringify(plan);
+  const d = run(plan, [{ op: 'deleteObjects', args: {} }], makeCtx({ inPlace: true, targets: [plan.items[0], locked] }));
+  assert.equal(d.errors.length, 1);
+  assert.equal(JSON.stringify(plan), before, '途中まで消えた');
+  const s = run(plan, [{ op: 'setProps', args: { props: { w: 10 } } }], makeCtx({ inPlace: true, allowProps: true, targets: [locked] }));
+  assert.equal(s.errors.length, 1);
+  const h = run(plan, [{ op: 'setProps', args: { props: { hidden3D: true } } }], makeCtx({ inPlace: true, allowProps: true, targets: [locked] }));
+  assert.deepEqual(h.errors, []);
+  assert.equal(locked.hidden3D, true);
+});
+
+test('ctx.targets: inPlace でないのに渡すと errors(プランは変えない)', () => {
+  const plan = dupPlan();
+  const before = JSON.stringify(plan);
+  for (const op of [
+    { op: 'deleteObjects', args: { ids: [12] } },
+    { op: 'setProps', args: { id: 12, props: { w: 1 } } },
+    { op: 'moveObject', args: { id: 12, dx: 10, dy: 0 } },
+  ]) {
+    const r = run(plan, [op], makeCtx({ allowProps: true, targets: [plan.items[2]] }));
+    assert.equal(r.errors.length, 1, op.op);
+    assert.match(r.errors[0].message, /inPlace のときだけ/);
+    assert.equal(r.plan, plan);
+  }
+  assert.equal(JSON.stringify(plan), before);
+});
+
+test('ctx.targets: 形の誤り(空・物でない・1つだけの操作に2つ)は errors', () => {
+  const plan = basePlan();
+  assert.match(run(plan, [{ op: 'deleteObjects', args: {} }], makeCtx({ inPlace: true, targets: [] })).errors[0].message, /物の配列/);
+  assert.match(run(plan, [{ op: 'deleteObjects', args: {} }], makeCtx({ inPlace: true, targets: [10] })).errors[0].message, /物の配列/);
+  const two = run(plan, [{ op: 'setProps', args: { props: { w: 1 } } }], makeCtx({ inPlace: true, allowProps: true, targets: [plan.items[0], plan.items[2]] }));
+  assert.match(two.errors[0].message, /1つだけ/);
+  assert.equal(plan.items[0].w, 1800);
+});
+
+test('ctx.targets: moveObject・rotateObject・resizeRoom・renameRoom・removeWall も指した物に当たる', () => {
+  const plan = dupPlan();
+  const second = plan.items[7];
+  const ctx = (t) => makeCtx({ inPlace: true, targets: [t] });
+  assert.deepEqual(run(plan, [{ op: 'moveObject', args: { dx: 100, dy: 0 } }], ctx(second)).errors, []);
+  assert.equal(second.x, 6100);
+  assert.equal(plan.items[0].x, 1000);
+  assert.deepEqual(run(plan, [{ op: 'rotateObject', args: { rot: 90 } }], ctx(second)).errors, []);
+  assert.equal(second.rot, 90);
+  assert.equal(plan.items[0].rot, 0);
+  assert.deepEqual(run(plan, [{ op: 'resizeRoom', args: { w: 3000 } }], ctx(plan.rooms[0])).errors, []);
+  assert.equal(plan.rooms[0].w, 3000);
+  assert.deepEqual(run(plan, [{ op: 'renameRoom', args: { name: '寝室' } }], ctx(plan.rooms[0])).errors, []);
+  assert.equal(plan.rooms[0].n, '寝室');
+  const wall = plan.walls[0];
+  assert.deepEqual(run(plan, [{ op: 'removeWall', args: {} }], ctx(wall)).errors, []);
+  assert.equal(plan.walls.indexOf(wall), -1);
+  // プランの外の物は、消す・変える以外の操作では errors
+  const outside = { id: 99, type: 'sofa', x: 0, y: 0, w: 10, d: 10, floor: 1 };
+  assert.match(run(plan, [{ op: 'moveObject', args: { dx: 1, dy: 0 } }], ctx(outside)).errors[0].message, /プランの中にありません/);
+});
+
 test('warnings: 天井高が変わったのに器具を動かせなかった', () => {
   const ctx = makeCtx({ allowProps: true, hooks: { ceilingElevation: (room) => (room.ceiling ? room.ceiling.heightMm : 2400) } });
   const r = run(basePlan(), [{ op: 'setProps', args: { id: 'rm_a', props: { ceiling: { type: 'flat', heightMm: 2600 } } } }], ctx);

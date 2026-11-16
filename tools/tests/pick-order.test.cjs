@@ -14,6 +14,7 @@ const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
 const html = require('./app-source.cjs').appSource();
+const { installOps } = require('./ops-vm.cjs');
 
 function topLevelFunction(name) {
   let at = html.indexOf('\nfunction ' + name + '(');
@@ -248,10 +249,59 @@ test('3Dの移動ギズモは選択中をまとめて動かす', () => {
   assert.match(apply, /\(gd\.group\|\|\[\{obj:ref,orig:gd\.orig\}\]\)\.forEach/);
 });
 
+// 画面の delSel を、操作の部品(PlanCoreOperations)と画面の ctx(planOpsCtx)ごと node:vm で動かして、
+// 複数選択した物が全部消えることを確かめる(関数の本文の文字は見ない)。
+function delSelCtx(data) {
+  const log = { save: 0, sync: 0 };
+  const ctx = vm.createContext({
+    console, Number, Math, isFinite, Array, Object, JSON, String,
+    DATA: data, ST: { floor: 1, selected: null, multiSelected: [], selectAll: false, snap: 10, shiftKey: false },
+    DRAG: {}, WALKTHROUGH: null, ren: null, nextId: 9000,
+    isObjectLocked: (o) => !!(o && o.locked),
+    saveState: () => { log.save++; }, syncExteriorWallSettings: () => { log.sync++; },
+    updateProps: () => {}, draw2d: () => {},
+  });
+  installOps(ctx);
+  vm.runInContext(['explicit2DSelection', 'clearMultiSelection', 'delSel'].map(topLevelFunction).join('\n'), ctx);
+  ctx.log = log;
+  return ctx;
+}
+
 test('削除は選択中すべてに効く（1つしか消えなかった）', () => {
-  const fn = topLevelFunction('delSel');
-  assert.match(fn, /var targets=explicit2DSelection\(\)/);
-  assert.match(fn, /DATA\.walls=DATA\.walls\.filter\(kept\)/);
+  const data = {
+    walls: [{ id: 1, floor: 1, x1: 0, y1: 0, x2: 1000, y2: 0 }, { id: 2, floor: 1, x1: 0, y1: 0, x2: 0, y2: 1000 }],
+    rooms: [{ id: 'r1', floor: 1, x: 0, y: 0, w: 1000, d: 1000 }],
+    items: [
+      { id: 10, type: 'sofa', floor: 1, x: 0, y: 0, w: 100, d: 100 },
+      { id: 11, type: 'desk', floor: 1, x: 0, y: 0, w: 100, d: 100 },
+      { id: 12, type: 'bed', floor: 1, x: 0, y: 0, w: 100, d: 100, locked: true },
+      { id: 13, type: 'tv', floor: 1, x: 0, y: 0, w: 100, d: 100 },
+    ],
+  };
+  const c = delSelCtx(data);
+  // 家具2つ・壁1つ・ロックした家具1つを選んで消す
+  c.ST.selected = data.items[1];
+  c.ST.multiSelected = [data.items[0], data.walls[0], data.items[2]];
+  c.delSel();
+  assert.deepEqual(c.DATA.items.map((o) => o.id), [12, 13], '選んだ家具が全部は消えていない(ロックした物は残る)');
+  assert.deepEqual(c.DATA.walls.map((o) => o.id), [2], '選んだ壁が消えていない');
+  assert.deepEqual(c.DATA.rooms.map((o) => o.id), ['r1']);
+  assert.equal(c.log.save, 1, '取り消しの履歴に1回だけ積む');
+  assert.equal(c.log.sync, 1, '外壁の設定表を片付けていない');
+  assert.equal(c.ST.selected, null);
+  assert.equal(c.ST.multiSelected.length, 0);
+  // ロックした物だけを選んでいるときは、何も消さず履歴にも積まない
+  const c2 = delSelCtx(data);
+  c2.ST.selected = data.items.find((o) => o.id === 12);
+  c2.delSel();
+  assert.deepEqual(c2.DATA.items.map((o) => o.id), [12, 13]);
+  assert.equal(c2.log.save, 0);
+  // id が重なった古いプランでも、選んだ方だけが消える(物そのものを指して消す)
+  const dup = { walls: [], rooms: [], items: [{ id: 5, type: 'sofa', floor: 1 }, { id: 5, type: 'desk', floor: 1 }] };
+  const c3 = delSelCtx(dup);
+  c3.ST.selected = dup.items[1];
+  c3.delSel();
+  assert.deepEqual(c3.DATA.items.map((o) => o.type), ['sofa'], 'id が重なった物で、選んでいない方まで消えた・選んだ方が消えない');
   const label = topLevelFunction('selectedDeleteButtonHtml');
   assert.match(label, /選択中の'\+n\+'個を削除/);
 });
