@@ -980,87 +980,22 @@ function setPropsBodyHtml(body,html,it){
   });
 }
 
-function rectSnapBounds(x,y,w,d,rot){
-  var cx=x+w/2, cy=y+d/2, rad=(rot||0)*Math.PI/180;
-  var ex=Math.abs(Math.cos(rad))*w/2+Math.abs(Math.sin(rad))*d/2;
-  var ey=Math.abs(Math.sin(rad))*w/2+Math.abs(Math.cos(rad))*d/2;
-  return {left:cx-ex,right:cx+ex,top:cy-ey,bottom:cy+ey,cx:cx,cy:cy};
+// 吸着の計算は assets/js/plan-core/snap.js(PlanCoreSnap)にある。ここは今の階・格子の幅・
+// 閾値などのグローバルを引数に詰めて呼ぶだけの包み。
+function snapEdgeOpts(excludeId){
+  return {
+    floor:ST.floor, threshold:EDGE_SNAP_THRESH, excludeIds:[excludeId],
+    isAnnotationType:isPlanAnnotationType, wallThickness:wallThicknessMm
+  };
 }
 function getEdgeCandidates(excludeId){
-  var ex={}, ey={}, cx={}, cy={};  // deduplicate edges and centers separately
-  var fl=ST.floor;
-  DATA.items.filter(function(it){return it.floor===fl&&it.id!==excludeId&&it.type!=='site-rect'&&!isPlanAnnotationType(it.type);}).forEach(function(it){
-    if(!isFiniteCanvasValue(it.x) || !isFiniteCanvasValue(it.y) || !isFiniteCanvasValue(it.w) || !isFiniteCanvasValue(it.d)) return;
-    var b=rectSnapBounds(it.x,it.y,it.w,it.d,it.rot||0);
-    [b.left,b.right].forEach(function(v){ex[Math.round(v)]=v;});
-    [b.top,b.bottom].forEach(function(v){ey[Math.round(v)]=v;});
-    cx[Math.round(b.cx)]=b.cx; cy[Math.round(b.cy)]=b.cy;
-  });
-  DATA.rooms.filter(function(r){return r.floor===fl;}).forEach(function(r){
-    [r.x,r.x+r.w].forEach(function(v){ex[Math.round(v)]=v;});
-    [r.y,r.y+r.d].forEach(function(v){ey[Math.round(v)]=v;});
-    cx[Math.round(r.x+r.w/2)]=r.x+r.w/2; cy[Math.round(r.y+r.d/2)]=r.y+r.d/2;
-  });
-  DATA.walls.filter(function(w){return w.floor===fl;}).forEach(function(w){
-    var half=wallThicknessMm(w)/2;
-    if(Math.abs(w.x2-w.x1)<Math.abs(w.y2-w.y1)){
-      var wx=(w.x1+w.x2)/2;
-      [wx-half,wx+half].forEach(function(v){ex[Math.round(v)]=v;});
-      cx[Math.round(wx)]=wx;
-      [Math.min(w.y1,w.y2),Math.max(w.y1,w.y2)].forEach(function(v){ey[Math.round(v)]=v;});
-    }else{
-      var wy=(w.y1+w.y2)/2;
-      [wy-half,wy+half].forEach(function(v){ey[Math.round(v)]=v;});
-      cy[Math.round(wy)]=wy;
-      [Math.min(w.x1,w.x2),Math.max(w.x1,w.x2)].forEach(function(v){ex[Math.round(v)]=v;});
-    }
-  });
-  return {
-    edgeX:Object.values(ex), edgeY:Object.values(ey),
-    centerX:Object.values(cx), centerY:Object.values(cy),
-    // Resize snapping intentionally uses physical edges, not center lines.
-    x:Object.values(ex), y:Object.values(ey)
-  };
-}
-
-function nearestAxisDelta(values,candidates,thresh){
-  var best=null, min=thresh;
-  values.forEach(function(v){candidates.forEach(function(c){
-    var delta=c-v, dist=Math.abs(delta);
-    if(dist<min){min=dist;best={delta:delta,target:c};}
-  });});
-  return best;
+  return PlanCoreSnap.edgeCandidates(DATA, snapEdgeOpts(excludeId));
 }
 function snapRectOriginToGrid(x,y,w,d,rot){
-  var step=Number(ST.snap)||0;
-  if(!step) return {x:x,y:y};
-  var b=rectSnapBounds(x,y,w,d,rot);
-  function gridDelta(values){
-    var best=null,min=Infinity;
-    values.forEach(function(v){
-      var delta=Math.round(v/step)*step-v, dist=Math.abs(delta);
-      if(dist<min){min=dist;best=delta;}
-    });
-    return best||0;
-  }
-  // Snap a physical edge—not merely the stored origin/center—to the configured grid.
-  return {x:x+gridDelta([b.left,b.right]),y:y+gridDelta([b.top,b.bottom])};
+  return PlanCoreSnap.snapRectOriginToGrid(x,y,w,d,rot,ST.snap);
 }
 function applyEdgeSnap(x, y, w, d, excludeId, rot){
-  var thresh=EDGE_SNAP_THRESH;
-  var cands=getEdgeCandidates(excludeId);
-  var b=rectSnapBounds(x,y,w,d,rot||0);
-  // Edge-to-edge alignment always wins while it is within the snap threshold.
-  var bestX=nearestAxisDelta([b.left,b.right],cands.edgeX,thresh);
-  var bestY=nearestAxisDelta([b.top,b.bottom],cands.edgeY,thresh);
-  // Only fall back to center alignment when no edge match is available.
-  if(!bestX) bestX=nearestAxisDelta([b.cx],cands.centerX,thresh);
-  if(!bestY) bestY=nearestAxisDelta([b.cy],cands.centerY,thresh);
-  return {
-    x:bestX?x+bestX.delta:x, y:bestY?y+bestY.delta:y,
-    snapX:!!bestX, snapXVal:bestX?bestX.target:null,
-    snapY:!!bestY, snapYVal:bestY?bestY.target:null
-  };
+  return PlanCoreSnap.edgeSnap({x:x,y:y,w:w,d:d,rot:rot||0}, DATA, snapEdgeOpts(excludeId));
 }
 
 function normalizeTextureOrientationTarget(obj){

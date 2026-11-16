@@ -3806,6 +3806,7 @@ input[type="reset"]:focus-visible{
      本体より先に、かつ #c2d などの要素より後に読む必要がある
      (トップレベルで document.getElementById を呼ぶ行があるため)。 -->
 <script src="assets/js/plan-core/factories.js"></script>
+<script src="assets/js/plan-core/snap.js"></script>
 <script src="assets/js/plan-core/patch.js"></script>
 <script src="assets/js/app-constants.js"></script>
 <script src="assets/js/app-state.js"></script>
@@ -11148,31 +11149,11 @@ function stairTouchingUnlinked(seed){
 // 吸い付かなければ {x,y} をそのまま返す。
 var STAIR_SNAP_MM=250;
 function stairSnapPosition(it,x,y){
-  if(!it||!isStairPartType(it.type)) return {x:x,y:y};
-  var probe=Object.assign({},it,{x:x,y:y});
-  var mine=stairPartEdgesMm(probe).filter(function(e){ return e.role!=='side'; });
-  var best=null, fl=it.floor||1;
-  DATA.items.forEach(function(o){
-    if(o===it||(o.floor||1)!==fl||!isStairPartType(o.type)||(it.id!==undefined&&o.id===it.id)) return;
-    stairPartEdgesMm(o).forEach(function(eo){
-      if(eo.role==='side') return;
-      mine.forEach(function(e){
-        if(e.len<1||e.n.x*eo.n.x+e.n.y*eo.n.y>-0.97) return;
-        var ex=(e.a.x+e.b.x)/2, ey=(e.a.y+e.b.y)/2, mx=(eo.a.x+eo.b.x)/2, my=(eo.a.y+eo.b.y)/2;
-        var gap=(mx-ex)*e.n.x+(my-ey)*e.n.y;
-        if(Math.abs(gap)>STAIR_SNAP_MM) return;
-        var ux=(e.b.x-e.a.x)/e.len, uy=(e.b.y-e.a.y)/e.len;
-        var lat=(mx-ex)*ux+(my-ey)*uy;
-        if(Math.abs(lat)>(e.len+eo.len)/2-STAIR_LINK_MIN_SPAN_MM) return;
-        var half=(eo.len-e.len)/2, al=null;
-        [lat, lat-half, lat+half].forEach(function(v){ if(Math.abs(v)<=STAIR_SNAP_MM&&(al===null||Math.abs(v)<Math.abs(al))) al=v; });
-        var dx=gap*e.n.x+(al!==null?al*ux:0), dy=gap*e.n.y+(al!==null?al*uy:0);
-        var score=Math.abs(gap)+(al!==null?Math.abs(al)*0.5:STAIR_SNAP_MM);
-        if(!best||score<best.score) best={x:x+dx,y:y+dy,score:score,other:o};
-      });
-    });
+  // 計算は assets/js/plan-core/snap.js の stairSnap。辺の求め方は、つながりの判定と同じ stairPartEdgesMm。
+  return PlanCoreSnap.stairSnap(it,x,y,DATA,{
+    radius:STAIR_SNAP_MM, minSpan:STAIR_LINK_MIN_SPAN_MM,
+    partEdges:stairPartEdgesMm, isStairPart:isStairPartType
   });
-  return best||{x:x,y:y};
 }
 // 選んだ階段の、上る順番とつながりの説明(設定欄に出す)。
 function stairConnectionSummary(it){
