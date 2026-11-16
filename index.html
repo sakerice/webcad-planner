@@ -18866,6 +18866,7 @@ function placeItem(type,wx,wy){
   saveState();
   var res=PlanCoreOperations.applyOperations(DATA,[{op:'placeItem',args:{type:type,x:wx,y:wy,rot:ST.placingRot,floor:ST.floor}}],planOpsCtx({inPlace:true}));
   if(res.errors.length){ console.warn('[WebCAD] 物を置けませんでした: '+res.errors[0].message); return; }
+  sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
   var it=DATA.items[DATA.items.length-1];
   ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
@@ -19350,6 +19351,7 @@ function delSel(){
   saveState();
   var res=PlanCoreOperations.applyOperations(DATA,[{op:'deleteObjects',args:{ids:targets.map(function(o){return o.id;})}}],planOpsCtx({inPlace:true,targets:targets}));
   if(res.errors.length) console.warn('[WebCAD] 消せませんでした: '+res.errors[0].message);
+  sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
   if(ST.selectAll){
     ST.selectAll=false;
   } else {
@@ -19886,6 +19888,25 @@ function sharedCollectionNameFor(obj){
 }
 function sharedMarkObjectsDirty(list){
   (list||[]).forEach(function(obj){var name=sharedCollectionNameFor(obj);if(name&&obj&&obj.id!==undefined&&obj.id!==null)SHARED.dirtyIds[name][String(obj.id)]=true;});
+}
+// 操作(PlanCoreOperations.applyOperations)が変えた・消した物の id に、送る候補の印を付ける。
+// saveState の印(sharedRememberEditTargets)は選んでいた物にしか付かないので、選んでいない物を操作が
+// 変えたとき(天井を変えて動いた器具など)はここで付ける。id は今のプランで探し、消えた物は基準で探す。
+// 共同編集中でなければ何もしない。
+function sharedMarkIdsDirty(ids){
+  if(!SHARED.roomId||SHARED.applying)return;
+  (ids||[]).forEach(function(id){
+    if(id===undefined||id===null)return;
+    var key=String(id),hit=false;
+    ['walls','items','rooms'].forEach(function(name){
+      if((DATA[name]||[]).some(function(o){return o&&o.id!==undefined&&o.id!==null&&String(o.id)===key;})){SHARED.dirtyIds[name][key]=true;hit=true;}
+    });
+    if(hit||!SHARED.baseline)return;
+    ['walls','items','rooms'].forEach(function(name){
+      var b=SHARED.baseline.collections&&SHARED.baseline.collections[name];
+      if(b&&b[key]!==undefined)SHARED.dirtyIds[name][key]=true;
+    });
+  });
 }
 function sharedRememberEditTargets(){
   if(!SHARED.roomId||SHARED.applying)return;

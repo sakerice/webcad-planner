@@ -1944,6 +1944,8 @@ function updateSelectedProp(p,v,noSave){
   props[p]=(p==='locked')?!!v:v;
   var res=PlanCoreOperations.applyOperations(DATA,[{op:'setProps',args:{id:ST.selected.id,props:props}}],planOpsCtx({inPlace:true,targets:[ST.selected]}));
   if(res.errors.length) console.warn('[WebCAD] 設定を変えられませんでした: '+res.errors[0].message);
+  // 選んだ物の印は saveState が付ける。選んでいない物(天井に付いていく器具など)の印をここで付ける。
+  sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
   if(p==='locked'){
     syncLockBatchUi();
     draw2d();
