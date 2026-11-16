@@ -18,6 +18,15 @@
 //   prop.exteriorColor / prop.exteriorTexture(obj, value, plan) … 外壁の設定表(getExteriorWallSetting)
 // windowSill・normalizeWindow は、省くと画面と同じ計算をここで行う(壁の高さは ctx.plan.wallHeightForFloor)。
 // ceilingElevation・shiftCeilingFixtures を省くと、器具は動かさず warnings に書く。
+//
+// hooks の決まり: hooks は引数で受けた plan と物だけを読み書きする。
+// グローバルの DATA を読み書きする hooks(画面の実物)は、inPlace(plan が DATA そのもの)のときだけ渡してよい。
+// 写しに当てるときに渡すと、hooks は写しでなく DATA を見て、DATA を書き換えてしまう。
+//
+// 入口の守り(AI から呼ばれる写しの側):
+//   ctx.allowProps … setProps の props(アプリの欄名をそのまま書く形)は、これが true のとき(画面の包み)だけ受ける。
+//   ctx.maxFloor   … 受ける階の上限(省けば 4。画面で選べる階は 1〜4)。
+//   写しに当てるとき(inPlace でないとき)は ctx.catalog.known が無いと物を置かない。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory(require('./factories.js'), require('./snap.js'));
@@ -31,7 +40,34 @@
 
   function isNum(v) { return typeof v === 'number' && isFinite(v); }
   function isPositive(v) { return isNum(v) && v > 0; }
-  function isFloor(v) { return isNum(v) && v >= 1 && Math.floor(v) === v; }
+  function maxFloorOf(ctx) { return ctx && isNum(ctx.maxFloor) && ctx.maxFloor >= 1 ? Math.floor(ctx.maxFloor) : 4; }
+  function floorError(v, ctx) {
+    if (v === undefined) return null;
+    var max = maxFloorOf(ctx);
+    if (isNum(v) && v >= 1 && v <= max && Math.floor(v) === v) return null;
+    return fail('floor は 1〜' + max + ' の整数で渡してください(' + label(v) + ' の階はありません)');
+  }
+  function isCopy(ctx) { return !(ctx && ctx.inPlace === true); }
+  // 書き込めば済むが、桁を間違えたらしい値(写しに当てるときだけ warnings に書く)。
+  var SMALL_MM = 50, LARGE_MM = 100000;
+  function checkScale(ctx, rec, what, dims, coords) {
+    if (!isCopy(ctx)) return;
+    (dims || []).forEach(function (d) {
+      if (!isNum(d[1])) return;
+      if (Math.abs(d[1]) < SMALL_MM) rec.warnings.push(what + 'の ' + d[0] + '=' + d[1] + 'mm は ' + SMALL_MM + 'mm 未満です。単位(mm)を確かめてください');
+      else if (Math.abs(d[1]) > LARGE_MM) rec.warnings.push(what + 'の ' + d[0] + '=' + d[1] + 'mm は ' + LARGE_MM + 'mm を超えています。単位(mm)を確かめてください');
+    });
+    (coords || []).forEach(function (c) {
+      if (isNum(c[1]) && Math.abs(c[1]) > LARGE_MM) rec.warnings.push(what + 'の ' + c[0] + '=' + c[1] + 'mm は ' + LARGE_MM + 'mm を超えています。単位(mm)を確かめてください');
+    });
+  }
+  function normRot(r) { return ((r % 360) + 360) % 360; }
+  // 書き込ませない項目名。id を書き換えると物を指せなくなり、残りの3つはオブジェクトの仕組みを壊す。
+  var FORBIDDEN_KEYS = ['id', '__proto__', 'constructor', 'prototype'];
+  function forbiddenKey(keys) {
+    for (var i = 0; i < keys.length; i++) if (FORBIDDEN_KEYS.indexOf(keys[i]) >= 0) return keys[i];
+    return null;
+  }
   function hooksOf(ctx) { return (ctx && ctx.hooks) || {}; }
   function isLocked(obj, ctx) {
     var h = hooksOf(ctx);
@@ -81,7 +117,7 @@
         if (o && (o.id === id || String(o.id) === String(id))) hits.push({ obj: o, coll: coll, index: i });
       });
     });
-    if (!hits.length) return { error: 'id ' + label(id) + ' の物はありません' };
+    if (!hits.length) return { error: 'id ' + label(id) + ' の物はありません。プランの要約にある id をそのまま使ってください(消した物の id は使えません)' };
     if (hits.length > 1) return { error: 'id ' + label(id) + ' の物が ' + hits.length + ' つあり、どれか決められません' };
     return hits[0];
   }
@@ -144,8 +180,8 @@
     }
     var isWindow = catIs(ctx, 'windowLike', obj.type);
     // 天井を書き換えると、その部屋の天井付けの器具も一緒に動く。
-    var canFollowCeiling = typeof h.ceilingElevation === 'function' && typeof h.shiftCeilingFixtures === 'function';
-    var ceilBefore = (key === 'ceiling' && canFollowCeiling) ? h.ceilingElevation(obj, plan) : null;
+    var canMeasureCeiling = typeof h.ceilingElevation === 'function';
+    var ceilBefore = (key === 'ceiling' && canMeasureCeiling) ? h.ceilingElevation(obj, plan) : null;
     if (key === 'color') obj.colorCustom = true;
     if (catIs(ctx, 'light', obj.type) && key === 'lightColor') {
       obj.color = value;
@@ -173,11 +209,17 @@
       if (ceilBefore !== null) {
         var ceilAfter = h.ceilingElevation(obj, plan);
         if (ceilAfter !== null && ceilAfter !== ceilBefore) {
-          var moved = h.shiftCeilingFixtures(obj, ceilAfter - ceilBefore, plan);
-          (Array.isArray(moved) ? moved : []).forEach(function (id) { if (changed.indexOf(id) < 0) changed.push(id); });
+          if (typeof h.shiftCeilingFixtures === 'function') {
+            var moved = h.shiftCeilingFixtures(obj, ceilAfter - ceilBefore, plan);
+            (Array.isArray(moved) ? moved : []).forEach(function (id) { if (changed.indexOf(id) < 0) changed.push(id); });
+          } else if (warnings) {
+            warnings.push('id ' + label(obj.id) + ' の天井高が ' + ceilBefore + 'mm から ' + ceilAfter
+              + 'mm に変わりましたが、その部屋の天井付けの器具(照明・物干しなど)の高さは動かしていません');
+          }
         }
-      } else if (!canFollowCeiling && warnings) {
-        warnings.push('id ' + label(obj.id) + ' の天井を変えましたが、天井付けの器具の高さは動かしていません');
+      } else if (!canMeasureCeiling && warnings) {
+        warnings.push('id ' + label(obj.id) + ' の天井を変えましたが、天井高を測れないため、'
+          + 'その部屋の天井付けの器具(照明・物干しなど)の高さは確かめておらず、動かしていません');
       }
     }
     // 既定へ戻したら受け口ごと消す(undefined を残すと、保存 JSON とメモリの中身が食い違う)。
@@ -204,9 +246,18 @@
   function addRoom(plan, a, ctx, rec) {
     if (!isNum(a.x) || !isNum(a.y)) return fail('x・y(部屋の中心)は数で渡してください');
     if (!isPositive(a.w) || !isPositive(a.d)) return fail('w・d(部屋の幅と奥行き)は 0 より大きい数で渡してください');
-    if (a.floor !== undefined && !isFloor(a.floor)) return fail('floor は 1 以上の整数で渡してください');
+    var fe = floorError(a.floor, ctx);
+    if (fe) return fe;
     if (a.name !== undefined && typeof a.name !== 'string') return fail('name は文字で渡してください');
+    // 部屋の id が既にある部屋と重なったら(画面の 'rm_'+時刻は同じミリ秒に2回呼ぶと重なる)、連番で作り直す。
     var id = typeof ctx.roomId === 'function' ? ctx.roomId() : 'rm_' + ctx.newId();
+    var rooms = plan.rooms || [];
+    var taken = function (x) { return rooms.some(function (r) { return r && String(r.id) === String(x); }); };
+    for (var tries = 0; taken(id); tries++) {
+      if (tries >= 1000) return fail('部屋の id を重ならないように作れませんでした');
+      id = 'rm_' + ctx.newId();
+    }
+    checkScale(ctx, rec, '部屋', [['w', a.w], ['d', a.d]], [['x', a.x], ['y', a.y]]);
     var args = { id: id, x: a.x - a.w / 2, y: a.y - a.d / 2, w: a.w, d: a.d, floor: a.floor || 1 };
     if (a.name !== undefined) args.n = a.name;
     var room = Factories.makeRoom(args, ctx);
@@ -237,6 +288,7 @@
     var w = a.w !== undefined ? a.w : r.w;
     var d = a.d !== undefined ? a.d : r.d;
     if (!isNum(cx) || !isNum(cy) || !isPositive(w) || !isPositive(d)) return fail('id ' + label(r.id) + ' の今の位置か大きさが数ではありません');
+    checkScale(ctx, rec, '部屋', [['w', a.w], ['d', a.d]], [['x', a.x], ['y', a.y]]);
     r.x = cx - w / 2;
     r.y = cy - d / 2;
     r.w = w;
@@ -257,8 +309,11 @@
   function addWall(plan, a, ctx, rec) {
     if (!isNum(a.x1) || !isNum(a.y1) || !isNum(a.x2) || !isNum(a.y2)) return fail('x1・y1・x2・y2 は数で渡してください');
     if (a.x1 === a.x2 && a.y1 === a.y2) return fail('壁の始点と終点が同じです');
-    if (a.floor !== undefined && !isFloor(a.floor)) return fail('floor は 1 以上の整数で渡してください');
+    var fe = floorError(a.floor, ctx);
+    if (fe) return fe;
     if (a.thick !== undefined && !isPositive(a.thick)) return fail('thick は 0 より大きい数で渡してください');
+    checkScale(ctx, rec, '壁', [['長さ', Math.hypot(a.x2 - a.x1, a.y2 - a.y1)]],
+      [['x1', a.x1], ['y1', a.y1], ['x2', a.x2], ['y2', a.y2]]);
     var w = Factories.makeWall({ x1: a.x1, y1: a.y1, x2: a.x2, y2: a.y2, floor: a.floor, thick: a.thick }, ctx);
     if (!plan.walls) plan.walls = [];
     plan.walls.push(w);
@@ -337,6 +392,8 @@
     var out = {};
     var keys = Object.keys(set);
     if (!keys.length) return fail('set が空です');
+    var bad = forbiddenKey(keys);
+    if (bad) return fail('set の「' + bad + '」は書き換えられません', allowed);
     var h = hooksOf(ctx);
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i], value = set[key];
@@ -388,10 +445,13 @@
     if (typeof a.type !== 'string' || !a.type) return fail('type(種類)を文字で渡してください');
     if (!isNum(a.x) || !isNum(a.y)) return fail('x・y(物の中心)は数で渡してください');
     if (a.rot !== undefined && !isNum(a.rot)) return fail('rot(度)は数で渡してください');
-    if (a.floor !== undefined && !isFloor(a.floor)) return fail('floor は 1 以上の整数で渡してください');
+    var fe = floorError(a.floor, ctx);
+    if (fe) return fe;
     if ((a.w !== undefined && !isPositive(a.w)) || (a.d !== undefined && !isPositive(a.d))) return fail('w・d は 0 より大きい数で渡してください');
     var h = hooksOf(ctx);
     var cat = ctx.catalog || {};
+    // 写しに当てる(AI の)ときは、種類をカタログで確かめられない ctx では置かない。
+    if (isCopy(ctx) && typeof cat.known !== 'function') return fail('この ctx では物を置けません(種類を確かめる ctx.catalog.known がありません)');
     var preset = typeof h.openingPreset === 'function' ? h.openingPreset(a.type) : null;
     var placeType = preset ? preset.type : a.type;
     if (typeof cat.known === 'function' && !cat.known(placeType)) {
@@ -413,14 +473,21 @@
     var on = typeof h.placeFloor === 'function' ? (h.placeFloor(placeType, floor, a.x, a.y, plan) || {}) : {};
     var indoor = !!on.indoor;
     var sz = typeof cat.defaultSize === 'function' ? cat.defaultSize(placeType) : { w: 0, d: 0 };
+    checkScale(ctx, rec, '種類 ' + label(a.type) + ' ', [['w', a.w], ['d', a.d]], [['x', a.x], ['y', a.y]]);
+    // 角度を 0〜360 にそろえるのは写しのときだけ(画面の今の保存値を変えない)。
+    var rot = (isCopy(ctx) && a.rot !== undefined) ? normRot(a.rot) : a.rot;
     var it = Factories.makeItem(placeType, {
-      x: a.x - (a.w || sz.w) / 2, y: a.y - (a.d || sz.d) / 2, rot: a.rot,
+      x: a.x - (a.w || sz.w) / 2, y: a.y - (a.d || sz.d) / 2, rot: rot,
       floor: on.floor !== undefined ? on.floor : floor, w: a.w, d: a.d
     }, ctx);
     if (indoor) it.indoor = true;
     if (preset) {
       if (preset.props) Object.keys(preset.props).forEach(function (k) { it[k] = preset.props[k]; });
       if (typeof preset.apply === 'function') preset.apply(it);
+      var over = [];
+      if (a.w !== undefined && it.w !== a.w) over.push('w=' + a.w + '→' + it.w);
+      if (a.d !== undefined && it.d !== a.d) over.push('d=' + a.d + '→' + it.d);
+      if (over.length) rec.warnings.push('種類 ' + label(a.type) + ' は寸法が決まっているので、渡された寸法を使っていません(' + over.join('、') + ')');
     }
     // 角は最終の寸法(プリセットで変わった寸法を含む)から出す。吸着もこの寸法の辺で見る。
     it.x = a.x - it.w / 2;
@@ -456,6 +523,7 @@
     if (byDelta && (!isNum(a.dx) || !isNum(a.dy))) return fail('dx・dy は数で渡してください');
     if (!byCenter && !byDelta) return fail('x,y(中心)か dx,dy(動かす量)を渡してください');
     if (isLocked(o, ctx)) return lockedError(o);
+    if (byCenter) checkScale(ctx, rec, 'id ' + label(o.id) + ' ', [], [['x', a.x], ['y', a.y]]);
     var snap = snapOf(ctx);
     if (f.coll === 'walls') {
       var dx = a.dx, dy = a.dy;
@@ -485,7 +553,7 @@
   }
 
   // x,y は回転前の矩形の北西角なので、rot を変えるだけで中心は動かない。
-  // 角度は 0 以上 360 未満にそろえる。
+  // 写しに当てるときは角度を 0 以上 360 未満にそろえる(inPlace では画面と同じくそろえない)。
   function rotateObject(plan, a, ctx, rec) {
     var f = findById(plan, a.id);
     if (f.error) return fail(f.error);
@@ -497,7 +565,7 @@
     var o = f.obj;
     if (isLocked(o, ctx)) return lockedError(o);
     var r = hasRot ? a.rot : (Number(o.rot) || 0) + a.by;
-    r = ((r % 360) + 360) % 360;
+    if (isCopy(ctx)) r = normRot(r);
     o.rot = r;
     rec.change(o.id);
   }
@@ -530,9 +598,13 @@
     if (hasSet === hasProps) return fail('set か props のどちらか一方を渡してください');
     var o = f.obj;
     if (hasProps) {
+      // props はアプリの欄名をそのまま書く画面用の形。検査が無いので、画面の包み(ctx.allowProps)だけに許す。
+      if (ctx.allowProps !== true) return fail('props は使えません。set を使ってください');
       if (!a.props || typeof a.props !== 'object' || Array.isArray(a.props)) return fail('props は {項目: 値} の形で渡してください');
       var keys = Object.keys(a.props);
       if (!keys.length) return fail('props が空です');
+      var bad = forbiddenKey(keys);
+      if (bad) return fail('props の「' + bad + '」は書き換えられません');
       if (isLocked(o, ctx) && keys.some(function (k) { return LOCK_ALLOWED.indexOf(k) < 0; })) return lockedError(o);
       keys.forEach(function (k) {
         applyProp(o, k, a.props[k], plan, ctx, rec.warnings).changed.forEach(function (id) { rec.change(id); });

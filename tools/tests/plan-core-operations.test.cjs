@@ -15,6 +15,7 @@ function makeCtx(over) {
   const ctx = {
     newId: () => ++n,
     catalog: {
+      known: () => true,
       resolveType: (t) => t,
       defaultSize: (t) => (t === 'sofa' ? { w: 1800, d: 900 } : { w: 900, d: 900 }),
       defaultColor: () => undefined,
@@ -122,11 +123,12 @@ test('removeWall は壁を消し、afterDelete に消した id を渡す', () =>
   assert.deepEqual(seen, [[1]]);
 });
 
-test('placeItem: 回転90・1800×900 を中心(5000,5000)に置くと x:4100, y:4550', () => {
-  const r = run(basePlan(), [{ op: 'placeItem', args: { type: 'sofa', x: 5000, y: 5000, rot: 90, w: 1800, d: 900 } }]);
+test('placeItem: 回転90・2000×800(既定寸法と違う)を中心(5000,5000)に置くと x:4000, y:4600', () => {
+  const r = run(basePlan(), [{ op: 'placeItem', args: { type: 'sofa', x: 5000, y: 5000, rot: 90, w: 2000, d: 800 } }]);
   assert.deepEqual(r.errors, []);
+  assert.deepEqual(r.warnings, []);
   const it = r.plan.items[r.plan.items.length - 1];
-  assert.deepEqual([it.id, it.type, it.x, it.y, it.w, it.d, it.rot, it.floor], [101, 'sofa', 4100, 4550, 1800, 900, 90, 1]);
+  assert.deepEqual([it.id, it.type, it.x, it.y, it.w, it.d, it.rot, it.floor], [101, 'sofa', 4000, 4600, 2000, 800, 90, 1]);
   assert.deepEqual(r.changedIds, [101]);
 });
 
@@ -243,7 +245,7 @@ test('deleteObjects は壁・物・部屋を消し、changedIds と removedIds �
 });
 
 test('setProps props: アプリの欄名をそのまま書き、色を変えたら colorCustom を立てる', () => {
-  const r = run(basePlan(), [{ op: 'setProps', args: { id: 10, props: { color: '#ff0000', flipX: true } } }]);
+  const r = run(basePlan(), [{ op: 'setProps', args: { id: 10, props: { color: '#ff0000', flipX: true } } }], makeCtx({ allowProps: true }));
   const it = itemById(r.plan, 10);
   assert.deepEqual([it.color, it.colorCustom, it.flipX], ['#ff0000', true, true]);
   assert.deepEqual(r.changedIds, [10]);
@@ -253,6 +255,7 @@ test('setProps props: 天井を変えると、天井付けの器具も changedId
   const plan = basePlan();
   let elev = 2400;
   const ctx = makeCtx({
+    allowProps: true,
     hooks: {
       ceilingElevation: (room) => (room.ceiling ? room.ceiling.heightMm : elev),
       shiftCeilingFixtures: (room, delta, p) => { const l = p.items.find((o) => o.id === 16); l.elev += delta; return [16]; },
@@ -270,7 +273,7 @@ test('setProps props: 既定へ戻した項目は受け口ごと消す', () => {
   const plan = basePlan();
   plan.items[0].stairTarget = 'level';
   plan.items[0].stairTo = '9';
-  const r = run(plan, [{ op: 'setProps', args: { id: 10, props: { stairTarget: '' } } }]);
+  const r = run(plan, [{ op: 'setProps', args: { id: 10, props: { stairTarget: '' } } }], makeCtx({ allowProps: true }));
   const it = itemById(r.plan, 10);
   assert.ok(!('stairTarget' in it));
   assert.ok(!('stairTo' in it));
@@ -374,7 +377,7 @@ test('inPlace: 成功すれば渡したプランを直接変える', () => {
 test('inPlace: 失敗したら1項目も変えない', () => {
   const plan = basePlan();
   const before = JSON.stringify(plan);
-  const ctx = makeCtx({ inPlace: true, settable: PlanSettable });
+  const ctx = makeCtx({ inPlace: true, settable: PlanSettable, allowProps: true });
   for (const op of [
     { op: 'moveObject', args: { id: 11, dx: 100, dy: 0 } },
     { op: 'deleteObjects', args: { ids: [10, 11] } },
@@ -411,7 +414,7 @@ test('ロックした物は、動かす・回す・消す・大きさを変え�
     { op: 'removeWall', args: { id: 2 } },
     { op: 'setProps', args: { id: 11, props: { w: 500 } } },
   ]) {
-    const r = run(plan, [op]);
+    const r = run(plan, [op], makeCtx({ allowProps: true }));
     assert.equal(r.errors.length, 1, op.op);
     assert.match(r.errors[0].message, /ロック/, op.op);
   }
@@ -419,10 +422,10 @@ test('ロックした物は、動かす・回す・消す・大きさを変え�
 });
 
 test('ロック中でも locked・hidden3D・vis3D は変えられる', () => {
-  const r = run(basePlan(), [{ op: 'setProps', args: { id: 11, props: { hidden3D: true, vis3D: 'x' } } }]);
+  const r = run(basePlan(), [{ op: 'setProps', args: { id: 11, props: { hidden3D: true, vis3D: 'x' } } }], makeCtx({ allowProps: true }));
   assert.deepEqual(r.errors, []);
   assert.deepEqual([itemById(r.plan, 11).hidden3D, itemById(r.plan, 11).vis3D], [true, 'x']);
-  const r2 = run(basePlan(), [{ op: 'setProps', args: { id: 11, props: { locked: false } } }]);
+  const r2 = run(basePlan(), [{ op: 'setProps', args: { id: 11, props: { locked: false } } }], makeCtx({ allowProps: true }));
   assert.ok(!('locked' in itemById(r2.plan, 11)));
 });
 
@@ -509,6 +512,169 @@ test('applyProp: 照明の色は color にも書く', () => {
   const l = { id: 1, type: 'light-x', color: '#fff' };
   O.applyProp(l, 'lightColor', '#f00', { items: [l] }, makeCtx());
   assert.deepEqual([l.color, l.colorCustom, l.lightColor], ['#f00', true, '#f00']);
+});
+
+// ── レビュー対応 ───────────────────────────────────────────────────
+
+test('id は文字でも数でも同じ物を引く。同じ文字になる id が2つあれば errors', () => {
+  const r = run(basePlan(), [{ op: 'moveObject', args: { id: '10', dx: 100, dy: 0 } }]);
+  assert.deepEqual(r.errors, []);
+  assert.equal(itemById(r.plan, 10).x, 1100);
+  const plan = basePlan();
+  plan.items[0].id = '10';
+  const r2 = run(plan, [{ op: 'moveObject', args: { id: 10, dx: 100, dy: 0 } }]);
+  assert.deepEqual(r2.errors, []);
+  assert.equal(r2.plan.items[0].x, 1100);
+  plan.items[1].id = 10;
+  const r3 = run(plan, [{ op: 'moveObject', args: { id: 10, dx: 100, dy: 0 } }]);
+  assert.equal(r3.errors.length, 1);
+  assert.match(r3.errors[0].message, /2 つ/);
+});
+
+test('無い id の message に、次にどうすればよいかを書く', () => {
+  const r = run(basePlan(), [{ op: 'moveObject', args: { id: 999, dx: 1, dy: 0 } }]);
+  assert.match(r.errors[0].message, /プランの要約にある id/);
+});
+
+test('存在しない階(99・0・1.5)は errors。範囲を message に書く。maxFloor で上限を変えられる', () => {
+  const plan = basePlan();
+  const before = JSON.stringify(plan);
+  for (const floor of [99, 0, 1.5, 5]) {
+    for (const op of [
+      { op: 'placeItem', args: { type: 'sofa', x: 0, y: 0, floor } },
+      { op: 'addRoom', args: { x: 0, y: 0, w: 1000, d: 1000, floor } },
+      { op: 'addWall', args: { x1: 0, y1: 0, x2: 1000, y2: 0, floor } },
+    ]) {
+      const r = run(plan, [op]);
+      assert.equal(r.errors.length, 1, op.op + ' ' + floor);
+      assert.match(r.errors[0].message, /1〜4/);
+    }
+  }
+  assert.equal(JSON.stringify(plan), before);
+  const ok = run(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0, floor: 5 } }], makeCtx({ maxFloor: 6 }));
+  assert.deepEqual(ok.errors, []);
+  const ng = run(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0, floor: 7 } }], makeCtx({ maxFloor: 6 }));
+  assert.match(ng.errors[0].message, /1〜6/);
+});
+
+test('allowProps が無ければ props は errors', () => {
+  const plan = basePlan();
+  const before = JSON.stringify(plan);
+  const r = run(plan, [{ op: 'setProps', args: { id: 10, props: { color: '#000' } } }]);
+  assert.equal(r.errors.length, 1);
+  assert.match(r.errors[0].message, /props は使えません。set を使ってください/);
+  const r2 = run(plan, [{ op: 'setProps', args: { id: 10, props: { color: '#000' } } }], makeCtx({ inPlace: true }));
+  assert.equal(r2.errors.length, 1);
+  assert.equal(JSON.stringify(plan), before);
+});
+
+test('allowProps でも id・__proto__・constructor・prototype は errors。set でも通らない', () => {
+  const plan = basePlan();
+  const before = JSON.stringify(plan);
+  const ctx = makeCtx({ allowProps: true, settable: PlanSettable });
+  // AI の JSON から来る形(JSON.parse は __proto__ を自前の項目として作る)。
+  const evil = JSON.parse('{"__proto__": {"polluted": true}}');
+  for (const props of [{ id: 77 }, evil, { constructor: 1 }, { prototype: 1 }, Object.assign(JSON.parse('{"__proto__": 1}'), { color: '#000' })]) {
+    const r = run(plan, [{ op: 'setProps', args: { id: 10, props } }], ctx);
+    assert.equal(r.errors.length, 1, JSON.stringify(Object.keys(props)));
+    assert.match(r.errors[0].message, /書き換えられません/);
+    const s = run(plan, [{ op: 'setProps', args: { id: 1, set: props } }], ctx);
+    assert.equal(s.errors.length, 1);
+  }
+  assert.equal(JSON.stringify(plan), before);
+  assert.equal(Object.getPrototypeOf(plan.items[0]), Object.prototype);
+  assert.equal({}.polluted, undefined);
+  // 入口が塞がっているので、プランの物は素のオブジェクトのまま。写しは別の物になる(同じ物を指さない)。
+  const r = run(plan, [{ op: 'moveObject', args: { id: 10, dx: 1, dy: 0 } }], ctx);
+  assert.notEqual(itemById(r.plan, 10), itemById(plan, 10));
+  assert.equal(itemById(plan, 10).x, 1000);
+});
+
+test('写しに当てるとき、deleteObjects に1つでもロックした物があれば何も消えない', () => {
+  const plan = basePlan();
+  const before = JSON.stringify(plan);
+  const r = run(plan, [{ op: 'deleteObjects', args: { ids: [10, 1, 11] } }]);
+  assert.equal(r.errors.length, 1);
+  assert.match(r.errors[0].message, /ロック/);
+  assert.equal(r.plan, plan);
+  assert.equal(JSON.stringify(plan), before);
+  assert.deepEqual(r.removedIds, []);
+});
+
+test('addRoom: roomId が毎回同じ値でも、部屋の id は重ならない', () => {
+  const ctx = makeCtx({ roomId: () => 'rm_same' });
+  const r = run(basePlan(), [
+    { op: 'addRoom', args: { x: 0, y: 0, w: 1000, d: 1000 } },
+    { op: 'addRoom', args: { x: 0, y: 0, w: 1000, d: 1000 } },
+  ], ctx);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.changedIds.length, 2);
+  assert.notEqual(r.changedIds[0], r.changedIds[1]);
+  assert.deepEqual(r.changedIds, ['rm_same', 'rm_101']);
+  const ids = r.plan.rooms.map((x) => String(x.id));
+  assert.equal(new Set(ids).size, ids.length);
+  const r2 = run(basePlan(), [{ op: 'addRoom', args: { x: 0, y: 0, w: 1000, d: 1000 } }], makeCtx({ roomId: () => 'rm_a' }));
+  assert.deepEqual(r2.changedIds, ['rm_101']);
+});
+
+test('写しに当てるとき catalog.known が無ければ placeItem は errors、inPlace なら今のまま置く', () => {
+  const ctx = makeCtx();
+  delete ctx.catalog.known;
+  const plan = basePlan();
+  const r = run(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0 } }], ctx);
+  assert.equal(r.errors.length, 1);
+  assert.match(r.errors[0].message, /この ctx では物を置けません/);
+  const r2 = run(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0 } }], Object.assign(ctx, { inPlace: true }));
+  assert.deepEqual(r2.errors, []);
+  assert.equal(plan.items[plan.items.length - 1].type, 'sofa');
+});
+
+test('warnings: 天井高が変わったのに器具を動かせなかった', () => {
+  const ctx = makeCtx({ allowProps: true, hooks: { ceilingElevation: (room) => (room.ceiling ? room.ceiling.heightMm : 2400) } });
+  const r = run(basePlan(), [{ op: 'setProps', args: { id: 'rm_a', props: { ceiling: { type: 'flat', heightMm: 2600 } } } }], ctx);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.warnings.length, 1);
+  assert.match(r.warnings[0], /2400mm から 2600mm/);
+  assert.match(r.warnings[0], /器具/);
+  assert.equal(itemById(r.plan, 16).elev, 2390);
+  // 天井高が変わらなければ書かない。
+  const same = run(basePlan(), [{ op: 'setProps', args: { id: 'rm_a', props: { ceiling: { type: 'flat', heightMm: 2400 } } } }], ctx);
+  assert.deepEqual(same.warnings, []);
+});
+
+test('warnings: AI が渡した寸法をプリセットが上書きした', () => {
+  const ctx = makeCtx({ hooks: { openingPreset: (t) => (t === 'tool:door' ? { type: 'door-swing', apply: (it) => { it.w = 780; it.d = 780; } } : null) } });
+  const r = run(basePlan(), [{ op: 'placeItem', args: { type: 'tool:door', x: 0, y: 0, w: 900 } }], ctx);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.warnings.length, 1);
+  assert.match(r.warnings[0], /w=900→780/);
+});
+
+test('warnings: 桁違いの寸法・座標は通したうえで書く(写しのときだけ)', () => {
+  const r = run(basePlan(), [
+    { op: 'placeItem', args: { type: 'sofa', x: 200000, y: 0, w: 30, d: 900 } },
+    { op: 'addWall', args: { x1: 0, y1: 0, x2: 10, y2: 0 } },
+    { op: 'addRoom', args: { x: 0, y: 0, w: 150000, d: 1000 } },
+  ]);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.changedIds.length, 3);
+  assert.equal(r.warnings.length, 4);
+  assert.ok(r.warnings.some((w) => /x=200000mm/.test(w)));
+  assert.ok(r.warnings.some((w) => /w=30mm/.test(w)));
+  assert.ok(r.warnings.some((w) => /長さ=10mm/.test(w)));
+  assert.ok(r.warnings.some((w) => /w=150000mm/.test(w)));
+  const r2 = run(basePlan(), [{ op: 'placeItem', args: { type: 'sofa', x: 200000, y: 0, w: 30 } }], makeCtx({ inPlace: true }));
+  assert.deepEqual(r2.warnings, []);
+});
+
+test('角度を 0〜360 にそろえるのは写しのときだけ', () => {
+  const r = run(basePlan(), [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0, rot: 450 } }]);
+  assert.equal(r.plan.items[r.plan.items.length - 1].rot, 90);
+  const plan = basePlan();
+  run(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0, rot: 450 } }], makeCtx({ inPlace: true }));
+  assert.equal(plan.items[plan.items.length - 1].rot, 450);
+  run(plan, [{ op: 'rotateObject', args: { id: 10, by: -30 } }], makeCtx({ inPlace: true }));
+  assert.equal(itemById(plan, 10).rot, -30);
 });
 
 // ── グローバル ─────────────────────────────────────────────────────
