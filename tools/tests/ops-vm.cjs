@@ -42,11 +42,15 @@ const DEFAULTS = {
   syncExteriorWallSettings: () => {},
   // 共同編集の印(index.html)。共同編集中でない画面では何もしないので、ここでも何もしない。
   sharedMarkIdsDirty: () => {},
+  // 包みが errors のときに saveState の跡を戻す印(app-state.js)。履歴を見ない検査では何もしない。
+  saveStateMark: () => null, undoSaveState: () => {},
 };
 
 // ctx: vm.createContext で作った文脈。DATA が無ければ空のプランを入れる(画面の選択がプランの外の物でも動く)。
 function installOps(ctx) {
   ctx.PlanCoreOperations = Ops;
+  // planOpsCtx は階の上限を PlanSchema から取る
+  if (ctx.PlanSchema === undefined) ctx.PlanSchema = require(join(ROOT, 'assets', 'js', 'plan-schema.js'));
   if (ctx.DATA === undefined) ctx.DATA = { walls: [], rooms: [], items: [] };
   for (const k of Object.keys(DEFAULTS)) if (ctx[k] === undefined) ctx[k] = DEFAULTS[k];
   vm.runInContext(['planCoreCtx', 'planOpsCtx'].map(topLevelFunction).join('\n'), ctx);

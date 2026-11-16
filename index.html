@@ -18863,11 +18863,15 @@ function placeItem(type,wx,wy){
   var openingPreset=getOpeningModelToolPreset(type);
   var placeType=openingPreset?openingPreset.baseType:type;
   if(placeGroundOnly(placeType) && ST.floor!==1 && !placeIndoorAt(placeType,ST.floor,wx,wy)) return;
+  var saved=saveStateMark();
   saveState();
   var res=PlanCoreOperations.applyOperations(DATA,[{op:'placeItem',args:{type:type,x:wx,y:wy,rot:ST.placingRot,floor:ST.floor}}],planOpsCtx({inPlace:true}));
-  if(res.errors.length){ console.warn('[WebCAD] 物を置けませんでした: '+res.errors[0].message); return; }
+  // errors のときはプランは変わっていない。積んだ取り消しの履歴を外し、置かなかったのと同じにする。
+  if(res.errors.length){ undoSaveState(saved); console.warn('[WebCAD] 物を置けませんでした: '+res.errors[0].message); return; }
   sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
-  var it=DATA.items[DATA.items.length-1];
+  // 置いた物は操作の結果(最後に記録した id)から引く。id が重なった古いプランでも、後ろから探して新しい物を取る。
+  var newId=String(res.changedIds[res.changedIds.length-1]), it=null;
+  for(var i=DATA.items.length-1;i>=0;i--){ if(DATA.items[i]&&String(DATA.items[i].id)===newId){ it=DATA.items[i]; break; } }
   ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
   syncToolUi();
@@ -19348,9 +19352,11 @@ function delSel(){
     targets=explicit2DSelection().filter(function(o){return !isObjectLocked(o);});
     if(!targets.length){ updateProps(); draw2d(); return; }
   }
+  var saved=saveStateMark();
   saveState();
   var res=PlanCoreOperations.applyOperations(DATA,[{op:'deleteObjects',args:{ids:targets.map(function(o){return o.id;})}}],planOpsCtx({inPlace:true,targets:targets}));
-  if(res.errors.length) console.warn('[WebCAD] 消せませんでした: '+res.errors[0].message);
+  // errors のときは何も消えていない。積んだ取り消しの履歴を外し、選択もそのまま残す。
+  if(res.errors.length){ undoSaveState(saved); console.warn('[WebCAD] 消せませんでした: '+res.errors[0].message); updateProps(); draw2d(); return; }
   sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
   if(ST.selectAll){
     ST.selectAll=false;

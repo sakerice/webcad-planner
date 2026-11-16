@@ -89,9 +89,16 @@ function planCoreSuggestTypes(type){
 // 画面の操作(placeItem・delSel・updateSelectedProp)が PlanCoreOperations.applyOperations に渡す ctx。
 // planCoreCtx に、吸着の設定(ST の今の値)・PlanSettable・画面の後始末(hooks)を足したもの。
 // hooks は DATA とグローバルを読み書きするので、inPlace(plan が DATA そのもの)のときだけ使う。
-// extra(省略可)の項目は上書きで足す(inPlace・targets など)。
+// extra の項目は上書きで足す(inPlace・targets など)。extra.inPlace は必ず true にする
+// (写しに当てる ctx をこれで作ると、hooks が写しでなく DATA を書き換えてしまうため、投げて止める)。
 function planOpsCtx(extra){
+  if(!extra||extra.inPlace!==true) throw new Error('planOpsCtx は画面の操作(inPlace: DATA に直接当てる)専用です。写しに当てる ctx には使えません(hooks が DATA を書き換えるため)');
   var ctx=planCoreCtx();
+  // 途中の例外は errors に変えず、変更前の画面と同じく上へ出す(エラーの見張りに出るように)。
+  ctx.rethrow=true;
+  // 受ける階の上限は、保存プランが持てる上限(PlanSchema)。画面では今の階が 5 になりうる
+  // (選択した壁へ飛ぶ・ウォークスルーの階移動)。AI に渡す範囲(operations.js の既定 4)とは別。
+  ctx.maxFloor=PlanSchema.LIMITS.MAX_FLOOR;
   ctx.roomId=function(){ return 'rm_'+Date.now(); };
   ctx.settable=typeof PlanSettable!=='undefined'?PlanSettable:undefined;
   // 画面は設定欄の項目名をそのまま書く(setProps の props)。

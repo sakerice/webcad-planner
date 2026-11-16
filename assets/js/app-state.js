@@ -1936,14 +1936,16 @@ function updateSelectedProp(p,v,noSave){
   var lockAllowed=['locked','hidden3D','vis3D'];
   if(isObjectLocked(ST.selected) && lockAllowed.indexOf(p)<0){ updateProps(); return; }
   var keepColorPickerOpen=isAppearanceColorInputActive() && /color/i.test(p);
+  var saved=null;
   if(keepColorPickerOpen) markAppearanceColorDirty();
-  else if(!noSave) saveState();
+  else if(!noSave){ saved=saveStateMark(); saveState(); }
   // 値の書き込みと後始末(天井付けの器具の追従・窓の高さ・外壁の設定表・既定へ戻したときの受け口の削除)は
   // assets/js/plan-core/operations.js の applyProp が、選んだ物そのもの(ctx.targets)に対して行う。
   var props={};
   props[p]=(p==='locked')?!!v:v;
   var res=PlanCoreOperations.applyOperations(DATA,[{op:'setProps',args:{id:ST.selected.id,props:props}}],planOpsCtx({inPlace:true,targets:[ST.selected]}));
-  if(res.errors.length) console.warn('[WebCAD] 設定を変えられませんでした: '+res.errors[0].message);
+  // errors のときはプランは変わっていない。積んだ取り消しの履歴を外し、何もしなかったのと同じにする。
+  if(res.errors.length){ undoSaveState(saved); console.warn('[WebCAD] 設定を変えられませんでした: '+res.errors[0].message); updateProps(); return; }
   // 選んだ物の印は saveState が付ける。選んでいない物(天井に付いていく器具など)の印をここで付ける。
   sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
   if(p==='locked'){
@@ -2365,6 +2367,22 @@ function saveState(){
   pushHistorySnapshot(HISTORY,serializeDataSnapshot());
   REDO_HISTORY.length=0;
   markDirty();
+}
+// 画面の操作の包み(placeItem・delSel・updateSelectedProp)が、saveState の後で操作が errors を返した
+// (プランは1項目も変わっていない)ときに、saveState の跡を戻すための印と戻し方。
+// 戻すもの: 取り消しの履歴(上限で押し出した先頭も戻す)・やり直しの履歴・未保存の印(DIRTY)。
+// 戻さないもの: 共同編集の送る候補の印(sharedRememberEditTargets。中身が変わっていなければ何も送られない)と、
+// markDirty が予約した同期・自動保存(差分が無ければ何もしない)。
+function saveStateMark(){
+  return {len:HISTORY.length, first:HISTORY[0], redo:REDO_HISTORY.slice(), dirty:DIRTY};
+}
+function undoSaveState(mark){
+  if(!mark) return;
+  if(HISTORY.length>mark.len) HISTORY.pop();
+  else if(mark.len>0 && HISTORY.length===mark.len){ HISTORY.pop(); HISTORY.unshift(mark.first); }
+  REDO_HISTORY.length=0;
+  mark.redo.forEach(function(s){ REDO_HISTORY.push(s); });
+  if(!mark.dirty) clearDirty();
 }
 
 // プランを開いたときの補完を、1つにまとめたもの。

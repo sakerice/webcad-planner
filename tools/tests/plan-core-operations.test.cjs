@@ -749,6 +749,33 @@ test('ctx.targets: moveObject・rotateObject・resizeRoom・renameRoom・removeW
   assert.match(run(plan, [{ op: 'moveObject', args: { dx: 1, dy: 0 } }], ctx(outside)).errors[0].message, /プランの中にありません/);
 });
 
+test('ctx.rethrow: inPlace で立てると、途中の例外をそのまま投げる(無ければ errors)', () => {
+  const boom = () => { throw new Error('hook の中の誤り'); };
+  const plan = basePlan();
+  assert.throws(() => O.applyOperations(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0 } }],
+    makeCtx({ inPlace: true, rethrow: true, hooks: { afterPlace: boom } })), /hook の中の誤り/);
+  const r = O.applyOperations(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0 } }],
+    makeCtx({ inPlace: true, hooks: { afterPlace: boom } }));
+  assert.equal(r.errors.length, 1);
+  assert.match(r.errors[0].message, /hook の中の誤り/);
+  // 写しに当てるときは、立っていても投げず errors にする(AI の呼び出しを落とさない)
+  const before = JSON.stringify(plan);
+  const c = O.applyOperations(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0 } }],
+    makeCtx({ rethrow: true, hooks: { afterPlace: boom } }));
+  assert.equal(c.errors.length, 1);
+  assert.equal(JSON.stringify(plan), before);
+});
+
+test('deleteObjects: 消える順・残る並び・removedIds の順は、渡した順と今の並びのまま(多数でも)', () => {
+  const plan = { walls: [], rooms: [], items: [] };
+  for (let i = 0; i < 3000; i++) plan.items.push({ id: i, type: 'sofa', x: 0, y: 0, w: 10, d: 10, floor: 1 });
+  const targets = plan.items.filter((o) => o.id % 3 === 0).reverse();
+  const r = O.applyOperations(plan, [{ op: 'deleteObjects', args: {} }], makeCtx({ inPlace: true, targets }));
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual(r.removedIds, targets.map((o) => o.id));
+  assert.deepEqual(plan.items.map((o) => o.id), Array.from({ length: 3000 }, (_, i) => i).filter((i) => i % 3 !== 0));
+});
+
 test('warnings: 天井高が変わったのに器具を動かせなかった', () => {
   const ctx = makeCtx({ allowProps: true, hooks: { ceilingElevation: (room) => (room.ceiling ? room.ceiling.heightMm : 2400) } });
   const r = run(basePlan(), [{ op: 'setProps', args: { id: 'rm_a', props: { ceiling: { type: 'flat', heightMm: 2600 } } } }], ctx);

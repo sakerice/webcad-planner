@@ -42,7 +42,8 @@
   var str = function (description) { return { type: 'string', description: description }; };
   // checkArgs はこの ID を指す欄だけ、数も受ける(上の決めごと)。
   var ID = { type: 'string', description: '物・壁・部屋の id。数の id は "12" のように文字で渡す' };
-  // 階の上限は operations.js の ctx.maxFloor(省けば 4)。
+  // 階の上限は operations.js の ctx.maxFloor(省けば 4)。AI に渡す範囲は、画面で階を選べる 1〜4。
+  // 画面の包み(planOpsCtx)は保存プランが持てる上限(PlanSchema の MAX_FLOOR=5)まで受けるが、それは画面の範囲で、AI には広げない。
   var FLOOR = int('階（1〜4）。省くと 1');
   var SET = {
     type: 'object',

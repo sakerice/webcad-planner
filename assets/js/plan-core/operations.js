@@ -25,7 +25,10 @@
 //
 // 入口の守り(AI から呼ばれる写しの側):
 //   ctx.allowProps … setProps の props(アプリの欄名をそのまま書く形)は、これが true のとき(画面の包み)だけ受ける。
-//   ctx.maxFloor   … 受ける階の上限(省けば 4。画面で選べる階は 1〜4)。
+//   ctx.maxFloor   … 受ける階の上限。省けば 4(AI に渡す範囲。画面の階の選び方の 1〜4 と同じ)。
+//                    画面の包み(planOpsCtx)は、保存プランが持てる上限(PlanSchema.LIMITS.MAX_FLOOR=5)を渡す。
+//                    画面では選択した壁へ飛ぶ・ウォークスルーの階移動で今の階が 5 になりうるので、
+//                    「AI の範囲」と「画面が許す範囲」は別にしている。
 //   写しに当てるとき(inPlace でないとき)は ctx.catalog.known が無いと物を置かない。
 //   種類を known で確かめるのも写しのときだけ(画面は、カタログに無い種類名でも今までどおり置く)。
 //
@@ -34,6 +37,10 @@
 //   古いプランでも今と同じに消せる・変えられるように、包みは選んだ物を targets で渡す。
 //   deleteObjects は targets の物すべて(ids は見ない)。setProps・moveObject・rotateObject・resizeRoom・
 //   renameRoom・removeWall は targets の1つめだけ(2つ以上は errors)。inPlace でないのに渡すと errors。
+//
+// ctx.rethrow(inPlace のときだけ効く): 操作の途中で出た例外を errors に変えず、そのまま投げ直す。
+//   画面の包みが立てる(変更前の画面と同じく、例外がエラーの見張りに出るように)。
+//   写しに当てるとき(AI)は立っていても投げず、今までどおり errors にして外へ出さない。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory(require('./factories.js'), require('./snap.js'));
@@ -597,13 +604,15 @@
 
   // ── 消す ─────────────────────────────────────────────────────────
   function deleteObjects(plan, a, ctx, rec) {
-    var targets = [];
+    // 全選択の削除では物の数も消す数も多いので、重ねがけの indexOf でなく Set で引く。
+    var targets = [], targetSet = new Set();
+    var add = function (o) { if (!targetSet.has(o)) { targetSet.add(o); targets.push(o); } };
     if (ctx.targets) {
       // 画面: 選んだ物そのものを消す(id が重なっていても、指した物だけが消える)。
       for (var t = 0; t < ctx.targets.length; t++) {
         var o = ctx.targets[t];
         if (isLocked(o, ctx)) return lockedError(o);
-        if (targets.indexOf(o) < 0) targets.push(o);
+        add(o);
       }
     } else {
       if (!Array.isArray(a.ids) || !a.ids.length) return fail('ids は id の配列で渡してください');
@@ -611,16 +620,16 @@
         var f = findById(plan, a.ids[i]);
         if (f.error) return fail(f.error);
         if (isLocked(f.obj, ctx)) return lockedError(f.obj);
-        if (targets.indexOf(f.obj) < 0) targets.push(f.obj);
+        add(f.obj);
       }
     }
-    // 消したと記録するのは、プランの中にあった物だけ。
-    var ids = targets.filter(function (o) {
-      return COLLS.some(function (coll) { return (plan[coll] || []).indexOf(o) >= 0; });
-    }).map(function (o) { return o.id; });
+    // 消したと記録するのは、プランの中にあった物だけ(順は targets の順)。
+    var present = new Set();
+    COLLS.forEach(function (coll) { (plan[coll] || []).forEach(function (o) { present.add(o); }); });
+    var ids = targets.filter(function (o) { return present.has(o); }).map(function (o) { return o.id; });
     COLLS.forEach(function (coll) {
       if (!plan[coll]) return;
-      plan[coll] = plan[coll].filter(function (o) { return targets.indexOf(o) < 0; });
+      plan[coll] = plan[coll].filter(function (o) { return !targetSet.has(o); });
     });
     ids.forEach(function (id) { rec.remove(id); });
     var h = hooksOf(ctx);
@@ -703,6 +712,7 @@
       }
       return { plan: target, changedIds: rec.changed, removedIds: rec.removed, warnings: rec.warnings, errors: [] };
     } catch (e) {
+      if (ctx && ctx.inPlace === true && ctx.rethrow === true) throw e;
       var msg = '操作の途中で誤りが起きました: ' + (e && e.message ? e.message : String(e));
       if (ctx && ctx.inPlace === true) msg += '(inPlace なので、プランが途中まで変わっているかもしれません)';
       return failure(plan, index, opName, msg);
