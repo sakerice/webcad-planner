@@ -2,6 +2,8 @@
 // 操作の名前・説明・引数の Schema が operations.js の OPS と食い違わないこと、
 // Claude に渡す道具の定義が大きくなりすぎないこと(enum・anyOf が多いと「文法が大きすぎる」で断られる)を見る。
 const test = require('node:test');
+const fs = require('node:fs');
+const path = require('node:path');
 const assert = require('node:assert/strict');
 const C = require('../../assets/js/plan-core/operations-catalog.js');
 const O = require('../../assets/js/plan-core/operations.js');
@@ -10,36 +12,6 @@ const ObjectKnowledge = require('../../assets/js/object-knowledge.js');
 
 const deps = { settable: PlanSettable, knowledge: ObjectKnowledge };
 
-// 小さな Schema の検査。使っている形(type・properties・required・items・additionalProperties)だけを見る。
-function typeOk(type, v) {
-  if (Array.isArray(type)) return type.some((t) => typeOk(t, v));
-  switch (type) {
-    case 'object': return v !== null && typeof v === 'object' && !Array.isArray(v);
-    case 'array': return Array.isArray(v);
-    case 'string': return typeof v === 'string';
-    case 'number': return typeof v === 'number' && isFinite(v);
-    case 'integer': return Number.isInteger(v);
-    case 'boolean': return typeof v === 'boolean';
-    case undefined: return true;
-    default: throw new Error('検査関数が知らない type: ' + type);
-  }
-}
-function validate(schema, v, at) {
-  at = at || 'args';
-  const errs = [];
-  if (!typeOk(schema.type, v)) return [at + ' の型が ' + JSON.stringify(schema.type) + ' でない'];
-  if (schema.enum && !schema.enum.includes(v)) errs.push(at + ' が選択肢に無い');
-  if (schema.type === 'object' || (Array.isArray(schema.type) && typeOk('object', v) && schema.properties)) {
-    (schema.required || []).forEach((k) => { if (!(k in v)) errs.push(at + '.' + k + ' が無い'); });
-    Object.keys(v).forEach((k) => {
-      const p = schema.properties && schema.properties[k];
-      if (!p) { if (schema.additionalProperties === false) errs.push(at + '.' + k + ' は定義に無い'); return; }
-      errs.push(...validate(p, v[k], at + '.' + k));
-    });
-  }
-  if (schema.type === 'array' && schema.items) v.forEach((x, i) => errs.push(...validate(schema.items, x, at + '[' + i + ']')));
-  return errs;
-}
 function countKeys(node, names) {
   let n = 0;
   if (Array.isArray(node)) { node.forEach((x) => { n += countKeys(x, names); }); return n; }
@@ -131,18 +103,52 @@ const SUCCESS = [
   ['setProps', { id: 'rm_a', set: { floorLevel: 'doma', floorMaterial: 'tile_floor' } }],
 ];
 
-test('Task 3 の成功例の args は、対応する Schema の required と型を満たす', () => {
+test('Task 3 の成功例の args は、checkArgs を全部通る', () => {
   SUCCESS.forEach(([name, args]) => {
-    const errs = validate(opByName(name).inputSchema, args);
-    assert.deepEqual(errs, [], name + ' ' + JSON.stringify(args));
+    assert.deepEqual(C.checkArgs(name, args), { ok: true, errors: [] }, name + ' ' + JSON.stringify(args));
   });
 });
 
-test('検査関数そのものが、型の違いと required の抜けを見つける', () => {
-  assert.notDeepEqual(validate(opByName('addWall').inputSchema, { x1: '0', y1: 0, x2: 1, y2: 0 }), []);
-  assert.notDeepEqual(validate(opByName('addRoom').inputSchema, { x: 0, y: 0, w: 1000 }), []);
-  assert.notDeepEqual(validate(opByName('deleteObjects').inputSchema, { ids: [true] }), []);
-  assert.notDeepEqual(validate(opByName('setProps').inputSchema, { id: 1, props: { color: '#000' } }), []);
+test('id は Schema では文字。数の id も checkArgs は通す（文字でも数でも operations.js は同じ物を引く）', () => {
+  assert.equal(opByName('moveObject').inputSchema.properties.id.type, 'string');
+  assert.ok(opByName('moveObject').inputSchema.properties.id.description.includes('"12"'));
+  assert.equal(C.checkArgs('moveObject', { id: '12', dx: 1, dy: 0 }).ok, true);
+  assert.equal(C.checkArgs('moveObject', { id: 12, dx: 1, dy: 0 }).ok, true);
+  assert.equal(C.checkArgs('deleteObjects', { ids: [12, 'rm_a'] }).ok, true);
+  assert.equal(C.checkArgs('moveObject', { id: true, dx: 1, dy: 0 }).ok, false);
+  // id 以外の文字の欄は数を受けない
+  assert.equal(C.checkArgs('renameRoom', { id: 'rm_a', name: 12 }).ok, false);
+});
+
+test('checkArgs は定義に無い鍵・required の欠け・型違い・知らない操作名を errors にする', () => {
+  const props = C.checkArgs('setProps', { id: '10', set: { thick: 100 }, props: { color: '#000' } });
+  assert.equal(props.ok, false);
+  assert.ok(props.errors.some((e) => e.includes('props')), JSON.stringify(props.errors));
+  const onlyProps = C.checkArgs('setProps', { id: '10', props: { color: '#000' } });
+  assert.equal(onlyProps.ok, false);
+  assert.ok(onlyProps.errors.some((e) => e.includes('set')));
+  assert.equal(C.checkArgs('addWall', { x1: '0', y1: 0, x2: 1, y2: 0 }).ok, false);
+  assert.equal(C.checkArgs('addWall', { x1: NaN, y1: 0, x2: 1, y2: 0 }).ok, false);
+  assert.equal(C.checkArgs('addRoom', { x: 0, y: 0, w: 1000 }).ok, false);
+  assert.equal(C.checkArgs('addRoom', { x: 0, y: 0, w: 1000, d: 1000, floor: 1.5 }).ok, false);
+  assert.equal(C.checkArgs('deleteObjects', { ids: [true] }).ok, false);
+  assert.equal(C.checkArgs('deleteObjects', { ids: 'rm_a' }).ok, false);
+  assert.equal(C.checkArgs('placeItem', { type: 'sofa', x: 0, y: 0, set: 'thick=100' }).ok, false);
+  assert.equal(C.checkArgs('moveObject', null).ok, false);
+  assert.equal(C.checkArgs('moveObject', [1]).ok, false);
+  const unknown = C.checkArgs('noSuchOp', {});
+  assert.equal(unknown.ok, false);
+  assert.ok(unknown.errors[0].includes('noSuchOp'));
+  assert.ok(unknown.errors.every((e) => typeof e === 'string'));
+});
+
+test('checkArgs の判定は Schema から機械的に作る（全操作で、定義に無い鍵を1つ足すと落ちる）', () => {
+  C.OPERATIONS.forEach((o) => {
+    const ok = SUCCESS.find(([name]) => name === o.name)[1];
+    const r = C.checkArgs(o.name, Object.assign({ unknownKey: 1 }, ok));
+    assert.equal(r.ok, false, o.name);
+    assert.equal(r.errors.length, 1, o.name + ' ' + JSON.stringify(r.errors));
+  });
 });
 
 test('describeVocabulary は PlanSettable.SETTINGS の全項目の key と、家財の分類・窓扉の種類を含む', () => {
@@ -163,4 +169,18 @@ test('describeVocabulary は座標の約束と、失敗すると全部が取り�
   assert.ok(text.includes('mm'));
   assert.ok(text.includes('中心'));
   assert.ok(text.includes('取り消'));
+});
+
+test('説明は operations.js の今の動きを書く（全部取り消し・両方渡す・階段の向き・吊元・階・桁・部屋の中身）', () => {
+  const all = C.toClaudeTools(deps).map((t) => t.description).join('\n') + '\n' + C.describeVocabulary(deps);
+  ['全部取り消', 'x と y の両方', 'dx と dy の両方', '南（+y）へ上る', '吊元と開く向きは指定できない',
+    '1〜4', '桁（mm）', '中の物と壁は動かない'].forEach((w) => assert.ok(all.includes(w), w));
+});
+
+test('plan-core/operations-catalog.js はグローバルに触らない', () => {
+  const src = fs.readFileSync(path.join(__dirname, '../../assets/js/plan-core/operations-catalog.js'), 'utf8')
+    .split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
+  for (const w of ['DATA', 'ST.', 'document', 'window.', 'nextId', 'PlanSettable', 'ObjectKnowledge', 'PlanCoreOperations.', 'require(']) {
+    assert.ok(!src.includes(w), w + ' が残っている');
+  }
 });

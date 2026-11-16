@@ -7,6 +7,13 @@
 // 手で書くと、操作の引数を変えたときに片方だけ古くなるので、ここに1回だけ書いて
 // toClaudeTools / toMcpTools で作る。
 //
+// 使う側の決まり
+// --------------
+// 段4(チャット)・段5(MCP)では、AI から来た道具の呼び出しを applyOperations に渡す前に、
+// 必ず checkArgs(name, args) を通す。Claude も ChatGPT も、道具の Schema を守るとは限らない
+// (知らない鍵・欠けた鍵・型違いをそのまま送ってくる)。operations.js は props のような画面用の
+// 引数も受ける作りなので、AI に見せていない引数をここで止める。
+//
 // 決めごと
 // --------
 // - 名前は operations.js の OPS の鍵と同じ(検査が突き合わせる)。
@@ -15,10 +22,13 @@
 //   「文法が大きすぎる」で断られた(worker/plan-free.mjs の FREE_SCHEMA の説明、2026-10-19・20 実測)。
 //   家財の種類は文字列で受け、操作の中で照合して、合わなければ候補を errors に入れて返す。
 //   設定項目(set)は object で受け、項目名と値は操作の中で PlanSettable が確かめる。
+// - id は Schema では文字。壁と物の id は数だが、operations.js は 12 と "12" を同じ物として引くので、
+//   AI には文字で渡させる。数で来ても checkArgs は通す(落とすと AI が同じ呼び出しを繰り返すだけになる)。
 // - 家財の種類・設定項目の一覧は手で書かず、PlanSettable(plan-settable.js)と
 //   ObjectKnowledge(object-knowledge.js)から作る。どちらも引数 deps で受ける
 //   (このファイルはグローバルにも兄弟のモジュールにも触らない)。
 // - 説明文は日本語で、読み取りの道具の定義(worker/plan-free.mjs)と同じ書き方にする。
+//   説明は operations.js の今の動き(写しに当てるとき)と合わせる。operations.js を変えたら、ここも見直す。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory();
@@ -30,9 +40,10 @@
   var n = function (description) { return { type: 'number', description: description }; };
   var int = function (description) { return { type: 'integer', description: description }; };
   var str = function (description) { return { type: 'string', description: description }; };
-  // id は壁と物が数、部屋が文字('rm_…')。12 と "12" は同じ物とみなす。
-  var ID = { type: ['string', 'integer'], description: '物・壁・部屋の id' };
-  var FLOOR = int('階（1 から）。省くと 1');
+  // checkArgs はこの ID を指す欄だけ、数も受ける(上の決めごと)。
+  var ID = { type: 'string', description: '物・壁・部屋の id。数の id は "12" のように文字で渡す' };
+  // 階の上限は operations.js の ctx.maxFloor(省けば 4)。
+  var FLOOR = int('階（1〜4）。省くと 1');
   var SET = {
     type: 'object',
     description: '{項目: 値}。使える項目は物の種類で決まる（set に書ける項目の一覧を見る）'
@@ -40,11 +51,13 @@
   function obj(properties, required) {
     return { type: 'object', properties: properties, required: required || [], additionalProperties: false };
   }
+  // 桁の警告は operations.js の checkScale(写しに当てるとき、寸法 50mm 未満・100,000mm 超、座標 100,000mm 超)。
+  var SCALE = '桁（mm）を間違えたらしい値は、通したうえで warnings で知らせる。';
 
   var OPERATIONS = [
     {
       name: 'addRoom',
-      description: '部屋を1つ足す。部屋は床の範囲を表す長方形で、壁は作らない（壁は addWall で足す）。',
+      description: '部屋を1つ足す。部屋は床の範囲を表す長方形で、壁は作らない（壁は addWall で足す）。' + SCALE,
       inputSchema: obj({
         name: str('部屋の名前（洋室・LDK など）'),
         floor: FLOOR,
@@ -54,7 +67,8 @@
     },
     {
       name: 'resizeRoom',
-      description: '部屋の大きさと位置を変える。渡した欄だけが変わる（x,y を省くと中心は今のまま）。',
+      description: '部屋の大きさと位置を変える。渡した欄だけが変わる（x,y を省くと中心は今のまま）。'
+        + '部屋の中の物と、まわりの壁は動かない。' + SCALE,
       inputSchema: obj({
         id: ID,
         x: n('新しい中心の x（mm）'), y: n('新しい中心の y（mm）'),
@@ -68,7 +82,7 @@
     },
     {
       name: 'addWall',
-      description: '壁を1本足す。x1,y1 から x2,y2 までの壁の芯の線分（mm）。',
+      description: '壁を1本足す。x1,y1 から x2,y2 までの壁の芯の線分（mm）。' + SCALE,
       inputSchema: obj({
         x1: n('始点の x（mm）'), y1: n('始点の y（mm）'), x2: n('終点の x（mm）'), y2: n('終点の y（mm）'),
         floor: FLOOR,
@@ -77,14 +91,14 @@
     },
     {
       name: 'removeWall',
-      description: '壁を1本消す（壁以外は deleteObjects で消す）。',
+      description: '壁を1本消す。壁の上の窓・扉は残る（壁以外は deleteObjects で消す）。',
       inputSchema: obj({ id: ID }, ['id'])
     },
     {
       name: 'placeItem',
       description: '家具・設備・窓・扉・階段・外構を1つ置く。x,y は物の中心（mm）。'
-        + 'rot は度で、図の上を北として時計回り（カタログの家具は rot=0 で正面が南を向く）。'
-        + '種類が合わなければ errors に候補が返る。',
+        + 'rot は度で、図の上を北として時計回り。カタログの家具は rot=0 で正面が南を向き、階段（stair）は rot=0 で南（+y）へ上る。'
+        + '窓・扉の吊元と開く向きは指定できない。種類が合わなければ errors に候補が返る。' + SCALE,
       inputSchema: obj({
         type: str('置く物の種類（置ける物の種類の一覧を見る）'),
         x: n('物の中心の x（mm）'), y: n('物の中心の y（mm）'),
@@ -97,7 +111,8 @@
     },
     {
       name: 'moveObject',
-      description: '物・部屋・壁を動かす。x,y（新しい中心）か dx,dy（動かす量）のどちらか一方を渡す。壁は dx,dy だけ。',
+      description: '物・部屋・壁を動かす。x と y の両方（新しい中心）か、dx と dy の両方（動かす量）のどちらかを渡す。壁は dx,dy だけ。'
+        + '部屋を動かしても、中の物と壁は動かない。' + SCALE,
       inputSchema: obj({
         id: ID,
         x: n('新しい中心の x（mm）'), y: n('新しい中心の y（mm）'),
@@ -124,7 +139,63 @@
   ];
 
   // どの道具にも付ける約束。1回の applyOperations は全部か無し。
-  var COMMON = 'ロックされた物は変えられない。失敗すると、いっしょに当てた操作も含めて全部取り消され、プランは変わらない。';
+  var COMMON = 'ロックされた物は変えられない。無い id は使えない。失敗すると、同じ呼び出しの操作は全部取り消され、プランは変わらない。';
+
+  // ── 引数の検査 ─────────────────────────────────────────────────────
+  // Schema から機械的に判定する(操作ごとの手書きはしない)。使っている形は
+  // type・properties・required・items・additionalProperties だけなので、それだけを見る。
+  function typeName(v) {
+    if (v === null) return 'null';
+    if (Array.isArray(v)) return '配列';
+    return typeof v;
+  }
+  function typeOk(type, v, schema) {
+    if (Array.isArray(type)) return type.some(function (t) { return typeOk(t, v, schema); });
+    switch (type) {
+      case 'object': return v !== null && typeof v === 'object' && !Array.isArray(v);
+      case 'array': return Array.isArray(v);
+      case 'string': return typeof v === 'string' || (schema === ID && typeof v === 'number' && isFinite(v));
+      case 'number': return typeof v === 'number' && isFinite(v);
+      case 'integer': return typeof v === 'number' && isFinite(v) && Math.floor(v) === v;
+      case 'boolean': return typeof v === 'boolean';
+      default: return true;
+    }
+  }
+  var TYPE_JA = { object: '{…} の形', array: '配列', string: '文字', number: '数', integer: '整数', boolean: 'true か false' };
+  function checkValue(schema, v, at, errors) {
+    if (!typeOk(schema.type, v, schema)) {
+      var want = [].concat(schema.type).map(function (t) { return TYPE_JA[t] || t; }).join('か');
+      errors.push(at + ' は' + want + 'で渡してください（' + typeName(v) + ' が来ました）');
+      return;
+    }
+    if (schema.type === 'object' && schema.properties) {
+      (schema.required || []).forEach(function (k) {
+        if (!Object.prototype.hasOwnProperty.call(v, k)) errors.push(at + '.' + k + ' がありません');
+      });
+      Object.keys(v).forEach(function (k) {
+        if (!Object.prototype.hasOwnProperty.call(schema.properties, k)) {
+          if (schema.additionalProperties === false) {
+            errors.push(at + '.' + k + ' は使えない引数です（使える引数: ' + Object.keys(schema.properties).join(', ') + '）');
+          }
+          return;
+        }
+        checkValue(schema.properties[k], v[k], at + '.' + k, errors);
+      });
+    }
+    if (schema.type === 'array' && schema.items) {
+      v.forEach(function (x, i) { checkValue(schema.items, x, at + '[' + i + ']', errors); });
+    }
+  }
+  function checkArgs(name, args) {
+    var op = null;
+    for (var i = 0; i < OPERATIONS.length; i++) if (OPERATIONS[i].name === name) op = OPERATIONS[i];
+    if (!op) {
+      return { ok: false, errors: ['知らない操作です: ' + String(name) + '（使える操作: ' + OPERATIONS.map(function (o) { return o.name; }).join(', ') + '）'] };
+    }
+    var errors = [];
+    checkValue(op.inputSchema, args === undefined ? {} : args, 'args', errors);
+    return { ok: errors.length === 0, errors: errors };
+  }
 
   // ── 語彙(deps から作る)─────────────────────────────────────────────
   // 家具・設備の分類のうち、placeItem の type に出さないもの。
@@ -185,12 +256,15 @@
       '',
       '座標は mm。x は東（右）へ、y は南（下）へ増える。図の上が北。すべての階で同じ原点を使う。',
       '物と部屋の位置 x,y は中心で渡す。壁は芯の線分 x1,y1,x2,y2 で渡す。',
-      '回転 rot は度で、図の上を北として時計回り。カタログの家具は rot=0 で正面が南を向く。',
-      '操作が1つでも失敗すると、いっしょに当てた操作も含めて全部取り消され、プランは変わらない。errors に理由と、分かれば候補（candidates）が返る。',
+      '回転 rot は度で、図の上を北として時計回り。カタログの家具は rot=0 で正面が南を向き、階段（stair）は rot=0 で南（+y）へ上る。',
+      '操作が1つでも失敗すると、同じ呼び出しの操作は全部取り消され、プランは変わらない。errors に理由と、分かれば候補（candidates）が返る。',
+      '階は 1〜4。桁（mm）を間違えたらしい値（寸法 50mm 未満・100,000mm 超、座標 100,000mm 超）は、通したうえで warnings で知らせる。',
+      'id はプランの要約にある id をそのまま使う。数の id は "12" のように文字で渡す。消した物の id は使えない。',
+      '部屋は床の範囲の長方形で、部屋を動かしても大きさを変えても、中の物と壁は動かない。',
       'ロックされた物は変えられない。',
       '',
       '## 置ける物の種類（placeItem の type）',
-      '- 窓・扉（中心を壁の芯の上に置く）:'
+      '- 窓・扉（中心を壁の芯の上に置く。吊元と開く向きは指定できない）:'
     ];
     (settable.OPENINGS || []).forEach(function (o) { rows.push('  ' + o.type + ' = ' + o.ja + '（' + o.what + '）'); });
     rows.push('- 階段:');
@@ -258,6 +332,7 @@
 
   return {
     OPERATIONS: OPERATIONS,
+    checkArgs: checkArgs,
     toClaudeTools: toClaudeTools,
     toMcpTools: toMcpTools,
     describeVocabulary: describeVocabulary
