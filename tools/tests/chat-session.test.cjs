@@ -371,6 +371,23 @@ test('2回めの依頼: 前の依頼は「利用者の文」と「AI の最後�
   assert.deepEqual(s.history, [{ user: 'ソファを回して', assistant: '回しました。' }, { user: '動かして', assistant: 'どちらへ動かしますか？' }]);
 });
 
+test('forgetLast(): 最後に済んだ依頼を履歴から外し、次の依頼の messages に入れない', async () => {
+  const c1 = [{ type: 'text', text: '回しました。' }];
+  const c2 = [{ type: 'text', text: '置きました。' }];
+  const c3 = [{ type: 'text', text: 'はい。' }];
+  const { s, fetch } = makeSession([{ sse: sseFor(c1) }, { sse: sseFor(c2) }, { sse: sseFor(c3) }]);
+  assert.equal((await s.send('ソファを回して')).ok, true);
+  assert.equal((await s.send('ベッドを置いて')).ok, true);
+  s.forgetLast();
+  assert.deepEqual(s.history, [{ user: 'ソファを回して', assistant: '回しました。' }]);
+  assert.equal((await s.send('次へ')).ok, true);
+  const msgs = fetch.calls[2].body.messages;
+  assert.equal(msgs.length, 3);
+  assert.ok(!JSON.stringify(msgs).includes('置きました'));
+  s.forgetLast(); s.forgetLast(); s.forgetLast();
+  assert.deepEqual(s.history, []);
+});
+
 test('置いて消した物は removedIds に入れない。元からある物を消せば入る', async () => {
   const c1 = [TOOL('a', 'placeItem', { type: 'chair', x: 0, y: 0 })];
   const c2 = [TOOL('b', 'deleteObjects', { ids: ['501', '10'] })];

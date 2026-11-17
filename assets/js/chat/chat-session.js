@@ -3,6 +3,7 @@
 //   var s = ChatSession.create(deps);
 //   s.send(text) → Promise<結果>   1回の依頼を最後まで回す(実行中にもう一度呼ぶと reason 'busy')
 //   s.cancel()                     実行中の依頼を取り消す(send はすぐに reason 'cancelled' で終わる)
+//   s.forgetLast()                 最後に済んだ依頼を履歴から外す(画面が結果を取り込まなかったとき)
 //   s.history                      済んだ依頼の [{user, assistant}](利用者の文と AI の最後の文。写し)
 //
 // deps:
@@ -369,6 +370,9 @@
     return {
       send: send,
       cancel: cancel,
+      // 最後に済んだ依頼を履歴から外す。画面が結果を取り込まなかったとき(途中でプランが変わった・取り込みで失敗した)に呼ぶ。
+      // 外さないと、次の依頼で AI が「前の依頼で直した」と思い込む。実行中は何もしない(まだ履歴に入っていないため)。
+      forgetLast: function () { if (!current && history.length) history.pop(); },
       get history() { return history.map(function (h) { return { user: h.user, assistant: h.assistant }; }); }
     };
   }
