@@ -48,6 +48,8 @@ const MSG = {
   maxTokens: '返事が長くなりすぎて、途中で止まりました。依頼を小さく分けて頼み直してください。',
   quota: '本日ぶんのチャットを使い切りました。明日またお試しください。',
   cancelled: '依頼を取り消しました。',
+  applyFailed: '変更を取り込めませんでした。',
+  undoBlocked: 'そのあとにプランが変わったため、元に戻せませんでした。',
 };
 
 // ── 台本 ────────────────────────────────────────────────────────────
@@ -191,6 +193,11 @@ const layout = (page) => page.evaluate(() => {
     .forEach((id) => { const r = vis(document.getElementById(id)); if (r) fixed[id] = r; });
   return { vw: innerWidth, vh: innerHeight, fab: vis(document.getElementById('chat-fab')), panel: vis(document.getElementById('chat-panel')), fixed };
 });
+const busyNote = (page) => page.evaluate(() => {
+  const n = document.querySelector('#chat-busy-cover .chat-busy-note');
+  const b = n.getBoundingClientRect();
+  return { left: b.left, top: b.top, right: b.right, bottom: b.bottom };
+});
 function assertInside(r, l, name) {
   assert.ok(r, name + ' が見えない');
   assert.ok(r.left >= 0 && r.top >= 0 && r.right <= l.vw + 0.5 && r.bottom <= l.vh + 0.5, name + ' が画面の外に出ている: ' + JSON.stringify(r));
@@ -253,6 +260,8 @@ try {
     assert.match(e.ai, /主寝室にベッドを置きました。/);
     assert.ok(e.undo, '「元に戻す」が出ていない');
     assert.match(await page.locator('#chat-remaining').textContent(), /本日あと 4 回 頼めます/);
+    await page.waitForFunction(() => /主寝室にベッドを置きました。/.test(document.getElementById('chat-announce').textContent), null, { timeout: 2000 });
+    assert.equal(await page.evaluate(() => document.getElementById('chat-log').hasAttribute('aria-live')), false, '一覧全体が読み上げの対象になっている');
     // 送った本文には要約と依頼文が入り、考えの要約は画面に出さない
     const call0 = await page.evaluate(() => window.__chat.calls[0]);
     assert.match(call0.messages[0].content, /^<plan_summary>[\s\S]*<\/plan_summary>\n\n寝室にベッドを置いて$/);
@@ -399,6 +408,22 @@ try {
       assert.equal(hit, 'chat-busy-cover', '依頼中に作図の領域が覆われていない');
       const tb = await page.evaluate(() => { const r = document.getElementById('toolbar').getBoundingClientRect(); const el = document.elementFromPoint(r.left + 200, r.top + r.height / 2); return el && el.id; });
       assert.equal(tb, 'chat-busy-cover', '依頼中にツールバーが覆われていない');
+      // 「AIが作業しています」は既存の部品とパネルに重ならない
+      {
+        const l = await layout(page);
+        const n = await busyNote(page);
+        assertInside(n, l, '作業中の文(1280)');
+        assertNoOverlap(n, l, '作業中の文(1280)');
+        assert.ok(!rectsOverlap(n, l.panel), '作業中の文がパネルに重なっている');
+      }
+      // 覆いの後ろへ Tab でフォーカスが移らない
+      assert.equal(await page.evaluate(() => document.getElementById('toolbar').closest('[inert]') !== null), true, '依頼中にツールバーが inert になっていない');
+      await page.locator('#chat-stop').focus();
+      for (let i = 0; i < 12; i++) {
+        await page.keyboard.press('Tab');
+        const where = await page.evaluate(() => { const a = document.activeElement; return a === document.body || !a ? 'body' : (a.closest('#chat-panel') ? 'panel' : (a.id || a.tagName)); });
+        assert.ok(where === 'panel' || where === 'body', '依頼中に Tab で覆いの後ろへフォーカスが移った: ' + where);
+      }
       await page.screenshot({ path: join(SHOTS, 'chat-1280-busy.png') });
       await page.locator('#chat-stop').click();
       await waitIdle(page);
@@ -407,6 +432,8 @@ try {
       assert.equal(after.history, before.history, 'やめる: 履歴が増えた');
       assert.ok((await lastEntry(page)).ai.includes(MSG.cancelled), 'やめる: 文が出ていない');
       assert.ok(!(await page.locator('#chat-busy-cover').isVisible()), 'やめたあとも覆いが残っている');
+      assert.equal(await page.evaluate(() => document.querySelectorAll('[inert]').length), 0, 'やめたあとも inert が残っている');
+      assert.equal(await page.evaluate(() => document.activeElement && document.activeElement.id), 'chat-input', '終わったあと入力欄にフォーカスが戻っていない');
       // 門を開けても、取り消した依頼の続きは当たらない
       await gate(page, 'cancel');
       await page.waitForTimeout(300);
@@ -451,6 +478,13 @@ try {
       const e = await lastEntry(page);
       assert.ok(e.ai.includes(MSG.conflict), '断りの文が出ていない: ' + e.ai);
       assert.ok(!e.undo);
+      // 取り込まなかった依頼は、次の依頼の会話に入れない(AI が「置いた」と思わないように)
+      await script(page, [ok([txt('はい。')], 'end_turn')]);
+      await send(page, '次の依頼');
+      await waitIdle(page);
+      const calls = await page.evaluate(() => window.__chat.calls);
+      const last = calls[calls.length - 1];
+      assert.ok(!JSON.stringify(last.messages).includes('途中で変わる'), '取り込まなかった依頼が次の依頼の会話に残っている');
     }
 
     // 5. 入力欄のキー操作がプランと選択を変えない。変換中の Enter で送らない
@@ -475,6 +509,11 @@ try {
       await page.waitForTimeout(200);
       assert.equal(await page.evaluate(() => window.__chat.calls.length), calls0, '変換中の Enter で送った');
       assert.equal(await page.locator('#chat-input').inputValue(), '寝室');
+      await page.evaluate(() => {
+        const t = document.getElementById('chat-input');
+        t.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', isComposing: true, keyCode: 229, bubbles: true, cancelable: true }));
+      });
+      assert.ok(await page.locator('#chat-panel').isVisible(), '変換中の Escape でパネルを閉じた');
       // Shift+Enter は改行、Enter は送る
       await page.keyboard.press('Shift+Enter');
       await page.keyboard.type('に');
@@ -484,6 +523,126 @@ try {
       await waitIdle(page);
       assert.equal(await page.evaluate(() => window.__chat.calls.length), calls0 + 1, 'Enter で送っていない');
       assert.equal(await page.locator('#chat-input').inputValue(), '', '送ったあと入力欄が空になっていない');
+    }
+    assert.deepEqual(errors, []);
+    await context.close();
+  }
+
+
+  // ── 取り込みの途中の例外・2回続けた取り込み・相手の変更のあとの「元に戻す」・外壁の設定表・3D ──
+  {
+    const { context, page, errors } = await openApp(browser, { width: 1280, height: 800 });
+    const consoleErrors = [];
+    page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
+    await openChatPanel(page);
+
+    // 1. normalizeLoadedPlan・draw2d が投げても、覆いが外れ、プランと履歴は依頼の前のまま
+    for (const fn of ['normalizeLoadedPlan', 'draw2d']) {
+      const before = await plan(page);
+      await page.evaluate((name) => {
+        window.__orig = window[name];
+        window[name] = function () { if (window.__throwOn) throw new Error('テストの例外 ' + name); return window.__orig.apply(this, arguments); };
+      }, fn);
+      await script(page, [ok([tool('e1', 'placeItem', BED)], 'tool_use'), ok([txt('置きました。')], 'end_turn')]);
+      await page.evaluate(() => { window.__throwOn = true; });
+      await send(page, 'ベッドを置いて(' + fn + ' が投げる)');
+      await waitIdle(page);
+      await page.evaluate((name) => { window.__throwOn = false; window[name] = window.__orig; draw2d(); }, fn);
+      const after = await plan(page);
+      assert.equal(after.json, before.json, fn + ' が投げた: プランが依頼の前と違う');
+      assert.equal(after.history, before.history, fn + ' が投げた: 取り消しの履歴が増えた');
+      assert.ok(!(await page.locator('#chat-busy-cover').isVisible()), fn + ' が投げた: 覆いが残っている');
+      assert.equal(await page.evaluate(() => document.querySelectorAll('[inert]').length), 0, fn + ' が投げた: inert が残っている');
+      assert.equal(await page.evaluate(() => ChatUI.state().busy), false);
+      const e = await lastEntry(page);
+      assert.ok(e.ai.includes(MSG.applyFailed), fn + ' が投げた: 文が出ていない: ' + e.ai);
+      assert.ok(!e.undo);
+      assert.ok(consoleErrors.some((t) => t.includes('テストの例外 ' + fn)), fn + ' の例外が console.error に出ていない');
+      // 依頼の前のプランで、キー操作が効く(固まっていない)
+      await page.evaluate(() => { ST.selected = DATA.items.find((o) => o.floor === 1 && o.type !== 'foundation' && !isObjectLocked(o)); updateProps(); draw2d(); document.activeElement && document.activeElement.blur(); });
+      const h0 = (await plan(page)).history;
+      await page.keyboard.press('ArrowRight');
+      assert.equal((await plan(page)).history, h0 + 1, fn + ' が投げた後、キー操作が効かない');
+      await page.evaluate(() => { undoAction(); ST.selected = null; updateProps(); });
+    }
+    errors.length = 0; // テストで投げた例外は pageerror に出ない(後始末で受け止めた)はずだが、念のため数えない
+
+    // 2. 2回続けて取り込むと、「元に戻す」は最後のやり取りにだけ残り、押すと2回めだけ戻る
+    {
+      await script(page, [ok([tool('d1', 'placeItem', BED)], 'tool_use'), ok([txt('1台めを置きました。')], 'end_turn')]);
+      await send(page, '1台め');
+      await waitIdle(page);
+      const first = await plan(page);
+      await script(page, [ok([tool('d2', 'placeItem', { ...BED, x: 1365, y: 4500 })], 'tool_use'), ok([txt('2台めを置きました。')], 'end_turn')]);
+      await send(page, '2台め');
+      await waitIdle(page);
+      const second = await plan(page);
+      assert.equal(second.items, first.items + 1);
+      const undos = await page.evaluate(() => [...document.querySelectorAll('#chat-log .chat-entry')].map((e) => !!e.querySelector('.chat-undo')));
+      assert.deepEqual(undos.filter(Boolean).length, 1, '「元に戻す」が2つ以上ある');
+      assert.equal(undos[undos.length - 1], true, '「元に戻す」が最後のやり取りに無い');
+      await page.locator('.chat-undo').click();
+      const back = await plan(page);
+      assert.equal(back.json, first.json, '「元に戻す」で2回めのぶんだけ戻っていない');
+    }
+
+    // 3. 取り込みのあとに、履歴に積まれない変更(相手の変更など)が入ったら、巻き戻さない
+    {
+      await script(page, [ok([tool('g1', 'placeItem', BED)], 'tool_use'), ok([txt('置きました。')], 'end_turn')]);
+      await send(page, 'ベッドを置いて(相手の変更のあと)');
+      await waitIdle(page);
+      await page.evaluate(() => {
+        const it = mkItem('chair', 5005, 4095, 0, 1);
+        DATA.items.push(it);
+        draw2d();
+      });
+      const mid = await plan(page);
+      await page.locator('.chat-undo').click();
+      const after = await plan(page);
+      assert.equal(after.json, mid.json, '履歴に積まれない変更のあとで「元に戻す」が巻き戻した');
+      const e = await lastEntry(page);
+      assert.ok(e.ai.includes(MSG.undoBlocked), '戻せなかった文が出ていない: ' + e.ai);
+      assert.ok(!e.undo, '戻せなかったあともボタンが残っている');
+    }
+
+    // 5. 依頼の途中で外壁の設定表に欄が足されても(3D の作り直しと同じ)、取り込む
+    {
+      const before = await plan(page);
+      await script(page, [ok([tool('x1', 'placeItem', BED)], 'tool_use'), ok([txt('置きました。')], 'end_turn', { hold: 'ews' })]);
+      await send(page, 'ベッドを置いて(外壁の設定表)');
+      await page.waitForFunction(() => window.__chat.calls.length >= 2, null, { timeout: 5000 });
+      await page.evaluate(() => { const s = ensureExteriorWallSettings(); s.walls['テストの壁'] = { color: null, texture: null, textureFlipX: false, textureFlipY: false }; });
+      await gate(page, 'ews');
+      await waitIdle(page);
+      const after = await plan(page);
+      assert.equal(after.items, before.items + 1, '外壁の設定表が変わっただけで取り込みを断った');
+      assert.ok((await lastEntry(page)).undo);
+      assert.equal(await page.evaluate(() => !!(DATA.exteriorWallSettings && DATA.exteriorWallSettings.walls['テストの壁'])), false,
+        '外壁の設定表が今の壁と合わせられていない(消えた壁の欄が残っている)');
+    }
+
+    // 5. 外観3Dを出した状態でも取り込める
+    {
+      await page.evaluate(() => setView('3d-ext'));
+      await page.waitForFunction(() => window.ren && window.sc3, null, { timeout: 20000 });
+      await page.waitForSelector('#app-loading', { state: 'hidden', timeout: 60000 });
+      const before = await plan(page);
+      const rebuilds = await page.evaluate(() => { window.__rb = 0; const o = window.rebuild3D; window.rebuild3D = function () { window.__rb++; return o.apply(this, arguments); }; return 0; });
+      await script(page, [ok([tool('v1', 'placeItem', BED)], 'tool_use'), ok([txt('置きました。')], 'end_turn')]);
+      // 3D の準備中はアプリの読み込み表示(#app-loading)が画面を覆うことがあるので、ボタンを押さずに送る
+      const t3d = Date.now();
+      await page.evaluate(() => ChatUI.send('ベッドを置いて(3D)'));
+      await page.waitForFunction(() => !ChatUI.state().busy, null, { timeout: 180000, polling: 500 }).catch(async (e) => {
+        console.log('3D の依頼の状態', JSON.stringify(await page.evaluate(() => ({ st: ChatUI.state(), calls: window.__chat.calls.length, q: window.__chat.queue.length, prog: document.getElementById('chat-progress').textContent, tags: !!CATALOGUE_TAGS }))));
+        throw e;
+      });
+      console.log('3D 表示中の依頼: ' + (Date.now() - t3d) + 'ms');
+      const after = await plan(page);
+      assert.equal(after.items, before.items + 1, '3D 表示中に取り込めない');
+      assert.ok(await page.evaluate(() => window.__rb > 0), '3D 表示中の取り込みで 3D を作り直していない');
+      assert.equal(await page.evaluate(() => ST.view), '3d-ext', '取り込みで視点が変わった');
+      await page.evaluate(() => setView('2d'));
+      void rebuilds;
     }
     assert.deepEqual(errors, []);
     await context.close();
@@ -553,6 +712,13 @@ try {
     await send(page, '選んでいる物を1つ消して');
     await page.waitForFunction(() => ChatUI.state().busy, null, { timeout: 5000 });
     await page.waitForTimeout(200);
+    {
+      const l = await layout(page);
+      const n = await busyNote(page);
+      assertInside(n, l, '作業中の文(375)');
+      assertNoOverlap(n, l, '作業中の文(375)');
+      assert.ok(!rectsOverlap(n, l.panel), '作業中の文がシートに重なっている(375)');
+    }
     await page.screenshot({ path: join(SHOTS, 'chat-375-busy.png') });
     await gate(page, 'shot');
     await waitIdle(page);
@@ -568,6 +734,35 @@ try {
     assert.ok(!(await page.locator('#chat-fab').isVisible()), 'ウォークスルーの間も開くボタンが見えている');
     await page.evaluate(() => { document.getElementById('walk-hud').style.display = 'none'; document.getElementById('c3d-wrap').style.display = 'none'; });
     assert.ok(await page.locator('#chat-fab').isVisible());
+    assert.deepEqual(errors, []);
+    await context.close();
+  }
+
+  // ── 900 の幅(769〜1100 の間) ─────────────────────────────────────
+  {
+    const { context, page, errors } = await openApp(browser, { width: 900, height: 800 });
+    const l0 = await layout(page);
+    assertInside(l0.fab, l0, '開くボタン(900)');
+    assertNoOverlap(l0.fab, l0, '開くボタン(900)');
+    await openChatPanel(page);
+    const l1 = await layout(page);
+    assertInside(l1.panel, l1, 'パネル(900)');
+    assertNoOverlap(l1.panel, l1, 'パネル(900)');
+    await page.screenshot({ path: join(SHOTS, 'chat-900-open.png') });
+    await page.evaluate(() => { ST.selected = DATA.items.find((o) => o.floor === 1 && o.type !== 'foundation'); updateProps(); draw2d(); });
+    await page.waitForTimeout(300);
+    const l2 = await layout(page);
+    assertNoOverlap(l2.panel, l2, 'パネル(900・選択中)');
+    await script(page, [ok([txt('考えます')], 'end_turn', { hold: 'w900' })]);
+    await send(page, 'テレビを置いて');
+    await page.waitForFunction(() => ChatUI.state().busy, null, { timeout: 5000 });
+    const l3 = await layout(page);
+    const n = await busyNote(page);
+    assertInside(n, l3, '作業中の文(900)');
+    assertNoOverlap(n, l3, '作業中の文(900)');
+    assert.ok(!rectsOverlap(n, l3.panel), '作業中の文がパネルに重なっている(900)');
+    await gate(page, 'w900');
+    await waitIdle(page);
     assert.deepEqual(errors, []);
     await context.close();
   }

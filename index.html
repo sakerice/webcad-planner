@@ -3815,7 +3815,8 @@ input[type="reset"]:focus-visible{
     <div class="unity-render-title" id="chat-title">AIに頼む</div>
     <button class="unity-render-close" type="button" aria-label="閉じる" onclick="closeChat()">×</button>
   </div>
-  <div id="chat-log" class="chat-log" aria-live="polite"></div>
+  <div id="chat-log" class="chat-log"></div>
+  <div id="chat-announce" class="chat-sr-only" aria-live="polite"></div>
   <div id="chat-progress" class="chat-progress" role="status" hidden></div>
   <textarea id="chat-input" class="chat-input" rows="2" placeholder="例：寝室にベッドを置いて" aria-label="AIに頼むこと"></textarea>
   <div class="chat-actions">
