@@ -1,0 +1,233 @@
+/* チャット欄（AIに頼む）。動きは assets/js/chat/chat-ui.js。
+   index.html の ui-refinement.css の後ろで読む（テーマの上書きより後に効かせる）。
+
+   置き場所（既存の固定の部品と重ねない）:
+     デスクトップ  開くボタンは下の行（#statusbar と #coords の間）。#coords は right:205px から左へ伸びるので、
+                  その左に 155px 空けて right:360px に置く。パネルは右下に浮く箱で、下の行（#app-version など）の上。
+                  右上の #surface-control より下に収める。設定欄（#props）が出ている間は、その左へずらす。
+                  外観3Dの立面スナップ（#elev-snap-fab）が出ている間は、その上へ上げる。
+     768px 以下    開くボタンは丸いアイコンだけにして、下のナビ（#bottom-nav）と設定欄の見出し（選択中に下へ出る）の上。
+                  パネルは下からのシート。下のナビの上に重ねて出す。
+   重なり順: 開くボタン 340（デスクトップ）・455（768px 以下。下のナビ 460・シート 490〜500 より奥）。
+            依頼中の覆い 520、パネル 530（ツールバー 470・サイドバーと設定欄のシート 500 より手前）。
+            ダイアログ（900〜1001・15000）はどれもパネルより手前。
+   文字の大きさは、パネルの中は .airx-dialog の4段階（--airx-fs-*）だけを使う。 */
+
+#chat-fab{
+  position:fixed;
+  right:calc(360px + var(--safe-r,0px));
+  bottom:6px;
+  z-index:340;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  height:40px;
+  min-width:40px;
+  padding:0 16px 0 13px;
+  border:0;
+  border-radius:999px;
+  background:var(--hp-primary);
+  color:#fff;
+  font:inherit;
+  font-size:12px;
+  font-weight:700;
+  line-height:1;
+  white-space:nowrap;
+  box-shadow:0 8px 20px rgba(233,71,43,.28);
+  cursor:pointer;
+  touch-action:manipulation;
+}
+#chat-fab:hover{background:var(--hp-primary-dark)}
+#chat-fab .chat-fab-icon{width:20px;height:20px;flex:0 0 auto}
+/* ボタンの文字は端末の字体で描く。「頼」は起動の画面のほかの文字に無く、Noto Sans JP で描くと、その字を含む字体の
+   ファイルを起動のたびに1つ余分に読む(チャットを使わない人にも読み込みが増える)。パネルの中は Noto Sans JP のまま。 */
+#chat-fab .chat-fab-label{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic UI','Meiryo',sans-serif}
+#chat-fab.is-open{display:none}
+
+/* ほかのダイアログとウォークスルーの間は、開くボタンを隠す。ウォークスルーの間はパネルも隠す（操作の邪魔になるため）。 */
+body:has(#walk-hud:not([style*="none"])) #chat-fab,
+body:has(#walk-hud:not([style*="none"])) #chat-panel,
+body:has(#plan-import-modal.show) #chat-fab,
+body:has(#unity-render-modal.show) #chat-fab,
+body:has(#video-render-modal.show) #chat-fab,
+body:has(#preset-choice-modal.show) #chat-fab,
+body:has(#share-overlay.show) #chat-fab,
+body:has(#compare-modal) #chat-fab,
+body:has(#plan-library-modal) #chat-fab,
+body:has(#asset-swap-modal) #chat-fab,
+body:has(#jis-drawing-overlay:not([style*="none"])) #chat-fab{
+  display:none!important;
+}
+
+/* 依頼中の覆い。作図の領域・ツールバー・サイドバー・設定欄の上に置き、編集の操作を受け止める。パネルは覆わない。 */
+#chat-busy-cover{
+  position:fixed;
+  inset:0;
+  z-index:520;
+  background:rgba(250,247,242,.42);
+  cursor:progress;
+  touch-action:none;
+}
+#chat-busy-cover[hidden]{display:none}
+#chat-busy-cover .chat-busy-note{
+  position:absolute;
+  top:calc(80px + var(--safe-top,0px));
+  left:50%;
+  transform:translateX(-50%);
+  padding:10px 18px;
+  border-radius:999px;
+  background:#fff;
+  color:var(--hp-text);
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+  box-shadow:var(--hp-shadow);
+  pointer-events:none;
+}
+
+/* パネル。見た目はダイアログ（.unity-render-card.airx-dialog）に合わせ、大きさと置き場所だけ決める。 */
+#chat-panel{
+  position:fixed;
+  right:calc(14px + var(--safe-r,0px));
+  bottom:54px;
+  z-index:530;
+  width:min(380px, calc(100vw - 28px));
+  max-height:min(600px, calc(100dvh - 200px));
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  overflow:hidden;
+  padding:16px!important;
+  border-radius:24px!important;
+  box-shadow:var(--hp-shadow), 0 4px 12px rgba(24,20,18,.13)!important;
+}
+#chat-panel[hidden]{display:none!important}
+#chat-panel .unity-render-head{margin-bottom:0;flex:0 0 auto}
+#chat-panel .unity-render-close{width:40px;height:40px;flex:0 0 auto}
+@media (min-width:769px){
+  body:has(#props.show) #chat-panel{right:calc(260px + var(--safe-r,0px))}
+  body:has(#elev-snap-fab.show) #chat-panel{bottom:110px;max-height:min(600px, calc(100dvh - 256px))}
+}
+
+.chat-log{
+  flex:1 1 auto;
+  min-height:96px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:2px 2px 4px;
+}
+.chat-intro{color:var(--hp-text-soft);font-size:var(--airx-fs-body);line-height:1.6}
+.chat-intro-text{margin:0 0 10px}
+.chat-examples{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.chat-example{
+  min-height:40px;
+  max-width:100%;
+  padding:0 14px;
+  border:0;
+  border-radius:999px;
+  background:var(--hp-secondary-soft,#e4f8ff);
+  color:var(--hp-text);
+  font:inherit;
+  font-size:var(--airx-fs-body);
+  text-align:left;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.chat-example:hover{color:var(--hp-secondary-dark,#007bb0)}
+
+.chat-entry{display:flex;flex-direction:column;gap:6px}
+.chat-user{
+  align-self:flex-end;
+  max-width:85%;
+  padding:8px 12px;
+  border-radius:16px 16px 4px 16px;
+  background:var(--hp-primary);
+  color:#fff;
+  font-size:var(--airx-fs-body);
+  line-height:1.55;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.chat-ai{
+  align-self:flex-start;
+  max-width:92%;
+  padding:8px 12px;
+  border-radius:16px 16px 16px 4px;
+  background:#f5f2ee;
+  color:var(--hp-text);
+  font-size:var(--airx-fs-body);
+  line-height:1.6;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.chat-ai.is-error{background:#fff1ec;color:#8a2c17}
+.chat-ai-undone{display:block;color:var(--hp-text-soft);font-size:var(--airx-fs-help)}
+.chat-ai-text + .chat-ai-undone{margin-top:4px}
+.chat-entry-note .chat-ai{background:transparent;padding:0 4px;color:var(--hp-text-soft);font-size:var(--airx-fs-help)}
+#chat-panel .chat-undo{align-self:flex-start;width:auto;min-height:40px;margin:0;padding:0 16px}
+
+.chat-progress{flex:0 0 auto;color:var(--hp-text-soft);font-size:var(--airx-fs-label);padding:0 4px}
+.chat-progress[hidden]{display:none}
+.chat-input{
+  flex:0 0 auto;
+  width:100%;
+  min-height:56px;
+  max-height:140px;
+  resize:none;
+  box-sizing:border-box;
+  padding:10px 14px;
+  border:0;
+  border-radius:18px;
+  background:#f7f8fa;
+  color:var(--hp-text);
+  font:inherit;
+  font-size:var(--airx-fs-body);
+  line-height:1.5;
+  box-shadow:inset 0 0 0 1px rgba(31,27,24,.08);
+}
+.chat-input:focus{outline:3px solid rgba(0,168,239,.18);box-shadow:inset 0 0 0 1px var(--hp-secondary,#00a8ef)}
+.chat-input:disabled{opacity:.6}
+.chat-actions{flex:0 0 auto;display:flex;align-items:center;gap:8px}
+.chat-actions-gap{flex:1 1 auto}
+#chat-panel .chat-actions .pbtn{width:auto;min-height:40px;margin:0;padding:0 18px;display:inline-flex;align-items:center;gap:6px}
+#chat-panel .chat-actions .pbtn[hidden]{display:none}
+#chat-panel .chat-attach svg{width:18px;height:18px;flex:0 0 auto}
+#chat-panel .chat-attach:disabled{opacity:.5}
+/* ファイルの選択欄は見せず、「図面の画像」ボタンから開く(display:none にすると開けない端末があるため、見えない大きさにする)。 */
+.chat-file-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}
+.chat-remaining{flex:0 0 auto;color:var(--hp-text-soft);font-size:var(--airx-fs-help);text-align:right}
+.chat-remaining[hidden]{display:none}
+
+/* 769〜1100px は下の行が詰まるので、開くボタンはアイコンだけにする。 */
+@media (min-width:769px) and (max-width:1100px){
+  #chat-fab{width:40px;padding:0}
+  #chat-fab .chat-fab-label{display:none}
+}
+
+@media (max-width:768px){
+  #chat-fab{
+    right:calc(12px + var(--safe-r,0px));
+    bottom:calc(144px + var(--safe-bot,0px));
+    z-index:455;
+    width:48px;
+    height:48px;
+    padding:0;
+  }
+  #chat-fab .chat-fab-icon{width:22px;height:22px}
+  #chat-fab .chat-fab-label{display:none}
+  #chat-panel{
+    left:0;
+    right:0;
+    bottom:0;
+    width:auto;
+    max-height:min(72dvh, calc(100dvh - 140px));
+    padding:16px 16px calc(14px + var(--safe-bot,0px))!important;
+    border-radius:24px 24px 0 0!important;
+  }
+  .chat-input{font-size:16px}
+  #chat-busy-cover .chat-busy-note{top:calc(130px + var(--safe-top,0px))}
+}

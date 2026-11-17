@@ -31,6 +31,7 @@ const EXTRACTED = [
   'assets/js/chat/claude-stream.js',
   'assets/js/chat/plan-summary.js',
   'assets/js/chat/chat-session.js',
+  'assets/js/chat/chat-ui.js',
 ];
 
 let cached = null;
