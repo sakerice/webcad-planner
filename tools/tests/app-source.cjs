@@ -28,6 +28,9 @@ const EXTRACTED = [
   'assets/js/app-state.js',
   'assets/js/plan-data.js',
   'assets/js/draw-2d.js',
+  'assets/js/chat/claude-stream.js',
+  'assets/js/chat/plan-summary.js',
+  'assets/js/chat/chat-session.js',
 ];
 
 let cached = null;

@@ -141,6 +141,97 @@ function planOpsCtx(extra){
   if(extra) Object.keys(extra).forEach(function(k){ ctx[k]=extra[k]; });
   return ctx;
 }
+// チャット(AI)が操作を「プランの写し」に当てるときの ctx。assets/js/chat/chat-session.js の ctxFor が使う。
+//
+// hooks は planOpsCtx と同じ画面の関数で、それらはグローバルの DATA を前提にしている(屋内の判定・置いたときの
+// 高さ決め・天井に付く器具の追従・外壁の設定表など)。引数の plan を見る形に直す代わりに、
+// 操作を当てている間だけ DATA を写しに差し替え、finally で必ず戻す(withPlan。前例は compare-mode.js の withPane)。
+// 差し替えている間に描画・保存・共同編集の同期・markDirty は呼ばれない(hooks の中から呼ぶ道は無く、
+// applyOperations は同期の処理で終わるので、タイマーも割り込まない)。
+// 戻したあと、内容を鍵にして DATA の物を覚えている天井の計算の記憶(_roofCeilingExtentCache)を空にする
+// (写しの屋根を覚えたまま、本物のプランの計算に使われないように)。
+//
+// inPlace でない(写しに当てる)ので、allowProps(画面用の props)は立てず、階の上限は AI の範囲(1〜4)。
+// 部屋の id は 'rm_'+連番(同じ依頼で続けて足しても重ならない)。格子と階段の吸着は画面と同じで、物の端への吸着はしない
+// (画面では Shift を押している間だけの吸着で、AI には関係ない)。
+// カタログは AI 用: placeItem の type に、家具・設備の分類名(ObjectKnowledge の kind。sofa・bed など)を
+// 先に引き(PlanFreeApply.typeForKind。取り込みと同じ種類になる)、分類名でなければ今の種類名の引き方を使う。
+// toilet・sofa・tv・dining-table・desk・closet は分類名と古い種類名が同じ綴りで、古い種類(tv は読み込みのたびに消える)
+// にならないよう、必ず分類名の側で引く。fence と other は分類名として引かない(operations-catalog.js の
+// SKIP_KINDS と同じ。fence はアプリの種類名のブロック塀、木のフェンスは wood-fence)。
+var CHAT_SKIP_KINDS={fence:true,other:true};
+var CHAT_KITCHEN_UNIT_MESSAGE='調理台(kitchen-unit)は部品の台を並べて作るので、1つの物としては置けません。流し(kitchen-sink)・コンロ(cooktop)・引出しの台を並べて置いてください';
+var CHAT_TAGS_LOADING_MESSAGE='家具の一覧を読み込み中です。少し待ってからもう一度お試しください';
+function planChatKindType(name){
+  if(typeof name!=='string' || CHAT_SKIP_KINDS[name]) return null;
+  var K=(typeof ObjectKnowledge!=='undefined'&&ObjectKnowledge&&ObjectKnowledge.KNOWLEDGE)||{};
+  if(!Object.prototype.hasOwnProperty.call(K,name)) return null;
+  if(name==='kitchen-unit') return {type:null,why:CHAT_KITCHEN_UNIT_MESSAGE};
+  if(typeof PlanFreeApply==='undefined') return {type:null,why:CHAT_TAGS_LOADING_MESSAGE};
+  // 流し・コンロは、取り込みで調理台の上に無いときと同じ、単独の部品の台。
+  var box=PlanFreeApply.KITCHEN_BOX&&PlanFreeApply.KITCHEN_BOX[name];
+  if(box && name!=='cooking-appliance') return {type:box.type};
+  var tags=(typeof CATALOGUE_TAGS!=='undefined'&&CATALOGUE_TAGS&&CATALOGUE_TAGS.items)||null;
+  var t=PlanFreeApply.typeForKind(name,0,tags||{});
+  if(t) return {type:t};
+  return {type:null,why:tags?'分類 '+name+' に当たる物がカタログにありません。候補から選んでください':CHAT_TAGS_LOADING_MESSAGE};
+}
+function planChatCtx(){
+  var ctx=planCoreCtx();
+  var base=ctx.catalog;
+  var resolve=function(type){ var k=planChatKindType(type); return k ? (k.type ? bestFmpType(k.type) : type) : bestFmpType(type); };
+  var baseKnown=function(t){ return !!(t && (Object.prototype.hasOwnProperty.call(ISIZES,t) || isFmpItemType(t))); };
+  var known=function(type){ var k=planChatKindType(type); return k ? !!(k.type && baseKnown(bestFmpType(k.type))) : baseKnown(bestFmpType(type)); };
+  ctx.catalog={
+    resolveType:resolve,
+    known:known,
+    unknownMessage:function(type){ var k=planChatKindType(type); return k&&!k.type ? k.why : null; },
+    suggest:function(type){
+      var q=String(type||'').toLowerCase(), out=[];
+      var add=function(t){ if(t && out.indexOf(t)<0 && known(t)) out.push(t); };
+      if(type==='kitchen-unit'){
+        add('kitchen-sink'); add('cooktop');
+        [450,600,750,900].forEach(function(w){ add('original-kitchen-box-drawer'+w); });
+        return out.slice(0,8);
+      }
+      var K=(typeof ObjectKnowledge!=='undefined'&&ObjectKnowledge&&ObjectKnowledge.KNOWLEDGE)||{};
+      if(q) Object.keys(K).forEach(function(k){ if(!CHAT_SKIP_KINDS[k] && (k.indexOf(q)>=0||q.indexOf(k)>=0)) add(k); });
+      planCoreSuggestTypes(type).forEach(add);
+      return out.slice(0,8);
+    },
+    defaultSize:function(type){ return base.defaultSize(resolve(type)); },
+    defaultColor:function(type){ return base.defaultColor(resolve(type)); },
+    model:function(type){ return base.model(resolve(type)); },
+    is:function(kind,type){ return base.is(kind,resolve(type)); },
+    canSetElevation:base.canSetElevation,
+    applyLightDefaults:base.applyLightDefaults,
+    contextExteriorHeight:function(type){ return base.contextExteriorHeight(resolve(type)); },
+    contextFloors:function(type){ return base.contextFloors(resolve(type)); },
+    constants:base.constants
+  };
+  ctx.settable=typeof PlanSettable!=='undefined'?PlanSettable:undefined;
+  // hooks と吸着の設定は画面の ctx(planOpsCtx)と同じ物を使う。planOpsCtx は inPlace でしか作れないので、
+  // inPlace で作った ctx から hooks と snap だけを取り出す(inPlace・targets・rethrow・allowProps・maxFloor・roomId は持ち込まない)。
+  var screen=planOpsCtx({inPlace:true});
+  ctx.snap=screen.snap;
+  ctx.snap.edges=false;
+  var hooks=screen.hooks;
+  // 置けるか・どの階に載るかは、分類名を引いた後の種類で見る(地面に置くカタログの物の印を見るため)。
+  var canPlace=hooks.canPlace, placeFloor=hooks.placeFloor;
+  hooks.canPlace=function(type,floor,cx,cy){ return canPlace(resolve(type),floor,cx,cy); };
+  hooks.placeFloor=function(type,floor,cx,cy){ return placeFloor(resolve(type),floor,cx,cy); };
+  ctx.hooks=hooks;
+  ctx.withPlan=function(work,run){
+    var saved=DATA;
+    DATA=work;
+    try{ return run(); }
+    finally{
+      DATA=saved;
+      if(typeof _roofCeilingExtentCache!=='undefined') _roofCeilingExtentCache={};
+    }
+  };
+  return ctx;
+}
 function mkWall(x1,y1,x2,y2,floor,thick,color){
   return PlanCoreFactories.makeWall({x1:x1,y1:y1,x2:x2,y2:y2,floor:floor,thick:thick,color:color}, planCoreCtx());
 }
