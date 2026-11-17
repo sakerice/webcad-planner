@@ -152,8 +152,11 @@ function planOpsCtx(extra){
 // (写しの屋根を覚えたまま、本物のプランの計算に使われないように)。
 //
 // inPlace でない(写しに当てる)ので、allowProps(画面用の props)は立てず、階の上限は AI の範囲(1〜4)。
-// 部屋の id は 'rm_'+連番(同じ依頼で続けて足しても重ならない)。格子と階段の吸着は画面と同じで、物の端への吸着はしない
-// (画面では Shift を押している間だけの吸着で、AI には関係ない)。
+// 部屋の id は 'rm_'+連番(同じ依頼で続けて足しても重ならない)。
+// 吸着は階段どうしのつながりだけ。格子(利用者の画面の ST.snap。910 などにしている人もいる)と物の端には吸着させない
+// (AI が指定した中心・動かす量のとおりに置く)。
+// 置いた物の分類(CATALOGUE_TAGS の kind)が、読み取りで壁や天井に吊る物(PlanFreeApply.MOUNT_ELEV_MM。レンジフードなど)で、
+// 画面の高さ決めが高さを変えていなければ(物を作る部品の既定の 0 のまま)、読み取りと同じ取付の高さを入れる。
 // カタログは AI 用: placeItem の type に、家具・設備の分類名(ObjectKnowledge の kind。sofa・bed など)を
 // 先に引き(PlanFreeApply.typeForKind。取り込みと同じ種類になる)、分類名でなければ今の種類名の引き方を使う。
 // toilet・sofa・tv・dining-table・desk・closet は分類名と古い種類名が同じ綴りで、古い種類(tv は読み込みのたびに消える)
@@ -214,12 +217,24 @@ function planChatCtx(){
   // inPlace で作った ctx から hooks と snap だけを取り出す(inPlace・targets・rethrow・allowProps・maxFloor・roomId は持ち込まない)。
   var screen=planOpsCtx({inPlace:true});
   ctx.snap=screen.snap;
+  ctx.snap.grid=0;
   ctx.snap.edges=false;
   var hooks=screen.hooks;
   // 置けるか・どの階に載るかは、分類名を引いた後の種類で見る(地面に置くカタログの物の印を見るため)。
   var canPlace=hooks.canPlace, placeFloor=hooks.placeFloor;
   hooks.canPlace=function(type,floor,cx,cy){ return canPlace(resolve(type),floor,cx,cy); };
   hooks.placeFloor=function(type,floor,cx,cy){ return placeFloor(resolve(type),floor,cx,cy); };
+  var afterPlace=hooks.afterPlace;
+  hooks.afterPlace=function(it,plan){
+    // 物を作る部品は高さを入れられる物に既定の 0 を入れる。画面の高さ決め(載る面を探す)が変えなかったときだけ、
+    // 取付の高さを入れる(台の上に載せた物・モデルの既定の高さがある物はそのまま)。
+    var before=it?it.elev:undefined;
+    afterPlace(it,plan);
+    if(!it || it.elev!==before || (before!==undefined && before!==0)) return;
+    var tag=(typeof CATALOGUE_TAGS!=='undefined'&&CATALOGUE_TAGS&&CATALOGUE_TAGS.items&&CATALOGUE_TAGS.items[it.type])||null;
+    var mount=(typeof PlanFreeApply!=='undefined'&&PlanFreeApply.MOUNT_ELEV_MM)||{};
+    if(tag && Object.prototype.hasOwnProperty.call(mount,tag.kind)) it.elev=mount[tag.kind];
+  };
   ctx.hooks=hooks;
   ctx.withPlan=function(work,run){
     var saved=DATA;

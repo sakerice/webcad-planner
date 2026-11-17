@@ -97,6 +97,29 @@ try {
           floor: it && it.floor, indoor: it && !!it.indoor, roomId: withRoom.errors.length ? null : withRoom.plan.rooms[withRoom.plan.rooms.length - 1].id,
         };
       }
+      // 利用者の格子が 910 でも、AI の指定どおりに置く・動かす(格子にも物の端にも吸着しない)
+      const snapSaved = ST.snap, shiftSaved = ST.shiftKey;
+      ST.snap = 910; ST.shiftKey = true;
+      try {
+        const put = PlanCoreOperations.applyOperations(DATA, [{ op: 'placeItem', args: { type: 'bed', x: 1234, y: 5678, floor: 1 } }], planChatCtx());
+        const bed = put.errors.length ? null : put.plan.items[put.plan.items.length - 1];
+        const mover = DATA.items.find((o) => !o.locked && !isStairPartType(o.type) && o.type !== 'foundation' && (o.floor || 1) === 1);
+        const mv = PlanCoreOperations.applyOperations(DATA, [{ op: 'moveObject', args: { id: String(mover.id), dx: 300, dy: 0 } }], planChatCtx());
+        const moved = mv.errors.length ? null : mv.plan.items.find((o) => o.id === mover.id);
+        res.snap = {
+          errors: put.errors.concat(mv.errors).map((e) => e.message),
+          center: bed ? [bed.x + bed.w / 2, bed.y + bed.d / 2] : null,
+          dx: moved ? moved.x - mover.x : null, dy: moved ? moved.y - mover.y : null,
+        };
+      } finally { ST.snap = snapSaved; ST.shiftKey = shiftSaved; }
+      // 読み取りで壁や天井に吊る分類は、読み取りと同じ取付の高さで置く
+      res.mount = Object.keys(PlanFreeApply.MOUNT_ELEV_MM).map((kind) => {
+        const r = PlanCoreOperations.applyOperations(DATA, [{ op: 'placeItem', args: { type: kind, x: cx, y: cy, floor: 1 } }], planChatCtx());
+        const it = r.errors.length ? null : r.plan.items[r.plan.items.length - 1];
+        const imp = PlanFreeApply.toImportPlan({ floors: [{ floor: 1, objects: [{ kind, x: cx, y: cy, w: 900, d: 600, face: 'S' }] }] }, tags);
+        const got = imp.items.find((x) => x.type === (it && it.type));
+        return { kind, type: it && it.type, elev: it && it.elev, importElev: got && got.extra ? got.extra.elev : undefined, table: PlanFreeApply.MOUNT_ELEV_MM[kind] };
+      });
       // 途中で投げても戻る
       const ctx = planChatCtx();
       ctx.hooks.afterPlace = () => { throw new Error('わざと'); };
@@ -136,6 +159,8 @@ try {
       kindOf: (t) => (CATALOGUE_TAGS && CATALOGUE_TAGS.items && CATALOGUE_TAGS.items[t] ? CATALOGUE_TAGS.items[t].kind : null),
     });
     res.summaryLength = summary.length;
+    res.summaryBytes = new TextEncoder().encode(summary).length;
+    res.summaryCollapsed = (summary.match(/（まとめ）/g) || []).length;
     res.summaryHead = summary.split('\n').slice(0, 30);
     res.summaryItems = summary.split('\n').filter((l) => /^(\[選択中\] )?id=\S+ (?!部屋|壁)/.test(l)).slice(0, 12);
     res.modules = [typeof ChatClaudeStream, typeof ChatSession, typeof ChatPlanSummary];
@@ -145,7 +170,7 @@ try {
   console.log(JSON.stringify({
     placed: out.placed.map((p) => p.kind + '→' + p.type),
     refused: out.refused, skipped: out.skipped, indoor: out.indoor, groundKind: out.groundKind, loading: out.loading, loadingDefault: out.loadingDefault,
-    summaryLength: out.summaryLength, roomIds: out.roomIds,
+    summaryLength: out.summaryLength, summaryBytes: out.summaryBytes, roomIds: out.roomIds, snap: out.snap, mount: out.mount,
   }, null, 1));
   if (process.env.CHAT_CTX_DUMP) {
     console.log(out.summaryHead.join('\n'));
@@ -184,11 +209,17 @@ try {
   assert.match(out.loading[0], /読み込み中/);
   assert.equal(out.loadingDefault, 'fmp-Sofa01', '既定のモデルがある分類は札が無くても置ける');
   assert.deepEqual(out.guards, { floor5: 1, props: 1 });
+  assert.deepEqual(out.snap, { errors: [], center: [1234, 5678], dx: 300, dy: 0 }, '格子 910 でも指定どおり');
+  assert.ok(out.mount.length >= 1);
+  for (const m of out.mount) {
+    assert.equal(m.elev, m.table, m.kind + ' の高さ');
+    assert.equal(m.elev, m.importElev, m.kind + ' が読み取りと同じ高さ');
+  }
   assert.equal(out.roomIds.length, 2);
   assert.notEqual(out.roomIds[0], out.roomIds[1]);
-  assert.ok(out.summaryLength > 1000 && out.summaryLength < 40000);
+  assert.ok(out.summaryLength > 1000 && out.summaryBytes <= 24 * 1024);
   assert.deepEqual(errors, []);
-  console.log('チャット用の ctx: 置けた分類 ' + out.placed.length + '・置けない分類 ' + out.refused.length + '、要約 ' + out.summaryLength + ' 文字');
+  console.log('チャット用の ctx: 置けた分類 ' + out.placed.length + '・置けない分類 ' + out.refused.length + '、要約 ' + out.summaryLength + ' 文字・' + out.summaryBytes + ' バイト(まとめ ' + out.summaryCollapsed + ' 種類)');
 } finally {
   await browser.close();
 }

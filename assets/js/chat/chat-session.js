@@ -46,7 +46,12 @@
 }(typeof self !== 'undefined' ? self : this, function (ChatClaudeStream) {
 
   var MAX_ROUNDS = 8;   // 1回の依頼の呼び出しは、最初を含めて 8 回まで(Worker と同じ)
-  var LIST_MAX = 40;    // 道具の結果に入れる検査の指摘の数の上限(本文の大きさを抑える)
+  // 送る量の決まり(Worker の上限は1回 160KB、1回の依頼の合計 1MB)。
+  var LIST_MAX = 10;               // 検査の結果に入れる指摘と警告の数(それぞれ)。残りは「ほか N 件」
+  var RESULT_MAX_CHARS = 2000;     // 道具の結果の文1件の長さ
+  var HISTORY_MAX = 6;             // 前の依頼のやり取りを入れる件数(直近から)
+  var HISTORY_TEXT_MAX = 400;      // 前の依頼の、利用者の文と AI の文それぞれの長さ
+  var BODY_MAX_BYTES = 150 * 1024; // 1回の本文の上限(Worker の 160KB より少し手前で止める)
 
   // 道具の名前 → 利用者向けの進み具合の文。
   var TOOL_LABELS = {
@@ -85,6 +90,7 @@
     max_tokens: '返事が長くなりすぎて、途中で止まりました。依頼を小さく分けて頼み直してください。',
     refusal: 'AI がこの依頼を断りました。間取りをどう直したいかを書いて、頼み直してください。',
     pause_turn: 'AI の返事が途中で止まりました。もう一度お試しください。',
+    too_long: '頼みごとが多すぎて、途中で続けられなくなりました。少しずつ分けてお試しください。',
     failed: '依頼を最後まで進められませんでした。もう一度お試しください。'
   };
   // サーバの失敗の code のうち、そのまま理由にするもの(ほかは http_error)。
@@ -99,6 +105,30 @@
   function textOf(content) {
     return (content || []).filter(function (b) { return b && b.type === 'text' && typeof b.text === 'string'; })
       .map(function (b) { return b.text; }).join('').trim();
+  }
+  function hasOwn(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function labelFor(name) { return typeof name === 'string' && hasOwn(TOOL_LABELS, name) ? TOOL_LABELS[name] : TOOL_LABEL_OTHER; }
+  function cut(str, max) { str = String(str); return str.length > max ? str.slice(0, max - 1) + '…' : str; }
+  // UTF-8 のバイト数(TextEncoder に頼らない)。
+  function utf8Bytes(str) {
+    var b = 0;
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c < 0x80) b += 1;
+      else if (c < 0x800) b += 2;
+      else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length) { b += 4; i++; }
+      else b += 3;
+    }
+    return b;
+  }
+  // 取り消したあとに届いた返事の通信を閉じる(AbortController が無いときの備え)。
+  function closeBody(res) {
+    try {
+      if (res && res.body && typeof res.body.cancel === 'function') {
+        var p = res.body.cancel();
+        if (p && typeof p.then === 'function') p.then(null, function () {});
+      }
+    } catch (e) { /* 無視 */ }
   }
   function capList(list) {
     list = (list || []).map(String);
@@ -166,11 +196,13 @@
       var warnings = [];
       var summary = String(deps.summarize(work));
       var messages = [];
-      history.forEach(function (h) {
-        messages.push({ role: 'user', content: h.user });
-        messages.push({ role: 'assistant', content: h.assistant });
+      // 前の依頼は直近 HISTORY_MAX 件まで、文はそれぞれ HISTORY_TEXT_MAX 字までに切って入れる。
+      history.slice(-HISTORY_MAX).forEach(function (h) {
+        messages.push({ role: 'user', content: cut(h.user, HISTORY_TEXT_MAX) });
+        messages.push({ role: 'assistant', content: cut(h.assistant, HISTORY_TEXT_MAX) });
       });
       messages.push({ role: 'user', content: '<plan_summary>\n' + summary + '\n</plan_summary>\n\n' + text });
+      var retried = false;
       var ticket = null;
       var round = 0;
 
@@ -185,16 +217,21 @@
       function runTool(block) {
         var name = block.name, input = block.input;
         var result = function (obj, isError) {
-          var r = { type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(obj) };
+          var r = { type: 'tool_result', tool_use_id: block.id, content: cut(JSON.stringify(obj), RESULT_MAX_CHARS) };
           if (isError) r.is_error = true;
           return r;
         };
         try {
           if (name === 'inspect_plan') {
-            var ins = tools.inspectPlan(work) || {};
+            // 検査も写しを「今のプラン」として行う(画面の関数を使う検査を足しても、本物の DATA を見ないように)。
+            var ictx = deps.ctxFor();
+            var target = work;
+            var ins = (ictx && typeof ictx.withPlan === 'function'
+              ? ictx.withPlan(target, function () { return tools.inspectPlan(target); })
+              : tools.inspectPlan(target)) || {};
             return result({ ok: !!ins.ok, errors: capList(ins.errors), warnings: capList(ins.warnings) });
           }
-          if (!Object.prototype.hasOwnProperty.call(TOOL_LABELS, name)) {
+          if (typeof name !== 'string' || !hasOwn(TOOL_LABELS, name)) {
             return result({ errors: ['知らない道具です: ' + String(name)] }, true);
           }
           var ck = tools.checkArgs(name, input);
@@ -227,13 +264,23 @@
       function step() {
         if (job.cancelled) return Promise.resolve(failure('cancelled'));
         if (round >= MAX_ROUNDS) return Promise.resolve(failure('rounds_exceeded'));
+        var body = JSON.stringify(ticket ? { ticket: ticket, messages: messages } : { messages: messages });
+        if (utf8Bytes(body) > BODY_MAX_BYTES) {
+          // 最初の呼び出しなら、前の依頼のやり取りを古い順に落として収める(まだ何も送っていないので変えてよい)。
+          // 続きの呼び出しでは送った messages を変えられないので、依頼を終える。
+          if (round > 0) return Promise.resolve(failure('too_long'));
+          while (messages.length > 1 && utf8Bytes(body) > BODY_MAX_BYTES) {
+            messages.splice(0, 2);
+            body = JSON.stringify({ messages: messages });
+          }
+          if (utf8Bytes(body) > BODY_MAX_BYTES) return Promise.resolve(failure('too_long'));
+        }
         round++;
         emit({ type: 'round', round: round });
-        var payload = ticket ? { ticket: ticket, messages: messages } : { messages: messages };
-        var init = { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) };
+        var init = { method: 'POST', headers: { 'content-type': 'application/json' }, body: body };
         if (job.abort) init.signal = job.abort.signal;
         return Promise.resolve().then(function () { return deps.fetch(url, init); }).then(function (res) {
-          if (job.cancelled) return failure('cancelled');
+          if (job.cancelled) { closeBody(res); return failure('cancelled'); }
           var head = function (k) { try { return res.headers && res.headers.get ? res.headers.get(k) : null; } catch (e) { return null; } };
           var t = head('x-chat-ticket');
           if (t) ticket = t;
@@ -241,11 +288,21 @@
           var roundsLeft = left === null || left === undefined || left === '' ? null : Number(left);
           var remain = head('x-chat-remaining');
           if (remain !== null && remain !== undefined && remain !== '' && isFinite(Number(remain))) emit({ type: 'remaining', left: Number(remain) });
-          if (!res.ok) return readError(res);
+          if (!res.ok) {
+            return readError(res).then(function (f) {
+              // 最初の呼び出しで AI が失敗し、失敗の返事に札が付いていたら、その札で同じ本文を1回だけ送り直す
+              // (札があれば今日の回数を使い直さない)。2度めの失敗はそのまま終える。
+              if (f.reason === 'ai_upstream_error' && round === 1 && !retried && t && !job.cancelled) {
+                retried = true;
+                return step();
+              }
+              return f;
+            });
+          }
           var assembler = Stream.createAssembler({
             onText: function (d) { if (!job.cancelled) emit({ type: 'text', delta: d }); },
             onThinking: function (d) { if (!job.cancelled) emit({ type: 'thinking', delta: d }); },
-            onToolStart: function (name) { if (!job.cancelled) emit({ type: 'tool', name: name, label: TOOL_LABELS[name] || TOOL_LABEL_OTHER }); }
+            onToolStart: function (name) { if (!job.cancelled) emit({ type: 'tool', name: name, label: labelFor(name) }); }
           });
           return readBody(res, job, assembler).then(function () { return assembler.end(); }, function () {
             var r = assembler.end();

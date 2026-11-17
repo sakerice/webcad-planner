@@ -423,5 +423,5 @@
     };
   }
 
-  return { factsOf: factsOf, toImportPlan: toImportPlan, progressOf: progressOf, typeForKind: typeForKind, DEFAULT_MODEL: DEFAULT_MODEL, KITCHEN_BOX: KITCHEN_BOX };
+  return { factsOf: factsOf, toImportPlan: toImportPlan, progressOf: progressOf, typeForKind: typeForKind, DEFAULT_MODEL: DEFAULT_MODEL, KITCHEN_BOX: KITCHEN_BOX, MOUNT_ELEV_MM: MOUNT_ELEV_MM };
 }));

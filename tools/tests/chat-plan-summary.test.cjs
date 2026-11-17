@@ -54,32 +54,48 @@ test('名前の改行と囲みの記号は書き換え、長い名前は切る',
   assert.ok(line.length < 120);
 });
 
-test('maxChars を超えると、数の多い種類を種類ごとの数にまとめ、長さが収まる', () => {
+const bytes = (t) => Buffer.byteLength(t, 'utf8');
+
+test('maxBytes を超えると、数の多い種類を種類ごとの数にまとめ、バイト数が収まる', () => {
   const p = plan();
-  const full = Summary.summarize(p, opts());
-  assert.ok(full.length > 4000);
+  const full = Summary.summarize(p, opts({ maxBytes: 10 * 1024 * 1024 }));
+  assert.ok(bytes(full) > 12000);
   const sel = p.items.find((it) => it.type === 'light-down').id;
-  const s = Summary.summarize(p, opts({ maxChars: 6000, selectedIds: [sel] }));
-  assert.ok(s.length <= 6000, '長さ ' + s.length);
+  const s = Summary.summarize(p, opts({ maxBytes: 12000, selectedIds: [sel] }));
+  assert.ok(bytes(s) <= 12000, 'バイト数 ' + bytes(s));
   assert.ok(/数だけ/.test(s), 'まとめたことを書いた行がある');
-  assert.ok(/light-down（ダウンライト） \d+個/.test(s));
+  assert.ok(/（まとめ）light-down（ダウンライト） \d+個/.test(s));
   // 選択中の物はまとめずに残す
   assert.ok(s.split('\n').some((l) => l.startsWith('[選択中] id=' + sel + ' ')));
   // 部屋と壁は残る
   for (const r of p.rooms) assert.ok(s.includes('id=' + r.id + ' '));
-  // とても小さくしても上限を守る
-  const tiny = Summary.summarize(p, opts({ maxChars: 500 }));
-  assert.ok(tiny.length <= 500, '長さ ' + tiny.length);
+  for (const w of p.walls) assert.ok(s.includes('id=' + w.id + ' 壁 '));
 });
 
-test('既定の maxChars は 40,000', () => {
-  assert.equal(Summary.DEFAULT_MAX_CHARS, 40000);
+test('まとめても入らなければ、選択中でない物を末尾から落とす。選択中の物は落とさない', () => {
+  const p = plan();
+  const last = p.items[p.items.length - 1].id;
+  for (const max of [6000, 3000, 800]) {
+    const s = Summary.summarize(p, opts({ maxBytes: max, selectedIds: [last] }));
+    assert.ok(bytes(s) <= max, max + ': バイト数 ' + bytes(s));
+    if (max >= 3000) {
+      assert.ok(s.split('\n').some((l) => l.startsWith('[選択中] id=' + last + ' ')), max + ': 選択中の物が落ちた');
+      assert.ok(/省いた/.test(s));
+    }
+  }
+  assert.equal(Summary.utf8Bytes('aあ😀'), 1 + 3 + 4);
+});
+
+test('既定の上限は UTF-8 で 24KB。house-2f は既定の上限に収まる', () => {
+  assert.equal(Summary.DEFAULT_MAX_BYTES, 24 * 1024);
+  const s = Summary.summarize(plan(), opts());
+  assert.ok(bytes(s) <= 24 * 1024);
 });
 
 test('plan を書き換えない', () => {
   const p = plan();
   const before = JSON.stringify(p);
-  Summary.summarize(p, opts({ maxChars: 3000, selectedIds: [p.items[0].id] }));
+  Summary.summarize(p, opts({ maxBytes: 3000, selectedIds: [p.items[0].id] }));
   Summary.summarize(p, opts());
   assert.equal(JSON.stringify(p), before);
 });

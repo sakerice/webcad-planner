@@ -117,6 +117,19 @@ test('data が JSON でない・始まっていないブロックへの delta �
   assert.equal(feed(stray + sse).error.code, 'bad_event');
 });
 
+test('同じ index に start が2度来たら bad_event(前の入力を別のブロックに付けない)', () => {
+  const head = eventText('message_start', { type: 'message_start', message: { usage: {} } })
+    + eventText('content_block_start', { type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 't', name: 'addRoom', input: {} } })
+    + eventText('content_block_delta', { type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: '{"x":' } })
+    + eventText('content_block_start', { type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } })
+    + eventText('content_block_stop', { type: 'content_block_stop', index: 0 })
+    + eventText('message_delta', { type: 'message_delta', delta: { stop_reason: 'end_turn' } })
+    + eventText('message_stop', { type: 'message_stop' });
+  const r = feed(head);
+  assert.equal(r.error.code, 'bad_event');
+  assert.ok(!r.message.content.some((b) => b.type === 'text' && 'input' in b));
+});
+
 test('push と end は何が来ても例外を投げない', () => {
   const junk = ['', 'data: ', 'event: x\n\n', 'data: null\n\n', 'data: 1\n\n', 'data: {"type":"content_block_start"}\n\n',
     'data: {"type":"content_block_delta","index":0}\n\n', 'data: {"type":"message_delta"}\n\n'];

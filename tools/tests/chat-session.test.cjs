@@ -48,6 +48,11 @@ function fakeFetch(script) {
     const s = script[calls.length - 1];
     if (!s) return Promise.reject(new Error('台本に無い呼び出し'));
     if (s.reject) return Promise.reject(s.reject);
+    if (s.delay) {
+      const bodyObj = { cancelled: 0, cancel: () => { bodyObj.cancelled++; return Promise.resolve(); }, getReader: () => ({ read: () => Promise.resolve({ done: true }), cancel: () => Promise.resolve() }) };
+      s.bodyObj = bodyObj;
+      return new Promise((resolve) => setTimeout(() => resolve({ ok: true, status: 200, headers: { get: () => null }, body: bodyObj }), s.delay));
+    }
     if (s.hang) {
       return new Promise((resolve, reject) => {
         if (init.signal) init.signal.addEventListener('abort', () => reject(new Error('aborted')));
@@ -91,7 +96,7 @@ function makeSession(script, over) {
     onEvent: (ev) => events.push(ev),
     AbortController,
   }, over || {}));
-  return { s, fetch, events, applied, getPlan: () => plan, setPlan: (p) => { plan = p; } };
+  return { s, fetch, events, applied, tools, getPlan: () => plan, setPlan: (p) => { plan = p; } };
 }
 
 const TOOL = (id, name, input) => ({ type: 'tool_use', id, name, input });
@@ -255,7 +260,7 @@ test('HTTP の失敗は code ごとの文で終える(回数切れ・長すぎ�
     [500, { error: 'something' }, 'http_error', /使えません/],
   ];
   for (const [status, json, reason, re] of cases) {
-    const { s } = makeSession([{ status, json }]);
+    const { s } = makeSession([{ status, json, headers: { 'x-chat-ticket': null } }]);
     const r = await s.send('部屋');
     assert.equal(r.ok, false);
     assert.equal(r.reason, reason);
@@ -383,6 +388,141 @@ test('道具の名前と利用者向けの文の表は、操作 10 個と検査�
   // 道具の名前・コード名(英小文字)を利用者に出さない。「AI」は読み取りの文言と同じく使う。
   for (const v of Object.values(Session.TOOL_LABELS)) assert.ok(!/[A-Za-z]/.test(v), v);
   for (const v of Object.values(Session.MESSAGES)) assert.ok(!/[a-z]/.test(v), v);
+});
+
+// ── 送る量の決まり ───────────────────────────────────────────────────
+
+test('前の依頼は直近 6 件まで、文はそれぞれ 400 字までに切る', async () => {
+  const script = [];
+  for (let i = 0; i < 8; i++) script.push({ sse: sseFor([{ type: 'text', text: 'い'.repeat(500) + i }]) });
+  const { s, fetch } = makeSession(script);
+  for (let i = 0; i < 8; i++) assert.equal((await s.send('あ'.repeat(500) + i)).ok, true);
+  const msgs = fetch.calls[7].body.messages;
+  assert.equal(msgs.length, 13);
+  assert.ok(msgs[0].content.startsWith('あ'.repeat(10)));
+  assert.equal(msgs[0].content.length, 400);
+  assert.ok(msgs[0].content.endsWith('…'));
+  assert.equal(msgs[1].content.length, 400);
+  // 直近 6 件は 2〜7 回めの依頼(0・1 回めは落ちる)
+  assert.equal(fetch.calls[6].body.messages.length, 13);
+  assert.ok(msgs[12].content.endsWith('あ'.repeat(10) + '7'));
+});
+
+test('道具の結果の文は 2,000 字まで。検査の指摘と警告は 10 件ずつ、残りは「ほか N 件」', async () => {
+  const c1 = [TOOL('t1', 'inspect_plan', {})];
+  const { s, fetch, tools } = makeSession([{ sse: sseFor(c1, { stop: 'tool_use', emptyJson: true }) }, { sse: sseFor([{ type: 'text', text: 'x' }]) }]);
+  tools.inspectPlan = () => ({ ok: false, errors: Array.from({ length: 30 }, (_, i) => 'E' + i), warnings: Array.from({ length: 30 }, (_, i) => 'W' + i + 'う'.repeat(300)) });
+  await s.send('確かめて');
+  const res = fetch.calls[1].body.messages[2].content[0];
+  assert.ok(res.content.length <= 2000, '長さ ' + res.content.length);
+  assert.ok(res.content.includes('"E9"') && !res.content.includes('"E10"'));
+  assert.ok(res.content.includes('ほか 20 件'));
+});
+
+test('最初の本文が大きすぎるときは、前の依頼を古い順に落として送る', async () => {
+  let big = false;
+  const script = [];
+  for (let i = 0; i < 7; i++) script.push({ sse: sseFor([{ type: 'text', text: 'い'.repeat(400) }]) });
+  const { s, fetch } = makeSession(script, { summarize: () => (big ? 'あ'.repeat(50000) : '小') });
+  for (let i = 0; i < 6; i++) await s.send('依頼' + i);
+  big = true;
+  const r = await s.send('今回');
+  assert.equal(r.ok, true);
+  const last = fetch.calls[6];
+  assert.ok(Buffer.byteLength(last.raw) <= 150 * 1024, 'バイト数 ' + Buffer.byteLength(last.raw));
+  assert.ok(last.body.messages.length < 13 && last.body.messages.length >= 1);
+  assert.equal(last.body.messages[0].role, 'user');
+  assert.ok(last.body.messages[last.body.messages.length - 1].content.endsWith('今回'));
+  // 落としたのは古い方(残っているのは直近の依頼で、並びはそのまま)
+  const users = last.body.messages.filter((m, i) => m.role === 'user' && i < last.body.messages.length - 1).map((m) => m.content);
+  const k = users.length;
+  assert.ok(k < 6, '落としていない');
+  assert.deepEqual(users, ['依頼0', '依頼1', '依頼2', '依頼3', '依頼4', '依頼5'].slice(6 - k));
+});
+
+test('今回の依頼だけで大きすぎれば送らずに too_long', async () => {
+  const { s, fetch } = makeSession([], { summarize: () => 'あ'.repeat(60000) });
+  const r = await s.send('部屋');
+  assert.equal(r.ok, false);
+  assert.equal(r.reason, 'too_long');
+  assert.match(r.message, /頼みごとが多すぎて/);
+  assert.equal(fetch.calls.length, 0);
+});
+
+test('続きの本文が大きすぎれば、messages を変えずに too_long で終える(写しは捨てる)', async () => {
+  const c1 = [{ type: 'text', text: 'え'.repeat(20000) }, TOOL('t1', 'rotateObject', { id: '10', by: 10 })];
+  const { s, fetch } = makeSession([{ sse: sseFor(c1, { stop: 'tool_use', textPiece: 5000 }) }, { sse: sseFor([{ type: 'text', text: 'x' }]) }],
+    { summarize: () => 'あ'.repeat(35000) });
+  const r = await s.send('回して');
+  assert.equal(r.ok, false);
+  assert.equal(r.reason, 'too_long');
+  assert.equal(r.plan, undefined);
+  assert.equal(fetch.calls.length, 1);
+});
+
+// ── 失敗の返事の札でのやり直し ─────────────────────────────────────
+
+test('最初の呼び出しが ai_upstream_error で札があれば、その札で同じ本文を1回だけ送り直す', async () => {
+  const fail = { status: 502, json: { error: 'ai_upstream_error', code: 'ai_upstream_error', message: 'x', status: 529 } };
+  const { s, fetch } = makeSession([fail, { sse: sseFor([{ type: 'text', text: 'はい' }]) }]);
+  const r = await s.send('部屋');
+  assert.equal(r.ok, true);
+  assert.equal(fetch.calls.length, 2);
+  assert.equal(fetch.calls[0].body.ticket, undefined);
+  assert.equal(fetch.calls[1].body.ticket, 'T1');
+  assert.equal(JSON.stringify(fetch.calls[1].body.messages), JSON.stringify(fetch.calls[0].body.messages));
+  // 2度めも失敗したら終える
+  const two = makeSession([fail, fail, { sse: sseFor([{ type: 'text', text: 'はい' }]) }]);
+  const r2 = await two.s.send('部屋');
+  assert.equal(r2.reason, 'ai_upstream_error');
+  assert.equal(two.fetch.calls.length, 2);
+  // 札が無ければやり直さない
+  const none = makeSession([{ ...fail, headers: { 'x-chat-ticket': null } }]);
+  assert.equal((await none.s.send('部屋')).reason, 'ai_upstream_error');
+  assert.equal(none.fetch.calls.length, 1);
+  // 続きの呼び出しの失敗はやり直さない
+  const later = makeSession([{ sse: sseFor([TOOL('t1', 'rotateObject', { id: '10', by: 10 })], { stop: 'tool_use' }) }, fail, { sse: sseFor([{ type: 'text', text: 'x' }]) }]);
+  assert.equal((await later.s.send('回して')).reason, 'ai_upstream_error');
+  assert.equal(later.fetch.calls.length, 2);
+});
+
+// ── 細かい守り ─────────────────────────────────────────────────────
+
+test('道具の名前が constructor などでも、表の引き方で取り違えない', async () => {
+  const c1 = [TOOL('t1', 'constructor', {}), TOOL('t2', 'toString', {})];
+  const { s, fetch, events } = makeSession([{ sse: sseFor(c1, { stop: 'tool_use', emptyJson: true }) }, { sse: sseFor([{ type: 'text', text: 'x' }]) }]);
+  await s.send('x');
+  const res = fetch.calls[1].body.messages[2].content;
+  assert.equal(res[0].is_error, true);
+  assert.equal(res[1].is_error, true);
+  const labels = events.filter((e) => e.type === 'tool').map((e) => e.label);
+  assert.deepEqual(labels, ['間取りを直しています', '間取りを直しています']);
+});
+
+test('取り消したあとに返事が届いたら、通信を閉じる(AbortController が無くても)', async () => {
+  const script = [{ delay: 30 }];
+  const { s } = makeSession(script, { AbortController: undefined });
+  const p = s.send('部屋');
+  await new Promise((r) => setTimeout(r, 5));
+  s.cancel();
+  assert.equal((await p).reason, 'cancelled');
+  await new Promise((r) => setTimeout(r, 60));
+  assert.equal(script[0].bodyObj.cancelled, 1);
+});
+
+test('inspect_plan は ctx の withPlan の中で写しを検査する', async () => {
+  const c1 = [TOOL('t1', 'inspect_plan', {})];
+  const seen = [];
+  const { s, tools } = makeSession([{ sse: sseFor(c1, { stop: 'tool_use', emptyJson: true }) }, { sse: sseFor([{ type: 'text', text: 'x' }]) }], {
+    ctxFor: () => Object.assign(makeCtx(), { withPlan: (work, run) => { seen.push({ work, inside: true }); const r = run(); seen.push({ after: true }); return r; } }),
+  });
+  let insideCall = null;
+  tools.inspectPlan = (p) => { insideCall = seen.length === 1 ? p : 'outside'; return { ok: true, errors: [], warnings: [] }; };
+  const r = await s.send('確かめて');
+  assert.equal(r.ok, true);
+  assert.equal(seen.length, 2);
+  assert.equal(insideCall, seen[0].work);
+  assert.equal(insideCall, r.plan);
 });
 
 test('グローバルに触らない', () => {

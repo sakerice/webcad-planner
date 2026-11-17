@@ -9,7 +9,7 @@
 //       stream_error … SSE の error の出来事が来た(type は error.type。overloaded_error など)
 //       incomplete   … message_stop が来ないまま終わった(通信が途中で切れた)
 //       bad_json     … 道具の入力(partial_json をつないだもの)が JSON として読めない
-//       bad_event    … data が JSON でない、始まっていないブロックへの delta など、並びが壊れている
+//       bad_event    … data が JSON でない、始まっていないブロックへの delta、同じ番号のブロックが2度始まるなど、並びが壊れている
 //
 // 会話の履歴は足すだけ(1バイトも変えずに次の呼び出しへ返す)なので、ブロックは
 // content_block_start の content_block を土台にし、delta をその欄へ足すだけにする。
@@ -66,6 +66,8 @@
           if (typeof i !== 'number' || !ev.content_block || typeof ev.content_block !== 'object') {
             setError('bad_event', 'ブロックの始まりの形が壊れています'); return;
           }
+          // 同じ番号のブロックが2度始まるのは並びが壊れている(前のためた入力を別のブロックに付けないため止める)。
+          if (content[i]) { setError('bad_event', '同じ番号のブロックが2度始まりました'); return; }
           content[i] = copyBlock(ev.content_block);
           if (content[i].type === 'tool_use') { json[i] = ''; call(cb.onToolStart, content[i].name); }
           return;

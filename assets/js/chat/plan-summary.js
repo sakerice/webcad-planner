@@ -1,14 +1,16 @@
 // チャットで AI に渡すプランの要約を作る。画面にも Worker にも依存しない(グローバルに触らない)。
 //
-//   ChatPlanSummary.summarize(plan, {selectedIds, labelOf(type), kindOf(type), maxChars}) → 文字列
+//   ChatPlanSummary.summarize(plan, {selectedIds, labelOf(type), kindOf(type), maxBytes}) → 文字列
 //
 // 部屋・壁・物を1行ずつ、id・種類・階・中心・大きさ・回転の順に書く(worker/chat.mjs の CHAT_SYSTEM の
 // 「依頼文に付くプランの要約」と合わせてある)。座標は mm の整数で、部屋と物は中心(x+w/2, y+d/2)。
 // 選択中の物の行は先頭に「[選択中] 」を付ける。物の行は、選択中の物を先に、残りをプランの並びで書く。
 // 物の呼び名は labelOf(type)(画面では itemTypeLabel)、家具の分類は kindOf(type)(画面では
 // CATALOGUE_TAGS.items[type].kind)を引数で受ける。
-// maxChars(既定 40,000)を超えるときは、選択中でない物を、数の多い種類から「種類ごとの数」の行にまとめ、
-// まとめたことを1行書く。それでも超えれば、末尾を切って切ったことを書く。
+// 大きさは UTF-8 のバイト数で決める(maxBytes、既定 24KB。送る本文の上限がバイトで決まっているため)。
+// 超えるときは、部屋・壁・選択中の物を残し、選択中でない物を数の多い種類から「種類ごとの数」の行にまとめ、
+// まとめたことを1行書く。それでも超えれば、選択中でない物の行を末尾から落とし(足りなければ部屋・壁も)、
+// 落としたことを書く。選択中の物の行は落とさない。
 // 名前は利用者が付けた文字なので、改行と < > を書き換え(依頼文の <plan_summary> の囲みを壊させない)、長さを切る。
 // plan は書き換えない。
 (function (root, factory) {
@@ -19,9 +21,21 @@
   }
 }(typeof self !== 'undefined' ? self : this, function () {
 
-  var DEFAULT_MAX_CHARS = 40000;
+  var DEFAULT_MAX_BYTES = 24 * 1024;
   var NAME_MAX = 40;
 
+  // UTF-8 のバイト数(TextEncoder に頼らない)。
+  function utf8Bytes(str) {
+    var b = 0;
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c < 0x80) b += 1;
+      else if (c < 0x800) b += 2;
+      else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length) { b += 4; i++; }
+      else b += 3;
+    }
+    return b;
+  }
   function n(v) { var x = Number(v); return isFinite(x) ? Math.round(x) : 0; }
   function clean(s, max) {
     var t = String(s === undefined || s === null ? '' : s)
@@ -52,7 +66,7 @@
   function summarize(plan, opts) {
     plan = plan || {};
     opts = opts || {};
-    var maxChars = Number(opts.maxChars) > 0 ? Math.floor(Number(opts.maxChars)) : DEFAULT_MAX_CHARS;
+    var maxBytes = Number(opts.maxBytes) > 0 ? Math.floor(Number(opts.maxBytes)) : DEFAULT_MAX_BYTES;
     var selected = {};
     (opts.selectedIds || []).forEach(function (id) { selected[String(id)] = true; });
     var mark = function (o) { return o && o.id !== undefined && selected[String(o.id)] ? '[選択中] ' : ''; };
@@ -97,47 +111,59 @@
     });
     var collapsed = {};
 
+    // 行は {text, keep}。keep の行(見出し・まとめの知らせ・選択中の物)は、切るときも残す。
     function build() {
-      var lines = head.concat(roomLines, wallLines);
+      var lines = [];
+      var put = function (text, keep) { lines.push({ text: text, keep: !!keep }); };
+      head.forEach(function (t) { put(t, true); });
+      roomLines.forEach(function (t, i) { put(t, i === 0 || t.indexOf('[選択中] ') === 0); });
+      wallLines.forEach(function (t, i) { put(t, i === 0 || t.indexOf('[選択中] ') === 0); });
       var names = order.filter(function (t) { return collapsed[t]; });
-      lines.push(itemHead);
-      if (names.length) lines.push('※ 物が多いので、数の多い種類は（まとめ）の行に種類ごとの数だけを書いた（その物の id は載せていない）。');
+      put(itemHead, true);
+      if (names.length) put('※ 物が多いので、数の多い種類は（まとめ）の行に種類ごとの数だけを書いた（その物の id は載せていない）。', true);
       // まとめの行は個々の行より先に書く(それでも長すぎて末尾を切るとき、まとめが残るように)。
       names.forEach(function (t) {
         var per = {};
         groups[t].forEach(function (it) { var f = floorOf(it); per[f] = (per[f] || 0) + 1; });
-        lines.push('（まとめ）' + typeText(t, opts) + ' ' + groups[t].length + '個: '
+        put('（まとめ）' + typeText(t, opts) + ' ' + groups[t].length + '個: '
           + Object.keys(per).map(Number).sort(function (a, b) { return a - b; }).map(function (f) { return f + '階 ' + per[f]; }).join('・'));
       });
       // 選択中の物は先に書く(末尾を切っても残るように)。残りはプランの並び。
-      items.forEach(function (it) { if (mark(it)) lines.push(itemLine(it)); });
-      items.forEach(function (it) { if (!mark(it) && !collapsed[String(it.type)]) lines.push(itemLine(it)); });
+      items.forEach(function (it) { if (mark(it)) put(itemLine(it), true); });
+      items.forEach(function (it) { if (!mark(it) && !collapsed[String(it.type)]) put(itemLine(it)); });
       return lines;
     }
+    function join(lines) { return lines.map(function (l) { return l.text; }).join('\n'); }
 
     var lines = build();
-    var text = lines.join('\n');
-    for (var i = 0; i < order.length && text.length > maxChars; i++) {
+    var text = join(lines);
+    for (var i = 0; i < order.length && utf8Bytes(text) > maxBytes; i++) {
       collapsed[order[i]] = true;
       lines = build();
-      text = lines.join('\n');
+      text = join(lines);
     }
-    if (text.length > maxChars) {
-      var tail = '…（長すぎるので、ここから後を省いた）';
+    if (utf8Bytes(text) > maxBytes) {
+      // 残す行の分を先に取り、残りに入るだけ、ほかの行を前から入れる(入らなくなった所から後は落とす)。
+      var tail = '…（長すぎるので、ここから後の一部を省いた）';
+      var budget = maxBytes - utf8Bytes(tail) - 1;
+      lines.forEach(function (l) { if (l.keep) budget -= utf8Bytes(l.text) + 1; });
+      var full = false;
       var out = [];
-      var len = 0;
-      for (var k = 0; k < lines.length; k++) {
-        var add = (out.length ? 1 : 0) + lines[k].length;
-        if (len + add + 1 + tail.length > maxChars) break;
-        out.push(lines[k]);
-        len += add;
-      }
+      lines.forEach(function (l) {
+        if (l.keep) { out.push(l.text); return; }
+        if (full) return;
+        var b = utf8Bytes(l.text) + 1;
+        if (b > budget) { full = true; return; }
+        budget -= b;
+        out.push(l.text);
+      });
       out.push(tail);
       text = out.join('\n');
-      if (text.length > maxChars) text = text.slice(0, maxChars);
+      // 残す行だけで上限を超える(極端に小さい上限)ときは、バイトで切る。
+      while (utf8Bytes(text) > maxBytes) text = text.slice(0, Math.max(0, text.length - Math.max(1, Math.ceil((utf8Bytes(text) - maxBytes) / 3))));
     }
     return text;
   }
 
-  return { summarize: summarize, DEFAULT_MAX_CHARS: DEFAULT_MAX_CHARS };
+  return { summarize: summarize, utf8Bytes: utf8Bytes, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES };
 }));
