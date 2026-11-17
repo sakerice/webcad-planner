@@ -107,7 +107,9 @@ function ceilingFinishElevationMm(floor,cx,cy){
 //
 // 天井が動く操作は、段差・床上げ・天井高・天井の種類と複数ある。**どれか1つだけを
 // 直しても、残りで器具が取り残される**ので、書き込む側を1か所に集めてここを通す。
-function shiftRoomCeilingFixtures(room,deltaMm){
+// 戻り値は動かした数。movedIds(省略可)に配列を渡すと、動かした器具の id をそこへ足す
+// (画面の操作の包みが、共同編集で相手に送る物の印に使う)。
+function shiftRoomCeilingFixtures(room,deltaMm,movedIds){
   if(!room||!deltaMm||typeof DATA==='undefined'||!DATA||!DATA.items) return 0;
   var n=0;
   DATA.items.forEach(function(it){
@@ -116,6 +118,7 @@ function shiftRoomCeilingFixtures(room,deltaMm){
     if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==room) return;
     it.elev=(Number(it.elev)||0)+deltaMm;
     n++;
+    if(movedIds) movedIds.push(it.id);
   });
   return n;
 }
@@ -980,87 +983,22 @@ function setPropsBodyHtml(body,html,it){
   });
 }
 
-function rectSnapBounds(x,y,w,d,rot){
-  var cx=x+w/2, cy=y+d/2, rad=(rot||0)*Math.PI/180;
-  var ex=Math.abs(Math.cos(rad))*w/2+Math.abs(Math.sin(rad))*d/2;
-  var ey=Math.abs(Math.sin(rad))*w/2+Math.abs(Math.cos(rad))*d/2;
-  return {left:cx-ex,right:cx+ex,top:cy-ey,bottom:cy+ey,cx:cx,cy:cy};
+// 吸着の計算は assets/js/plan-core/snap.js(PlanCoreSnap)にある。ここは今の階・格子の幅・
+// 閾値などのグローバルを引数に詰めて呼ぶだけの包み。
+function snapEdgeOpts(excludeId){
+  return {
+    floor:ST.floor, threshold:EDGE_SNAP_THRESH, excludeIds:[excludeId],
+    isAnnotationType:isPlanAnnotationType, wallThickness:wallThicknessMm
+  };
 }
 function getEdgeCandidates(excludeId){
-  var ex={}, ey={}, cx={}, cy={};  // deduplicate edges and centers separately
-  var fl=ST.floor;
-  DATA.items.filter(function(it){return it.floor===fl&&it.id!==excludeId&&it.type!=='site-rect'&&!isPlanAnnotationType(it.type);}).forEach(function(it){
-    if(!isFiniteCanvasValue(it.x) || !isFiniteCanvasValue(it.y) || !isFiniteCanvasValue(it.w) || !isFiniteCanvasValue(it.d)) return;
-    var b=rectSnapBounds(it.x,it.y,it.w,it.d,it.rot||0);
-    [b.left,b.right].forEach(function(v){ex[Math.round(v)]=v;});
-    [b.top,b.bottom].forEach(function(v){ey[Math.round(v)]=v;});
-    cx[Math.round(b.cx)]=b.cx; cy[Math.round(b.cy)]=b.cy;
-  });
-  DATA.rooms.filter(function(r){return r.floor===fl;}).forEach(function(r){
-    [r.x,r.x+r.w].forEach(function(v){ex[Math.round(v)]=v;});
-    [r.y,r.y+r.d].forEach(function(v){ey[Math.round(v)]=v;});
-    cx[Math.round(r.x+r.w/2)]=r.x+r.w/2; cy[Math.round(r.y+r.d/2)]=r.y+r.d/2;
-  });
-  DATA.walls.filter(function(w){return w.floor===fl;}).forEach(function(w){
-    var half=wallThicknessMm(w)/2;
-    if(Math.abs(w.x2-w.x1)<Math.abs(w.y2-w.y1)){
-      var wx=(w.x1+w.x2)/2;
-      [wx-half,wx+half].forEach(function(v){ex[Math.round(v)]=v;});
-      cx[Math.round(wx)]=wx;
-      [Math.min(w.y1,w.y2),Math.max(w.y1,w.y2)].forEach(function(v){ey[Math.round(v)]=v;});
-    }else{
-      var wy=(w.y1+w.y2)/2;
-      [wy-half,wy+half].forEach(function(v){ey[Math.round(v)]=v;});
-      cy[Math.round(wy)]=wy;
-      [Math.min(w.x1,w.x2),Math.max(w.x1,w.x2)].forEach(function(v){ex[Math.round(v)]=v;});
-    }
-  });
-  return {
-    edgeX:Object.values(ex), edgeY:Object.values(ey),
-    centerX:Object.values(cx), centerY:Object.values(cy),
-    // Resize snapping intentionally uses physical edges, not center lines.
-    x:Object.values(ex), y:Object.values(ey)
-  };
-}
-
-function nearestAxisDelta(values,candidates,thresh){
-  var best=null, min=thresh;
-  values.forEach(function(v){candidates.forEach(function(c){
-    var delta=c-v, dist=Math.abs(delta);
-    if(dist<min){min=dist;best={delta:delta,target:c};}
-  });});
-  return best;
+  return PlanCoreSnap.edgeCandidates(DATA, snapEdgeOpts(excludeId));
 }
 function snapRectOriginToGrid(x,y,w,d,rot){
-  var step=Number(ST.snap)||0;
-  if(!step) return {x:x,y:y};
-  var b=rectSnapBounds(x,y,w,d,rot);
-  function gridDelta(values){
-    var best=null,min=Infinity;
-    values.forEach(function(v){
-      var delta=Math.round(v/step)*step-v, dist=Math.abs(delta);
-      if(dist<min){min=dist;best=delta;}
-    });
-    return best||0;
-  }
-  // Snap a physical edge—not merely the stored origin/center—to the configured grid.
-  return {x:x+gridDelta([b.left,b.right]),y:y+gridDelta([b.top,b.bottom])};
+  return PlanCoreSnap.snapRectOriginToGrid(x,y,w,d,rot,ST.snap);
 }
 function applyEdgeSnap(x, y, w, d, excludeId, rot){
-  var thresh=EDGE_SNAP_THRESH;
-  var cands=getEdgeCandidates(excludeId);
-  var b=rectSnapBounds(x,y,w,d,rot||0);
-  // Edge-to-edge alignment always wins while it is within the snap threshold.
-  var bestX=nearestAxisDelta([b.left,b.right],cands.edgeX,thresh);
-  var bestY=nearestAxisDelta([b.top,b.bottom],cands.edgeY,thresh);
-  // Only fall back to center alignment when no edge match is available.
-  if(!bestX) bestX=nearestAxisDelta([b.cx],cands.centerX,thresh);
-  if(!bestY) bestY=nearestAxisDelta([b.cy],cands.centerY,thresh);
-  return {
-    x:bestX?x+bestX.delta:x, y:bestY?y+bestY.delta:y,
-    snapX:!!bestX, snapXVal:bestX?bestX.target:null,
-    snapY:!!bestY, snapYVal:bestY?bestY.target:null
-  };
+  return PlanCoreSnap.edgeSnap({x:x,y:y,w:w,d:d,rot:rot||0}, DATA, snapEdgeOpts(excludeId));
 }
 
 function normalizeTextureOrientationTarget(obj){
@@ -1994,79 +1932,28 @@ function updateSelectedProp(p,v,noSave){
   // ロックが止めるのは削除・移動・寸法/座標変更。3D表示の一時切り替えは
   // 間取りの形を変えないので、ロック中でも通す(UI 側も data-lock-control)。
   // 増やすときは「間取りの形を変えないか」で判断する(ロック中の注記が
-  // 名乗っている範囲を超えない)。関数の中に置くのは、この判定だけを
-  // node:vm で切り出して走らせている検査があるため。
+  // 名乗っている範囲を超えない)。操作の部品(operations.js の LOCK_ALLOWED)も同じ3つを通す。
   var lockAllowed=['locked','hidden3D','vis3D'];
   if(isObjectLocked(ST.selected) && lockAllowed.indexOf(p)<0){ updateProps(); return; }
   var keepColorPickerOpen=isAppearanceColorInputActive() && /color/i.test(p);
+  var saved=null;
   if(keepColorPickerOpen) markAppearanceColorDirty();
-  else if(!noSave) saveState();
+  else if(!noSave){ saved=saveStateMark(); saveState(); }
+  // 値の書き込みと後始末(天井付けの器具の追従・窓の高さ・外壁の設定表・既定へ戻したときの受け口の削除)は
+  // assets/js/plan-core/operations.js の applyProp が、選んだ物そのもの(ctx.targets)に対して行う。
+  var props={};
+  props[p]=(p==='locked')?!!v:v;
+  var res=PlanCoreOperations.applyOperations(DATA,[{op:'setProps',args:{id:ST.selected.id,props:props}}],planOpsCtx({inPlace:true,targets:[ST.selected]}));
+  // errors のときはプランは変わっていない。積んだ取り消しの履歴を外し、何もしなかったのと同じにする。
+  if(res.errors.length){ undoSaveState(saved); console.warn('[WebCAD] 設定を変えられませんでした: '+res.errors[0].message); updateProps(); return; }
+  // 選んだ物の印は saveState が付ける。選んでいない物(天井に付いていく器具など)の印をここで付ける。
+  sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
   if(p==='locked'){
-    setObjectLocked(ST.selected,!!v);
     syncLockBatchUi();
     draw2d();
     if(ren) rebuild3D();
     updateProps();
     return;
-  }
-  // 天井を書き換えると、その部屋の天井付けの器具も一緒に動く。
-  // 平天井・勾配・吹き抜けの切り替えはすべてここ(p==='ceiling')を通る。
-  var ceilBefore=(p==='ceiling')?roomCeilingElevationMm(ST.selected):null;
-  if(p==='color') ST.selected.colorCustom=true;
-  if(isLightItemType(ST.selected.type) && p==='lightColor'){
-    ST.selected.color=v;
-    ST.selected.colorCustom=true;
-  }
-  if(p==='texture'){
-    if(ST.selected._texObj) ST.selected._texObj=null;
-    if(!v){
-      ST.selected.textureFlipX=false;
-      ST.selected.textureFlipY=false;
-    }
-  }
-  if(isWindowLikeType(ST.selected.type) && p==='windowTop'){
-    ST.selected.windowHeight=Number(v)-windowSillMm(ST.selected);
-    normalizeWindowVerticalProps(ST.selected,'windowTop');
-    delete ST.selected.windowTop;
-  } else {
-    ST.selected[p]=v;
-    if(isWindowLikeType(ST.selected.type) && (p==='windowSill'||p==='windowHeight')) normalizeWindowVerticalProps(ST.selected,p);
-  }
-  // 天井を「指定なし」へ戻したときは受け口ごと消す。undefined を残すと保存 JSON
-  // には出ないのにメモリ上のプランは「指定あり」に見え、判定が食い違う。
-  // 天井を書いたときは旧フィールド(ceilingHeight)も消す: HeightModel が
-  // ceiling.heightMm を優先するので、残しても効かない古い値が居座るだけ。
-  if(p==='ceiling'){
-    if(!v) delete ST.selected.ceiling;
-    delete ST.selected.ceilingHeight;
-    if(ceilBefore!==null){
-      var ceilAfter=roomCeilingElevationMm(ST.selected);
-      if(ceilAfter!==null&&ceilAfter!==ceilBefore)
-        shiftRoomCeilingFixtures(ST.selected,ceilAfter-ceilBefore);
-    }
-  }
-  // 斜線制限も同じ扱い: 「未設定」へ戻したら受け口ごと消す。undefined を残すと
-  // 保存 JSON には出ないのにメモリ上のプランは「設定あり」に見える。
-  if(p==='setback' && !v) delete ST.selected.setback;
-  // 階段の行き先・置く高さの基準も同じ扱い。既定へ戻したら受け口ごと消す。
-  // undefined を残すと保存 JSON には出ないのにメモリ上は「設定あり」に見える。
-  if((p==='stairTarget'||p==='baseLevel'||p==='vis3D'||p==='footOffsetMm'||p==='lightAim') && !v) delete ST.selected[p];
-  if(p==='stairTarget' && v!=='level') delete ST.selected.stairTo;
-  // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
-  // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
-  if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;
-  if(p==='floorColor' && !v) delete ST.selected.floorColor;
-  if(p==='stairFloorMaterial' && !v) delete ST.selected.stairFloorMaterial;
-  if(p==='ceilingTexture' && !v){
-    delete ST.selected.ceilingTexture;
-    delete ST.selected.ceilingTextureFlipX;
-    delete ST.selected.ceilingTextureFlipY;
-  }
-  if(isWindowLikeType(ST.selected.type) && (p==='w'||p==='windowHeight'||p==='windowSill'||p==='windowTop')) delete ST.selected.windowStd;
-  if((p==='exteriorColor'||p==='exteriorTexture') && ST.selected.x1!==undefined){
-    var ws=getExteriorWallSetting(ST.selected);
-    if(p==='exteriorColor') ws.color=v||null;
-    if(p==='exteriorTexture') ws.texture=v||null;
   }
   draw2d();
   if(keepColorPickerOpen){
@@ -2480,6 +2367,22 @@ function saveState(){
   pushHistorySnapshot(HISTORY,serializeDataSnapshot());
   REDO_HISTORY.length=0;
   markDirty();
+}
+// 画面の操作の包み(placeItem・delSel・updateSelectedProp)が、saveState の後で操作が errors を返した
+// (プランは1項目も変わっていない)ときに、saveState の跡を戻すための印と戻し方。
+// 戻すもの: 取り消しの履歴(上限で押し出した先頭も戻す)・やり直しの履歴・未保存の印(DIRTY)。
+// 戻さないもの: 共同編集の送る候補の印(sharedRememberEditTargets。中身が変わっていなければ何も送られない)と、
+// markDirty が予約した同期・自動保存(差分が無ければ何もしない)。
+function saveStateMark(){
+  return {len:HISTORY.length, first:HISTORY[0], redo:REDO_HISTORY.slice(), dirty:DIRTY};
+}
+function undoSaveState(mark){
+  if(!mark) return;
+  if(HISTORY.length>mark.len) HISTORY.pop();
+  else if(mark.len>0 && HISTORY.length===mark.len){ HISTORY.pop(); HISTORY.unshift(mark.first); }
+  REDO_HISTORY.length=0;
+  mark.redo.forEach(function(s){ REDO_HISTORY.push(s); });
+  if(!mark.dirty) clearDirty();
 }
 
 // プランを開いたときの補完を、1つにまとめたもの。

@@ -19,6 +19,10 @@ const ROOT = join(__dirname, '..', '..');
 // index.html が読む順。切り出したファイルを増やしたらここにも足すこと。
 const EXTRACTED = [
   'assets/js/plan-core/factories.js',
+  'assets/js/plan-core/snap.js',
+  'assets/js/plan-core/operations.js',
+  'assets/js/plan-core/operations-catalog.js',
+  'assets/js/plan-core/inspect.js',
   'assets/js/plan-core/patch.js',
   'assets/js/app-constants.js',
   'assets/js/app-state.js',

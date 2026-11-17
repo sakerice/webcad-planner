@@ -16,6 +16,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const html = require('./app-source.cjs').appSource();
+const { installOps } = require('./ops-vm.cjs');
 
 function topLevelFunction(name) {
   const at = html.indexOf('\nfunction ' + name + '(');
@@ -80,6 +81,9 @@ function propCtx(selected) {
     getExteriorWallSetting: function () { return {}; }
   });
   vm.runInContext(topLevelFunction('updateSelectedProp'), ctx);
+  // updateSelectedProp は操作の部品(PlanCoreOperations)と画面の ctx(planOpsCtx)を呼ぶ包みなので、両方を入れる。
+  // 選んだ物はプランの外に置いている(画面の選択を物そのものとして渡す ctx.targets の経路を通る)。
+  installOps(ctx);
   ctx.$calls = calls;
   return ctx;
 }
@@ -118,5 +122,10 @@ test('ロックを外す操作自体はロック中でも通る', () => {
   const item = { id: 9, type: 'sofa', locked: true };
   const ctx = propCtx(item);
   ctx.updateSelectedProp('locked', false);
-  assert.equal(item.locked, false);
+  // 外したら受け口ごと消す(画面の setObjectLocked と同じ。保存 JSON に "locked":false を残さない)
+  assert.equal(ctx.isObjectLocked(item), false, 'ロックが外れていない');
+  assert.equal(Object.prototype.hasOwnProperty.call(item, 'locked'), false);
+  // 外したあとは寸法も変えられる(ロックの判定が外した値を見ている)
+  ctx.updateSelectedProp('w', 1800);
+  assert.equal(item.w, 1800);
 });

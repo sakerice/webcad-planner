@@ -3806,6 +3806,10 @@ input[type="reset"]:focus-visible{
      本体より先に、かつ #c2d などの要素より後に読む必要がある
      (トップレベルで document.getElementById を呼ぶ行があるため)。 -->
 <script src="assets/js/plan-core/factories.js"></script>
+<script src="assets/js/plan-core/snap.js"></script>
+<script src="assets/js/plan-core/operations.js"></script>
+<script src="assets/js/plan-core/operations-catalog.js"></script>
+<script src="assets/js/plan-core/inspect.js"></script>
 <script src="assets/js/plan-core/patch.js"></script>
 <script src="assets/js/app-constants.js"></script>
 <script src="assets/js/app-state.js"></script>
@@ -11148,31 +11152,11 @@ function stairTouchingUnlinked(seed){
 // 吸い付かなければ {x,y} をそのまま返す。
 var STAIR_SNAP_MM=250;
 function stairSnapPosition(it,x,y){
-  if(!it||!isStairPartType(it.type)) return {x:x,y:y};
-  var probe=Object.assign({},it,{x:x,y:y});
-  var mine=stairPartEdgesMm(probe).filter(function(e){ return e.role!=='side'; });
-  var best=null, fl=it.floor||1;
-  DATA.items.forEach(function(o){
-    if(o===it||(o.floor||1)!==fl||!isStairPartType(o.type)||(it.id!==undefined&&o.id===it.id)) return;
-    stairPartEdgesMm(o).forEach(function(eo){
-      if(eo.role==='side') return;
-      mine.forEach(function(e){
-        if(e.len<1||e.n.x*eo.n.x+e.n.y*eo.n.y>-0.97) return;
-        var ex=(e.a.x+e.b.x)/2, ey=(e.a.y+e.b.y)/2, mx=(eo.a.x+eo.b.x)/2, my=(eo.a.y+eo.b.y)/2;
-        var gap=(mx-ex)*e.n.x+(my-ey)*e.n.y;
-        if(Math.abs(gap)>STAIR_SNAP_MM) return;
-        var ux=(e.b.x-e.a.x)/e.len, uy=(e.b.y-e.a.y)/e.len;
-        var lat=(mx-ex)*ux+(my-ey)*uy;
-        if(Math.abs(lat)>(e.len+eo.len)/2-STAIR_LINK_MIN_SPAN_MM) return;
-        var half=(eo.len-e.len)/2, al=null;
-        [lat, lat-half, lat+half].forEach(function(v){ if(Math.abs(v)<=STAIR_SNAP_MM&&(al===null||Math.abs(v)<Math.abs(al))) al=v; });
-        var dx=gap*e.n.x+(al!==null?al*ux:0), dy=gap*e.n.y+(al!==null?al*uy:0);
-        var score=Math.abs(gap)+(al!==null?Math.abs(al)*0.5:STAIR_SNAP_MM);
-        if(!best||score<best.score) best={x:x+dx,y:y+dy,score:score,other:o};
-      });
-    });
+  // 計算は assets/js/plan-core/snap.js の stairSnap。辺の求め方は、つながりの判定と同じ stairPartEdgesMm。
+  return PlanCoreSnap.stairSnap(it,x,y,DATA,{
+    radius:STAIR_SNAP_MM, minSpan:STAIR_LINK_MIN_SPAN_MM,
+    partEdges:stairPartEdgesMm, isStairPart:isStairPartType
   });
-  return best||{x:x,y:y};
 }
 // 選んだ階段の、上る順番とつながりの説明(設定欄に出す)。
 function stairConnectionSummary(it){
@@ -18851,34 +18835,18 @@ function handleRoomClick(wx,wy){
     ST.drawing=false;ST.drawPts=[];if(ren)build3D();draw2d();
   }
 }
-function placeItem(type,wx,wy){
-  var openingPreset=getOpeningModelToolPreset(type);
-  var placeType=openingPreset?openingPreset.baseType:type;
-  var groundOnly=((getFmpItem(placeType)&&getFmpItem(placeType).groundLevel) || placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || placeType==='gas-heater' || isContextExteriorItemType(placeType));
-  // 地面に置く印のカタログのモデルでも、部屋の中に置いたらその部屋の床に載せる
-  // (洗濯機・物干し・卓上の小物にも印が付いていて、1階の地面に埋まっていた)。
-  // 印の扱いは app-constants.js の itemPlacedOnFloorExplicitly。
-  var indoor=!!(getFmpItem(placeType)&&getFmpItem(placeType).groundLevel&&roomAtPointOnFloor(ST.floor,wx,wy));
-  if(groundOnly && ST.floor!==1 && !indoor) return;
-  saveState();
-  var sz=getItemDefaultSize(placeType);
-  var it=mkItem(placeType,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly&&!indoor?1:ST.floor);
-  if(indoor) it.indoor=true;
-  if(openingPreset && openingPreset.windowKind) it.windowKind=openingPreset.windowKind;
-  if(openingPreset){applyOpeningModelToItem(it,openingPreset.openingModel);it.doorFinish=openingPreset.doorFinish||'';}
-  // Final dimensions (including opening presets) determine the visual edges used for placement snap.
-  it.x=wx-it.w/2; it.y=wy-it.d/2;
-  var gridPlaced=snapRectOriginToGrid(it.x,it.y,it.w,it.d,it.rot||0);
-  it.x=gridPlaced.x; it.y=gridPlaced.y;
-  if(ST.shiftKey){
-    var objectPlaced=applyEdgeSnap(it.x,it.y,it.w,it.d,null,it.rot||0);
-    it.x=objectPlaced.x; it.y=objectPlaced.y;
-  }
-  // 階段の部材は、プレビューで吸い付いて見えた位置にそのまま置く。
-  if(isStairPartType(it.type)){
-    var stairPlaced=stairSnapPosition(it,it.x,it.y);
-    it.x=stairPlaced.x; it.y=stairPlaced.y;
-  }
+// 地面に置く種類か(2階以上では、部屋の中でなければ置けず、置くと1階になる)。
+function placeGroundOnly(placeType){
+  return !!((getFmpItem(placeType)&&getFmpItem(placeType).groundLevel) || placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || placeType==='gas-heater' || isContextExteriorItemType(placeType));
+}
+// 地面に置く印のカタログのモデルでも、部屋の中に置いたらその部屋の床に載せる
+// (洗濯機・物干し・卓上の小物にも印が付いていて、1階の地面に埋まっていた)。
+// 印の扱いは app-constants.js の itemPlacedOnFloorExplicitly。
+function placeIndoorAt(placeType,floor,wx,wy){
+  return !!(getFmpItem(placeType)&&getFmpItem(placeType).groundLevel&&roomAtPointOnFloor(floor,wx,wy));
+}
+// 置いた物の高さを決め、段差の上の柱を段差の下まで伸ばす(吸着のあと、DATA へ足す前)。
+function placeAfterSnap(it){
   applyDefaultPlacementElevation(it);
   // 段差の上に置いた柱は、段差の下を持たせるためのものとみなして、
   // 足元をその階の構造床へ下ろし、高さを段差に合わせる。毎回入力させるものではない。
@@ -18887,7 +18855,24 @@ function placeItem(type,wx,wy){
     var cavity=roomSkipCavityMm(colRoom);
     if(cavity>0){ it.baseLevel='under'; it.columnHeight=cavity; }
   }
-  DATA.items.push(it);ST.placingRot=0;
+}
+// 物を置く。作る中身(開口のプリセット・格子・物の端・階段の吸着・高さ・柱の段差)は
+// assets/js/plan-core/operations.js の placeItem が、planOpsCtx の hooks を使って行う。
+// 置けない(地面に置く種類を2階の屋外に置く)ときは、取り消しの履歴に積む前に戻る。
+function placeItem(type,wx,wy){
+  var openingPreset=getOpeningModelToolPreset(type);
+  var placeType=openingPreset?openingPreset.baseType:type;
+  if(placeGroundOnly(placeType) && ST.floor!==1 && !placeIndoorAt(placeType,ST.floor,wx,wy)) return;
+  var saved=saveStateMark();
+  saveState();
+  var res=PlanCoreOperations.applyOperations(DATA,[{op:'placeItem',args:{type:type,x:wx,y:wy,rot:ST.placingRot,floor:ST.floor}}],planOpsCtx({inPlace:true}));
+  // errors のときはプランは変わっていない。積んだ取り消しの履歴を外し、置かなかったのと同じにする。
+  if(res.errors.length){ undoSaveState(saved); console.warn('[WebCAD] 物を置けませんでした: '+res.errors[0].message); return; }
+  sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
+  // 置いた物は操作の結果(最後に記録した id)から引く。id が重なった古いプランでも、後ろから探して新しい物を取る。
+  var newId=String(res.changedIds[res.changedIds.length-1]), it=null;
+  for(var i=DATA.items.length-1;i>=0;i--){ if(DATA.items[i]&&String(DATA.items[i].id)===newId){ it=DATA.items[i]; break; } }
+  ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
   syncToolUi();
   if(ren)build3D();draw2d();
@@ -19342,6 +19327,10 @@ function selectedDeleteButtonHtml(){
   return '<button class="pbtn sec" onclick="delSel()">'+
     (n>1?('選択中の'+n+'個を削除'):'この要素を削除')+'</button>';
 }
+// 選んだ物(複数選択・全選択を含む)を消す。ロックした物は消さない。
+// 消す中身は assets/js/plan-core/operations.js の deleteObjects が、選んだ物そのもの(ctx.targets)を
+// 指して行う(id が重なっている・id が無い古いプランでも、今までどおり指した物だけが消える)。
+// 消したあとの外壁の設定表の片付け(syncExteriorWallSettings)は planOpsCtx の hooks.afterDelete。
 function delSel(){
   if(!ST.selected && !ST.selectAll)return;
   if(WALKTHROUGH){
@@ -19352,30 +19341,29 @@ function delSel(){
     );
     if(deletingActiveRoute) stopWalkthrough();
   }
+  var targets;
   if(ST.selectAll){
-    var willDelete=DATA.walls.some(function(w){return w.floor===ST.floor && !isObjectLocked(w);}) ||
-      DATA.rooms.some(function(r){return r.floor===ST.floor && !isObjectLocked(r);}) ||
-      DATA.items.some(function(i){return i.floor===ST.floor && !isObjectLocked(i);});
-    if(!willDelete){ ST.selectAll=false; draw2d(); return; }
-    saveState();
-    DATA.walls=DATA.walls.filter(function(w){return w.floor!==ST.floor || isObjectLocked(w);});
-    DATA.rooms=DATA.rooms.filter(function(r){return r.floor!==ST.floor || isObjectLocked(r);});
-    DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor || isObjectLocked(i);});
-    ST.selectAll=false;
+    var onFloor=function(o){ return o.floor===ST.floor && !isObjectLocked(o); };
+    targets=DATA.walls.filter(onFloor).concat(DATA.rooms.filter(onFloor),DATA.items.filter(onFloor));
+    if(!targets.length){ ST.selectAll=false; draw2d(); return; }
   } else {
     // 複数選択しているときは掴んでいるもの全部を消す。以前は ST.selected の
     // 1つだけを消していたので、3つ選んでも1つしか消えなかった。
-    var targets=explicit2DSelection().filter(function(o){return !isObjectLocked(o);});
+    targets=explicit2DSelection().filter(function(o){return !isObjectLocked(o);});
     if(!targets.length){ updateProps(); draw2d(); return; }
-    saveState();
-    var kept=function(o){ return targets.indexOf(o)<0; };
-    DATA.walls=DATA.walls.filter(kept);
-    DATA.rooms=DATA.rooms.filter(kept);
-    DATA.items=DATA.items.filter(kept);
+  }
+  var saved=saveStateMark();
+  saveState();
+  var res=PlanCoreOperations.applyOperations(DATA,[{op:'deleteObjects',args:{ids:targets.map(function(o){return o.id;})}}],planOpsCtx({inPlace:true,targets:targets}));
+  // errors のときは何も消えていない。積んだ取り消しの履歴を外し、選択もそのまま残す。
+  if(res.errors.length){ undoSaveState(saved); console.warn('[WebCAD] 消せませんでした: '+res.errors[0].message); updateProps(); draw2d(); return; }
+  sharedMarkIdsDirty(res.changedIds.concat(res.removedIds));
+  if(ST.selectAll){
+    ST.selectAll=false;
+  } else {
     ST.selected=null;
     clearMultiSelection();
   }
-  syncExteriorWallSettings();
   updateProps();
   if(ren)rebuild3D();draw2d();
 }
@@ -19906,6 +19894,25 @@ function sharedCollectionNameFor(obj){
 }
 function sharedMarkObjectsDirty(list){
   (list||[]).forEach(function(obj){var name=sharedCollectionNameFor(obj);if(name&&obj&&obj.id!==undefined&&obj.id!==null)SHARED.dirtyIds[name][String(obj.id)]=true;});
+}
+// 操作(PlanCoreOperations.applyOperations)が変えた・消した物の id に、送る候補の印を付ける。
+// saveState の印(sharedRememberEditTargets)は選んでいた物にしか付かないので、選んでいない物を操作が
+// 変えたとき(天井を変えて動いた器具など)はここで付ける。id は今のプランで探し、消えた物は基準で探す。
+// 共同編集中でなければ何もしない。
+function sharedMarkIdsDirty(ids){
+  if(!SHARED.roomId||SHARED.applying)return;
+  (ids||[]).forEach(function(id){
+    if(id===undefined||id===null)return;
+    var key=String(id),hit=false;
+    ['walls','items','rooms'].forEach(function(name){
+      if((DATA[name]||[]).some(function(o){return o&&o.id!==undefined&&o.id!==null&&String(o.id)===key;})){SHARED.dirtyIds[name][key]=true;hit=true;}
+    });
+    if(hit||!SHARED.baseline)return;
+    ['walls','items','rooms'].forEach(function(name){
+      var b=SHARED.baseline.collections&&SHARED.baseline.collections[name];
+      if(b&&b[key]!==undefined)SHARED.dirtyIds[name][key]=true;
+    });
+  });
 }
 function sharedRememberEditTargets(){
   if(!SHARED.roomId||SHARED.applying)return;

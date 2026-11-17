@@ -15,6 +15,7 @@ const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
 const html = require('./app-source.cjs').appSource();
+const { installOps } = require('./ops-vm.cjs');
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
 const PlanSchema = require(join(ROOT, 'assets', 'js', 'plan-schema.js'));
 const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
@@ -1241,11 +1242,49 @@ test('柱が部屋・壁メニューから置ける', () => {
   assert.match(html, /column:'角柱','column-round':'円柱'/);
 });
 
+// 画面の placeItem は PlanCoreOperations.applyOperations の placeItem を呼ぶ包みで、柱の段差の扱いは
+// planOpsCtx の hooks.afterPlace(= placeAfterSnap)にある。ここでは操作の部品と placeAfterSnap を
+// 合わせて、段差のある部屋に柱を「置いて」確かめる(関数の本文の文字は見ない)。
 test('段差の上に置いた柱は、足元が段差の下へ下り、高さが段差に合う', () => {
-  const body = sliceFunction('placeItem');
-  assert.match(body, /isColumnType\(it\.type\)/, '柱を置いたときの段差の扱いが無い');
-  assert.match(body, /roomSkipCavityMm\(/);
-  assert.match(body, /baseLevel='under'/);
+  const Ops = require(join(ROOT, 'assets', 'js', 'plan-core', 'operations.js'));
+  // 画面の包みが、置いたあとの後始末を placeAfterSnap に任せていること(この経路を外すと下の確かめが無意味になる)
+  assert.match(sliceFunction('placeItem'), /PlanCoreOperations\.applyOperations\(DATA,\[\{op:'placeItem'/, '画面の placeItem が操作の部品を通っていない');
+  assert.match(sliceFunction('planOpsCtx'), /afterPlace:function\(it\)\{ placeAfterSnap\(it\); \}/, '画面の ctx の afterPlace が placeAfterSnap でない');
+  function place(skip, type) {
+    const g = heights(skipHouse(skip === undefined ? {} : { skip: skip }));
+    g.applyDefaultPlacementElevation = () => null; // 高さ決めはこの検査の対象外
+    vm.runInContext(sliceFunction('placeAfterSnap'), g);
+    let n = 900;
+    const ctx = {
+      inPlace: true, newId: () => ++n,
+      catalog: {
+        resolveType: (t) => t, defaultSize: () => ({ w: 300, d: 300 }), defaultColor: () => undefined, model: () => null,
+        is: () => false, canSetElevation: () => false, applyLightDefaults: () => {}, contextExteriorHeight: () => 0, contextFloors: () => 1,
+        constants: { rulerThickness: 60, walkRouteThickness: 50, walkDefaultSpeed: 1.2 }
+      },
+      plan: { wallHeightForFloor: () => 2400, floorRaiseForFloor: () => 0, foundationHeight: () => 0 },
+      hooks: { afterPlace: (it) => g.placeAfterSnap(it) }
+    };
+    // 段差の上の部屋(x 4000〜7000)の中ほどに置く
+    const r = Ops.applyOperations(g.DATA, [{ op: 'placeItem', args: { type: type, x: 5500, y: 2000, floor: 1 } }], ctx);
+    assert.deepEqual(r.errors, []);
+    return g.DATA.items[g.DATA.items.length - 1];
+  }
+  for (const type of ['column', 'column-round']) {
+    const deep = place(600, type);
+    assert.equal(deep.baseLevel, 'under', type + ': 段差 600 の上の柱の足元が段差の下へ下りていない');
+    assert.equal(deep.columnHeight, 600, type + ': 柱の高さが段差に合っていない');
+    // 床下を空間として作らない浅い段差(SKIP_CAVITY_MIN_MM 未満)と、段差が無い部屋では付けない
+    const flat = place(undefined, type), shallow = place(300, type);
+    assert.equal(flat.baseLevel, undefined, type + ': 段差なしで足元を下ろした');
+    assert.equal(shallow.baseLevel, undefined, type + ': 浅い段差で足元を下ろした');
+    assert.notEqual(flat.columnHeight, 600);
+    assert.equal(shallow.columnHeight, flat.columnHeight, type + ': 浅い段差で柱の高さを変えた');
+  }
+  // 柱でない物には付けない
+  const shelf = place(600, 'shelf-built-in');
+  assert.equal(shelf.baseLevel, undefined, '柱でない物の足元を下ろした');
+  assert.equal(shelf.columnHeight, undefined);
 });
 
 test('柱は3Dで角柱と円柱に描き分ける', () => {
@@ -1341,10 +1380,49 @@ test('床上げでは天井が動かないので、器具の世界での高さ�
   assert.ok(Math.abs(worldAfter - worldBefore) < 1e-9, '床上げで照明が動いた');
 });
 
+// 画面の updateSelectedProp は、値の書き込みを PlanCoreOperations の applyProp に任せる包みで、
+// 天井の前後の高さを測って器具を動かすのは planOpsCtx の hooks(roomCeilingElevationMm・
+// shiftRoomCeilingFixtures)。ここでは包みと操作の部品を node:vm で合わせて動かし、
+// 天井を書き換えたら器具が付いていくことを確かめる(関数の本文の文字は見ない)。
+function ceilingPropCtx(h) {
+  const g = heights(h);
+  Object.assign(g, {
+    ST: { selected: null }, ren: null,
+    isObjectLocked: (o) => !!(o && o.locked), saveState: () => {}, draw2d: () => {}, updateProps: () => {},
+    syncLockBatchUi: () => {}, isAppearanceColorInputActive: () => false, markAppearanceColorDirty: () => {},
+    scheduleAppearancePreviewUpdate: () => {},
+    isLightItemType: (t) => /^light-/.test(t), isWindowLikeType: () => false,
+  });
+  installOps(g);
+  vm.runInContext(sliceFunction('updateSelectedProp'), g);
+  return g;
+}
 test('天井を書き換える経路は1か所(updateSelectedProp)を通る', () => {
-  const body = sliceFunction('updateSelectedProp');
-  assert.match(body, /roomCeilingElevationMm\(ST\.selected\)/, '天井の前後を測っていない');
-  assert.match(body, /shiftRoomCeilingFixtures\(/, '天井の書き換えで器具が追従しない');
+  // 天井高を変えると、直付けの器具は直付けのまま、下げたペンダントは下がりを保って動く
+  const h = houseWithLight({ ceilingMm: 2200 });
+  h.items.push({ id: 'pend', type: 'light-ceiling', floor: 1, x: 6000, y: 1900, w: 300, d: 300, rot: 0, elev: 0 });
+  h.items.push({ id: 'other', type: 'light-down', floor: 1, x: 1000, y: 1900, w: 180, d: 180, rot: 0, elev: 2388 });
+  const g = ceilingPropCtx(h);
+  const up = g.DATA.rooms[1], dl = g.DATA.items.find((i) => i.id === 'dl'), pend = g.DATA.items.find((i) => i.id === 'pend');
+  const other = g.DATA.items.find((i) => i.id === 'other');
+  dl.elev = g.roomCeilingElevationMm(up);
+  pend.elev = g.roomCeilingElevationMm(up) - 400;
+  g.ST.selected = up;
+  g.updateSelectedProp('ceiling', { type: 'flat', heightMm: 2500 });
+  assert.equal(up.ceiling.heightMm, 2500);
+  assert.equal(dl.elev, g.roomCeilingElevationMm(up), '天井の書き換えで直付けの器具が追従しない');
+  assert.equal(pend.elev, g.roomCeilingElevationMm(up) - 400, 'ペンダントの下がりが変わった');
+  assert.equal(other.elev, 2388, '別の部屋の器具まで動いた');
+  // 「指定なし」へ戻しても同じく付いていく
+  g.updateSelectedProp('ceiling', null);
+  assert.equal(up.ceiling, undefined);
+  assert.equal(dl.elev, g.roomCeilingElevationMm(up), '天井を指定なしへ戻したとき器具が追従しない');
+  // 動かした器具は、操作の結果の changedIds に入る(共同編集で相手に送る印に使う)
+  const r = g.PlanCoreOperations.applyOperations(g.DATA,
+    [{ op: 'setProps', args: { props: { ceiling: { type: 'flat', heightMm: 2300 } } } }], g.planOpsCtx({ inPlace: true, targets: [up] }));
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual(Array.from(r.changedIds).sort(), ['dl', 'pend', 'up']);
+  assert.equal(dl.elev, g.roomCeilingElevationMm(up));
   // 段差・床上げも同じ規則へ寄せてある。
   assert.match(sliceFunction('updateSelectedRoomSkipLevel'), /followRoomCeiling\(/);
   assert.match(sliceFunction('updateSelectedRoomFloor'), /followRoomCeiling\(/);
