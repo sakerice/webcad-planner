@@ -31,6 +31,8 @@ import { REVISE_SYSTEM, buildRevisePrompt } from "./plan-revise.mjs";
 import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
 import { nameRooms, pickModels, judgeMarks, missingByRoom, MAX_ROOMS, MAX_SLOTS, MAX_MARKS } from "./plan-finish.mjs";
 import { knowledgeWarnings } from "./plan-check.mjs";
+import { quotaLimits, POINTS_PER_IMPORT } from "./ai-quota.mjs";
+import { handleChat } from "./chat.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -52,23 +54,8 @@ const COST_IMPORT_PAGE = 10;
 // 見直しは、元の図面と「答えを描き直した絵」の2枚を見て、全体を作り直させる。
 // 入力の画像が1枚増えるが出力は同じなので、読み取りと同じ重さとして数える。
 const COST_REVISE_PAGE = 10;
-// 「1回の取り込み」の目安。3ページのPDFで 3×(1+10+10) = 63点。
-// 上限は**回数で**設定する（点は内部の数え方で、設定する人が意識するものではない）。
-const POINTS_PER_IMPORT = 63;
-const DEFAULT_IMPORTS_TOTAL = 5;     // 全体。1日およそ ¥1,100
-const DEFAULT_IMPORTS_PER_USER = 2;  // 1つの接続元
-
-function quotaLimits(env) {
-  const perUser = Number((env && env.AI_DAILY_IMPORTS_PER_USER) || DEFAULT_IMPORTS_PER_USER);
-  const total = Number((env && env.AI_DAILY_IMPORTS_TOTAL) || DEFAULT_IMPORTS_TOTAL);
-  return {
-    imports: { perUser, total },
-    points: {
-      perUser: Math.max(1, Math.round(perUser * POINTS_PER_IMPORT)),
-      total: Math.max(1, Math.round(total * POINTS_PER_IMPORT)),
-    },
-  };
-}
+// 1日の上限（「1回の取り込み」= 63点を単位に、回数で設定する）は worker/ai-quota.mjs の
+// quotaLimits にある。チャット（worker/chat.mjs）も同じ枠を使うので、そちらに置いた。
 // 1回に読むページ数の上限。各ページが各階になる。
 const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
@@ -98,6 +85,9 @@ export async function handleAi(request, env, url, deps = {}) {
   if (url.pathname === "/api/ai/quota") return aiQuota(env, request);
 
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+
+  // チャットは本文が小さい（256KB まで）。下の「約40MBまで読む」より前で分け、自分の上限で読む。
+  if (url.pathname === "/api/ai/chat") return handleChat(request, env, deps);
 
   let payload;
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }

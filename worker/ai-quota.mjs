@@ -18,6 +18,35 @@
 //
 // 日付は UTC で切っている。日本時間の朝9時に戻る。利用者に見せる数字では
 // ないので、ずれても実害はない。
+//
+// 2つめの操作（/ticket）は、チャットの「依頼の札」ごとの往復の数を数える（worker/chat.mjs）。
+// 札は署名つきで画面が持ち回るので、何回使ったかは札の中ではなくここで数える。
+
+// 1日の上限。**回数ではなく「点」で数える**（点の重さは worker/routes-ai.mjs の COST_* と
+// worker/chat.mjs の AI_CHAT_POINTS）。
+// 「1回の取り込み」の目安。3ページのPDFで 3×(1+10+10) = 63点。
+// 上限は**回数で**設定する（点は内部の数え方で、設定する人が意識するものではない）。
+// 読み取りとチャットが同じ枠を使う。
+export const POINTS_PER_IMPORT = 63;
+const DEFAULT_IMPORTS_TOTAL = 5;     // 全体。1日およそ ¥1,100
+const DEFAULT_IMPORTS_PER_USER = 2;  // 1つの接続元
+
+export function quotaLimits(env) {
+  const perUser = Number((env && env.AI_DAILY_IMPORTS_PER_USER) || DEFAULT_IMPORTS_PER_USER);
+  const total = Number((env && env.AI_DAILY_IMPORTS_TOTAL) || DEFAULT_IMPORTS_TOTAL);
+  return {
+    imports: { perUser, total },
+    points: {
+      perUser: Math.max(1, Math.round(perUser * POINTS_PER_IMPORT)),
+      total: Math.max(1, Math.round(total * POINTS_PER_IMPORT)),
+    },
+  };
+}
+
+// 札の記録の鍵。forgetOldDays（日付で古い数を捨てる）はこの前置きの鍵に触らない。
+const TICKET_PREFIX = "chat-ticket:";
+const TICKET_ID_RE = /^[A-Za-z0-9_-]{16,64}$/;
+
 export class AiQuota {
   constructor(state, env) {
     this.state = state;
@@ -27,6 +56,7 @@ export class AiQuota {
   // { ok, remaining, limit, scope } を返す。ok が false なら断る。
   async fetch(request) {
     const url = new URL(request.url);
+    if (url.pathname === "/ticket") return this.countTicket(url);
     const cost = Math.max(1, Math.min(64, Number(url.searchParams.get("cost")) || 1));
     const who = url.searchParams.get("who") || "unknown";
     const perDay = Math.max(1, Number(url.searchParams.get("perDay")) || 0);
@@ -71,15 +101,49 @@ export class AiQuota {
     const all = await this.state.storage.list();
     const stale = [];
     for (const key of all.keys()) {
+      if (String(key).startsWith(TICKET_PREFIX)) continue;
       const day = String(key).split(":")[1];
       if (day && !keep.has(day)) stale.push(key);
     }
     if (stale.length) await this.state.storage.delete(stale);
   }
 
-  reply(body) {
+  // 札の id の使用回数を1つ増やして返す。{ ok, n, left }。ok が false なら往復の上限を超えた。
+  //
+  // 札を作った最初の呼び出しは、ここを通らずに数える（記録が無ければ「1回使った」とみなす）。
+  // 最初の呼び出しのたびに Durable Object へもう1往復するのを避けるため。
+  // max を超えたら増やさない（何度叩いても記録は max のまま）。
+  // 新しい札の記録を作るときだけ、期限の過ぎた札の記録を消す。札は10分で切れるので、残るのは
+  // ここ10分ほどに使われた札だけで、一覧を読む量は小さい。
+  async countTicket(url) {
+    const id = url.searchParams.get("id") || "";
+    const exp = Number(url.searchParams.get("exp"));
+    const max = Math.max(1, Math.min(64, Math.floor(Number(url.searchParams.get("max")) || 0)));
+    if (!TICKET_ID_RE.test(id) || !Number.isFinite(exp)) {
+      return this.reply({ ok: false, error: "bad_ticket" }, 400);
+    }
+    const key = TICKET_PREFIX + id;
+    const seen = await this.state.storage.get(key);
+    const used = seen && Number.isFinite(Number(seen.n)) ? Number(seen.n) : 1;
+    if (used >= max) return this.reply({ ok: false, n: used, left: 0 });
+    const n = used + 1;
+    await this.state.storage.put(key, { n, exp });
+    if (!seen) await this.forgetOldTickets(Date.now());
+    return this.reply({ ok: true, n, left: max - n });
+  }
+
+  async forgetOldTickets(now) {
+    const all = await this.state.storage.list({ prefix: TICKET_PREFIX });
+    const stale = [];
+    for (const [key, value] of all) {
+      if (!value || !(Number(value.exp) > now)) stale.push(key);
+    }
+    if (stale.length) await this.state.storage.delete(stale);
+  }
+
+  reply(body, status = 200) {
     return new Response(JSON.stringify(body), {
-      status: 200,
+      status,
       headers: { "content-type": "application/json" },
     });
   }
