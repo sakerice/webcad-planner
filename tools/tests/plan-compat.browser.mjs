@@ -124,6 +124,21 @@ function fingerprint() {
 async function waitApp(page) {
   await page.waitForFunction(() => window.DATA && DATA.walls, null, { timeout: 60000 });
   await page.waitForSelector('#app-loading', { state: 'hidden', timeout: 60000 });
+  await waitFonts(page);
+}
+
+// Web の字体(Noto Sans JP)を読み終えるまで待つ。
+// 2D の視点合わせ(resetView)は操作ガイド(#help-box)の高さを余白に使うので、字体を読み終える前に
+// プランを開くと、ガイドが仮の字体の高さのまま測られ、視点が 1px ずれる(読み終える時刻しだいで正解と食い違った)。
+// 字体は文字の範囲ごとのファイルに分かれていて、画面に出た文字の分だけ読まれる。ガイドの文字を明示して読ませてから、
+// 読み込み中の字体が無くなるのを待つ。読めない環境(通信が無いなど)でも止まらないよう、時間を区切る。
+async function waitFonts(page) {
+  await page.evaluate(async () => {
+    const help = document.getElementById('help-box');
+    const text = (help ? help.textContent : '') || 'あ';
+    const loads = ['400', '700'].map((w) => document.fonts.load(w + ' 12px "Noto Sans JP"', text).catch(() => null));
+    await Promise.race([Promise.all(loads).then(() => document.fonts.ready), new Promise((r) => setTimeout(r, 10000))]);
+  });
 }
 
 // 保存の復元が終わるまで待つ。復元されない（＝既定間取りの選択待ちのまま）なら
@@ -252,10 +267,15 @@ async function openThrough(browser, name, route) {
       return { fp: opened ? await page.evaluate(fingerprint) : null, dialogs, errors };
     }
     if (route === 'shared-patch' || route === 'shared-patch-fields') {
-      // 空のプランに、見本の壁・家具・部屋を丸ごと upserts にした patch を applySharedPatch で当てる
-      await page.goto(APP + '?preset=blank');
+      // 空のプランに、見本の壁・家具・部屋を丸ごと upserts にした patch を applySharedPatch で当てる。
+      // 空のプランは、起動の間取りの選択で「白紙から始める」を押して作る。この経路の 2D の視点は、白紙を選んだときの
+      // 視点合わせ(resetView)の結果がそのまま残る。?preset=blank で開くと、Web の字体を読み終える前に視点を合わせることが
+      // あり、操作ガイドの幅が仮の字体で測られて 1px ずれた(正解は字体を読み終えたあとの値)。字体を待ってから押す。
+      await page.goto(APP);
       await waitApp(page);
-      await page.waitForFunction(() => window._defaultPlanPending === false, null, { timeout: 20000 });
+      await page.waitForSelector('#preset-choice-modal.show', { timeout: 20000 });
+      await page.click('#preset-choice-modal .preset-blank-btn:has-text("白紙から始める")');
+      await page.waitForFunction(() => window._defaultPlanPending === false && window.PRESET_CURRENT === 'blank', null, { timeout: 20000 });
       const applied = await page.evaluate(({ raw, withFields }) => {
         const plan = JSON.parse(raw);
         // shared-patch-fields: 送信側の buildSharedPatch がそのまま作る patch（fields は SHARED_FIELDS の全部）
