@@ -137,14 +137,14 @@ async function sendStream(config, bodyText, fetchImpl) {
 // 最上位の cache_control は Claude API で anthropic-version 2023-06-01 のまま、ベータのヘッダ無しで
 // 使える（Anthropic の文書の prompt caching の "Automatic vs explicit breakpoints" と、
 // 提供範囲の表 "Automatic prompt caching: Claude API Yes"。2026-11-17 に確かめた）。
-// 印は1回に4つまでなので、画面は messages に cache_control を付けないこと。
-export function buildConversationRequest({ config, system, tools, messages, maxOutputTokens = 16000 }) {
+// 印は1回に4つまでなので、messages に cache_control を入れない（worker/chat.mjs が断る）。
+export function buildConversationRequest({ config, system, tools, messages, maxOutputTokens = 8000 }) {
   const body = {
     model: config.model,
     max_tokens: maxOutputTokens,
     stream: true,
     thinking: { type: "adaptive", display: "summarized" },
-    output_config: { effort: config.effort || "high" },
+    output_config: { effort: config.effort || "medium" },
     fallbacks: "default",
   };
   if (system) body.system = system;
@@ -154,12 +154,23 @@ export function buildConversationRequest({ config, system, tools, messages, maxO
   return body;
 }
 
-export async function startConversationStream({ config, system, tools, messages, maxOutputTokens = 16000, fetchImpl = fetch }) {
+// 本文の文字列を作る。messages は、呼び出し側が既に JSON にした文字列（messagesJson）で受ける。
+// worker/chat.mjs は messages の JSON を、札の検査（SHA-256）と本文の両方に使うので、
+// 2回 JSON にしないで済むよう、messages の手前までを JSON にして後ろに継ぐ。
+// messages は最後の欄なので、継いだ結果は JSON.stringify(buildConversationRequest(...)) と同じ文字列になる。
+export function conversationBodyText({ config, system, tools, messagesJson, maxOutputTokens = 8000 }) {
+  const head = JSON.stringify(buildConversationRequest({ config, system, tools, messages: [], maxOutputTokens }));
+  const tail = '"messages":[]}';
+  if (!head.endsWith(tail)) throw new Error("conversation body layout changed");
+  return head.slice(0, head.length - 3) + messagesJson + "}";
+}
+
+// 作り終えた本文（文字列かバイト列）を送る。返事の SSE は読まずに返す。
+export async function sendConversation({ config, body, fetchImpl = fetch }) {
   if (!config || !config.apiKey) {
     return { ok: false, status: 503, message: "Anthropic のキーがこの環境に設定されていません。" };
   }
-  const body = buildConversationRequest({ config, system, tools, messages, maxOutputTokens });
-  return sendStream(config, JSON.stringify(body), fetchImpl);
+  return sendStream(config, body, fetchImpl);
 }
 
 export async function generate({
