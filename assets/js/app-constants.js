@@ -3112,11 +3112,35 @@ function ownGet(table,key){
 }
 // 鍵ごとの入れ物(壁ごと・面ごとの設定)を取り出し、無ければ作る。鍵が __proto__ でも
 // 自分の欄として作る(代入で作ると、入れ物の継承元を差し替え、全部の物に色が付く)。
+// 入れ物や今の値がオブジェクトでない(共同編集の相手から文字が届いた、など)ときも例外を出さない。
+// 入れ物がオブジェクトでなければ作った物をそのまま返し(どこにも残らない)、今の値がオブジェクトでなければ作り直す。
 function ownSlot(table,key,make){
   var k=String(key);
-  if(!Object.prototype.hasOwnProperty.call(table,k)||!table[k])
+  if(!table||typeof table!=='object') return make();
+  var cur=Object.prototype.hasOwnProperty.call(table,k)?table[k]:undefined;
+  if(!cur||typeof cur!=='object')
     Object.defineProperty(table,k,{value:make(),writable:true,enumerable:true,configurable:true});
   return table[k];
+}
+// プランの設定の欄(外観・内観・屋根の設定)の形を、ensure… が作り直せる形に戻す。
+// 欄の値・中の入れ物(parts)がオブジェクトでなければ消す。maps に挙げた入れ物の中の値も、オブジェクトでなければ消す。
+// ensure… は `if(!s.walls)` のように「無い」ときだけ作るので、文字などが入っていると残ってしまい、
+// ownSlot や色の読み出しが例外になって 3D と設定欄が壊れるため(共同編集の相手や古い Worker から届いた形に備える)。
+function isPlainObj(v){
+  return !!v&&typeof v==='object'&&!Array.isArray(v);
+}
+function repairSettingsShape(plan,field,parts,maps){
+  if(!plan) return;
+  var s=plan[field];
+  if(s===undefined||s===null) return;
+  if(!isPlainObj(s)){ plan[field]=null; return; }
+  (parts||[]).forEach(function(part){
+    if(!Object.prototype.hasOwnProperty.call(s,part)) return;
+    if(!isPlainObj(s[part])){ delete s[part]; return; }
+    if((maps||[]).indexOf(part)<0) return;
+    var m=s[part];
+    Object.keys(m).forEach(function(k){ if(m[k]!==null&&!isPlainObj(m[k])) delete m[k]; });
+  });
 }
 // 画面の data-… 属性から、プランの物を引き直す(onclick に id を書かないため)。
 // 一番近い祖先の data-wall-id を見る。id の型(数か文字か)はプランの物のまま返す。

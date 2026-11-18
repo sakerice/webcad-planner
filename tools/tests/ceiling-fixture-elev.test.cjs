@@ -52,7 +52,7 @@ function topLevelVar(name) {
   return m[0];
 }
 
-const FNS = [ 'ownGet', 'ownSlot',
+const FNS = [ 'ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape',
   'roomFloorOffsetMm', 'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',

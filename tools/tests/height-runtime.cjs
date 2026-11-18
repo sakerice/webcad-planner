@@ -50,7 +50,7 @@ function topLevelVar(name) {
   return m[0];
 }
 
-const FNS = [ 'ownGet', 'ownSlot',
+const FNS = [ 'ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape',
   'usesFinishedHeightModel','defaultFloorThicknessMm','roomFloorTopY',
   'buildRoomFloorMeshes','makeFloorSlabMaterial','clipPolyToRect',
   'roomFloorOffsetMm', 'foundationHeightMm', 'foundationHeightM',

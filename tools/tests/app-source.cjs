@@ -49,12 +49,13 @@ function appSource() {
   return cached;
 }
 
-// 表を自分の鍵だけで引く小さな関数(assets/js/app-constants.js の ownGet・ownSlot)の本文。
+// 表を自分の鍵だけで引く小さな関数(assets/js/app-constants.js の ownGet・ownSlot)と、
+// 設定の欄の形を作り直せる形に戻す関数(isPlainObj・repairSettingsShape。ensure… が最初に呼ぶ)の本文。
 // 種類名などで表を引く関数は、これを使う(継承した鍵 constructor などに当たらないため)。
 // 関数を切り出して node:vm に載せるテストは、これも一緒に載せる。
 function ownHelpersSource() {
   const src = appSource();
-  return ['ownGet', 'ownSlot'].map((name) => {
+  return ['ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape'].map((name) => {
     const at = src.indexOf('\nfunction ' + name + '(');
     if (at < 0) throw new Error('function ' + name + ' がソースに無い');
     return src.slice(at + 1, src.indexOf('\n}\n', at) + 2);

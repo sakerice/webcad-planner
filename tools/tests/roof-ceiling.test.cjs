@@ -132,7 +132,7 @@ const THREE = {
 };
 THREE.Float32BufferAttribute.prototype = Attr.prototype;
 
-const HEIGHT_FNS = [ 'ownGet', 'ownSlot',
+const HEIGHT_FNS = [ 'ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape',
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',

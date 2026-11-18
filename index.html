@@ -8060,6 +8060,7 @@ function defaultInteriorFloorSetting(){
 }
 
 function ensureInteriorWallSettings(){
+  repairSettingsShape(DATA,'interiorWallSettings',['whole','floors','walls','faces'],['floors','walls','faces']);
   if(!DATA.interiorWallSettings){
     DATA.interiorWallSettings={
       whole:{linked:false,color:INTERIOR_WALL_DEFAULT,texture:null,textureFlipX:false,textureFlipY:false},
@@ -8087,6 +8088,7 @@ function ensureInteriorWallSettings(){
 }
 
 function ensureRoofAppearance(){
+  repairSettingsShape(DATA,'roofAppearance',['whole','floors'],['floors']);
   if(!DATA.roofAppearance){
     DATA.roofAppearance={whole:{linked:true,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false},floors:{}};
   }
@@ -8387,6 +8389,7 @@ function defaultExteriorFloorSetting(floor){
 }
 
 function ensureExteriorWallSettings(){
+  repairSettingsShape(DATA,'exteriorWallSettings',['whole','floors','walls','faces'],['floors','walls','faces']);
   if(!DATA.exteriorWallSettings){
     DATA.exteriorWallSettings={
       whole:{linked:false,color:'#e8e0cc',texture:null,textureFlipX:false,textureFlipY:false},

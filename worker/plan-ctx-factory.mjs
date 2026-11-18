@@ -51,9 +51,11 @@ const has = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
 const ownGet = (o, k) => (k === null || k === undefined ? undefined : (has(o, String(k)) ? o[String(k)] : undefined));
 // 鍵ごとの入れ物を取り出し、無ければ作る(画面の ownSlot)。鍵が __proto__ でも自分の欄として作る
 // (代入で作ると、入れ物の継承元を差し替え、全部の物に色が付く)。
+const isPlainObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 function ownSlot(table, key, make) {
   const k = String(key);
-  if (!has(table, k) || !table[k]) Object.defineProperty(table, k, { value: make(), writable: true, enumerable: true, configurable: true });
+  if (!table || typeof table !== 'object') return make();
+  if (!has(table, k) || !table[k] || typeof table[k] !== 'object') Object.defineProperty(table, k, { value: make(), writable: true, enumerable: true, configurable: true });
   return table[k];
 }
 const isPositiveNumber = (v) => typeof v === 'number' && isFinite(v) && v > 0;
@@ -390,7 +392,21 @@ export function createPlanCtxTools(deps) {
   function defaultExteriorFloorSetting(floor) {
     return { linked: true, color: ownGet(WALL_COLORS, floor) || '#e8e0cc', texture: null, textureFlipX: false, textureFlipY: false };
   }
+  // 画面の repairSettingsShape(app-constants.js)。欄・中の入れ物・入れ物の中の値がオブジェクトでなければ消し、下で作り直させる。
+  function repairSettingsShape(p, field, parts, maps) {
+    var s = p[field];
+    if (s === undefined || s === null) return;
+    if (!isPlainObj(s)) { p[field] = null; return; }
+    parts.forEach(function (part) {
+      if (!has(s, part)) return;
+      if (!isPlainObj(s[part])) { delete s[part]; return; }
+      if (maps.indexOf(part) < 0) return;
+      var m = s[part];
+      Object.keys(m).forEach(function (k) { if (m[k] !== null && !isPlainObj(m[k])) delete m[k]; });
+    });
+  }
   function ensureExteriorWallSettings(p) {
+    repairSettingsShape(p, 'exteriorWallSettings', ['whole', 'floors', 'walls', 'faces'], ['floors', 'walls', 'faces']);
     if (!p.exteriorWallSettings) {
       p.exteriorWallSettings = {
         whole: { linked: false, color: '#e8e0cc', texture: null, textureFlipX: false, textureFlipY: false },
