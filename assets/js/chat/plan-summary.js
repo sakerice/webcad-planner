@@ -67,7 +67,9 @@
     plan = plan || {};
     opts = opts || {};
     var maxBytes = Number(opts.maxBytes) > 0 ? Math.floor(Number(opts.maxBytes)) : DEFAULT_MAX_BYTES;
-    var selected = {};
+    // 種類名・id を鍵にする表は、素のオブジェクトでなく Object.create(null) で作る
+    // (種類名や id が constructor・__proto__ でも、Object.prototype の物と取り違えないように)。
+    var selected = Object.create(null);
     (opts.selectedIds || []).forEach(function (id) { selected[String(id)] = true; });
     var mark = function (o) { return o && o.id !== undefined && selected[String(o.id)] ? '[選択中] ' : ''; };
 
@@ -106,7 +108,7 @@
     });
 
     // まとめる候補: 選択中でない物を種類ごとに。数の多い順(同数は種類名の順)。
-    var groups = {};
+    var groups = Object.create(null);
     items.forEach(function (it) {
       if (mark(it)) return;
       var t = String(it.type);
@@ -116,7 +118,7 @@
     var order = Object.keys(groups).filter(function (t) { return groups[t].length >= 2; }).sort(function (a, b) {
       return groups[b].length - groups[a].length || (a < b ? -1 : a > b ? 1 : 0);
     });
-    var collapsed = {};
+    var collapsed = Object.create(null);
     var NOTICE = '※ 物が多いので、数の多い種類は（まとめ）の行に種類ごとの数だけを書いた（その物の id は載せていない）。';
     var collapseLine = function (t) {
       var per = {};
@@ -150,7 +152,7 @@
     var lines = build();
     var total = -1;
     lines.forEach(function (l) { total += utf8Bytes(l.text) + 1; });
-    var typeBytes = {};
+    var typeBytes = Object.create(null);
     items.forEach(function (it, k) {
       if (mark(it)) return;
       var t = String(it.type);

@@ -194,3 +194,15 @@ test('連番の数え始めを外から渡せる。渡さなければ今まで�
   assert.equal(r.plan.rooms.at(-1).id, 'rm_' + (base + 7));
   assert.equal(r.nextId, base + 8);
 });
+
+test('要約: 種類名が constructor・__proto__ の物があっても例外にならない', async () => {
+  const { workerSummarize } = await load();
+  const p = plan();
+  for (const t of ['constructor', '__proto__', 'toString']) {
+    p.items.push({ id: 'odd-' + t + '-1', type: t, x: 0, y: 0, w: 500, d: 500, floor: 1 });
+    p.items.push({ id: 'odd-' + t + '-2', type: t, x: 600, y: 0, w: 500, d: 500, floor: 2 });
+  }
+  const s = workerSummarize(p);
+  assert.ok(s.startsWith('<plan_summary>\n') && s.endsWith('\n</plan_summary>'));
+  for (const t of ['constructor', '__proto__', 'toString']) assert.ok(s.includes('id=odd-' + t + '-1 ' + t + ' 1階'), t);
+});
