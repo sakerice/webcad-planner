@@ -4,7 +4,8 @@
 // のに、画面は以前、失敗のたびに同じ差分を 600ms ごとに送り直し、同期が止まったまま送り続けた。
 // 400 のときは送り直さず、部屋の最新の状態を取り直して画面を合わせ、同期できなかったことを
 // 共有の欄(#share-status)に出す。
-// 413(大きすぎる)・429(多すぎる)・5xx・通信の失敗は、これまでどおり送り直す(この挙動は変えない)。
+// 413(本文か当てたあとのプランが保存の上限を超える)も、待っても通らないので 400 と同じ扱いにする。
+// 429(多すぎる)・5xx・通信の失敗は、これまでどおり送り直す(この挙動は変えない)。
 //
 // サーバーは使わない。ルームの GET と /update を偽物にし、WebSocket も偽物にする。
 //
@@ -70,10 +71,11 @@ const state = (page) => page.evaluate(() => {
 try {
   const serverThick = BASE.walls[0].thick;
 
-  // ── 400: 送り直さず、部屋の状態を取り直す ──
-  {
-    const label = '400';
-    const { context, page, st } = await openRoom(label, 400);
+  // ── 400・413: 送り直さず、部屋の状態を取り直す ──
+  // 413 は本文か、当てたあとのプランが保存の上限を超える(worker/collab-room.mjs の update)。どちらも待っても通らない。
+  for (const rejected of [400, 413]) {
+    const label = String(rejected);
+    const { context, page, st } = await openRoom(label, rejected);
     const gets0 = st.gets;
     await editWall(page, serverThick + 30);
     await sleep(4000);
@@ -96,8 +98,8 @@ try {
     await context.close();
   }
 
-  // ── 413・429・5xx・通信の失敗: これまでどおり送り直す(手元の変更は残す) ──
-  for (const reply of [413, 429, 500, 503, 'abort']) {
+  // ── 429・5xx・通信の失敗: これまでどおり送り直す(手元の変更は残す) ──
+  for (const reply of [429, 500, 503, 'abort']) {
     const label = String(reply);
     const { context, page, st } = await openRoom(label, reply);
     const gets0 = st.gets;
@@ -108,8 +110,7 @@ try {
     assert.equal(st.gets, gets0, `${label}: 部屋の状態を取り直した(これまでの挙動と違う)`);
     assert.equal(s.thick, serverThick + 30, `${label}: 手元の変更が消えた`);
     assert.ok(s.error, `${label}: 同期できないことが出ていない`);
-    if (reply === 413) assert.match(s.status, /10MB/);
-    else if (reply === 'abort') assert.ok(s.status.length > 0);
+    if (reply === 'abort') assert.ok(s.status.length > 0);
     else assert.match(s.status, new RegExp('同期できませんでした（' + reply + '）'));
     // 直れば、残っていた変更が届く
     st.reply = 200;
@@ -125,4 +126,4 @@ try {
 } finally {
   await browser.close();
 }
-console.log('共同編集: 400 は送り直さず取り直し、ほかの失敗はこれまでどおり送り直す');
+console.log('共同編集: 400・413 は送り直さず取り直し、ほかの失敗はこれまでどおり送り直す');
