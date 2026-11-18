@@ -6,6 +6,7 @@
 import { json } from "./shared.mjs";
 import { handlesRooms, handleRooms } from "./routes-rooms.mjs";
 import { handlesAi, handleAi } from "./routes-ai.mjs";
+import { handlesMcp, handleMcp } from "./mcp.mjs";
 
 export default {
   async fetch(request, env) {
@@ -13,6 +14,8 @@ export default {
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     if (handlesRooms(url.pathname)) return handleRooms(request, env, url);
     if (handlesAi(url.pathname)) return handleAi(request, env, url);
+    // 外の AI(MCP)の受け口。/mcp でないのは run_worker_first が /api/* だけのため(worker/mcp.mjs の冒頭)。
+    if (handlesMcp(url.pathname)) return handleMcp(request, env);
     return json({ error: "not_found" }, 404);
   },
 };
