@@ -88,7 +88,8 @@ async function chat(body, e, fetchImpl, headers) {
   return handleAi(request, e, url, { fetchImpl });
 }
 
-const ASK = [{ role: 'user', content: '<plan_summary>\n…\n</plan_summary>\n\nLDK を東へ半間広げて' }];
+// 画面(chat-session.js)が送る形: 要約と依頼を囲み、道具の結果も囲む。この形なら Worker は1バイトも変えずに送る。
+const ASK = [{ role: 'user', content: '<plan_summary>\n…\n</plan_summary>\n\n<user_request>\nLDK を東へ半間広げて\n</user_request>' }];
 
 // 画面と同じく、前の messages に Claude の返事と道具の結果を足す。
 function grow(messages, i) {
@@ -98,7 +99,7 @@ function grow(messages, i) {
       { type: 'thinking', thinking: '考え' + i, signature: 'sig' + i },
       { type: 'tool_use', id, name: 'moveObject', input: { id: '12', dx: 910, dy: 0 } },
     ] },
-    { role: 'user', content: [{ type: 'tool_result', tool_use_id: id, content: '{"ok":true,"changedIds":["12"]}' }] },
+    { role: 'user', content: [{ type: 'tool_result', tool_use_id: id, content: '<tool_result>\n{"ok":true,"changedIds":["12"]}\n</tool_result>' }] },
   ]);
 }
 

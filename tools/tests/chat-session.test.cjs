@@ -100,6 +100,14 @@ function makeSession(script, over) {
 }
 
 const TOOL = (id, name, input) => ({ type: 'tool_use', id, name, input });
+// 囲み(<tag>\n中身\n</tag>)の中身を取り出す。形が違えば落とす。
+function inner(text, tag) {
+  const m = /^<([a-z_]+)>\n([\s\S]*)\n<\/([a-z_]+)>$/.exec(text);
+  assert.ok(m && m[1] === m[3], '囲みの形でない: ' + text.slice(0, 80));
+  if (tag) assert.equal(m[1], tag);
+  return m[2];
+}
+const userRequest = (text) => '<user_request>\n' + text + '\n</user_request>';
 const THINK = { type: 'thinking', thinking: '部屋を足す', signature: 'c2lnbmF0dXJl' };
 
 // 毎回: 前の呼び出しの messages が今回の先頭にそのまま入っている。件数が増えている。
@@ -150,13 +158,13 @@ test('道具1回 → 終わり。写しに当たり、本物のプランは変�
   assert.equal(fetch.calls[1].body.ticket, 'T1');
   const first = fetch.calls[0].body.messages;
   assert.equal(first.length, 1);
-  assert.equal(first[0].content, '<plan_summary>\n部屋 1\n</plan_summary>\n\n書斎を足して');
+  assert.equal(first[0].content, '<plan_summary>\n部屋 1\n</plan_summary>\n\n<user_request>\n書斎を足して\n</user_request>');
   checkChain(fetch.calls, [c1]);
   const tr = fetch.calls[1].body.messages[2].content;
   assert.equal(tr.length, 1);
   assert.equal(tr[0].tool_use_id, 't1');
   assert.equal(tr[0].is_error, undefined);
-  assert.deepEqual(JSON.parse(tr[0].content).changedIds, [r.plan.rooms[1].id]);
+  assert.deepEqual(JSON.parse(inner(tr[0].content, 'tool_result')).changedIds, [r.plan.rooms[1].id]);
   // 知らせ
   assert.ok(events.some((e) => e.type === 'round' && e.round === 1));
   assert.ok(events.some((e) => e.type === 'round' && e.round === 2));
@@ -224,7 +232,7 @@ test('inspect_plan は写しを検査した結果を返す(写しは変えない
   assert.equal(r.ok, true);
   const res = fetch.calls[1].body.messages[2].content[1];
   assert.equal(res.tool_use_id, 't2');
-  assert.deepEqual(JSON.parse(res.content).warnings, ['部屋が 2 つ']);
+  assert.deepEqual(JSON.parse(inner(res.content, 'inspect_result')).warnings, ['部屋が 2 つ']);
 });
 
 test('知らない道具名は is_error', async () => {
@@ -363,7 +371,7 @@ test('2回めの依頼: 前の依頼は「利用者の文」と「AI の最後�
   assert.equal(r2.ok, true);
   assert.equal(r2.changed, 0);
   const msgs = fetch.calls[2].body.messages;
-  assert.deepEqual(msgs.slice(0, 2), [{ role: 'user', content: 'ソファを回して' }, { role: 'assistant', content: '回しました。' }]);
+  assert.deepEqual(msgs.slice(0, 2), [{ role: 'user', content: userRequest('ソファを回して') }, { role: 'assistant', content: '回しました。' }]);
   assert.match(msgs[2].content, /^<plan_summary>\n/);
   assert.ok(!JSON.stringify(msgs).includes('thinking'));
   assert.ok(!JSON.stringify(msgs).includes('tool_use'));
@@ -416,13 +424,14 @@ test('前の依頼は直近 6 件まで、文はそれぞれ 400 字までに切
   for (let i = 0; i < 8; i++) assert.equal((await s.send('あ'.repeat(500) + i)).ok, true);
   const msgs = fetch.calls[7].body.messages;
   assert.equal(msgs.length, 13);
-  assert.ok(msgs[0].content.startsWith('あ'.repeat(10)));
-  assert.equal(msgs[0].content.length, 400);
-  assert.ok(msgs[0].content.endsWith('…'));
+  const u0 = inner(msgs[0].content, 'user_request');
+  assert.ok(u0.startsWith('あ'.repeat(10)));
+  assert.equal(u0.length, 400);
+  assert.ok(u0.endsWith('…'));
   assert.equal(msgs[1].content.length, 400);
   // 直近 6 件は 2〜7 回めの依頼(0・1 回めは落ちる)
   assert.equal(fetch.calls[6].body.messages.length, 13);
-  assert.ok(msgs[12].content.endsWith('あ'.repeat(10) + '7'));
+  assert.ok(msgs[12].content.endsWith(userRequest('あ'.repeat(500) + '7')));
 });
 
 test('道具の結果の文は 2,000 字まで。検査の指摘と警告は 10 件ずつ、残りは「ほか N 件」', async () => {
@@ -431,7 +440,7 @@ test('道具の結果の文は 2,000 字まで。検査の指摘と警告は 10 
   tools.inspectPlan = () => ({ ok: false, errors: Array.from({ length: 30 }, (_, i) => 'E' + i), warnings: Array.from({ length: 30 }, (_, i) => 'W' + i + 'う'.repeat(300)) });
   await s.send('確かめて');
   const res = fetch.calls[1].body.messages[2].content[0];
-  assert.ok(res.content.length <= 2000, '長さ ' + res.content.length);
+  assert.ok(inner(res.content, 'inspect_result').length <= 2000, '長さ ' + res.content.length);
   assert.ok(res.content.includes('"E9"') && !res.content.includes('"E10"'));
   assert.ok(res.content.includes('ほか 20 件'));
 });
@@ -449,12 +458,12 @@ test('最初の本文が大きすぎるときは、前の依頼を古い順に�
   assert.ok(Buffer.byteLength(last.raw) <= 150 * 1024, 'バイト数 ' + Buffer.byteLength(last.raw));
   assert.ok(last.body.messages.length < 13 && last.body.messages.length >= 1);
   assert.equal(last.body.messages[0].role, 'user');
-  assert.ok(last.body.messages[last.body.messages.length - 1].content.endsWith('今回'));
+  assert.ok(last.body.messages[last.body.messages.length - 1].content.endsWith(userRequest('今回')));
   // 落としたのは古い方(残っているのは直近の依頼で、並びはそのまま)
   const users = last.body.messages.filter((m, i) => m.role === 'user' && i < last.body.messages.length - 1).map((m) => m.content);
   const k = users.length;
   assert.ok(k < 6, '落としていない');
-  assert.deepEqual(users, ['依頼0', '依頼1', '依頼2', '依頼3', '依頼4', '依頼5'].slice(6 - k));
+  assert.deepEqual(users, ['依頼0', '依頼1', '依頼2', '依頼3', '依頼4', '依頼5'].slice(6 - k).map(userRequest));
 });
 
 test('今回の依頼だけで大きすぎれば送らずに too_long', async () => {
