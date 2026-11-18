@@ -317,7 +317,7 @@ async function aiImportPlan(payload, env, deps, request) {
 
   const asks = images.map((img, i) => ({
     system: SYSTEM_PROMPT,
-    text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
+    text: buildPlanPrompt({ hint, page: pageLine(i, images.length) }),
     images: [{ mimeType: img.mimeType, base64: img.base64 }],
     fetchImpl: deps.fetchImpl,
   }));
@@ -481,7 +481,8 @@ async function aiRevisePlan(payload, env, deps, request) {
     system: REVISE_SYSTEM,
     text: buildRevisePrompt({
       json: JSON.stringify(pair.page),
-      hint: pageHint(hint, i, pairs.length),
+      hint,
+      page: pageLine(i, pairs.length),
     }),
     // **手順も渡す。** 見直しは全体を作り直させるので、読み取りと同じ手順が要る。
     // 渡さずに作り直させたところ、室名から畳数を除くという手順7の決まりが
@@ -723,11 +724,10 @@ async function takeQuota(request, env, count, peek) {
   }
 }
 
-// ページごとの補足。何ページ目かを伝えると、階の取り違えが減る。
-function pageHint(hint, index, total) {
-  if (total <= 1) return hint;
-  const page = `この画像はPDFの${index + 1}ページ目です（全${total}ページ）。`;
-  return hint ? `${page}\n${hint}` : page;
+// ページごとの文。何ページ目かを伝えると、階の取り違えが減る。こちらが作る文なので、利用者の補足の囲みには入れない。
+function pageLine(index, total) {
+  if (total <= 1) return "";
+  return `この画像はPDFの${index + 1}ページ目です（全${total}ページ）。`;
 }
 
 // ページごとの読み取りを、1つの家にまとめる。
