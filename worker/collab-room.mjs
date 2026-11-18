@@ -30,7 +30,14 @@ const MAX_OP_BODY_BYTES = 64 * 1024;
 //          数はメモリと meta(成功して積んだときだけ書く。数のためだけには書かない)の多いほうを使う。
 //          メモリが消える(ルームが眠る)と失敗の分は数え直しになるが、それは許す。
 //   /read … ルームごとに1分 60 回。メモリだけで数える(書き込みを増やさない)。
+//   消す数 … deleteObjects は1回に 20 件まで(MCP_DELETE_PER_CALL)。消えた物(removedIds。removeWall も数える)は
+//          ルームごとに1日(UTC)100 件まで(MCP_DELETES_PER_DAY)。外の AI が名前の中の指示に乗せられても、
+//          1日でプランを丸ごと消せないようにする。数は /op の回数と同じ {day, n, del} に入れる(meta.mcpOps)。
+//          画面の操作(/update)には掛けない。画面の正当な使い方では、1度に消すのは選んだ数個〜十数個。
 export const MCP_OPS_PER_DAY = 600;
+export const MCP_DELETE_PER_CALL = 20;
+export const MCP_DELETES_PER_DAY = 100;
+export const MCP_DELETE_LIMIT_MESSAGE = "このプランは、きょう AI から消せる数の上限に達しました。消さない操作はできます。消すのは house-planner の画面で行ってください。";
 export const MCP_READS_PER_MINUTE = 60;
 export const MCP_OP_LIMIT_MESSAGE = "このプランは、きょう AI から直せる回数の上限に達しました。あすまたお試しいただくか、house-planner の画面で直してください。";
 export const MCP_READ_LIMIT_MESSAGE = "このプランを読む回数が多すぎます。少し待ってからもう一度お試しください。";
@@ -144,18 +151,19 @@ export class CollaborationRoom {
     this.env = env;
     this.queue = Promise.resolve();
     // 外の AI の回数(メモリの中の数)。/op は {day, n}、/read は {start, n}(1分の窓)。
-    this.mcpOps = { day: "", n: 0 };
+    this.mcpOps = { day: "", n: 0, del: 0 };
     this.mcpReads = { start: 0, n: 0 };
   }
 
-  // /op を1回数える。上限を超えていれば null(数を進めない)。進めた後の {day, n} を返す。
+  // /op を1回数える。上限を超えていれば null(数を進めない)。進めた後の {day, n, del} を返す(del はその日に消えた物の数)。
   takeMcpOp(meta) {
     const day = utcDay(Date.now());
-    const mem = this.mcpOps.day === day ? this.mcpOps.n : 0;
-    const stored = meta && meta.mcpOps && meta.mcpOps.day === day ? Number(meta.mcpOps.n) || 0 : 0;
-    const used = Math.max(mem, stored);
+    const today = this.mcpOps.day === day;
+    const storedToday = meta && meta.mcpOps && meta.mcpOps.day === day;
+    const used = Math.max(today ? this.mcpOps.n : 0, storedToday ? Number(meta.mcpOps.n) || 0 : 0);
+    const del = Math.max(today ? Number(this.mcpOps.del) || 0 : 0, storedToday ? Number(meta.mcpOps.del) || 0 : 0);
     if (used >= MCP_OPS_PER_DAY) return null;
-    this.mcpOps = { day, n: used + 1 };
+    this.mcpOps = { day, n: used + 1, del };
     return { ...this.mcpOps };
   }
 
@@ -474,6 +482,9 @@ export class CollaborationRoom {
     if (tooLarge) return opFailure([tooLarge]);
     const checked = OperationsCatalog.checkArgs(op, args);
     if (!checked.ok) return opFailure(checked.errors);
+    if (op === "deleteObjects" && Array.isArray(args.ids) && args.ids.length > MCP_DELETE_PER_CALL) {
+      return opFailure([`この受け口から1回に消せるのは ${MCP_DELETE_PER_CALL} 件までです（${args.ids.length} 件が来ました）。分けて呼んでください`]);
+    }
     const materialized = await this.materializePlan(meta);
     if (!materialized) return roomNotFound();
     const before = materialized.plan;
@@ -486,6 +497,15 @@ export class CollaborationRoom {
     }
     if (result.errors.length) {
       return opFailure(result.errors.map((e) => (e.candidates ? { message: e.message, candidates: e.candidates } : { message: e.message })));
+    }
+    // 消す数の1日の上限。消えた物の数で数える(removeWall の壁、deleteObjects の物・壁・部屋)。
+    const removedCount = Array.isArray(result.removedIds) ? result.removedIds.length : 0;
+    if (removedCount) {
+      if (counted.del + removedCount > MCP_DELETES_PER_DAY) {
+        return json({ ok: false, code: "delete_limit", errors: [{ message: MCP_DELETE_LIMIT_MESSAGE }] }, 429);
+      }
+      counted.del += removedCount;
+      this.mcpOps = { ...counted };
     }
     const { patch, unshared } = buildRoomPatch(before, result.plan);
     if (unshared.length) {
