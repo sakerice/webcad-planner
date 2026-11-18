@@ -146,14 +146,16 @@
     card.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99999;'+
       'background:#fff;color:#222;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.18);'+
       'padding:20px;max-width:min(92vw,720px);max-height:86vh;overflow:auto;font:13px/1.5 system-ui,sans-serif';
+    // URL(?preset=)から来る文字があるので、つなぐ値はすべて置き換える
+    function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];}); }
     var rows=result.cases.map(function(c){
       var td='<td style="padding:4px 10px;text-align:right;white-space:nowrap">';
-      return '<tr><td style="padding:4px 10px 4px 0;white-space:nowrap">'+c.name+'</td>'+td+(c.enterMs!=null?c.enterMs:'')+'</td>'+td+c.fps+'</td>'+td+c.renderMedianMs+'</td>'+td+c.renderP95Ms+'</td>'+td+c.triangles.toLocaleString()+'</td></tr>';
+      return '<tr><td style="padding:4px 10px 4px 0;white-space:nowrap">'+esc(c.name)+'</td>'+td+esc(c.enterMs!=null?c.enterMs:'')+'</td>'+td+esc(c.fps)+'</td>'+td+esc(c.renderMedianMs)+'</td>'+td+esc(c.renderP95Ms)+'</td>'+td+esc(c.triangles.toLocaleString())+'</td></tr>';
     }).join('');
-    card.innerHTML='<div style="font-weight:600;font-size:15px;margin-bottom:8px">性能の測定結果（'+result.preset+'）</div>'+
+    card.innerHTML='<div style="font-weight:600;font-size:15px;margin-bottom:8px">性能の測定結果（'+esc(result.preset)+'）</div>'+
       '<table style="border-collapse:collapse;width:100%"><thead><tr style="text-align:left">'+
       '<th style="padding:4px 10px 4px 0">場面</th><th style="padding:4px 10px;text-align:right">入るまで(ms)</th><th style="padding:4px 10px;text-align:right">fps</th><th style="padding:4px 10px;text-align:right">1コマ(ms)</th><th style="padding:4px 10px;text-align:right">遅い方(ms)</th><th style="padding:4px 10px;text-align:right">三角形</th></tr></thead><tbody>'+rows+'</tbody></table>'+
-      '<textarea readonly style="width:100%;height:120px;margin-top:12px;font:11px monospace">'+JSON.stringify(result)+'</textarea>'+
+      '<textarea readonly style="width:100%;height:120px;margin-top:12px;font:11px monospace">'+esc(JSON.stringify(result))+'</textarea>'+
       '<button type="button" style="margin-top:10px;border:0;border-radius:999px;padding:8px 18px;background:#222;color:#fff">結果をコピー</button>';
     card.querySelector('button').onclick=function(){
       var ta=card.querySelector('textarea'); ta.select();

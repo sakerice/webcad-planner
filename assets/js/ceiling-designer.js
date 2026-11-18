@@ -155,8 +155,8 @@ function drawArea(it){
 function props(it){
  document.getElementById('props-title').textContent='天井範囲 の設定';
  let html=selectedLockControlHtml(it)+'<div class="ph">天井の範囲</div>';
- [['x','X位置'],['y','Y位置'],['w','幅'],['d','奥行'],['offset','段差（下げは負）']].forEach(([key,label])=>{html+='<div class="pr"><label class="pl">'+label+' mm</label><input class="pi" data-ceiling-field="'+key+'" type="number" step="10" value="'+(Math.round(it[key]*100)/100)+'" onchange="updateSelectedProp(\''+key+'\',Number(this.value))"></div>';});
- html+='<div class="pr"><label class="pl">仕上げ色</label><input class="pi" type="color" value="'+(it.color||'#e4ddd1')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>'
+ [['x','X位置'],['y','Y位置'],['w','幅'],['d','奥行'],['offset','段差（下げは負）']].forEach(([key,label])=>{html+='<div class="pr"><label class="pl">'+label+' mm</label><input class="pi" data-ceiling-field="'+key+'" type="number" step="10" value="'+escHtml(Math.round(it[key]*100)/100)+'" onchange="updateSelectedProp(\''+key+'\',Number(this.value))"></div>';});
+ html+='<div class="pr"><label class="pl">仕上げ色</label><input class="pi" type="color" value="'+safeHtmlColor(it.color,'#e4ddd1')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>'
   +selectedTextureUploadHtml(it,'仕上げテクスチャ')
   +(it.texture?'<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>':'')
   +selectedTextureFlipControlsHtml(it)
@@ -174,10 +174,10 @@ function coveProps(it){
   +'<label class="lock-control-label"><input type="checkbox" '+(it.cove?'checked':'')+' onchange="updateSelectedProp(\'cove\',this.checked||undefined)">間接照明を仕込む</label>';
  if(!it.cove)return html+'<div class="lock-status-note">入れると、下げ天井の縁の上に線照明を仕込み、周りの天井を照らします。器具は段差の陰に隠れます。</div>';
  const gap=Math.max(40,Math.min(300,Number(it.coveGap)||COVE_GAP_DEFAULT_MM));
- html+='<div class="pr"><label class="pl">光の出口の高さ mm</label><input class="pi" type="number" min="40" max="300" step="10" value="'+gap+'" onchange="updateSelectedProp(\'coveGap\',Number(this.value))"></div>'
-  +'<div class="pr"><label class="pl">光の色</label><input class="pi" type="color" value="'+(it.coveColor||'#ffd9a8')+'" onchange="updateSelectedProp(\'coveColor\',this.value)"></div>'
-  +'<div class="pr"><label class="pl">明るさ</label><input class="pi" type="number" min="0" max="3" step="0.05" value="'+(isFinite(Number(it.coveIntensity))?Number(it.coveIntensity):.8)+'" onchange="updateSelectedProp(\'coveIntensity\',Number(this.value))"></div>';
- if(!coveOf(it))html+='<div class="lock-status-note" style="color:#b3261e">段差が浅くて仕込めません。段差を光の出口の高さ＋40mm以上（いまは '+(gap+40)+'mm 以上）にしてください。</div>';
+ html+='<div class="pr"><label class="pl">光の出口の高さ mm</label><input class="pi" type="number" min="40" max="300" step="10" value="'+escHtml(gap)+'" onchange="updateSelectedProp(\'coveGap\',Number(this.value))"></div>'
+  +'<div class="pr"><label class="pl">光の色</label><input class="pi" type="color" value="'+safeHtmlColor(it.coveColor,'#ffd9a8')+'" onchange="updateSelectedProp(\'coveColor\',this.value)"></div>'
+  +'<div class="pr"><label class="pl">明るさ</label><input class="pi" type="number" min="0" max="3" step="0.05" value="'+escHtml(isFinite(Number(it.coveIntensity))?Number(it.coveIntensity):.8)+'" onchange="updateSelectedProp(\'coveIntensity\',Number(this.value))"></div>';
+ if(!coveOf(it))html+='<div class="lock-status-note" style="color:#b3261e">段差が浅くて仕込めません。段差を光の出口の高さ＋40mm以上（いまは '+escHtml(gap+40)+'mm 以上）にしてください。</div>';
  else html+='<div class="lock-status-note">下げ天井の立ち上がりを、元の天井より光の出口の高さぶん下で止め、その上の縁に線照明を仕込みます。照らすのは内観3D・ウォークスルーのときです。</div>';
  return html;
 }

@@ -416,7 +416,7 @@ test('勾配天井の部屋にも同じ仕上げが乗る（平らだけの対�
 
 // ── 6. UI ────────────────────────────────────────────────────────────────
 const UI_FNS = [
-  'normalizeTextureOrientationTarget', 'textureFlipControlsHtml',
+  'escHtml', 'safeHtmlColor', 'normalizeTextureOrientationTarget', 'textureFlipControlsHtml',
   'selectedRoomCeilingFinishHtml', 'updateSelectedProp'
 ];
 

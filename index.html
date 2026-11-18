@@ -7404,14 +7404,14 @@ function roofMergeSectionHtml(it){
   var rejected=(m&&m.rejected)||[];
   var html='<div class="ph" style="margin-top:12px">屋根の結合（L字・コの字）</div>';
   if(parts){
-    html+='<div class="lock-status-note">いま矩形 '+parts.length+' 枚を結合した屋根です。棟・谷・軒樋は結合後の外周から作られます。</div>';
+    html+='<div class="lock-status-note">いま矩形 '+escHtml(parts.length)+' 枚を結合した屋根です。棟・谷・軒樋は結合後の外周から作られます。</div>';
     html+='<button class="pbtn sec" onclick="splitSelectedRoof()">結合を解除</button>';
   }
   if(others>0){
-    html+='<button class="pbtn" onclick="mergeSelectedRoofs()">選択中の屋根を結合（'+(others+1)+'枚）</button>';
+    html+='<button class="pbtn" onclick="mergeSelectedRoofs()">選択中の屋根を結合（'+escHtml(others+1)+'枚）</button>';
   }else{
     if(rejected.length){
-      html+='<div class="lock-status-note">いま選んでいる屋根どうしは結合できません。<br>・'+rejected.join('<br>・')+'</div>';
+      html+='<div class="lock-status-note">いま選んでいる屋根どうしは結合できません。<br>・'+rejected.map(escHtml).join('<br>・')+'</div>';
     }
     html+='<div class="lock-status-note"><b>やり方</b><br>'+
       '1. 屋根ツールでもう1枚、同じ階に屋根を置く<br>'+
@@ -8522,13 +8522,13 @@ function presetTextureSelectHtml(kind,current,call,disabled){
   html+='<select class="preset-texture-select" aria-label="素材" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'"'+(disabled?' disabled':'')+'>';
   html+='<option value=""'+(current?'':' selected')+'>素材なし（色だけ）</option>';
   if(current&&!known) html+='<option value="'+escHtml(current.indexOf('data:')===0?'':current)+'" selected disabled>読み込んだ画像</option>';
-  list.forEach(function(o){ html+='<option value="'+o[0]+'"'+(o[0]===current?' selected':'')+'>'+o[1]+'</option>'; });
+  list.forEach(function(o){ html+='<option value="'+escHtml(o[0])+'"'+(o[0]===current?' selected':'')+'>'+escHtml(o[1])+'</option>'; });
   return html+'</select></div>';
 }
 function roofSheenSelectHtml(current,call){
   var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#cce">質感</span>';
   html+='<select class="roof-sheen-select" aria-label="屋根の質感" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'">';
-  ROOF_SHEEN_OPTIONS.forEach(function(o){ html+='<option value="'+o[0]+'"'+((current||'')===o[0]?' selected':'')+'>'+o[1]+'</option>'; });
+  ROOF_SHEEN_OPTIONS.forEach(function(o){ html+='<option value="'+escHtml(o[0])+'"'+((current||'')===o[0]?' selected':'')+'>'+escHtml(o[1])+'</option>'; });
   return html+'</select></div>';
 }
 function renderExteriorWallPanel(mode){
@@ -8546,11 +8546,11 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(ins.whole.linked?'checked':'')+' onchange="updateInteriorSetting(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(ins.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()">';
+  html += '<input type="color" value="'+safeHtmlColor(ins.whole.color,INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadInteriorTex(this,\'whole\')">';
   html += '</div>';
   html += presetTextureSelectHtml('interior',ins.whole.texture,"updateInteriorSetting('whole','texture',VALUE)");
-  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ins.whole.texture)+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+escHtml(textureStateLabel(ins.whole.texture))+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateInteriorSetting(\'whole\',\'textureFlipX\','+(!ins.whole.textureFlipX)+')',
     'updateInteriorSetting(\'whole\',\'textureFlipY\','+(!ins.whole.textureFlipY)+')',
@@ -8563,7 +8563,7 @@ function renderExteriorWallPanel(mode){
   html += '<option value="on" '+(ins.whole.skirting===false?'':'selected')+'>あり (既定)</option>';
   html += '<option value="off" '+(ins.whole.skirting===false?'selected':'')+'>なし</option>';
   html += '</select>';
-  html += '<input type="color" value="'+(ins.whole.skirtingColor||ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" onchange="updateInteriorSetting(\'whole\',\'skirtingColor\',this.value)">';
+  html += '<input type="color" value="'+(safeHtmlColor(ins.whole.skirtingColor,'')||safeHtmlColor(ins.whole.color,INTERIOR_WALL_DEFAULT))+'" style="width:42px;height:24px;border:none" onchange="updateInteriorSetting(\'whole\',\'skirtingColor\',this.value)">';
   if(ins.whole.skirtingColor) html += '<button class="pbtn sec" style="padding:3px 6px" onclick="updateInteriorSetting(\'whole\',\'skirtingColor\',null)">壁紙合わせ</button>';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:3px">色を指定しなければ壁紙の色に合わせます。階・面の個別指定が優先されます。</div>';
@@ -8573,11 +8573,11 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(ifs.linked?'checked':'')+' onchange="updateInteriorSetting(\'floor\',\'linked\',this.checked,'+ifl+')" '+(ins.whole.linked?'disabled':'')+'> '+ifl+'F</label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!ins.whole.linked&&ifs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="finishAppearanceColorInput()">';
+    html += '<input type="color" value="'+safeHtmlColor(ifs.color,INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadInteriorTex(this,\'floor\','+ifl+')">';
     html += '</div>';
     html += presetTextureSelectHtml('interior',ifs.texture,"updateInteriorSetting('floor','texture',VALUE,"+ifl+")");
-    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ifs.texture)+' '+(ifs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'floor\',\'texture\',null,'+ifl+')">解除</button>':'')+'</div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+escHtml(textureStateLabel(ifs.texture))+' '+(ifs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'floor\',\'texture\',null,'+ifl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateInteriorSetting(\'floor\',\'textureFlipX\','+(!ifs.textureFlipX)+','+ifl+')',
       'updateInteriorSetting(\'floor\',\'textureFlipY\','+(!ifs.textureFlipY)+','+ifl+')',
@@ -8592,7 +8592,7 @@ function renderExteriorWallPanel(mode){
     html += '<option value="on" '+(iflSkSel==='on'?'selected':'')+'>あり</option>';
     html += '<option value="off" '+(iflSkSel==='off'?'selected':'')+'>なし</option>';
     html += '</select>';
-    html += '<input type="color" value="'+(ifs.skirtingColor||ins.whole.skirtingColor||ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" onchange="updateInteriorSetting(\'floor\',\'skirtingColor\',this.value,'+ifl+')">';
+    html += '<input type="color" value="'+(safeHtmlColor(ifs.skirtingColor,'')||safeHtmlColor(ins.whole.skirtingColor,'')||safeHtmlColor(ifs.color,INTERIOR_WALL_DEFAULT))+'" style="width:42px;height:24px;border:none" onchange="updateInteriorSetting(\'floor\',\'skirtingColor\',this.value,'+ifl+')">';
     if(ifs.skirtingColor) html += '<button class="pbtn sec" style="padding:3px 6px" onclick="updateInteriorSetting(\'floor\',\'skirtingColor\',null,'+ifl+')">戻す</button>';
     html += '</div>';
     html += '</div>';
@@ -8608,12 +8608,12 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(roof.whole.linked?'checked':'')+' onchange="updateRoofAppearance(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(roof.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="finishAppearanceColorInput()">';
+  html += '<input type="color" value="'+safeHtmlColor(roof.whole.color,'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
   html += presetTextureSelectHtml('roof',roof.whole.texture,"updateRoofAppearance('whole','texture',VALUE)");
   html += roofSheenSelectHtml(roof.whole.sheen,"updateRoofAppearance('whole','sheen',VALUE)");
-  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+escHtml(textureStateLabel(roof.whole.texture))+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateRoofAppearance(\'whole\',\'textureFlipX\','+(!roof.whole.textureFlipX)+')',
     'updateRoofAppearance(\'whole\',\'textureFlipY\','+(!roof.whole.textureFlipY)+')',
@@ -8626,12 +8626,12 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(rfs.linked?'checked':'')+' onchange="updateRoofAppearance(\'floor\',\'linked\',this.checked,'+rfl+')" '+(roof.whole.linked?'disabled':'')+'> '+rfl+'F</label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!roof.whole.linked&&rfs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="finishAppearanceColorInput()">';
+    html += '<input type="color" value="'+safeHtmlColor(rfs.color,'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
     html += presetTextureSelectHtml('roof',rfs.texture,"updateRoofAppearance('floor','texture',VALUE,"+rfl+")");
     html += roofSheenSelectHtml(rfs.sheen,"updateRoofAppearance('floor','sheen',VALUE,"+rfl+")");
-    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+escHtml(textureStateLabel(rfs.texture))+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateRoofAppearance(\'floor\',\'textureFlipX\','+(!rfs.textureFlipX)+','+rfl+')',
       'updateRoofAppearance(\'floor\',\'textureFlipY\','+(!rfs.textureFlipY)+','+rfl+')',
@@ -8643,7 +8643,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(exteriorDetailEnabled('gutters')?'checked':'')+' onchange="setExteriorDetail(\'gutters\',this.checked)"> 雨樋・排水を表示</label>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">屋根の軒先に雨樋・竪樋・雨水枡を自動生成します。</div>';
-  html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#7a8fb0">雨樋カラー</span><input type="color" value="'+((DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor)||'#6b6e73')+'" style="width:42px;height:22px;border:none" onchange="setExteriorDetailValue(\'gutterColor\',this.value)"></div>';
+  html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#7a8fb0">雨樋カラー</span><input type="color" value="'+safeHtmlColor(DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor,'#6b6e73')+'" style="width:42px;height:22px;border:none" onchange="setExteriorDetailValue(\'gutterColor\',this.value)"></div>';
   html += '</div>';
   html += '<button class="pbtn" onclick="hideWallPanel()" style="margin-top:10px">閉じる</button>';
   body.innerHTML=html;
@@ -8657,11 +8657,11 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(s.whole.linked?'checked':'')+' onchange="updateExteriorSetting(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(s.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="finishAppearanceColorInput()" '+(!s.whole.linked?'disabled':'')+'>';
+  html += '<input type="color" value="'+safeHtmlColor(s.whole.color,'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="finishAppearanceColorInput()" '+(!s.whole.linked?'disabled':'')+'>';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'whole\')" '+(!s.whole.linked?'disabled':'')+'>';
   html += '</div>';
   html += presetTextureSelectHtml('exterior',s.whole.texture,"updateExteriorSetting('whole','texture',VALUE)",!s.whole.linked);
-  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(s.whole.texture)+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+escHtml(textureStateLabel(s.whole.texture))+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
     'updateExteriorSetting(\'whole\',\'textureFlipX\','+(!s.whole.textureFlipX)+')',
     'updateExteriorSetting(\'whole\',\'textureFlipY\','+(!s.whole.textureFlipY)+')',
@@ -8673,13 +8673,13 @@ function renderExteriorWallPanel(mode){
     var fs=s.floors[fl]||defaultExteriorFloorSetting(fl);
     var walls=rows[fl]||[];
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
-    html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(fs.linked?'checked':'')+' onchange="updateExteriorSetting(\'floor\',\'linked\',this.checked,'+fl+')" '+(s.whole.linked?'disabled':'')+'> '+fl+'F <span style="font-size:9px;color:#7a8fb0">('+walls.length+'枚)</span></label>';
+    html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(fs.linked?'checked':'')+' onchange="updateExteriorSetting(\'floor\',\'linked\',this.checked,'+fl+')" '+(s.whole.linked?'disabled':'')+'> '+fl+'F <span style="font-size:9px;color:#7a8fb0">('+escHtml(walls.length)+'枚)</span></label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!s.whole.linked&&fs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
+    html += '<input type="color" value="'+safeHtmlColor(fs.color||WALL_COLORS[fl],'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
     html += presetTextureSelectHtml('exterior',fs.texture,"updateExteriorSetting('floor','texture',VALUE,"+fl+")",s.whole.linked||!fs.linked);
-    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+escHtml(textureStateLabel(fs.texture))+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
     html += textureFlipControlsHtml(
       'updateExteriorSetting(\'floor\',\'textureFlipX\','+(!fs.textureFlipX)+','+fl+')',
       'updateExteriorSetting(\'floor\',\'textureFlipY\','+(!fs.textureFlipY)+','+fl+')',
@@ -8690,16 +8690,19 @@ function renderExteriorWallPanel(mode){
       walls.forEach(function(w,idx){
         var ap=resolveExteriorWallAppearance(w);
         var ws=getExteriorWallSetting(w);
-        html += '<div style="margin-top:7px;padding:7px;border:1px solid #20365d;border-radius:6px;background:rgba(5,18,42,0.32)">';
-        html += '<button class="pbtn sec" style="padding:3px 6px;margin:0 0 5px 0;text-align:left" onclick="selectWallById('+w.id+')">'+exteriorWallLabel(w,idx)+'</button>';
+        // 壁の id はプランの値なので onclick の JS に書かない。data-wall-id に入れ、
+        // ハンドラは wallIdFromEl(this) で読む(押したときの結果は以前と同じ)。
+        var wid='wallIdFromEl(this)';
+        html += '<div data-wall-id="'+escHtml(String(w.id))+'" style="margin-top:7px;padding:7px;border:1px solid #20365d;border-radius:6px;background:rgba(5,18,42,0.32)">';
+        html += '<button class="pbtn sec" style="padding:3px 6px;margin:0 0 5px 0;text-align:left" onclick="selectWallById('+wid+')">'+escHtml(exteriorWallLabel(w,idx))+'</button>';
         html += '<div style="display:flex;gap:6px;align-items:center">';
-        html += '<input type="color" value="'+(ws.color||w.exteriorColor||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onchange="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onblur="finishAppearanceColorInput()">';
-        html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadExteriorTex(this,\'wall\','+fl+','+w.id+')">';
+        html += '<input type="color" value="'+(safeHtmlColor(ws.color,'')||safeHtmlColor(w.exteriorColor,'')||safeHtmlColor(ap.color,'#e8e0cc'))+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+wid+',true)" onchange="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+wid+',true)" onblur="finishAppearanceColorInput()">';
+        html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadExteriorTex(this,\'wall\','+fl+','+wid+')">';
         html += '</div>';
-        html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ws.texture||w.exteriorTexture)+' '+(ws.texture||w.exteriorTexture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'wall\',\'texture\',null,'+fl+','+w.id+')">解除</button>':'')+'</div>';
+        html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+escHtml(textureStateLabel(ws.texture||w.exteriorTexture))+' '+(ws.texture||w.exteriorTexture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'wall\',\'texture\',null,'+fl+','+wid+')">解除</button>':'')+'</div>';
         html += textureFlipControlsHtml(
-          'updateExteriorSetting(\'wall\',\'textureFlipX\','+(!ws.textureFlipX)+','+fl+','+w.id+')',
-          'updateExteriorSetting(\'wall\',\'textureFlipY\','+(!ws.textureFlipY)+','+fl+','+w.id+')',
+          'updateExteriorSetting(\'wall\',\'textureFlipX\','+(!ws.textureFlipX)+','+fl+','+wid+')',
+          'updateExteriorSetting(\'wall\',\'textureFlipY\','+(!ws.textureFlipY)+','+fl+','+wid+')',
           ws,
           false
         );
@@ -19504,7 +19507,7 @@ function stackOrderControlsHtml(it){
     '<button class="pbtn sec" style="margin-top:0" onclick="sendSelectedToBack()">最背面へ</button>'+
     '<button class="pbtn sec" style="margin-top:0" onclick="bringSelectedToFront()">最前面へ</button>'+
     '</div></div>';
-  html+='<div class="lock-status-note">'+state+'。平面図で重なって選びにくいものは、後ろに回すと下のもの（壁・部屋を含む）が選べるようになります。同じ場所を続けてクリックしても、重なっている次のものへ移ります。</div>';
+  html+='<div class="lock-status-note">'+escHtml(state)+'。平面図で重なって選びにくいものは、後ろに回すと下のもの（壁・部屋を含む）が選べるようになります。同じ場所を続けてクリックしても、重なっている次のものへ移ります。</div>';
   if(stackOrderAdjustedCount(it.floor||1)>0){
     html+='<button class="pbtn sec" onclick="resetStackOrderOnFloor()">この階の重ね順をリセット</button>';
   }
@@ -24415,7 +24418,7 @@ var JISDRAW=(function(){
   function itemGroupOpen(it){
     var cx=it.x+it.w/2, cy=it.y+it.d/2;
     var fx=it.flipX?-1:1, fy=it.flipY?-1:1;
-    var t='<g transform="translate('+cx+','+cy+') rotate('+(it.rot||0)+')';
+    var t='<g transform="translate('+cx+','+cy+') rotate('+(Number(it.rot)||0)+')';
     if(fx!==1||fy!==1) t+=' scale('+fx+','+fy+')';
     return t+'">';
   }
@@ -24427,8 +24430,11 @@ var JISDRAW=(function(){
     if(fx!==1||fy!==1) t+=' scale('+fx+','+fy+')';
     return t+'">';
   }
+  // 本文にも属性の値にも使えるよう、引用符まで置き換える(引用符は \x22 / \x27 と書く。
+  // tools/tests の切り出しが引用符を文字列の始まりと読むため)。
   function escSvgText(s){
-    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var t; try{ t=String(s==null?'':s); }catch(e){ t=''; }
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\x22/g,'&quot;').replace(/\x27/g,'&#39;');
   }
   // 屋根(roof)は最上階の1つ上のフロア番号に配置される設計であり、また外構・バルコニー等は
   // 「居室」ではないため、これらのアイテムだけがfloor+1にあっても「上階が存在する」とはみなさない
@@ -24879,8 +24885,11 @@ function renderJisSheetList(sheets){
   function btnHtml(s){
     // keyは数値(階)または1文字の方角コード。onclick属性はダブルクォートで囲むため、
     // JSON.stringifyの二重引用符文字列をそのまま埋め込むと属性が壊れる → シングルクォートで手組みする
-    var keyLit=(typeof s.key==='number')?String(s.key):("'"+s.key+"'");
-    return '<button type="button" class="jis-sheet-btn'+(isActive(s)?' active':'')+'" onclick="jisSelectSheet(\''+s.kind+'\','+keyLit+')">'+s.label+'</button>';
+    // 図面の種類と鍵は data-… に入れてハンドラで読む(JS の文字列を属性へ手組みしない)。
+    // 鍵の型(階は数、方角は文字)は data-key-num で戻す。
+    return '<button type="button" class="jis-sheet-btn'+(isActive(s)?' active':'')+'" data-kind="'+escHtml(s.kind)+'" data-key="'+escHtml(s.key)+'"'+
+      ((typeof s.key==='number')?' data-key-num="1"':'')+
+      ' onclick="jisSelectSheet(this.dataset.kind,this.dataset.keyNum?Number(this.dataset.key):this.dataset.key)">'+escHtml(s.label)+'</button>';
   }
   var html='';
   if(plans.length){
@@ -24896,8 +24905,37 @@ function jisCurrentOpts(){
 }
 function jisCurrentSvg(){
   var s=JIS_UI.sheet;
-  return s.kind==='plan' ? JISDRAW.buildFloorPlanSvg(s.key,jisCurrentOpts())
-                         : JISDRAW.buildElevationSvg(s.key,jisCurrentOpts());
+  var svg=s.kind==='plan' ? JISDRAW.buildFloorPlanSvg(s.key,jisCurrentOpts())
+                          : JISDRAW.buildElevationSvg(s.key,jisCurrentOpts());
+  return jisSvgIsSafe(svg)?svg:JIS_UNSAFE_SVG;
+}
+// 図面の SVG は文字をつないで作り、画面(innerHTML)・印刷(srcdoc)・書き出しへそのまま出る。
+// プランの文字は escSvgText で、数は数に直してから入れているが、**組み立ての取りこぼしが
+// 1つでもあれば相手のスクリプトが動く**。出す前に XML として読み直し、図面に使う要素と
+// 属性しか無いことを確かめる。合わなければ図面を出さない(作り手が使っていない物は全部拒む)。
+var JIS_SVG_TAGS={svg:1,g:1,rect:1,line:1,text:1,tspan:1,polygon:1,polyline:1,path:1,circle:1,ellipse:1,defs:1,clipPath:1,title:1};
+var JIS_UNSAFE_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297"><rect width="420" height="297" fill="#fff"/>'+
+  '<text x="210" y="148" text-anchor="middle" font-size="12" fill="#000">図面に描けない文字がプランに含まれているため、図面を作れませんでした。</text></svg>';
+function jisSvgIsSafe(svg){
+  try{
+    var doc=new DOMParser().parseFromString(String(svg),'image/svg+xml');
+    if(doc.getElementsByTagName('parsererror').length) return false;
+    var root=doc.documentElement;
+    if(!root||root.localName!=='svg') return false;
+    var ok=true;
+    (function walk(node){
+      for(var c=node.firstChild;c&&ok;c=c.nextSibling){
+        if(c.nodeType===3) continue;                 // 文字(コメント・処理命令・CDATA は拒む)
+        if(c.nodeType!==1||c.namespaceURI!=='http://www.w3.org/2000/svg'||!JIS_SVG_TAGS[c.localName]){ ok=false; return; }
+        for(var i=0;i<c.attributes.length;i++){
+          var n=c.attributes[i].name.toLowerCase(), v=c.attributes[i].value;
+          if(/^on/.test(n)||n==='style'||/href$/.test(n)||/url\s*\(|javascript:|expression\s*\(/i.test(v)){ ok=false; return; }
+        }
+        walk(c);
+      }
+    })(doc);
+    return ok;
+  }catch(e){ return false; }
 }
 function jisRerender(){
   var host=document.getElementById('jis-preview');
@@ -25015,6 +25053,9 @@ function jisPrint(){
   iframe.style.height='0';
   iframe.style.border='0';
   iframe.setAttribute('aria-hidden','true');
+  // 中のスクリプトは動かさない(図面にスクリプトは要らない)。印刷は親から呼ぶので
+  // 同じオリジンとして読めること(allow-same-origin)と、印刷のダイアログ(allow-modals)だけ許す。
+  iframe.setAttribute('sandbox','allow-same-origin allow-modals');
   document.body.appendChild(iframe);
   JIS_PRINT_IFRAME=iframe;
   var cleaned=false;

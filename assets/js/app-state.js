@@ -472,14 +472,14 @@ function selectedRoomCeilingHtml(it){
     ((voidBlocked&&type!=='void')?' disabled':'')+'>吹き抜け'+
     (voidBlocked?'（この部屋では作れません）':'')+'</option>';
   html+='</select></div>';
-  if(blocked&&type!=='void') html+='<div class="lock-status-note">'+blocked+'</div>';
+  if(blocked&&type!=='void') html+='<div class="lock-status-note">'+escHtml(blocked)+'</div>';
   // 上の階に床が無いのに、自分の高さで天井を張っている部屋への案内(利用者の選択:
   // 自動で吹き抜けにはせず、気づけるようにする)。上の階のどこかに部屋はあるが
   // この部屋の真上には無く、さらに上の屋根だけが覆っている -- この形では、
   // 上に床の無い天井が宙に浮いた板のように見える(階段室で報告された)。
   if(type==='flat'&&!voidBlocked&&roomHasNoFloorAbove(it)){
-    html+='<div class="lock-status-note">この部屋の真上（'+((it.floor||1)+1)+'階）には床がありません。いまは'+
-      (it.floor||1)+'階の高さで天井を張っているので、上の階から見ると天井が板のように浮いて見えます。'+
+    html+='<div class="lock-status-note">この部屋の真上（'+escHtml((it.floor||1)+1)+'階）には床がありません。いまは'+
+      escHtml(it.floor||1)+'階の高さで天井を張っているので、上の階から見ると天井が板のように浮いて見えます。'+
       '上まで開いた空間なら、吹き抜けにしてください。</div>';
     html+='<button class="pbtn sec" onclick="updateSelectedCeilingType(\'void\')">吹き抜けにする</button>';
   }
@@ -488,13 +488,13 @@ function selectedRoomCeilingHtml(it){
     // 瞬間に上階の天井と食い違い、スラブの小口が室内に見える。
     var toF=roomVoidTargetFloor(it);
     html+='<div class="pr"><div class="pl">抜き先の階</div><input class="pi" type="number" min="'+
-      ((it.floor||1)+1)+'" max="8" step="1" value="'+toF+
+      escHtml((it.floor||1)+1)+'" max="8" step="1" value="'+escHtml(toF)+
       '" onchange="updateSelectedVoidToFloor(this.value)"></div>';
     if(voidBlocked){
-      html+='<div class="lock-status-note">'+voidBlocked+'</div>';
+      html+='<div class="lock-status-note">'+escHtml(voidBlocked)+'</div>';
     } else {
-      html+='<div class="lock-status-note">'+toF+'階の天井まで抜けます（現在 '+
-        roomRenderedCeilingMm(it)+'mm）。高さは階高から計算するので入力は要りません。'+
+      html+='<div class="lock-status-note">'+escHtml(toF)+'階の天井まで抜けます（現在 '+
+        escHtml(roomRenderedCeilingMm(it))+'mm）。高さは階高から計算するので入力は要りません。'+
         '縁には手すり壁（壁のスタイル=バルコニー手すり）を必ず置いてください。</div>';
     }
     return html;
@@ -509,51 +509,51 @@ function selectedRoomCeilingHtml(it){
     html+='<div class="pr"><div class="pl">天井高プリセット</div><select class="pi" onchange="updateSelectedFlatCeilingMm(this.value)">';
     html+='<option value=""'+(cur===''?' selected':'')+'>指定なし（階高をそのまま天井にする）</option>';
     CEILING_HEIGHT_PRESETS_MM.forEach(function(p){
-      html+='<option value="'+p[0]+'"'+(cur===p[0]?' selected':'')+'>'+p[1]+'</option>';
+      html+='<option value="'+escHtml(p[0])+'"'+(cur===p[0]?' selected':'')+'>'+escHtml(p[1])+'</option>';
     });
     html+='</select></div>';
-    html+='<div class="pr"><div class="pl">天井高 (mm)</div><input class="pi" type="number" min="0" step="10" placeholder="空欄=指定なし" value="'+cur+'" onchange="updateSelectedFlatCeilingMm(this.value)"></div>';
+    html+='<div class="pr"><div class="pl">天井高 (mm)</div><input class="pi" type="number" min="0" step="10" placeholder="空欄=指定なし" value="'+escHtml(cur)+'" onchange="updateSelectedFlatCeilingMm(this.value)"></div>';
     if(cur===''){
-      html+='<div class="lock-status-note">指定なしです。この部屋の天井は今までどおり階高いっぱい（現在 '+renderedMm+'mm）に置かれます。</div>';
+      html+='<div class="lock-status-note">指定なしです。この部屋の天井は今までどおり階高いっぱい（現在 '+escHtml(renderedMm)+'mm）に置かれます。</div>';
     } else if(renderedMm<cur){
-      html+='<div class="lock-status-note">'+cur+'mm は階高 '+storyMm+'mm を超えるため、'+renderedMm+'mm に丸めて描いています（階高を上げると上階の床ごと家全体が動くので、丸めるのは天井の側）。</div>';
+      html+='<div class="lock-status-note">'+escHtml(cur)+'mm は階高 '+escHtml(storyMm)+'mm を超えるため、'+escHtml(renderedMm)+'mm に丸めて描いています（階高を上げると上階の床ごと家全体が動くので、丸めるのは天井の側）。</div>';
     }
     return html;
   }
   var shape=roomRenderedCeilingShape(it);
   var roof=roofItemOverRoom(it);
   if(shape&&shape.type==='sloped'){
-    html+='<div class="pr"><div class="pl">平面図のラベル</div><input class="pi" type="text" value="'+roomRenderedCeilingLabel(it)+'" readonly></div>';
+    html+='<div class="pr"><div class="pl">平面図のラベル</div><input class="pi" type="text" value="'+escHtml(roomRenderedCeilingLabel(it))+'" readonly></div>';
   }
   if(roof){
     // 屋根が載っている部屋では、高さを決めるのは屋根である。手で書ける欄を
     // 出すと画面の数字と描かれる天井が食い違う。読み取り専用で見せるだけにする。
-    html+='<div class="pr"><div class="pl">天井の決まり方</div><input class="pi" type="text" value="屋根から自動（屋根 '+objectIdLabel(roof)+'）" readonly></div>';
-    html+='<div class="pr"><div class="pl">屋根の形状</div><input class="pi" type="text" value="'+roofTypeLabel(roof)+'" readonly></div>';
-    html+='<div class="pr"><div class="pl">屋根の勾配 (°)</div><input class="pi" type="text" value="'+Math.round(roof.pitch||30)+'" readonly></div>';
+    html+='<div class="pr"><div class="pl">天井の決まり方</div><input class="pi" type="text" value="屋根から自動（屋根 '+escHtml(objectIdLabel(roof))+'）" readonly></div>';
+    html+='<div class="pr"><div class="pl">屋根の形状</div><input class="pi" type="text" value="'+escHtml(roofTypeLabel(roof))+'" readonly></div>';
+    html+='<div class="pr"><div class="pl">屋根の勾配 (°)</div><input class="pi" type="text" value="'+escHtml(Math.round(roof.pitch||30))+'" readonly></div>';
     if(shape&&shape.type==='sloped'){
-      html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="text" value="'+shape.lowMm+'" readonly></div>';
-      html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="text" value="'+shape.highMm+'" readonly></div>';
+      html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="text" value="'+escHtml(shape.lowMm)+'" readonly></div>';
+      html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="text" value="'+escHtml(shape.highMm)+'" readonly></div>';
     }
-    html+='<div class="lock-status-note">高さは屋根が決めます（屋根下面から '+roofCeilingOffsetMm(roof)+'mm 下がった面）。屋根の勾配や形を変えると天井もついてきます。</div>';
+    html+='<div class="lock-status-note">高さは屋根が決めます（屋根下面から '+escHtml(roofCeilingOffsetMm(roof))+'mm 下がった面）。屋根の勾配や形を変えると天井もついてきます。</div>';
   } else {
     var c2=it.ceiling||{};
     var lowMm=isPositiveNumber(c2.lowMm)?Math.round(c2.lowMm):HeightModel.DEFAULTS.slopedLowMm;
     var highMm=isPositiveNumber(c2.highMm)?Math.round(c2.highMm):HeightModel.DEFAULTS.slopedHighMm;
     var dir=(typeof c2.direction==='number'&&isFinite(c2.direction))?Math.round(c2.direction):0;
-    html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+lowMm+'" onchange="updateSelectedSlopedCeiling(\'lowMm\',this.value)"></div>';
-    html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+highMm+'" onchange="updateSelectedSlopedCeiling(\'highMm\',this.value)"></div>';
+    html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+escHtml(lowMm)+'" onchange="updateSelectedSlopedCeiling(\'lowMm\',this.value)"></div>';
+    html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+escHtml(highMm)+'" onchange="updateSelectedSlopedCeiling(\'highMm\',this.value)"></div>';
     // 勾配(°)。低い側・高い側と連動する(どれを変えても残りが決まる)。
-    html+='<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="0" max="75" step="0.5" value="'+(Math.round(slopedCeilingAngleDeg(it,lowMm,highMm,dir)*10)/10)+'" onchange="updateSelectedSlopedCeiling(\'angle\',this.value)"></div>';
-    html+='<div class="pr"><div class="pl">向き (°)</div><input class="pi" type="number" step="15" value="'+dir+'" onchange="updateSelectedSlopedCeiling(\'direction\',this.value)"></div>';
-    html+='<div class="lock-status-note">低い側・高い側・勾配は連動します。勾配を入れると、低い側はそのままで高い側が決まります（上る距離は勾配の向きの部屋の奥行き '+Math.round(slopedCeilingSpanMm(it,dir))+'mm）。向きは 0 が北、時計回り。低い側から高い側へ向かう向きです。この部屋の上に屋根はありません。屋根を載せると、これらの値ではなく屋根が天井を決めます。</div>';
+    html+='<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="0" max="75" step="0.5" value="'+escHtml(Math.round(slopedCeilingAngleDeg(it,lowMm,highMm,dir)*10)/10)+'" onchange="updateSelectedSlopedCeiling(\'angle\',this.value)"></div>';
+    html+='<div class="pr"><div class="pl">向き (°)</div><input class="pi" type="number" step="15" value="'+escHtml(dir)+'" onchange="updateSelectedSlopedCeiling(\'direction\',this.value)"></div>';
+    html+='<div class="lock-status-note">低い側・高い側・勾配は連動します。勾配を入れると、低い側はそのままで高い側が決まります（上る距離は勾配の向きの部屋の奥行き '+escHtml(Math.round(slopedCeilingSpanMm(it,dir)))+'mm）。向きは 0 が北、時計回り。低い側から高い側へ向かう向きです。この部屋の上に屋根はありません。屋根を載せると、これらの値ではなく屋根が天井を決めます。</div>';
     if(shape&&shape.type==='sloped'&&shape.highMm<highMm){
       // 丸めが起きるのは上に部屋がある階だけになった (Task 14-2)。なぜ丸まったのかを
       // 「階高を超えたから」で止めず、上に何が載っているかまで言う。
-      html+='<div class="lock-status-note">高い側 '+highMm+'mm は階高 '+storyMm+'mm を超えるため、'+shape.highMm+'mm に丸めて描いています。'+
+      html+='<div class="lock-status-note">高い側 '+escHtml(highMm)+'mm は階高 '+escHtml(storyMm)+'mm を超えるため、'+escHtml(shape.highMm)+'mm に丸めて描いています。'+
         (blocked?'上に部屋がある階なので、階高より上へは伸ばせません（理由は上のとおり）。':'')+'</div>';
     } else if(shape&&shape.type==='sloped'&&shape.highMm>storyMm&&!blocked){
-      html+='<div class="lock-status-note">高い側 '+shape.highMm+'mm は階高 '+storyMm+'mm を超えていますが、この部屋の上には部屋がないので丸めずにそのまま描いています（小屋裏へ抜ける形です）。</div>';
+      html+='<div class="lock-status-note">高い側 '+escHtml(shape.highMm)+'mm は階高 '+escHtml(storyMm)+'mm を超えていますが、この部屋の上には部屋がないので丸めずにそのまま描いています（小屋裏へ抜ける形です）。</div>';
     }
   }
   html+='<div class="lock-status-note">勾配天井の天井面は内観3Dの天井ビュー・外観3D・ウォークスルーで確認できます。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
@@ -581,8 +581,8 @@ function slideDoorPocketHtml(it){
     return html+'<div class="lock-status-note">取り付く壁が見つかりません。壁の上に置くと、引き込む側を確かめられます。</div>';
   }
   html+='<div class="pr"><div class="pl">引く向き</div><select class="pi" onchange="updateSelectedProp(\'flipX\',this.value===\'back\')">'+
-    '<option value="fwd"'+(dir>0?' selected':'')+'>平面図で'+slideDoorDirLabel(it,1)+'へ引く</option>'+
-    '<option value="back"'+(dir<0?' selected':'')+'>平面図で'+slideDoorDirLabel(it,-1)+'へ引く</option>'+
+    '<option value="fwd"'+(dir>0?' selected':'')+'>平面図で'+escHtml(slideDoorDirLabel(it,1))+'へ引く</option>'+
+    '<option value="back"'+(dir<0?' selected':'')+'>平面図で'+escHtml(slideDoorDirLabel(it,-1))+'へ引く</option>'+
     '</select></div>';
   var note;
   if(cur.missingMm<=0){
@@ -591,9 +591,9 @@ function slideDoorPocketHtml(it){
     note='引き込む部分に壁が '+cur.missingMm+'mm 足りません（必要 '+cur.needMm+'mm／壁 '+cur.haveMm+'mm）。開けた戸が壁の外に出ます。';
     if(other&&other.missingMm<=0) note+='反対側なら壁に納まります。';
   }
-  html+='<div class="lock-status-note">'+note+'</div>';
+  html+='<div class="lock-status-note">'+escHtml(note)+'</div>';
   if(cur.missingMm>0&&other&&other.missingMm<=0){
-    html+='<button class="pbtn sec" onclick="updateSelectedProp(\'flipX\','+(dir>0)+')">反対側（'+slideDoorDirLabel(it,-dir)+'）へ引くようにする</button>';
+    html+='<button class="pbtn sec" onclick="updateSelectedProp(\'flipX\','+(dir>0)+')">反対側（'+escHtml(slideDoorDirLabel(it,-dir))+'）へ引くようにする</button>';
   }
   if(cur.missingMm>0&&cur.extendable){
     html+='<button class="pbtn sec" onclick="extendWallForSlideDoor()">壁を延ばして引き込み部分を作る</button>';
@@ -639,10 +639,10 @@ function selectedRoomFloorFinishHtml(it){
   html+='<div class="pr"><div class="pl">床材</div><select class="pi" onchange="updateSelectedRoomFloorMaterial(this.value)">'+
     '<option value=""'+(key?'':' selected')+'>自動（部屋名から：水まわりはタイル）</option>';
   ROOM_FLOOR_MATERIAL_OPTIONS.forEach(function(o){
-    html+='<option value="'+o[0]+'"'+(key===o[0]?' selected':'')+'>'+o[1]+'</option>';
+    html+='<option value="'+escHtml(o[0])+'"'+(key===o[0]?' selected':'')+'>'+escHtml(o[1])+'</option>';
   });
   html+='</select></div>';
-  html+='<div class="pr"><div class="pl">床カラー</div><input class="pi" type="color" value="'+(it.floorColor||'#ffffff')+'" onchange="updateSelectedProp(\'floorColor\',this.value)"></div>';
+  html+='<div class="pr"><div class="pl">床カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.floorColor,'#ffffff')+'" onchange="updateSelectedProp(\'floorColor\',this.value)"></div>';
   if(hasColor) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'floorColor\',null)">床カラー解除</button>';
   html+='<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
   if(uploaded) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">床テクスチャ解除</button>';
@@ -678,7 +678,7 @@ function selectedRoomCeilingFinishHtml(it){
   var hasColor=!!it.ceilingColor;
   var hasTex=!!it.ceilingTexture;
   var html='<div class="ph" style="margin-top:12px">天井の仕上げ</div>';
-  html+='<div class="pr"><div class="pl">天井カラー</div><input class="pi" type="color" value="'+(it.ceilingColor||CEILING_DEFAULT_COLOR)+'" onchange="updateSelectedProp(\'ceilingColor\',this.value)"></div>';
+  html+='<div class="pr"><div class="pl">天井カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.ceilingColor,CEILING_DEFAULT_COLOR)+'" onchange="updateSelectedProp(\'ceilingColor\',this.value)"></div>';
   if(hasColor) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'ceilingColor\',null)">天井カラー解除</button>';
   html+='<div class="pr"><div class="pl">天井テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadRoomCeilingTex(this)"></div>';
   if(hasTex) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'ceilingTexture\',null)">天井テクスチャ解除</button>';
@@ -688,7 +688,7 @@ function selectedRoomCeilingFinishHtml(it){
     {texture:it.ceilingTexture,textureFlipX:it.ceilingTextureFlipX,textureFlipY:it.ceilingTextureFlipY},
     false);
   if(!hasColor&&!hasTex){
-    html+='<div class="lock-status-note">未設定です。この部屋の天井は今までどおり既定の色（'+CEILING_DEFAULT_COLOR+'）で描かれます。</div>';
+    html+='<div class="lock-status-note">未設定です。この部屋の天井は今までどおり既定の色（'+escHtml(CEILING_DEFAULT_COLOR)+'）で描かれます。</div>';
   } else if(hasTex&&hasColor){
     html+='<div class="lock-status-note">テクスチャを設定しているあいだ、天井カラーは効きません（画像が優先されます）。</div>';
   }
@@ -707,7 +707,7 @@ function roomSetbackCeilingNoteHtml(room){
   var p=roomCeilingProfile(room);
   var kinds=rs.map(function(r){ return r.setbackKind==='north'?'北側斜線':'道路斜線'; }).join('・');
   var declared=roomDeclaresSlopedCeiling(room);
-  return '<div class="lock-status-note">この部屋は<b>'+kinds+'で削られています</b>。'+
+  return '<div class="lock-status-note">この部屋は<b>'+escHtml(kinds)+'で削られています</b>。'+
     (declared
       ? '勾配は手動で宣言されており、そのうえで斜線の面でも頭を押さえられています（低い方が勝ちます）。'
       : '勾配天井は宣言ではなく<b>削った結果として</b>現れています（下の「天井の種類」は宣言欄で、ここでは効いていません）。')+
@@ -721,7 +721,7 @@ function setbackZoneOptionsHtml(cur){
   var h='<option value=""'+(!cur?' selected':'')+'>未設定（斜線制限を使わない）</option>';
   if(!law) return h;
   law.ZONES.forEach(function(z){
-    h+='<option value="'+z.id+'"'+(cur===z.id?' selected':'')+'>'+escHtml(z.label)+'</option>';
+    h+='<option value="'+escHtml(z.id)+'"'+(cur===z.id?' selected':'')+'>'+escHtml(z.label)+'</option>';
   });
   return h;
 }
@@ -773,18 +773,18 @@ function siteSetbackPanelHtml(it){
   function mark(on){ if(on) anyCustom=true; return on?'<span style="color:#e94560">*</span>':''; }
   if(roads.length){
     h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.road?'checked':'')+' onchange="updateSelectedSetback(\'road\',this.checked)">道路斜線</label></div>';
-    h+='<div class="pr"><div class="pl">勾配 1:'+mark(eff.roadSlopeCustom,law.ROAD_SLOPE_RESIDENTIAL+' / '+law.ROAD_SLOPE_OTHER)+'</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.roadSlope+'" onchange="updateSelectedSetback(\'roadSlope\',this.value)"></div>';
+    h+='<div class="pr"><div class="pl">勾配 1:'+mark(eff.roadSlopeCustom,law.ROAD_SLOPE_RESIDENTIAL+' / '+law.ROAD_SLOPE_OTHER)+'</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+escHtml(eff.roadSlope)+'" onchange="updateSelectedSetback(\'roadSlope\',this.value)"></div>';
     h+='<div class="pr"><div class="pl">道路幅員</div><input class="pi" type="text" readonly value="'+
-      roads.map(function(r){ return Math.round(setbackRoadWidthMm(r))+'mm'; }).join(' / ')+
-      (roads.length>1?'（角地・'+roads.length+'本）':'')+'"></div>';
+      escHtml(roads.map(function(r){ return Math.round(setbackRoadWidthMm(r))+'mm'; }).join(' / ')+
+      (roads.length>1?'（角地・'+roads.length+'本）':''))+'"></div>';
   } else {
     h+='<div class="lock-status-note">道路を置くと道路斜線が使えます。</div>';
   }
   // 北側斜線は低層住専・中高層住専にしか無い。無い用途地域では欄ごと出さない。
   if(law.hasNorthLimit(cur.zone)){
     h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線</label></div>';
-    h+='<div class="pr"><div class="pl">基準高さ (mm)'+mark(eff.northBaseCustom,law.NORTH_BASE_LOW_MM+' / '+law.NORTH_BASE_MID_MM)+'</div><input class="pi" type="number" min="'+SETBACK_BASE_MIN_MM+'" max="'+SETBACK_BASE_MAX_MM+'" step="100" value="'+eff.northBaseMm+'" onchange="updateSelectedSetback(\'northBaseMm\',this.value)"></div>';
-    h+='<div class="pr"><div class="pl">勾配 1:'+mark(eff.northSlopeCustom,law.NORTH_SLOPE)+'</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.northSlope+'" onchange="updateSelectedSetback(\'northSlope\',this.value)"></div>';
+    h+='<div class="pr"><div class="pl">基準高さ (mm)'+mark(eff.northBaseCustom,law.NORTH_BASE_LOW_MM+' / '+law.NORTH_BASE_MID_MM)+'</div><input class="pi" type="number" min="'+SETBACK_BASE_MIN_MM+'" max="'+SETBACK_BASE_MAX_MM+'" step="100" value="'+escHtml(eff.northBaseMm)+'" onchange="updateSelectedSetback(\'northBaseMm\',this.value)"></div>';
+    h+='<div class="pr"><div class="pl">勾配 1:'+mark(eff.northSlopeCustom,law.NORTH_SLOPE)+'</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+escHtml(eff.northSlope)+'" onchange="updateSelectedSetback(\'northSlope\',this.value)"></div>';
   }
   if(anyCustom){
     h+='<div class="lock-status-note"><span style="color:#e94560">*</span> は手入力（用途地域の既定ではありません）。'+
@@ -814,7 +814,7 @@ function siteSetbackPanelHtml(it){
     'そのぶんは厳しい側へ出ますが、<b>「必ず厳しい側」ではありません</b>: '+
     '<b>絶対高さ制限（法55条。低層住専の10m／12m）と日影規制（法56条の2）は未実装です。</b>'+
     '第一種低層住専で最高高さ10.5mに設計しても、この画面は何も言いません。</div>';
-  h+='<div class="lock-status-note">真北はこのプランの方位（現在 '+setbackNorthDeg()+'°）から取っています。'+
+  h+='<div class="lock-status-note">真北はこのプランの方位（現在 '+escHtml(setbackNorthDeg())+'°）から取っています。'+
     '光の設定の「北の方角」で変えられます。敷地が真北を向いていないときは合わせてください。</div>';
   h+='</details>';
   return h;
@@ -1029,6 +1029,8 @@ function appearanceWithTextureOrientation(color, texture, source, owner, prefix)
   }
   return {color:color,texture:texture||null,source:source,textureFlipX:flipX,textureFlipY:flipY};
 }
+// updateX / updateY はボタンの onclick にそのまま入る JS。**プランの値を入れないこと**
+// (壁の id などは data-wall-id から wallIdFromEl(this) で読む)。
 function textureFlipControlsHtml(updateX, updateY, owner, disabled){
   if(!owner || !owner.texture) return '';
   var dis=disabled?' disabled':'';
@@ -1047,7 +1049,7 @@ function selectedTextureFlipControlsHtml(it){
 }
 function selectedTextureUploadHtml(it,label){
   var applied=!!(it&&it.texture);
-  return '<div class="pr"><div class="pl">'+label+'</div>'
+  return '<div class="pr"><div class="pl">'+escHtml(label)+'</div>'
     + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
     + '<label class="pbtn sec" style="margin-top:0;cursor:pointer">'
     + (applied?'画像を変更':'画像を選択')
@@ -1066,17 +1068,24 @@ function faceRuleMode(setting, appearance){
   return 'whole';
 }
 
+// 壁の面ごとの設定欄。壁の id と面の鍵(壁の id を含む)はプランの値なので、onclick の JS に
+// 書かない。呼び出し側が包む要素に data-wall-id / data-face-key を付け、ハンドラは
+// wallIdFromEl(this) / faceKeyFromEl(this) で読む(押したときの結果は以前と同じ)。
+function faceCardAttrs(wall, faceKey){
+  return ' data-wall-id="'+escHtml(String(wall.id))+'" data-face-key="'+escHtml(faceKey)+'"';
+}
 function renderFaceRuleControls(kind, wall, faceKey, setting, appearance){
   var updateFn=kind==='interior'?'updateInteriorFaceSetting':'updateExteriorFaceSetting';
   var uploadFn=kind==='interior'?'uploadInteriorFaceTex':'uploadExteriorFaceTex';
+  var target='wallIdFromEl(this),faceKeyFromEl(this)';
   var mode=faceRuleMode(setting,appearance);
   var group=kind+'-face-rule-'+wall.id+'-'+faceKey;
   var defaultColor=kind==='interior'?INTERIOR_WALL_DEFAULT:'#e8e0cc';
-  var colorValue=setting.color||appearance.color||defaultColor;
+  var colorValue=safeHtmlColor(setting.color,'')||safeHtmlColor(appearance.color,'')||defaultColor;
   var texLabel=textureStateLabel(setting.texture);
   var html='';
   function radio(value,label){
-    html += '<label class="face-rule"><input type="radio" name="'+group+'" '+(mode===value?'checked':'')+' onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'mode\',\''+value+'\')"> '+label+'</label>';
+    html += '<label class="face-rule"><input type="radio" name="'+escHtml(group)+'" '+(mode===value?'checked':'')+' onchange="'+updateFn+'('+target+',\'mode\',\''+value+'\')"> '+escHtml(label)+'</label>';
   }
   radio('custom','個別設定を利用');
   radio('whole','家全体に合わせる');
@@ -1084,13 +1093,13 @@ function renderFaceRuleControls(kind, wall, faceKey, setting, appearance){
   radio('inherit',(kind==='interior'?'内観':'外観')+'カラー設定に任せる');
   html += '<div class="face-custom-row" style="opacity:'+(mode==='custom'?1:0.42)+'">';
   html += '<span class="face-muted">個別カラー</span>';
-  html += '<input type="color" value="'+colorValue+'" oninput="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()" '+(mode!=='custom'?'disabled':'')+'>';
+  html += '<input type="color" value="'+colorValue+'" oninput="'+updateFn+'('+target+',\'color\',this.value,true)" onchange="'+updateFn+'('+target+',\'color\',this.value,true)" onblur="finishAppearanceColorInput()" '+(mode!=='custom'?'disabled':'')+'>';
   html += '</div>';
-  html += '<div style="margin-top:7px;opacity:'+(mode==='custom'?1:0.42)+'"><div class="face-muted" style="margin-bottom:4px">個別テクスチャ</div><input type="file" accept="image/*" style="font-size:10px;width:100%;max-width:100%" onchange="'+uploadFn+'(this,'+wall.id+',\''+faceKey+'\')" '+(mode!=='custom'?'disabled':'')+'></div>';
-  html += '<div class="face-muted" style="margin-top:5px">テクスチャ: '+texLabel+' '+(setting.texture?'<button class="pbtn sec" style="padding:3px 8px;margin-top:4px" onclick="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += '<div style="margin-top:7px;opacity:'+(mode==='custom'?1:0.42)+'"><div class="face-muted" style="margin-bottom:4px">個別テクスチャ</div><input type="file" accept="image/*" style="font-size:10px;width:100%;max-width:100%" onchange="'+uploadFn+'(this,'+target+')" '+(mode!=='custom'?'disabled':'')+'></div>';
+  html += '<div class="face-muted" style="margin-top:5px">テクスチャ: '+escHtml(texLabel)+' '+(setting.texture?'<button class="pbtn sec" style="padding:3px 8px;margin-top:4px" onclick="'+updateFn+'('+target+',\'texture\',null)">解除</button>':'')+'</div>';
   html += textureFlipControlsHtml(
-    updateFn+'('+wall.id+',\''+faceKey+'\',\'textureFlipX\','+(!setting.textureFlipX)+')',
-    updateFn+'('+wall.id+',\''+faceKey+'\',\'textureFlipY\','+(!setting.textureFlipY)+')',
+    updateFn+'('+target+',\'textureFlipX\','+(!setting.textureFlipX)+')',
+    updateFn+'('+target+',\'textureFlipY\','+(!setting.textureFlipY)+')',
     setting,
     mode!=='custom'
   );
@@ -1102,15 +1111,15 @@ function renderFaceRuleControls(kind, wall, faceKey, setting, appearance){
     var skOwn=setting.skirting;   // undefined=任せる / true / false
     var skSel=(skOwn===undefined)?'inherit':(skOwn===false?'off':'on');
     html += '<div class="face-custom-row" style="margin-top:7px"><span class="face-muted">巾木</span>';
-    html += '<select onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirting\',this.value===\'inherit\'?null:this.value===\'on\')">';
+    html += '<select onchange="'+updateFn+'('+target+',\'skirting\',this.value===\'inherit\'?null:this.value===\'on\')">';
     html += '<option value="inherit" '+(skSel==='inherit'?'selected':'')+'>内観カラー設定に任せる（現在: '+(skResolved.on?'あり':'なし')+'）</option>';
     html += '<option value="on" '+(skSel==='on'?'selected':'')+'>あり (60mm)</option>';
     html += '<option value="off" '+(skSel==='off'?'selected':'')+'>なし</option>';
     html += '</select></div>';
     if(skResolved.on){
       html += '<div class="face-custom-row"><span class="face-muted">巾木カラー</span>';
-      html += '<input type="color" value="'+(setting.skirtingColor||skResolved.color||colorValue)+'" onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirtingColor\',this.value)"></div>';
-      if(setting.skirtingColor) html += '<button class="pbtn sec" style="padding:3px 8px;margin-top:4px" onclick="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirtingColor\',null)">壁紙の色に戻す</button>';
+      html += '<input type="color" value="'+(safeHtmlColor(setting.skirtingColor,'')||safeHtmlColor(skResolved.color,'')||colorValue)+'" onchange="'+updateFn+'('+target+',\'skirtingColor\',this.value)"></div>';
+      if(setting.skirtingColor) html += '<button class="pbtn sec" style="padding:3px 8px;margin-top:4px" onclick="'+updateFn+'('+target+',\'skirtingColor\',null)">壁紙の色に戻す</button>';
     }
   }
   return html;
@@ -1155,7 +1164,7 @@ function updateProps(){
   if(it.type==='memo'){
     html += '<div class="ph">メモ</div>';
     html += '<div class="pr"><div class="pl">テキスト</div><textarea class="pi note-textarea" oninput="updateSelectedNoteText(this.value)" onblur="finishSelectedNoteText()">'+escHtml(it.noteText||'')+'</textarea></div>';
-    html += '<div class="pr"><div class="pl">背景色</div><input class="pi" type="color" value="'+(it.color||'#fff3a6')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">背景色</div><input class="pi" type="color" value="'+safeHtmlColor(it.color,'#fff3a6')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += selectedModelFinishesHtml(it);
   html += selectedDeleteButtonHtml();
     setPropsBodyHtml(body,html,it);
@@ -1163,11 +1172,11 @@ function updateProps(){
   }
   if(it.type==='ruler'){
     html += '<div class="ph">定規</div>';
-    html += '<div class="pr"><div class="pl">測定長さ (mm)</div><input class="pi" type="number" min="'+RULER_MIN_LEN_MM+'" max="'+RULER_MAX_LEN_MM+'" step="10" value="'+Math.round(rulerLengthMm(it))+'" onchange="updateSelectedRulerLength(this.value)"></div>';
+    html += '<div class="pr"><div class="pl">測定長さ (mm)</div><input class="pi" type="number" min="'+RULER_MIN_LEN_MM+'" max="'+RULER_MAX_LEN_MM+'" step="10" value="'+escHtml(Math.round(rulerLengthMm(it)))+'" onchange="updateSelectedRulerLength(this.value)"></div>';
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">置いたあとでも数値で入れ直せます。1点目は動かず、2点目だけが同じ向きに伸び縮みします</div>';
-    html += '<div class="pr"><div class="pl">補助線の長さ(mm)</div><input class="pi" type="number" step="100" value="'+Math.round(Number(it.extLen)||0)+'" onchange="updateSelectedProp(\'extLen\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">補助線の長さ(mm)</div><input class="pi" type="number" step="100" value="'+escHtml(Math.round(Number(it.extLen)||0))+'" onchange="updateSelectedProp(\'extLen\',+this.value)"></div>';
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">両端から測定対象へ垂直に伸びる補助線。負の値で反対側に伸びます</div>';
-    html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+safeHtmlColor(it.color,'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += selectedModelFinishesHtml(it);
   html += selectedDeleteButtonHtml();
     setPropsBodyHtml(body,html,it);
@@ -1180,11 +1189,11 @@ function updateProps(){
     var isWalking=isWalkthroughRouteActive(it);
     var isDrawingRoute=ST.drawing && ST.tool==='walk-route' && ST.selected===it;
     html += '<div class="ph">ウォークルート</div>';
-    html += '<div class="pr"><div class="pl">ルート長さ</div><input class="pi" type="text" value="'+formatWalkRouteDistance(walkLen)+'" readonly></div>';
-    html += '<div class="pr"><div class="pl">区間数</div><input class="pi" type="text" value="'+walkRouteSegmentCount(it)+'" readonly></div>';
-    html += '<div class="pr"><div class="pl">歩行速度 (m/s)</div><input class="pi" type="number" min="0.1" max="3" step="0.1" value="'+walkSpeed.toFixed(1)+'" onchange="updateWalkRouteSpeed(+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">再生時間</div><input class="pi" type="text" value="'+walkDuration.toFixed(1)+'秒" readonly></div>';
-    html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#10b981')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">ルート長さ</div><input class="pi" type="text" value="'+escHtml(formatWalkRouteDistance(walkLen))+'" readonly></div>';
+    html += '<div class="pr"><div class="pl">区間数</div><input class="pi" type="text" value="'+escHtml(walkRouteSegmentCount(it))+'" readonly></div>';
+    html += '<div class="pr"><div class="pl">歩行速度 (m/s)</div><input class="pi" type="number" min="0.1" max="3" step="0.1" value="'+escHtml(walkSpeed.toFixed(1))+'" onchange="updateWalkRouteSpeed(+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">再生時間</div><input class="pi" type="text" value="'+escHtml(walkDuration.toFixed(1))+'秒" readonly></div>';
+    html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+safeHtmlColor(it.color,'#10b981')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(isDrawingRoute) html += '<button class="pbtn" data-lock-control type="button" onclick="finishWalkRouteDrawing()">ルート確定</button>';
     html += isWalking
       ? '<button class="pbtn" data-lock-control type="button" onclick="stopWalkthrough()">再生を停止</button>'
@@ -1194,19 +1203,19 @@ function updateProps(){
     setPropsBodyHtml(body,html,it);
     return;
   }
-  html += '<div class="pr"><div class="pl">ID</div><input class="pi" type="text" value="'+objectIdLabel(it)+'" readonly></div>';
+  html += '<div class="pr"><div class="pl">ID</div><input class="pi" type="text" value="'+escHtml(objectIdLabel(it))+'" readonly></div>';
   html += stackOrderControlsHtml(it);
 
   if(it.x1 !== undefined && it.x2 !== undefined) {
-    html += '<div class="pr"><div class="pl">始点 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x1)+'" onchange="updateSelectedProp(\'x1\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">始点 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y1)+'" onchange="updateSelectedProp(\'y1\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">終点 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x2)+'" onchange="updateSelectedProp(\'x2\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">終点 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y2)+'" onchange="updateSelectedProp(\'y2\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">壁高さ (mm)</div><input class="pi" type="number" min="300" max="6000" step="10" value="'+Math.round(wallHeightMm(it))+'" onchange="updateSelectedProp(\'wallHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">始点 X (mm)</div><input class="pi" type="number" value="'+escHtml(Math.round(it.x1))+'" onchange="updateSelectedProp(\'x1\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">始点 Y (mm)</div><input class="pi" type="number" value="'+escHtml(Math.round(it.y1))+'" onchange="updateSelectedProp(\'y1\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">終点 X (mm)</div><input class="pi" type="number" value="'+escHtml(Math.round(it.x2))+'" onchange="updateSelectedProp(\'x2\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">終点 Y (mm)</div><input class="pi" type="number" value="'+escHtml(Math.round(it.y2))+'" onchange="updateSelectedProp(\'y2\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+htmlNum(it.thick)+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">壁高さ (mm)</div><input class="pi" type="number" min="300" max="6000" step="10" value="'+escHtml(Math.round(wallHeightMm(it)))+'" onchange="updateSelectedProp(\'wallHeight\',+this.value)"></div>';
     // 足元の上下。天端はそのまま、下端だけを伸ばし縮みさせる。
-    html += '<div class="pr"><div class="pl">足元の上下 (mm)</div><input class="pi" type="number" min="-3000" max="2000" step="10" value="'+wallFootOffsetMm(it)+'" onchange="updateSelectedProp(\'footOffsetMm\',+this.value||0)"></div>';
-    if(wallFootOffsetMm(it)!==0) html += '<div class="lock-status-note">足元を '+(wallFootOffsetMm(it)<0?'床より '+(-wallFootOffsetMm(it))+'mm 下へ伸ばしています':'床から '+wallFootOffsetMm(it)+'mm 持ち上げています')+'。天端は動きません。</div>';
+    html += '<div class="pr"><div class="pl">足元の上下 (mm)</div><input class="pi" type="number" min="-3000" max="2000" step="10" value="'+escHtml(wallFootOffsetMm(it))+'" onchange="updateSelectedProp(\'footOffsetMm\',+this.value||0)"></div>';
+    if(wallFootOffsetMm(it)!==0) html += '<div class="lock-status-note">足元を '+escHtml(wallFootOffsetMm(it)<0?'床より '+(-wallFootOffsetMm(it))+'mm 下へ伸ばしています':'床から '+wallFootOffsetMm(it)+'mm 持ち上げています')+'。天端は動きません。</div>';
     html += '<div class="pr"><div class="pl">設置高さ</div><select class="pi" onchange="updateSelectedProp(\'wallBand\',this.value)">';
     [['full','通常'],['low','低位のみ'],['high','高位のみ']].forEach(function(opt){
       html += '<option value="'+opt[0]+'" '+((it.wallBand||'full')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
@@ -1231,11 +1240,11 @@ function updateProps(){
     // (以前の「壁の基準」の欄は、壁がここで return するため一度も表示されていなかった。)
     html += baseFloorSelectHtml(it);
     if(floorHasSkipLevel(it.floor||1))
-      html += '<div class="lock-status-note">いまの足元は ＋'+wallSkipFootMm(it)+'mm、高さの基準は ＋'+wallSkipBaseMm(it)+'mm です。</div>';
+      html += '<div class="lock-status-note">いまの足元は ＋'+escHtml(wallSkipFootMm(it))+'mm、高さの基準は ＋'+escHtml(wallSkipBaseMm(it))+'mm です。</div>';
     // 巾木の有無と色は壁単位ではなく**内観面ごと**(下の「壁紙カラー(内観面)」)。
     // 壁は両面が別の部屋に面するので、壁単位だと部屋ごとの統一が取れない。
     if((it.thick||0)<120){
-      html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+      html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color,'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
       html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
       html += selectedTextureFlipControlsHtml(it);
@@ -1251,7 +1260,7 @@ function updateProps(){
         var fs=getInteriorFaceSetting(it,face);
         var faceKey=interiorFaceKey(it,face);
         var ap=resolveInteriorFaceAppearance(it,face);
-        html += '<div class="face-card">';
+        html += '<div class="face-card"'+faceCardAttrs(it,faceKey)+'>';
         html += '<div class="face-card-title">内面 '+(idx+1)+'</div>';
         html += renderFaceRuleControls('interior',it,faceKey,fs,ap);
         html += '</div>';
@@ -1265,7 +1274,7 @@ function updateProps(){
           var efs=getExteriorFaceSetting(it,face);
           var faceKey=exteriorFaceKey(it,face);
           var ap=resolveExteriorFaceAppearance(it,face);
-          html += '<div class="face-card">';
+          html += '<div class="face-card"'+faceCardAttrs(it,faceKey)+'>';
           html += '<div class="face-card-title">外面 '+(idx+1)+'</div>';
           html += renderFaceRuleControls('exterior',it,faceKey,efs,ap);
           html += '</div>';
@@ -1280,8 +1289,8 @@ function updateProps(){
     return;
   }
   
-  html += '<div class="pr"><div class="pl">位置 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x)+'" onchange="updateSelectedProp(\'x\',+this.value)"></div>';
-  html += '<div class="pr"><div class="pl">位置 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y)+'" onchange="updateSelectedProp(\'y\',+this.value)"></div>';
+  html += '<div class="pr"><div class="pl">位置 X (mm)</div><input class="pi" type="number" value="'+escHtml(Math.round(it.x))+'" onchange="updateSelectedProp(\'x\',+this.value)"></div>';
+  html += '<div class="pr"><div class="pl">位置 Y (mm)</div><input class="pi" type="number" value="'+escHtml(Math.round(it.y))+'" onchange="updateSelectedProp(\'y\',+this.value)"></div>';
   
   // 道路は w が道路に沿った長さ、d が幅員。「幅 W / 奥行 D」のままだと
   // 幅を変えたいのに長さの欄を触ることになる(既定プランは w=30000/d=4550)。
@@ -1289,13 +1298,13 @@ function updateProps(){
   var wLabel=(it.type==='road')?'道路長 (mm)':'幅 W (mm)';
   var dLabel=(it.type==='road')?'幅員 (mm)':'奥行 D (mm)';
   if(it.w !== undefined && !isWindowLikeType(it.type)) {
-    html += '<div class="pr"><div class="pl">'+wLabel+'</div><input class="pi" type="number" value="'+Math.round(it.w)+'" onchange="updateSelectedProp(\'w\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">'+wLabel+'</div><input class="pi" type="number" value="'+escHtml(Math.round(it.w))+'" onchange="updateSelectedProp(\'w\',+this.value)"></div>';
   }
   if(it.d !== undefined && !isWindowLikeType(it.type)) {
-    html += '<div class="pr"><div class="pl">'+dLabel+'</div><input class="pi" type="number" value="'+Math.round(it.d)+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">'+dLabel+'</div><input class="pi" type="number" value="'+escHtml(Math.round(it.d))+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
   }
   if(it.rot !== undefined) {
-    html += '<div class="pr"><div class="pl">回転 (°)</div><input class="pi" type="number" value="'+Math.round(it.rot)+'" onchange="updateSelectedProp(\'rot\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">回転 (°)</div><input class="pi" type="number" value="'+escHtml(Math.round(it.rot))+'" onchange="updateSelectedProp(\'rot\',+this.value)"></div>';
   }
   if(it.type==='site-rect'){
     html += '<div class="ph" style="margin-top:12px">敷地設定</div>';
@@ -1304,11 +1313,11 @@ function updateProps(){
       html += '<div class="pr" style="display:block;font-size:12px;line-height:1.7">この矩形は土地全体の境界です。建物の範囲は外壁の輪郭、庭・駐車場は下の外構仕上げで示します。建築可能範囲を示す線ではありません。</div>';
     }
     siteFinishZones(it).forEach(function(z,index){
-      html += '<div class="ph">外構仕上げ '+(index+1)+'</div>';
+      html += '<div class="ph">外構仕上げ '+escHtml(index+1)+'</div>';
       html += '<div class="pr"><div class="pl">用途</div><input class="pi" value="'+escHtml(z.name)+'" onchange="updateSiteZone('+index+',\'name\',this.value)"></div>';
       html += '<div class="pr"><div class="pl">表面</div><select class="pi" onchange="updateSiteZone('+index+',\'surface\',this.value)">'+siteSurfaceOptionsHtml(z.surface)+'</select></div>';
       [['x','左端から (mm)'],['y','上端から (mm)'],['w','幅 (mm)'],['d','奥行 (mm)']].forEach(function(f){
-        html += '<div class="pr"><div class="pl">'+f[1]+'</div><input class="pi" type="number" min="0" value="'+z[f[0]]+'" onchange="updateSiteZone('+index+',\''+f[0]+'\',this.value)"></div>';
+        html += '<div class="pr"><div class="pl">'+f[1]+'</div><input class="pi" type="number" min="0" value="'+htmlNum(z[f[0]])+'" onchange="updateSiteZone('+index+',\''+f[0]+'\',this.value)"></div>';
       });
     });
     html += siteSetbackPanelHtml(it);
@@ -1316,12 +1325,12 @@ function updateProps(){
   if(isWindowLikeType(it.type)){
     ensureWindowProps(it);
     html += '<div class="ph" style="margin-top:12px">窓サイズ・高さ</div>';
-    html += '<div class="pr"><div class="pl">窓幅 (mm)</div><input class="pi" type="number" min="200" step="10" value="'+Math.round(it.w||0)+'" onchange="updateSelectedProp(\'w\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">見込み/奥行 (mm)</div><input class="pi" type="number" min="30" step="10" value="'+Math.round(it.d||0)+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">下端高さ (床からmm)</div><input class="pi" type="number" min="0" max="'+Math.round(windowMaxTopMm(it))+'" step="10" value="'+Math.round(windowSillMm(it))+'" onchange="updateSelectedProp(\'windowSill\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">窓幅 (mm)</div><input class="pi" type="number" min="200" step="10" value="'+escHtml(Math.round(it.w||0))+'" onchange="updateSelectedProp(\'w\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">見込み/奥行 (mm)</div><input class="pi" type="number" min="30" step="10" value="'+escHtml(Math.round(it.d||0))+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">下端高さ (床からmm)</div><input class="pi" type="number" min="0" max="'+escHtml(Math.round(windowMaxTopMm(it)))+'" step="10" value="'+escHtml(Math.round(windowSillMm(it)))+'" onchange="updateSelectedProp(\'windowSill\',+this.value)"></div>';
     var stdOpts='<option value="">規格サイズを選択...</option>';
     WINDOW_STD_PRESETS.forEach(function(p){
-      stdOpts+='<option value="'+p.id+'"'+(it.windowStd===p.id?' selected':'')+'>'+p.label+'</option>';
+      stdOpts+='<option value="'+escHtml(p.id)+'"'+(it.windowStd===p.id?' selected':'')+'>'+escHtml(p.label)+'</option>';
     });
     if(it.type==='window'){
       var wk=effectiveWindowKind(it);
@@ -1334,22 +1343,22 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">サッシ規格 (LIXIL呼称)</div><select class="pi" onchange="applyWindowStdPreset(this.value)">'+stdOpts+'</select></div>';
     var sashColorOpts='<option value=""'+(!it.sashColor?' selected':'')+'>標準 (ダークグレー)</option>';
     SASH_COLORS.forEach(function(sc){
-      sashColorOpts+='<option value="'+sc.hex+'"'+(it.sashColor===sc.hex?' selected':'')+'>'+sc.label+'</option>';
+      sashColorOpts+='<option value="'+escHtml(sc.hex)+'"'+(it.sashColor===sc.hex?' selected':'')+'>'+escHtml(sc.label)+'</option>';
     });
     html += '<div class="pr"><div class="pl">サッシ色</div><select class="pi" onchange="updateSelectedProp(\'sashColor\',this.value)">'+sashColorOpts+'</select></div>';
-    html += '<div class="pr"><div class="pl">窓の縦高さ (mm)</div><input class="pi" type="number" min="200" max="'+Math.round(windowMaxTopMm(it))+'" step="10" value="'+Math.round(windowHeightMm(it))+'" onchange="updateSelectedProp(\'windowHeight\',+this.value)"></div>';
-    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">上端高さ: '+Math.round(windowTopMm(it))+'mm</div>';
+    html += '<div class="pr"><div class="pl">窓の縦高さ (mm)</div><input class="pi" type="number" min="200" max="'+escHtml(Math.round(windowMaxTopMm(it)))+'" step="10" value="'+escHtml(Math.round(windowHeightMm(it)))+'" onchange="updateSelectedProp(\'windowHeight\',+this.value)"></div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">上端高さ: '+escHtml(Math.round(windowTopMm(it)))+'mm</div>';
   }
   if(isDoorLikeOpeningType(it.type)){
     html += '<div class="ph" style="margin-top:12px">ドア・開口高さ</div>';
     if(isInteriorSwingDoorType(it.type)){
       var doorWOpts='<option value="">規格幅を選択...</option>';
       DOOR_STD_WIDTHS.forEach(function(p){
-        doorWOpts+='<option value="'+p.w+'"'+(it.w===p.w?' selected':'')+'>'+p.label+'</option>';
+        doorWOpts+='<option value="'+escHtml(p.w)+'"'+(it.w===p.w?' selected':'')+'>'+escHtml(p.label)+'</option>';
       });
       html += '<div class="pr"><div class="pl">ドア幅規格 (LIXIL実勢値)</div><select class="pi" onchange="applyDoorWidthPreset(this.value)">'+doorWOpts+'</select></div>';
     }
-    html += '<div class="pr"><div class="pl">高さ (mm)</div><input class="pi" type="number" min="300" max="3200" step="10" value="'+Math.round(doorHeightMm(it))+'" onchange="updateSelectedProp(\'doorHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">高さ (mm)</div><input class="pi" type="number" min="300" max="3200" step="10" value="'+escHtml(Math.round(doorHeightMm(it)))+'" onchange="updateSelectedProp(\'doorHeight\',+this.value)"></div>';
     if(isDoorPanelType(it.type)){
       html += '<div class="pr"><div class="pl">開閉状態</div><select class="pi" onchange="updateSelectedProp(\'doorOpenState\',this.value)">';
       [['open','開き'],['closed','閉じ']].forEach(function(opt){
@@ -1369,7 +1378,7 @@ function updateProps(){
     if(!it.fenceHeight) it.fenceHeight=1600;
     if(!it.fencePattern) it.fencePattern='horizontal';
     if(!it.fenceTopStyle) it.fenceTopStyle='even';
-    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+Math.round(it.fenceHeight)+'" onchange="updateSelectedProp(\'fenceHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+escHtml(Math.round(it.fenceHeight))+'" onchange="updateSelectedProp(\'fenceHeight\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">板方向</div><select class="pi" onchange="updateSelectedProp(\'fencePattern\',this.value)">';
     [['vertical','縦板'],['horizontal','横板']].forEach(function(opt){
       html += '<option value="'+opt[0]+'" '+((it.fencePattern||'vertical')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
@@ -1380,7 +1389,7 @@ function updateProps(){
     if(!it.latticeHeight) it.latticeHeight=1600;
     if(!it.fencePattern) it.fencePattern='vertical';
     if(!it.fenceTopStyle) it.fenceTopStyle='even';
-    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+Math.round(it.latticeHeight)+'" onchange="updateSelectedProp(\'latticeHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+escHtml(Math.round(it.latticeHeight))+'" onchange="updateSelectedProp(\'latticeHeight\',+this.value)"></div>';
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">高さZ(mm)で浮かせて、バルコニーのルーバーや室内間仕切りに使えます</div>';
   }
   if(isContextExteriorItemType(it.type)){
@@ -1389,13 +1398,13 @@ function updateProps(){
     if(it.type==='neighbor-building' || it.type==='neighbor-house'){
       var ctxFloors=getContextFloors(it);
       var maxFloors=it.type==='neighbor-building'?12:3;
-      html += '<div class="pr"><div class="pl">階数</div><input class="pi" type="number" min="1" max="'+maxFloors+'" step="1" value="'+ctxFloors+'" onchange="updateSelectedContextFloors(+this.value)"></div>';
-      html += '<div class="pr"><div class="pl">算定高さ</div><input class="pi" type="text" value="'+Math.round(getContextExteriorHeight(it))+'mm（1階 '+contextStoryHeightMm()+'mm）" readonly></div>';
+      html += '<div class="pr"><div class="pl">階数</div><input class="pi" type="number" min="1" max="'+maxFloors+'" step="1" value="'+escHtml(ctxFloors)+'" onchange="updateSelectedContextFloors(+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">算定高さ</div><input class="pi" type="text" value="'+escHtml(Math.round(getContextExteriorHeight(it)))+'mm（1階 '+escHtml(contextStoryHeightMm())+'mm）" readonly></div>';
       html += '<div class="pr"><div class="pl">半透明表示</div><label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" '+(it.contextGhost!==false?'checked':'')+' onchange="updateSelectedProp(\'contextGhost\',this.checked)">計画建物を見やすくする</label></div>';
     } else if(it.type!=='road'){
-      html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="100" max="30000" step="100" value="'+Math.round(getContextExteriorHeight(it))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="100" max="30000" step="100" value="'+escHtml(Math.round(getContextExteriorHeight(it)))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
     } else {
-      html += '<div class="pr"><div class="pl">路面厚 (mm)</div><input class="pi" type="number" min="20" max="200" step="10" value="'+Math.round(getContextExteriorHeight(it))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">路面厚 (mm)</div><input class="pi" type="number" min="20" max="200" step="10" value="'+escHtml(Math.round(getContextExteriorHeight(it)))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
     }
   }
   if(isCustomBlockType(it.type)){
@@ -1403,8 +1412,8 @@ function updateProps(){
     if(!it.color) it.color=ICOLORS[it.type]||'#c9d7ee';
     html += '<div class="ph" style="margin-top:12px">任意ブロック設定</div>';
     html += '<div class="pr"><div class="pl">名称</div><input class="pi" type="text" value="'+escHtml(it.name||'任意ブロック')+'" onchange="updateSelectedProp(\'name\',this.value)"></div>';
-    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="10" max="6000" step="10" value="'+Math.round(getCustomBlockHeight(it))+'" onchange="updateSelectedProp(\'customHeight\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#c9d7ee')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="10" max="6000" step="10" value="'+escHtml(Math.round(getCustomBlockHeight(it)))+'" onchange="updateSelectedProp(\'customHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color||ICOLORS[it.type],'#c9d7ee')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       html += '<div class="pr"><div class="pl">テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
@@ -1434,40 +1443,40 @@ function updateProps(){
         '</select></div>';
       html += '<div class="lock-status-note">線の長さ全体から、この向きへ照らします。横へは器具の前（平面図で奥行きの向き）の壁を照らします。線照明は影を落としません。</div>';
     }
-    html += '<div class="pr"><div class="pl">ライトカラー</div><input class="pi" type="color" value="'+(it.lightColor||'#fff6dd')+'" onchange="updateSelectedProp(\'lightColor\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">ライトカラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.lightColor,'#fff6dd')+'" onchange="updateSelectedProp(\'lightColor\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">色温度プリセット</div><div style="display:flex;gap:4px;flex-wrap:wrap">';
     LIGHT_KELVIN_PRESETS.forEach(function(k){
       var active=(it.lightColor||'').toLowerCase()===k.color;
-      html += '<button type="button" class="pbtn sec" style="margin-top:0;padding:4px 6px;font-size:10px;background:'+k.color+';color:#333;border:'+(active?'2px solid #e94560':'1px solid #999')+'" onclick="updateSelectedProp(\'lightColor\',\''+k.color+'\')">'+k.label+'</button>';
+      html += '<button type="button" class="pbtn sec" style="margin-top:0;padding:4px 6px;font-size:10px;background:'+safeHtmlColor(k.color,'#fff')+';color:#333;border:'+(active?'2px solid #e94560':'1px solid #999')+'" onclick="updateSelectedProp(\'lightColor\',\''+safeHtmlColor(k.color,'#ffffff')+'\')">'+escHtml(k.label)+'</button>';
     });
     html += '</div></div>';
-    html += '<div class="pr"><div class="pl">明るさ</div><input class="pi" type="number" min="0" max="3" step="0.05" value="'+Number(it.lightIntensity||0).toFixed(2)+'" onchange="updateSelectedProp(\'lightIntensity\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">光の届く距離 (mm)</div><input class="pi" type="number" min="500" max="12000" step="100" value="'+Math.round(it.lightRange||4500)+'" onchange="updateSelectedProp(\'lightRange\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">明るさ</div><input class="pi" type="number" min="0" max="3" step="0.05" value="'+escHtml((Number(it.lightIntensity)||0).toFixed(2))+'" onchange="updateSelectedProp(\'lightIntensity\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">光の届く距離 (mm)</div><input class="pi" type="number" min="500" max="12000" step="100" value="'+escHtml(Math.round(it.lightRange||4500))+'" onchange="updateSelectedProp(\'lightRange\',+this.value)"></div>';
     if(lk!=='ceiling'){
-      html += '<div class="pr"><div class="pl">照射角 (°)</div><input class="pi" type="number" min="10" max="110" step="1" value="'+Math.round(it.lightAngle||45)+'" onchange="updateSelectedProp(\'lightAngle\',+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">照射角 (°)</div><input class="pi" type="number" min="10" max="110" step="1" value="'+escHtml(Math.round(it.lightAngle||45))+'" onchange="updateSelectedProp(\'lightAngle\',+this.value)"></div>';
     }
     html += '<label class="lock-control-label" style="margin-top:8px"><input type="checkbox" '+(it.lightCastShadow!==false?'checked':'')+' onchange="updateSelectedProp(\'lightCastShadow\',this.checked)">影を落とす</label>';
   }
   if(it.type==='foundation'){
     if(it.foundationHeight===undefined || isNaN(Number(it.foundationHeight))) it.foundationHeight=450;
     html += '<div class="ph" style="margin-top:12px">基礎設定</div>';
-    html += '<div class="pr"><div class="pl">実寸素材</div><select class="pi" onchange="updateSelectedProp(\'texture\',this.value)"><option value="">色・既存の画像</option>'+Object.keys(SITE_SURFACE_OPTIONS).map(function(key){return '<option value="'+key+'" '+(it.texture===key?'selected':'')+'>'+SITE_SURFACE_OPTIONS[key].label+'</option>';}).join('')+'</select></div>';
-    html += '<div class="pr"><div class="pl">基礎厚さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+Math.round(it.foundationHeight)+'" onchange="updateSelectedProp(\'foundationHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">実寸素材</div><select class="pi" onchange="updateSelectedProp(\'texture\',this.value)"><option value="">色・既存の画像</option>'+Object.keys(SITE_SURFACE_OPTIONS).map(function(key){return '<option value="'+escHtml(key)+'" '+(it.texture===key?'selected':'')+'>'+escHtml(SITE_SURFACE_OPTIONS[key].label)+'</option>';}).join('')+'</select></div>';
+    html += '<div class="pr"><div class="pl">基礎厚さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+escHtml(Math.round(it.foundationHeight))+'" onchange="updateSelectedProp(\'foundationHeight\',+this.value)"></div>';
     html += '<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(it.foundationFlashing!==false?'checked':'')+' onchange="updateSelectedProp(\'foundationFlashing\',this.checked)">水切りを付ける</label></div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">基礎厚さ分、家全体の床・壁・家具・屋根が上に持ち上がります。水切りは外壁の下端を受ける金物で、基礎の上に壁が立っているときだけ付きます。</div>';
   }
   if(it.type==='exterior-stair' || it.type==='ramp'){
     if(!it.targetHeight) it.targetHeight=foundationHeightMm()||450;
     html += '<div class="ph" style="margin-top:12px">外構高さ</div>';
-    html += '<div class="pr"><div class="pl">到達高さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+Math.round(it.targetHeight)+'" onchange="updateSelectedProp(\'targetHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">到達高さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+escHtml(Math.round(it.targetHeight))+'" onchange="updateSelectedProp(\'targetHeight\',+this.value)"></div>';
     if(it.type==='exterior-stair'){
       if(!it.accessSteps) it.accessSteps=3;
-      html += '<div class="pr"><div class="pl">段数</div><input class="pi" type="number" min="1" max="12" step="1" value="'+Math.round(it.accessSteps)+'" onchange="updateSelectedProp(\'accessSteps\',+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">段数</div><input class="pi" type="number" min="1" max="12" step="1" value="'+escHtml(Math.round(it.accessSteps))+'" onchange="updateSelectedProp(\'accessSteps\',+this.value)"></div>';
     }
   }
   if(canSetItemElevation(it)) {
     if(it.elev === undefined || isNaN(it.elev)) it.elev = 0;
-    html += '<div class="pr"><div class="pl">高さ Z (mm)</div><input class="pi" type="number" step="10" value="'+Math.round(it.elev||0)+'" onchange="updateSelectedProp(\'elev\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">高さ Z (mm)</div><input class="pi" type="number" step="10" value="'+escHtml(Math.round(it.elev||0))+'" onchange="updateSelectedProp(\'elev\',+this.value)"></div>';
   }
   if(it.flipX === undefined && it.type && it.type!=='room' && it.type!=='site-rect' && it.type!=='foundation') it.flipX=false;
   if(it.flipY === undefined && it.type && it.type!=='room' && it.type!=='site-rect' && it.type!=='foundation') it.flipY=false;
@@ -1488,15 +1497,15 @@ function updateProps(){
     var roofGlobal=ensureRoofAppearance();
     html += '<div class="pr"><div class="pl">屋根形状</div><select class="pi" onchange="updateSelectedProp(\'roofType\',this.value)">';
     roofTypeOptions().forEach(function(opt){
-      html += '<option value="'+opt[0]+'" '+(it.roofType===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+      html += '<option value="'+escHtml(opt[0])+'" '+(it.roofType===opt[0]?'selected':'')+'>'+escHtml(opt[1])+'</option>';
     });
     html += '</select></div>';
-    html += '<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="5" max="60" step="0.5" value="'+(Math.round((Number(it.pitch)||30)*10)/10)+'" onchange="updateSelectedProp(\'pitch\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="5" max="60" step="0.5" value="'+escHtml(Math.round((Number(it.pitch)||30)*10)/10)+'" onchange="updateSelectedProp(\'pitch\',+this.value)"></div>';
     var rlh=roofLowHighMm(it);
     if(rlh){
-      html += '<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="number" step="10" value="'+rlh.lowMm+'" onchange="updateSelectedRoofHeight(\'low\',this.value)"></div>';
-      html += '<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="number" step="10" value="'+rlh.highMm+'" onchange="updateSelectedRoofHeight(\'high\',this.value)"></div>';
-      html += '<div class="lock-status-note">勾配・低い側・高い側は連動します。高さは屋根の下の階の床から、屋根の上面で測ります。低い側を変えると屋根ごと上下し、高い側を変えると勾配が変わります（勾配は 5〜60°）。上る距離は '+rlh.runMm+'mm です。</div>';
+      html += '<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="number" step="10" value="'+escHtml(rlh.lowMm)+'" onchange="updateSelectedRoofHeight(\'low\',this.value)"></div>';
+      html += '<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="number" step="10" value="'+escHtml(rlh.highMm)+'" onchange="updateSelectedRoofHeight(\'high\',this.value)"></div>';
+      html += '<div class="lock-status-note">勾配・低い側・高い側は連動します。高さは屋根の下の階の床から、屋根の上面で測ります。低い側を変えると屋根ごと上下し、高い側を変えると勾配が変わります（勾配は 5〜60°）。上る距離は '+escHtml(rlh.runMm)+'mm です。</div>';
     }
     html += roofMergeSectionHtml(it);
     var gm=it.gutterMode||'auto';
@@ -1505,14 +1514,14 @@ function updateProps(){
     html += '<option value="eaves"'+(gm==='eaves'?' selected':'')+'>軒樋のみ (竪樋は手動配置)</option>';
     html += '<option value="off"'+(gm==='off'?' selected':'')+'>なし</option>';
     html += '</select></div>';
-    html += '<div class="pr"><div class="pl">屋根厚み (mm)</div><input class="pi" type="number" min="30" max="600" step="10" value="'+Math.round(it.roofThickness||180)+'" onchange="updateSelectedProp(\'roofThickness\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">隙間補完下がり (mm)</div><input class="pi" type="number" min="0" max="1200" step="10" value="'+Math.round(it.roofSkirt||0)+'" onchange="updateSelectedProp(\'roofSkirt\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">厚み部分の色</div><input class="pi" type="color" value="'+(it.roofEdgeColor||'#3a2f2a')+'" onchange="updateSelectedProp(\'roofEdgeColor\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">屋根厚み (mm)</div><input class="pi" type="number" min="30" max="600" step="10" value="'+escHtml(Math.round(it.roofThickness||180))+'" onchange="updateSelectedProp(\'roofThickness\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">隙間補完下がり (mm)</div><input class="pi" type="number" min="0" max="1200" step="10" value="'+escHtml(Math.round(it.roofSkirt||0))+'" onchange="updateSelectedProp(\'roofSkirt\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">厚み部分の色</div><input class="pi" type="color" value="'+safeHtmlColor(it.roofEdgeColor,'#3a2f2a')+'" onchange="updateSelectedProp(\'roofEdgeColor\',this.value)"></div>';
     if(roofGlobal.whole && roofGlobal.whole.linked){
       html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">屋根カラー/テクスチャは「屋根カラー設定」が優先中です。</div>';
       html += '<button class="pbtn sec" onclick="toggleRoofColorPanel()" style="margin-top:6px">屋根カラー設定を開く</button>';
     } else {
-      html += '<div class="pr"><div class="pl">屋根カラー</div><input class="pi" type="color" value="'+(it.color||'#2a2a30')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+      html += '<div class="pr"><div class="pl">屋根カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color,'#2a2a30')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
       html += '<div class="pr"><div class="pl">屋根テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">屋根テクスチャ解除</button>';
       html += selectedTextureFlipControlsHtml(it);
@@ -1530,14 +1539,14 @@ function updateProps(){
         '<option value="floor"'+(floorLanding?' selected':'')+'>床（高さを指定）</option>'+
         '</select></div>';
       if(floorLanding){
-        html += '<div class="pr"><div class="pl">床の高さ（階の床から mm）</div><input class="pi" type="number" min="0" max="'+LANDING_LEVEL_MAX_MM+'" step="10" value="'+landingFloorLevelMm(it)+'" onchange="updateSelectedProp(\'landingLevelMm\',Math.max(0,Math.min('+LANDING_LEVEL_MAX_MM+',Math.round(+this.value||0))))"></div>';
+        html += '<div class="pr"><div class="pl">床の高さ（階の床から mm）</div><input class="pi" type="number" min="0" max="'+LANDING_LEVEL_MAX_MM+'" step="10" value="'+escHtml(landingFloorLevelMm(it))+'" onchange="updateSelectedProp(\'landingLevelMm\',Math.max(0,Math.min('+LANDING_LEVEL_MAX_MM+',Math.round(+this.value||0))))"></div>';
         var near=skipRoomsOnFloor(it.floor||1).map(function(r){
           return baseRoomLabel(r)+' は +'+Math.round((roomFloorTopY(r)-floorTopY(it.floor||1))/U);
         });
         var fconn=stairConnectionSummary(it);
         if(fconn) html += '<div class="lock-status-note">つながり: '+escHtml(fconn.text)+'</div>';
         html += '<div class="lock-status-note">床として置いた踊り場です。ここで階段が切れます。接している階段は、ここから上り始めるか、「行き先」でこの踊り場を選べます。'+
-          (near.length?'同じ物差しで '+near.join('、')+' です。':'')+'</div>';
+          (near.length?'同じ物差しで '+escHtml(near.join('、'))+' です。':'')+'</div>';
       } else {
         html += '<div class="lock-status-note">接している段と1本の階段になり、手前の段が上りきった高さに付きます。行き先は、この階段のどの部材から変えても全体に入ります。</div>';
       }
@@ -1589,9 +1598,9 @@ function updateProps(){
     var sfRoom=roomAtPointOnFloor(it.floor||1,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
     html += '<div class="pr"><div class="pl">踏板の床材</div><select class="pi" onchange="updateSelectedProp(\'stairFloorMaterial\',this.value)">'+
       '<option value=""'+(sfm===''?' selected':'')+'>なし（3Dカラー・テクスチャで塗る）</option>'+
-      '<option value="match"'+(sfm==='match'?' selected':'')+'>床と同じ'+(sfRoom?'（'+((sfRoom.n&&String(sfRoom.n).trim())||'部屋')+'の床）':'')+'</option>';
+      '<option value="match"'+(sfm==='match'?' selected':'')+'>床と同じ'+(sfRoom?'（'+escHtml((sfRoom.n&&String(sfRoom.n).trim())||'部屋')+'の床）':'')+'</option>';
     ROOM_FLOOR_MATERIAL_OPTIONS.forEach(function(o){
-      html += '<option value="'+o[0]+'"'+(sfm===o[0]?' selected':'')+'>'+o[1]+'</option>';
+      html += '<option value="'+escHtml(o[0])+'"'+(sfm===o[0]?' selected':'')+'>'+escHtml(o[1])+'</option>';
     });
     html += '</select></div>';
     if(sfm) html += '<div class="lock-status-note">踏板と踊り場を'+(sfm==='match'?'足元の部屋の床（床材・床カラー・床テクスチャ）':'この床材')+'で仕上げています。部屋の床を変えると'+(sfm==='match'?'一緒に変わります':'変わりません')+'。蹴込み板は3Dカラー・テクスチャのままです。'+(sfm==='match'&&!sfRoom?'いまは足元に部屋が無いので、3Dカラーで塗っています。':'')+'</div>';
@@ -1608,25 +1617,25 @@ function updateProps(){
     if(!floorLanding){
     // 載せる床(足元)。段差のある階でだけ出す。家具・壁と同じ欄。
     html += baseFloorSelectHtml(it);
-    html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
-      (sri.steps||getStairStepCount(it))+'段。'+
+    html += '<div class="lock-status-note">上り高さ '+escHtml(Math.round(stairGroupRiseM(it)/U))+'mm / '+
+      escHtml(sri.steps||getStairStepCount(it))+'段。'+
       (target==='level'
         ? '同じ階の段差を上ります。上階の床には穴を開けません。'
         : '上の階の床まで上がります。')+'</div>';
-    html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+htmlNum(orderVal)+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
     var conn=stairConnectionSummary(it);
     if(conn) html += '<div class="lock-status-note"'+(conn.warn?' style="color:#b3261e"':'')+'>つながり: '+escHtml(conn.text)+'</div>';
-    html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
+    html += '<div class="pr"><div class="pl">接続パーツ: '+escHtml(sri.count)+' / 現在 '+escHtml(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
     }
   }
   if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type) && !isCustomBlockType(it.type) && !isLightItemType(it.type)) {
     if(it.type==='downspout'){
-      html += '<div class="pr"><div class="pl">上端の高さ (mm)</div><input class="pi" type="number" min="500" max="12000" step="50" value="'+Math.round(it.downspoutTop||5450)+'" onchange="updateSelectedProp(\'downspoutTop\',+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">上端の高さ (mm)</div><input class="pi" type="number" min="500" max="12000" step="50" value="'+escHtml(Math.round(it.downspoutTop||5450))+'" onchange="updateSelectedProp(\'downspoutTop\',+this.value)"></div>';
     }
     if(it.type==='gas-heater'){
-      html += '<div class="pr"><div class="pl">取付高さ (下端mm)</div><input class="pi" type="number" min="0" max="3000" step="50" value="'+Math.round(it.gasHeaterMount||1300)+'" onchange="updateSelectedProp(\'gasHeaterMount\',+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">取付高さ (下端mm)</div><input class="pi" type="number" min="0" max="3000" step="50" value="'+escHtml(Math.round(it.gasHeaterMount||1300))+'" onchange="updateSelectedProp(\'gasHeaterMount\',+this.value)"></div>';
     }
-    if(!EXTERIOR_MODEL_IDS[it.type]) html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    if(!EXTERIOR_MODEL_IDS[it.type]) html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color||ICOLORS[it.type],'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
       html += isDoorItemType(it.type)
@@ -1638,33 +1647,33 @@ function updateProps(){
     var isDoorTextureCrop=isDoorItemType(it.type);
     if(!isContextExteriorItemType(it.type) && !EXTERIOR_MODEL_IDS[it.type] && (!isDoorTextureCrop || it.texture)){
       html += '<div class="ph" style="margin-top:15px">'+(isDoorTextureCrop?'テクスチャ画像トリミング':'画像トリミング (余白調整)')+'</div>';
-      html += '<div class="pr"><div class="pl">拡大率: <span class="texture-crop-value">'+(it.sScale||1).toFixed(2)+'</span></div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedTextureCrop(\'sScale\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
-      html += '<div class="pr"><div class="pl">位置 X: <span class="texture-crop-value">'+Math.round(it.sX||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedTextureCrop(\'sX\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
-      html += '<div class="pr"><div class="pl">位置 Y: <span class="texture-crop-value">'+Math.round(it.sY||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedTextureCrop(\'sY\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
+      html += '<div class="pr"><div class="pl">拡大率: <span class="texture-crop-value">'+escHtml((Number(it.sScale)||1).toFixed(2))+'</span></div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+htmlNum(it.sScale||1)+'" oninput="updateSelectedTextureCrop(\'sScale\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
+      html += '<div class="pr"><div class="pl">位置 X: <span class="texture-crop-value">'+escHtml(Math.round(it.sX||0))+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+htmlNum(it.sX||0)+'" oninput="updateSelectedTextureCrop(\'sX\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
+      html += '<div class="pr"><div class="pl">位置 Y: <span class="texture-crop-value">'+escHtml(Math.round(it.sY||0))+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+htmlNum(it.sY||0)+'" oninput="updateSelectedTextureCrop(\'sY\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
     }
   }
   if(it.type === 'lattice-screen') {
     html += '<div class="ph" style="margin-top:12px">格子</div>';
-    html += '<div class="pr"><div class="pl">格子の間隔 (mm)</div><input class="pi" type="number" min="30" max="600" step="5" value="'+latticePitchMm(it)+'" onchange="updateSelectedProp(\'latticePitch\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">格子の見付 (mm)</div><input class="pi" type="number" min="15" max="200" step="5" value="'+latticeSlatMm(it)+'" onchange="updateSelectedProp(\'latticeSlat\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">格子の間隔 (mm)</div><input class="pi" type="number" min="30" max="600" step="5" value="'+escHtml(latticePitchMm(it))+'" onchange="updateSelectedProp(\'latticePitch\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">格子の見付 (mm)</div><input class="pi" type="number" min="15" max="200" step="5" value="'+escHtml(latticeSlatMm(it))+'" onchange="updateSelectedProp(\'latticeSlat\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
     [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
       html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
     html += railingDesignHtml(it,{label:'格子の意匠',frameDefault:'#b09468',capToggle:true});
-    html += '<div class="lock-status-note">格子の内法 '+latticeClearMm(it)+'mm。'+
+    html += '<div class="lock-status-note">格子の内法 '+escHtml(latticeClearMm(it))+'mm。'+
       (latticeClearMm(it)>110?'手すりには 110mm 以下が目安です。':'手すりとして使える内法です。')+'</div>';
   }
   if(isColumnType(it.type)) {
-    html += '<div class="pr"><div class="pl">柱の高さ (mm)</div><input class="pi" type="number" min="100" max="6000" step="50" value="'+columnHeightMm(it)+'" onchange="updateSelectedProp(\'columnHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">柱の高さ (mm)</div><input class="pi" type="number" min="100" max="6000" step="50" value="'+escHtml(columnHeightMm(it))+'" onchange="updateSelectedProp(\'columnHeight\',+this.value)"></div>';
     html += '<div class="lock-status-note">'+(it.baseLevel==='under'
       ? '段差の下に立っています。高さは段差に合わせてあります。'
       : '太さは上の幅・奥行きで変えられます。段差の下に置くと、足元と高さが段差に合います。')+'</div>';
   }
   if(it.type === 'shelf-built-in') {
-    html += '<div class="pr"><div class="pl">棚の高さ (mm)</div><input class="pi" type="number" min="150" max="2700" step="50" value="'+shelfHeightMm(it)+'" onchange="updateSelectedProp(\'shelfHeight\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">棚板の枚数</div><input class="pi" type="number" min="1" max="8" step="1" value="'+shelfBoardCount(it)+'" onchange="updateSelectedProp(\'shelfCount\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">棚の高さ (mm)</div><input class="pi" type="number" min="150" max="2700" step="50" value="'+escHtml(shelfHeightMm(it))+'" onchange="updateSelectedProp(\'shelfHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">棚板の枚数</div><input class="pi" type="number" min="1" max="8" step="1" value="'+escHtml(shelfBoardCount(it))+'" onchange="updateSelectedProp(\'shelfCount\',+this.value)"></div>';
     var sides = (it.shelfSides==='none'||it.shelfSides==='both') ? it.shelfSides : 'auto';
     html += '<div class="pr"><div class="pl">縦板</div><select class="pi" onchange="updateSelectedProp(\'shelfSides\',this.value===\'auto\'?undefined:this.value)">'+
       '<option value="auto"'+(sides==='auto'?' selected':'')+'>自動（壁に付いていれば無し）</option>'+
@@ -1682,7 +1691,7 @@ function updateProps(){
   // 既存の操作は1つも増えない)。壁と階段は、それぞれの欄の中で同じものを出す。
   if(baseFloorKindOf(it)==='item') html += baseFloorSelectHtml(it);
   if(it.type === 'room') {
-    html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+escHtml(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
     html += selectedRoomFloorFinishHtml(it);
     html += selectedRoomFloorHtml(it);
     html += selectedRoomSkipHtml(it);
@@ -1690,8 +1699,8 @@ function updateProps(){
     html += selectedRoomCeilingFinishHtml(it);
   }
   if(it.thick !== undefined) {
-    html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+htmlNum(it.thick)+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color,'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
     html += selectedTextureFlipControlsHtml(it);
@@ -1728,7 +1737,7 @@ function selectedKitchenConfigurationHtml(it,model){
   if(model.kitchenDishwasherVariant){
     html+='<div class="pr"><label class="pl" for="kitchen-dishwasher">食洗機</label><select id="kitchen-dishwasher" class="pi" onchange="updateSelectedKitchenDishwasher(this.value)"><option value="no" '+(!model.kitchenDishwasher?'selected':'')+'>なし（収納BOX）</option><option value="yes" '+(model.kitchenDishwasher?'selected':'')+'>あり（幅450mm）</option></select></div>';
   }
-  html+='<div class="model-finish-note">正面から左→右：' +model.kitchenModules.map(function(m){return (labels[m.kind]||m.kind)+' '+m.width;}).join(' / ')+' mm<br>天板高850mm。機器寸法を保った構成です。</div>';
+  html+='<div class="model-finish-note">正面から左→右：' +escHtml(model.kitchenModules.map(function(m){return (labels[m.kind]||m.kind)+' '+m.width;}).join(' / '))+' mm<br>天板高850mm。機器寸法を保った構成です。</div>';
   return html;
 }
 function updateSelectedKitchenDishwasher(value){
@@ -1754,14 +1763,14 @@ function selectedModelFinishesHtml(it){
   if(model.mirrorOption) html+='<div class="pr"><label class="pl" for="shoe-mirror">姿見</label><input id="shoe-mirror" type="checkbox" '+(it.showMirror?'checked':'')+' onchange="updateSelectedProp(\'showMirror\',this.checked)"></div>';
   model.finishChannels.forEach(function(channel){
     var value=(it.finishColors&&it.finishColors[channel.key])||channel.default;
-    html+='<div class="pr"><label class="pl" for="finish-'+channel.key+'">'+escHtml(channel.label)+'</label><input id="finish-'+channel.key+'" class="pi" type="color" value="'+escHtml(value)+'" oninput="updateSelectedModelFinish(\''+channel.key+'\',this.value)"></div>';
+    html+='<div class="pr"><label class="pl" for="finish-'+channel.key+'">'+escHtml(channel.label)+'</label><input id="finish-'+channel.key+'" class="pi" type="color" value="'+safeHtmlColor(value,safeHtmlColor(channel.default,'#ffffff'))+'" oninput="updateSelectedModelFinish(\''+channel.key+'\',this.value)"></div>';
     // **壁と同じ資産から選ばせる。** 壁は色のほかにテクスチャを貼れるのに
     // カタログのモデルは色だけ、という分かれ方をしていた。仕様を分ける理由が
     // 無いので揃える。「元の柄のまま」を既定にし、選んだときだけ差し替える。
     var texture=(it.finishTextures&&it.finishTextures[channel.key])||'';
     html+='<div class="pr"><label class="pl" for="finish-texture-'+channel.key+'">'+escHtml(channel.label)+'の素材</label><select id="finish-texture-'+channel.key+'" class="pi" onchange="updateSelectedModelTexture(\''+channel.key+'\',this.value)">';
     modelFinishTextureOptions(channel.key).forEach(function(option){
-      html+='<option value="'+option[0]+'" '+(texture===option[0]?'selected':'')+'>'+escHtml(option[1])+'</option>';
+      html+='<option value="'+escHtml(option[0])+'" '+(texture===option[0]?'selected':'')+'>'+escHtml(option[1])+'</option>';
     });
     html+='</select></div>';
     if(channel.key!=='fabric'&&channel.key!=='accent'){
@@ -2073,7 +2082,7 @@ function roofGapInfillSettingsHtml(it){
     '<option value="wall"'+(own?'':' selected')+'>下の階の外壁と同じ</option>'+
     '<option value="own"'+(own?' selected':'')+'>個別に指定</option></select></div>';
   if(own){
-    html+='<div class="pr"><div class="pl">色</div><input class="pi" type="color" value="'+(it.gapInfillColor||ap.color||'#e8e0cc')+'" onchange="updateSelectedProp(\'gapInfillColor\',this.value)"></div>';
+    html+='<div class="pr"><div class="pl">色</div><input class="pi" type="color" value="'+(safeHtmlColor(it.gapInfillColor,'')||safeHtmlColor(ap.color,'#e8e0cc'))+'" onchange="updateSelectedProp(\'gapInfillColor\',this.value)"></div>';
     html+='<div class="pr"><div class="pl">テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadRoofGapInfillTex(this)"></div>';
     if(it.gapInfillTexture){
       html+='<button class="pbtn sec" onclick="updateSelectedProp(\'gapInfillTexture\',null)">テクスチャ解除</button>';
@@ -2476,6 +2485,6 @@ function siteSurfaceOptionsHtml(value){
   var cur=SITE_SURFACE_OPTIONS[value]?value:'grass';
   return Object.keys(SITE_SURFACE_OPTIONS).map(function(key){
     var opt=SITE_SURFACE_OPTIONS[key];
-    return '<option value="'+key+'" '+(cur===key?'selected':'')+'>'+opt.label+'</option>';
+    return '<option value="'+escHtml(key)+'" '+(cur===key?'selected':'')+'>'+escHtml(opt.label)+'</option>';
   }).join('');
 }
