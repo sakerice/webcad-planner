@@ -20295,9 +20295,16 @@ async function sharedSyncNow(){
   sharedResetDirtyTracking();SHARED.sending=true;var sendEntry=sharedBeginSend(patch);
   SHARED.sendPromise=(async function(){try{
     var response=await fetch('/api/rooms/'+SHARED.roomId+'/update',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'patch',clientId:sharedClientId(),baseVersion:SHARED.version,patch:patch})});
-    if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'同期できませんでした（'+response.status+'）');
+    if(!response.ok){var sendError=new Error(response.status===413?'プランが10MBを超えています。':'同期できませんでした（'+response.status+'）');sendError.rejected=response.status===400;throw sendError;}
     var result=await response.json();SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;sharedCommitSend(sendEntry);sharedSetStatus('変更を同期しました。操作が止まると自動保存します。');renderSharedUi();
-  }catch(e){sharedAbortSend(sendEntry);SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
+  }catch(e){sharedAbortSend(sendEntry);
+    if(e&&e.rejected){
+      // 400 は差分の形が部屋に合わない(何度送っても通らない)。送り直さず、部屋の最新の状態を取り直して画面を合わせる。
+      // 取り直すと、この画面の送れなかった変更は消える。取り直しに失敗したときは、その知らせが上書きする。
+      sharedSetStatus('この変更は共同編集に反映できなかったため、取り消して最新の状態に戻しました。',true);
+      await refreshSharedPlan();
+    }else{SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
+  }
   finally{SHARED.sending=false;if(SHARED.sendEntry===sendEntry)SHARED.sendEntry=null;if(SHARED.pending||sharedHasTrackedChanges()){SHARED.pending=false;queueSharedSync(600);}}})();
   return SHARED.sendPromise;
 }
