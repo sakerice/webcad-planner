@@ -20,7 +20,7 @@ const T = { timeout: 60000 };
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 const PROMPT = 'house-planner のこのプランを開いてください。';
-const ROOM_URL = /^http:\/\/[^/]+\/#room=[A-Za-z0-9_-]{22}$/;
+const ROOM_URL = /^https?:\/\/[^/]+\/#room=[A-Za-z0-9_-]{22}$/;
 
 async function openApp(browser, { width = 1280, height = 900, roomStatus = 200, clipboardFails = false } = {}) {
   const context = await browser.newContext({ viewport: { width, height } });
