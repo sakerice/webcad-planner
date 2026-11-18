@@ -646,3 +646,53 @@ test('消す数の上限: deleteObjects は1回に 20 件まで。消えた物�
   const moved = await call(ctx, 'moveObject', { plan: id, id: String(items[29].id), dx: 100, dy: 0 });
   assert.equal(moved.isError, false, textOf(moved));
 });
+
+test('消す数: 断った操作では増えない。removeWall で消えた壁も数える', async () => {
+  const ctx = await setup();
+  const rooms = await mod('worker/routes-rooms.mjs');
+  const made = await rooms.createRoomWithPlan(ctx.env, {
+    walls: [{ id: 1, x1: 0, y1: 0, x2: 4000, y2: 0, floor: 1, thick: 120 }, { id: 2, x1: 0, y1: 0, x2: 0, y2: 4000, floor: 1, thick: 120 }],
+    rooms: [], items: [{ id: 10, type: 'chair', x: 0, y: 0, w: 500, d: 500, floor: 1, rot: 0, locked: true }],
+  }, HOST);
+  const id = made.roomId;
+  // ロックされた物は消せない(断られる)。数は増えない
+  const locked = await call(ctx, 'deleteObjects', { plan: id, ids: ['10'] });
+  assert.equal(locked.isError, true, textOf(locked));
+  const wall = await call(ctx, 'removeWall', { plan: id, id: '1' });
+  assert.equal(wall.isError, false, textOf(wall));
+  const meta = await ctx.env.room(id).storage.get('meta');
+  assert.equal(meta.mcpOps.del, 1, '壁1本だけを数える(断った操作は数えない)');
+});
+
+test('範囲: 外の AI からは、原点から 200m を超える座標・455mm 未満の部屋の辺・100m を超える大きさを断る', async () => {
+  const ctx = await setup();
+  const rooms = await mod('worker/routes-rooms.mjs');
+  const made = await rooms.createRoomWithPlan(ctx.env, {
+    walls: [], rooms: [{ id: 'rm_1', n: '洋室', x: 0, y: 0, w: 3640, d: 3640, floor: 1 }],
+    items: [{ id: 10, type: 'chair', x: 0, y: 0, w: 500, d: 500, floor: 1, rot: 0 }],
+  }, HOST);
+  const id = made.roomId;
+  const bad = [
+    ['moveObject', { id: '10', dx: 250000, dy: 0 }, /±200000mm/],
+    ['moveObject', { id: 'rm_1', x: 0, y: 250000 }, /±200000mm/],
+    ['resizeRoom', { id: 'rm_1', w: 1 }, /455〜100000mm/],
+    ['addRoom', { x: 0, y: 0, w: 300, d: 3000 }, /455〜100000mm/],
+    ['addWall', { x1: 0, y1: 0, x2: 300000, y2: 0 }, /±200000mm/],
+    ['placeItem', { type: 'chair', x: -300000, y: 0 }, /±200000mm/],
+  ];
+  for (const [op, args, re] of bad) {
+    const r = await call(ctx, op, { plan: id, ...args });
+    assert.equal(r.isError, true, op + ': ' + textOf(r));
+    assert.match(textOf(r), re, op + ": " + textOf(r));
+    assert.match(textOf(r), /失敗の種類: 引数の誤り/, op);
+  }
+  // ふつうの値は通る(敷地の外の道路・隣家の位置くらいは通る)
+  for (const [op, args] of [
+    ['moveObject', { id: '10', x: 15000, y: -5000 }],
+    ['resizeRoom', { id: 'rm_1', w: 455 }],
+    ['addWall', { x1: 0, y1: 0, x2: 30000, y2: 0 }],
+  ]) {
+    const r = await call(ctx, op, { plan: id, ...args });
+    assert.equal(r.isError, false, op + ': ' + textOf(r));
+  }
+});
