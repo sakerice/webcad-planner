@@ -30,13 +30,53 @@ const MAX_OP_BODY_BYTES = 64 * 1024;
 //          数はメモリと meta(成功して積んだときだけ書く。数のためだけには書かない)の多いほうを使う。
 //          メモリが消える(ルームが眠る)と失敗の分は数え直しになるが、それは許す。
 //   /read … ルームごとに1分 60 回。メモリだけで数える(書き込みを増やさない)。
-//   消す数 … deleteObjects は1回に 20 件まで(MCP_DELETE_PER_CALL)。消えた物(removedIds。removeWall も数える)は
-//          ルームごとに1日(UTC)100 件まで(MCP_DELETES_PER_DAY)。外の AI が名前の中の指示に乗せられても、
-//          1日でプランを丸ごと消せないようにする。数は /op の回数と同じ {day, n, del} に入れる(meta.mcpOps)。
+//   消す数 … deleteObjects は1回に 20 件まで(MCP_DELETE_PER_CALL)。消えた物(removedIds。removeWall の壁も数える)は
+//          ルームごとに1日(UTC)100 件まで(MCP_DELETES_PER_DAY)。数は /op の回数と同じ {day, n, del} に入れ
+//          (meta.mcpOps)、当てて積めたときだけ増やす(断った操作では増えない)。
 //          画面の操作(/update)には掛けない。画面の正当な使い方では、1度に消すのは選んだ数個〜十数個。
+//   範囲 … 動かす・置く・足す・大きさを変える操作(moveObject・placeItem・addRoom・resizeRoom・addWall)で、
+//          変わった物が現実の家としてあり得ない値になるものは断る(mcpRangeProblem)。座標は原点から ±200m、
+//          部屋の辺は 455mm〜100m、物の大きさは 100m まで。
+// これらで守れるのは「1日に消せる数」と「敷地から遠く離れた所へ動かす・桁外れの大きさにする」ことまで。
+// 名前の書き換え・設定の変更・範囲の中での移動や大きさの変更は数えていないので、名前の中の指示に乗せられた
+// 外の AI が 1日 600 回の操作でプランを大きく作り替えることは、この上限では防げない。
 export const MCP_OPS_PER_DAY = 600;
 export const MCP_DELETE_PER_CALL = 20;
 export const MCP_DELETES_PER_DAY = 100;
+// 範囲の値の根拠: 手元の fixtures と既定のプラン(64 件)で、座標の絶対値の最大は約 16.4m(周辺のビル)、
+// 物の大きさの最大は 30m(道路)、部屋の辺の最小は 900mm(トイレ)。部屋の辺の下限 455mm は四半間。
+export const MCP_COORD_MAX = 200000;
+export const MCP_ROOM_SIDE_MIN = 455;
+export const MCP_SIZE_MAX = 100000;
+const RANGE_OPS = new Set(["moveObject", "placeItem", "addRoom", "resizeRoom", "addWall"]);
+
+// 範囲の外になった物があれば理由の文(引数を直せば通る失敗として返す)、無ければ null。変わった物(changedIds)だけを見る。
+export function mcpRangeProblem(op, result) {
+  if (!RANGE_OPS.has(op)) return null;
+  const ids = new Set((result.changedIds || []).map(String));
+  const plan = result.plan || {};
+  const far = (v) => Number.isFinite(Number(v)) && Math.abs(Number(v)) > MCP_COORD_MAX;
+  const where = `この受け口からは、座標は原点から ±${MCP_COORD_MAX}mm（200m）の範囲で渡してください`;
+  for (const w of plan.walls || []) {
+    if (!w || !ids.has(String(w.id))) continue;
+    if ([w.x1, w.y1, w.x2, w.y2].some(far)) return `${where}（壁 ${String(w.id).slice(0, 40)}）`;
+  }
+  for (const r of plan.rooms || []) {
+    if (!r || !ids.has(String(r.id))) continue;
+    const w = Number(r.w), d = Number(r.d);
+    if (far(Number(r.x) + w / 2) || far(Number(r.y) + d / 2)) return `${where}（部屋）`;
+    if (!(w >= MCP_ROOM_SIDE_MIN && d >= MCP_ROOM_SIDE_MIN && w <= MCP_SIZE_MAX && d <= MCP_SIZE_MAX)) {
+      return `この受け口からは、部屋の幅と奥行きは ${MCP_ROOM_SIDE_MIN}〜${MCP_SIZE_MAX}mm で渡してください`;
+    }
+  }
+  for (const it of plan.items || []) {
+    if (!it || !ids.has(String(it.id))) continue;
+    const w = Number(it.w) || 0, d = Number(it.d) || 0;
+    if (far(Number(it.x) + w / 2) || far(Number(it.y) + d / 2)) return `${where}（物）`;
+    if (w > MCP_SIZE_MAX || d > MCP_SIZE_MAX) return `この受け口からは、物の幅と奥行きは ${MCP_SIZE_MAX}mm までで渡してください`;
+  }
+  return null;
+}
 export const MCP_DELETE_LIMIT_MESSAGE = "このプランは、きょう AI から消せる数の上限に達しました。消さない操作はできます。消すのは house-planner の画面で行ってください。";
 export const MCP_READS_PER_MINUTE = 60;
 export const MCP_OP_LIMIT_MESSAGE = "このプランは、きょう AI から直せる回数の上限に達しました。あすまたお試しいただくか、house-planner の画面で直してください。";
@@ -499,13 +539,10 @@ export class CollaborationRoom {
       return opFailure(result.errors.map((e) => (e.candidates ? { message: e.message, candidates: e.candidates } : { message: e.message })));
     }
     // 消す数の1日の上限。消えた物の数で数える(removeWall の壁、deleteObjects の物・壁・部屋)。
+    // 数を増やすのは、下の検査をすべて通って積めたときだけ(断った操作では増やさない)。
     const removedCount = Array.isArray(result.removedIds) ? result.removedIds.length : 0;
-    if (removedCount) {
-      if (counted.del + removedCount > MCP_DELETES_PER_DAY) {
-        return json({ ok: false, code: "delete_limit", errors: [{ message: MCP_DELETE_LIMIT_MESSAGE }] }, 429);
-      }
-      counted.del += removedCount;
-      this.mcpOps = { ...counted };
+    if (removedCount && counted.del + removedCount > MCP_DELETES_PER_DAY) {
+      return json({ ok: false, code: "delete_limit", errors: [{ message: MCP_DELETE_LIMIT_MESSAGE }] }, 429);
     }
     const { patch, unshared } = buildRoomPatch(before, result.plan);
     if (unshared.length) {
@@ -523,6 +560,9 @@ export class CollaborationRoom {
         return opFailure([{ message: "この操作をすると間取りのデータが正しくなくなるため、行いませんでした（" + added.slice(0, 5).join(" / ") + "）" }]);
       }
     }
+    // 現実の家としてあり得ない座標・大きさは断る(外の AI からだけ。データの形の検査の後に見る)。
+    const range = mcpRangeProblem(op, result);
+    if (range) return opFailure([range]);
     const out = (version) => json({
       ok: true,
       version,
@@ -535,9 +575,11 @@ export class CollaborationRoom {
     // 検査の前に作られた部屋で、プランに使えない名前などが残っているときにここで断られる。
     if (roomPatchProblem(patch)) return opFailure([BROKEN_PLAN_MESSAGE]);
     const nextId = Math.max(Number(meta.nextId) || 0, Number(result.nextId) || 0);
-    const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId, mcpOps: counted });
+    const mcpOps = { ...counted, del: counted.del + removedCount };
+    const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId, mcpOps });
     if (!next) return roomNotFound();
     if (next.tooLarge) return opFailure(["この操作をするとプランが保存できる大きさ（10MB）を超えるため、行いませんでした"]);
+    if (this.mcpOps.day === mcpOps.day) this.mcpOps = { ...this.mcpOps, del: Math.max(Number(this.mcpOps.del) || 0, mcpOps.del) };
     return out(next.version);
   }
 

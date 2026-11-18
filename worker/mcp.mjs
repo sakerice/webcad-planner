@@ -41,7 +41,7 @@ import { ROOM_ID_RE, readBytesWithLimit } from "./shared.mjs";
 import { createRoomWithPlan, roomOp, roomRead, ROOM_UNAVAILABLE_MESSAGE } from "./routes-rooms.mjs";
 import { REFUSAL } from "./plan-ctx.mjs";
 import { MCP_RESULT_RULES, MCP_TOOL_NOTE } from "./ai-rules.mjs";
-import { MCP_DELETE_PER_CALL } from "./collab-room.mjs";
+import { MCP_DELETE_PER_CALL, MCP_DELETES_PER_DAY } from "./collab-room.mjs";
 
 export const MCP_PATH = "/api/mcp";
 export const MAX_MCP_BODY_BYTES = 64 * 1024;
@@ -137,6 +137,7 @@ const DESTRUCTIVE = new Set(["deleteObjects", "removeWall"]);
 
 const OP_PREFIX = "house-planner の共有プラン（引数 plan で指す）を直す。";
 const OP_SUFFIX = "\n\n【約束】座標・寸法は mm（x は東、y は南へ増える。図の上が北）。物と部屋の x,y は中心。回転は度で時計回り。"
+  + "この受け口からは、座標は原点から ±200000mm、部屋の幅と奥行きは 455〜100000mm、物の大きさは 100000mm までに限る（外れると失敗で返る）。"
   + "id は open_plan / get_plan の要約にある物を使う（会話で最初にプランを受け取ったら open_plan を1回呼ぶ）。"
   + "失敗したら、引数を直せば通る失敗は直してやり直す。この受け口では行えない操作だと分かったら、利用者に house-planner の画面で行うよう伝える。"
   + "直したら結果の「house-planner で開く」の URL を利用者に伝える。" + MCP_TOOL_NOTE;
@@ -158,13 +159,14 @@ function withPlan(schema) {
   };
 }
 
-// deleteObjects は、この受け口からは1回に MCP_DELETE_PER_CALL 件まで(ルームの /op が断る)。1日の上限もある
-// (worker/collab-room.mjs の MCP_DELETES_PER_DAY)。画面の操作には掛けない。
+// deleteObjects は、この受け口からは1回に MCP_DELETE_PER_CALL 件まで(ルームの /op が断る)。消えた物の数には1日の上限もある
+// (worker/collab-room.mjs の MCP_DELETES_PER_DAY)。画面の操作には掛けない。守れる範囲は collab-room.mjs の冒頭を見る
+// (消す数と桁外れの移動・大きさは抑えるが、名前・設定の書き換えや範囲の中での移動は抑えない)。
 function mcpSchema(t) {
   const schema = withPlan(t.inputSchema);
   if (t.name !== "deleteObjects") return schema;
   const ids = schema.properties.ids;
-  return { ...schema, properties: { ...schema.properties, ids: { ...ids, maxItems: MCP_DELETE_PER_CALL, description: ids.description + `（この受け口からは1回に ${MCP_DELETE_PER_CALL} 件まで）` } } };
+  return { ...schema, properties: { ...schema.properties, ids: { ...ids, maxItems: MCP_DELETE_PER_CALL, description: ids.description + `（この受け口からは1回に ${MCP_DELETE_PER_CALL} 件まで。消えた物はプランごとに1日 ${MCP_DELETES_PER_DAY} 件まで）` } } };
 }
 
 const OP_TOOLS = OperationsCatalog.toMcpTools(DEPS).map((t) => ({
