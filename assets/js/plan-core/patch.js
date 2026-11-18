@@ -34,8 +34,13 @@
   function idOf(item) { return String(item && item.id); }
 
   // 危ない鍵。JSON.parse は "__proto__" を自分の鍵として作るので、値の中に残っていると、
-  // あとで Object.assign や代入で写したときにプロトタイプを差し替えてしまう。どの深さでも受け付けない。
-  var UNSAFE_KEYS = ['__proto__', 'constructor', 'prototype'];
+  // あとで Object.assign や代入で写したときにプロトタイプを差し替えてしまう。
+  // toString・valueOf などを自分の鍵に持つオブジェクトは、文字や数に直すところで例外になる
+  // (部屋の名前を描く・要約に書く、など)。どの深さでも受け付けない。
+  // 一覧は prototype と、Object.prototype にある名前(実行環境に依らないよう固定で持つ)。
+  var UNSAFE_KEYS = ['__proto__', 'constructor', 'prototype', 'toString', 'toLocaleString', 'valueOf',
+    'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+    '__defineGetter__', '__defineSetter__', '__lookupGetter__', '__lookupSetter__'];
   // 値をたどる深さの上限(プランの物の中は、手元で最も深くても3段)。超えたら危ないとみなす。
   var MAX_SCAN_DEPTH = 64;
 

@@ -205,7 +205,9 @@ test('形の合わない差分は例外を出さず、合わない部分だけ�
 test('hasUnsafeKey: 自分の鍵だけを見る。深すぎるものは危ないとみなす', () => {
   assert.equal(P.hasUnsafeKey({ a: { b: [1, { c: 'constructor' }] } }), false, '値の文字は見ない');
   assert.equal(P.hasUnsafeKey(JSON.parse('{"a":[{"__proto__":1}]}')), true);
-  assert.equal(P.hasUnsafeKey({ toString: 1 }), false, 'Object.prototype の名前でも3つ以外は通す');
+  assert.equal(P.hasUnsafeKey({ toString: 1 }), true, '文字に直すときに例外になる鍵も危ない');
+  assert.equal(P.hasUnsafeKey({ a: [{ valueOf: 1 }] }), true);
+  for (const k of Object.getOwnPropertyNames(Object.prototype)) assert.ok(P.UNSAFE_KEYS.includes(k), k + ' が一覧に無い');
   let deep = 1;
   for (let i = 0; i < 70; i++) deep = { a: deep };
   assert.equal(P.hasUnsafeKey(deep), true);
