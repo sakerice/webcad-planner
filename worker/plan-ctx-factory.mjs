@@ -14,7 +14,9 @@
 //
 // 画面のどの関数に合わせたかは、各関数の注釈と .superpowers/sdd/2026-11-18-stage5-mcp/task-2-report.md。
 // 式は画面の関数を1行ずつ写したもので、条件・丸め・計算の順を変えていない(浮動小数の丸めまで同じにするため)。
-// 画面の関数を直したら、ここも直す(照らし合わせのテストが落ちて気づける)。
+// 画面の関数を直したら、ここも直す。書き写し元の本文は tools/tests/worker-ctx-sources.test.cjs(CI で走る)が
+// SHA-256 で見張っていて、変わると落ちる。落ちたら対応する式を見直し、画面テスト worker-ctx-parity を通してから、
+// node tools/tests/worker-ctx-sources.test.cjs --write で記録を作り直す。各式の注釈に書き写し元の名前を書く。
 
 // 断るときの文の頭。続けて(理由)を書く。
 export const REFUSAL = 'この操作は house-planner の画面で行ってください';
@@ -80,15 +82,15 @@ export function createPlanCtxTools(deps) {
   TYPE_ORDER.forEach(function (t) { var s = {}; (TYPES[t].f || []).forEach(function (k) { s[k] = true; }); FLAGS[t] = s; });
   Object.keys(OTHERS).forEach(function (t) { var s = {}; (OTHERS[t].f || []).forEach(function (k) { s[k] = true; }); FLAGS['\u0000' + t] = s; });
   function flag(t, k) { return has(TYPES, t) ? !!FLAGS[t][k] : false; }
-  function entry(t) { return has(TYPES, t) ? TYPES[t] : null; }
+  function entry(t) { return has(TYPES, t) ? TYPES[t] : null; }                     // getFmpItem / ISIZES[t]
 
   // ── 種類(画面の planCoreCtx の catalog と、planChatCtx の分類名の引き方)───────────
   function bestFmpType(t) { return has(LEGACY, t) ? LEGACY[t] : t; }               // bestFmpType
   function isFmpItemType(t) { return !!(t && has(TYPES, t) && TYPES[t].m); }          // isFmpItemType(標準のカタログ)
   function baseKnown(t) { return !!(t && has(TYPES, t)); }                            // ISIZES か FMP_ITEMS にある
   function itemColor(t) { if (has(TYPES, t)) return TYPES[t].c; if (has(OTHERS, t)) return OTHERS[t].c; return undefined; } // ICOLORS[t]
-  function isLightType(t) { return flag(t, 'light'); }
-  function isContextExteriorType(t) { return flag(t, 'contextExterior'); }
+  function isLightType(t) { return flag(t, 'light'); }                                // isLightItemType
+  function isContextExteriorType(t) { return flag(t, 'contextExterior'); }            // isContextExteriorItemType
   function isGroundOnly(t) { return flag(t, 'groundOnly'); }                          // placeGroundOnly(index.html)
   function isGroundLevelType(t) { return flag(t, 'groundLevel'); }                    // isGroundLevelItemType
   function isCeilingFixtureType(t) { return flag(t, 'ceilingFixture'); }              // shiftRoomCeilingFixtures の条件
@@ -96,7 +98,7 @@ export function createPlanCtxTools(deps) {
   function isStairPartType(t) { return t === 'stair' || t === 'stair-corner' || t === 'stair-landing'; }
   function isPlanAnnotationType(t) { return t === 'memo' || t === 'ruler' || t === 'walk-route'; }
   function isWindowLikeType(t) { return t === 'window' || t === 'window-door'; }
-  // canSetItemElevation(index.html)。表に無い種類(追加のセットの品番など)は、画面の規則(開口・注記・
+  // canSetItemElevation(index.html。開口は isOpeningItemType)。表に無い種類(追加のセットの品番など)は、画面の規則(開口・注記・
   // 敷地・基礎以外は真)と同じく真にする。開口の種類は全部表にある。
   function canSetItemElevation(it) {
     if (!it || !it.type) return false;
@@ -106,7 +108,8 @@ export function createPlanCtxTools(deps) {
     if (t === 'room' || t === 'wall' || isPlanAnnotationType(t) || t === 'site-rect' || t === 'foundation') return false;
     return true;
   }
-  // isPlacementSurfaceItem(index.html)。表に無い種類は、台になるかを決められない(追加のセットの分類による)
+  // isPlacementSurfaceItem(index.html。台の分類・種類は ITEM_SURFACE_CATEGORIES・ITEM_SURFACE_TYPES で、種類の表の
+  // surface の印に入っている)。表に無い種類は、台になるかを決められない(追加のセットの分類による)
   // ので、台とみなす(その上に置く物は断る側に倒れる)。
   function isPlacementSurfaceItem(it) {
     if (!it) return false;
@@ -154,7 +157,9 @@ export function createPlanCtxTools(deps) {
   }
 
   // ── 高さ(app-constants.js・app-state.js の関数を、DATA の代わりに引数 p で)──────────
-  function wallHGlobal(p) {                                      // WALL_H(開いたプランの heightDefaults から)
+  // WALL_H(画面がプランを開いたときに heightDefaults から写す値: ensureHeightDefaults・copyPlanWallHeightToGlobal・
+  // clampWallHeightMm。プランが値を持たなければ既定の 2400)
+  function wallHGlobal(p) {
     var hd = p && p.heightDefaults;
     var v = Number(hd && hd.wallHeight);
     if (hd && isFinite(v) && v > 0) return Math.max(C.wallHeightMin, Math.min(C.wallHeightMax, Math.round(v)));
@@ -483,7 +488,7 @@ export function createPlanCtxTools(deps) {
     });
   }
 
-  // ── 周辺の建物の高さ(app-state.js の defaultContextExteriorHeight など)─────────────
+  // ── 周辺の建物の高さ(app-state.js の defaultContextExteriorHeight・contextHeightFromFloors など)─────────────
   function contextStoryHeightMm(p) { return Math.round(Math.max(C.floorHeight || 2700, wallHGlobal(p) || 2400, 2700)); }
   function defaultContextFloors(t) { if (t === 'neighbor-building') return 4; if (t === 'neighbor-house') return 2; return 1; }
   function defaultContextExteriorHeight(p, t) {
@@ -577,10 +582,11 @@ export function createPlanCtxTools(deps) {
         stair: true, stairRadius: STAIR_SNAP_MM, stairMinSpan: STAIR_LINK_MIN_SPAN_MM,
         stairPartEdges: stairPartEdgesMm, isStairPart: isStairPartType,
         isAnnotationType: isPlanAnnotationType,
-        wallThickness: function (w) { var t = Number(w && w.thick); return isFinite(t) && t > 0 ? t : 120; }
+        wallThickness: function (w) { var t = Number(w && w.thick); return isFinite(t) && t > 0 ? t : 120; }  // wallThicknessMm
       },
       hooks: {
-        isLocked: function (o) { return !!(o && o.locked); },
+        // ここから hooks は planOpsCtx(plan-data.js)の hooks を写した物。
+        isLocked: function (o) { return !!(o && o.locked); },                   // isObjectLocked
         canPlace: function (type, floor, cx, cy, p) {
           var t = resolve(type);
           var work = p || cur;
