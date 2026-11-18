@@ -24474,7 +24474,7 @@ var JISDRAW=(function(){
   function stairSymbolSvg(it,LW){
     var hw=it.w/2, hd=it.d/2;
     var out=itemGroupOpen(it);
-    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+(hw*2)+'" height="'+(hd*2)+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
     var label=floorHasUpper(it.floor||1)?'UP':'DN';
     if(it.type==='stair-corner'){
       out+='<line x1="'+hw+'" y1="'+hd+'" x2="'+(-hw)+'" y2="0" stroke="#000" stroke-width="'+LW.mid+'"/>';
@@ -24511,7 +24511,7 @@ var JISDRAW=(function(){
   function kitchenSymbolSvg(it,LW){
     var hw=it.w/2, hd=it.d/2;
     var out=itemGroupOpen(it);
-    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+(hw*2)+'" height="'+(hd*2)+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
     var sinkW=it.w*0.32, sinkD=it.d*0.55, sinkCx=-hw+it.w*0.06+sinkW/2, rx=Math.min(sinkW,sinkD)*0.18;
     out+='<rect x="'+(sinkCx-sinkW/2)+'" y="'+(-sinkD/2)+'" width="'+sinkW+'" height="'+sinkD+'" rx="'+rx+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
     var stoveCx=hw-it.w*0.24, stoveW=it.w*0.38, stoveD=it.d*0.6, br=Math.min(stoveW,stoveD)*0.16;
@@ -24524,7 +24524,7 @@ var JISDRAW=(function(){
   function bathSymbolSvg(it,LW){
     var hw=it.w/2, hd=it.d/2, margin=Math.min(it.w,it.d)*0.12;
     var out=itemGroupOpen(it);
-    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+(hw*2)+'" height="'+(hd*2)+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
     out+='<rect x="'+(-hw+margin)+'" y="'+(-hd+margin)+'" width="'+(it.w-margin*2)+'" height="'+(it.d-margin*2)+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
     var dr=Math.min(it.w,it.d)*0.05;
     out+='<circle cx="'+(-hw+margin*1.6)+'" cy="'+(-hd+margin*1.6)+'" r="'+dr+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
@@ -24543,7 +24543,7 @@ var JISDRAW=(function(){
   function sinkSymbolSvg(it,LW){
     var hw=it.w/2, hd=it.d/2;
     var out=itemGroupOpen(it);
-    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+(hw*2)+'" height="'+(hd*2)+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
     out+='<ellipse cx="0" cy="0" rx="'+(it.w*0.36)+'" ry="'+(it.d*0.32)+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
     out+=itemGroupClose();
     return out;
