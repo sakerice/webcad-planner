@@ -189,5 +189,6 @@
     return text;
   }
 
-  return { summarize: summarize, utf8Bytes: utf8Bytes, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES };
+  // clean は外の AI の受け口(worker/mcp.mjs)が、検査や警告の文にも要約と同じ置き換えを通すために使う。
+  return { summarize: summarize, utf8Bytes: utf8Bytes, clean: clean, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES };
 }));
