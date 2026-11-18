@@ -88,7 +88,7 @@ function generatedBad() {
     { id: 'too-long-key', patch: up('items', { id: 1, ['k'.repeat(1001)]: 1 }) },
     { id: 'too-long-id', patch: up('items', { id: 'i'.repeat(201) }) },
     { id: 'too-long-remove-id', patch: { collections: { items: { upserts: [], removes: ['r'.repeat(201)] } }, fields: {} } },
-    { id: 'id-not-finite', patch: up('items', { id: 1e400 }) },
+    { id: 'id-infinity-sent-as-null', patch: up('items', { id: 1e400 }) },   // JSON にすると null になる(有限でない数は JSON では送れない)
   ];
 }
 
@@ -287,4 +287,124 @@ test('/op: 引数に危ない鍵があれば断る(ルームは変わらない)'
   assert.equal(res.ok, false);
   assert.equal((await env.room(made.roomId).storage.get('meta')).version, 1);
   assertCleanPrototype('/op');
+});
+
+// ── 検査のあとの直し(2026-11-19)。検査役が見つけたすり抜けを1つずつ ──
+
+test('/update: 座標の空の文字は null と同じく通す(古い保存データを弾かない)', async () => {
+  const env = await makeEnv();
+  const made = await createRoom(env);
+  const res = await call(env, 'POST', `/api/rooms/${made.roomId}/update`, { type: 'patch', clientId: 'a', baseVersion: 1,
+    patch: { collections: { items: { upserts: [{ id: 'i1', type: 'bed', x: '', y: 0, w: 900, d: 2000 }], removes: [] } } } });
+  assert.equal(res.status, 200);
+});
+
+// 画面は受けた壁の id を鍵に、外壁の設定表へ壁ごとの行を作り(getExteriorWallSetting)、次の変更でその表を送り返す。
+// その送り返しが通ること(id が Object.prototype の名前なら、壁そのものを最初に断る)。
+test('/update: 壁を受けた画面が補完した外壁の設定表を送り返しても通る(id が数・文字・UUID)', async () => {
+  const { workerOpsCtx } = await mod('worker/plan-ctx.mjs');
+  const Ops = require('../../assets/js/plan-core/operations.js');
+  for (const id of [9001, 'w12', '3f2a9c4e-1b7d-4c55-9a0e-7d2f5b1c8e44', '']) {
+    const env = await makeEnv();
+    const made = await createRoom(env);
+    const wall = { id, floor: 1, x1: 0, y1: 20000, x2: 3000, y2: 20000, thick: 120 };
+    const send = (patch, v) => call(env, 'POST', `/api/rooms/${made.roomId}/update`, { type: 'patch', clientId: 'a', baseVersion: v, patch });
+    assert.equal((await send({ collections: { walls: { upserts: [wall], removes: [] } } }, 1)).status, 200, String(id));
+    const p = await getPlan(env, made.roomId);
+    Ops.applyProp(p.walls.find((w) => w.id === id), 'exteriorColor', '#123456', p, workerOpsCtx(p));
+    const back = await send({ collections: {}, fields: { exteriorWallSettings: p.exteriorWallSettings } }, 2);
+    assert.equal(back.status, 200, String(id) + ' ' + (await back.text()));
+  }
+});
+
+test('POST /api/rooms と /save: 物がオブジェクトでない・id が使えない名前・欄の形の誤りのプランは 400', async () => {
+  const base = () => plan();
+  const bad = [
+    ['walls-null', (p) => { p.walls.push(null); }],
+    ['items-number', (p) => { p.items.push(5); }],
+    ['rooms-string', (p) => { p.rooms.push('x'); }],
+    ['wall-id-constructor', (p) => { p.walls[0].id = 'constructor'; }],
+    ['room-name-toString', (p) => { p.rooms[0].n = { toString: 1, valueOf: 1 }; }],
+    ['item-type-object', (p) => { p.items[0].type = {}; }],
+    ['ext-walls-string', (p) => { p.exteriorWallSettings = { walls: 'x' }; }],
+    ['roof-floors-string', (p) => { p.roofAppearance = { whole: null, floors: 'x' }; }],
+    ['walls-not-array', (p) => { p.walls = { 0: p.walls[0] }; }],
+  ];
+  const env = await makeEnv();
+  for (const [name, edit] of bad) {
+    const p = base(); edit(p);
+    const res = await call(env, 'POST', '/api/rooms', p);
+    assert.equal(res.status, 400, name);
+  }
+  assert.equal(env.ROOMS.created.length, 0);
+  const made = await createRoom(env);
+  const before = JSON.stringify(await getPlan(env, made.roomId));
+  for (const [name, edit] of bad) {
+    const p = base(); edit(p);
+    const res = await call(env, 'POST', `/api/rooms/${made.roomId}/save`, { clientId: 'a', baseVersion: 1, plan: p });
+    assert.equal(res.status, 400, '/save ' + name);
+  }
+  assert.equal(JSON.stringify(await getPlan(env, made.roomId)), before);
+  assertCleanPrototype('物ごとのプランの検査');
+});
+
+test('/update: 当てたあとのプランが保存の上限(10MB)を超える差分は 413 で、部屋は変わらない。書き戻しは通り続ける', async () => {
+  const env = await makeEnv();
+  const made = await createRoom(env);
+  const room = env.room(made.roomId);
+  const ws = connect(room, 'b');
+  let version = 1, rejected = null;
+  for (let i = 0; i < 9; i++) {
+    const item = { id: 'big' + i, type: 'bed', x: 0, y: 0, w: 900, d: 2000, memo: 'x'.repeat(1400 * 1000) };
+    const res = await call(env, 'POST', `/api/rooms/${made.roomId}/update`, { type: 'patch', clientId: 'a', baseVersion: version, patch: { collections: { items: { upserts: [item], removes: [] } } } });
+    if (res.status === 413) { rejected = i; break; }
+    assert.equal(res.status, 200, 'i=' + i);
+    version = (await res.json()).version;
+  }
+  assert.ok(rejected !== null, '上限を超える差分を受け付けた');
+  const metaBefore = await room.storage.get('meta');
+  const sentBefore = ws.sent.length;
+  const again = await call(env, 'POST', `/api/rooms/${made.roomId}/update`, { type: 'patch', clientId: 'a', baseVersion: version, patch: { collections: { items: { upserts: [{ id: 'big-x', memo: 'y'.repeat(1400 * 1000) }], removes: [] } } } });
+  assert.equal(again.status, 413);
+  assert.deepEqual(await room.storage.get('meta'), metaBefore, '断ったのに meta が変わった');
+  assert.equal(ws.sent.length, sentBefore, '断ったのに流した');
+  const got = await call(env, 'GET', `/api/rooms/${made.roomId}`);
+  assert.ok((await got.text()).length <= 10 * 1024 * 1024);
+  assert.ok(await room.instance.checkpoint(await room.storage.get('meta')), '書き戻せない');
+  // 小さい差分は今までどおり通る
+  const small = await call(env, 'POST', `/api/rooms/${made.roomId}/update`, { type: 'patch', clientId: 'a', baseVersion: version, patch: { collections: {}, fields: { northDeg: 5 } } });
+  assert.equal(small.status, 200);
+});
+
+test('/read・/op: 保存済みのプランの形が崩れていても例外で落ちず、分かる失敗を返す', async () => {
+  const { roomRead, roomOp } = await mod('worker/routes-rooms.mjs');
+  const { BROKEN_PLAN_MESSAGE } = await mod('worker/collab-room.mjs');
+  const env = await makeEnv();
+  const made = await createRoom(env);
+  // 検査の前に置かれた本体(R2)を作る: 部屋の名前と壁の階が、文字に直せないオブジェクト
+  const p = plan();
+  p.rooms[0].n = { toString: 1, valueOf: 1 };
+  p.walls[0].floor = { toString: 1, valueOf: 1 };
+  env.PLANS.objects.get(`rooms/${made.roomId}.json`).body = JSON.stringify(p);
+  for (const what of ['summary', 'inspect']) {
+    const r = await roomRead(env, made.roomId, what);
+    assert.deepEqual(r, { ok: false, errors: [{ message: BROKEN_PLAN_MESSAGE }] }, what);
+  }
+  const op = await roomOp(env, made.roomId, 'moveObject', { id: p.items[1].id, dx: 10, dy: 0 });
+  assert.deepEqual(op, { ok: false, errors: [{ message: BROKEN_PLAN_MESSAGE }] });
+  assert.equal((await env.room(made.roomId).storage.get('meta')).version, 1);
+});
+
+test('/op: 操作が作る差分も同じ検査を通す(検査の前に作られた部屋の、使えない名前の壁)', async () => {
+  const { roomOp } = await mod('worker/routes-rooms.mjs');
+  const env = await makeEnv();
+  const made = await createRoom(env);
+  const p = plan();
+  p.walls[0].id = 'constructor';
+  env.PLANS.objects.get(`rooms/${made.roomId}.json`).body = JSON.stringify(p);
+  const { BROKEN_PLAN_MESSAGE } = await mod('worker/collab-room.mjs');
+  const op = await roomOp(env, made.roomId, 'setProps', { id: 'constructor', set: { wallHeight: 2600 } });
+  assert.deepEqual(op, { ok: false, errors: [{ message: BROKEN_PLAN_MESSAGE }] });
+  assert.equal((await env.room(made.roomId).storage.get('meta')).version, 1);
+  assert.equal((await env.room(made.roomId).storage.list({ prefix: 'patch:' })).size, 0);
 });
