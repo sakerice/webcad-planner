@@ -40,21 +40,28 @@ export const ROOM_LIMITS = Object.freeze({
   maxSameId: 8,              // 1つの集まりの中で同じ id の物の数(手元の最大は2。raised-floor-plan.json)
 });
 
-// 1つの集まりの中で、同じ id(String で同じになる物)が並ぶ数の最大。id の無い物は数えない。
-// 差分の当て方は、同じ id の物を全部その upsert の物に置き換えるので、差分の大きさはこの数だけ掛かって効く。
-export function maxSameId(plan) {
-  let most = 0;
+// 集まりごとに、upsert が当たる鍵(PlanCorePatch.upsertKey。当て方と同じ関数)ごとの物の数を数える。
+// 戻り値は {walls: Map(鍵 → 数), items: …, rooms: …}。id の無い・null の物は upsert が当たらないので数えない。
+export function upsertKeyCounts(plan) {
+  const out = {};
   for (const name of PlanCorePatch.COLLECTIONS) {
     const list = plan && Array.isArray(plan[name]) ? plan[name] : [];
     const count = new Map();
     for (const item of list) {
-      if (!item || typeof item !== "object" || item.id === undefined || item.id === null) continue;
-      const k = String(item.id);
-      const n = (count.get(k) || 0) + 1;
-      count.set(k, n);
-      if (n > most) most = n;
+      const key = item && typeof item === "object" ? PlanCorePatch.upsertKey(item) : null;
+      if (key !== null) count.set(key, (count.get(key) || 0) + 1);
     }
+    out[name] = count;
   }
+  return out;
+}
+
+// 1つの集まりの中で、同じ鍵に当たる物の数の最大。差分の当て方は、同じ鍵の物を全部その upsert の物に置き換えるので、
+// 差分の大きさはこの数だけ掛かって効く(見積もりの上界に使う)。
+export function maxSameId(plan) {
+  let most = 0;
+  const counts = upsertKeyCounts(plan);
+  for (const name of PlanCorePatch.COLLECTIONS) for (const n of counts[name].values()) if (n > most) most = n;
   return most;
 }
 
@@ -128,10 +135,15 @@ export function jsonShapeProblem(v, depth, maxDepth, where) {
   return null;
 }
 
-function idProblem(id, where) {
+// forUpsert のときは、id の文字 "undefined"・"null"・空白だけ(空の文字は除く)も断る。画面は送る前に
+// ensureObjectIds で id の無い物に数を振るので、正当な画面の upsert にこの id は無い(id の無い物を指す名前に見えるため)。
+// removes では受ける(画面は、id を振る前の物を "undefined" の鍵で消す)。空の文字の id は、画面が振り直さない古いデータに
+// あり得るので受け、同じ鍵の物の数として見積もりに数える。
+function idProblem(id, where, forUpsert) {
   if (typeof id === "string") {
     if (id.length > ROOM_LIMITS.maxIdLength) return `${where} の id が長すぎます（${ROOM_LIMITS.maxIdLength} 字まで）`;
     if (UNSAFE.has(id)) return `${where} の id に使えない名前です（${id}）`;
+    if (forUpsert && (id === "undefined" || id === "null" || (id !== "" && id.trim() === ""))) return `${where} の id に使えない値です`;
     return null;
   }
   if (typeof id === "number" && Number.isFinite(id)) return null;
@@ -166,7 +178,7 @@ function objectProblem(item, name, where, strict) {
   if (!isPlainObject(item)) return `${where} の物はオブジェクトで送ってください`;
   if (own(item, "id")) {
     if (!strict && (item.id === null || item.id === undefined || item.id === "")) { /* 古いデータの id の無い物は画面が振る */ }
-    else { const m = idProblem(item.id, where); if (m) return m; }
+    else { const m = idProblem(item.id, where, strict); if (m) return m; }
   } else if (strict) return `${where} の物に id がありません`;
   return scalarProblem(item, where) || (strict ? coordProblem(item, name, where) : null);
 }

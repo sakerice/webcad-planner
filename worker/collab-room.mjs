@@ -16,7 +16,7 @@ import {
 import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
-import { roomPatchProblem, roomPlanProblem, maxSameId } from "./room-guard.mjs";
+import { roomPatchProblem, roomPlanProblem, maxSameId, upsertKeyCounts } from "./room-guard.mjs";
 
 // MCP 経由の差分の送り手の名前。画面の clientId は 24 桁の16進(index.html の sharedClientId)なので重ならない。
 export const MCP_CLIENT_ID = "mcp";
@@ -335,6 +335,23 @@ export class CollaborationRoom {
     return { planBytes, journalBytes, sameIdMax, learned };
   }
 
+  // 本体(R2)に、積んである差分とこの差分を当てたあとの大きさの上界。プランを作らずに数える(本体の JSON を読むだけ)。
+  // 鍵ごとの物の数は本体から数え(room-guard.mjs の upsertKeyCounts。当て方と同じ PlanCorePatch.upsertKey)、
+  // 差分ごとの増え方は PlanCorePatch.patchGrowthBound(当て方と同じ取り出し方)で数える。
+  async growthBound(meta, patch) {
+    const object = await this.env.PLANS.get(roomKey(meta.roomId));
+    if (!object) return null;
+    const text = await object.text();
+    let plan = null;
+    try { plan = JSON.parse(text); } catch { return null; }
+    const counts = upsertKeyCounts(plan);
+    const countOf = (name, key) => counts[name].get(key) || 0;
+    const sizeOf = (v) => encodedSize(JSON.stringify(v === undefined ? null : v));
+    let total = encodedSize(text);
+    for (const entry of (await this.listJournal()).values()) total += PlanCorePatch.patchGrowthBound(entry, countOf, sizeOf);
+    return total + PlanCorePatch.patchGrowthBound(patch, countOf, sizeOf);
+  }
+
   // 差分を1つ積んで全員へ流す。/update(画面)と /op(外の AI)が共用する。
   // 版を1つ進め、期限を延ばし、書き戻しを予約する。差分が大きいときは積まずにその場で R2 へ書き戻す。
   // 戻り値は進めたあとの meta。書き戻しで元の全体が R2 に無かったときは null(何も流さない)。
@@ -365,7 +382,14 @@ export class CollaborationRoom {
     const sizes = await this.roomSizes(meta);
     if (!sizes) return null;
     Object.assign(next, sizes.learned);
-    const bound = sizes.planBytes + (sizes.journalBytes + patchBytes) * Math.max(1, sizes.sameIdMax);
+    // 1段目: 安い見積もり。差分の大きさに、同じ鍵の物の数の最大を掛ける
+    let bound = sizes.planBytes + (sizes.journalBytes + patchBytes) * Math.max(1, sizes.sameIdMax);
+    // 2段目: 1段目が上限を超えたら、当て方と同じ規則(PlanCorePatch.patchGrowthBound)で、本体の鍵ごとの数から上界を数え直す
+    if (bound > MAX_PLAN_BYTES) {
+      const exact = await this.growthBound(meta, patch);
+      if (exact === null) return null;
+      bound = Math.min(bound, exact);
+    }
     if (bound > 2 * MAX_PLAN_BYTES) return { tooLarge: true };
     let writeNow = storedBytes > MAX_JOURNAL_ENTRY_BYTES;
     let materialized = null;

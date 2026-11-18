@@ -113,3 +113,109 @@ test('差分の当て方: id が Object.prototype の名前の物は、upserts �
   P.applyPatch(p, { collections: { walls: { upserts: [{ id: 'toString', v: 1 }, { id: 'constructor', v: 2 }, { id: 2 }], removes: ['__proto__', 'constructor'] } } });
   assert.deepEqual(p.walls, [{ id: 'constructor', v: 0 }, { id: 1 }, { id: 2 }]);
 });
+
+// ── 最終検査のあと(2026-11-19)。id の無い物・null の物を並べて、見積もりをすり抜ける形 ──
+const noIdPlan = (n, mk) => ({ walls: [], items: Array.from({ length: n }, mk), rooms: [] });
+const bigUpsert = (id) => ({ collections: { items: { upserts: [{ id, x: 0, y: 0, pad: 'p'.repeat(2000) }], removes: [] } } });
+
+test('/save のあと id の無い物・null の物に当てる upsert は断られ、部屋は膨らまない(検査役の3つの形)', async () => {
+  const forms = [
+    ['id 無し × 50000 に "undefined"', noIdPlan(50000, () => ({})), 'undefined'],
+    ['null × 50000 に "null"', noIdPlan(50000, () => ({ id: null })), 'null'],
+    ['"undefined" × 8 + id 無し × 49992 に "undefined"', noIdPlan(50000, (_, i) => (i < 8 ? { id: 'undefined' } : {})), 'undefined'],
+  ];
+  for (const [label, p, id] of forms) {
+    const env = await makeEnv();
+    const made = await createRoom(env);
+    const saved = await call(env, 'POST', `/api/rooms/${made.roomId}/save`, { clientId: 'a', baseVersion: 1, plan: p });
+    assert.equal(saved.status, 200, label + ' /save(id の無い物を含む古いプランは弾かない)');
+    const res = await call(env, 'POST', `/api/rooms/${made.roomId}/update`, { type: 'patch', clientId: 'a', baseVersion: 2, patch: bigUpsert(id) });
+    assert.equal(res.status, 400, label);
+    const got = await call(env, 'GET', `/api/rooms/${made.roomId}`);
+    assert.ok((await got.text()).length < 2 * 1024 * 1024, label + ': 部屋が膨らんだ');
+  }
+});
+
+test('差分の当て方: id の無い物・null の物には upsert を当てない(古い Worker が積んだ差分でも膨らまない)', async () => {
+  const p = noIdPlan(5, (_, i) => (i % 2 ? {} : { id: null }));
+  P.applyPatch(p, { collections: { items: { upserts: [{ id: 'undefined', v: 1 }, { id: 'null', v: 2 }, { v: 3 }], removes: [] } } });
+  assert.equal(p.items.length, 7, '当たらない upsert は新しい物として1つずつ足す(id の無い upsert の物は足さない)');
+  assert.deepEqual(p.items.slice(5), [{ id: 'undefined', v: 1 }, { id: 'null', v: 2 }]);
+  // removes は今までどおり idOf で当てる(画面は id を振る前の物を "undefined" で消す)
+  P.applyPatch(p, { collections: { items: { upserts: [], removes: ['undefined'] } } });
+  assert.deepEqual(p.items.map((x) => x.id), [null, null, null, 'null']);
+  // 古い Worker が積んだ差分の部屋を開いても膨らまない
+  const env = await makeEnv();
+  const made = await createRoom(env);
+  env.PLANS.objects.get(`rooms/${made.roomId}.json`).body = JSON.stringify(noIdPlan(50000, () => ({})));
+  await env.room(made.roomId).storage.put('patch:000000000002', bigUpsert('undefined'));
+  const got = await call(env, 'GET', `/api/rooms/${made.roomId}`);
+  assert.ok((await got.text()).length < 2 * 1024 * 1024);
+});
+
+test('作成と /save の「同じ id は 8 個まで」は、当て方と同じ鍵で数える(id の無い物は upsert が当たらないので数えない)', async () => {
+  const env = await makeEnv();
+  assert.equal((await call(env, 'POST', '/api/rooms', noIdPlan(9, () => ({ id: 'undefined' })))).status, 400, '文字の "undefined" は同じ鍵');
+  assert.equal((await call(env, 'POST', '/api/rooms', noIdPlan(50, () => ({})))).status, 201, 'id の無い物そのものは断らない');
+  assert.equal((await call(env, 'POST', '/api/rooms', noIdPlan(9, () => ({ id: '' })))).status, 400, '空の文字の id は同じ鍵として数える');
+});
+
+test('見積もりの2段目: 安い見積もりが上限を超えても、当て方と同じ規則の上界が収まれば、当てずに受ける', async () => {
+  const env = await makeEnv();
+  const p = plan();
+  p.items.push({ ...p.items[0] });   // 同じ id が2個(安い見積もりは差分に2を掛ける)
+  const made = await createRoom(env, p);
+  const room = env.room(made.roomId);
+  let materialized = 0;
+  const orig = room.instance.materializePlan.bind(room.instance);
+  room.instance.materializePlan = async (...a) => { materialized++; return orig(...a); };
+  // 新しい id の 6MB の物: 安い見積もりは 本体 + 12MB で上限を超えるが、実際には1つ足すだけ
+  const res = await call(env, 'POST', `/api/rooms/${made.roomId}/update`, { type: 'patch', clientId: 'a', baseVersion: 1, patch: { collections: { items: { upserts: [{ id: 'new', memo: 'm'.repeat(6 * 1024 * 1024) }], removes: [] } } } });
+  assert.equal(res.status, 200);
+  assert.equal(materialized, 1, '上界が上限以下なら、書き戻しのとき以外にプランを作らない');
+});
+
+// 性質: 無作為のプランと差分の列で、当て方と同じ規則で数えた上界 ≥ 実際に当てた大きさ。
+// 数え方が当て方とずれたら落ちる(id の無い物・null・数と文字の id・重なる id・removes・欄を混ぜる)。
+test('性質: patchGrowthBound の上界は、実際に当てたあとの大きさ以上(無作為 400 通り)', async () => {
+  const { upsertKeyCounts, maxSameId } = await mod('worker/room-guard.mjs');
+  let seed = 12345;
+  const rnd = (n) => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
+  const ids = [undefined, null, 1, '1', 2, 'a', '', 'undefined', 'null', 3];
+  const mkItem = () => { const o = { x: rnd(1000), pad: 'q'.repeat(rnd(40)) }; const id = ids[rnd(ids.length)]; if (id !== undefined) o.id = id; return o; };
+  const size = (v) => Buffer.byteLength(JSON.stringify(v === undefined ? null : v));
+  for (let trial = 0; trial < 400; trial++) {
+    const p = { walls: [], items: [], rooms: [] };
+    for (const name of P.COLLECTIONS) for (let i = rnd(12); i > 0; i--) p[name].push(mkItem());
+    if (rnd(2)) p.northDeg = rnd(360);
+    const counts = upsertKeyCounts(p);
+    const countOf = (name, key) => counts[name].get(key) || 0;
+    const k = Math.max(1, maxSameId(p));
+    let bound = size(p), quick = size(p);
+    const q = JSON.parse(JSON.stringify(p));
+    for (let step = rnd(5) + 1; step > 0; step--) {
+      const patch = { collections: {}, fields: {} };
+      for (const name of P.COLLECTIONS) {
+        if (!rnd(2)) continue;
+        const upserts = []; for (let i = rnd(4); i > 0; i--) upserts.push(mkItem());
+        const removes = []; for (let i = rnd(3); i > 0; i--) removes.push(String(ids[rnd(ids.length)]));
+        patch.collections[name] = { upserts, removes };
+      }
+      if (rnd(2)) patch.fields.northDeg = rnd(360);
+      if (rnd(3) === 0) patch.fields.floors = { 1: { pad: 'f'.repeat(rnd(50)) } };
+      bound += P.patchGrowthBound(patch, countOf, size);
+      quick += size(patch) * k;
+      P.applyPatch(q, patch);
+      assert.ok(size(q) <= bound, `試行 ${trial}: 上界 ${bound} < 実際 ${size(q)}`);
+      assert.ok(size(q) <= quick, `試行 ${trial}: 安い見積もり ${quick} < 実際 ${size(q)}`);
+    }
+  }
+});
+
+test('Worker の大きさの数え方は、当て方と同じ関数(PlanCorePatch.upsertKey・patchGrowthBound)を使う', () => {
+  const guard = fs.readFileSync(join(ROOT, 'worker/room-guard.mjs'), 'utf8');
+  const room = fs.readFileSync(join(ROOT, 'worker/collab-room.mjs'), 'utf8');
+  assert.match(guard, /PlanCorePatch\.upsertKey\(/, 'room-guard.mjs が当て方の鍵の関数を使っていない');
+  assert.match(room, /PlanCorePatch\.patchGrowthBound\(/, 'collab-room.mjs が当て方と同じ上界の関数を使っていない');
+  assert.ok(!/String\(item\.id\)/.test(guard), 'room-guard.mjs が自前で id を文字にして数えている');
+});
