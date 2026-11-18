@@ -1,0 +1,360 @@
+// Worker 用の ctx(worker/plan-ctx-factory.mjs)が、画面のチャット(assets/js/plan-data.js の planChatCtx)と
+// 同じ結果を出すかを、実物の画面の上で照らし合わせる。
+//
+// ページの中で、画面の部品(PlanCoreOperations など)と fetch した表(worker-catalog.json・tags.json)を
+// 工場 createPlanCtxTools に渡して Worker と同じ ctx を作り、同じプラン・同じ操作を両方に当てる。
+//   - Worker が当てられた操作は、チャットでも当たり、結果(プラン全体の JSON・changedIds・removedIds・warnings)が
+//     1文字も違わないこと。違えば失敗。
+//   - Worker が断った操作(「この操作は house-planner の画面で行ってください」)は一覧にして出す。
+//     断る文でない誤りで Worker だけが失敗したら失敗。
+//   - 両方が失敗した操作は、誤りの文と候補が同じであること。
+// プランは凍結間取り tools/tests/fixtures/house-2f.json と、それを書き換えた変種(高さの設定・段差・天井高の指定・
+// 面ごとの外壁設定)。変種の壁の高さの既定は、画面の WALL_H をその値にしてから当てる(画面でそのプランを開いた状態)。
+//
+// sh tools/run_browser_tests.sh worker-ctx-parity
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const PLAN = JSON.parse(readFileSync(join(HERE, 'fixtures', 'house-2f.json'), 'utf8'));
+const APP = process.env.APP_URL || 'http://localhost:8932/';
+const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
+const T = { timeout: 60000 };
+
+const browser = await chromium.launch();
+try {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const errors = [];
+  page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text())) errors.push('console.error: ' + m.text()); });
+  page.on('dialog', (d) => d.accept());
+  await page.goto(APP + (APP.includes('?') ? '&' : '?') + 'preset=blank');
+  await page.waitForFunction(() => window.ST && window.DATA && window.PRESET_CURRENT === 'blank', null, T);
+  await page.waitForSelector('#app-loading', { state: 'hidden', ...T });
+  await page.evaluate((plan) => {
+    ['walls', 'rooms', 'items', 'floorMetadata', 'exteriorWallSettings', 'interiorWallSettings', 'roofAppearance', 'exteriorDetail'].forEach((k) => {
+      if (plan[k] !== undefined) DATA[k] = plan[k];
+    });
+    let maxId = 0;
+    DATA.items.concat(DATA.walls).forEach((o) => { const n = Number(o.id); if (isFinite(n) && n > maxId) maxId = n; });
+    nextId = Math.max(nextId || 1, Math.floor(maxId) + 1);
+    normalizeLoadedPlan({ resetHeights: false, restoreView: false });
+    draw2d();
+  }, PLAN);
+  await page.waitForFunction(() => typeof CATALOGUE_TAGS !== 'undefined' && CATALOGUE_TAGS && CATALOGUE_TAGS.items, null, T);
+
+  const out = await page.evaluate(async (app) => {
+    const F = await import(new URL('worker/plan-ctx-factory.mjs', app).href);
+    const catalog = await (await fetch(new URL('assets/data/worker-catalog.json', app).href)).json();
+    const tags = await (await fetch(new URL('assets/models/tags.json', app).href)).json();
+    const tools = F.createPlanCtxTools({
+      catalog, tags, Operations: PlanCoreOperations, Settable: PlanSettable, Knowledge: ObjectKnowledge, FreeApply: PlanFreeApply,
+      HeightModel, Summary: ChatPlanSummary, Inspect: PlanCoreInspect, Schema: PlanSchema, Check: PlanCheck, Structure: PlanStructure,
+    });
+    const Ops = PlanCoreOperations;
+    const json = (v) => JSON.stringify(v, (k, x) => (k.charAt(0) === '_' ? undefined : x));
+    const clone = (v) => JSON.parse(json(v));
+    const realData = DATA, realJson = json(DATA), wallHSaved = WALL_H;
+    const res = { total: 0, same: 0, bothFailed: 0, refused: [], failures: [], byVariant: {}, deadFaces: [] };
+
+    // ── 照らし合わせの1件 ──
+    function check(variant, plan, op, label) {
+      res.total++;
+      const before = json(plan);
+      const w = tools.workerApply(plan, [op]);
+      if (json(plan) !== before) { res.failures.push({ variant, label, why: 'Worker がプランを書き換えた' }); return; }
+      nextId = F.firstNewId(plan);
+      let c;
+      try { c = Ops.applyOperations(plan, [op], planChatCtx()); } catch (e) { c = { errors: [{ message: '例外: ' + e.message }] }; }
+      const v = res.byVariant[variant] = res.byVariant[variant] || { total: 0, same: 0, bothFailed: 0, refused: 0 };
+      v.total++;
+      if (w.errors.length && c.errors.length) {
+        const a = json(w.errors.map((e) => [e.message, e.candidates || null]));
+        const b = json(c.errors.map((e) => [e.message, e.candidates || null]));
+        if (a !== b) res.failures.push({ variant, label, why: '両方失敗したが文が違う', worker: a, chat: b });
+        else { res.bothFailed++; v.bothFailed++; }
+        return;
+      }
+      if (w.errors.length) {
+        const msg = w.errors[0].message;
+        if (msg.indexOf(F.REFUSAL) === 0) { res.refused.push({ variant, label, message: msg }); v.refused++; }
+        else res.failures.push({ variant, label, why: 'Worker だけが失敗', worker: msg });
+        return;
+      }
+      if (c.errors.length) { res.failures.push({ variant, label, why: 'チャットだけが失敗', chat: c.errors[0].message }); return; }
+      const a = json([w.plan, w.changedIds, w.removedIds, w.warnings]);
+      const b = json([c.plan, c.changedIds, c.removedIds, c.warnings]);
+      if (a === b) { res.same++; v.same++; return; }
+      // 決めて受け入れている違いは1つだけ: 消したあとの面ごとの外壁設定(exteriorWallSettings.faces)の片付け。
+      // 画面は今の外面を幾何で求め直して当たらない行を消すが、Worker は消えた壁の行だけを消す
+      // (求め直しは 1 階あたり数 ms〜十数 ms かかり、Worker の計算時間に収まらない)。
+      // 残るのは画面が消した行=今のどの外面にも当たらない行だけで、見た目は変わらず、画面で開くと片付く。
+      // ここでは「違いがそれだけで、画面の残した行は Worker にも同じ値で残っている」ことを確かめる。
+      const ws = w.plan.exteriorWallSettings, cs = c.plan.exteriorWallSettings;
+      if (ws && cs && ws.faces && cs.faces) {
+        const wNoFaces = Object.assign({}, w.plan, { exteriorWallSettings: Object.assign({}, ws, { faces: null }) });
+        const cNoFaces = Object.assign({}, c.plan, { exteriorWallSettings: Object.assign({}, cs, { faces: null }) });
+        const kept = Object.keys(cs.faces).every((k) => json(ws.faces[k]) === json(cs.faces[k]));
+        const order = Object.keys(ws.faces).filter((k) => k in cs.faces).join('|') === Object.keys(cs.faces).join('|');
+        if (kept && order && json([wNoFaces, w.changedIds, w.removedIds, w.warnings]) === json([cNoFaces, c.changedIds, c.removedIds, c.warnings])) {
+          res.same++; v.same++;
+          res.deadFaces.push({ variant, label, left: Object.keys(ws.faces).filter((k) => !(k in cs.faces)).length });
+          return;
+        }
+      }
+      // どこが違うか(物・部屋・壁は id ごと、ほかは欄ごと)
+      const diff = [];
+      ['items', 'rooms', 'walls'].forEach((k) => {
+        const wm = new Map((w.plan[k] || []).map((o) => [String(o.id), json(o)]));
+        (c.plan[k] || []).forEach((o) => { const s = json(o); if (wm.get(String(o.id)) !== s) diff.push({ k, worker: wm.get(String(o.id)) || null, chat: s }); });
+        if ((w.plan[k] || []).length !== (c.plan[k] || []).length) diff.push({ k, count: [(w.plan[k] || []).length, (c.plan[k] || []).length] });
+      });
+      Object.keys(Object.assign({}, w.plan, c.plan)).forEach((k) => {
+        if (['items', 'rooms', 'walls'].includes(k)) return;
+        if (json(w.plan[k]) !== json(c.plan[k])) diff.push({ k, worker: json(w.plan[k]), chat: json(c.plan[k]) });
+      });
+      ['changedIds', 'removedIds', 'warnings'].forEach((k) => { if (json(w[k]) !== json(c[k])) diff.push({ k, worker: json(w[k]), chat: json(c[k]) }); });
+      res.failures.push({ variant, label, why: '結果が違う', diff: diff.slice(0, 4) });
+    }
+
+    // ── 場所選び ──
+    function inside(it, px, py) {
+      const cx = it.x + it.w / 2, cy = it.y + it.d / 2, rad = -(it.rot || 0) * Math.PI / 180;
+      const dx = px - cx, dy = py - cy;
+      const lx = dx * Math.cos(rad) - dy * Math.sin(rad), ly = dx * Math.sin(rad) + dy * Math.cos(rad);
+      return Math.abs(lx) <= it.w / 2 + 50 && Math.abs(ly) <= it.d / 2 + 50;
+    }
+    // 床の空いた場所を探すときに避ける物: 台になる物(基礎は除く)と階段。照明・敷物・カーテンなどは避けない。
+    const blocks = (it) => (it.type !== 'foundation' && isPlacementSurfaceItem(it)) || isStairPartType(it.type);
+    function freeIn(plan, room) {
+      for (let fy = 0.5; fy < 0.95; fy += 0.07) for (let fx = 0.5; fx < 0.95; fx += 0.07) {
+        for (const sx of [1, -1]) for (const sy of [1, -1]) {
+          const x = Math.round(room.x + room.w * (0.5 + sx * (fx - 0.5))), y = Math.round(room.y + room.d * (0.5 + sy * (fy - 0.5)));
+          if (!plan.items.some((it) => (it.floor || 1) === room.floor && blocks(it) && inside(it, x, y))) return { x, y };
+        }
+      }
+      return null;
+    }
+    function outdoor(plan) {
+      for (let y = -6000; y < 20000; y += 500) for (let x = -6000; x < 20000; x += 500) {
+        if (plan.rooms.some((r) => r.floor === 1 && x >= r.x - 200 && x <= r.x + r.w + 200 && y >= r.y - 200 && y <= r.y + r.d + 200)) continue;
+        if (!plan.items.some((it) => (it.floor || 1) === 1 && inside(it, x, y))) return { x, y };
+      }
+      return null;
+    }
+    const flatRooms = (plan, floor) => plan.rooms.filter((r) => r.floor === floor && r.w >= 2000 && r.d >= 2000 && !(r.ceiling && (r.ceiling.type === 'void' || r.ceiling.type === 'sloped')))
+      .sort((a, b) => b.w * b.d - a.w * a.d);
+    // その階で、物の無い場所がある一番大きい部屋と、その場所
+    function spotRoom(plan, floor, skip) {
+      for (const r of flatRooms(plan, floor)) { if (skip && skip.includes(r.id)) continue; const pt = freeIn(plan, r); if (pt) return { room: r, pt }; }
+      return null;
+    }
+    const bigRoom = (plan, floor) => (spotRoom(plan, floor) || {}).room;
+
+    // ── 変種のプラン ──
+    const base = clone(DATA);
+    const variants = [];
+    variants.push({ name: 'house-2f', plan: base });
+    {
+      // 高さの設定: 仕上げ基準の高さ(modelVersion 2)・階ごとの高さ・床の上げ・天井高の指定
+      const p = clone(base);
+      p.heightDefaults = Object.assign({}, p.heightDefaults || {}, { modelVersion: 2, perFloor: true, wallHeight: 2500, floorRaise: 30, floorThickness: 220 });
+      p.floors = { 1: { wallHeight: 2600, floorRaise: 120, floorThickness: 240 }, 2: { wallHeight: 2350, storyHeight: 2900 } };
+      const r1 = bigRoom(p, 1), r2 = bigRoom(p, 2);
+      r1.ceiling = { type: 'flat', heightMm: 2300 };
+      r2.floorRaiseMm = 60;
+      variants.push({ name: '高さの設定', plan: p, wallH: 2500 });
+    }
+    {
+      // 段差の部屋(柱・照明)と、階高を超える天井高の指定、天井の範囲
+      const p = clone(base);
+      const r1 = bigRoom(p, 1);
+      r1.skipLevelMm = 600;
+      const r2 = bigRoom(p, 2);
+      r2.ceiling = { type: 'flat', heightMm: 3400 };
+      const s3 = spotRoom(p, 2, [r2.id]);
+      p.items.push({ id: 99001, type: 'ceiling-area', floor: 2, x: s3.pt.x - 450, y: s3.pt.y - 450, w: 900, d: 900, rot: 0, offset: 150, color: '#e4ddd1' });
+      variants.push({ name: '段差と天井', plan: p, extra: [['天井の範囲のある2階の部屋', 2, s3.pt]] });
+    }
+    {
+      // 面ごとの外壁設定がある(画面で3Dを描いたプランと同じに、画面の関数で今の外面の行を作る)。
+      // 加えて、壁を動かしたあと片付けていない古い面の行(今の外面に当たらない)を2つ置く。
+      const p = clone(base);
+      p.items = p.items.filter((it) => it.type !== 'foundation');  // 基礎の無いプラン
+      planChatCtx().withPlan(p, () => {
+        p.walls.forEach((wl) => getWallExteriorSpans(wl).forEach((face, i) => { const fs = getExteriorFaceSetting(wl, face); if (i === 0 && wl.floor === 2) { fs.mode = 'custom'; fs.color = '#334455'; } }));
+      });
+      const s = p.exteriorWallSettings;
+      s.faces[String(p.walls[0].id) + '_1_0_999'] = { mode: 'custom', color: '#aa0000', texture: null, textureFlipX: false, textureFlipY: false };
+      s.faces[String(p.walls[7].id) + '_-1_5_77'] = { mode: 'inherit', color: null, texture: null, textureFlipX: false, textureFlipY: false };
+      res.facesInVariant = Object.keys(s.faces).length;
+      variants.push({ name: '外壁の面・基礎なし', plan: p });
+    }
+
+    const kinds = Object.keys(ObjectKnowledge.KNOWLEDGE);
+    const isizes = Object.keys(ISIZES);
+    for (const V of variants) {
+      const p = V.plan;
+      WALL_H = V.wallH || wallHSaved;
+      const s1 = spotRoom(p, 1), s2 = spotRoom(p, 2);
+      const r1 = s1.room;
+      const spots = [['1階の部屋', 1, s1.pt], ['屋外', 1, outdoor(p)], ['2階の部屋', 2, s2.pt]].concat(V.extra || []).filter((s) => s[2]);
+      res.spots = res.spots || {};
+      res.spots[V.name] = spots.map((s) => s[0] + '(' + s[2].x + ',' + s[2].y + ')').concat([s1.room.n + ' ' + JSON.stringify(s1.room.ceiling || null) + ' skip=' + (s1.room.skipLevelMm || 0), s2.room.n + ' ' + JSON.stringify(s2.room.ceiling || null)]);
+      // 置く: 全分類と寸法の表の全種類を、3か所に
+      for (const [where, floor, pt] of spots) {
+        for (const t of kinds.concat(isizes)) check(V.name, p, { op: 'placeItem', args: { type: t, x: pt.x, y: pt.y, floor } }, '置く ' + t + ' ' + where);
+      }
+      if (V.name !== 'house-2f') continue;
+      const [, , pt1] = spots[0];
+      // 回転・寸法・設定つきで置く
+      check(V.name, p, { op: 'placeItem', args: { type: 'bed', x: pt1.x, y: pt1.y, rot: -90 } }, '置く bed 回転-90');
+      check(V.name, p, { op: 'placeItem', args: { type: 'sofa', x: pt1.x, y: pt1.y, rot: 450, w: 1800, d: 800 } }, '置く sofa 回転450 寸法');
+      check(V.name, p, { op: 'placeItem', args: { type: 'window', x: 1500, y: 0, set: { windowSill: 1000, windowHeight: 900 } } }, '置く 窓 設定つき');
+      check(V.name, p, { op: 'placeItem', args: { type: 'wood-fence', x: -1500, y: 3000, set: { fenceHeight: 1200 } } }, '置く 木のフェンス 設定つき');
+      check(V.name, p, { op: 'placeItem', args: { type: 'opening-door-model:default', x: 1500, y: 0 } }, '置く 建具のモデル');
+      check(V.name, p, { op: 'placeItem', args: { type: 'no-such-thing', x: 0, y: 0 } }, '置く 知らない種類');
+      check(V.name, p, { op: 'placeItem', args: { type: 'sofa', x: 0, y: 0, floor: 5 } }, '置く 5階');
+      // 吹き抜けの部屋と、台の上・基礎の上
+      const voidRoom = p.rooms.find((r) => r.ceiling && r.ceiling.type === 'void');
+      if (voidRoom) for (const t of ['light-ceiling', 'light-down', 'fmp-CeilingFan01', 'sofa']) check(V.name, p, { op: 'placeItem', args: { type: t, x: voidRoom.x + voidRoom.w / 2, y: voidRoom.y + voidRoom.d / 2 } }, '置く ' + t + ' 吹き抜け');
+      const table = p.items.find((it) => /Table/.test(it.type) && (it.floor || 1) === 1);
+      if (table) for (const t of ['plant', 'decor', 'light-down', 'tv']) check(V.name, p, { op: 'placeItem', args: { type: t, x: table.x + table.w / 2, y: table.y + table.d / 2 } }, '置く ' + t + ' 台の上');
+      const fnd = p.items.find((it) => it.type === 'foundation');
+      if (fnd) for (const t of ['car', 'tree', 'ac-outdoor', 'chair']) check(V.name, p, { op: 'placeItem', args: { type: t, x: fnd.x + 300, y: fnd.y + 300 } }, '置く ' + t + ' 基礎の上');
+      // 部屋・壁
+      check(V.name, p, { op: 'addRoom', args: { name: '書庫', x: 20000, y: 20000, w: 2730, d: 3640 } }, '部屋を足す 1階');
+      check(V.name, p, { op: 'addRoom', args: { x: 3000, y: 3000, w: 2000, d: 2000, floor: 2 } }, '部屋を足す 2階');
+      check(V.name, p, { op: 'addRoom', args: { name: '屋根裏', x: 3000, y: 3000, w: 2000, d: 2000, floor: 3 } }, '部屋を足す 3階');
+      check(V.name, p, { op: 'addWall', args: { x1: 0, y1: 9000, x2: 3640, y2: 9000 } }, '壁を足す 1階');
+      check(V.name, p, { op: 'addWall', args: { x1: 0, y1: 1000, x2: 0, y2: 4000, floor: 2, thick: 150 } }, '壁を足す 2階');
+      check(V.name, p, { op: 'resizeRoom', args: { id: r1.id, w: r1.w + 910 } }, '部屋の大きさ');
+      check(V.name, p, { op: 'renameRoom', args: { id: r1.id, name: '和室' } }, '部屋の名前');
+      // 動かす・回す
+      const movers = p.items.filter((it) => !it.locked && ['fmp-Sofa16', 'stair', 'stair-corner', 'light-down', 'window', 'car', 'tree', 'memo'].includes(it.type));
+      const seenTypes = {};
+      for (const it of movers) {
+        if (seenTypes[it.type]) continue; seenTypes[it.type] = 1;
+        check(V.name, p, { op: 'moveObject', args: { id: it.id, dx: 120, dy: -60 } }, '動かす ' + it.type + ' dx');
+        check(V.name, p, { op: 'moveObject', args: { id: it.id, x: it.x + it.w / 2 + 300, y: it.y + it.d / 2 } }, '動かす ' + it.type + ' 中心');
+        check(V.name, p, { op: 'rotateObject', args: { id: it.id, by: 90 } }, '回す ' + it.type);
+        check(V.name, p, { op: 'rotateObject', args: { id: it.id, rot: -45 } }, '回す ' + it.type + ' -45');
+      }
+      const wall = p.walls.find((x) => !x.locked);
+      check(V.name, p, { op: 'moveObject', args: { id: wall.id, dx: 0, dy: 455 } }, '動かす 壁');
+      check(V.name, p, { op: 'moveObject', args: { id: r1.id, x: r1.x + r1.w / 2 + 100, y: r1.y + r1.d / 2 } }, '動かす 部屋');
+      check(V.name, p, { op: 'rotateObject', args: { id: wall.id, by: 90 } }, '回す 壁');
+      // 消す
+      check(V.name, p, { op: 'deleteObjects', args: { ids: [p.items.find((it) => /Sofa/.test(it.type)).id] } }, '消す ソファ');
+      check(V.name, p, { op: 'deleteObjects', args: { ids: [wall.id] } }, '消す 壁');
+      check(V.name, p, { op: 'deleteObjects', args: { ids: [r1.id, p.items[0].id, p.walls[3].id] } }, '消す 部屋と物と壁');
+      check(V.name, p, { op: 'removeWall', args: { id: p.walls[5].id } }, '壁を消す');
+      check(V.name, p, { op: 'deleteObjects', args: { ids: [999999] } }, '消す 無い id');
+      // 設定を変える(PlanSettable の対象ごとに)
+      const fixtureRoom = p.rooms.find((r) => r.floor === 1 && p.items.some((it) => /^light-/.test(it.type) && it.floor === 1 && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d));
+      const plainRoom = p.rooms.find((r) => !p.items.some((it) => (/^light-/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail') && it.floor === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d));
+      const sets = [
+        [wall.id, { wallHeight: 2600 }], [wall.id, { thick: 150 }], [wall.id, { wallHeight: 9000 }],
+        [r1.id, { floorMaterial: 'tile_floor' }], [r1.id, { floorLevel: 'doma' }],
+        [plainRoom && plainRoom.id, { ceilingHeight: 2600 }], [plainRoom && plainRoom.id, { void: 'yes' }],
+        [fixtureRoom && fixtureRoom.id, { ceilingHeight: 2200 }], [fixtureRoom && fixtureRoom.id, { floorMaterial: 'wood_oak' }],
+      ];
+      const byType = (t) => p.items.find((it) => it.type === t);
+      [['window', { windowKind: 'casement' }], ['window', { windowSill: 300 }], ['window', { windowHeight: 2400 }], ['window-door', { windowHeight: 1900 }],
+        ['door-swing', { doorHeight: 2200 }], ['door-front', { doorHeight: 9999 }],
+        ['stair', { stairRail: 'both' }], ['stair-corner', { stairStyle: 'open' }],
+        ['lattice-screen', { latticeHeight: 1200 }], ['exterior-stair', { targetHeight: 600 }], ['exterior-stair', { accessSteps: 4 }],
+        ['site-rect', { surface: 'gravel' }], ['fence', { fenceHeight: 1000 }], ['car', { fenceHeight: 1000 }], ['fmp-Sofa16', { color: 'red' }],
+        ['window', { windowKind: 'round' }],
+      ].forEach(([t, set]) => { const it = byType(t); if (it) sets.push([it.id, set]); });
+      for (const [id, set] of sets) if (id !== undefined && id !== null) check(V.name, p, { op: 'setProps', args: { id, set } }, '設定 ' + id + ' ' + JSON.stringify(set));
+      check(V.name, p, { op: 'setProps', args: { id: wall.id, props: { color: '#fff' } } }, '設定 props');
+    }
+    // 変種でも、部屋・壁・設定の代表を当てる
+    for (const V of variants.slice(1)) {
+      const p = V.plan;
+      WALL_H = V.wallH || wallHSaved;
+      const r1 = bigRoom(p, 1) || p.rooms[0];
+      check(V.name, p, { op: 'addRoom', args: { name: '書庫', x: 20000, y: 20000, w: 2730, d: 3640 } }, '部屋を足す 1階');
+      check(V.name, p, { op: 'addRoom', args: { x: 3000, y: 3000, w: 2000, d: 2000, floor: 2 } }, '部屋を足す 2階');
+      check(V.name, p, { op: 'addWall', args: { x1: 0, y1: 9000, x2: 3640, y2: 9000, floor: 2 } }, '壁を足す 2階');
+      check(V.name, p, { op: 'deleteObjects', args: { ids: [p.walls[0].id] } }, '消す 壁');
+      check(V.name, p, { op: 'deleteObjects', args: { ids: [p.items.find((it) => /Sofa/.test(it.type)).id] } }, '消す ソファ');
+      const balcony = p.items.find((it) => it.type === 'balcony');
+      if (balcony) check(V.name, p, { op: 'deleteObjects', args: { ids: [balcony.id] } }, '消す バルコニー');
+      const w2 = p.walls.find((x) => x.floor === 2);
+      check(V.name, p, { op: 'removeWall', args: { id: w2.id } }, '壁を消す 2階');
+      check(V.name, p, { op: 'setProps', args: { id: r1.id, set: { ceilingHeight: 2500 } } }, '設定 天井高');
+      check(V.name, p, { op: 'setProps', args: { id: p.walls[1].id, set: { wallHeight: 2700 } } }, '設定 壁の高さ');
+      const win = p.items.find((it) => it.type === 'window');
+      check(V.name, p, { op: 'setProps', args: { id: win.id, set: { windowHeight: 2600 } } }, '設定 窓の高さ');
+    }
+    WALL_H = wallHSaved;
+    // 照らし合わせが「どちらも何もしない」で一致していないことの確かめ(式で決める値が実際に入っている)
+    {
+      const placed = (V, type, where) => {
+        const p = variants.find((x) => x.name === V).plan;
+        const s = where === 2 ? spotRoom(p, 2) : spotRoom(p, 1);
+        WALL_H = (variants.find((x) => x.name === V).wallH) || wallHSaved;
+        const r = tools.workerApply(p, [{ op: 'placeItem', args: { type, x: s.pt.x, y: s.pt.y, floor: where } }]);
+        WALL_H = wallHSaved;
+        return r.errors.length ? r.errors[0].message : r.plan.items[r.plan.items.length - 1];
+      };
+      const col = placed('段差と天井', 'column', 1);
+      const light1 = placed('house-2f', 'light-ceiling', 1), light2 = placed('高さの設定', 'light-down', 2);
+      const hood = placed('house-2f', 'range-hood', 1);
+      const washer = placed('house-2f', 'laundry', 2);
+      res.formula = { column: [col.baseLevel, col.columnHeight], light1: light1.elev, light2: light2.elev, hood: hood.elev, washer: [washer.type, washer.floor, washer.indoor] };
+    }
+
+    // 外壁の色・素材の受け口(props からしか呼ばれないので、applyProp を直接当てて比べる)
+    {
+      const p = clone(base), q = clone(base);
+      const w0 = p.walls[2], q0 = q.walls[2];
+      Ops.applyProp(w0, 'exteriorColor', '#123456', p, tools.workerOpsCtx(p));
+      Ops.applyProp(w0, 'exteriorTexture', 'brick_red', p, tools.workerOpsCtx(p));
+      const cctx = planChatCtx();
+      cctx.withPlan(q, () => { Ops.applyProp(q0, 'exteriorColor', '#123456', q, cctx); Ops.applyProp(q0, 'exteriorTexture', 'brick_red', q, cctx); });
+      res.exterior = json(p) === json(q);
+    }
+    // 要約と検査
+    {
+      const want = '<plan_summary>\n' + ChatPlanSummary.summarize(base, { labelOf: (t) => itemTypeLabel(t), kindOf: (t) => (CATALOGUE_TAGS.items[t] ? CATALOGUE_TAGS.items[t].kind : null) }) + '\n</plan_summary>';
+      res.summary = tools.workerSummarize(base) === want;
+      res.inspect = json(tools.workerInspect(base)) === json(PlanCoreInspect.inspectPlan(base, { defaults: ISIZES }));
+      const broken = clone(base); broken.items.push({ id: broken.items[0].id, type: 'sofa', x: 0, y: 0, w: 100, d: 100, floor: 1 });
+      res.inspectBroken = json(tools.workerInspect(broken)) === json(PlanCoreInspect.inspectPlan(broken, { defaults: ISIZES }));
+    }
+    res.dataUntouched = DATA === realData && json(DATA) === realJson;
+    return res;
+  }, APP);
+
+  const groups = {};
+  out.refused.forEach((r) => { const k = r.message.replace(/^[^(]*\(/, '').replace(/\)$/, ''); (groups[k] = groups[k] || []).push(r.variant + ': ' + r.label); });
+  console.log(JSON.stringify({ total: out.total, same: out.same, bothFailed: out.bothFailed, refused: out.refused.length, byVariant: out.byVariant, facesInVariant: out.facesInVariant, spots: out.spots }, null, 1));
+  console.log('一致(面ごとの外壁設定に、どの外面にも当たらない行が残る): ' + out.deadFaces.map((d) => d.variant + ': ' + d.label + ' 残り' + d.left).join(' / '));
+  console.log('断った操作:');
+  Object.keys(groups).forEach((k) => { console.log('  [' + groups[k].length + '] ' + k); groups[k].forEach((l) => console.log('     ' + l)); });
+  if (out.failures.length) {
+    console.log('食い違い ' + out.failures.length + ' 件:');
+    out.failures.slice(0, 40).forEach((f) => console.log(JSON.stringify(f).slice(0, 1500)));
+  }
+  console.log('式で決めた値: ' + JSON.stringify(out.formula));
+  assert.deepEqual(out.failures, [], 'Worker と画面のチャットの結果が食い違った');
+  assert.equal(out.formula.column[0], 'under', '段差の部屋の柱が段差の下まで伸びていない');
+  assert.ok(out.formula.light1 > 2000 && out.formula.light2 > 1800, '照明の高さが天井から決まっていない');
+  assert.equal(out.formula.hood, 1650, 'レンジフードの取付の高さ');
+  assert.deepEqual(out.deadFaces.map((d) => d.variant).filter((v) => v !== '外壁の面・基礎なし'), [], '面ごとの外壁設定の残りは、その変種でしか起きない');
+  assert.ok(out.same >= 500, '一致した操作が少なすぎる: ' + out.same);
+  assert.equal(out.exterior, true, '外壁の色・素材の書き込みが違う');
+  assert.equal(out.summary, true, '要約が違う');
+  assert.equal(out.inspect, true, '検査が違う');
+  assert.equal(out.inspectBroken, true, '壊れたプランの検査が違う');
+  assert.equal(out.dataUntouched, true, '画面の DATA が変わった');
+  assert.deepEqual(errors, []);
+} finally {
+  await browser.close();
+}
