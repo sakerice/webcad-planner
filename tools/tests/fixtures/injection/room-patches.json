@@ -1,58 +1,1042 @@
 {
-  "about": "共同編集のルームの /update に送る、形の壊れた差分(patch)の固定集。tools/tests/room-patch-guard.test.cjs が使う。どれも 400 で断られ、ルームの状態が変わらないこと。__proto__ は JSON.parse で自分の鍵として作られる(この JSON をそのまま送る)。深さ・件数・長さの上限を超える物は、大きいのでテストの中で作る。",
+  "about": "共同編集のルームの /update に送る、形の壊れた差分(patch)の固定集。tools/tests/room-patch-guard.test.cjs が使う。どれも 400 で断られ、ルームの状態が変わらないこと。__proto__ は JSON.parse で自分の鍵として作られる(この JSON をそのまま送る)。深さ・件数・長さの上限を超える物は、大きいのでテストの中で作る。 2026-11-19 の検査で見つかった、id が Object.prototype の名前・toString などの鍵・文字のはずの欄のオブジェクト・共有する欄の中の入れ物の形の誤りを足した。",
   "bad": [
-    { "id": "patch-string", "patch": "abc" },
-    { "id": "patch-array", "patch": [] },
-    { "id": "patch-number", "patch": 5 },
-    { "id": "unknown-top-key", "patch": { "collections": {}, "fields": {}, "extra": 1 } },
-    { "id": "top-proto", "patch": { "collections": {}, "__proto__": { "polluted": "top" } } },
-    { "id": "collections-string", "patch": { "collections": "abc" } },
-    { "id": "collections-array", "patch": { "collections": [] } },
-    { "id": "collections-null", "patch": { "collections": null } },
-    { "id": "unknown-collection", "patch": { "collections": { "doors": { "upserts": [], "removes": [] } } } },
-    { "id": "collection-proto", "patch": { "collections": { "__proto__": { "upserts": [{ "id": 1 }] } } } },
-    { "id": "collection-constructor", "patch": { "collections": { "constructor": { "upserts": [], "removes": [] } } } },
-    { "id": "collection-toString", "patch": { "collections": { "toString": { "upserts": [], "removes": [] } } } },
-    { "id": "change-string", "patch": { "collections": { "walls": "x" } } },
-    { "id": "change-array", "patch": { "collections": { "walls": [] } } },
-    { "id": "change-unknown-key", "patch": { "collections": { "walls": { "upserts": [], "removes": [], "extra": [] } } } },
-    { "id": "upserts-string", "patch": { "collections": { "walls": { "upserts": "abc", "removes": [] } } } },
-    { "id": "upserts-object", "patch": { "collections": { "items": { "upserts": { "id": 1 }, "removes": [] } } } },
-    { "id": "upsert-null", "patch": { "collections": { "items": { "upserts": [null], "removes": [] } } } },
-    { "id": "upsert-string", "patch": { "collections": { "items": { "upserts": ["abc"], "removes": [] } } } },
-    { "id": "upsert-array", "patch": { "collections": { "items": { "upserts": [[1, 2]], "removes": [] } } } },
-    { "id": "upsert-no-id", "patch": { "collections": { "items": { "upserts": [{ "x": 1 }], "removes": [] } } } },
-    { "id": "upsert-id-null", "patch": { "collections": { "items": { "upserts": [{ "id": null }], "removes": [] } } } },
-    { "id": "upsert-id-object", "patch": { "collections": { "items": { "upserts": [{ "id": { "a": 1 } }], "removes": [] } } } },
-    { "id": "upsert-id-bool", "patch": { "collections": { "rooms": { "upserts": [{ "id": true }], "removes": [] } } } },
-    { "id": "upsert-id-array", "patch": { "collections": { "rooms": { "upserts": [{ "id": ["rm1"] }], "removes": [] } } } },
-    { "id": "removes-string", "patch": { "collections": { "walls": { "upserts": [], "removes": "abc" } } } },
-    { "id": "removes-object", "patch": { "collections": { "walls": { "upserts": [], "removes": { "0": "1" } } } } },
-    { "id": "remove-null", "patch": { "collections": { "walls": { "upserts": [], "removes": [null] } } } },
-    { "id": "remove-object", "patch": { "collections": { "walls": { "upserts": [], "removes": [{}] } } } },
-    { "id": "remove-bool", "patch": { "collections": { "walls": { "upserts": [], "removes": [false] } } } },
-    { "id": "fields-string", "patch": { "collections": {}, "fields": "x" } },
-    { "id": "fields-array", "patch": { "collections": {}, "fields": [] } },
-    { "id": "fields-unknown", "patch": { "collections": {}, "fields": { "planName": "x" } } },
-    { "id": "fields-walls", "patch": { "collections": {}, "fields": { "walls": [] } } },
-    { "id": "fields-viewState", "patch": { "collections": {}, "fields": { "viewState": { "z": 2 } } } },
-    { "id": "fields-proto", "patch": { "collections": {}, "fields": { "__proto__": { "polluted": "fields" } } } },
-    { "id": "fields-constructor", "patch": { "collections": {}, "fields": { "constructor": { "prototype": { "polluted": "ctor" } } } } },
-    { "id": "fields-prototype", "patch": { "collections": {}, "fields": { "prototype": { "polluted": "proto" } } } },
-    { "id": "fields-hasOwnProperty", "patch": { "collections": {}, "fields": { "hasOwnProperty": 1 } } },
-    { "id": "field-type-settings-string", "patch": { "collections": {}, "fields": { "exteriorWallSettings": "abc" } } },
-    { "id": "field-type-settings-array", "patch": { "collections": {}, "fields": { "roofAppearance": [] } } },
-    { "id": "field-type-north-object", "patch": { "collections": {}, "fields": { "northDeg": {} } } },
-    { "id": "field-type-north-huge", "patch": { "collections": {}, "fields": { "northDeg": 1e300 } } },
-    { "id": "field-type-autolights-string", "patch": { "collections": {}, "fields": { "autoRoomLights": "off" } } },
-    { "id": "field-type-floors-string", "patch": { "collections": {}, "fields": { "floors": "1" } } },
-    { "id": "nested-proto-in-upsert", "patch": { "collections": { "items": { "upserts": [{ "id": 1, "finishColors": { "__proto__": { "polluted": "nested" } } }], "removes": [] } } } },
-    { "id": "nested-constructor-in-upsert", "patch": { "collections": { "items": { "upserts": [{ "id": 1, "constructor": { "prototype": { "polluted": "nested" } } }], "removes": [] } } } },
-    { "id": "nested-prototype-in-field", "patch": { "collections": {}, "fields": { "exteriorWallSettings": { "walls": { "1": { "prototype": { "polluted": 1 } } } } } } },
-    { "id": "nested-proto-in-array", "patch": { "collections": { "rooms": { "upserts": [{ "id": "rm1", "pts": [{ "__proto__": { "polluted": "arr" } }] }], "removes": [] } } } },
-    { "id": "coord-string", "patch": { "collections": { "walls": { "upserts": [{ "id": 1, "x1": "abc", "y1": 0, "x2": 1000, "y2": 0 }], "removes": [] } } } },
-    { "id": "coord-huge", "patch": { "collections": { "items": { "upserts": [{ "id": 1, "type": "bed", "x": 1e300, "y": 0, "w": 900, "d": 2000 }], "removes": [] } } } },
-    { "id": "coord-object", "patch": { "collections": { "rooms": { "upserts": [{ "id": "rm1", "x": {}, "y": 0, "w": 900, "d": 900 }], "removes": [] } } } },
-    { "id": "coord-bool", "patch": { "collections": { "items": { "upserts": [{ "id": 1, "type": "bed", "x": 0, "y": true, "w": 900, "d": 2000 }], "removes": [] } } } }
+    {
+      "id": "patch-string",
+      "patch": "abc"
+    },
+    {
+      "id": "patch-array",
+      "patch": []
+    },
+    {
+      "id": "patch-number",
+      "patch": 5
+    },
+    {
+      "id": "unknown-top-key",
+      "patch": {
+        "collections": {},
+        "fields": {},
+        "extra": 1
+      }
+    },
+    {
+      "id": "top-proto",
+      "patch": {
+        "collections": {},
+        "__proto__": {
+          "polluted": "top"
+        }
+      }
+    },
+    {
+      "id": "collections-string",
+      "patch": {
+        "collections": "abc"
+      }
+    },
+    {
+      "id": "collections-array",
+      "patch": {
+        "collections": []
+      }
+    },
+    {
+      "id": "collections-null",
+      "patch": {
+        "collections": null
+      }
+    },
+    {
+      "id": "unknown-collection",
+      "patch": {
+        "collections": {
+          "doors": {
+            "upserts": [],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "collection-proto",
+      "patch": {
+        "collections": {
+          "__proto__": {
+            "upserts": [
+              {
+                "id": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "collection-constructor",
+      "patch": {
+        "collections": {
+          "constructor": {
+            "upserts": [],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "collection-toString",
+      "patch": {
+        "collections": {
+          "toString": {
+            "upserts": [],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "change-string",
+      "patch": {
+        "collections": {
+          "walls": "x"
+        }
+      }
+    },
+    {
+      "id": "change-array",
+      "patch": {
+        "collections": {
+          "walls": []
+        }
+      }
+    },
+    {
+      "id": "change-unknown-key",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [],
+            "removes": [],
+            "extra": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upserts-string",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": "abc",
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upserts-object",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": {
+              "id": 1
+            },
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-null",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              null
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-string",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              "abc"
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-array",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              [
+                1,
+                2
+              ]
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-no-id",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "x": 1
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-id-null",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": null
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-id-object",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": {
+                  "a": 1
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-id-bool",
+      "patch": {
+        "collections": {
+          "rooms": {
+            "upserts": [
+              {
+                "id": true
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "upsert-id-array",
+      "patch": {
+        "collections": {
+          "rooms": {
+            "upserts": [
+              {
+                "id": [
+                  "rm1"
+                ]
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "removes-string",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [],
+            "removes": "abc"
+          }
+        }
+      }
+    },
+    {
+      "id": "removes-object",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [],
+            "removes": {
+              "0": "1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "remove-null",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [],
+            "removes": [
+              null
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "remove-object",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [],
+            "removes": [
+              {}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "remove-bool",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [],
+            "removes": [
+              false
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "fields-string",
+      "patch": {
+        "collections": {},
+        "fields": "x"
+      }
+    },
+    {
+      "id": "fields-array",
+      "patch": {
+        "collections": {},
+        "fields": []
+      }
+    },
+    {
+      "id": "fields-unknown",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "planName": "x"
+        }
+      }
+    },
+    {
+      "id": "fields-walls",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "walls": []
+        }
+      }
+    },
+    {
+      "id": "fields-viewState",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "viewState": {
+            "z": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "fields-proto",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "__proto__": {
+            "polluted": "fields"
+          }
+        }
+      }
+    },
+    {
+      "id": "fields-constructor",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "constructor": {
+            "prototype": {
+              "polluted": "ctor"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "fields-prototype",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "prototype": {
+            "polluted": "proto"
+          }
+        }
+      }
+    },
+    {
+      "id": "fields-hasOwnProperty",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "hasOwnProperty": 1
+        }
+      }
+    },
+    {
+      "id": "field-type-settings-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "exteriorWallSettings": "abc"
+        }
+      }
+    },
+    {
+      "id": "field-type-settings-array",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "roofAppearance": []
+        }
+      }
+    },
+    {
+      "id": "field-type-north-object",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "northDeg": {}
+        }
+      }
+    },
+    {
+      "id": "field-type-north-huge",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "northDeg": 1e+300
+        }
+      }
+    },
+    {
+      "id": "field-type-autolights-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "autoRoomLights": "off"
+        }
+      }
+    },
+    {
+      "id": "field-type-floors-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "floors": "1"
+        }
+      }
+    },
+    {
+      "id": "nested-proto-in-upsert",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": 1,
+                "finishColors": {
+                  "__proto__": {
+                    "polluted": "nested"
+                  }
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "nested-constructor-in-upsert",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": 1,
+                "constructor": {
+                  "prototype": {
+                    "polluted": "nested"
+                  }
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "nested-prototype-in-field",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "exteriorWallSettings": {
+            "walls": {
+              "1": {
+                "prototype": {
+                  "polluted": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "nested-proto-in-array",
+      "patch": {
+        "collections": {
+          "rooms": {
+            "upserts": [
+              {
+                "id": "rm1",
+                "pts": [
+                  {
+                    "__proto__": {
+                      "polluted": "arr"
+                    }
+                  }
+                ]
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "coord-string",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": 1,
+                "x1": "abc",
+                "y1": 0,
+                "x2": 1000,
+                "y2": 0
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "coord-huge",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": 1,
+                "type": "bed",
+                "x": 1e+300,
+                "y": 0,
+                "w": 900,
+                "d": 2000
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "coord-object",
+      "patch": {
+        "collections": {
+          "rooms": {
+            "upserts": [
+              {
+                "id": "rm1",
+                "x": {},
+                "y": 0,
+                "w": 900,
+                "d": 900
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "coord-bool",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": 1,
+                "type": "bed",
+                "x": 0,
+                "y": true,
+                "w": 900,
+                "d": 2000
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-id-constructor",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": "constructor",
+                "floor": 1,
+                "x1": 0,
+                "y1": 0,
+                "x2": 3000,
+                "y2": 0
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-id-__proto__",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": "__proto__",
+                "floor": 1,
+                "x1": 0,
+                "y1": 0,
+                "x2": 3000,
+                "y2": 0
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-id-prototype",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": "prototype",
+                "floor": 1,
+                "x1": 0,
+                "y1": 0,
+                "x2": 3000,
+                "y2": 0
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-id-toString",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": "toString",
+                "floor": 1,
+                "x1": 0,
+                "y1": 0,
+                "x2": 3000,
+                "y2": 0
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-id-valueOf",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": "valueOf",
+                "floor": 1,
+                "x1": 0,
+                "y1": 0,
+                "x2": 3000,
+                "y2": 0
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-id-hasOwnProperty",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": "hasOwnProperty",
+                "floor": 1,
+                "x1": 0,
+                "y1": 0,
+                "x2": 3000,
+                "y2": 0
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "room-id-constructor",
+      "patch": {
+        "collections": {
+          "rooms": {
+            "upserts": [
+              {
+                "id": "constructor",
+                "x": 0,
+                "y": 0,
+                "w": 900,
+                "d": 900
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "remove-id-constructor",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [],
+            "removes": [
+              "constructor"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "room-name-toString",
+      "patch": {
+        "collections": {
+          "rooms": {
+            "upserts": [
+              {
+                "id": "rm1",
+                "n": {
+                  "toString": 1,
+                  "valueOf": 1
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-floor-valueOf",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": 1,
+                "floor": {
+                  "valueOf": 1
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "item-type-toString-deep",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": 1,
+                "finishColors": {
+                  "body": {
+                    "toString": 1
+                  }
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "room-name-object",
+      "patch": {
+        "collections": {
+          "rooms": {
+            "upserts": [
+              {
+                "id": "rm1",
+                "n": {}
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-floor-array",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": 1,
+                "floor": [
+                  1
+                ]
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "item-type-object",
+      "patch": {
+        "collections": {
+          "items": {
+            "upserts": [
+              {
+                "id": 1,
+                "type": {
+                  "a": 1
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-thick-object",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": 1,
+                "thick": {
+                  "a": 1
+                }
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "wall-floor-constructor",
+      "patch": {
+        "collections": {
+          "walls": {
+            "upserts": [
+              {
+                "id": 1,
+                "floor": "constructor"
+              }
+            ],
+            "removes": []
+          }
+        }
+      }
+    },
+    {
+      "id": "ext-walls-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "exteriorWallSettings": {
+            "walls": "x"
+          }
+        }
+      }
+    },
+    {
+      "id": "ext-faces-number",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "exteriorWallSettings": {
+            "faces": 5
+          }
+        }
+      }
+    },
+    {
+      "id": "ext-whole-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "exteriorWallSettings": {
+            "whole": "x"
+          }
+        }
+      }
+    },
+    {
+      "id": "ext-wall-entry-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "exteriorWallSettings": {
+            "walls": {
+              "1": "x"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "int-faces-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "interiorWallSettings": {
+            "faces": "x"
+          }
+        }
+      }
+    },
+    {
+      "id": "int-floors-array",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "interiorWallSettings": {
+            "floors": []
+          }
+        }
+      }
+    },
+    {
+      "id": "roof-floors-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "roofAppearance": {
+            "floors": "x"
+          }
+        }
+      }
+    },
+    {
+      "id": "roof-floor-entry-number",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "roofAppearance": {
+            "floors": {
+              "1": 3
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "floors-entry-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "floors": {
+            "1": "x"
+          }
+        }
+      }
+    },
+    {
+      "id": "floor-metadata-entry-string",
+      "patch": {
+        "collections": {},
+        "fields": {
+          "floorMetadata": {
+            "1": "x"
+          }
+        }
+      }
+    }
   ]
 }

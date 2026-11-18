@@ -10,10 +10,17 @@
 //   - upserts の物が素のオブジェクトでない・id が無い(文字か有限の数でない)・id が長すぎる
 //   - removes の id が文字か有限の数でない・長すぎる
 //   - fields の鍵が PlanCorePatch.SHARED_FIELDS に無い、欄の値の型が違う(FIELD_TYPES)
-//   - どの深さでも __proto__・constructor・prototype の鍵(JSON.parse は __proto__ を自分の鍵として作るので、自分の鍵をたどって探す)
+//   - どの深さでも、PlanCorePatch.UNSAFE_KEYS の鍵(__proto__・constructor・prototype と、toString・valueOf など
+//     Object.prototype にある名前)。JSON.parse は __proto__ を自分の鍵として作るので、自分の鍵をたどって探す。
+//     toString・valueOf を自分の鍵に持つオブジェクトは、文字や数に直すところ(要約・検査・2D の部屋名)で例外になる
+//   - 物の id と階が UNSAFE_KEYS の名前(画面はその値を鍵に設定表を作る。作られた表を送ると上の決まりで断られ、
+//     その画面の同期が止まるため)
+//   - 文字か数のはずの物の欄(SCALAR_KEYS)に、オブジェクトや配列
+//   - 共有する欄の中の入れ物(外壁の walls・faces など。FIELD_SHAPES)が素のオブジェクトでない
 //   - 深さ・配列の件数・オブジェクトの鍵の数・文字の長さ・鍵の長さの上限を超える
 //   - 物の座標(壁の x1・y1・x2・y2、物と部屋の x・y・w・d)が、数・数の文字・null 以外か、絶対値が 1e9 を超える
-// プラン全体(ルームを作る・手動保存)には、危ない鍵と上限(深さはプランの根から数える)だけを見る。
+// プラン全体(ルームを作る・手動保存)には、危ない鍵と上限(深さはプランの根から数える)、walls・items・rooms の要素が
+// 素のオブジェクトであること、id(あれば)・階・SCALAR_KEYS、共有する欄の形を見る。id の有無と座標は見ない(古い保存データのため)。
 //
 // 上限の値と根拠は .superpowers/sdd/2026-11-19-injection-hardening/task-2-report.md。
 // 手元の正当なプラン(既定プラン・固定プラン・互換の保存データ)の最大は、深さ 5 段・配列 1212 件・鍵 2522 個
@@ -33,10 +40,25 @@ export const ROOM_LIMITS = Object.freeze({
 });
 
 const UNSAFE = new Set(PlanCorePatch.UNSAFE_KEYS);
+// 物の欄のうち、文字・数・真偽値・null だけを受ける欄。Worker の要約(workerSummarize)・検査(workerInspect)・
+// 操作(workerApply)と画面の描画が、文字や数として読む欄。手元の全プランでこの型だった
+// (オブジェクトや配列を持つ欄は finishColors・finishTextures・kitchenWorkPoint・ceiling・siteZones など)。
+const SCALAR_KEYS = ["type", "floor", "n", "name", "label", "rot", "thick", "elev", "h", "locked", "detached", "baseRoom", "stairTo", "color", "texture", "model", "lightKind"];
 const COLLECTIONS = new Set(PlanCorePatch.COLLECTIONS);
 const SHARED_FIELDS = new Set(PlanCorePatch.SHARED_FIELDS);
 const own = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
 const isPlainObject = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+
+// 共有する欄の中の入れ物の形。値は「無い・null・素のオブジェクト」に限る。map は、さらに中の値も素のオブジェクトか null。
+// 画面の ensureExteriorWallSettings などが `if(!s.walls)` で見るので、文字が入っていると作り直さずに残し、
+// ownSlot が例外になって 3D と外観の設定欄が壊れるため。
+const FIELD_SHAPES = {
+  exteriorWallSettings: { whole: "object", floors: "map", walls: "map", faces: "map" },
+  interiorWallSettings: { whole: "object", floors: "map", walls: "map", faces: "map" },
+  roofAppearance: { whole: "object", floors: "map" },
+  floorMetadata: { "*": "object" },
+  floors: { "*": "object" },
+};
 
 // 共有する欄の値の型。手元のプランと画面の作り方(normalizeLoadedPlan が作る形)に合わせ、null はどれも受ける。
 const FIELD_TYPES = {
@@ -88,19 +110,63 @@ export function jsonShapeProblem(v, depth, maxDepth, where) {
 }
 
 function idProblem(id, where) {
-  if (typeof id === "string") return id.length > ROOM_LIMITS.maxIdLength ? `${where} の id が長すぎます（${ROOM_LIMITS.maxIdLength} 字まで）` : null;
+  if (typeof id === "string") {
+    if (id.length > ROOM_LIMITS.maxIdLength) return `${where} の id が長すぎます（${ROOM_LIMITS.maxIdLength} 字まで）`;
+    if (UNSAFE.has(id)) return `${where} の id に使えない名前です（${id}）`;
+    return null;
+  }
   if (typeof id === "number" && Number.isFinite(id)) return null;
   return `${where} の id は文字か数で送ってください`;
 }
 
-// 座標は、数・数の文字(古い保存データを弾かないため)・null を受ける。
+// 座標は、数・数の文字(古い保存データを弾かないため)・空の文字・null を受ける。
 function coordProblem(item, name, where) {
   for (const k of COORD_KEYS[name]) {
-    if (!own(item, k) || item[k] === null) continue;
+    if (!own(item, k) || item[k] === null || item[k] === "") continue;
     const v = item[k];
     if (typeof v === "number" && finiteInRange(v, ROOM_LIMITS.maxCoord)) continue;
     if (typeof v === "string" && v.trim() !== "" && finiteInRange(Number(v), ROOM_LIMITS.maxCoord)) continue;
     return `${where} の ${k} が座標の数ではありません`;
+  }
+  return null;
+}
+
+// 物1つの欄の型。where は場所の名前。
+function scalarProblem(item, where) {
+  for (const k of SCALAR_KEYS) {
+    if (!own(item, k)) continue;
+    const v = item[k];
+    if (v !== null && typeof v === "object") return `${where} の ${k} は文字か数で送ってください`;
+  }
+  if (typeof item.floor === "string" && UNSAFE.has(item.floor)) return `${where} の floor に使えない名前です（${item.floor}）`;
+  return null;
+}
+
+// 物1つを確かめる。差分では id が必ず要り、座標も見る。プラン全体では id の有無と座標を見ない。
+function objectProblem(item, name, where, strict) {
+  if (!isPlainObject(item)) return `${where} の物はオブジェクトで送ってください`;
+  if (own(item, "id")) {
+    if (!strict && (item.id === null || item.id === undefined || item.id === "")) { /* 古いデータの id の無い物は画面が振る */ }
+    else { const m = idProblem(item.id, where); if (m) return m; }
+  } else if (strict) return `${where} の物に id がありません`;
+  return scalarProblem(item, where) || (strict ? coordProblem(item, name, where) : null);
+}
+
+function shapeProblem(key, value) {
+  const shape = FIELD_SHAPES[key];
+  if (!shape || !value || typeof value !== "object") return null;
+  for (const part of Object.keys(shape)) {
+    const kind = shape[part];
+    const entries = part === "*" ? Object.keys(value).map((k) => [k, value[k]]) : (own(value, part) ? [[part, value[part]]] : []);
+    for (const [k, v] of entries) {
+      if (v === null || v === undefined) continue;
+      if (!isPlainObject(v)) return `fields.${key}.${k} の形が違います`;
+      if (kind === "map") {
+        for (const inner of Object.keys(v)) {
+          if (v[inner] !== null && !isPlainObject(v[inner])) return `fields.${key}.${k}.${inner.slice(0, 40)} の形が違います`;
+        }
+      }
+    }
   }
   return null;
 }
@@ -114,7 +180,7 @@ function fieldTypeProblem(key, value) {
       || (typeof value === "string" && value.trim() !== "" && finiteInRange(Number(value), ROOM_LIMITS.maxCoord)))
     : type === "boolean" ? typeof value === "boolean"
     : true;
-  return ok ? null : `fields.${key} の値の形が違います`;
+  return ok ? shapeProblem(key, value) : `fields.${key} の値の形が違います`;
 }
 
 // /update の差分を確かめる。収まっていれば null、断るときは理由の文。
@@ -138,10 +204,7 @@ export function roomPatchProblem(patch) {
       if (own(change, "upserts")) {
         if (!Array.isArray(change.upserts)) return `collections.${name}.upserts は配列で送ってください`;
         for (const item of change.upserts) {
-          const where = `collections.${name}.upserts`;
-          if (!isPlainObject(item)) return `${where} の物はオブジェクトで送ってください`;
-          if (!own(item, "id")) return `${where} の物に id がありません`;
-          const m = idProblem(item.id, where) || coordProblem(item, name, where);
+          const m = objectProblem(item, name, `collections.${name}.upserts`, true);
           if (m) return m;
         }
       }
@@ -169,5 +232,20 @@ export function roomPatchProblem(patch) {
 // ルームを作る・手動保存で置くプラン全体を確かめる(validPlan を通ったあとに呼ぶ)。収まっていれば null、断るときは理由の文。
 // 物の中身の形は見ない(今ある共有の門番 validPlan と同じく、手元にある古いプランを弾かないため)。
 export function roomPlanProblem(plan) {
-  return jsonShapeProblem(plan, 1, ROOM_LIMITS.maxPlanDepth, "プラン");
+  const deep = jsonShapeProblem(plan, 1, ROOM_LIMITS.maxPlanDepth, "プラン");
+  if (deep) return deep;
+  if (!isPlainObject(plan)) return "プランはオブジェクトで送ってください";
+  for (const name of PlanCorePatch.COLLECTIONS) {
+    if (!Array.isArray(plan[name])) return `プランの ${name} は配列で送ってください`;
+    for (const item of plan[name]) {
+      const m = objectProblem(item, name, `プランの ${name}`, false);
+      if (m) return m;
+    }
+  }
+  for (const key of PlanCorePatch.SHARED_FIELDS) {
+    if (!own(plan, key)) continue;
+    const m = fieldTypeProblem(key, plan[key]);
+    if (m) return m.replace(/^fields\./, "プランの ");
+  }
+  return null;
 }
