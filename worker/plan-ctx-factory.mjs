@@ -481,11 +481,17 @@ export function createPlanCtxTools(deps) {
   // 写しに当てる(inPlace でない)ctx。applyOperations(plan, ops, ctx) は plan を変えず、結果の plan(写し)を返す。
   // 画面のチャット(planChatCtx)も写しに当てるので、種類の確かめ(候補つき)、角度の 0〜360 へのそろえ、
   // 桁違いの値の警告が、同じに働く。
-  function workerOpsCtx(plan) {
+  // opts.firstId(省略可): 連番の数え始め。plan から数えた値(firstNewId)より小さければ plan の値を使う
+  // (ルームが持つ「減らない連番」を渡して、消した物の id を使い回さないため)。省けば今までどおり firstNewId(plan)。
+  // ctx.peekNextId() は、まだ使っていない次の連番(部屋の 'rm_'+連番 も同じ連番から取る)。
+  function workerOpsCtx(plan, opts) {
     var next = firstNewId(plan);
+    var given = opts && Number(opts.firstId);
+    if (given && isFinite(given) && given > next) next = Math.floor(given);
     var cur = plan;   // 操作を当てている写し(withPlan で差し替える)
     var ctx = {
       newId: function () { return next++; },
+      peekNextId: function () { return next; },
       catalog: {
         resolveType: resolve,
         known: known,
@@ -621,9 +627,13 @@ export function createPlanCtxTools(deps) {
     });
     return res;
   }
-  // ルームの中で使う入口: plan(変えない)に ops を当て、{plan(当てた後の写し), changedIds, removedIds, warnings, errors}。
-  function workerApply(plan, ops) {
-    return tidy(Operations.applyOperations(plan, ops, workerOpsCtx(plan)));
+  // ルームの中で使う入口: plan(変えない)に ops を当て、{plan(当てた後の写し), changedIds, removedIds, warnings, errors, nextId}。
+  // opts.firstId は workerOpsCtx と同じ。nextId は当てたあとの、まだ使っていない次の連番(失敗のときも返すが、使わない)。
+  function workerApply(plan, ops, opts) {
+    var ctx = workerOpsCtx(plan, opts);
+    var res = tidy(Operations.applyOperations(plan, ops, ctx));
+    res.nextId = ctx.peekNextId();
+    return res;
   }
 
   // 要約(画面のチャットと同じ部品と同じ呼び名・分類。選択中の物は無い)。依頼文に付ける囲みまで付ける。

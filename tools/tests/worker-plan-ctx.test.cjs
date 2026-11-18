@@ -176,3 +176,21 @@ test('検査は {ok, errors, warnings} を返す', async () => {
   broken.items.push(Object.assign({}, broken.items[0]));
   assert.equal(workerInspect(broken).ok, false, 'id の重なりは誤り');
 });
+
+test('連番の数え始めを外から渡せる。渡さなければ今までどおり plan の最大 + 1。部屋も同じ連番', async () => {
+  const { workerApply, firstNewId } = await load();
+  const p = plan();
+  const base = firstNewId(p);
+  const bed = { op: 'placeItem', args: { type: 'bed', x: 1365, y: 5460, floor: 2 } };
+  const a = workerApply(p, [bed]);
+  assert.equal(a.plan.items.at(-1).id, base);
+  assert.equal(a.nextId, base + 1);
+  const b = workerApply(p, [bed], { firstId: base + 50 });
+  assert.equal(b.plan.items.at(-1).id, base + 50);
+  assert.equal(b.nextId, base + 51);
+  const c = workerApply(p, [bed], { firstId: 3 });
+  assert.equal(c.plan.items.at(-1).id, base, 'plan の値より小さい数え始めは使わない');
+  const r = workerApply(p, [{ op: 'addRoom', args: { x: 20000, y: 20000, w: 2730, d: 3640 } }], { firstId: base + 7 });
+  assert.equal(r.plan.rooms.at(-1).id, 'rm_' + (base + 7));
+  assert.equal(r.nextId, base + 8);
+});

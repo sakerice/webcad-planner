@@ -1,13 +1,122 @@
-// 共有編集のルーム（Durable Object）。worker.mjs から中身を1文字も変えずに移した。
+// 共有編集のルーム（Durable Object）。worker.mjs から移した。
 //
 // 1つのルームに1つのインスタンスが立ち、WebSocket をここで受ける。
 // 間取りの実体は R2 に置き、編集は差分(patch)としてストレージに積み、
 // 落ち着いたところで R2 へ書き戻す(checkpoint)。
+//
+// 段5で、外の AI(MCP)から間取りを直すための、ルームの中だけの経路を足した(外の /api/rooms/:id/… には出さない)。
+//   POST /op    {op, args}            操作を1つ当て、変わった物を画面の共同編集と同じ差分として積み、全員へ流す(clientId "mcp")
+//   POST /read  {what:"summary"|"inspect"}  今のプランの要約か検査
+// 呼ぶのは worker/routes-rooms.mjs の roomOp・roomRead(id の形を確かめてから Durable Object を引く)。
 import {
   RETENTION_MS, AUTO_SAVE_IDLE_MS, AUTO_SAVE_MAX_MS,
   MAX_PLAN_BYTES, MAX_JOURNAL_ENTRY_BYTES,
   json, roomKey, patchKey, validPlan, encodedSize, readJsonWithLimit, applyPatch,
 } from "./shared.mjs";
+import PlanCorePatch from "../assets/js/plan-core/patch.js";
+import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
+import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
+
+// MCP 経由の差分の送り手の名前。画面の clientId は 24 桁の16進(index.html の sharedClientId)なので重ならない。
+export const MCP_CLIENT_ID = "mcp";
+// /op・/read の本文の上限。操作1つの引数なので小さい。
+const MAX_OP_BODY_BYTES = 64 * 1024;
+
+// 操作の前(before)と後(after)のプランから、画面の共同編集(index.html の buildSharedPatch)と同じ形の差分を作る。
+//   {collections: {walls|items|rooms: {upserts: [物の写し], removes: [id の文字]}}, fields: {欄: 値の写し}}
+// - 物は id(文字)ごとに JSON で比べる。新しい物・中身の変わった物を upserts、無くなった物を removes に入れる。
+//   upserts の並びは after の並び(新しい物は末尾に足される。applyPatch と operations.js の足し方と同じ)。
+// - 欄は PlanCorePatch.SHARED_FIELDS だけを、画面と同じく「無い欄は null」として比べ、変わった欄を入れる。
+// - 共有しない欄(SHARED_FIELDS と物の配列以外)が変わったら、差分にせず unshared に名前を返す
+//   (画面どうしの共同編集では届かない欄なので、外の AI の操作だけが届けると画面ごとに食い違う)。
+// 戻り値: {patch: 差分 | null(何も変わらない), unshared: [欄の名前]}
+export function buildRoomPatch(before, after) {
+  const patch = { collections: {}, fields: {} };
+  let changed = false;
+  for (const name of PlanCorePatch.COLLECTIONS) {
+    const old = new Map();
+    for (const item of (before && before[name]) || []) old.set(String(item && item.id), JSON.stringify(item));
+    const now = new Map();
+    for (const item of (after && after[name]) || []) now.set(String(item && item.id), item);
+    const upserts = [];
+    for (const [id, item] of now) {
+      const encoded = JSON.stringify(item);
+      if (old.get(id) !== encoded) upserts.push(JSON.parse(encoded));
+    }
+    const removes = Array.from(old.keys()).filter((id) => !now.has(id));
+    if (upserts.length || removes.length) {
+      patch.collections[name] = { upserts, removes };
+      changed = true;
+    }
+  }
+  const sig = (plan, key) => JSON.stringify(plan && plan[key] !== undefined ? plan[key] : null);
+  for (const key of PlanCorePatch.SHARED_FIELDS) {
+    const encoded = sig(after, key);
+    if (sig(before, key) !== encoded) {
+      patch.fields[key] = JSON.parse(encoded);
+      changed = true;
+    }
+  }
+  const unshared = [];
+  const known = new Set([...PlanCorePatch.COLLECTIONS, ...PlanCorePatch.SHARED_FIELDS]);
+  const keys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+  for (const key of keys) {
+    if (known.has(key)) continue;
+    if (sig(before, key) !== sig(after, key)) unshared.push(key);
+  }
+  return { patch: changed ? patch : null, unshared };
+}
+
+// 引数の大きさの上限(Worker の計算時間を守るため。checkArgs と操作の前に見る)。
+const MAX_ARG_STRING = 500;
+const MAX_ARG_ARRAY = 200;
+const MAX_ARG_DEPTH = 6;   // args 自身を1段と数える
+
+// 上限を超えていれば理由の文、収まっていれば null。
+export function argsTooLarge(args) {
+  const walk = (v, depth, where) => {
+    if (typeof v === "string") return v.length > MAX_ARG_STRING ? `${where} の文字が長すぎます（${MAX_ARG_STRING} 字まで）` : null;
+    if (!v || typeof v !== "object") return null;
+    if (depth > MAX_ARG_DEPTH) return `引数の入れ子が深すぎます（${MAX_ARG_DEPTH} 段まで）`;
+    if (Array.isArray(v)) {
+      if (v.length > MAX_ARG_ARRAY) return `${where} の数が多すぎます（${MAX_ARG_ARRAY} 件まで）`;
+      for (let i = 0; i < v.length; i++) { const m = walk(v[i], depth + 1, where); if (m) return m; }
+      return null;
+    }
+    const keys = Object.keys(v);
+    if (keys.length > MAX_ARG_ARRAY) return `${where} の項目が多すぎます（${MAX_ARG_ARRAY} 件まで）`;
+    for (const k of keys) {
+      if (k.length > MAX_ARG_STRING) return `項目の名前が長すぎます（${MAX_ARG_STRING} 字まで）`;
+      const m = walk(v[k], depth + 1, depth === 1 ? k : where);
+      if (m) return m;
+    }
+    return null;
+  };
+  return walk(args, 1, "args");
+}
+
+// 検査(workerInspect)の errors が、当てる前より増えたものを返す。
+// 文の中の配列の位置([12])は、消す・足すでずれるので比べるときは外す。同じ文の数が増えたぶんだけを「増えた」とする。
+export function addedInspectErrors(beforeErrors, afterErrors) {
+  const norm = (m) => String(m).replace(/\[\d+\]/g, "[]");
+  const count = new Map();
+  for (const m of beforeErrors || []) count.set(norm(m), (count.get(norm(m)) || 0) + 1);
+  const added = [];
+  for (const m of afterErrors || []) {
+    const k = norm(m);
+    const n = count.get(k) || 0;
+    if (n > 0) count.set(k, n - 1);
+    else added.push(String(m));
+  }
+  return added;
+}
+
+function roomNotFound() {
+  return json({ ok: false, code: "room_not_found" }, 404);
+}
+function opFailure(messages, status = 200) {
+  return json({ ok: false, errors: messages.map((m) => (typeof m === "string" ? { message: m } : m)) }, status);
+}
 
 export class CollaborationRoom {
   constructor(state, env) {
@@ -93,6 +202,9 @@ export class CollaborationRoom {
     if (url.pathname === "/plan" && request.method === "GET") return this.enqueue(() => this.getPlan());
     if (url.pathname === "/update" && request.method === "POST") return this.enqueue(() => this.update(request));
     if (url.pathname === "/save" && request.method === "POST") return this.enqueue(() => this.manualSave(request));
+    // ここから下はルームの中だけの経路(routes-rooms.mjs の転送の一覧には無い。roomOp・roomRead が直接呼ぶ)
+    if (url.pathname === "/op" && request.method === "POST") return this.enqueue(() => this.applyOp(request));
+    if (url.pathname === "/read" && request.method === "POST") return this.enqueue(() => this.read(request));
     return json({ error: "not_found" }, 404);
   }
 
@@ -138,29 +250,29 @@ export class CollaborationRoom {
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  async update(request) {
-    const meta = await this.getMeta();
-    if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
-    let payload;
-    try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
-    if (!payload || payload.type !== "patch" || !payload.patch) return json({ error: "invalid_patch" }, 400);
+  // 差分を1つ積んで全員へ流す。/update(画面)と /op(外の AI)が共用する。
+  // 版を1つ進め、期限を延ばし、書き戻しを予約する。差分が大きいときは積まずにその場で R2 へ書き戻す。
+  // 戻り値は進めたあとの meta。書き戻しで元の全体が R2 に無かったときは null(何も流さない)。
+  // extraMeta(省略可)は meta に足して一緒に保存する欄(/op の nextId)。
+  async commitPatch(meta, patch, clientId, extraMeta = null) {
     const now = Date.now();
     const version = Number(meta.version || 0) + 1;
     const dirtySince = Number(meta.dirtySince || now);
     let next = {
       ...meta,
+      ...(extraMeta || {}),
       version,
       updatedAt: now,
       expiresAt: now + RETENTION_MS,
       dirtySince,
       checkpointDueAt: Math.min(now + AUTO_SAVE_IDLE_MS, dirtySince + AUTO_SAVE_MAX_MS),
     };
-    const patchBytes = encodedSize(payload.patch);
+    const patchBytes = encodedSize(patch);
     if (patchBytes > MAX_JOURNAL_ENTRY_BYTES) {
-      next = await this.checkpoint(next, payload.patch, false);
-      if (!next) return json({ error: "not_found" }, 404);
+      next = await this.checkpoint(next, patch, false);
+      if (!next) return null;
     } else {
-      await this.state.storage.put(patchKey(version), payload.patch);
+      await this.state.storage.put(patchKey(version), patch);
       await this.state.storage.put("meta", next);
       await this.setNextAlarm(next);
     }
@@ -168,12 +280,23 @@ export class CollaborationRoom {
       type: "patch",
       version: next.version,
       expiresAt: next.expiresAt,
-      clientId: String(payload.clientId || "").slice(0, 64),
-      patch: payload.patch,
+      clientId: String(clientId || "").slice(0, 64),
+      patch,
     });
     if (patchBytes > MAX_JOURNAL_ENTRY_BYTES) {
       this.broadcast({ type: "checkpoint", version: next.version, savedAt: next.savedAt, expiresAt: next.expiresAt });
     }
+    return next;
+  }
+
+  async update(request) {
+    const meta = await this.getMeta();
+    if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    let payload;
+    try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
+    if (!payload || payload.type !== "patch" || !payload.patch) return json({ error: "invalid_patch" }, 400);
+    const next = await this.commitPatch(meta, payload.patch, payload.clientId);
+    if (!next) return json({ error: "not_found" }, 404);
     return json({
       version: next.version,
       expiresAt: next.expiresAt,
@@ -181,6 +304,88 @@ export class CollaborationRoom {
       checkpointPending: !!next.checkpointDueAt,
       conflict: Number(payload.baseVersion || 0) !== Number(meta.version || 0),
     });
+  }
+
+  // /op と /read の入口で、ルームがあるか・期限内かを見る。期限切れは取得(getPlan)と同じく片付ける。
+  async liveMeta() {
+    const meta = await this.getMeta();
+    if (!meta) return null;
+    if (meta.expiresAt <= Date.now()) {
+      await this.expire(meta);
+      return null;
+    }
+    return meta;
+  }
+
+  // POST /op {op, args}: 操作を1つ当てる。
+  // 成功 {ok:true, version, changedIds, removedIds, warnings}。何も変わらなかったときは版を進めず、積まず、流さない。
+  // 失敗 {ok:false, errors:[{message, candidates?}]}(ルームは1項目も変えない)。ルームが無い・期限切れ {ok:false, code:"room_not_found"}。
+  async applyOp(request) {
+    const meta = await this.liveMeta();
+    if (!meta) return roomNotFound();
+    let payload;
+    try { payload = await readJsonWithLimit(request, MAX_OP_BODY_BYTES); } catch {
+      return opFailure(["操作を読み取れませんでした（{op, args} の JSON を 64KB までで送ってください）"], 400);
+    }
+    if (!payload || typeof payload !== "object" || typeof payload.op !== "string") {
+      return opFailure(["操作を読み取れませんでした（{op, args} の形で送ってください）"], 400);
+    }
+    const op = payload.op;
+    const args = payload.args === undefined ? {} : payload.args;
+    const tooLarge = argsTooLarge(args);
+    if (tooLarge) return opFailure([tooLarge]);
+    const checked = OperationsCatalog.checkArgs(op, args);
+    if (!checked.ok) return opFailure(checked.errors);
+    const materialized = await this.materializePlan(meta);
+    if (!materialized) return roomNotFound();
+    const before = materialized.plan;
+    // 新しい物の id は、ルームの減らない連番(meta.nextId)とプランの最大 + 1 の大きいほうから数える
+    // (消した物の id を使い回すと、画面に残っている選択・取り消しの履歴・送る印が別の物を指すため)。
+    const result = workerApply(before, [{ op, args }], { firstId: Number(meta.nextId) || 0 });
+    if (result.errors.length) {
+      return opFailure(result.errors.map((e) => (e.candidates ? { message: e.message, candidates: e.candidates } : { message: e.message })));
+    }
+    const { patch, unshared } = buildRoomPatch(before, result.plan);
+    if (unshared.length) {
+      // 今の操作はどれも共有する欄だけを書く。ここに来たら操作の側が変わったということなので、届けずに断る。
+      return opFailure([REFUSAL + "(この操作は、共同編集で相手に届かない設定を変えます)"]);
+    }
+    if (patch) {
+      // 積む前に検査する。もとから誤りのあるプランも直せるよう、誤りが増えたときだけ断る。
+      const added = addedInspectErrors(workerInspect(before).errors, workerInspect(result.plan).errors);
+      if (added.length) {
+        return opFailure([{ message: "この操作をすると間取りのデータが正しくなくなるため、行いませんでした（" + added.slice(0, 5).join(" / ") + "）" }]);
+      }
+    }
+    const out = (version) => json({
+      ok: true,
+      version,
+      changedIds: result.changedIds,
+      removedIds: result.removedIds,
+      warnings: result.warnings,
+    });
+    if (!patch) return out(Number(meta.version || 0));
+    const nextId = Math.max(Number(meta.nextId) || 0, Number(result.nextId) || 0);
+    const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId });
+    if (!next) return roomNotFound();
+    return out(next.version);
+  }
+
+  // POST /read {what}: "summary" → {ok:true, version, summary}、"inspect" → {ok:true, version, inspect:{ok, errors, warnings}}。
+  async read(request) {
+    const meta = await this.liveMeta();
+    if (!meta) return roomNotFound();
+    let payload;
+    try { payload = await readJsonWithLimit(request, MAX_OP_BODY_BYTES); } catch { payload = null; }
+    const what = payload && payload.what;
+    if (what !== "summary" && what !== "inspect") {
+      return opFailure(["what は summary か inspect で渡してください"], 400);
+    }
+    const materialized = await this.materializePlan(meta);
+    if (!materialized) return roomNotFound();
+    const version = Number(meta.version || 0);
+    if (what === "summary") return json({ ok: true, version, summary: workerSummarize(materialized.plan) });
+    return json({ ok: true, version, inspect: workerInspect(materialized.plan) });
   }
 
   async manualSave(request) {
