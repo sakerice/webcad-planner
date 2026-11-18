@@ -67,7 +67,9 @@
     plan = plan || {};
     opts = opts || {};
     var maxBytes = Number(opts.maxBytes) > 0 ? Math.floor(Number(opts.maxBytes)) : DEFAULT_MAX_BYTES;
-    var selected = {};
+    // 種類名・id を鍵にする表は、素のオブジェクトでなく Object.create(null) で作る
+    // (種類名や id が constructor・__proto__ でも、Object.prototype の物と取り違えないように)。
+    var selected = Object.create(null);
     (opts.selectedIds || []).forEach(function (id) { selected[String(id)] = true; });
     var mark = function (o) { return o && o.id !== undefined && selected[String(o.id)] ? '[選択中] ' : ''; };
 
@@ -93,13 +95,20 @@
         + ' 厚さ=' + n(w.thick || 120) + lockMark(w));
     });
     var itemHead = '物（id・種類（呼び名、分類）・階・中心・幅x奥行き・回転）:';
-    var itemLine = function (it) {
-      return mark(it) + 'id=' + clean(it.id, 60) + ' ' + typeText(it.type, opts) + ' ' + floorOf(it) + '階 中心=' + center(it)
-        + ' 大きさ=' + n(it.w) + 'x' + n(it.d) + ' 回転=' + n(it.rot) + lockMark(it);
+    // 種類の書き方(呼び名と分類を引く)は種類ごとに1回だけ作る。
+    var typeTexts = new Map();
+    var typeTextOf = function (type) {
+      if (!typeTexts.has(type)) typeTexts.set(type, typeText(type, opts));
+      return typeTexts.get(type);
     };
+    // 物の行は1回だけ作って覚える(まとめ直すたびに作り直さない)。
+    var itemLines = items.map(function (it) {
+      return mark(it) + 'id=' + clean(it.id, 60) + ' ' + typeTextOf(it.type) + ' ' + floorOf(it) + '階 中心=' + center(it)
+        + ' 大きさ=' + n(it.w) + 'x' + n(it.d) + ' 回転=' + n(it.rot) + lockMark(it);
+    });
 
     // まとめる候補: 選択中でない物を種類ごとに。数の多い順(同数は種類名の順)。
-    var groups = {};
+    var groups = Object.create(null);
     items.forEach(function (it) {
       if (mark(it)) return;
       var t = String(it.type);
@@ -109,7 +118,14 @@
     var order = Object.keys(groups).filter(function (t) { return groups[t].length >= 2; }).sort(function (a, b) {
       return groups[b].length - groups[a].length || (a < b ? -1 : a > b ? 1 : 0);
     });
-    var collapsed = {};
+    var collapsed = Object.create(null);
+    var NOTICE = '※ 物が多いので、数の多い種類は（まとめ）の行に種類ごとの数だけを書いた（その物の id は載せていない）。';
+    var collapseLine = function (t) {
+      var per = {};
+      groups[t].forEach(function (it) { var f = floorOf(it); per[f] = (per[f] || 0) + 1; });
+      return '（まとめ）' + typeTextOf(t) + ' ' + groups[t].length + '個: '
+        + Object.keys(per).map(Number).sort(function (a, b) { return a - b; }).map(function (f) { return f + '階 ' + per[f]; }).join('・');
+    };
 
     // 行は {text, keep}。keep の行(見出し・まとめの知らせ・選択中の物)は、切るときも残す。
     function build() {
@@ -120,28 +136,36 @@
       wallLines.forEach(function (t, i) { put(t, i === 0 || t.indexOf('[選択中] ') === 0); });
       var names = order.filter(function (t) { return collapsed[t]; });
       put(itemHead, true);
-      if (names.length) put('※ 物が多いので、数の多い種類は（まとめ）の行に種類ごとの数だけを書いた（その物の id は載せていない）。', true);
+      if (names.length) put(NOTICE, true);
       // まとめの行は個々の行より先に書く(それでも長すぎて末尾を切るとき、まとめが残るように)。
-      names.forEach(function (t) {
-        var per = {};
-        groups[t].forEach(function (it) { var f = floorOf(it); per[f] = (per[f] || 0) + 1; });
-        put('（まとめ）' + typeText(t, opts) + ' ' + groups[t].length + '個: '
-          + Object.keys(per).map(Number).sort(function (a, b) { return a - b; }).map(function (f) { return f + '階 ' + per[f]; }).join('・'));
-      });
+      names.forEach(function (t) { put(collapseLine(t)); });
       // 選択中の物は先に書く(末尾を切っても残るように)。残りはプランの並び。
-      items.forEach(function (it) { if (mark(it)) put(itemLine(it), true); });
-      items.forEach(function (it) { if (!mark(it) && !collapsed[String(it.type)]) put(itemLine(it)); });
+      items.forEach(function (it, k) { if (mark(it)) put(itemLines[k], true); });
+      items.forEach(function (it, k) { if (!mark(it) && !collapsed[String(it.type)]) put(itemLines[k]); });
       return lines;
     }
     function join(lines) { return lines.map(function (l) { return l.text; }).join('\n'); }
 
+    // まとめる種類を決めるのは、全体のバイト数の足し引きで行う(行を作り直して数え直さない)。
+    // 全体のバイト数 = 各行のバイト数の和 + 改行の数で、つないだ文字列を utf8Bytes で数えた値と同じ
+    // (行が対になっていない上位サロゲートで終わるときも、行の 3 と改行の 1 の和が、つないだときの 4 と同じ)。
     var lines = build();
-    var text = join(lines);
-    for (var i = 0; i < order.length && utf8Bytes(text) > maxBytes; i++) {
-      collapsed[order[i]] = true;
-      lines = build();
-      text = join(lines);
+    var total = -1;
+    lines.forEach(function (l) { total += utf8Bytes(l.text) + 1; });
+    var typeBytes = Object.create(null);
+    items.forEach(function (it, k) {
+      if (mark(it)) return;
+      var t = String(it.type);
+      typeBytes[t] = (typeBytes[t] || 0) + utf8Bytes(itemLines[k]) + 1;
+    });
+    for (var i = 0; i < order.length && total > maxBytes; i++) {
+      var t = order[i];
+      if (i === 0) total += utf8Bytes(NOTICE) + 1;
+      total += utf8Bytes(collapseLine(t)) + 1 - typeBytes[t];
+      collapsed[t] = true;
     }
+    if (i > 0) lines = build();
+    var text = join(lines);
     if (utf8Bytes(text) > maxBytes) {
       // 残す行の分を先に取り、残りに入るだけ、ほかの行を前から入れる(入らなくなった所から後は落とす)。
       var tail = '…（長すぎるので、ここから後の一部を省いた）';
@@ -165,5 +189,6 @@
     return text;
   }
 
-  return { summarize: summarize, utf8Bytes: utf8Bytes, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES };
+  // clean は外の AI の受け口(worker/mcp.mjs)が、検査や警告の文にも要約と同じ置き換えを通すために使う。
+  return { summarize: summarize, utf8Bytes: utf8Bytes, clean: clean, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES };
 }));

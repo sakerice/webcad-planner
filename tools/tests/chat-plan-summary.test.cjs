@@ -112,3 +112,28 @@ test('グローバルに触らない', () => {
     .split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
   for (const w of ['DATA', 'ST.', 'document', 'window.', 'itemTypeLabel', 'CATALOGUE_TAGS']) assert.ok(!src.includes(w), w + ' が残っている');
 });
+
+test('種類名・id が constructor・__proto__ などでも例外にならず、取り違えない', () => {
+  const odd = ['constructor', '__proto__', 'toString', 'hasOwnProperty', 'valueOf'];
+  const items = [];
+  odd.forEach((t, i) => {
+    items.push({ id: 'a' + i, type: t, x: i * 1000, y: 0, w: 500, d: 500, floor: 1 });
+    items.push({ id: 'b' + i, type: t, x: i * 1000, y: 1000, w: 500, d: 500, floor: 2 });
+  });
+  items.push({ id: 'constructor', type: 'sofa', x: 0, y: 3000, w: 1800, d: 800, floor: 1 });
+  items.push({ id: '__proto__', type: 'sofa', x: 0, y: 5000, w: 1800, d: 800, floor: 1 });
+  const p = { walls: [], rooms: [], items };
+  // 呼び名と分類は表に無い(この試しの LABELS は素のオブジェクトなので使わない)。
+  const plain = (over) => Object.assign({ labelOf: () => null, kindOf: () => null }, over || {});
+  const s = Summary.summarize(p, plain());
+  for (const it of items) assert.ok(s.includes('id=' + it.id + ' ' + it.type + ' '), it.id);
+  // 選択していないのに選択中の印が付かない(id が Object.prototype の名前でも)。
+  assert.ok(!s.includes('[選択中]'));
+  // 上限を小さくすると、変わった名前の種類も種類ごとの数にまとまる。
+  const small = Summary.summarize(p, plain({ maxBytes: 700 }));
+  assert.ok(bytes(small) <= 700);
+  assert.ok(!small.includes('省いた'));
+  for (const t of odd) assert.ok(small.includes('（まとめ）' + t + ' 2個: 1階 1・2階 1'), t);
+  const sel = Summary.summarize(p, plain({ selectedIds: ['constructor'] }));
+  assert.equal(sel.split('\n').filter((l) => l.startsWith('[選択中] ')).length, 1);
+});

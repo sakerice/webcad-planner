@@ -203,6 +203,19 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .share-people{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
 .share-person{background:#eaf4ff;color:#285c8e;border-radius:999px;padding:5px 9px;font-size:11px}
 .share-expiry{font-size:11px;color:#778599;margin-top:8px}
+.share-ai{margin-top:20px;padding-top:16px;border-top:1px solid #edf1f6}
+.share-ai-title{font-size:14px;font-weight:800;margin:0 0 4px}
+.share-ai .share-actions{margin-top:12px}
+.share-ai .share-secondary{min-height:40px}
+.share-ai-text{display:block;margin-top:10px;resize:none;font-size:12px;line-height:1.5}
+.share-ai-setup{margin-top:10px}
+.share-url-row .share-secondary{white-space:nowrap;flex:none}
+.share-ai-setup summary{display:flex;align-items:center;gap:6px;min-height:40px;cursor:pointer;font-size:12px;font-weight:750;color:#24507f;list-style:none}
+.share-ai-setup summary::-webkit-details-marker{display:none}
+.share-ai-setup summary::before{content:'';width:0;height:0;border-left:6px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .15s}
+.share-ai-setup[open] summary::before{transform:rotate(90deg)}
+.share-ai-gap{margin-top:10px}
+.share-ai-note{font-size:11px;line-height:1.6;color:#778599;margin:8px 0 0}
 @media(max-width:720px){#collab-indicator{display:none!important}.share-card{padding:18px}.share-url-row{align-items:stretch;flex-direction:column}}
 @media (max-width:1180px), (pointer:coarse){
   .mobile-only{display:block}
@@ -3184,6 +3197,21 @@ input[type="reset"]:focus-visible{
       <button id="share-create-btn" class="share-primary" type="button" onclick="createSharedRoom()">共同編集を開始</button>
       <button id="share-leave-btn" class="share-danger" type="button" style="display:none" onclick="leaveSharedRoom()">共同編集を終了</button>
     </div>
+    <section id="share-ai-section" class="share-ai" aria-labelledby="share-ai-title">
+      <h3 id="share-ai-title" class="share-ai-title">AIアプリから直す</h3>
+      <p class="share-copy">ChatGPT や Claude などのAIアプリとの会話から、このプランを直せます。</p>
+      <div class="share-actions"><button id="share-ai-btn" class="share-secondary" type="button" onclick="openPlanInAiApp()">AIアプリで開く</button></div>
+      <textarea id="share-ai-text" class="share-input share-ai-text" rows="3" readonly aria-label="AIアプリに貼る文" style="display:none"></textarea>
+      <div id="share-ai-status" class="share-status" role="status" style="display:none"></div>
+      <details id="share-ai-setup" class="share-ai-setup">
+        <summary>はじめて使うとき</summary>
+        <p class="share-copy">AIアプリの設定で、次の住所を連携先として1度だけ登録します。</p>
+        <label class="share-label" for="share-ai-address">連携先の住所</label>
+        <div class="share-url-row"><input id="share-ai-address" class="share-input" readonly><button id="share-ai-address-btn" class="share-secondary" type="button" onclick="copyAiAppAddress()">住所をコピー</button></div>
+        <p class="share-copy share-ai-gap">登録のしかたはAIアプリによって違います。ChatGPT は Plugins の「＋」から、Claude は設定のコネクタから追加します。</p>
+      </details>
+      <p class="share-ai-note">AIが直すと、この画面の「元に戻す」の履歴は消えます。AIアプリによっては、直す操作が使えないことがあります。</p>
+    </section>
   </div>
 </div>
 <div id="toolbar">
@@ -20007,14 +20035,57 @@ function renderSharedUi(){
 function openShareDialog(){
   var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.add('show');
   var name=document.getElementById('share-name');if(name){name.value=sharedDisplayName()==='ゲスト'?'':sharedDisplayName();setTimeout(function(){name.focus();},0);}
+  var aiAddress=document.getElementById('share-ai-address');if(aiAddress)aiAddress.value=aiAppAddress();
   renderSharedUi();
 }
 function closeShareDialog(){var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.remove('show');}
 function closeShareDialogOnBackdrop(e){if(e.target&&e.target.id==='share-overlay')closeShareDialog();}
+// 文をクリップボードへ写す。navigator.clipboard が使えなければ、欄を選んで execCommand('copy') で写す。
+// onFallback は欄を選ぶ前に呼ぶ(隠れている欄を見せるため)。写せたかどうかを返す。
+async function sharedCopyText(value,input,onFallback){
+  try{await navigator.clipboard.writeText(value);return true;}
+  catch(e){
+    if(!input)return false;
+    if(onFallback)onFallback();
+    try{input.select();return document.execCommand('copy')===true;}catch(err){return false;}
+  }
+}
 async function copySharedUrl(){
-  var value=sharedUrl();
-  try{await navigator.clipboard.writeText(value);sharedSetStatus('共同編集URLをコピーしました。');}
-  catch(e){var input=document.getElementById('share-url');if(input){input.select();document.execCommand('copy');sharedSetStatus('共同編集URLをコピーしました。');}}
+  var value=sharedUrl();var input=document.getElementById('share-url');
+  if(await sharedCopyText(value,input)||input)sharedSetStatus('共同編集URLをコピーしました。');
+}
+// 外の AI アプリ(ChatGPT・Claude など)から共有プランを直すための入口。
+// 共同編集のルームを使う(ルームの URL を知っていることが、外の AI から触れる条件)。
+var AI_APP_PROMPT='house-planner のこのプランを開いてください。';
+function aiAppAddress(){return location.origin+'/api/mcp';}
+function aiAppSetStatus(message,isError){
+  var el=document.getElementById('share-ai-status');if(!el)return;
+  el.textContent=message;el.classList.toggle('error',!!isError);el.style.display=message?'block':'none';
+}
+async function openPlanInAiApp(){
+  var button=document.getElementById('share-ai-btn');if(button&&button.disabled)return;
+  var field=document.getElementById('share-ai-text');
+  if(field){field.style.display='none';field.value='';}
+  aiAppSetStatus('');
+  if(button)button.disabled=true;
+  try{
+    var created=false;
+    if(!SHARED.roomId){
+      await createSharedRoom(); // 失敗の出し方は共同編集の開始と同じ(share-status に出る)
+      if(!SHARED.roomId)return;
+      created=true;
+    }
+    var text=AI_APP_PROMPT+sharedUrl();
+    if(field)field.value=text;
+    var copied=await sharedCopyText(text,field,function(){if(field)field.style.display='block';});
+    if(created)sharedSetStatus('共同編集を開始しました。URLを共有してください。'); // 開始のときに写した共同編集URLは、AI に貼る文で上書きした
+    aiAppSetStatus(copied?'AIアプリに貼る文をコピーしました。':'この文をコピーして、AIアプリに貼ってください。');
+  }finally{if(button)button.disabled=false;}
+}
+async function copyAiAppAddress(){
+  var input=document.getElementById('share-ai-address');var value=aiAppAddress();
+  if(input)input.value=value;
+  aiAppSetStatus(await sharedCopyText(value,input)?'住所をコピーしました。':'住所を選んで、コピーしてください。');
 }
 function sharedBaselineFrom(plan){
   var base={collections:{},fields:{}};

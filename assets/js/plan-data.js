@@ -155,8 +155,8 @@ function planOpsCtx(extra){
 // 部屋の id は 'rm_'+連番(同じ依頼で続けて足しても重ならない)。
 // 吸着は階段どうしのつながりだけ。格子(利用者の画面の ST.snap。910 などにしている人もいる)と物の端には吸着させない
 // (AI が指定した中心・動かす量のとおりに置く)。
-// 置いた物の分類(CATALOGUE_TAGS の kind)が、読み取りで壁や天井に吊る物(PlanFreeApply.MOUNT_ELEV_MM。レンジフードなど)で、
-// 画面の高さ決めが高さを変えていなければ(物を作る部品の既定の 0 のまま)、読み取りと同じ取付の高さを入れる。
+// 置いた物の分類(CATALOGUE_TAGS の kind)が、読み取りで壁や天井に吊る物(PlanFreeApply.MOUNT_ELEV_MM。レンジフードなど)なら、
+// 下に台があっても、読み取りと同じ取付の高さを入れる。
 // カタログは AI 用: placeItem の type に、家具・設備の分類名(ObjectKnowledge の kind。sofa・bed など)を
 // 先に引き(PlanFreeApply.typeForKind。取り込みと同じ種類になる)、分類名でなければ今の種類名の引き方を使う。
 // toilet・sofa・tv・dining-table・desk・closet は分類名と古い種類名が同じ綴りで、古い種類(tv は読み込みのたびに消える)
@@ -226,12 +226,14 @@ function planChatCtx(){
   hooks.placeFloor=function(type,floor,cx,cy){ return placeFloor(resolve(type),floor,cx,cy); };
   var afterPlace=hooks.afterPlace;
   hooks.afterPlace=function(it,plan){
-    // 物を作る部品は高さを入れられる物に既定の 0 を入れる。画面の高さ決め(載る面を探す)が変えなかったときだけ、
-    // 取付の高さを入れる(台の上に載せた物・モデルの既定の高さがある物はそのまま)。
-    var before=it?it.elev:undefined;
     afterPlace(it,plan);
-    if(!it || it.elev!==before || (before!==undefined && before!==0)) return;
-    var tag=(typeof CATALOGUE_TAGS!=='undefined'&&CATALOGUE_TAGS&&CATALOGUE_TAGS.items&&CATALOGUE_TAGS.items[it.type])||null;
+    if(!it) return;
+    // 壁や天井の決まった高さに付ける分類(取付の高さの表 PlanFreeApply.MOUNT_ELEV_MM。レンジフードなど)は、
+    // 読み取り(plan-free-apply.js の toImportPlan が extra.elev に入れ、plan-import.js が物に重ねる)と同じく、
+    // 下に台があっても台に載せず、モデルの既定の高さより先に、表の高さにする。
+    // (以前は画面の高さ決めが高さを変えなかったときだけ入れていたので、調理台の上に置くと天板の上に載っていた。)
+    var tags=(typeof CATALOGUE_TAGS!=='undefined'&&CATALOGUE_TAGS&&CATALOGUE_TAGS.items)||null;
+    var tag=tags&&Object.prototype.hasOwnProperty.call(tags,it.type)?tags[it.type]:null;
     var mount=(typeof PlanFreeApply!=='undefined'&&PlanFreeApply.MOUNT_ELEV_MM)||{};
     if(tag && Object.prototype.hasOwnProperty.call(mount,tag.kind)) it.elev=mount[tag.kind];
   };

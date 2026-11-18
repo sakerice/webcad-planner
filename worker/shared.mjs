@@ -77,5 +77,31 @@ export async function readJsonWithLimit(request, maxBytes = MAX_REQUEST_BYTES) {
   }
 }
 
+// 本文を流しながら読み、maxBytes を超えたところで読むのをやめる（全部を読み込んでから大きさを見ない）。
+// Content-Length が上限を超えていれば読まない。戻り値: Uint8Array、上限を超えたら null。
+// readJsonWithLimit（今ある経路が使う。全部読んでから見る）とは別に置き、今ある経路の動きは変えない。
+export async function readBytesWithLimit(request, maxBytes) {
+  const length = Number(request.headers.get("content-length") || 0);
+  if (length > maxBytes) return null;
+  if (!request.body) return new Uint8Array(0);
+  const reader = request.body.getReader();
+  const chunks = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      try { await reader.cancel(); } catch { /* 読み手を閉じられなくても、もう読まない */ }
+      return null;
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const c of chunks) { out.set(c, at); at += c.byteLength; }
+  return out;
+}
+
 // 差分の当て方は画面と同じ1つ(assets/js/plan-core/patch.js)。ここでは名前だけ出し直す。
 export const applyPatch = PlanCorePatch.applyPatch;

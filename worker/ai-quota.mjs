@@ -23,6 +23,11 @@
 // （前の messages に足しただけか）を確かめて数える（worker/chat.mjs）。札の記録はチャットの最初の
 // 呼び出しで、/take に札の欄を足して作る。札は署名つきで画面が持ち回るので、何回使ったかは
 // 札の中ではなくここで数える。
+//
+// 同じクラスを、別の名前のインスタンスで別の物を数えるのにも使う（数は名前ごとに別々に持つ）。
+//   idFromName("ai-usage")     AI の点（読み取り・チャット）
+//   idFromName("room-create")  外の AI（/api/mcp の create_plan）が作るルームの数。/take を cost=1 で呼ぶ
+//                              （worker/mcp.mjs。画面からの POST /api/rooms は数えない）
 
 // 1日の上限。**回数ではなく「点」で数える**（点の重さは worker/routes-ai.mjs の COST_* と
 // worker/chat.mjs の AI_CHAT_POINTS）。
