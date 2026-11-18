@@ -149,3 +149,64 @@ test('upserts の新しい物は、届いた順に末尾へ足す（id の大小
   assert.deepEqual(plan.walls.map((w) => w.id), [5, 'a', 'z', 9, 2]);
   assert.equal(plan.walls[1].v, 1, '既にある物はその場で入れ替える');
 });
+
+// ── 形の合わない差分と危ない鍵(2026-11-19)。Worker が古い版で形を見ずに流してきても、受け手が壊れないこと ──
+const PROTO_NAMES = Object.getOwnPropertyNames(Object.prototype).sort().join(',');
+const cleanProto = () => {
+  assert.equal(Object.getOwnPropertyNames(Object.prototype).sort().join(','), PROTO_NAMES);
+  assert.equal({}.polluted, undefined);
+};
+
+test('fields の __proto__・constructor・prototype と Object.prototype の名前は書かない', () => {
+  const plan = { walls: [], items: [], rooms: [] };
+  const protoBefore = Object.getPrototypeOf(plan);
+  P.applyPatch(plan, JSON.parse('{"fields":{"__proto__":{"polluted":1},"constructor":{"prototype":{"polluted":1}},"prototype":{"polluted":1},"hasOwnProperty":1,"toString":"x","northDeg":5}}'));
+  assert.equal(Object.getPrototypeOf(plan), protoBefore, 'プランの継承元が変わった');
+  assert.equal(plan.polluted, undefined);
+  assert.equal(typeof plan.hasOwnProperty, 'function');
+  assert.equal(typeof plan.toString, 'function');
+  assert.ok(!Object.prototype.hasOwnProperty.call(plan, 'constructor'));
+  assert.ok(!Object.prototype.hasOwnProperty.call(plan, 'prototype'));
+  assert.equal(plan.northDeg, 5, '正当な欄は書く');
+  cleanProto();
+});
+
+test('値のどこかに危ない鍵を含む物と欄は入れない', () => {
+  const plan = { walls: [{ id: 1, v: 0 }], items: [], rooms: [] };
+  P.applyPatch(plan, JSON.parse('{"collections":{"walls":{"upserts":[{"id":1,"v":1,"a":{"b":[{"__proto__":{"polluted":1}}]}},{"id":2,"constructor":{"prototype":{"polluted":1}}},{"id":3,"v":3}],"removes":[]}},"fields":{"exteriorWallSettings":{"walls":{"1":{"prototype":{}}}},"floors":{"1":{"wallHeight":2500}}}}'));
+  assert.deepEqual(plan.walls, [{ id: 1, v: 0 }, { id: 3, v: 3 }]);
+  assert.equal(plan.exteriorWallSettings, undefined);
+  assert.deepEqual(plan.floors, { 1: { wallHeight: 2500 } });
+  cleanProto();
+});
+
+test('形の合わない差分は例外を出さず、合わない部分だけ飛ばす', () => {
+  const bad = [
+    'abc', 5, null, [], { collections: 'x', fields: 'y' }, { collections: [], fields: [] },
+    { collections: { walls: 'x', items: [], rooms: null } },
+    { collections: { walls: { upserts: 'abc', removes: 'abc' } } },
+    { collections: { items: { upserts: { id: 1 }, removes: { 0: '1' } } } },
+    { collections: { items: { upserts: [null, 5, 'x', [1, 2], true], removes: [null, {}, [], true] } } },
+    { collections: { doors: { upserts: [{ id: 9 }] } } },
+    JSON.parse('{"collections":{"__proto__":{"walls":{"upserts":[{"id":9}]}}}}'),
+  ];
+  for (const patch of bad) {
+    const plan = { walls: [{ id: 1 }], items: [{ id: 2 }], rooms: [{ id: 'rm3' }] };
+    P.applyPatch(plan, patch);
+    assert.deepEqual(plan, { walls: [{ id: 1 }], items: [{ id: 2 }], rooms: [{ id: 'rm3' }] }, JSON.stringify(patch));
+  }
+  // 壊れた部分と正しい部分が混ざっていても、正しい部分は当てる
+  const plan = { walls: [{ id: 1 }], items: [{ id: 2 }], rooms: [] };
+  P.applyPatch(plan, { collections: { walls: { upserts: 'abc', removes: ['1'] }, items: { upserts: [null, { id: 2, x: 5 }], removes: 'x' } } });
+  assert.deepEqual(plan, { walls: [], items: [{ id: 2, x: 5 }], rooms: [] });
+  cleanProto();
+});
+
+test('hasUnsafeKey: 自分の鍵だけを見る。深すぎるものは危ないとみなす', () => {
+  assert.equal(P.hasUnsafeKey({ a: { b: [1, { c: 'constructor' }] } }), false, '値の文字は見ない');
+  assert.equal(P.hasUnsafeKey(JSON.parse('{"a":[{"__proto__":1}]}')), true);
+  assert.equal(P.hasUnsafeKey({ toString: 1 }), false, 'Object.prototype の名前でも3つ以外は通す');
+  let deep = 1;
+  for (let i = 0; i < 70; i++) deep = { a: deep };
+  assert.equal(P.hasUnsafeKey(deep), true);
+});
