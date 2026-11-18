@@ -48,6 +48,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { watch3dSkips, assertNo3dSkips, read3dSkips } from './build3d-skips.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -668,6 +669,7 @@ try {
     };
     data.meta.counts.cases = Object.fromEntries(SECTIONS.map((s) => [s, Object.keys(data[s]).length]));
     assert.equal(errors.length, 0, 'ページで例外: ' + errors.slice(0, 5).join(' / '));
+    await assertNo3dSkips(page, 'operations-golden');
   } finally {
     await context.close();
   }

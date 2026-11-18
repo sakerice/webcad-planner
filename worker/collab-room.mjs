@@ -16,6 +16,7 @@ import {
 import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
+import { roomPatchProblem, roomPlanProblem, maxSameId, upsertKeyCounts } from "./room-guard.mjs";
 
 // MCP 経由の差分の送り手の名前。画面の clientId は 24 桁の16進(index.html の sharedClientId)なので重ならない。
 export const MCP_CLIENT_ID = "mcp";
@@ -99,6 +100,8 @@ export function argsTooLarge(args) {
     const keys = Object.keys(v);
     if (keys.length > MAX_ARG_ARRAY) return `${where} の項目が多すぎます（${MAX_ARG_ARRAY} 件まで）`;
     for (const k of keys) {
+      // JSON.parse は __proto__ を自分の鍵として作る。写すときにプロトタイプを差し替えるので受け付けない。
+      if (PlanCorePatch.UNSAFE_KEYS.includes(k)) return `引数に使えない名前の項目があります（${k}）`;
       if (k.length > MAX_ARG_STRING) return `項目の名前が長すぎます（${MAX_ARG_STRING} 字まで）`;
       const m = walk(v[k], depth + 1, depth === 1 ? k : where);
       if (m) return m;
@@ -123,6 +126,10 @@ export function addedInspectErrors(beforeErrors, afterErrors) {
   }
   return added;
 }
+
+// 保存されたプランの形が崩れていて、Worker の要約・検査・操作が例外になったときの文。
+// (形を確かめる前に積まれた差分や、別の道で置かれたプランのとき。部屋は変えない)
+export const BROKEN_PLAN_MESSAGE = "このプランには AI から扱えない形の所があるため、読んだり直したりできませんでした。house-planner の画面で直してください。";
 
 function roomNotFound() {
   return json({ ok: false, code: "room_not_found" }, 404);
@@ -188,21 +195,30 @@ export class CollaborationRoom {
   async readSnapshot(meta) {
     const object = await this.env.PLANS.get(roomKey(meta.roomId));
     if (!object) return null;
-    try { return JSON.parse(await object.text()); } catch { return null; }
+    let plan;
+    try { plan = JSON.parse(await object.text()); } catch { return null; }
+    return plan && typeof plan === "object" && !Array.isArray(plan) ? plan : null;
   }
 
+  // 元の全体に、積んだ差分を順に当てる。
+  // 形を確かめる前(2026-11)に積まれた壊れた差分があっても、例外で落ちずに読めるようにする。
+  // applyPatch は形の合わない部分を飛ばすが、それでも例外が出た差分は飛ばして残りを当てる。
   async materializePlan(meta, extraPatch = null) {
     const plan = await this.readSnapshot(meta);
     if (!plan) return null;
     const entries = await this.listJournal();
-    for (const patch of entries.values()) applyPatch(plan, patch);
+    for (const [key, patch] of entries) {
+      try { applyPatch(plan, patch); } catch (e) { console.warn("[room] 積んだ差分を当てられないので飛ばす", key, e && e.message); }
+    }
     if (extraPatch) applyPatch(plan, extraPatch);
     return { plan, entries };
   }
 
+  // 戻り値は置いた大きさ(UTF-8 のバイト数)。
   async writeSnapshot(plan, meta) {
     const encoded = JSON.stringify(plan);
-    if (encodedSize(encoded) > MAX_PLAN_BYTES) throw new Error("plan_too_large");
+    const bytes = encodedSize(encoded);
+    if (bytes > MAX_PLAN_BYTES) throw new Error("plan_too_large");
     await this.env.PLANS.put(roomKey(meta.roomId), encoded, {
       httpMetadata: { contentType: "application/json" },
       customMetadata: {
@@ -211,14 +227,17 @@ export class CollaborationRoom {
         version: String(meta.version),
       },
     });
+    return bytes;
   }
 
-  async checkpoint(meta, extraPatch = null, broadcast = true) {
-    const materialized = await this.materializePlan(meta, extraPatch);
+  // materialized(省略可)は、呼ぶ側が materializePlan(meta, extraPatch) で作った物(作り直さないため)。
+  // 書き戻したあとの meta に、R2 の本体の大きさ(planBytes)を入れ、積んだ差分の大きさ(journalBytes)を 0 に戻す。
+  async checkpoint(meta, extraPatch = null, broadcast = true, materialized = null) {
+    if (!materialized) materialized = await this.materializePlan(meta, extraPatch);
     if (!materialized) return null;
     const savedAt = Date.now();
-    const next = { ...meta, savedAt, dirtySince: null, checkpointDueAt: null };
-    await this.writeSnapshot(materialized.plan, next);
+    const next = { ...meta, savedAt, dirtySince: null, checkpointDueAt: null, journalBytes: 0, sameIdMax: maxSameId(materialized.plan) };
+    next.planBytes = await this.writeSnapshot(materialized.plan, next);
     await this.clearJournal(materialized.entries);
     await this.state.storage.put("meta", next);
     await this.setNextAlarm(next);
@@ -286,9 +305,62 @@ export class CollaborationRoom {
     return new Response(null, { status: 101, webSocket: client });
   }
 
+  // 大きさの見積もりに使う3つの数。meta に無い数(この欄を足す前に作った部屋)は、ここで1回だけ数え、
+  // learned に入れて返す(呼ぶ側が差分を積むときに meta へ書く。断るときは書かない)。
+  //   planBytes  … R2 の本体の大きさ(無ければ R2 の物の大きさ)
+  //   journalBytes … 積んである差分の大きさの合計(無ければ積んである差分を読んで数える)
+  //   sameIdMax  … 本体の中で同じ id の物が並ぶ数の最大(無ければ本体を読んで数える)。積んだ差分では増えない
+  //               (差分の当て方は、新しい id の物を1つ足すか、ある物を置き換えるか消すだけ)
+  async roomSizes(meta) {
+    const learned = {};
+    const finite = (v) => Number.isFinite(Number(v)) && v !== null && v !== "" && Number(v) >= 0;
+    let planBytes = finite(meta.planBytes) ? Number(meta.planBytes) : null;
+    let sameIdMax = finite(meta.sameIdMax) ? Number(meta.sameIdMax) : null;
+    if (planBytes === null || sameIdMax === null) {
+      const object = await this.env.PLANS.get(roomKey(meta.roomId));
+      if (!object) return null;
+      if (planBytes === null) planBytes = learned.planBytes = Number.isFinite(Number(object.size)) ? Number(object.size) : encodedSize(await object.text());
+      if (sameIdMax === null) {
+        let plan = null;
+        try { plan = JSON.parse(await object.text()); } catch { plan = null; }
+        sameIdMax = learned.sameIdMax = maxSameId(plan);
+      }
+    }
+    let journalBytes = finite(meta.journalBytes) ? Number(meta.journalBytes) : null;
+    if (journalBytes === null) {
+      journalBytes = 0;
+      for (const patch of (await this.listJournal()).values()) journalBytes += encodedSize(patch === undefined ? null : patch);
+      learned.journalBytes = journalBytes;
+    }
+    return { planBytes, journalBytes, sameIdMax, learned };
+  }
+
+  // 本体(R2)に、積んである差分とこの差分を当てたあとの大きさの上界。プランを作らずに数える(本体の JSON を読むだけ)。
+  // 鍵ごとの物の数は本体から数え(room-guard.mjs の upsertKeyCounts。当て方と同じ PlanCorePatch.upsertKey)、
+  // 差分ごとの増え方は PlanCorePatch.patchGrowthBound(当て方と同じ取り出し方)で数える。
+  async growthBound(meta, patch) {
+    const object = await this.env.PLANS.get(roomKey(meta.roomId));
+    if (!object) return null;
+    const text = await object.text();
+    let plan = null;
+    try { plan = JSON.parse(text); } catch { return null; }
+    const counts = upsertKeyCounts(plan);
+    const countOf = (name, key) => counts[name].get(key) || 0;
+    const sizeOf = (v) => encodedSize(JSON.stringify(v === undefined ? null : v));
+    let total = encodedSize(text);
+    for (const entry of (await this.listJournal()).values()) total += PlanCorePatch.patchGrowthBound(entry, countOf, sizeOf);
+    return total + PlanCorePatch.patchGrowthBound(patch, countOf, sizeOf);
+  }
+
   // 差分を1つ積んで全員へ流す。/update(画面)と /op(外の AI)が共用する。
   // 版を1つ進め、期限を延ばし、書き戻しを予約する。差分が大きいときは積まずにその場で R2 へ書き戻す。
   // 戻り値は進めたあとの meta。書き戻しで元の全体が R2 に無かったときは null(何も流さない)。
+  // 当てたあとのプランが保存の上限(MAX_PLAN_BYTES)を超えるときは、何も変えずに {tooLarge: true} を返す
+  // (受けてしまうと書き戻しが毎回失敗し、積んだ差分が増え続けて部屋が開けなくなるため)。
+  // 当てたあとの大きさの上の見積もり(bound)は 本体 + (積んだ差分の合計 + この差分) × 同じ id の物の数の最大。
+  // 差分は物と欄を置き換えるだけだが、同じ id の物が k 個あると、upsert の物が k 個に写るため。
+  // bound が上限以下なら積む。上限の2倍を超えるなら当てずに断る(膨らんだプランをメモリに作らないため)。
+  // その間なら実際に当てて測り、収まればその場で書き戻す。
   // extraMeta(省略可)は meta に足して一緒に保存する欄(/op の nextId)。
   async commitPatch(meta, patch, clientId, extraMeta = null) {
     const now = Date.now();
@@ -303,11 +375,35 @@ export class CollaborationRoom {
       dirtySince,
       checkpointDueAt: Math.min(now + AUTO_SAVE_IDLE_MS, dirtySince + AUTO_SAVE_MAX_MS),
     };
-    const patchBytes = encodedSize(patch);
-    if (patchBytes > MAX_JOURNAL_ENTRY_BYTES) {
-      next = await this.checkpoint(next, patch, false);
+    const encoded = JSON.stringify(patch);
+    const patchBytes = encodedSize(encoded);
+    // Durable Object の保存は値を V8 の形式で書き、日本語を含む文字は1字2バイトになる。積むかどうかは大きいほうで決める。
+    const storedBytes = Math.max(patchBytes, encoded.length * 2);
+    const sizes = await this.roomSizes(meta);
+    if (!sizes) return null;
+    Object.assign(next, sizes.learned);
+    // 1段目: 安い見積もり。差分の大きさに、同じ鍵の物の数の最大を掛ける
+    let bound = sizes.planBytes + (sizes.journalBytes + patchBytes) * Math.max(1, sizes.sameIdMax);
+    // 2段目: 1段目が上限を超えたら、当て方と同じ規則(PlanCorePatch.patchGrowthBound)で、本体の鍵ごとの数から上界を数え直す
+    if (bound > MAX_PLAN_BYTES) {
+      const exact = await this.growthBound(meta, patch);
+      if (exact === null) return null;
+      bound = Math.min(bound, exact);
+    }
+    if (bound > 2 * MAX_PLAN_BYTES) return { tooLarge: true };
+    let writeNow = storedBytes > MAX_JOURNAL_ENTRY_BYTES;
+    let materialized = null;
+    if (bound > MAX_PLAN_BYTES) {
+      materialized = await this.materializePlan(meta, patch);
+      if (!materialized) return null;
+      if (encodedSize(JSON.stringify(materialized.plan)) > MAX_PLAN_BYTES) return { tooLarge: true };
+      writeNow = true;
+    }
+    if (writeNow) {
+      next = await this.checkpoint(next, patch, false, materialized);
       if (!next) return null;
     } else {
+      next.journalBytes = sizes.journalBytes + patchBytes;
       await this.state.storage.put(patchKey(version), patch);
       await this.state.storage.put("meta", next);
       await this.setNextAlarm(next);
@@ -319,7 +415,7 @@ export class CollaborationRoom {
       clientId: String(clientId || "").slice(0, 64),
       patch,
     });
-    if (patchBytes > MAX_JOURNAL_ENTRY_BYTES) {
+    if (writeNow) {
       this.broadcast({ type: "checkpoint", version: next.version, savedAt: next.savedAt, expiresAt: next.expiresAt });
     }
     return next;
@@ -331,8 +427,12 @@ export class CollaborationRoom {
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || payload.type !== "patch" || !payload.patch) return json({ error: "invalid_patch" }, 400);
+    // 形を確かめてから積む(壊れた差分を1回受けると、ルームのプランが開けなくなる・相手の画面が壊れるため)
+    const problem = roomPatchProblem(payload.patch);
+    if (problem) return json({ error: "invalid_patch", reason: problem }, 400);
     const next = await this.commitPatch(meta, payload.patch, payload.clientId);
     if (!next) return json({ error: "not_found" }, 404);
+    if (next.tooLarge) return json({ error: "plan_too_large" }, 413);
     return json({
       version: next.version,
       expiresAt: next.expiresAt,
@@ -379,7 +479,11 @@ export class CollaborationRoom {
     const before = materialized.plan;
     // 新しい物の id は、ルームの減らない連番(meta.nextId)とプランの最大 + 1 の大きいほうから数える
     // (消した物の id を使い回すと、画面に残っている選択・取り消しの履歴・送る印が別の物を指すため)。
-    const result = workerApply(before, [{ op, args }], { firstId: Number(meta.nextId) || 0 });
+    let result;
+    try { result = workerApply(before, [{ op, args }], { firstId: Number(meta.nextId) || 0 }); } catch (e) {
+      console.warn("[room] /op で例外", e && e.message);
+      return opFailure([BROKEN_PLAN_MESSAGE]);
+    }
     if (result.errors.length) {
       return opFailure(result.errors.map((e) => (e.candidates ? { message: e.message, candidates: e.candidates } : { message: e.message })));
     }
@@ -390,7 +494,11 @@ export class CollaborationRoom {
     }
     if (patch) {
       // 積む前に検査する。もとから誤りのあるプランも直せるよう、誤りが増えたときだけ断る。
-      const added = addedInspectErrors(workerInspect(before).errors, workerInspect(result.plan).errors);
+      let added;
+      try { added = addedInspectErrors(workerInspect(before).errors, workerInspect(result.plan).errors); } catch (e) {
+        console.warn("[room] /op の検査で例外", e && e.message);
+        return opFailure([BROKEN_PLAN_MESSAGE]);
+      }
       if (added.length) {
         return opFailure([{ message: "この操作をすると間取りのデータが正しくなくなるため、行いませんでした（" + added.slice(0, 5).join(" / ") + "）" }]);
       }
@@ -403,9 +511,13 @@ export class CollaborationRoom {
       warnings: result.warnings,
     });
     if (!patch) return out(Number(meta.version || 0));
+    // 画面の差分と同じ検査を通す(積まれる差分はすべて検査を通った、と言えるようにする)。
+    // 検査の前に作られた部屋で、プランに使えない名前などが残っているときにここで断られる。
+    if (roomPatchProblem(patch)) return opFailure([BROKEN_PLAN_MESSAGE]);
     const nextId = Math.max(Number(meta.nextId) || 0, Number(result.nextId) || 0);
     const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId, mcpOps: counted });
     if (!next) return roomNotFound();
+    if (next.tooLarge) return opFailure(["この操作をするとプランが保存できる大きさ（10MB）を超えるため、行いませんでした"]);
     return out(next.version);
   }
 
@@ -423,8 +535,13 @@ export class CollaborationRoom {
     const materialized = await this.materializePlan(meta);
     if (!materialized) return roomNotFound();
     const version = Number(meta.version || 0);
-    if (what === "summary") return json({ ok: true, version, summary: workerSummarize(materialized.plan) });
-    return json({ ok: true, version, inspect: workerInspect(materialized.plan) });
+    try {
+      if (what === "summary") return json({ ok: true, version, summary: workerSummarize(materialized.plan) });
+      return json({ ok: true, version, inspect: workerInspect(materialized.plan) });
+    } catch (e) {
+      console.warn("[room] /read で例外", e && e.message);
+      return opFailure([BROKEN_PLAN_MESSAGE]);
+    }
   }
 
   async manualSave(request) {
@@ -433,6 +550,8 @@ export class CollaborationRoom {
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || !validPlan(payload.plan)) return json({ error: "invalid_plan" }, 400);
+    const problem = roomPlanProblem(payload.plan);
+    if (problem) return json({ error: "invalid_plan", reason: problem }, 400);
     const encoded = JSON.stringify(payload.plan);
     if (encodedSize(encoded) > MAX_PLAN_BYTES) return json({ error: "plan_too_large" }, 413);
     const now = Date.now();
@@ -445,8 +564,10 @@ export class CollaborationRoom {
       savedAt: now,
       dirtySince: null,
       checkpointDueAt: null,
+      journalBytes: 0,
+      sameIdMax: maxSameId(payload.plan),
     };
-    await this.writeSnapshot(payload.plan, next);
+    next.planBytes = await this.writeSnapshot(payload.plan, next);
     await this.clearJournal(entries);
     await this.state.storage.put("meta", next);
     await this.setNextAlarm(next);

@@ -1,3 +1,4 @@
+require('./app-source.cjs').installOwnHelpersInVm(); // 画面の関数が使う ownGet・ownSlot を vm に入れる
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const html=require('./app-source.cjs').appSource();
 // floorBaseY / floorSlabHeightMForFloor は「階の基準面」を表すだけなので、

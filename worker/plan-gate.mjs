@@ -125,7 +125,8 @@ export function pageFacts(page, index = 0) {
     floors: floors.map((f) => {
       const width = Number(f && f.width), depth = Number(f && f.depth);
       const rooms = (Array.isArray(f && f.rooms) ? f.rooms : []).map(roomFacts);
-      const items = {};
+      // 種類名は読み取りの値。継承元の無い表で数える(constructor などを継承した値に足さない)
+      const items = Object.create(null);
       for (const it of Array.isArray(f && f.items) ? f.items : []) {
         const type = it && typeof it.type === "string" ? it.type : "";
         if (type) items[type] = (items[type] || 0) + 1;

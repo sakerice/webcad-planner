@@ -47,7 +47,7 @@ function topLevelVar(name) {
   return m[0];
 }
 
-const FNS = [
+const FNS = [ 'ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape',
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry',
@@ -80,7 +80,7 @@ const FNS = [
   'stairRailSides', 'stairSideHasWall', 'stairRailMountFor', 'isStairLandingType',
   'railPolylineYAt', 'railStepYAt', 'stairBalusterSeats', 'stairRailExtendEnds', 'stairRailStationsAlong',
   'railInfillOf', 'railBarCount', 'railCapColorOf', 'railFrameColorOf',
-  'stairRailFrameColorOf', 'stairRailColorOf', 'railingDesignHtml', 'canSetItemTexture',
+  'stairRailFrameColorOf', 'stairRailColorOf', 'railingDesignHtml', 'escHtml', 'safeHtmlColor', 'htmlNum', 'canSetItemTexture',
   'stairStepCount', 'getStairStepCount',
   'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
   'levelStairHolesForRoom', 'stairwellHolesForRoom', 'clipPolyToRect', 'polyAreaAbs',

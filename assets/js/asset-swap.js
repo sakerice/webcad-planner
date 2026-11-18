@@ -423,13 +423,13 @@
     var modal=doc.createElement('div');modal.id='asset-swap-modal';
     modal.addEventListener('click',function(e){ if(e.target===modal) close(); });
     var change=rows.filter(function(r){return r.action!=='keep';}), keep=rows.filter(function(r){return r.action==='keep';});
-    var floors=function(r){ return r.floor+'階'; };
+    var floors=function(r){ return esc(r.floor)+'階'; };
     var html='<div class="asset-swap-card" role="dialog" aria-modal="true" aria-labelledby="asset-swap-title">';
     html+='<div class="asset-swap-title" id="asset-swap-title">置いてある家具を'+esc(set.name)+'に差し替える</div>';
     if(!change.length){
       html+='<p class="asset-swap-sub">差し替えられる家具がありません。</p>';
     }else{
-      html+='<p class="asset-swap-sub">'+change.length+'点を差し替え、'+keep.length+'点はそのまま残します。チェックを外した物は替えません。'+
+      html+='<p class="asset-swap-sub">'+esc(change.length)+'点を差し替え、'+esc(keep.length)+'点はそのまま残します。チェックを外した物は替えません。'+
             '位置・向き・階・大きさはそのままです（替えた物を元の大きさに合わせます）。台の上の物は台の高さに合わせます。差し替えたあとでも、Undo を1回押せば全部元に戻ります。</p>';
       html+='<div class="asset-swap-list">';
       change.forEach(function(r){
@@ -442,7 +442,7 @@
       html+='</div>';
     }
     if(keep.length){
-      html+='<details class="asset-swap-keep"><summary>そのまま残す物（'+keep.length+'点）</summary><ul>';
+      html+='<details class="asset-swap-keep"><summary>そのまま残す物（'+esc(keep.length)+'点）</summary><ul>';
       keep.forEach(function(r){ html+='<li>'+esc(itemName(r.type))+' <small>'+floors(r)+'・'+esc(r.reason)+'</small></li>'; });
       html+='</ul></details>';
     }

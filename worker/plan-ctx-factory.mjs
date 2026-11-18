@@ -47,6 +47,17 @@ function refusal(key) { return REFUSAL + '(' + WHY[key] + ')'; }
 function RefusalError(key) { var e = new Error(refusal(key)); e.workerRefusal = true; return e; }
 
 const has = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
+// 自分の鍵だけで引く(画面の ownGet)。鍵はプランの値(階・壁の id など)なので、constructor などを継承元から拾わない。
+const ownGet = (o, k) => (k === null || k === undefined ? undefined : (has(o, String(k)) ? o[String(k)] : undefined));
+// 鍵ごとの入れ物を取り出し、無ければ作る(画面の ownSlot)。鍵が __proto__ でも自分の欄として作る
+// (代入で作ると、入れ物の継承元を差し替え、全部の物に色が付く)。
+const isPlainObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+function ownSlot(table, key, make) {
+  const k = String(key);
+  if (!table || typeof table !== 'object') return make();
+  if (!has(table, k) || !table[k] || typeof table[k] !== 'object') Object.defineProperty(table, k, { value: make(), writable: true, enumerable: true, configurable: true });
+  return table[k];
+}
 const isPositiveNumber = (v) => typeof v === 'number' && isFinite(v) && v > 0;
 
 // 画面の ensureObjectIds(app-state.js)と同じ数え方: 壁・物・部屋の id の末尾の数字の最大 + 1。
@@ -122,10 +133,10 @@ export function createPlanCtxTools(deps) {
 
   // planChatKindType(plan-data.js): 家具・設備の分類名(ObjectKnowledge の kind)を先に引く。
   function kindType(name) {
-    if (typeof name !== 'string' || CHAT_SKIP_KINDS[name]) return null;
+    if (typeof name !== 'string' || has(CHAT_SKIP_KINDS, name)) return null;
     if (!has(KNOWLEDGE, name)) return null;
     if (name === 'kitchen-unit') return { type: null, why: CHAT_KITCHEN_UNIT_MESSAGE };
-    var box = FreeApply.KITCHEN_BOX && FreeApply.KITCHEN_BOX[name];
+    var box = ownGet(FreeApply.KITCHEN_BOX, name);
     if (box && name !== 'cooking-appliance') return { type: box.type };
     var t = FreeApply.typeForKind(name, 0, TAG_ITEMS);
     if (t) return { type: t };
@@ -169,7 +180,7 @@ export function createPlanCtxTools(deps) {
   function planFloorHeightEntry(p, floor) {
     var floors = p ? p.floors : null;
     if (!floors || typeof floors !== 'object') return null;
-    var e = floors[String(floor)] !== undefined ? floors[String(floor)] : floors[floor];
+    var e = ownGet(floors, floor);
     return (e && typeof e === 'object' && !Array.isArray(e)) ? e : null;
   }
   function defaultWallHeightMmForFloor(p, floor) {
@@ -379,9 +390,23 @@ export function createPlanCtxTools(deps) {
     return obj;
   }
   function defaultExteriorFloorSetting(floor) {
-    return { linked: true, color: WALL_COLORS[floor] || '#e8e0cc', texture: null, textureFlipX: false, textureFlipY: false };
+    return { linked: true, color: ownGet(WALL_COLORS, floor) || '#e8e0cc', texture: null, textureFlipX: false, textureFlipY: false };
+  }
+  // 画面の repairSettingsShape(app-constants.js)。欄・中の入れ物・入れ物の中の値がオブジェクトでなければ消し、下で作り直させる。
+  function repairSettingsShape(p, field, parts, maps) {
+    var s = p[field];
+    if (s === undefined || s === null) return;
+    if (!isPlainObj(s)) { p[field] = null; return; }
+    parts.forEach(function (part) {
+      if (!has(s, part)) return;
+      if (!isPlainObj(s[part])) { delete s[part]; return; }
+      if (maps.indexOf(part) < 0) return;
+      var m = s[part];
+      Object.keys(m).forEach(function (k) { if (m[k] !== null && !isPlainObj(m[k])) delete m[k]; });
+    });
   }
   function ensureExteriorWallSettings(p) {
+    repairSettingsShape(p, 'exteriorWallSettings', ['whole', 'floors', 'walls', 'faces'], ['floors', 'walls', 'faces']);
     if (!p.exteriorWallSettings) {
       p.exteriorWallSettings = {
         whole: { linked: false, color: '#e8e0cc', texture: null, textureFlipX: false, textureFlipY: false },
@@ -412,7 +437,8 @@ export function createPlanCtxTools(deps) {
   function getExteriorWallSetting(p, w) {
     var s = ensureExteriorWallSettings(p);
     var key = wallSettingKey(w);
-    if (!s.walls[key]) s.walls[key] = { color: null, texture: null, textureFlipX: false, textureFlipY: false };
+    // 鍵は壁の id(プランの値)。'__proto__' のとき代入で作ると、設定の入れ物の継承元を差し替える。自分の欄として作る。
+    ownSlot(s.walls, key, function () { return { color: null, texture: null, textureFlipX: false, textureFlipY: false }; });
     normalizeTextureOrientationTarget(s.walls[key]);
     if (w.exteriorColor && !s.walls[key].color) s.walls[key].color = w.exteriorColor;
     if (w.exteriorTexture && !s.walls[key].texture) s.walls[key].texture = w.exteriorTexture;
@@ -426,7 +452,8 @@ export function createPlanCtxTools(deps) {
   var FACE_SUFFIX = /^-?1_-?\d+_-?\d+$/;
   function syncExteriorWallSettings(p) {
     var s = ensureExteriorWallSettings(p);
-    var alive = {};
+    // 鍵は壁の id から作る。継承した鍵(constructor など)を「ある」と読まないよう、継承元の無い表にする。
+    var alive = Object.create(null);
     (p.walls || []).forEach(function (w) { alive[wallSettingKey(w)] = true; });
     Object.keys(s.walls).forEach(function (key) { if (!alive[key]) delete s.walls[key]; });
     Object.keys(s.faces).forEach(function (key) {
@@ -536,7 +563,7 @@ export function createPlanCtxTools(deps) {
             [450, 600, 750, 900].forEach(function (w) { add('original-kitchen-box-drawer' + w); });
             return out.slice(0, 8);
           }
-          if (q) Object.keys(KNOWLEDGE).forEach(function (k) { if (!CHAT_SKIP_KINDS[k] && (k.indexOf(q) >= 0 || q.indexOf(k) >= 0)) add(k); });
+          if (q) Object.keys(KNOWLEDGE).forEach(function (k) { if (!has(CHAT_SKIP_KINDS, k) && (k.indexOf(q) >= 0 || q.indexOf(k) >= 0)) add(k); });
           suggestTypes(type).forEach(add);
           return out.slice(0, 8);
         },

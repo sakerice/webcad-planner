@@ -1,0 +1,88 @@
+{
+  "about": "プランの欄に入る攻撃の文字の固定集。画面テスト(tools/tests/injection-screen.browser.mjs)と、AI への入力のテストが同じ物を使う。__TAG__ は使う側が「どの欄に入れたか」の名前に置き換える。window.__xss が無ければ、使う側が空の配列を用意する。attacker.invalid は届かない名前(RFC 6761)。",
+  "tag": "__TAG__",
+  "markup": [
+    {
+      "id": "dq-img",
+      "value": "\"><img src=x onerror=window.__xss.push('__TAG__')>"
+    },
+    {
+      "id": "sq-svg",
+      "value": "'><svg onload=window.__xss.push('__TAG__')>"
+    },
+    {
+      "id": "script",
+      "value": "</script><script>window.__xss.push('__TAG__')</script>"
+    },
+    {
+      "id": "js-string",
+      "value": "');window.__xss.push('__TAG__');//"
+    },
+    {
+      "id": "js-number",
+      "value": "1);window.__xss.push('__TAG__');(1"
+    },
+    {
+      "id": "attr-break",
+      "value": "x\" autofocus onfocus=\"window.__xss.push('__TAG__')\" data-x=\""
+    },
+    {
+      "id": "entity",
+      "value": "&quot;><img src=x onerror=window.__xss.push('__TAG__')>&#39;"
+    },
+    {
+      "id": "javascript-url",
+      "value": "javascript:window.__xss.push('__TAG__')"
+    },
+    {
+      "id": "css",
+      "value": "red;background:url(//attacker.invalid/css-__TAG__)"
+    },
+    {
+      "id": "svg-pi",
+      "value": "<?x a=\"><img src=x onerror=window.__xss.push('__TAG__')>\"?>"
+    },
+    {
+      "id": "cdata",
+      "value": "<![CDATA[<img src=x onerror=window.__xss.push('__TAG__')>]]>"
+    }
+  ],
+  "urls": [
+    {
+      "id": "https",
+      "value": "https://attacker.invalid/__TAG__.png"
+    },
+    {
+      "id": "protocol-relative",
+      "value": "//attacker.invalid/__TAG__.glb"
+    },
+    {
+      "id": "data-html",
+      "value": "data:text/html,<script>window.__xss.push('__TAG__')</script>"
+    }
+  ],
+  "inheritedKeys": [
+    "constructor",
+    "__proto__",
+    "toString",
+    "hasOwnProperty",
+    "valueOf",
+    "__defineGetter__",
+    "isPrototypeOf"
+  ],
+  "control": [
+    {
+      "id": "control-chars",
+      "value": "a\u0000b\u0007c\u001bd\r\n\t"
+    },
+    {
+      "id": "invisible",
+      "value": "‮​﻿  ­名前"
+    }
+  ],
+  "long": {
+    "id": "long-10000",
+    "unit": "<&\"'あ",
+    "length": 10000
+  }
+}

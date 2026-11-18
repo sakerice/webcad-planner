@@ -74,7 +74,7 @@ function topLevelVar(name) {
   return html.slice(at2 + 1, end + 1);
 }
 
-const FNS = [
+const FNS = [ 'ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape',
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
@@ -95,7 +95,7 @@ const FNS = [
   'roomCeilingTypeValue', 'roomFlatCeilingInputMm', 'roofTypeLabel',
   // Task 14 で足したもの
   'roomDisplayLabel', 'roomSlopedCeilingBlockReason',
-  'selectedRoomCeilingHtml', 'roomHasNoFloorAbove', 'slopedCeilingSpanMm', 'slopedCeilingAngleDeg',
+  'escHtml', 'safeHtmlColor', 'htmlNum', 'selectedRoomCeilingHtml', 'roomHasNoFloorAbove', 'slopedCeilingSpanMm', 'slopedCeilingAngleDeg',
   'updateSelectedCeilingType', 'updateSelectedFlatCeilingMm', 'updateSelectedSlopedCeiling',
   'updateSelectedProp',
   // 天井を書き換えると、その部屋の天井付け器具も追従する

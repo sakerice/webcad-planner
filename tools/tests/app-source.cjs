@@ -49,4 +49,34 @@ function appSource() {
   return cached;
 }
 
-module.exports = { appSource, EXTRACTED, ROOT };
+// 表を自分の鍵だけで引く小さな関数(assets/js/app-constants.js の ownGet・ownSlot)と、
+// 設定の欄の形を作り直せる形に戻す関数(isPlainObj・repairSettingsShape。ensure… が最初に呼ぶ)の本文。
+// 種類名などで表を引く関数は、これを使う(継承した鍵 constructor などに当たらないため)。
+// 関数を切り出して node:vm に載せるテストは、これも一緒に載せる。
+function ownHelpersSource() {
+  const src = appSource();
+  return ['ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape'].map((name) => {
+    const at = src.indexOf('\nfunction ' + name + '(');
+    if (at < 0) throw new Error('function ' + name + ' がソースに無い');
+    return src.slice(at + 1, src.indexOf('\n}\n', at) + 2);
+  }).join('\n');
+}
+
+// 関数を node:vm に載せるテストのうち、載せる関数を名前の一覧で持たない物(本文を範囲で
+//切り出す物や、文脈を何か所でも作る物)は、これを先頭で1回呼ぶ。以後このプロセスで作る
+// vm の文脈には、最初から ownGet・ownSlot が入っている。
+let ownHelpersInstalled = false;
+function installOwnHelpersInVm() {
+  if (ownHelpersInstalled) return;
+  ownHelpersInstalled = true;
+  const vm = require('node:vm');
+  const create = vm.createContext;
+  const src = ownHelpersSource();
+  vm.createContext = function (sandbox, options) {
+    const ctx = create.call(vm, sandbox, options);
+    vm.runInContext(src, ctx);
+    return ctx;
+  };
+}
+
+module.exports = { appSource, ownHelpersSource, installOwnHelpersInVm, EXTRACTED, ROOT };

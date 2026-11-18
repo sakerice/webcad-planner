@@ -365,7 +365,7 @@ function draw2dScene(){
   // ── Ghost preview + placement dimensions ──
   var openingGhostPreset=getOpeningModelToolPreset(ST.tool);
   var ghostToolType=openingGhostPreset?openingGhostPreset.baseType:ST.tool;
-  if(!ST.drawing && planCaptureShows('toolOverlays') && (ISIZES[ghostToolType]||isFmpItemType(ghostToolType)||openingGhostPreset) && ghostToolType!=='site-rect' && !(ST.floor!==1 && (ghostToolType==='foundation'||ghostToolType==='exterior-stair'||ghostToolType==='ramp')) && ST.view === '2d') {
+  if(!ST.drawing && planCaptureShows('toolOverlays') && (ownGet(ISIZES,ghostToolType)||isFmpItemType(ghostToolType)||openingGhostPreset) && ghostToolType!=='site-rect' && !(ST.floor!==1 && (ghostToolType==='foundation'||ghostToolType==='exterior-stair'||ghostToolType==='ramp')) && ST.view === '2d') {
     var mx = snapV(ST.mouseW.x), my = snapV(ST.mouseW.y);
     var sz = getItemDefaultSize(ghostToolType);
     var ghost = {type:ghostToolType, x:mx - sz.w/2, y:my - sz.d/2, w:sz.w, d:sz.d, rot:ST.placingRot||0, floor:ST.floor, flipX:false, flipY:false, sScale:1, sX:0, sY:0};
@@ -608,7 +608,7 @@ function drawRoomLbls(){
     drawCeilingLabel2d(l);
   });
   DATA.items.filter(function(i){return i.floor===ST.floor && i.type==='balcony';}).forEach(function(it){
-    drawAreaTag(it.x+it.w/2,it.y+it.d/2,it.w,it.d,it.n||ILABELS[it.type]||'バルコニー',planCaptureShows('selection')&&ST.selected===it);
+    drawAreaTag(it.x+it.w/2,it.y+it.d/2,it.w,it.d,it.n||ownGet(ILABELS,it.type)||'バルコニー',planCaptureShows('selection')&&ST.selected===it);
   });
 }
 // 天井高は、生成AIが「その空間がどれだけ高いか」を知る唯一の手がかりなので、
@@ -857,7 +857,7 @@ function getItemDisplayPose(it){
 }
 function getItem2dFillColor(it){
   if(it && it.colorCustom && it.color) return it.color;
-  return (it && ICOLORS[it.type]) || '#dddddd';
+  return (it && ownGet(ICOLORS,it.type)) || '#dddddd';
 }
 
 function memoTextValue(it){
@@ -1480,7 +1480,7 @@ function drawItem2d(it){
     }
     return;
   }
-  var spriteKey=SPRITE_MAP[it.type];
+  var spriteKey=ownGet(SPRITE_MAP,it.type);
   var s = spriteKey ? SPRITE_JSON.sprites[spriteKey] : null;
   var fmp=planTopImageModelFor(it.type);
   if(fmp){
@@ -1537,7 +1537,7 @@ function drawItem2d(it){
       ctx.moveTo(-hw+5,-hd+5); ctx.lineTo(hw-5,hd-5);
       ctx.moveTo(hw-5,-hd+5); ctx.lineTo(-hw+5,hd-5);
       ctx.stroke();
-      var label=(it.name||ILABELS[it.type]||'任意ブロック').trim();
+      var label=(it.name||ownGet(ILABELS,it.type)||'任意ブロック').trim();
       var heightLabel='H '+Math.round(getCustomBlockHeight(it))+'mm';
       var maxTextW=Math.max(0,it.w*sc-10);
       if(maxTextW>24 && it.d*sc>18){

@@ -167,15 +167,16 @@
     var lines=[];
     if(part==='exterior'){
       if(!p.exterior.length) return null;
-      lines=p.exterior.map(function(e){ return e.floor+'階: '+esc(texName(style,e.texture)); });
+      lines=p.exterior.map(function(e){ return esc(e.floor)+'階: '+esc(texName(style,e.texture)); });
     }else if(part==='roof'){
       if(!p.roof) return null;
       lines=['家全体: '+esc(texName(style,p.roof))];
     }else if(part==='interior'){
       if(!p.interior) return null;
       lines=['家全体: '+esc(texName(style,p.interior))];
-      var by={};
-      p.faces.forEach(function(f){ (by[f.texture]=by[f.texture]||{})[f.room]=true; });
+      // 部屋の名前はプランの値。__proto__ などの名前の部屋が一覧から抜けないよう、継承元の無い表で数える
+      var by=Object.create(null);
+      p.faces.forEach(function(f){ (by[f.texture]=by[f.texture]||Object.create(null))[f.room]=true; });
       Object.keys(by).forEach(function(k){
         lines.push(esc(Object.keys(by[k]).join('・'))+'の壁: '+esc(texName(style,k)));
       });
@@ -185,26 +186,26 @@
       p.doors.forEach(function(d){ byModel[d.model]=(byModel[d.model]||0)+1; });
       lines=Object.keys(byModel).map(function(m){
         var f=typeof root.getFmpItem==='function'?root.getFmpItem(m):null;
-        return esc(f?f.name:m)+': '+byModel[m]+'か所';
+        return esc(f?f.name:m)+': '+esc(byModel[m])+'か所';
       });
-      if(p.keptDoors) lines.push('<small>そのまま: 引き戸・折れ戸など '+p.keptDoors+'か所（替えられる扉が無い）</small>');
+      if(p.keptDoors) lines.push('<small>そのまま: 引き戸・折れ戸など '+esc(p.keptDoors)+'か所（替えられる扉が無い）</small>');
     }else if(part==='windows'){
       if(!p.windows.length) return null;
       var byWin={};
       p.windows.forEach(function(w){ byWin[w.model]=(byWin[w.model]||0)+1; });
       lines=Object.keys(byWin).map(function(m){
         var f=typeof root.getFmpItem==='function'?root.getFmpItem(m):null;
-        return esc(f?f.name:m)+': '+byWin[m]+'か所';
+        return esc(f?f.name:m)+': '+esc(byWin[m])+'か所';
       });
-      if(p.keptWindows) lines.push('<small>そのまま: '+p.keptWindows+'か所（細長い・横長すぎるなど、縦横の比が合う窓が無い）</small>');
+      if(p.keptWindows) lines.push('<small>そのまま: '+esc(p.keptWindows)+'か所（細長い・横長すぎるなど、縦横の比が合う窓が無い）</small>');
     }else if(part==='floor'){
       if(!p.rooms.length) return null;
       lines=groupRooms(p.rooms).map(function(g){
-        var names={}; g.rooms.forEach(function(r){ names[roomLabel(r)]=true; });
+        var names=Object.create(null); g.rooms.forEach(function(r){ names[roomLabel(r)]=true; });
         return esc(texName(style,g.texture))+': '+esc(Object.keys(names).join('・'));
       });
       if(p.skippedRooms.length){
-        var sk={}; p.skippedRooms.forEach(function(r){ sk[roomLabel(r)]=true; });
+        var sk=Object.create(null); p.skippedRooms.forEach(function(r){ sk[roomLabel(r)]=true; });
         lines.push('<small>そのまま: '+esc(Object.keys(sk).join('・'))+'（屋外）</small>');
       }
     }

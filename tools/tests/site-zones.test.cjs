@@ -1,3 +1,4 @@
+require('./app-source.cjs').installOwnHelpersInVm(); // 画面の関数が使う ownGet・ownSlot を vm に入れる
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');
 function context(){const c={SITE_SURFACE_OPTIONS:{grass:{},gravel:{},concrete:{}},ST:{},updateSelectedProp:(k,v)=>{c.ST.selected[k]=v}};vm.createContext(c);vm.runInContext(html.slice(html.indexOf('function siteFinishZones('),html.indexOf('function makeSiteSurfaceMaterial(')),c);return c;}

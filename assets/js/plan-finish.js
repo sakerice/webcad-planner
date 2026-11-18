@@ -29,9 +29,9 @@
   function items() { return (typeof FMP_ITEMS === 'object' && FMP_ITEMS) || {}; }
 
   function kindOf(type) {
-    var fmp = items()[type];
+    var fmp = ownGet(items(), type);
     if (fmp && fmp.kind) return fmp.kind;
-    return TYPE_KIND[type] || null;
+    return ownGet(TYPE_KIND,type) || null;
   }
 
   function inRect(x, y, r) {
@@ -104,7 +104,7 @@
   function slotsOf(plan) {
     var out = [];
     (plan.items || []).forEach(function (it, i) {
-      var kind = SWAPPABLE[it.type];
+      var kind = ownGet(SWAPPABLE,it.type);
       if (!kind) return;
       var at = roomAt(plan, it);
       if (!at) return;

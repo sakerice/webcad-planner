@@ -122,7 +122,11 @@
     if (proto !== Object.prototype && proto !== null) return v;
     out = {};
     seen.set(v, out);
-    Object.keys(v).forEach(function (k) { out[k] = cloneDeep(v[k], seen); });
+    // 鍵が __proto__(プランの値の壁の id など)のとき、代入すると写しの継承元を差し替えてしまう。自分の欄として作る。
+    Object.keys(v).forEach(function (k) {
+      if (k === '__proto__') Object.defineProperty(out, k, { value: cloneDeep(v[k], seen), writable: true, enumerable: true, configurable: true });
+      else out[k] = cloneDeep(v[k], seen);
+    });
     return out;
   }
 

@@ -30,6 +30,9 @@ import ObjectKnowledge from "../assets/js/object-knowledge.js";
 import tags from "../assets/models/tags.json" with { type: "json" };
 import { jevAsk, choice } from "./jev.mjs";
 
+// 表を自分の鍵だけで引く。鍵(部屋の use・階・種類名)は画面や AI から来るので、constructor などを継承元から拾わない。
+const has = (o, k) => !!o && typeof k === "string" && Object.prototype.hasOwnProperty.call(o, k);
+
 // 1回で扱う上限。**この窓口には認証が無い**ので、1回の呼び出しで投げられる
 // 判断の数を手前で抑える。
 export const MAX_ROOMS = 40;
@@ -65,7 +68,7 @@ function roomState(room, context) {
     width_mm: Math.round(Number(room.w) || 0),
     depth_mm: Math.round(Number(room.d) || 0),
     openings: room.openings || {},
-    other_rooms_on_this_floor: context.byFloor[room.floor] || [],
+    other_rooms_on_this_floor: has(context.byFloor, String(room.floor)) ? context.byFloor[String(room.floor)] : [],
     floors_in_this_house: context.floors,
   };
 }
@@ -78,10 +81,11 @@ export async function nameRooms(rooms, env, deps = {}) {
   const list = (Array.isArray(rooms) ? rooms : []).slice(0, MAX_ROOMS);
   const context = {
     floors: [...new Set(list.map((r) => r.floor).filter(Boolean))].sort(),
+    // 階はプランの値。継承元の無い表にする(階が constructor などでも、継承した値を配列と取り違えて例外にならない)
     byFloor: list.reduce((acc, r) => {
       (acc[r.floor] || (acc[r.floor] = [])).push(r.name || "(名前なし)");
       return acc;
-    }, {}),
+    }, Object.create(null)),
   };
 
   return Promise.all(list.map(async (room) => {
@@ -91,10 +95,10 @@ export async function nameRooms(rooms, env, deps = {}) {
     // 実物の図面3枚の「趣味部屋」「KB置き場」「スキップ」などを名前と広さで
     // 当てさせると 9件中4件しか当たらず、外したものは全部「和室」だった。
     // 図面を見れば床がフローリングか畳かは一目で分かる。
-    if (room.use && RoomProgram.ROOM_TYPES[room.use]) return { id: room.id, type: room.use, from: "reader" };
+    if (room.use && has(RoomProgram.ROOM_TYPES, room.use)) return { id: room.id, type: room.use, from: "reader" };
     const answers = await jevAsk(env, { state: roomState(room, context), questions: roomQuestion(room) }, deps);
     const picked = choice(answers, "room_type");
-    if (!picked || !RoomProgram.ROOM_TYPES[picked]) return { id: room.id, type: "other", from: "unknown" };
+    if (!picked || !has(RoomProgram.ROOM_TYPES, picked)) return { id: room.id, type: "other", from: "unknown" };
     const a = answers.room_type;
     return {
       id: room.id,
@@ -169,7 +173,7 @@ function markQuestion(mark) {
   const criteria = {};
   for (const kind of mark.candidates) {
     const text = ObjectKnowledge.describe(kind).replace(/\n/g, " / ");
-    const ja = (tags.kinds[kind] && tags.kinds[kind].ja) || kind;
+    const ja = (has(tags.kinds, kind) && tags.kinds[kind].ja) || kind;
     criteria[kind] = `${ja}: ${text}`;
   }
   criteria.none = "None of these: the symbol is something else, or cannot be told";

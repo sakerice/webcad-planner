@@ -8,6 +8,7 @@
 //
 // sh tools/run_browser_tests.sh plan-load-paths
 import assert from 'node:assert/strict';
+import { watch3dSkips, assertNo3dSkips, read3dSkips } from './build3d-skips.mjs';
 
 const APP = process.env.APP_URL || 'http://localhost:8932/';
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -50,6 +51,7 @@ try {
     const dialogs = [], restoreFailures = [];
     page.on('dialog', (d) => { dialogs.push(d.message()); d.accept(); });
     page.on('pageerror', (e) => errors.push(e.message));
+    watch3dSkips(page, errors);
     page.on('console', (m) => { if (m.type() === 'error' && /saved plan restore failed/.test(m.text())) restoreFailures.push(m.text()); });
     await page.goto(APP);
     await waitApp(page);
@@ -66,6 +68,7 @@ try {
     }));
     assert.deepEqual(state, { walls: true, items: true, rooms: true, pending: true });
     console.log('ok  壊れた保存データ(walls が文字列)は既定プランに戻った');
+    await assertNo3dSkips(page, '壊れた保存データ');
     await context.close();
   }
 
@@ -101,6 +104,7 @@ try {
     if (process.env.PRINT_BLANK_KEYS === '1') console.log(JSON.stringify(keys, null, 2));
     assert.deepEqual(keys, BLANK_SAVED_KEYS);
     console.log('ok  白紙から始めたプランの保存 JSON のキーは置き換え前と同じ');
+    await assertNo3dSkips(page, '白紙から始めたプラン');
     await context.close();
   }
 

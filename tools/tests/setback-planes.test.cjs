@@ -142,7 +142,7 @@ const SETBACK_VARS = ['U', 'SETBACK_PLANE_MARGIN_MM', 'SETBACK_DIM_CLEAR_MM',
   '_setbackBuildingBox', 'SETBACK_DIM_LABEL_GAP_NDC', 'SETBACK_DIM_LABEL_MAX_M', 'SETBACK_CUT_EPS_M', 'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
   'CEILING_UNDER_ROOF_OFFSET_MM', 'SETBACK_NORTH_COLOR',
   'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR', 'CONTEXT_EXTERIOR_TYPES'];
-const SETBACK_FNS = [
+const SETBACK_FNS = [ 'ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape',
   'escHtml', 'isFiniteCanvasValue', 'getObjBounds',
   'isContextExteriorItemType', 'isGroundLevelItemType',
   'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',

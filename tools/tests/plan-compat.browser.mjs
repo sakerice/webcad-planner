@@ -20,6 +20,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { watch3dSkips, assertNo3dSkips, read3dSkips } from './build3d-skips.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DIR = join(HERE, 'fixtures', 'compat');
@@ -212,6 +213,7 @@ async function openPresetThrough(browser, route) {
   const dialogs = [], errors = [];
   page.on('dialog', (d) => { dialogs.push(d.message()); d.accept(); });
   page.on('pageerror', (e) => errors.push(e.message));
+  watch3dSkips(page, errors);
   try {
     await page.goto(APP);
     await waitApp(page);
@@ -226,6 +228,9 @@ async function openPresetThrough(browser, route) {
     } catch (_) { fp = null; }
     return { fp, dialogs, errors };
   } finally {
+    // 3D の作り直しで物を飛ばしていない(返した errors に足す。同じ配列を返しているので届く)
+    const skipped = await read3dSkips(page);
+    if (skipped && skipped.count) errors.push(`3D で ${skipped.count} 個飛ばした: ` + skipped.ids.join(', '));
     await context.close();
   }
 }
@@ -237,6 +242,7 @@ async function openThrough(browser, name, route) {
   const dialogs = [], errors = [];
   page.on('dialog', (d) => { dialogs.push(d.message()); d.accept(); });
   page.on('pageerror', (e) => errors.push(e.message));
+  watch3dSkips(page, errors);
   try {
     if (route === 'json') {
       await page.goto(APP + '?preset=2f');
@@ -304,6 +310,9 @@ async function openThrough(browser, name, route) {
     }
     return { fp, dialogs, errors };
   } finally {
+    // 3D の作り直しで物を飛ばしていない(返した errors に足す。同じ配列を返しているので届く)
+    const skipped = await read3dSkips(page);
+    if (skipped && skipped.count) errors.push(`3D で ${skipped.count} 個飛ばした: ` + skipped.ids.join(', '));
     await context.close();
   }
 }

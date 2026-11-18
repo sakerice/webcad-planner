@@ -367,8 +367,8 @@ function heightDefaultsRowHtml(floor){
   var raiseV=defaultFloorThicknessMm(floor===null?1:floor);
   return '<div class="hd-row">'+
     (tag?'<span class="hd-tag">'+tag+'</span>':'')+
-    '<input class="pi" type="number" min="'+WALL_H_MIN+'" max="'+WALL_H_MAX+'" step="50" value="'+wallV+'" title="壁の高さ(mm)" onchange="setDefaultWallHeight('+arg+',+this.value)">'+
-    '<input class="pi" type="number" min="20" max="1000" step="10" value="'+raiseV+'" title="床厚(mm)" onchange="setDefaultFloorThickness('+arg+',+this.value)">'+
+    '<input class="pi" type="number" min="'+WALL_H_MIN+'" max="'+WALL_H_MAX+'" step="50" value="'+escHtml(wallV)+'" title="壁の高さ(mm)" onchange="setDefaultWallHeight('+arg+',+this.value)">'+
+    '<input class="pi" type="number" min="20" max="1000" step="10" value="'+escHtml(raiseV)+'" title="床厚(mm)" onchange="setDefaultFloorThickness('+arg+',+this.value)">'+
     '</div>';
 }
 function syncHeightDefaultsUI(){
@@ -603,9 +603,9 @@ function railingDesignHtml(it,opts){
   }
   var cur=(RAIL_INFILL_VALUES.indexOf(it&&it.railInfill)>=0)?it.railInfill:(opts.autoLabel?'':railInfillOf(it));
   function opt(v,label){
-    return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+label+'</option>';
+    return '<option value="'+escHtml(v)+'"'+(cur===v?' selected':'')+'>'+escHtml(label)+'</option>';
   }
-  html+='<div class="pr"><div class="pl">'+(opts.label||'意匠')+'</div>'+
+  html+='<div class="pr"><div class="pl">'+escHtml(opts.label||'意匠')+'</div>'+
     '<select class="pi" onchange="updateSelectedProp('+q+'railInfill'+q+',this.value||undefined)">'+
     (opts.autoLabel?opt('',opts.autoLabel):'')+
     opt('bars','横桟')+
@@ -615,14 +615,14 @@ function railingDesignHtml(it,opts){
     '</select></div>';
   if(railInfillOf(it)==='bars')
     html+='<div class="pr"><div class="pl">横桟の本数</div><input class="pi" type="number" min="0" max="12" step="1" value="'+
-      railBarCount(it)+'" onchange="updateSelectedProp('+q+'railBars'+q+',+this.value)"></div>';
+      escHtml(railBarCount(it))+'" onchange="updateSelectedProp('+q+'railBars'+q+',+this.value)"></div>';
   // 笠木の色は、笠木があるときだけ。無い部材の色を選ばせない。
   if(hasCap)
     html+='<div class="pr"><div class="pl">笠木の色（木）</div><input class="pi" type="color" value="'+
-      railCapColorOf(it)+'" onchange="updateSelectedProp('+q+'railCapColor'+q+',this.value)"></div>';
+      safeHtmlColor(railCapColorOf(it),'#9c7749')+'" onchange="updateSelectedProp('+q+'railCapColor'+q+',this.value)"></div>';
   html+='<div class="pr"><div class="pl">骨の色（支柱・桟）</div><input class="pi" type="color" value="'+
-    (railFrameColorOf(it)||opts.frameDefault||'#2b2f33')+'" onchange="updateSelectedProp('+q+'railFrameColor'+q+',this.value)"></div>';
-  html+='<div class="lock-status-note">階段の手すりと共通の設定です。'+(opts.note||'')+'</div>';
+    safeHtmlColor(railFrameColorOf(it)||opts.frameDefault,'#2b2f33')+'" onchange="updateSelectedProp('+q+'railFrameColor'+q+',this.value)"></div>';
+  html+='<div class="lock-status-note">階段の手すりと共通の設定です。'+escHtml(opts.note||'')+'</div>';
   return html;
 }
 // ── 格子柵 ────────────────────────────────────────────────────────────────
@@ -1139,14 +1139,14 @@ function selectedRoomSkipHtml(r){
     '<option value="1200"'+(v===1200?' selected':'')+'>中2階 ＋1200mm</option>'+
     '<option value="1600"'+(v===1600?' selected':'')+'>＋1600mm</option>'+
     '</select></div>'+
-    '<div class="pr"><label class="pl" for="room-skip-level">段差 (mm)</label><input id="room-skip-level" class="pi" type="number" min="0" max="'+SKIP_LEVEL_MAX_MM+'" step="50" value="'+v+'" onchange="updateSelectedRoomSkipLevel(this.value)"></div>';
+    '<div class="pr"><label class="pl" for="room-skip-level">段差 (mm)</label><input id="room-skip-level" class="pi" type="number" min="0" max="'+SKIP_LEVEL_MAX_MM+'" step="50" value="'+escHtml(v)+'" onchange="updateSelectedRoomSkipLevel(this.value)"></div>';
   if(v===0){
     html+='<div class="lock-status-note">床上げ（上の欄）は天井の位置を変えない仕上げの段差です。こちらは床も天井も一緒に持ち上がります。'+
       '天井高を指定していない部屋では天井は動かないので、段差を付けたら天井高も入れてください。</div>';
   }else{
-    html+='<div class="lock-status-note">この部屋の床は ＋'+v+'mm。天井高・家具・建具・歩行高さがこの床を基準にします。現在の天井高は '+roomRenderedCeilingMm(r)+'mm です。'+
+    html+='<div class="lock-status-note">この部屋の床は ＋'+escHtml(v)+'mm。天井高・家具・建具・歩行高さがこの床を基準にします。現在の天井高は '+escHtml(roomRenderedCeilingMm(r))+'mm です。'+
       (cavity>0
-        ? '床下 '+cavity+'mm ぶんは空間として開きます（低いレベルに面した側だけ開口）。造作棚を置いて収納にしてください。'
+        ? '床下 '+escHtml(cavity)+'mm ぶんは空間として開きます（低いレベルに面した側だけ開口）。造作棚を置いて収納にしてください。'
         : '床下は '+SKIP_CAVITY_MIN_MM+'mm 未満なので中身の詰まった段差として描きます。')+
       '段差の上り下りには、階段の「行き先」を「同じ階の段差」にした階段を置いてください。</div>';
   }
@@ -1201,7 +1201,7 @@ function baseFloorSelectHtml(it){
   var rooms=skipRoomsOnFloor(it.floor||1);
   var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
   var canUnder=(kind==='item') && (it.baseLevel==='under' || roomSkipCavityMm(roomAtPointOnFloor(it.floor,cx,cy))>0);
-  function opt(v,label){ return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+label+'</option>'; }
+  function opt(v,label){ return '<option value="'+escHtml(v)+'"'+(cur===v?' selected':'')+'>'+escHtml(label)+'</option>'; }
   var html='<div class="ph" style="margin-top:12px">スキップフロア</div>'+
     '<div class="pr"><div class="pl">載せる床</div><select class="pi" onchange="updateSelectedBaseFloor(this.value)">'+
     opt('auto','自動')+
@@ -1236,7 +1236,7 @@ function baseFloorSelectHtml(it){
   else if(cur==='under') now='いまは 段差の下 に置いています（指定）。';
   else if(cur==='floor') now='いまは 階の床 に載っています（指定）。';
   else now='いまは いちばん高い段差 に載っています（以前の指定）。';
-  return html+'<div class="lock-status-note"><b>'+now+'</b>'+note+'</div>';
+  return html+'<div class="lock-status-note"><b>'+escHtml(now)+'</b>'+note+'</div>';
 }
 // ドア・窓の「載せる床」。自動と、両側の部屋(床の高さを添えて)を並べる。
 // 段差のある階では、従来の「階の床」と段差の部屋も残す。
@@ -1246,7 +1246,7 @@ function openingBaseFloorSelectHtml(it){
   var chosen=baseRoomOf(it);
   if(chosen&&adj.indexOf(chosen)<0) adj.push(chosen);   // 面していない部屋を選んだまま動かした
   var skip=floorHasSkipLevel(fl);
-  function opt(v,label){ return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+label+'</option>'; }
+  function opt(v,label){ return '<option value="'+escHtml(v)+'"'+(cur===v?' selected':'')+'>'+escHtml(label)+'</option>'; }
   var html='<div class="ph" style="margin-top:12px">載せる床</div>'+
     '<div class="pr"><div class="pl">載せる床</div><select class="pi" onchange="updateSelectedBaseFloor(this.value)">'+opt('auto','自動');
   adj.forEach(function(r){ html+=opt('room:'+r.id,openingFloorLabel(r,fl)); });
@@ -1273,7 +1273,7 @@ function openingBaseFloorSelectHtml(it){
     now='いまは いちばん高い段差 に載っています（以前の指定）。';
     note='以前の指定です。部屋を選び直すことを勧めます。';
   }
-  return html+'<div class="lock-status-note"><b>'+now+'</b>'+note+'</div>';
+  return html+'<div class="lock-status-note"><b>'+escHtml(now)+'</b>'+note+'</div>';
 }
 // 「載せる床」を変える。階段は1本の階段全体で1つの指定なので、
 // つながった部材の指定をまとめて置き換える。
@@ -1325,13 +1325,13 @@ function selectedRoomFloorHtml(r){
   var dirtLabel=dirtMm<0?'−'+(-dirtMm):'＋0';
   return '<div class="ph" style="margin-top:12px">床の高さ</div>'+
     '<div class="pr"><div class="pl">仕上げ床</div><select class="pi" onchange="if(this.value)updateSelectedRoomFloor(this.value)">'+
-    '<option value="">プリセットを選択</option><option value="'+dirtMm+'">玄関土間（基礎の天端＋20mm）'+dirtLabel+'mm</option><option value="0">床の構造面 ±0mm</option><option value="150">室内床 ＋150mm</option><option value="150">浴室（室内と段差なし）＋150mm</option></select></div>'+
-    '<div class="pr"><label class="pl" for="room-floor-raise">床の上下 (mm)</label><input id="room-floor-raise" class="pi" type="number" min="'+(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?-(floorSlabMmForFloor(r.floor)-20):0)+'" max="600" step="5" value="'+v+'" onchange="updateSelectedRoomFloor(this.value)"></div>'+
+    '<option value="">プリセットを選択</option><option value="'+escHtml(dirtMm)+'">玄関土間（基礎の天端＋20mm）'+escHtml(dirtLabel)+'mm</option><option value="0">床の構造面 ±0mm</option><option value="150">室内床 ＋150mm</option><option value="150">浴室（室内と段差なし）＋150mm</option></select></div>'+
+    '<div class="pr"><label class="pl" for="room-floor-raise">床の上下 (mm)</label><input id="room-floor-raise" class="pi" type="number" min="'+escHtml(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?-(floorSlabMmForFloor(r.floor)-20):0)+'" max="600" step="5" value="'+escHtml(v)+'" onchange="updateSelectedRoomFloor(this.value)"></div>'+
     '<div class="lock-status-note">この階の標準床面を0mmとして指定。正は床上げ、負は床下げ（床厚内・残り20mmまで）。家具・建具・歩行高さが追従します。浴室の段差は製品仕様に合わせて調整してください。天井の位置は固定です。</div>';
 }
 var CONTEXT_EXTERIOR_TYPES = {'neighbor-building':1,'neighbor-house':1,road:1,'utility-pole':1};
 function isContextExteriorItemType(type){
-  return !!CONTEXT_EXTERIOR_TYPES[type];
+  return !!ownGet(CONTEXT_EXTERIOR_TYPES,type);
 }
 function shouldRenderItemInCurrent3DView(it){
   if(!it) return false;
@@ -2714,7 +2714,7 @@ function roofGapInfillAppearance(H){
     return {color:s.whole.color||'#e8e0cc',texture:s.whole.texture||null,
       textureFlipX:!!s.whole.textureFlipX,textureFlipY:!!s.whole.textureFlipY,source:'wall'};
   var fs=(s&&s.floors&&s.floors[fl])||(typeof defaultExteriorFloorSetting==='function'?defaultExteriorFloorSetting(fl):{});
-  return {color:fs.color||(typeof WALL_COLORS!=='undefined'&&WALL_COLORS[fl])||'#e8e0cc',texture:fs.texture||null,
+  return {color:fs.color||(typeof WALL_COLORS!=='undefined'&&ownGet(WALL_COLORS,fl))||'#e8e0cc',texture:fs.texture||null,
     textureFlipX:!!fs.textureFlipX,textureFlipY:!!fs.textureFlipY,source:'wall'};
 }
 // 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
@@ -3000,9 +3000,9 @@ var GLTF_MODEL_CONFIG = {
 };
 var EXTERIOR_MODEL_IDS={'ac-outdoor':'original-ac-unit','water-heater':'original-tank','gas-heater':'original-gas-unit','meter-box':'original-meter','sewer-pit':'original-drain-cover'};
 var EXTERIOR_MODEL_URLS={};Object.keys(EXTERIOR_MODEL_IDS).forEach(function(type){EXTERIOR_MODEL_URLS[type]='assets/models/original/'+EXTERIOR_MODEL_IDS[type]+'.glb';});
-function getItemFinishModel(type){return getFmpItem(type)||getFmpItem(EXTERIOR_MODEL_IDS[type]);}
+function getItemFinishModel(type){return getFmpItem(type)||getFmpItem(ownGet(EXTERIOR_MODEL_IDS,type));}
 function buildDetailedExterior(grp,it,w,d,h){
-  var url=EXTERIOR_MODEL_URLS[it.type];
+  var url=ownGet(EXTERIOR_MODEL_URLS,it.type);
   if(!url || !ensureGltfModel(url)) return false;
   var clone=makeGltfBoxFitClone(url,w,h,d,it.colorCustom?it.color:null);
   ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness,it.finishTextures,typeof FINISH_TEXTURE_DEPS==='object'?FINISH_TEXTURE_DEPS:null);grp.add(clone);return true;
@@ -3058,22 +3058,102 @@ var LEGACY_FMP_TYPE_MAP = {
   closet:'fmp-Closet01',
   shoe_cabinet:'fmp-Drawer01'
 };
-function isFmpItemType(type){ return !!(type && FMP_ITEMS[type]); }
-function getFmpItem(type){ return FMP_ITEMS[type]||null; }
-function bestFmpType(type){ return LEGACY_FMP_TYPE_MAP[type]||type; }
+function isFmpItemType(type){ return !!(type && ownGet(FMP_ITEMS,type)); }
+function getFmpItem(type){ return ownGet(FMP_ITEMS,type)||null; }
+function bestFmpType(type){ return ownGet(LEGACY_FMP_TYPE_MAP,type)||type; }
 function getItemDefaultSize(type){
   type=bestFmpType(type);
   var fmp=getFmpItem(type);
   if(fmp) return {w:fmp.w||900,d:fmp.d||900,h:fmp.h||600};
-  return ISIZES[type]||{w:900,d:900};
+  return ownGet(ISIZES,type)||{w:900,d:900};
 }
 function hasCustomPlanSize(it){
   if(!it || it.w===undefined || it.d===undefined) return false;
   var sz=getItemDefaultSize(it.type);
   return Math.abs((it.w||0)-(sz.w||0))>1 || Math.abs((it.d||0)-(sz.d||0))>1;
 }
+// 画面の HTML へつなぐ文字は必ずこれに通す(本文にも、引用符で囲んだ属性の値にも使える)。
+// **プランのどの欄も他人が決められる**(他人のプランのファイル・共有 URL・共同編集の相手の
+// 差分・AI の出力)。0 と false は文字として出す(以前は `s||''` で空になっていた)。
+// 文字に直せない値(toString が関数でない物など)は空にする。
+// onclick="f('…')" のような JS の中には、これを通しても入れてはいけない(属性を読むときに
+// 実体参照が元に戻る)。値は data-… 属性に入れ、ハンドラの中で this.dataset から読む。
+// 属性の値は必ず "…" か '…' で囲む。引用符の無い属性(value=… の形)には使えない
+// (空白・バッククォート・= は置き換えないので、属性が切れる)。
 function escHtml(s){
-  return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+  var t;
+  try{ t=(s===null||s===undefined)?'':String(s); }catch(e){ t=''; }
+  // 引用符は \x22 / \x27 と書く(tools/tests の関数の切り出しが、正規表現の中の引用符を
+  // 文字列の始まりと読んでしまうため)。
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\x22/g,'&quot;').replace(/\x27/g,'&#39;');
+}
+// 色として画面(value="…"・style・<input type=color>)へ出してよい形か。保存済みプランには
+// #rgb・#rrggbb・rgb()/rgba() があるので、その形だけを通す。合わなければ fallback を返す。
+function safeHtmlColor(v,fallback){
+  if(typeof v==='string'&&(/^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v)||
+    /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+|1\.0+)\s*)?\)$/i.test(v))) return v;
+  return fallback===undefined?'':fallback;
+}
+// 数を属性へ出す。有限の数(数の文字を含む)ならその数、そうでなければ fallback(既定は空)。
+function htmlNum(v,fallback){
+  var n=(typeof v==='number')?v:((typeof v==='string'&&v.trim()!=='')?Number(v):NaN);
+  if(isFinite(n)) return String(n);
+  return fallback===undefined?'':String(fallback);
+}
+// 表(種類名→モデル・色・大きさ など)をプラン由来の鍵で引く。継承した鍵(constructor・
+// __proto__・toString …)に当たらないよう、自分の鍵だけを見る。無ければ undefined。
+// `表[it.type]` と書くと、種類名が constructor の物が1つあるだけで 3D が全部出なくなった
+// (自動保存に残り、起動のたびに壊れたままになった)。
+function ownGet(table,key){
+  if(!table||key===null||key===undefined) return undefined;
+  var k;
+  try{ k=String(key); }catch(e){ return undefined; }
+  return Object.prototype.hasOwnProperty.call(table,k)?table[k]:undefined;
+}
+// 鍵ごとの入れ物(壁ごと・面ごとの設定)を取り出し、無ければ作る。鍵が __proto__ でも
+// 自分の欄として作る(代入で作ると、入れ物の継承元を差し替え、全部の物に色が付く)。
+// 入れ物や今の値がオブジェクトでない(共同編集の相手から文字が届いた、など)ときも例外を出さない。
+// 入れ物がオブジェクトでなければ作った物をそのまま返し(どこにも残らない)、今の値がオブジェクトでなければ作り直す。
+function ownSlot(table,key,make){
+  var k=String(key);
+  if(!table||typeof table!=='object') return make();
+  var cur=Object.prototype.hasOwnProperty.call(table,k)?table[k]:undefined;
+  if(!cur||typeof cur!=='object')
+    Object.defineProperty(table,k,{value:make(),writable:true,enumerable:true,configurable:true});
+  return table[k];
+}
+// プランの設定の欄(外観・内観・屋根の設定)の形を、ensure… が作り直せる形に戻す。
+// 欄の値・中の入れ物(parts)がオブジェクトでなければ消す。maps に挙げた入れ物の中の値も、オブジェクトでなければ消す。
+// ensure… は `if(!s.walls)` のように「無い」ときだけ作るので、文字などが入っていると残ってしまい、
+// ownSlot や色の読み出しが例外になって 3D と設定欄が壊れるため(共同編集の相手や古い Worker から届いた形に備える)。
+function isPlainObj(v){
+  return !!v&&typeof v==='object'&&!Array.isArray(v);
+}
+function repairSettingsShape(plan,field,parts,maps){
+  if(!plan) return;
+  var s=plan[field];
+  if(s===undefined||s===null) return;
+  if(!isPlainObj(s)){ plan[field]=null; return; }
+  (parts||[]).forEach(function(part){
+    if(!Object.prototype.hasOwnProperty.call(s,part)) return;
+    if(!isPlainObj(s[part])){ delete s[part]; return; }
+    if((maps||[]).indexOf(part)<0) return;
+    var m=s[part];
+    Object.keys(m).forEach(function(k){ if(m[k]!==null&&!isPlainObj(m[k])) delete m[k]; });
+  });
+}
+// 画面の data-… 属性から、プランの物を引き直す(onclick に id を書かないため)。
+// 一番近い祖先の data-wall-id を見る。id の型(数か文字か)はプランの物のまま返す。
+function wallIdFromEl(el){
+  var host=el&&el.closest?el.closest('[data-wall-id]'):null;
+  var key=host?host.getAttribute('data-wall-id'):null;
+  if(key===null) return null;
+  var w=(typeof DATA!=='undefined'&&DATA&&DATA.walls||[]).find(function(x){return x&&String(x.id)===key;});
+  return w?w.id:key;
+}
+function faceKeyFromEl(el){
+  var host=el&&el.closest?el.closest('[data-face-key]'):null;
+  return host?host.getAttribute('data-face-key'):null;
 }
 function isAppearanceColorInput(inp){
   // Every native color input must keep the same DOM node for as long as the
@@ -3313,7 +3393,7 @@ function getOpeningModelToolPreset(tool){
 function openingToolTileHtml(tool,label,icon,item,extraClass){
   var title=item&&item.name?item.name:label;
   var cls='asset-tile opening-model-tile '+(extraClass||'');
-  var html='<button class="'+escHtml(cls)+'" type="button" data-tool="'+escHtml(tool)+'" onclick="chooseOpeningModelTool(\''+escHtml(tool)+'\')" title="'+escHtml(title)+'"';
+  var html='<button class="'+escHtml(cls)+'" type="button" data-tool="'+escHtml(tool)+'" onclick="chooseOpeningModelTool(this.dataset.tool)" title="'+escHtml(title)+'"';
   if(item&&item.thumb){
     html+=' onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'"';
   }
@@ -3403,7 +3483,7 @@ function catalogueSubcatsHtml(items){
     html+='<div class="asset-subcat"'+(kind?' data-kind="'+escHtml(kind)+'"':'')+'><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+marks+'</span><span class="asset-subname">'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
     cats[cat].forEach(function(item){
       var setBadge=(typeof AssetSets==='object')?AssetSets.badge(item):'';
-      html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':'')+(setBadge?' '+setBadge:''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
+      html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(this.dataset.tool)" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':'')+(setBadge?' '+setBadge:''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
       html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
       html+=setBadge?'<span class="asset-set-badge">'+escHtml(setBadge)+'</span>':(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
       html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';
@@ -3524,7 +3604,7 @@ function getFmpTopRotationRad(item){
   if(item && item.topRot!==undefined && isFinite(+item.topRot)){
     rot+=Number(item.topRot)*Math.PI/180;
   }
-  var cfg=item ? GLTF_MODEL_CONFIG[item.id] : null;
+  var cfg=item ? ownGet(GLTF_MODEL_CONFIG,item.id) : null;
   if(cfg){
     if(cfg.planRot!==undefined) rot+=cfg.planRot;
     else if(cfg.rotY!==undefined) rot-=cfg.rotY;
@@ -3603,7 +3683,7 @@ function pbrTexLinear(name) {
 // id ではなく名前で語る。FMP のモデル名が最優先で、無ければ日本語ラベル。
 function itemTypeLabel(type){
   var fmp=getFmpItem(type);
-  return (fmp&&fmp.name)||ILABELS[type]||type||'要素';
+  return (fmp&&fmp.name)||ownGet(ILABELS,type)||type||'要素';
 }
 var ILABELS = {
   kitchen:'キッチン',bath:'バス',toilet:'トイレ',sink:'洗面',fridge:'冷蔵庫',washer:'洗濯機',

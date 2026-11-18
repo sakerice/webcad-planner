@@ -6,6 +6,7 @@
 // 重なっていた。実測(既定間取り): 開始直後の視界が平均輝度 4.8/255・
 // 画素の100%が暗部・正面9cmに面、という真っ暗な状態だった。
 // ミニマップは「○F タップで移動」を間取りの上に重ねて描いていた。
+require('./app-source.cjs').installOwnHelpersInVm(); // 画面の関数が使う ownGet・ownSlot を vm に入れる
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
