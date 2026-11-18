@@ -22,6 +22,19 @@ export const MCP_CLIENT_ID = "mcp";
 // /op・/read の本文の上限。操作1つの引数なので小さい。
 const MAX_OP_BODY_BYTES = 64 * 1024;
 
+// 外の AI(/op・/read)の回数の上限。誰でも呼べる受け口から、1つのルームへ回し続けられないようにする
+// (Durable Object の無料枠は1日の書き込み 10 万行。使い切ると、その日の全ルームの共同編集と AI の機能が止まる)。
+// 画面からの経路(/update・/save・GET・WebSocket)には掛けない。
+//   /op  … ルームごとに1日(UTC)600 回。成功・失敗を問わず、当てようとした回数。
+//          数はメモリと meta(成功して積んだときだけ書く。数のためだけには書かない)の多いほうを使う。
+//          メモリが消える(ルームが眠る)と失敗の分は数え直しになるが、それは許す。
+//   /read … ルームごとに1分 60 回。メモリだけで数える(書き込みを増やさない)。
+export const MCP_OPS_PER_DAY = 600;
+export const MCP_READS_PER_MINUTE = 60;
+export const MCP_OP_LIMIT_MESSAGE = "このプランは、きょう AI から直せる回数の上限に達しました。あすまたお試しいただくか、house-planner の画面で直してください。";
+export const MCP_READ_LIMIT_MESSAGE = "このプランを読む回数が多すぎます。少し待ってからもう一度お試しください。";
+const utcDay = (now) => new Date(now).toISOString().slice(0, 10);
+
 // 操作の前(before)と後(after)のプランから、画面の共同編集(index.html の buildSharedPatch)と同じ形の差分を作る。
 //   {collections: {walls|items|rooms: {upserts: [物の写し], removes: [id の文字]}}, fields: {欄: 値の写し}}
 // - 物は id(文字)ごとに JSON で比べる。新しい物・中身の変わった物を upserts、無くなった物を removes に入れる。
@@ -123,6 +136,29 @@ export class CollaborationRoom {
     this.state = state;
     this.env = env;
     this.queue = Promise.resolve();
+    // 外の AI の回数(メモリの中の数)。/op は {day, n}、/read は {start, n}(1分の窓)。
+    this.mcpOps = { day: "", n: 0 };
+    this.mcpReads = { start: 0, n: 0 };
+  }
+
+  // /op を1回数える。上限を超えていれば null(数を進めない)。進めた後の {day, n} を返す。
+  takeMcpOp(meta) {
+    const day = utcDay(Date.now());
+    const mem = this.mcpOps.day === day ? this.mcpOps.n : 0;
+    const stored = meta && meta.mcpOps && meta.mcpOps.day === day ? Number(meta.mcpOps.n) || 0 : 0;
+    const used = Math.max(mem, stored);
+    if (used >= MCP_OPS_PER_DAY) return null;
+    this.mcpOps = { day, n: used + 1 };
+    return { ...this.mcpOps };
+  }
+
+  // /read を1回数える。上限を超えていれば false。
+  takeMcpRead() {
+    const now = Date.now();
+    if (!(now - this.mcpReads.start < 60 * 1000) || now < this.mcpReads.start) this.mcpReads = { start: now, n: 0 };
+    if (this.mcpReads.n >= MCP_READS_PER_MINUTE) return false;
+    this.mcpReads.n += 1;
+    return true;
   }
 
   enqueue(task) {
@@ -323,6 +359,8 @@ export class CollaborationRoom {
   async applyOp(request) {
     const meta = await this.liveMeta();
     if (!meta) return roomNotFound();
+    const counted = this.takeMcpOp(meta);
+    if (!counted) return json({ ok: false, code: "op_limit", errors: [{ message: MCP_OP_LIMIT_MESSAGE }] }, 429);
     let payload;
     try { payload = await readJsonWithLimit(request, MAX_OP_BODY_BYTES); } catch {
       return opFailure(["操作を読み取れませんでした（{op, args} の JSON を 64KB までで送ってください）"], 400);
@@ -366,7 +404,7 @@ export class CollaborationRoom {
     });
     if (!patch) return out(Number(meta.version || 0));
     const nextId = Math.max(Number(meta.nextId) || 0, Number(result.nextId) || 0);
-    const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId });
+    const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId, mcpOps: counted });
     if (!next) return roomNotFound();
     return out(next.version);
   }
@@ -375,6 +413,7 @@ export class CollaborationRoom {
   async read(request) {
     const meta = await this.liveMeta();
     if (!meta) return roomNotFound();
+    if (!this.takeMcpRead()) return json({ ok: false, code: "read_limit", errors: [{ message: MCP_READ_LIMIT_MESSAGE }] }, 429);
     let payload;
     try { payload = await readJsonWithLimit(request, MAX_OP_BODY_BYTES); } catch { payload = null; }
     const what = payload && payload.what;

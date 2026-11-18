@@ -458,3 +458,83 @@ test('同時の呼び出し: R2 の読み込みが遅くても、/op・/update�
   const all = got.plan.items.map((i) => String(i.id)).concat(got.plan.rooms.map((r) => String(r.id)), got.plan.walls.map((w) => String(w.id)));
   assert.equal(new Set(all).size, all.length, '取得したプランの id に重なりが無い');
 });
+
+test('外の AI の回数の上限: /op はルームごとに1日 600 回(成功・失敗を問わず)。601 回めは当てず、版も差分も進まない。日付が変わると戻る', async () => {
+  const room = await mod('worker/collab-room.mjs');
+  assert.equal(room.MCP_OPS_PER_DAY, 600);
+  const small = { walls: [], items: [], rooms: [{ id: 'r1', n: '洋室', x: 0, y: 0, w: 2730, d: 3640, floor: 1 }] };
+  const ctx = await setup(small);
+  // 400 回は成功(名前を変える)、200 回は失敗(無い id)
+  for (let i = 0; i < 400; i++) {
+    const r = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'renameRoom', { id: 'r1', name: '洋室' + i });
+    assert.equal(r.ok, true, String(i));
+  }
+  for (let i = 0; i < 200; i++) {
+    const r = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'renameRoom', { id: 'nope', name: 'x' });
+    assert.equal(r.ok, false);
+    assert.notEqual(r.code, 'op_limit', String(i));
+  }
+  const ws = connect(ctx.room, 'screen-a');
+  const snap = snapshotRoom(ctx.env, ctx.room);
+  const over = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'renameRoom', { id: 'r1', name: '和室' });
+  assert.equal(over.ok, false);
+  assert.equal(over.code, 'op_limit');
+  assert.equal(over.errors[0].message, room.MCP_OP_LIMIT_MESSAGE);
+  assert.equal(snapshotRoom(ctx.env, ctx.room), snap, '版も差分も meta も変わらない');
+  assert.deepEqual(ws.messages(), [], '誰にも届かない');
+  // meta には成功した分の数だけが残る(失敗の分を数えるためだけには書かない)
+  const meta = await ctx.room.storage.get('meta');
+  assert.equal(meta.mcpOps.n, 400);
+  assert.equal(meta.version, 401);
+  // 画面からの /update と取得は今までどおり通る
+  const stub = ctx.env.ROOMS.get(ctx.env.ROOMS.idFromName(ctx.roomId));
+  const upd = await stub.fetch('https://room/update', {
+    method: 'POST', body: JSON.stringify({ type: 'patch', clientId: 'screen-a', baseVersion: 401, patch: { collections: {}, fields: { northDeg: 5 } } }),
+  });
+  assert.equal(upd.status, 200);
+  assert.equal((await upd.json()).version, 402);
+  assert.equal((await getPlan(ctx.env, ctx.roomId)).plan.northDeg, 5);
+  assert.equal((await ctx.room.storage.get('meta')).mcpOps.n, 400, '/update は数を変えない');
+  // ルームが眠ってメモリが消えたら、meta の数(成功の 400)から数え直す: あと 200 回
+  ctx.room.instance = new room.CollaborationRoom(ctx.room.state, ctx.env);
+  for (let i = 0; i < 200; i++) {
+    const r = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'renameRoom', { id: 'nope', name: 'x' });
+    assert.notEqual(r.code, 'op_limit', String(i));
+  }
+  assert.equal((await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'renameRoom', { id: 'r1', name: '和室' })).code, 'op_limit');
+  // 日付(UTC)が変わると戻る
+  const realNow = Date.now;
+  Date.now = () => realNow() + 24 * 60 * 60 * 1000;
+  try {
+    const next = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'renameRoom', { id: 'r1', name: '和室' });
+    assert.equal(next.ok, true, JSON.stringify(next));
+    assert.equal((await ctx.room.storage.get('meta')).mcpOps.n, 1);
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+test('外の AI の回数の上限: /read はルームごとに1分 60 回。61 回めは断り、1分たつと戻る。書き込みは増えない', async () => {
+  const room = await mod('worker/collab-room.mjs');
+  assert.equal(room.MCP_READS_PER_MINUTE, 60);
+  const ctx = await setup();
+  const snap = snapshotRoom(ctx.env, ctx.room);
+  for (let i = 0; i < 60; i++) {
+    const r = await ctx.rooms.roomRead(ctx.env, ctx.roomId, i % 2 ? 'summary' : 'inspect');
+    assert.equal(r.ok, true, String(i));
+  }
+  const over = await ctx.rooms.roomRead(ctx.env, ctx.roomId, 'summary');
+  assert.equal(over.ok, false);
+  assert.equal(over.code, 'read_limit');
+  assert.equal(over.errors[0].message, room.MCP_READ_LIMIT_MESSAGE);
+  assert.equal(snapshotRoom(ctx.env, ctx.room), snap, '読むだけでは storage も R2 も変わらない');
+  // 画面からの取得には掛からない
+  assert.equal((await getPlan(ctx.env, ctx.roomId)).version, 1);
+  const realNow = Date.now;
+  Date.now = () => realNow() + 61 * 1000;
+  try {
+    assert.equal((await ctx.rooms.roomRead(ctx.env, ctx.roomId, 'summary')).ok, true);
+  } finally {
+    Date.now = realNow;
+  }
+});
