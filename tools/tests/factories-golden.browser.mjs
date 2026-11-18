@@ -21,6 +21,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { watch3dSkips, assertNo3dSkips, read3dSkips } from './build3d-skips.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DIR = join(HERE, 'fixtures', 'factories');
@@ -157,6 +158,8 @@ async function openBlankAndCollect(browser) {
     }
     assert.ok(same >= 5, 'FMP_ITEMS の件数が落ち着かない');
     const data = await page.evaluate(collect);
+    const skipped = await read3dSkips(page);
+    if (skipped && skipped.count) errors.push(`3D で ${skipped.count} 個飛ばした: ` + skipped.ids.join(', '));
     return { data, errors };
   } finally {
     await context.close();

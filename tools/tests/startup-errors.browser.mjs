@@ -18,6 +18,7 @@
 // ショット比較でも見つからない(例外が出ても、その後の描画で絵は揃う)。
 // 2回読んでエラーを数えるのが、いちばん確実で速い。
 import assert from 'node:assert/strict';
+import { watch3dSkips, assertNo3dSkips, read3dSkips } from './build3d-skips.mjs';
 
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
@@ -39,6 +40,7 @@ try {
     // 画像の取得失敗など、アプリの不良ではないものは除く。
     const real = errors.filter((m) => !/Failed to load resource|net::ERR_/.test(m));
     assert.deepEqual(real, [], pass + 'の読み込みでエラーが出ている');
+    await assertNo3dSkips(page, pass + 'の読み込み');
   }
 
   // 本体側の関数が、外部ファイル側から実際に呼べる状態になっていること。

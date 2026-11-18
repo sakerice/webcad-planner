@@ -27,6 +27,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { watch3dSkips, read3dSkips } from './build3d-skips.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const APP = process.env.APP_URL || 'http://localhost:8932/';
@@ -165,9 +166,9 @@ async function openPage(label, { shared = null } = {}) {
     return route.abort();
   });
   page.on('pageerror', (e) => st.errors.push(e.message.slice(0, 300)));
-  // 3D の作り直しは、1つの物で例外が出るとその物だけ飛ばして警告を出す(残りは描く)。
-  // 飛ばした物があれば、作り直しが例外を出したのと同じに扱う。
-  page.on('console', (m) => { if (/3Dに描けない/.test(m.text())) st.errors.push(m.text().slice(0, 300)); });
+  // 3D の作り直しは、1つの物で例外が出るとその物だけ飛ばして console.error を出す(残りは描く)。
+  // 飛ばした物があれば、作り直しが例外を出したのと同じに扱う(check でも window.__build3dSkipped を見る)。
+  watch3dSkips(page, st.errors);
   page.on('dialog', (d) => { st.dialogs.push(d.message().slice(0, 120)); d.dismiss().catch(() => {}); });
   await page.addInitScript(() => {
     window.__xss = [];
@@ -267,9 +268,11 @@ async function check(where, page, st, extra = {}) {
   if (r.bad.length) note(where, '画面に差し込まれた: ' + r.bad.slice(0, 5).join(' / '));
   if (st.outside.length) note(where, 'オリジンの外へ要求: ' + [...new Set(st.outside)].slice(0, 5).join(' '));
   if (st.errors.length) note(where, 'pageerror: ' + [...new Set(st.errors)].slice(0, 5).join(' / '));
+  const skipped = await read3dSkips(page);
+  if (skipped && skipped.count) note(where, `3D で ${skipped.count} 個飛ばした: ` + skipped.ids.join(', '));
   if (extra.errs && extra.errs.length) note(where, '操作が例外: ' + extra.errs.slice(0, 6).join(' / ') + (extra.errs.length > 6 ? ` ほか${extra.errs.length - 6}件` : ''));
   st.outside.length = 0; st.errors.length = 0;
-  await page.evaluate(() => { window.__xss.length = 0; });
+  await page.evaluate(() => { window.__xss.length = 0; window.__build3dSkipped = 0; window.__build3dSkippedIds = []; });
 }
 
 try {
@@ -345,6 +348,7 @@ try {
     for (const [coll, pick] of [['items', (it) => it.type === 'custom-block'], ['items', (it) => it.type === 'roof'], ['walls', (w, i) => i === 4], ['rooms', (r, i) => i === 0], ['items', (it) => it.type === 'window']]) {
       const base = BASE[coll].find(pick);
       const evil = plan[coll].find((o) => o.x === base.x && o.y === base.y && o.x1 === base.x1 && o.y1 === base.y1 && (o.floor === base.floor || coll !== 'items'));
+      assert.ok(evil, `(d) 攻撃のプランに、土台の ${coll} と同じ位置の物が見つからない(空振りの検査になる)`);
       const body = Object.assign({}, evil, { id: base.id });
       await page.evaluate(([coll, id]) => { ST.selected = DATA[coll].find((o) => String(o.id) === String(id)); updateProps(); }, [coll, base.id]);
       const ver = await page.evaluate(() => SHARED.version + 1);

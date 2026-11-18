@@ -6449,9 +6449,16 @@ function build3D(){
   _roofBaseCache={};
   try{ build3DScene(); } finally { _roofBaseCache=null; }
 }
+// 飛ばすのは最後の守りで、ふつうのプランで起きたら不具合。隠さないよう console.error で出し、
+// 飛ばした数を window.__build3dSkipped に足していく(画面テストが終わりに 0 であることを見る)。
 function build3DOneSafely(fn,obj,label){
   try{ fn(obj); }
-  catch(e){ console.warn('3Dに描けない'+label+'を飛ばしました: '+String(obj&&obj.id).slice(0,40)+' '+(e&&e.message)); }
+  catch(e){
+    window.__build3dSkipped=(window.__build3dSkipped||0)+1;
+    if(!window.__build3dSkippedIds) window.__build3dSkippedIds=[];
+    if(window.__build3dSkippedIds.length<50) window.__build3dSkippedIds.push(label+':'+String(obj&&obj.id).slice(0,40));
+    console.error('3Dに描けない'+label+'を飛ばしました: '+String(obj&&obj.id).slice(0,40)+' '+(e&&e.message));
+  }
 }
 function build3DScene(){
   var toRemove=[];

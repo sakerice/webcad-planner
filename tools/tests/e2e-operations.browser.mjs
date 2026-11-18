@@ -26,6 +26,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { watch3dSkips, assertNo3dSkips, read3dSkips } from './build3d-skips.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OTHER_PLAN = join(HERE, 'fixtures', 'house-2f.json');
@@ -485,6 +486,8 @@ try {
   await page.waitForFunction(() => ST.view === '2d' && document.getElementById('c2d').style.display !== 'none', null, T);
   assert.ok((await planCanvasStats(page)).colors > 10, '3D から平面図に戻ったら何も描かれていない');
   console.log('ok  6. 3D から平面図へ戻った');
+  // 3D の作り直しで物を飛ばしていない(飛ばしても pageerror にならないので数で見る)
+  await assertNo3dSkips(page, '6. 3D 表示');
   await context.close();
 
   assert.deepEqual(errors, [], 'コンソールのエラー・ページの例外:\n' + errors.join('\n'));
