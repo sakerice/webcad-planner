@@ -52,7 +52,7 @@ try {
     const tags = await (await fetch(new URL('assets/models/tags.json', app).href)).json();
     const tools = F.createPlanCtxTools({
       catalog, tags, Operations: PlanCoreOperations, Settable: PlanSettable, Knowledge: ObjectKnowledge, FreeApply: PlanFreeApply,
-      HeightModel, Summary: ChatPlanSummary, Inspect: PlanCoreInspect, Schema: PlanSchema, Check: PlanCheck, Structure: PlanStructure,
+      HeightModel, Summary: ChatPlanSummary, Inspect: PlanCoreInspect, Schema: PlanSchema, Check: PlanCheck, Structure: PlanStructure, SetbackLaw,
     });
     const Ops = PlanCoreOperations;
     const json = (v) => JSON.stringify(v, (k, x) => (k.charAt(0) === '_' ? undefined : x));
@@ -157,7 +157,13 @@ try {
     // ── 変種のプラン ──
     const base = clone(DATA);
     const variants = [];
-    variants.push({ name: 'house-2f', plan: base });
+    {
+      const bal = base.items.find((it) => it.type === 'balcony');
+      variants.push({ name: 'house-2f', plan: base, extra: [
+        ['2階のバルコニー', 2, { x: Math.round(bal.x + bal.w / 2), y: Math.round(bal.y + bal.d / 2) }],
+        ['3階(部屋なし)', 3, { x: 4000, y: 4000 }],
+      ] });
+    }
     {
       // 高さの設定: 仕上げ基準の高さ(modelVersion 2)・階ごとの高さ・床の上げ・天井高の指定
       const p = clone(base);
@@ -193,6 +199,60 @@ try {
       res.facesInVariant = Object.keys(s.faces).length;
       variants.push({ name: '外壁の面・基礎なし', plan: p });
     }
+    {
+      // 高さの既定(heightDefaults・floors)の無いプランに、3階の部屋を足す(2階の部屋を写して階だけ3に)。
+      // 置く場所は、3階の部屋の中・3階の部屋の外・2階のバルコニーの上も加える。
+      const p = clone(base);
+      delete p.heightDefaults; delete p.floors;
+      const src = flatRooms(p, 2).slice(0, 2);
+      src.forEach((r, i) => p.rooms.push(Object.assign(clone(r), { id: 'rm_3f_' + i, floor: 3, n: '3階の部屋' + i })));
+      const s3 = spotRoom(p, 3);
+      const bal = p.items.find((it) => it.type === 'balcony');
+      variants.push({ name: '高さの既定なし・3階', plan: p, extra: [
+        ['3階の部屋', 3, s3.pt], ['3階の部屋の外', 3, { x: -3000, y: 3000 }],
+        ['2階のバルコニー', 2, { x: Math.round(bal.x + bal.w / 2), y: Math.round(bal.y + bal.d / 2) }],
+      ] });
+    }
+    {
+      // 入れ子の部屋(1階の大きい部屋の中に、天井高の違う小さい部屋)、回転した台、古い種類名の物
+      const p = clone(base);
+      const outer = bigRoom(p, 1);
+      const nested = { id: 'rm_nested_1', n: '入れ子', floor: 1, x: outer.x + 200, y: outer.y + 200, w: 1200, d: 1100, ceiling: { type: 'flat', heightMm: 2200 } };
+      p.rooms.push(nested);
+      // 回転した台(2階の部屋の空いた所に、30度回した机)
+      const s2 = spotRoom(p, 2);
+      const table = { id: 99101, type: 'fmp-Table44', floor: 2, x: s2.pt.x - 500, y: s2.pt.y - 250, w: 1000, d: 500, rot: 30 };
+      p.items.push(table);
+      // 古い種類名の物(読み込みの直しを通していない保存プランの形)
+      const s1 = spotRoom(p, 1, [outer.id]);
+      const legacy = ['kitchen', 'desk', 'sofa', 'bed-s', 'tv'];
+      legacy.forEach((t, i) => p.items.push({ id: 99201 + i, type: t, floor: 1, x: s1.pt.x - 300 + i * 40, y: s1.pt.y - 300 + i * 40, w: 600, d: 600, rot: 0 }));
+      // 回した台の、回した後の矩形の中で、回す前の矩形の外の点(と、その逆)
+      const c = { x: table.x + table.w / 2, y: table.y + table.d / 2 };
+      const rad = 30 * Math.PI / 180;
+      const rotPt = (lx, ly) => ({ x: Math.round(c.x + lx * Math.cos(rad) - ly * Math.sin(rad)), y: Math.round(c.y + lx * Math.sin(rad) + ly * Math.cos(rad)) });
+      variants.push({ name: '入れ子・回転した台・古い種類', plan: p, legacy: legacy.map((t, i) => 99201 + i), extra: [
+        ['入れ子の部屋', 1, { x: nested.x + 600, y: nested.y + 550 }],
+        ['回転した台の上(回す前の矩形の外)', 2, rotPt(420, 200)],
+        ['回転した台の外(回す前の矩形の中)', 2, { x: Math.round(c.x + 480), y: Math.round(c.y - 230) }],
+        ['古い種類の物の上', 1, { x: s1.pt.x, y: s1.pt.y }],
+      ] });
+    }
+    {
+      // 敷地に斜線制限の欄はあるが、効かない(道路も北側も切ってある・北側斜線の無い用途地域・用途地域が無い)
+      const p = clone(base);
+      const sites = p.items.filter((it) => it.type === 'site-rect');
+      sites[0].setback = { zone: 'low1', road: false, north: false };
+      sites[1].setback = { zone: 'res-other', road: false, north: true };
+      sites[2].setback = { road: true, north: true };
+      variants.push({ name: '斜線の欄あり・効かない', plan: p });
+    }
+    {
+      // 斜線制限が効く敷地(照明は断る側。断っていることを確かめる)
+      const p = clone(base);
+      p.items.find((it) => it.type === 'site-rect' && it.y === 0).setback = { zone: 'low1', road: false, north: true };
+      variants.push({ name: '斜線が効く', plan: p });
+    }
 
     const kinds = Object.keys(ObjectKnowledge.KNOWLEDGE);
     const isizes = Object.keys(ISIZES);
@@ -223,6 +283,16 @@ try {
       if (voidRoom) for (const t of ['light-ceiling', 'light-down', 'fmp-CeilingFan01', 'sofa']) check(V.name, p, { op: 'placeItem', args: { type: t, x: voidRoom.x + voidRoom.w / 2, y: voidRoom.y + voidRoom.d / 2 } }, '置く ' + t + ' 吹き抜け');
       const table = p.items.find((it) => /Table/.test(it.type) && (it.floor || 1) === 1);
       if (table) for (const t of ['plant', 'decor', 'light-down', 'tv']) check(V.name, p, { op: 'placeItem', args: { type: t, x: table.x + table.w / 2, y: table.y + table.d / 2 } }, '置く ' + t + ' 台の上');
+      // 取付の高さの表にある分類(レンジフード)を、台になる物(調理台・机・棚など)の中に置く。台に載せず表の高さ。
+      const seenCat = {};
+      for (const sf of p.items) {
+        if (!sf || sf.type === 'foundation' || !isPlacementSurfaceItem(sf)) continue;
+        const cat = (getFmpItem(sf.type) || {}).category || sf.type;
+        if (seenCat[cat]) continue; seenCat[cat] = 1;
+        for (const t of Object.keys(PlanFreeApply.MOUNT_ELEV_MM).concat(['fmp-KitchenExhaust07'])) {
+          check(V.name, p, { op: 'placeItem', args: { type: t, x: sf.x + sf.w / 2, y: sf.y + sf.d / 2, floor: sf.floor || 1 } }, '置く ' + t + ' 台(' + cat + ')の上');
+        }
+      }
       const fnd = p.items.find((it) => it.type === 'foundation');
       if (fnd) for (const t of ['car', 'tree', 'ac-outdoor', 'chair']) check(V.name, p, { op: 'placeItem', args: { type: t, x: fnd.x + 300, y: fnd.y + 300 } }, '置く ' + t + ' 基礎の上');
       // 部屋・壁
@@ -291,6 +361,14 @@ try {
       check(V.name, p, { op: 'setProps', args: { id: p.walls[1].id, set: { wallHeight: 2700 } } }, '設定 壁の高さ');
       const win = p.items.find((it) => it.type === 'window');
       check(V.name, p, { op: 'setProps', args: { id: win.id, set: { windowHeight: 2600 } } }, '設定 窓の高さ');
+      // 古い種類名の物を動かす・回す・設定する・消す
+      for (const id of V.legacy || []) {
+        const it = p.items.find((x) => x.id === id);
+        check(V.name, p, { op: 'moveObject', args: { id, dx: 100, dy: 50 } }, '動かす 古い種類 ' + it.type);
+        check(V.name, p, { op: 'rotateObject', args: { id, by: 90 } }, '回す 古い種類 ' + it.type);
+        check(V.name, p, { op: 'setProps', args: { id, set: { color: '#336699' } } }, '設定 古い種類 ' + it.type);
+        check(V.name, p, { op: 'deleteObjects', args: { ids: [id] } }, '消す 古い種類 ' + it.type);
+      }
     }
     WALL_H = wallHSaved;
     // 照らし合わせが「どちらも何もしない」で一致していないことの確かめ(式で決める値が実際に入っている)
@@ -303,11 +381,23 @@ try {
         WALL_H = wallHSaved;
         return r.errors.length ? r.errors[0].message : r.plan.items[r.plan.items.length - 1];
       };
+      const placedAt = (V, type, floor, where) => {
+        const p = variants.find((x) => x.name === V).plan;
+        const pt = where(p);
+        const r = tools.workerApply(p, [{ op: 'placeItem', args: { type, x: pt.x, y: pt.y, floor } }]);
+        return r.errors.length ? { elev: r.errors[0].message } : r.plan.items[r.plan.items.length - 1];
+      };
       const col = placed('段差と天井', 'column', 1);
       const light1 = placed('house-2f', 'light-ceiling', 1), light2 = placed('高さの設定', 'light-down', 2);
       const hood = placed('house-2f', 'range-hood', 1);
       const washer = placed('house-2f', 'laundry', 2);
-      res.formula = { column: [col.baseLevel, col.columnHeight], light1: light1.elev, light2: light2.elev, hood: hood.elev, washer: [washer.type, washer.floor, washer.indoor] };
+      const counter = base.items.find((it) => it.type === 'fmp-CabinetD01');
+      const onCounter = tools.workerApply(base, [{ op: 'placeItem', args: { type: 'range-hood', x: counter.x + counter.w / 2, y: counter.y + counter.d / 2 } }]);
+      const nestedLight = placedAt('入れ子・回転した台・古い種類', 'light-ceiling', 1, (p) => { const r = p.rooms.find((x) => x.id === 'rm_nested_1'); return { x: r.x + 600, y: r.y + 550 }; });
+      const outerLight = placedAt('入れ子・回転した台・古い種類', 'light-ceiling', 1, (p) => { const r = p.rooms.find((x) => x.id === 'rm_nested_1'); return { x: r.x + r.w + 300, y: r.y + 550 }; });
+      res.formula = { column: [col.baseLevel, col.columnHeight], light1: light1.elev, light2: light2.elev, hood: hood.elev, washer: [washer.type, washer.floor, washer.indoor],
+        hoodOnCounter: onCounter.errors.length ? onCounter.errors[0].message : onCounter.plan.items[onCounter.plan.items.length - 1].elev,
+        nestedLight: [nestedLight.elev, outerLight.elev] };
     }
 
     // 外壁の色・素材の受け口(props からしか呼ばれないので、applyProp を直接当てて比べる)
@@ -347,6 +437,12 @@ try {
   assert.equal(out.formula.column[0], 'under', '段差の部屋の柱が段差の下まで伸びていない');
   assert.ok(out.formula.light1 > 2000 && out.formula.light2 > 1800, '照明の高さが天井から決まっていない');
   assert.equal(out.formula.hood, 1650, 'レンジフードの取付の高さ');
+  assert.equal(out.formula.hoodOnCounter, 1650, '調理台の上に置いたレンジフードも取付の高さ');
+  assert.ok(out.formula.nestedLight[0] !== out.formula.nestedLight[1] && out.formula.nestedLight.every((v) => typeof v === 'number'), '入れ子の部屋の照明は、内側の部屋の天井から決まる: ' + JSON.stringify(out.formula.nestedLight));
+  const lightRefusals = (v) => out.refused.filter((r) => r.variant === v && r.message.includes('照明の高さを画面でしか'));
+  assert.deepEqual(lightRefusals('斜線の欄あり・効かない').map((r) => r.label), [], '斜線が効かない敷地で照明を断った');
+  assert.ok(lightRefusals('斜線が効く').length >= 1, '斜線が効く敷地で照明を断っていない');
+  assert.deepEqual(out.refused.filter((r) => /range-hood|KitchenExhaust/.test(r.label)).map((r) => r.variant + ': ' + r.label), [], '取付の高さの分類を断った');
   assert.deepEqual(out.deadFaces.map((d) => d.variant).filter((v) => v !== '外壁の面・基礎なし'), [], '面ごとの外壁設定の残りは、その変種でしか起きない');
   assert.ok(out.same >= 500, '一致した操作が少なすぎる: ' + out.same);
   assert.equal(out.exterior, true, '外壁の色・素材の書き込みが違う');
