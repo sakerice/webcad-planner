@@ -9,6 +9,7 @@
 //
 // grep ではなく、判定そのものを node:vm で走らせて、実測値に応じて
 // 答えが変わることを見る。
+require('./app-source.cjs').installOwnHelpersInVm(); // 画面の関数が使う ownGet・ownSlot を vm に入れる
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');

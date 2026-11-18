@@ -67,7 +67,7 @@ function jisdrawIife() {
   return html.slice(at + 1, end + 5);
 }
 
-const NORTH_FNS = [
+const NORTH_FNS = [ 'ownGet', 'ownSlot',
   'isStairPartType', 'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
   'compassSector', 'compassNameJa', 'compassCode',
   'planDirBearingDeg', 'elevationDirNameJa', 'elevationSheetLabel', 'elevationDirCode',
@@ -76,7 +76,7 @@ const NORTH_FNS = [
 const NORTH_VARS = ['COMPASS_8_JA', 'COMPASS_8_CODE', 'ELEV_DIR_SCREEN_DEG'];
 
 // 立面図 SVG を作るのに必要な、JISDRAW の外側の関数群。
-const DRAW_FNS = [
+const DRAW_FNS = [ 'ownGet', 'ownSlot',
   'bestFmpType',
   'getFmpItem',
   'isDoorLikeOpeningType',
@@ -204,7 +204,7 @@ test('19-1: 角度は 0〜360 に畳まれる（負・360超・小数）', () =>
 
 const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM',
   'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX'];
-const SETBACK_FNS = [
+const SETBACK_FNS = [ 'ownGet', 'ownSlot',
   'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',

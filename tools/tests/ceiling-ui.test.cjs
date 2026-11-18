@@ -74,7 +74,7 @@ function topLevelVar(name) {
   return html.slice(at2 + 1, end + 1);
 }
 
-const FNS = [
+const FNS = [ 'ownGet', 'ownSlot',
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',

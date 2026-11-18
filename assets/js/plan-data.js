@@ -42,7 +42,7 @@ function planCoreCtx(){
       // 知らない種類名に近い候補(名前に含む・含まれるもの、次に先頭の一致が長いもの)を最大 8 つ。
       suggest:function(type){ return planCoreSuggestTypes(type); },
       defaultSize:function(type){ return getItemDefaultSize(type); },
-      defaultColor:function(type){ return ICOLORS[type]; },
+      defaultColor:function(type){ return ownGet(ICOLORS,type); },
       model:function(type){ return isFmpItemType(type) ? getFmpItem(type) : null; },
       is:function(kind,type){
         switch(kind){

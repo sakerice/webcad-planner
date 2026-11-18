@@ -9,6 +9,7 @@
 // の2つだけ。この検査はその2つを守ったまま隙間が詰まっていることを見る。
 //
 // grep ではなく、buildWall3D を実際に走らせて**建った板とコアの世界座標の距離**を測る。
+require('./app-source.cjs').installOwnHelpersInVm(); // 画面の関数が使う ownGet・ownSlot を vm に入れる
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');

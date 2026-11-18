@@ -47,7 +47,7 @@ function topLevelVar(name) {
   return m[0];
 }
 
-const FNS = [
+const FNS = [ 'ownGet', 'ownSlot',
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry',

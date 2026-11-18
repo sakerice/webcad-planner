@@ -8,6 +8,7 @@
 // 後半を足した理由は、全体レビューの実測で 22 の変異のうち 16 が全テスト緑のまま
 // 生き残ったこと。grep は必要だが十分ではない。判断を下す側（ShadowLift・
 // LockTiers・VideoPrompt・構図の検査・高さの解決）は後半では本物を通す。
+require('./app-source.cjs').installOwnHelpersInVm(); // 画面の関数が使う ownGet・ownSlot を vm に入れる
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');

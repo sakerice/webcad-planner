@@ -43,10 +43,10 @@ function lightKindFromType(type){
   return 'ceiling';
 }
 function lightTypeForKind(kind){
-  return LIGHT_KIND_TO_TYPE[kind]||'light-ceiling';
+  return ownGet(LIGHT_KIND_TO_TYPE,kind)||'light-ceiling';
 }
 function lightKindLabel(kind){
-  return {ceiling:'シーリングライト',down:'ダウンライト',spot:'スポットライト'}[kind]||'シーリングライト';
+  return ownGet({ceiling:'シーリングライト',down:'ダウンライト',spot:'スポットライト'},kind)||'シーリングライト';
 }
 function lightShapeLabel(shape){
   return shape==='line'?'線ライト':'点ライト';
@@ -114,7 +114,7 @@ function shiftRoomCeilingFixtures(room,deltaMm,movedIds){
   var n=0;
   DATA.items.forEach(function(it){
     if(!it) return;
-    if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail') return;
+    if(ownGet(CEILING_FIXTURE_TOP_MM,it.type)===undefined && it.type!=='original-laundry-rail') return;
     if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==room) return;
     it.elev=(Number(it.elev)||0)+deltaMm;
     n++;
@@ -662,7 +662,7 @@ function updateSelectedRoomFloorMaterial(value){
   if(!r||r.type!=='room') return;
   if(isObjectLocked(r)){ updateProps(); return; }
   saveState();
-  if(typeof FLOOR_PBR_STEM!=='undefined'&&FLOOR_PBR_STEM[r.texture]) delete r.texture;
+  if(typeof FLOOR_PBR_STEM!=='undefined'&&ownGet(FLOOR_PBR_STEM,r.texture)) delete r.texture;
   if(value) r.floorMaterial=value; else delete r.floorMaterial;
   markDirty(); updateProps(); draw2d(); if(ren) rebuild3D();
 }
@@ -1142,14 +1142,14 @@ function updateProps(){
   if(it.sScale === undefined) { it.sScale = 1; it.sX = 0; it.sY = 0; }
   var html = '';
   var fmpInfo=getFmpItem(it.type);
-  var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
+  var typeName = (fmpInfo&&fmpInfo.name) || ownGet(ILABELS,it.type) || (it.type==='room'?'部屋':'要素');
   var selectedCount=explicit2DSelection().length;
   document.getElementById('props-title').textContent = selectedCount>1
     ? selectedCount+'件を選択中（'+typeName+'）'
     : typeName + ' の設定';
   // Update mobile header
   var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',bicycle:'🚲','bicycle-fold':'🚲',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔','door-fold':'🚪','door-fold-w':'🚪','door-slide-s':'⇢','door-pocket':'⇥',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','lattice-screen':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
-  var icon=icons[it.type]||'⚙';
+  var icon=ownGet(icons,it.type)||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
   if(mobName) mobName.textContent=typeName;
@@ -1409,11 +1409,11 @@ function updateProps(){
   }
   if(isCustomBlockType(it.type)){
     if(!it.customHeight) it.customHeight=900;
-    if(!it.color) it.color=ICOLORS[it.type]||'#c9d7ee';
+    if(!it.color) it.color=ownGet(ICOLORS,it.type)||'#c9d7ee';
     html += '<div class="ph" style="margin-top:12px">任意ブロック設定</div>';
     html += '<div class="pr"><div class="pl">名称</div><input class="pi" type="text" value="'+escHtml(it.name||'任意ブロック')+'" onchange="updateSelectedProp(\'name\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="10" max="6000" step="10" value="'+escHtml(Math.round(getCustomBlockHeight(it)))+'" onchange="updateSelectedProp(\'customHeight\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color||ICOLORS[it.type],'#c9d7ee')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color||ownGet(ICOLORS,it.type),'#c9d7ee')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       html += '<div class="pr"><div class="pl">テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
@@ -1460,7 +1460,7 @@ function updateProps(){
   if(it.type==='foundation'){
     if(it.foundationHeight===undefined || isNaN(Number(it.foundationHeight))) it.foundationHeight=450;
     html += '<div class="ph" style="margin-top:12px">基礎設定</div>';
-    html += '<div class="pr"><div class="pl">実寸素材</div><select class="pi" onchange="updateSelectedProp(\'texture\',this.value)"><option value="">色・既存の画像</option>'+Object.keys(SITE_SURFACE_OPTIONS).map(function(key){return '<option value="'+escHtml(key)+'" '+(it.texture===key?'selected':'')+'>'+escHtml(SITE_SURFACE_OPTIONS[key].label)+'</option>';}).join('')+'</select></div>';
+    html += '<div class="pr"><div class="pl">実寸素材</div><select class="pi" onchange="updateSelectedProp(\'texture\',this.value)"><option value="">色・既存の画像</option>'+Object.keys(SITE_SURFACE_OPTIONS).map(function(key){return '<option value="'+escHtml(key)+'" '+(it.texture===key?'selected':'')+'>'+escHtml(ownGet(SITE_SURFACE_OPTIONS,key).label)+'</option>';}).join('')+'</select></div>';
     html += '<div class="pr"><div class="pl">基礎厚さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+escHtml(Math.round(it.foundationHeight))+'" onchange="updateSelectedProp(\'foundationHeight\',+this.value)"></div>';
     html += '<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(it.foundationFlashing!==false?'checked':'')+' onchange="updateSelectedProp(\'foundationFlashing\',this.checked)">水切りを付ける</label></div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">基礎厚さ分、家全体の床・壁・家具・屋根が上に持ち上がります。水切りは外壁の下端を受ける金物で、基礎の上に壁が立っているときだけ付きます。</div>';
@@ -1567,7 +1567,7 @@ function updateProps(){
       '</select></div>';
     }
     // 手すり。付ける側は選ばせ、壁付けか柱建てかは置いた場所から決める。
-    var rail = ({left:'left',right:'right',both:'both'})[it.stairRail] || 'none';
+    var rail = ownGet({left:'left',right:'right',both:'both'},it.stairRail) || 'none';
     html += '<div class="pr"><div class="pl">手すり</div><select class="pi" onchange="updateSelectedProp(\'stairRail\',this.value===\'none\'?undefined:this.value)">'+
       '<option value="none"'+(rail==='none'?' selected':'')+'>なし</option>'+
       '<option value="left"'+(rail==='left'?' selected':'')+'>左側</option>'+
@@ -1635,7 +1635,7 @@ function updateProps(){
     if(it.type==='gas-heater'){
       html += '<div class="pr"><div class="pl">取付高さ (下端mm)</div><input class="pi" type="number" min="0" max="3000" step="50" value="'+escHtml(Math.round(it.gasHeaterMount||1300))+'" onchange="updateSelectedProp(\'gasHeaterMount\',+this.value)"></div>';
     }
-    if(!EXTERIOR_MODEL_IDS[it.type]) html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color||ICOLORS[it.type],'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    if(!ownGet(EXTERIOR_MODEL_IDS,it.type)) html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+safeHtmlColor(it.color||ownGet(ICOLORS,it.type),'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
       html += isDoorItemType(it.type)
@@ -1645,7 +1645,7 @@ function updateProps(){
       html += selectedTextureFlipControlsHtml(it);
     }
     var isDoorTextureCrop=isDoorItemType(it.type);
-    if(!isContextExteriorItemType(it.type) && !EXTERIOR_MODEL_IDS[it.type] && (!isDoorTextureCrop || it.texture)){
+    if(!isContextExteriorItemType(it.type) && !ownGet(EXTERIOR_MODEL_IDS,it.type) && (!isDoorTextureCrop || it.texture)){
       html += '<div class="ph" style="margin-top:15px">'+(isDoorTextureCrop?'テクスチャ画像トリミング':'画像トリミング (余白調整)')+'</div>';
       html += '<div class="pr"><div class="pl">拡大率: <span class="texture-crop-value">'+escHtml((Number(it.sScale)||1).toFixed(2))+'</span></div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+htmlNum(it.sScale||1)+'" oninput="updateSelectedTextureCrop(\'sScale\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
       html += '<div class="pr"><div class="pl">位置 X: <span class="texture-crop-value">'+escHtml(Math.round(it.sX||0))+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+htmlNum(it.sX||0)+'" oninput="updateSelectedTextureCrop(\'sX\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
@@ -2031,7 +2031,7 @@ function updateSelectedContextFloors(v){
 function updateSelectedLightKind(kind){
   if(!ST.selected || !isLightItemType(ST.selected.type)) return;
   if(isObjectLocked(ST.selected)){ updateProps(); return; }
-  kind=LIGHT_KIND_TO_TYPE[kind]?kind:'ceiling';
+  kind=ownGet(LIGHT_KIND_TO_TYPE,kind)?kind:'ceiling';
   saveState();
   ST.selected.type=lightTypeForKind(kind);
   ST.selected.lightKind=kind;
@@ -2471,20 +2471,20 @@ var SITE_SURFACE_OPTIONS = {
   gravel_white:{label:'化粧砂利（白）',texture:'gravel_white',tileM:1.5,normal:0.6,color:0xffffff,edge:0xa8a498,segment:0xe8d8a8,env:0.05}
 };
 function siteSurfaceType(it){
-  return (it&&SITE_SURFACE_OPTIONS[it.siteSurface]) ? it.siteSurface : 'grass';
+  return (it&&ownGet(SITE_SURFACE_OPTIONS,it.siteSurface)) ? it.siteSurface : 'grass';
 }
 function siteSurfaceLabel(type){
-  var opt=SITE_SURFACE_OPTIONS[type]||SITE_SURFACE_OPTIONS.grass;
+  var opt=ownGet(SITE_SURFACE_OPTIONS,type)||SITE_SURFACE_OPTIONS.grass;
   return opt.label;
 }
 function siteSurfaceSegmentColor(it){
-  var opt=SITE_SURFACE_OPTIONS[siteSurfaceType(it)]||SITE_SURFACE_OPTIONS.grass;
+  var opt=ownGet(SITE_SURFACE_OPTIONS,siteSurfaceType(it))||SITE_SURFACE_OPTIONS.grass;
   return opt.segment;
 }
 function siteSurfaceOptionsHtml(value){
-  var cur=SITE_SURFACE_OPTIONS[value]?value:'grass';
+  var cur=ownGet(SITE_SURFACE_OPTIONS,value)?value:'grass';
   return Object.keys(SITE_SURFACE_OPTIONS).map(function(key){
-    var opt=SITE_SURFACE_OPTIONS[key];
+    var opt=ownGet(SITE_SURFACE_OPTIONS,key);
     return '<option value="'+escHtml(key)+'" '+(cur===key?'selected':'')+'>'+escHtml(opt.label)+'</option>';
   }).join('');
 }

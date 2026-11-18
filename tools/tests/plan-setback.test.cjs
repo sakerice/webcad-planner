@@ -66,7 +66,7 @@ function jisdrawIife() {
   return html.slice(at + 1, end + 5);
 }
 
-const DRAW_FNS = [
+const DRAW_FNS = [ 'ownGet', 'ownSlot',
   'bestFmpType', 'getFmpItem',
   'isDoorLikeOpeningType', 'isWindowLikeType', 'isOpeningItemType',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
@@ -88,7 +88,7 @@ const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
   'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
   'SETBACK_VALLEY_LAP_MM', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_setbackRoofCache', '_setbackRoofCacheKey'];
-const SETBACK_FNS = [
+const SETBACK_FNS = [ 'ownGet', 'ownSlot',
   'roomsOverlapInPlan', 'overlapStripHiddenByWall', 'segmentInsideRectLengthMm', 'roomAboveRoom', 'roomHasRoomAbove',
   'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roofUndersideWorldYAt', 'roofBaseWorldY', 'roofCeilingWorldYAt',

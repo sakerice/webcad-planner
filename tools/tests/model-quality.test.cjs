@@ -1,3 +1,4 @@
+require('./app-source.cjs').installOwnHelpersInVm(); // 画面の関数が使う ownGet・ownSlot を vm に入れる
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {repairMaterial,prepare}=require('../../assets/js/model-quality.js');

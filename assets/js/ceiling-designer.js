@@ -30,7 +30,7 @@ function areaFinishElevationMm(r,x,y){
  if(!a)return null;
  return Math.round((areaBaseY(r,a)-roomFloorTopY(r)-ceilingFinishThicknessM())/U)+a.offset;
 }
-function fixtures(){return DATA.items.filter(it=>it.floor===ST.floor&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&CEILING_FIXTURE_TOP_MM[it.type]!==undefined)));}
+function fixtures(){return DATA.items.filter(it=>it.floor===ST.floor&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&ownGet(CEILING_FIXTURE_TOP_MM,it.type)!==undefined)));}
 function ceilingGroup(r,ceilY,mat,holes,profile){
  if(!areas(r).length)return buildRoomCeilingMesh(r,ceilY,mat,holes,profile);
  const inset=typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:.012;
@@ -111,7 +111,7 @@ function buildCove(group,a,ref,x,z,w,d,topY,fascia){
 }
 function active(){return !!ST.ceilingView&&(ST.view==='2d'||ST.view==='3d-int');}
 function zone(it){return it&&it.type==='ceiling-area';}
-function fixture(it){return it&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&CEILING_FIXTURE_TOP_MM[it.type]!==undefined));}
+function fixture(it){return it&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&ownGet(CEILING_FIXTURE_TOP_MM,it.type)!==undefined));}
 function visible(it){return zone(it)?active():!active()||fixture(it)||it.type==='room'||it.x1!==undefined;}
 function roomFor(it){return DATA.rooms.find(r=>r.floor===it.floor&&it.x+it.w/2>=r.x&&it.x+it.w/2<=r.x+r.w&&it.y+it.d/2>=r.y&&it.y+it.d/2<=r.y+r.d);}
 function migrate(){

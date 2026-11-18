@@ -4007,7 +4007,7 @@ var TEX_TILE_M = {
   roof_asphalt_shingle_brown: 1.064
 };
 function texTileM(key, fallback){
-  var v = key && TEX_TILE_M[key];
+  var v = key && ownGet(TEX_TILE_M,key);
   return (typeof v === 'number' && v > 0) ? v : fallback;
 }
 // 法線マップを持つテクスチャ。塗り壁・板張りは凹凸(=傾き)で見えるので、
@@ -4104,11 +4104,12 @@ function roofSlopeUVsForMesh(mesh){
   mesh.userData=Object.assign({},mesh.userData,{roofSlopeUV:true});
 }
 function getTexture3D(key) {
-  if (!key) return null;
-  if (_texCache[key]) return _texCache[key];
+  // key はプランの文字(texture など)。文字でない値と、継承した鍵(constructor など)は引かない。
+  if (!key || typeof key !== 'string') return null;
+  if (ownGet(_texCache,key)) return _texCache[key];
   var src = null;
   if (key.startsWith('data:image')) { src = normalizeDataImageMime(key); }
-  else if (ASSET_TEX_MAP[key]) { src = ASSET_TEX_MAP[key]; }
+  else if (ownGet(ASSET_TEX_MAP,key)) { src = ownGet(ASSET_TEX_MAP,key); }
   if (src) {
     var tex = new THREE.TextureLoader().load(src, function(){
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -6448,6 +6449,10 @@ function build3D(){
   _roofBaseCache={};
   try{ build3DScene(); } finally { _roofBaseCache=null; }
 }
+function build3DOneSafely(fn,obj,label){
+  try{ fn(obj); }
+  catch(e){ console.warn('3Dに描けない'+label+'を飛ばしました: '+String(obj&&obj.id).slice(0,40)+' '+(e&&e.message)); }
+}
 function build3DScene(){
   var toRemove=[];
   sc3.children.forEach(function(c){if(c.userData.b) toRemove.push(c);});
@@ -6467,9 +6472,11 @@ function build3DScene(){
   });
   // Interior mode: show only current floor
   var flFilt = isInt ? ST.floor : null;
-  DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
+  // 壁・物は1つずつ作る。1つの物の作りで例外が出ても(プランの中身は他人が決められる)、
+  // その物だけ飛ばして残りを描く。以前は1つの例外で 3D が全部出なくなった。
+  DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){build3DOneSafely(buildWall3D,w,'壁');});
   buildRooms3D(flFilt);
-  DATA.items.filter(function(it){return (!flFilt||it.floor===flFilt) && shouldRenderItemInCurrent3DView(it);}).forEach(function(it){buildItem3D(it);});
+  DATA.items.filter(function(it){return (!flFilt||it.floor===flFilt) && shouldRenderItemInCurrent3DView(it);}).forEach(function(it){build3DOneSafely(buildItem3D,it,'物');});
   finalizeFmpInstancePools();
   buildWinFrames(flFilt);
   // 2枚の屋根の段差を塞ぐ外壁(屋根ごとに。内観は階ごとの表示なので出さない)。
@@ -6588,7 +6595,7 @@ function isLikelyHeavy3DRebuild(){
   var rooms=(DATA.rooms||[]).length;
   var items=(DATA.items||[]).length;
   var modelItems=0;
-  (DATA.items||[]).forEach(function(it){if(isFmpItemType(it.type)||GLTF_MAP[it.type]) modelItems++;});
+  (DATA.items||[]).forEach(function(it){if(isFmpItemType(it.type)||ownGet(GLTF_MAP,it.type)) modelItems++;});
   // 壁・部屋は複数面を生成し、GLB家具は複数サブメッシュを持つため重めに数える。
   return walls*2+rooms*3+items+modelItems*5>=90;
 }
@@ -7294,7 +7301,7 @@ function makeInteriorLightingMaterial(params){
   return new THREE.MeshStandardMaterial(matParams);
 }
 function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor,opts){
-  if(it && SITE_SURFACE_OPTIONS[it.texture] && mode!=='stretch') return makeGroundSurfaceMaterial(it.texture,surfaceW,surfaceH,it);
+  if(it && ownGet(SITE_SURFACE_OPTIONS,it.texture) && mode!=='stretch') return makeGroundSurfaceMaterial(it.texture,surfaceW,surfaceH,it);
   var tex=it&&it.texture?getTexture3D(it.texture):null;
   if(!tex) return null;
   opts=opts||{};
@@ -7899,7 +7906,7 @@ function applyLightingToScene(refreshSky){
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
         if(o.groundColor) o.groundColor.set(hemiGroundColorFor(preset,daytimeInterior));
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
-        var cfg=SITE_SURFACE_OPTIONS[o.userData.siteZoneSurface||siteSurfaceType(o.userData.siteRectRef)]||SITE_SURFACE_OPTIONS.grass;
+        var cfg=ownGet(SITE_SURFACE_OPTIONS,o.userData.siteZoneSurface||siteSurfaceType(o.userData.siteRectRef))||SITE_SURFACE_OPTIONS.grass;
         o.material.envMapIntensity=Math.min(cfg.env==null?0.05:cfg.env,LIGHT_SETTINGS.env);
         o.material.needsUpdate=true;
       }
@@ -8140,7 +8147,7 @@ function uploadRoofAppearanceTex(inp,scope,floor){
 function resolveRoofAppearance(it){
   var s=ensureRoofAppearance();
   var fl=it.floor||1;
-  var fs=normalizeTextureOrientationTarget(s.floors[fl]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false});
+  var fs=normalizeTextureOrientationTarget(ownGet(s.floors,fl)||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false});
   var owner=(s.whole && s.whole.linked)?s.whole:(fs.linked?fs:it);
   var ap=(owner===s.whole)
     ? appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole)
@@ -8169,8 +8176,8 @@ var ROOF_TEXTURE_SHEEN={
   mansion_slate_roof:'satin'
 };
 function roofSurfaceParams(ap){
-  var key=(ap&&ap.sheen)||(ap&&ap.texture&&ROOF_TEXTURE_SHEEN[ap.texture])||'matte';
-  return ROOF_SHEEN_PARAMS[key]||ROOF_SHEEN_PARAMS.matte;
+  var key=(ap&&ap.sheen)||(ap&&ap.texture&&ownGet(ROOF_TEXTURE_SHEEN,ap.texture))||'matte';
+  return ownGet(ROOF_SHEEN_PARAMS,key)||ROOF_SHEEN_PARAMS.matte;
 }
 
 function interiorFaceKey(w,face){
@@ -8180,9 +8187,10 @@ function interiorFaceKey(w,face){
 function getInteriorFaceSetting(w,face){
   var s=ensureInteriorWallSettings();
   var key=interiorFaceKey(w,face);
-  if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false};
-  normalizeTextureOrientationTarget(s.faces[key]);
-  return s.faces[key];
+  // 鍵はプランの壁の id から作る。__proto__ などでも自分の欄として作る(ownSlot)。
+  var slot=ownSlot(s.faces,key,function(){ return {mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false}; });
+  normalizeTextureOrientationTarget(slot);
+  return slot;
 }
 
 function findExistingWallFaceAppearance(w,face,field){
@@ -8202,7 +8210,7 @@ function findExistingWallFaceAppearance(w,face,field){
 function resolveInteriorFaceAppearance(w,face){
   var s=ensureInteriorWallSettings();
   var fl=w.floor||1;
-  var fs=s.floors[fl]||defaultInteriorFloorSetting();
+  var fs=ownGet(s.floors,fl)||defaultInteriorFloorSetting();
   var faceSetting=face?getInteriorFaceSetting(w,face):null;
   if(faceSetting && faceSetting.mode==='custom'){
     return appearanceWithTextureOrientation(faceSetting.color||INTERIOR_WALL_DEFAULT,faceSetting.texture||null,'face',faceSetting);
@@ -8233,7 +8241,7 @@ function resolveInteriorFaceAppearance(w,face){
 function resolveSkirtingForFace(w,face){
   var s=ensureInteriorWallSettings();
   var fs=face?getInteriorFaceSetting(w,face):null;
-  var fl=s.floors[w.floor||1]||null;
+  var fl=ownGet(s.floors,w.floor||1)||null;
   var on=(fs&&fs.skirting!==undefined)?fs.skirting!==false
        :(fl&&fl.skirting!==undefined)?fl.skirting!==false
        :(s.whole&&s.whole.skirting!==undefined)?s.whole.skirting!==false
@@ -8246,7 +8254,7 @@ function resolveSkirtingForFace(w,face){
 function resolveInteriorWallAppearance(w){
   var s=ensureInteriorWallSettings();
   var fl=w.floor||1;
-  var fs=s.floors[fl]||defaultInteriorFloorSetting();
+  var fs=ownGet(s.floors,fl)||defaultInteriorFloorSetting();
   if(s.whole && s.whole.linked) return appearanceWithTextureOrientation(s.whole.color||INTERIOR_WALL_DEFAULT,s.whole.texture||null,'whole',s.whole);
   if(fs.linked) return appearanceWithTextureOrientation(fs.color||INTERIOR_WALL_DEFAULT,fs.texture||null,'floor',fs);
   if(w.interiorColor||w.interiorTexture){
@@ -8309,21 +8317,21 @@ function exteriorFaceKey(w,face){
 function getExteriorFaceSetting(w,face){
   var s=ensureExteriorWallSettings();
   var key=exteriorFaceKey(w,face);
-  if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false};
-  normalizeTextureOrientationTarget(s.faces[key]);
-  return s.faces[key];
+  var slot=ownSlot(s.faces,key,function(){ return {mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false}; });
+  normalizeTextureOrientationTarget(slot);
+  return slot;
 }
 
 function resolveExteriorFaceAppearance(w,face){
   var s=ensureExteriorWallSettings();
   var fl=w.floor||1;
-  var fs=s.floors[fl]||defaultExteriorFloorSetting(fl);
+  var fs=ownGet(s.floors,fl)||defaultExteriorFloorSetting(fl);
   var faceSetting=face?getExteriorFaceSetting(w,face):null;
   if(faceSetting && faceSetting.mode==='custom'){
     return appearanceWithTextureOrientation(faceSetting.color||'#e8e0cc',faceSetting.texture||null,'face',faceSetting);
   }
   if(faceSetting && faceSetting.mode==='floor'){
-    return appearanceWithTextureOrientation(fs.color||WALL_COLORS[fl]||'#e8e0cc',fs.texture||null,'floor',fs);
+    return appearanceWithTextureOrientation(fs.color||ownGet(WALL_COLORS,fl)||'#e8e0cc',fs.texture||null,'floor',fs);
   }
   if(faceSetting && faceSetting.mode==='whole'){
     return appearanceWithTextureOrientation(s.whole.color||'#e8e0cc',s.whole.texture||null,'whole',s.whole);
@@ -8368,7 +8376,7 @@ function uploadInteriorTex(inp,scope,floor){
 }
 
 function defaultExteriorFloorSetting(floor){
-  return {linked:true,color:WALL_COLORS[floor]||'#e8e0cc',texture:null,textureFlipX:false,textureFlipY:false};
+  return {linked:true,color:ownGet(WALL_COLORS,floor)||'#e8e0cc',texture:null,textureFlipX:false,textureFlipY:false};
 }
 
 function ensureExteriorWallSettings(){
@@ -8407,7 +8415,9 @@ function wallSettingKey(w){
 function getExteriorWallSetting(w){
   var s=ensureExteriorWallSettings();
   var key=wallSettingKey(w);
-  if(!s.walls[key]) s.walls[key]={color:null,texture:null,textureFlipX:false,textureFlipY:false};
+  // 鍵は壁の id(プランの値)。'__proto__' のとき代入で作ると、設定の入れ物の継承元を
+  // 差し替えて全部の物に色が付く。自分の欄として作る。
+  ownSlot(s.walls,key,function(){ return {color:null,texture:null,textureFlipX:false,textureFlipY:false}; });
   normalizeTextureOrientationTarget(s.walls[key]);
   if(w.exteriorColor && !s.walls[key].color) s.walls[key].color=w.exteriorColor;
   if(w.exteriorTexture && !s.walls[key].texture) s.walls[key].texture=w.exteriorTexture;
@@ -8418,8 +8428,9 @@ function getExteriorWallSetting(w){
 
 function syncExteriorWallSettings(){
   var s=ensureExteriorWallSettings();
-  var alive={};
-  var aliveFaces={};
+  // 鍵は壁の id から作る。継承した鍵(constructor など)を「ある」と読まないよう、継承元の無い表にする。
+  var alive=Object.create(null);
+  var aliveFaces=Object.create(null);
   DATA.walls.forEach(function(w){
     alive[wallSettingKey(w)]=true;
     getWallExteriorSpans(w).forEach(function(face){
@@ -8466,18 +8477,18 @@ function exteriorWallLabel(w,idx){
 function resolveExteriorWallAppearance(w){
   var s=ensureExteriorWallSettings();
   var fl=w.floor||1;
-  var fs=s.floors[fl]||defaultExteriorFloorSetting(fl);
+  var fs=ownGet(s.floors,fl)||defaultExteriorFloorSetting(fl);
   var ws=getExteriorWallSetting(w);
   if(s.whole && s.whole.linked){
     return appearanceWithTextureOrientation(s.whole.color||'#e8e0cc',s.whole.texture||null,'whole',s.whole);
   }
   if(fs.linked){
-    return appearanceWithTextureOrientation(fs.color||WALL_COLORS[fl]||'#e8e0cc',fs.texture||null,'floor',fs);
+    return appearanceWithTextureOrientation(fs.color||ownGet(WALL_COLORS,fl)||'#e8e0cc',fs.texture||null,'floor',fs);
   }
   var wallTexture=ws.texture||w.exteriorTexture||fs.texture||null;
   var wallTextureOwner=ws.texture?ws:(w.exteriorTexture?w:fs);
   return {
-    color:ws.color||w.exteriorColor||fs.color||WALL_COLORS[fl]||'#e8e0cc',
+    color:ws.color||w.exteriorColor||fs.color||ownGet(WALL_COLORS,fl)||'#e8e0cc',
     texture:wallTexture,
     textureFlipX:!!(wallTexture && (wallTextureOwner===w?w.exteriorTextureFlipX:wallTextureOwner.textureFlipX)),
     textureFlipY:!!(wallTexture && (wallTextureOwner===w?w.exteriorTextureFlipY:wallTextureOwner.textureFlipY)),
@@ -8675,7 +8686,7 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(fs.linked?'checked':'')+' onchange="updateExteriorSetting(\'floor\',\'linked\',this.checked,'+fl+')" '+(s.whole.linked?'disabled':'')+'> '+fl+'F <span style="font-size:9px;color:#7a8fb0">('+escHtml(walls.length)+'枚)</span></label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!s.whole.linked&&fs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+safeHtmlColor(fs.color||WALL_COLORS[fl],'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
+    html += '<input type="color" value="'+safeHtmlColor(fs.color||ownGet(WALL_COLORS,fl),'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
     html += presetTextureSelectHtml('exterior',fs.texture,"updateExteriorSetting('floor','texture',VALUE,"+fl+")",s.whole.linked||!fs.linked);
@@ -9687,20 +9698,20 @@ function makeExteriorWallMaterial(w,fl,len,face){
     var st=getTexture3D('siding');
     if(st){
       var stc=cloneRepeatReadyTexture(st);
-      if(!stc) return finish(new THREE.MeshStandardMaterial({color:WALL_COLORS[1],roughness:0.85}));
+      if(!stc) return finish(new THREE.MeshStandardMaterial({color:ownGet(WALL_COLORS,1),roughness:0.85}));
       setTextureRepeatNoDistort(stc,len,wallFullHeightM(fl),0.45);
-      return finish(new THREE.MeshStandardMaterial({map:stc,color:WALL_COLORS[1],roughness:0.85}));
+      return finish(new THREE.MeshStandardMaterial({map:stc,color:ownGet(WALL_COLORS,1),roughness:0.85}));
     }
-    return finish(new THREE.MeshStandardMaterial({color:WALL_COLORS[1],roughness:0.85}));
+    return finish(new THREE.MeshStandardMaterial({color:ownGet(WALL_COLORS,1),roughness:0.85}));
   }
   var pt=getTexture3D('plaster');
   if(pt){
     var ptc=cloneRepeatReadyTexture(pt);
-    if(!ptc) return finish(new THREE.MeshStandardMaterial({color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82}));
+    if(!ptc) return finish(new THREE.MeshStandardMaterial({color:ownGet(WALL_COLORS,fl)||'#e8e0cc',roughness:0.82}));
     setTextureRepeatNoDistort(ptc,len,wallFullHeightM(fl),0.55);
-    return finish(new THREE.MeshStandardMaterial({map:ptc,color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82}));
+    return finish(new THREE.MeshStandardMaterial({map:ptc,color:ownGet(WALL_COLORS,fl)||'#e8e0cc',roughness:0.82}));
   }
-  return finish(new THREE.MeshStandardMaterial({color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82}));
+  return finish(new THREE.MeshStandardMaterial({color:ownGet(WALL_COLORS,fl)||'#e8e0cc',roughness:0.82}));
 }
 
 function makeInteriorWallMaterial(w,len,face){
@@ -13122,10 +13133,10 @@ function buildItem3D(it){
   }
 
   // GLTF Loader Integration
-  if(GLTF_MAP[it.type]) {
-    var modelUrl = GLTF_MAP[it.type];
+  if(ownGet(GLTF_MAP,it.type)) {
+    var modelUrl = ownGet(GLTF_MAP,it.type);
     if(ensureGltfModel(modelUrl)) {
-        var cfg=GLTF_MODEL_CONFIG[it.type]||{};
+        var cfg=ownGet(GLTF_MODEL_CONFIG,it.type)||{};
         var clone;
         if(cfg.nativeScale){
           clone = makeGltfNativeClone(modelUrl,it.colorCustom?it.color:null,cfg);
@@ -13268,7 +13279,7 @@ function buildItem3D(it){
   else if(isCustomBlockType(it.type)){
     var blockOpts={lighting:true,roughness:0.88,metalness:0.02,envMapIntensity:0.16};
     var blockMat=makeItemTextureMaterial(it,Math.max(w3,d3),h,'repeat',0xffffff,blockOpts) ||
-      new THREE.MeshStandardMaterial({color:it.color||ICOLORS[it.type]||0xc9d7ee,roughness:0.78,metalness:0.02});
+      new THREE.MeshStandardMaterial({color:it.color||ownGet(ICOLORS,it.type)||0xc9d7ee,roughness:0.78,metalness:0.02});
     // 上下面は側面用の1マテリアルを使い回すと、高さでUVを決めている都合で
     // 平たいブロック(デッキ・ポーチ・土間)の天端だけ柄が極端に伸びる。
     // 天端は w×d でUVを取り直した専用マテリアルにする
@@ -15492,7 +15503,7 @@ function queueFmpInstance(url,it,grp){
   // 選択時（個別メッシュ）には正常に戻るため、反転時は通常描画へフォールバックする。
   if(it.flipX || it.flipY) return false;
   // Configured models must match the selected clone (rotation/material overrides).
-  if(GLTF_MODEL_CONFIG[it.type]) return false;
+  if(ownGet(GLTF_MODEL_CONFIG,it.type)) return false;
   // 仕上げを指定したものはインスタンス化しない。**1つでも漏らすと、その
   // 指定は黙って無視される**(同じモデルが1つのインスタンスにまとめられ、
   // applyFinishes を通らないため)。finishTextures を足したときに実際に
@@ -15533,7 +15544,7 @@ function finalizeFmpInstancePools(){
   _fmpInstancePools={};
 }
 function applyGltfModelConfig(obj,type){
-  var cfg=GLTF_MODEL_CONFIG[type];
+  var cfg=ownGet(GLTF_MODEL_CONFIG,type);
   if(!cfg) return;
   if(cfg.rotY) obj.rotation.y+=cfg.rotY;
   if(cfg.removeTallSkinny) removeTallSkinnyMeshes(obj);
@@ -15553,7 +15564,7 @@ function applyGltfModelConfig(obj,type){
 }
 
 function getGltfTargetSize(type,w,d){
-  var cfg=GLTF_MODEL_CONFIG[type]||{};
+  var cfg=ownGet(GLTF_MODEL_CONFIG,type)||{};
   var depth=Math.max(d,cfg.minDepth||0);
   if(cfg.swapXZ) return {w:depth,d:w};
   return {w:w,d:depth};
@@ -15750,7 +15761,7 @@ function build3DFoundation(grp,it,w,d){
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.92,metalness:0.02});
   var capMat=makeItemTextureMaterial(it,w,d,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.14}) ||
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xc7c1b7,roughness:0.9,metalness:0.02});
-  var groundKey=SITE_SURFACE_OPTIONS[it.texture]?it.texture:null;
+  var groundKey=ownGet(SITE_SURFACE_OPTIONS,it.texture)?it.texture:null;
   if(groundKey){
     disposeMat(mat);disposeMat(capMat);
     function groundBox(width,height,depth,y){
@@ -15847,7 +15858,7 @@ function build3DRamp(grp,it,w,d){
   mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
 }
 function makeGroundSurfaceMaterial(key,w,d,it){
-  var cfg=SITE_SURFACE_OPTIONS[key];
+  var cfg=ownGet(SITE_SURFACE_OPTIONS,key);
   if(!cfg) return null;
   function map(k){
     var source=getTexture3D(k),tex=source&&cloneRepeatReadyTexture(source);
@@ -15876,7 +15887,7 @@ function siteFinishZones(it){
     return {name:String(z.name||'外構仕上げ'),x:x,y:y,
       w:Math.max(0,Math.min(Number(z.w)||0,it.w-x)),
       d:Math.max(0,Math.min(Number(z.d)||0,it.d-y)),
-      surface:SITE_SURFACE_OPTIONS[z.surface]?z.surface:'grass'};
+      surface:ownGet(SITE_SURFACE_OPTIONS,z.surface)?z.surface:'grass'};
   }).filter(function(z){return z.w>0&&z.d>0;});
 }
 function updateSiteZone(index,key,value){
@@ -15891,7 +15902,7 @@ function makeSiteSurfaceMaterial(it,w,d){
 }
 
 function build3DSiteRect(grp,it,w,d){
-  var cfg=SITE_SURFACE_OPTIONS[siteSurfaceType(it)]||SITE_SURFACE_OPTIONS.grass;
+  var cfg=ownGet(SITE_SURFACE_OPTIONS,siteSurfaceType(it))||SITE_SURFACE_OPTIONS.grass;
   var mat=makeSiteSurfaceMaterial(it,w,d);
   var plane=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat);
   plane.rotation.x=-Math.PI/2;
@@ -16164,8 +16175,8 @@ var FLOOR_PBR_STEM = {
 //   r.texture       … アップロードした画像。床材より優先する
 // 古いプランは床材のキーを r.texture に書いていたので、そちらも床材として読む。
 function roomFloorMaterialKey(r){
-  if(r&&FLOOR_PBR_STEM[r.texture]) return r.texture;
-  if(r&&FLOOR_PBR_STEM[r.floorMaterial]) return r.floorMaterial;
+  if(r&&ownGet(FLOOR_PBR_STEM,r.texture)) return r.texture;
+  if(r&&ownGet(FLOOR_PBR_STEM,r.floorMaterial)) return r.floorMaterial;
   return null;
 }
 // 階段の踏板・踊り場の床材(利用者の指示: 階段は床と同じ仕上げにそろえることが多い)。
@@ -16184,7 +16195,7 @@ function stairTreadFloorMaterial(it,wM,dM){
     if(!room) return null;
     src={n:room.n,texture:room.texture,textureFlipX:room.textureFlipX,textureFlipY:room.textureFlipY,
       floorMaterial:room.floorMaterial,floorColor:room.floorColor};
-  } else if(FLOOR_PBR_STEM[mode]){
+  } else if(ownGet(FLOOR_PBR_STEM,mode)){
     src={floorMaterial:mode};
   } else return null;
   src.w=Math.max(1,wM/U); src.d=Math.max(1,dM/U);
@@ -16197,7 +16208,7 @@ function makeRoomFloorMaterial(r){
   // 床材はキーからPBRの3枚組を引く。真偽値で分けると、床材を足すたびに
   // 「diffuse だけ新しくて法線と粗さは旧のまま」になる
   var floorKey=roomFloorMaterialKey(r)||(isWet?'tile_floor':'wood_floor');
-  var stem=FLOOR_PBR_STEM[floorKey];
+  var stem=ownGet(FLOOR_PBR_STEM,floorKey);
   var diffName=stem+'_diffuse.jpg';
   var normName=stem+'_normal.jpg';
   var roughName=stem+'_roughness.jpg';
@@ -16208,7 +16219,7 @@ function makeRoomFloorMaterial(r){
   var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
   // マット塗装でも空は映る。0.06 では床が紙に見える
   var matParams={color:tint,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.85,0.85),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.20};
-  if(r.texture&&!FLOOR_PBR_STEM[r.texture]){
+  if(r.texture&&!ownGet(FLOOR_PBR_STEM,r.texture)){
     var tex=cloneRepeatReadyTexture(getTexture3D(r.texture));
     if(tex){
       setTextureRepeatNoDistort(tex,rw,rd,texTileM(r.texture,0.9)); applyTextureFlip(tex,r);
@@ -17437,7 +17448,7 @@ function walkSpawnObstructed(xMm,zMm,fl){
     if(!it || (it.floor||1)!==fl) return false;
     if(isPlanAnnotationType(it.type)) return false;
     if(isLightItemType(it.type)) return false;
-    if(WALK_SPAWN_FLOORLIKE_TYPES[it.type]) return false;
+    if(ownGet(WALK_SPAWN_FLOORLIKE_TYPES,it.type)) return false;
     if(isPlacementSurfaceItem(it)) return false;
     var swing=isSwingDoorType(it.type);
     if(isOpeningItemType(it.type) && !swing) return false;
@@ -17510,7 +17521,7 @@ function walkSpawnObstructed(xMm,zMm,fl){
     if(!it || (it.floor||1)!==fl) return false;
     if(isPlanAnnotationType(it.type)) return false;
     if(isLightItemType(it.type)) return false;
-    if(WALK_SPAWN_FLOORLIKE_TYPES[it.type]) return false;
+    if(ownGet(WALK_SPAWN_FLOORLIKE_TYPES,it.type)) return false;
     if(isPlacementSurfaceItem(it)) return false;
     var swing=isSwingDoorType(it.type);
     if(isOpeningItemType(it.type) && !swing) return false;
@@ -18423,7 +18434,7 @@ function applyOpeningPresetToItem(it,preset){
     it.type=preset.baseType;
     var sz=getItemDefaultSize(it.type);
     it.w=sz.w; it.d=sz.d;
-    it.color=ICOLORS[it.type]||it.color||'#ddd';
+    it.color=ownGet(ICOLORS,it.type)||it.color||'#ddd';
     if(isWindowLikeType(it.type)){
       it.windowSill=it.type==='window-door'?0:(it.windowSill===undefined?900:it.windowSill);
       it.windowHeight=it.type==='window-door'?2100:(it.windowHeight===undefined?1200:it.windowHeight);
@@ -20687,7 +20698,7 @@ function aiSegmentationLegend(){
     '#ffffff':'sky/background'
   };
   Object.keys(SITE_SURFACE_OPTIONS).forEach(function(key){
-    var opt=SITE_SURFACE_OPTIONS[key];
+    var opt=ownGet(SITE_SURFACE_OPTIONS,key);
     legend[aiSegHex(opt.segment)]='site surface: '+key+' ('+opt.label+'), only inside site rectangles';
   });
   legend['#e2ded2']='neutral outside-site context ground, not lawn';
@@ -22794,7 +22805,7 @@ function snapCeilingFixturesToCeiling(){
   var moved=0;
   DATA.items.forEach(function(it){
     if(!it) return;
-    var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+    var topOff=ownGet(CEILING_FIXTURE_TOP_MM,it.type);
     if(topOff===undefined) return;
     var fl=it.floor||1;
     var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
@@ -22823,7 +22834,7 @@ function snapOutdoorCeilingFixturesToRoof(){
   var moved=0;
   DATA.items.forEach(function(it){
     if(!it) return;
-    var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+    var topOff=ownGet(CEILING_FIXTURE_TOP_MM,it.type);
     if(topOff===undefined) return;
     var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
     if(roomAtPointOnFloor(it.floor||1,cx,cy)) return;   // 屋内は上の移行の領分
@@ -22850,7 +22861,7 @@ function snapOutdoorCeilingFixturesToRoof(){
 var LIGHT_ATTACH_TOLERANCE_MM=300;
 function snapCeilingLightToAttachSurface(it){
   if(!it||!isLightItemType(it.type)) return false;
-  var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+  var topOff=ownGet(CEILING_FIXTURE_TOP_MM,it.type);
   if(topOff===undefined) return false;
   var want=ceilingAttachElevationMm(it);
   if(want===null||!isFinite(want)) return false;
@@ -22894,7 +22905,7 @@ function normalizeLegacyFurnitureItems(){
       it.y=doorCy-it.d/2;
       it.doorHeight=Math.max(300,Math.min(3200,fmpCurrent.h||2000));
       it.doorOpenState=it.doorOpenState||'open';
-      it.color=ICOLORS[it.type]||'#f8e8c0';
+      it.color=ownGet(ICOLORS,it.type)||'#f8e8c0';
       it.colorCustom=false;
       delete it.fmpId;
       delete it.elev;
@@ -22913,7 +22924,7 @@ function normalizeLegacyFurnitureItems(){
       // ここでは窓がどの部屋に属するかも決まらないので置き換えない。
       it.windowHeight=Math.max(200,Math.min(WALL_H,fmpCurrent.h||1200));
       it.windowSill=Math.max(0,Math.min(it.windowSill||900,Math.max(0,WALL_H-it.windowHeight)));
-      it.color=ICOLORS[it.type]||'#c0e4f8';
+      it.color=ownGet(ICOLORS,it.type)||'#c0e4f8';
       it.colorCustom=false;
       delete it.fmpId;
       delete it.elev;

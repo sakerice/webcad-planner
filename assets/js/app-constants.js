@@ -1331,7 +1331,7 @@ function selectedRoomFloorHtml(r){
 }
 var CONTEXT_EXTERIOR_TYPES = {'neighbor-building':1,'neighbor-house':1,road:1,'utility-pole':1};
 function isContextExteriorItemType(type){
-  return !!CONTEXT_EXTERIOR_TYPES[type];
+  return !!ownGet(CONTEXT_EXTERIOR_TYPES,type);
 }
 function shouldRenderItemInCurrent3DView(it){
   if(!it) return false;
@@ -2714,7 +2714,7 @@ function roofGapInfillAppearance(H){
     return {color:s.whole.color||'#e8e0cc',texture:s.whole.texture||null,
       textureFlipX:!!s.whole.textureFlipX,textureFlipY:!!s.whole.textureFlipY,source:'wall'};
   var fs=(s&&s.floors&&s.floors[fl])||(typeof defaultExteriorFloorSetting==='function'?defaultExteriorFloorSetting(fl):{});
-  return {color:fs.color||(typeof WALL_COLORS!=='undefined'&&WALL_COLORS[fl])||'#e8e0cc',texture:fs.texture||null,
+  return {color:fs.color||(typeof WALL_COLORS!=='undefined'&&ownGet(WALL_COLORS,fl))||'#e8e0cc',texture:fs.texture||null,
     textureFlipX:!!fs.textureFlipX,textureFlipY:!!fs.textureFlipY,source:'wall'};
 }
 // 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
@@ -3000,9 +3000,9 @@ var GLTF_MODEL_CONFIG = {
 };
 var EXTERIOR_MODEL_IDS={'ac-outdoor':'original-ac-unit','water-heater':'original-tank','gas-heater':'original-gas-unit','meter-box':'original-meter','sewer-pit':'original-drain-cover'};
 var EXTERIOR_MODEL_URLS={};Object.keys(EXTERIOR_MODEL_IDS).forEach(function(type){EXTERIOR_MODEL_URLS[type]='assets/models/original/'+EXTERIOR_MODEL_IDS[type]+'.glb';});
-function getItemFinishModel(type){return getFmpItem(type)||getFmpItem(EXTERIOR_MODEL_IDS[type]);}
+function getItemFinishModel(type){return getFmpItem(type)||getFmpItem(ownGet(EXTERIOR_MODEL_IDS,type));}
 function buildDetailedExterior(grp,it,w,d,h){
-  var url=EXTERIOR_MODEL_URLS[it.type];
+  var url=ownGet(EXTERIOR_MODEL_URLS,it.type);
   if(!url || !ensureGltfModel(url)) return false;
   var clone=makeGltfBoxFitClone(url,w,h,d,it.colorCustom?it.color:null);
   ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness,it.finishTextures,typeof FINISH_TEXTURE_DEPS==='object'?FINISH_TEXTURE_DEPS:null);grp.add(clone);return true;
@@ -3058,14 +3058,14 @@ var LEGACY_FMP_TYPE_MAP = {
   closet:'fmp-Closet01',
   shoe_cabinet:'fmp-Drawer01'
 };
-function isFmpItemType(type){ return !!(type && FMP_ITEMS[type]); }
-function getFmpItem(type){ return FMP_ITEMS[type]||null; }
-function bestFmpType(type){ return LEGACY_FMP_TYPE_MAP[type]||type; }
+function isFmpItemType(type){ return !!(type && ownGet(FMP_ITEMS,type)); }
+function getFmpItem(type){ return ownGet(FMP_ITEMS,type)||null; }
+function bestFmpType(type){ return ownGet(LEGACY_FMP_TYPE_MAP,type)||type; }
 function getItemDefaultSize(type){
   type=bestFmpType(type);
   var fmp=getFmpItem(type);
   if(fmp) return {w:fmp.w||900,d:fmp.d||900,h:fmp.h||600};
-  return ISIZES[type]||{w:900,d:900};
+  return ownGet(ISIZES,type)||{w:900,d:900};
 }
 function hasCustomPlanSize(it){
   if(!it || it.w===undefined || it.d===undefined) return false;
@@ -3097,6 +3097,24 @@ function htmlNum(v,fallback){
   var n=(typeof v==='number')?v:((typeof v==='string'&&v.trim()!=='')?Number(v):NaN);
   if(isFinite(n)) return String(n);
   return fallback===undefined?'':String(fallback);
+}
+// 表(種類名→モデル・色・大きさ など)をプラン由来の鍵で引く。継承した鍵(constructor・
+// __proto__・toString …)に当たらないよう、自分の鍵だけを見る。無ければ undefined。
+// `表[it.type]` と書くと、種類名が constructor の物が1つあるだけで 3D が全部出なくなった
+// (自動保存に残り、起動のたびに壊れたままになった)。
+function ownGet(table,key){
+  if(!table||key===null||key===undefined) return undefined;
+  var k;
+  try{ k=String(key); }catch(e){ return undefined; }
+  return Object.prototype.hasOwnProperty.call(table,k)?table[k]:undefined;
+}
+// 鍵ごとの入れ物(壁ごと・面ごとの設定)を取り出し、無ければ作る。鍵が __proto__ でも
+// 自分の欄として作る(代入で作ると、入れ物の継承元を差し替え、全部の物に色が付く)。
+function ownSlot(table,key,make){
+  var k=String(key);
+  if(!Object.prototype.hasOwnProperty.call(table,k)||!table[k])
+    Object.defineProperty(table,k,{value:make(),writable:true,enumerable:true,configurable:true});
+  return table[k];
 }
 // 画面の data-… 属性から、プランの物を引き直す(onclick に id を書かないため)。
 // 一番近い祖先の data-wall-id を見る。id の型(数か文字か)はプランの物のまま返す。
@@ -3560,7 +3578,7 @@ function getFmpTopRotationRad(item){
   if(item && item.topRot!==undefined && isFinite(+item.topRot)){
     rot+=Number(item.topRot)*Math.PI/180;
   }
-  var cfg=item ? GLTF_MODEL_CONFIG[item.id] : null;
+  var cfg=item ? ownGet(GLTF_MODEL_CONFIG,item.id) : null;
   if(cfg){
     if(cfg.planRot!==undefined) rot+=cfg.planRot;
     else if(cfg.rotY!==undefined) rot-=cfg.rotY;
@@ -3639,7 +3657,7 @@ function pbrTexLinear(name) {
 // id ではなく名前で語る。FMP のモデル名が最優先で、無ければ日本語ラベル。
 function itemTypeLabel(type){
   var fmp=getFmpItem(type);
-  return (fmp&&fmp.name)||ILABELS[type]||type||'要素';
+  return (fmp&&fmp.name)||ownGet(ILABELS,type)||type||'要素';
 }
 var ILABELS = {
   kitchen:'キッチン',bath:'バス',toilet:'トイレ',sink:'洗面',fridge:'冷蔵庫',washer:'洗濯機',
