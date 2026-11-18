@@ -206,3 +206,16 @@ test('要約: 種類名が constructor・__proto__ の物があっても例外�
   assert.ok(s.startsWith('<plan_summary>\n') && s.endsWith('\n</plan_summary>'));
   for (const t of ['constructor', '__proto__', 'toString']) assert.ok(s.includes('id=odd-' + t + '-1 ' + t + ' 1階'), t);
 });
+
+test('取付の高さの分類(レンジフード)は、調理台の上に置いても断らず、読み取りと同じ高さ', async () => {
+  const { workerApply } = await load();
+  const FreeApply = require('../../assets/js/plan-free-apply.js');
+  const p = plan();
+  const counter = p.items.find((it) => it.type === 'fmp-CabinetD01');
+  const r = workerApply(p, [{ op: 'placeItem', args: { type: 'range-hood', x: counter.x + counter.w / 2, y: counter.y + counter.d / 2 } }]);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.plan.items[r.plan.items.length - 1].elev, FreeApply.MOUNT_ELEV_MM['range-hood']);
+  // 同じ所に普通の小物を置くのは断る(台の上の高さは画面でしか決められない)
+  const d = workerApply(p, [{ op: 'placeItem', args: { type: 'decor', x: counter.x + counter.w / 2, y: counter.y + counter.d / 2 } }]);
+  assert.equal(d.errors.length, 1);
+});

@@ -328,6 +328,11 @@ export function createPlanCtxTools(deps) {
     });
     return hit ? 'surface' : null;
   }
+  // 読み取りと同じ取付の高さ(PlanFreeApply.MOUNT_ELEV_MM。分類は tags.json の kind)。表に無ければ undefined。
+  function mountElevOf(t) {
+    var tag = has(TAG_ITEMS, t) ? TAG_ITEMS[t] : null;
+    return tag && has(MOUNT, tag.kind) ? MOUNT[tag.kind] : undefined;
+  }
   // 置いたあとの高さ・位置で、画面と同じに決められない物か(断る理由の鍵、無ければ null)。
   function placeProblem(p, t, floor, cx, cy, indoor) {
     if (isCeilingFixtureType(t)) {
@@ -339,6 +344,8 @@ export function createPlanCtxTools(deps) {
       if (lr) { var why = lightCeilingProblem(p, lr); if (why) return why; }
       return null;
     }
+    // 取付の高さの表にある分類(レンジフードなど)は台に載せず表の高さにする(planChatCtx の afterPlace)ので、台を見ない。
+    if (mountElevOf(t) !== undefined) return null;
     return surfaceProblem(p, t, floor, cx, cy, indoor);
   }
   // placeIndoorAt(index.html): 地面に置く印(gl)のモデルを、部屋の中に置くか。
@@ -576,20 +583,21 @@ export function createPlanCtxTools(deps) {
         // placeAfterSnap(index.html)と、planChatCtx の取付の高さ。
         afterPlace: function (it, p) {
           var work = p || cur;
-          var before = it ? it.elev : undefined;
           var cx = it.x + it.w / 2, cy = it.y + it.d / 2;
           // 階段の部材は吸着で中心が動くので、動いたあとの位置で断る理由を見直す。
           var why = placeProblem(work, it.type, it.floor || 1, cx, cy, !!it.indoor);
           if (why) throw RefusalError(why);
-          // applyDefaultPlacementElevation: 照明は天井から。ほかは台の上(断っているので、ここでは変えない)。
+          // placeAfterSnap(index.html)→ applyDefaultPlacementElevation: 照明は天井から
+          // (defaultLightElevationMm)。ほかは台の上(findDefaultPlacementSurface。台の上は断っているので、ここでは変えない)。
           if (isLightType(it.type)) it.elev = defaultLightElevationMm(work, it.floor, cx, cy);
+          // placeAfterSnap の柱の段差(roomSkipCavityMm)。
           if (isColumnType(it.type)) {
             var cavity = roomSkipCavityMm(work, roomAtPointOnFloor(work, it.floor, cx, cy));
             if (cavity > 0) { it.baseLevel = 'under'; it.columnHeight = cavity; }
           }
-          if (it.elev !== before || (before !== undefined && before !== 0)) return;
-          var tag = has(TAG_ITEMS, it.type) ? TAG_ITEMS[it.type] : null;
-          if (tag && has(MOUNT, tag.kind)) it.elev = MOUNT[tag.kind];
+          // planChatCtx の afterPlace: 取付の高さの表にある分類は、台があっても表の高さ。
+          var mount = mountElevOf(it.type);
+          if (mount !== undefined) it.elev = mount;
         },
         windowSill: function (it) { return windowSillMm(cur, it); },
         normalizeWindow: function (it) { normalizeWindowVerticalProps(cur, it); },

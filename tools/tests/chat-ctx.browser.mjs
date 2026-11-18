@@ -120,6 +120,28 @@ try {
         const got = imp.items.find((x) => x.type === (it && it.type));
         return { kind, type: it && it.type, elev: it && it.elev, importElev: got && got.extra ? got.extra.elev : undefined, table: PlanFreeApply.MOUNT_ELEV_MM[kind] };
       });
+      // 台になる物(調理台・机・棚など)の矩形の中に置いても、台に載せずに表の高さにする(読み取りと同じ)
+      const surfaces = [];
+      const seenSurface = {};
+      DATA.items.forEach((s) => {
+        if (!s || s.type === 'foundation' || !isPlacementSurfaceItem(s)) return;
+        const cat = (getFmpItem(s.type) || {}).category || s.type;
+        if (seenSurface[cat]) return;
+        seenSurface[cat] = 1;
+        surfaces.push(s);
+      });
+      res.mountOnSurface = [];
+      surfaces.forEach((s) => {
+        const sx = s.x + s.w / 2, sy = s.y + s.d / 2, floor = s.floor || 1;
+        Object.keys(PlanFreeApply.MOUNT_ELEV_MM).forEach((kind) => {
+          const r = PlanCoreOperations.applyOperations(DATA, [{ op: 'placeItem', args: { type: kind, x: sx, y: sy, floor } }], planChatCtx());
+          const it = r.errors.length ? null : r.plan.items[r.plan.items.length - 1];
+          // 比べのため、同じ所に普通の小物(台に載る物)を置いて、そこが本当に台の上であることを確かめる
+          const ref = PlanCoreOperations.applyOperations(DATA, [{ op: 'placeItem', args: { type: 'decor', x: sx, y: sy, floor } }], planChatCtx());
+          const refIt = ref.errors.length ? null : ref.plan.items[ref.plan.items.length - 1];
+          res.mountOnSurface.push({ kind, surface: s.type, errors: r.errors.map((e) => e.message), elev: it && it.elev, table: PlanFreeApply.MOUNT_ELEV_MM[kind], decorElev: refIt && refIt.elev });
+        });
+      });
       // 途中で投げても戻る
       const ctx = planChatCtx();
       ctx.hooks.afterPlace = () => { throw new Error('わざと'); };
@@ -170,7 +192,7 @@ try {
   console.log(JSON.stringify({
     placed: out.placed.map((p) => p.kind + '→' + p.type),
     refused: out.refused, skipped: out.skipped, indoor: out.indoor, groundKind: out.groundKind, loading: out.loading, loadingDefault: out.loadingDefault,
-    summaryLength: out.summaryLength, summaryBytes: out.summaryBytes, roomIds: out.roomIds, snap: out.snap, mount: out.mount,
+    summaryLength: out.summaryLength, summaryBytes: out.summaryBytes, roomIds: out.roomIds, snap: out.snap, mount: out.mount, mountOnSurface: out.mountOnSurface,
   }, null, 1));
   if (process.env.CHAT_CTX_DUMP) {
     console.log(out.summaryHead.join('\n'));
@@ -214,6 +236,12 @@ try {
   for (const m of out.mount) {
     assert.equal(m.elev, m.table, m.kind + ' の高さ');
     assert.equal(m.elev, m.importElev, m.kind + ' が読み取りと同じ高さ');
+  }
+  assert.ok(out.mountOnSurface.length >= 3, '台の上に置く場面が少ない: ' + out.mountOnSurface.length);
+  for (const m of out.mountOnSurface) {
+    assert.deepEqual(m.errors, [], m.kind + ' を ' + m.surface + ' の上に置けない');
+    assert.ok(m.decorElev > 0, m.surface + ' の上が台になっていない(小物が載らない)');
+    assert.equal(m.elev, m.table, m.kind + ' を ' + m.surface + ' の上に置いても表の高さ');
   }
   assert.equal(out.roomIds.length, 2);
   assert.notEqual(out.roomIds[0], out.roomIds[1]);
