@@ -824,6 +824,84 @@ test('角度を 0〜360 にそろえるのは写しのときだけ', () => {
   assert.equal(itemById(plan, 10).rot, -30);
 });
 
+// ── ctx.withPlan(写しに当てる間だけ、画面のグローバルを写しへ差し替える入口)──────
+
+// 画面の planChatCtx と同じ作り: 「今のプラン」を差し替え、finally で必ず戻す。
+function withPlanCtx(state, over) {
+  return makeCtx(Object.assign({
+    withPlan: (work, fn) => {
+      state.calls.push(work);
+      const saved = state.current;
+      state.current = work;
+      try { return fn(); } finally { state.current = saved; }
+    },
+  }, over || {}));
+}
+
+test('withPlan: 写しを渡し、hooks は差し替えた先(写し)を見る。終わると元に戻る', () => {
+  const plan = basePlan();
+  const state = { current: plan, calls: [], seen: [] };
+  const ctx = withPlanCtx(state, {
+    hooks: { afterPlace: (it, p) => { state.seen.push({ current: state.current, p }); } },
+  });
+  const r = run(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0 } }], ctx);
+  assert.deepEqual(r.errors, []);
+  assert.equal(state.calls.length, 1);
+  assert.notEqual(state.calls[0], plan);
+  assert.equal(state.calls[0], r.plan);
+  assert.equal(state.seen[0].current, r.plan);
+  assert.equal(state.seen[0].p, r.plan);
+  assert.equal(state.current, plan);
+  assert.equal(plan.items.length, basePlan().items.length);
+});
+
+test('withPlan: 操作の途中で投げても元に戻り、errors になる(プランは変わらない)', () => {
+  const plan = basePlan();
+  const before = JSON.stringify(plan);
+  const state = { current: plan, calls: [] };
+  const ctx = withPlanCtx(state, { hooks: { afterPlace: () => { throw new Error('boom'); } } });
+  const r = run(plan, [{ op: 'placeItem', args: { type: 'sofa', x: 0, y: 0 } }], ctx);
+  assert.equal(r.errors.length, 1);
+  assert.match(r.errors[0].message, /boom/);
+  assert.equal(r.plan, plan);
+  assert.equal(state.current, plan);
+  assert.equal(JSON.stringify(plan), before);
+});
+
+test('withPlan: 失敗した操作でも元に戻る。inPlace では呼ばない', () => {
+  const plan = basePlan();
+  const state = { current: plan, calls: [] };
+  const r = run(plan, [{ op: 'moveObject', args: { id: 999, dx: 1, dy: 1 } }], withPlanCtx(state));
+  assert.equal(r.errors.length, 1);
+  assert.equal(state.current, plan);
+  const state2 = { current: plan, calls: [] };
+  run(plan, [{ op: 'moveObject', args: { id: 10, dx: 10, dy: 0 } }], withPlanCtx(state2, { inPlace: true }));
+  assert.equal(state2.calls.length, 0);
+});
+
+test('clonePlan: 素のオブジェクトだけを写し、同じ物を2か所から指す形を保つ', () => {
+  const shared = { id: 1 };
+  const tex = new (class Tex {})();
+  const plan = { walls: [shared], items: [{ id: 2, _wallRef: shared, _texObj: tex }] };
+  const c = O.clonePlan(plan);
+  assert.notEqual(c, plan);
+  assert.notEqual(c.walls[0], shared);
+  assert.equal(c.items[0]._wallRef, c.walls[0]);
+  assert.equal(c.items[0]._texObj, tex);
+});
+
+test('placeItem: 置けない種類で catalog.unknownMessage があれば、その文と候補を返す', () => {
+  const ctx = makeCtx();
+  ctx.catalog = Object.assign({}, ctx.catalog, {
+    known: (t) => t !== 'kitchen-unit',
+    unknownMessage: (t) => (t === 'kitchen-unit' ? 'この種類は置けません' : null),
+    suggest: () => ['kitchen-sink'],
+  });
+  const r = run(basePlan(), [{ op: 'placeItem', args: { type: 'kitchen-unit', x: 0, y: 0 } }], ctx);
+  assert.equal(r.errors[0].message, 'この種類は置けません');
+  assert.deepEqual(r.errors[0].candidates, ['kitchen-sink']);
+});
+
 // ── グローバル ─────────────────────────────────────────────────────
 
 test('plan-core はグローバルに触らない', () => {

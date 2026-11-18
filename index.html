@@ -3154,6 +3154,7 @@ input[type="reset"]:focus-visible{
 .airx-dialog .airx-check{display:flex;align-items:center;gap:6px;margin-top:8px}
 </style>
 <link rel="stylesheet" href="assets/ui-refinement.css">
+<link rel="stylesheet" href="assets/chat.css">
 <link rel="stylesheet" href="assets/ceiling-designer.css">
 </head>
 <body>
@@ -3802,6 +3803,32 @@ input[type="reset"]:focus-visible{
   </button>
 </div>
 
+<!-- チャット欄（AIに頼む）。動きは assets/js/chat/chat-ui.js、見た目は assets/chat.css。
+     文字の大きさは .airx-dialog の4段階に乗せる（ここで font-size を足さないこと）。 -->
+<button id="chat-fab" type="button" aria-label="AIに頼む" aria-controls="chat-panel" aria-expanded="false" onclick="openChat()">
+  <svg class="chat-fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H9l-5 4Z"/><path d="M9 9.5h6M9 12.5h4"/></svg>
+  <span class="chat-fab-label">AIに頼む</span>
+</button>
+<div id="chat-busy-cover" hidden><div class="chat-busy-note" role="status">AIが作業しています</div></div>
+<div id="chat-panel" class="unity-render-card airx-dialog" role="dialog" aria-labelledby="chat-title" hidden>
+  <div class="unity-render-head">
+    <div class="unity-render-title" id="chat-title">AIに頼む</div>
+    <button class="unity-render-close" type="button" aria-label="閉じる" onclick="closeChat()">×</button>
+  </div>
+  <div id="chat-log" class="chat-log"></div>
+  <div id="chat-announce" class="chat-sr-only" aria-live="polite"></div>
+  <div id="chat-progress" class="chat-progress" role="status" hidden></div>
+  <textarea id="chat-input" class="chat-input" rows="2" placeholder="例：寝室にベッドを置いて" aria-label="AIに頼むこと"></textarea>
+  <div class="chat-actions">
+    <button id="chat-attach" class="pbtn sec chat-attach" type="button" aria-label="図面の画像を付ける"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v14H4ZM4 15l5-5 4 4 2-2 5 5"/><circle cx="15.5" cy="9" r="1.4"/></svg>図面の画像</button>
+    <input id="chat-file" class="chat-file-input" type="file" accept="application/pdf,image/*" tabindex="-1" aria-hidden="true">
+    <span class="chat-actions-gap"></span>
+    <button id="chat-stop" class="pbtn sec chat-stop" type="button" hidden>やめる</button>
+    <button id="chat-send" class="pbtn chat-send" type="button">送る</button>
+  </div>
+  <div id="chat-remaining" class="chat-remaining" hidden></div>
+</div>
+
 <!-- index.html のインライン script から切り出したもの。
      本体より先に、かつ #c2d などの要素より後に読む必要がある
      (トップレベルで document.getElementById を呼ぶ行があるため)。 -->
@@ -3830,6 +3857,12 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/plan-free-apply.js"></script>
 <script src="assets/js/plan-snapshot.js"></script>
 <script src="assets/js/plan-import.js"></script>
+<!-- チャット(AI で間取りを直す)の部品。画面を持たない。チャット欄が使う -->
+<script src="assets/js/chat/claude-stream.js"></script>
+<script src="assets/js/chat/plan-summary.js"></script>
+<script src="assets/js/chat/chat-session.js"></script>
+<!-- チャット欄の画面。開くまで ChatSession を作らない -->
+<script src="assets/js/chat/chat-ui.js"></script>
 <script>
 // ───── 3D ENGINE ─────
 var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;

@@ -95,23 +95,82 @@ export async function startStream({
   const body = buildRequest({ config, system, text, docs, image, images, maxOutputTokens });
   body.stream = true;
   body.thinking = { type: "adaptive", display: "summarized" };
+  return sendStream(config, JSON.stringify(body), fetchImpl);
+}
+
+function requestHeaders(config) {
+  return {
+    "x-api-key": config.apiKey,
+    "anthropic-version": API_VERSION,
+    "anthropic-beta": FALLBACK_BETA,
+    "content-type": "application/json",
+  };
+}
+
+// 投げて、返事の本文（SSE）を読まずに返す。失敗のときだけ本文を読む（キーは混ぜない）。
+async function sendStream(config, bodyText, fetchImpl) {
   let response;
   try {
     response = await fetchImpl(new Request(ENDPOINT, {
       method: "POST",
-      headers: {
-        "x-api-key": config.apiKey,
-        "anthropic-version": API_VERSION,
-        "anthropic-beta": FALLBACK_BETA,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(body),
+      headers: requestHeaders(config),
+      body: bodyText,
     }));
   } catch (e) {
     return { ok: false, status: 502, message: "Anthropic へ届きませんでした: " + (e && e.message ? e.message : e) };
   }
   if (!response.ok) return { ok: false, status: response.status, message: safeReason(await response.text()) };
   return { ok: true, body: response.body };
+}
+
+// ── 会話と道具を付けて呼ぶ（チャット、worker/chat.mjs） ──────────────────
+//
+// buildRequest は user のメッセージ1件しか作れず、道具も受けない。チャットは画面が持ち回る会話
+// （messages）をそのまま送り、道具（間取りの操作）を付ける。
+//
+// 決まり（claude-opus-5-5）: thinking は adaptive のみ（budget_tokens は 400）、tool_choice は
+// 指定しない（any・tool は 400。既定の auto）、temperature などは送らない。
+// 本文の欄の並びは毎回同じにする（system と tools を1バイトも変えない。プロンプトキャッシュのため）。
+//
+// キャッシュの印は2つ。system の最後のブロックに付ける印（道具と system までを使い回す）と、
+// 本文の最上位の cache_control（自動のキャッシュ。会話の伸びる末尾に印を自動で置き直す）。
+// 最上位の cache_control は Claude API で anthropic-version 2023-06-01 のまま、ベータのヘッダ無しで
+// 使える（Anthropic の文書の prompt caching の "Automatic vs explicit breakpoints" と、
+// 提供範囲の表 "Automatic prompt caching: Claude API Yes"。2026-11-17 に確かめた）。
+// 印は1回に4つまでなので、messages に cache_control を入れない（worker/chat.mjs が断る）。
+export function buildConversationRequest({ config, system, tools, messages, maxOutputTokens = 8000 }) {
+  const body = {
+    model: config.model,
+    max_tokens: maxOutputTokens,
+    stream: true,
+    thinking: { type: "adaptive", display: "summarized" },
+    output_config: { effort: config.effort || "medium" },
+    fallbacks: "default",
+  };
+  if (system) body.system = system;
+  if (tools && tools.length) body.tools = tools;
+  body.cache_control = { type: "ephemeral" };
+  body.messages = messages;
+  return body;
+}
+
+// 本文の文字列を作る。messages は、呼び出し側が既に JSON にした文字列（messagesJson）で受ける。
+// worker/chat.mjs は messages の JSON を、札の検査（SHA-256）と本文の両方に使うので、
+// 2回 JSON にしないで済むよう、messages の手前までを JSON にして後ろに継ぐ。
+// messages は最後の欄なので、継いだ結果は JSON.stringify(buildConversationRequest(...)) と同じ文字列になる。
+export function conversationBodyText({ config, system, tools, messagesJson, maxOutputTokens = 8000 }) {
+  const head = JSON.stringify(buildConversationRequest({ config, system, tools, messages: [], maxOutputTokens }));
+  const tail = '"messages":[]}';
+  if (!head.endsWith(tail)) throw new Error("conversation body layout changed");
+  return head.slice(0, head.length - 3) + messagesJson + "}";
+}
+
+// 作り終えた本文（文字列かバイト列）を送る。返事の SSE は読まずに返す。
+export async function sendConversation({ config, body, fetchImpl = fetch }) {
+  if (!config || !config.apiKey) {
+    return { ok: false, status: 503, message: "Anthropic のキーがこの環境に設定されていません。" };
+  }
+  return sendStream(config, body, fetchImpl);
 }
 
 export async function generate({
@@ -126,12 +185,7 @@ export async function generate({
   try {
     response = await fetchImpl(new Request(ENDPOINT, {
       method: "POST",
-      headers: {
-        "x-api-key": config.apiKey,
-        "anthropic-version": API_VERSION,
-        "anthropic-beta": FALLBACK_BETA,
-        "content-type": "application/json",
-      },
+      headers: requestHeaders(config),
       body,
     }));
   } catch (e) {

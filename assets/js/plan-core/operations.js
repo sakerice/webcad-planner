@@ -31,6 +31,7 @@
 //                    「AI の範囲」と「画面が許す範囲」は別にしている。
 //   写しに当てるとき(inPlace でないとき)は ctx.catalog.known が無いと物を置かない。
 //   種類を known で確かめるのも写しのときだけ(画面は、カタログに無い種類名でも今までどおり置く)。
+//   known が偽のとき、ctx.catalog.unknownMessage(type) が文を返せば、errors の文はそれにする(候補は suggest)。
 //
 // ctx.targets(inPlace のときだけ): 物そのものの配列。渡されたら、id で探す代わりにその物を使う。
 //   画面の delSel・updateSelectedProp は選んだ物そのものを指して操作する。id が重なっている・id が無い
@@ -38,6 +39,10 @@
 //   deleteObjects は targets の物すべて(ids は見ない)。setProps・moveObject・rotateObject・resizeRoom・
 //   renameRoom・removeWall は targets の1つめだけ(2つ以上は errors)。inPlace でないのに渡すと errors。
 //
+// ctx.withPlan(workPlan, run)(写しに当てるときだけ使う): あれば、写しを作ったあとの処理全体を
+//   ctx.withPlan(写し, run) の中で動かし、run の戻り値を返す。画面の hooks はグローバルの DATA を見るので、
+//   画面の AI 用の ctx(plan-data.js の planChatCtx)が、その間だけ DATA を写しに差し替え、finally で戻す。
+//   inPlace では呼ばない。
 // ctx.rethrow(inPlace のときだけ効く): 操作の途中で出た例外を errors に変えず、そのまま投げ直す。
 //   画面の包みが立てる(変更前の画面と同じく、例外がエラーの見張りに出るように)。
 //   写しに当てるとき(AI)は立っていても投げず、今までどおり errors にして外へ出さない。
@@ -486,7 +491,9 @@
     // 種類を確かめるのは写しに当てる(AI の)ときだけ。画面(inPlace)は今までどおり、カタログに無い種類名も置く。
     if (isCopy(ctx) && typeof cat.known === 'function' && !cat.known(placeType)) {
       var cands = typeof cat.suggest === 'function' ? cat.suggest(a.type) : undefined;
-      return fail('種類 ' + label(a.type) + ' はカタログにありません', cands);
+      // 置けない理由をカタログが言えるとき(読み込み中・組んで作る種類など)は、その文を使う。
+      var unknownWhy = typeof cat.unknownMessage === 'function' ? cat.unknownMessage(a.type) : null;
+      return fail(unknownWhy ? String(unknownWhy) : '種類 ' + label(a.type) + ' はカタログにありません', cands);
     }
     var floor = a.floor || 1;
     if (typeof h.canPlace === 'function') {
@@ -697,20 +704,26 @@
       }
       var target = ctx.inPlace === true ? plan : cloneDeep(plan, new Map());
       var rec = new Recorder();
-      for (var i = 0; i < ops.length; i++) {
-        index = i;
-        var op = ops[i];
-        opName = op && typeof op.op === 'string' ? op.op : null;
-        if (!op || typeof op !== 'object') return failure(plan, i, null, '操作は {op, args} の形で渡してください');
-        if (!opName || !Object.prototype.hasOwnProperty.call(OPS, opName)) {
-          return failure(plan, i, opName, '知らない操作です: ' + String(op.op), Object.keys(OPS));
+      var runAll = function () {
+        for (var i = 0; i < ops.length; i++) {
+          index = i;
+          var op = ops[i];
+          opName = op && typeof op.op === 'string' ? op.op : null;
+          if (!op || typeof op !== 'object') return failure(plan, i, null, '操作は {op, args} の形で渡してください');
+          if (!opName || !Object.prototype.hasOwnProperty.call(OPS, opName)) {
+            return failure(plan, i, opName, '知らない操作です: ' + String(op.op), Object.keys(OPS));
+          }
+          var args = op.args === undefined ? {} : op.args;
+          if (!args || typeof args !== 'object' || Array.isArray(args)) return failure(plan, i, opName, 'args は {…} の形で渡してください');
+          var res = OPS[opName](target, args, ctx, rec);
+          if (res && res.error) return failure(plan, i, opName, res.error, res.candidates);
         }
-        var args = op.args === undefined ? {} : op.args;
-        if (!args || typeof args !== 'object' || Array.isArray(args)) return failure(plan, i, opName, 'args は {…} の形で渡してください');
-        var res = OPS[opName](target, args, ctx, rec);
-        if (res && res.error) return failure(plan, i, opName, res.error, res.candidates);
-      }
-      return { plan: target, changedIds: rec.changed, removedIds: rec.removed, warnings: rec.warnings, errors: [] };
+        return { plan: target, changedIds: rec.changed, removedIds: rec.removed, warnings: rec.warnings, errors: [] };
+      };
+      // 写しに当てるときだけ、写しを作ったあとの処理全体を ctx.withPlan(写し, run) の中で動かす
+      // (画面のグローバルに依存する hooks に、写しを「今のプラン」として見せるため。画面の planChatCtx)。
+      if (ctx.inPlace !== true && typeof ctx.withPlan === 'function') return ctx.withPlan(target, runAll);
+      return runAll();
     } catch (e) {
       if (ctx && ctx.inPlace === true && ctx.rethrow === true) throw e;
       var msg = '操作の途中で誤りが起きました: ' + (e && e.message ? e.message : String(e));
@@ -719,5 +732,8 @@
     }
   }
 
-  return { applyOperations: applyOperations, applyProp: applyProp, OPS: OPS };
+  // プランの写し(applyOperations が写しに当てるときと同じ写し方)。チャットが依頼の始めに使う。
+  function clonePlan(plan) { return cloneDeep(plan, new Map()); }
+
+  return { applyOperations: applyOperations, applyProp: applyProp, clonePlan: clonePlan, OPS: OPS };
 }));
