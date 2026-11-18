@@ -148,6 +148,30 @@ test('壁を消すと外壁の設定表の行も片付く。外壁の色は設�
   assert.equal(q.exteriorWallSettings.walls[String(q.walls[0].id)].color, '#123456');
 });
 
+// 壁の id・階・種類名はプランの値。__proto__ などのとき、外壁の設定表の継承元や Object.prototype を書き換えない(2026-11-19)。
+test('壁の id・階・種類名が継承した鍵でも、外壁の設定表と Object.prototype を汚さない', async () => {
+  const { workerOpsCtx, workerApply } = await load();
+  const names = Object.getOwnPropertyNames(Object.prototype).sort().join(',');
+  for (const key of ['__proto__', 'constructor', 'toString', 'hasOwnProperty', 'valueOf']) {
+    const q = plan();
+    q.walls[0].id = key;
+    q.walls[0].floor = key;
+    q.items[0].type = key;
+    Ops.applyProp(q.walls[0], 'exteriorColor', '#123456', q, workerOpsCtx(q));
+    const slot = Object.getOwnPropertyDescriptor(q.exteriorWallSettings.walls, key);
+    assert.ok(slot && slot.value && slot.value.color === '#123456', key + ': 自分の欄に書いていない');
+    assert.equal(Object.getPrototypeOf(q.exteriorWallSettings.walls), Object.prototype, key + ': 設定表の継承元が変わった');
+    assert.equal({}.color, undefined, key);
+    assert.equal({}.textureFlipX, undefined, key);
+    // 壁を消すと、その壁の行が片付く(生きている壁の表を継承した鍵で「ある」と読まない)
+    const other = q.walls[1];
+    const r = workerApply(q, [{ op: 'removeWall', args: { id: other.id } }]);
+    assert.deepEqual(r.errors, [], key);
+    assert.ok(Object.prototype.hasOwnProperty.call(r.plan.exteriorWallSettings.walls, key), key + ': 残る壁の行が消えた');
+    assert.equal(Object.getOwnPropertyNames(Object.prototype).sort().join(','), names, key + ': Object.prototype に欄が増えた');
+  }
+});
+
 test('要約は <plan_summary> の囲みつき。物を3倍にしても 5ms 以内(20回の中央値)', async () => {
   const { workerSummarize } = await load();
   const p = plan();
