@@ -85,6 +85,9 @@ try {
     assert.equal(s.thick, serverThick, `${label}: 画面が部屋の状態に戻っていない`);
     assert.ok(s.error && /反映できなかった/.test(s.status), `${label}: 同期できなかったことが出ていない: ${s.status}`);
     assert.ok(!/\d{3}/.test(s.status), `${label}: 知らせに数値が出ている: ${s.status}`);
+    // 413 は理由(プランが保存できる大きさを超えること)を添える。400 は今までどおりの文
+    if (rejected === 413) assert.ok(/保存できる大きさ（10MB）を超える/.test(s.status), `413: 理由が出ていない: ${s.status}`);
+    else assert.equal(s.status, 'この変更は共同編集に反映できなかったため、取り消して最新の状態に戻しました。', `400: 文言が変わった: ${s.status}`);
     assert.equal(s.tracked, false, `${label}: 送れなかった変更の印が残っている`);
     // そのあとの正当な変更は、ふつうに送れる
     st.reply = 200;
