@@ -174,8 +174,9 @@
     }else if(part==='interior'){
       if(!p.interior) return null;
       lines=['家全体: '+esc(texName(style,p.interior))];
-      var by={};
-      p.faces.forEach(function(f){ (by[f.texture]=by[f.texture]||{})[f.room]=true; });
+      // 部屋の名前はプランの値。__proto__ などの名前の部屋が一覧から抜けないよう、継承元の無い表で数える
+      var by=Object.create(null);
+      p.faces.forEach(function(f){ (by[f.texture]=by[f.texture]||Object.create(null))[f.room]=true; });
       Object.keys(by).forEach(function(k){
         lines.push(esc(Object.keys(by[k]).join('・'))+'の壁: '+esc(texName(style,k)));
       });
@@ -200,11 +201,11 @@
     }else if(part==='floor'){
       if(!p.rooms.length) return null;
       lines=groupRooms(p.rooms).map(function(g){
-        var names={}; g.rooms.forEach(function(r){ names[roomLabel(r)]=true; });
+        var names=Object.create(null); g.rooms.forEach(function(r){ names[roomLabel(r)]=true; });
         return esc(texName(style,g.texture))+': '+esc(Object.keys(names).join('・'));
       });
       if(p.skippedRooms.length){
-        var sk={}; p.skippedRooms.forEach(function(r){ sk[roomLabel(r)]=true; });
+        var sk=Object.create(null); p.skippedRooms.forEach(function(r){ sk[roomLabel(r)]=true; });
         lines.push('<small>そのまま: '+esc(Object.keys(sk).join('・'))+'（屋外）</small>');
       }
     }

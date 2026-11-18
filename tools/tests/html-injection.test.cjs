@@ -359,6 +359,24 @@ test('継承した鍵(constructor・__proto__ …)を種類名・id・テクス�
   assert.equal(({}).color, undefined, 'Object.prototype が汚れた');
 });
 
+test('壁の階が継承した鍵でも、外観カラー設定の欄が開く(壁を階ごとに分ける表が継承元を持たない)', () => {
+  const allowed = allowedShape();
+  for (const k of PAYLOADS.inheritedKeys) {
+    const plan = openAllRows(clone(BASE));
+    plan.walls.filter((w) => (w.thick || 0) >= 120).slice(0, 3).forEach((w) => { w.floor = k; });
+    const ctx = makeCtx();
+    ctx.DATA = plan;
+    ctx.ST = { selected: null, floor: 1, view: '2d' };
+    for (const mode of ['exterior', 'interior', 'roof']) {
+      ctx.__sink['exterior-wall-panel-body'] = '';
+      run(ctx, `renderExteriorWallPanel(${JSON.stringify(mode)})`);
+      const h = ctx.__sink['exterior-wall-panel-body'];
+      assert.ok(h.length > 100, `${k} ${mode}: 欄が空`);
+      assert.deepEqual(problemsIn(h, allowed), [], `${k} ${mode}`);
+    }
+  }
+});
+
 test('図面の一覧: 図面の名前と鍵に攻撃の文字を入れても、ボタンの形が変わらない', () => {
   const ctx = makeCtx();
   ctx.JIS_UI = { sheet: null };

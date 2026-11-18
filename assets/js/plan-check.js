@@ -36,6 +36,11 @@
 
   // 画面に出す名前。読み取りの種類名のままでは利用者に伝わらない。
   var JA = { bath: "浴槽", toilet: "便器", sink: "洗面台", kitchen: "流し台" };
+  // 種類名はプランの値。constructor などの継承した鍵に当たらないよう、自分の鍵だけを見る
+  // (この表は Worker からも読むので、画面の ownGet には頼らない)
+  function own(table, key) {
+    return typeof key === 'string' && Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+  }
 
   /** 数として読めれば数、読めなければ null。null・空文字は 0 にしない。 */
   function numOrNull(v) {
@@ -72,9 +77,9 @@
     var defaults = (options && options.defaults) || null;
     if (!plan || !Array.isArray(plan.items)) return out;
     for (var item of plan.items) {
-      var kind = IMPORT_TO_KIND[item.type];
+      var kind = own(IMPORT_TO_KIND, item.type);
       if (!kind) continue;
-      var name = JA[item.type] || item.type;
+      var name = own(JA, item.type) || item.type;
       var c = centreOf(item);
       var room = roomAt(plan, item.floor, c.x, c.y);
 
@@ -244,7 +249,7 @@
       var dist = Math.sqrt((c.x - cx) * (c.x - cx) + (c.y - cy) * (c.y - cy));
       if (dist > 3000) continue;
       near.push({
-        kind: IMPORT_TO_KIND[it.type] || it.type,
+        kind: own(IMPORT_TO_KIND, it.type) || it.type,
         x: c.x, y: c.y, w: it.w, d: it.d, dist: dist,
       });
     }

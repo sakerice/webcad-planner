@@ -281,7 +281,7 @@ function maybeOfferPresetChoice(){
   var want=null;
   try{ want=new URLSearchParams(window.location.search).get('preset'); }catch(e){}
   if(want==='blank'){chooseBlankPlan();return;}
-  if(want && PRESET_PLANS[want]){ choosePresetPlan(want); return; }
+  if(want && ownGet(PRESET_PLANS,want)){ choosePresetPlan(want); return; }
   var grid=document.getElementById('preset-choice-grid');
   var modal=document.getElementById('preset-choice-modal');
   if(!grid||!modal) return;

@@ -3078,6 +3078,8 @@ function hasCustomPlanSize(it){
 // 文字に直せない値(toString が関数でない物など)は空にする。
 // onclick="f('…')" のような JS の中には、これを通しても入れてはいけない(属性を読むときに
 // 実体参照が元に戻る)。値は data-… 属性に入れ、ハンドラの中で this.dataset から読む。
+// 属性の値は必ず "…" か '…' で囲む。引用符の無い属性(value=… の形)には使えない
+// (空白・バッククォート・= は置き換えないので、属性が切れる)。
 function escHtml(s){
   var t;
   try{ t=(s===null||s===undefined)?'':String(s); }catch(e){ t=''; }

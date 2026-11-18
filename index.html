@@ -4045,9 +4045,9 @@ var ASSET_TEX_NORMAL = {
 };
 var _texNormalCache = {};
 function getTextureNormal3D(key){
-  var src = key && ASSET_TEX_NORMAL[key];
+  var src = key && ownGet(ASSET_TEX_NORMAL,key);
   if(!src) return null;
-  if(_texNormalCache[key]) return _texNormalCache[key];
+  if(ownGet(_texNormalCache,key)) return _texNormalCache[key];
   var tex = new THREE.TextureLoader().load(src, function(){
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     if(ren) tex.anisotropy = ren.capabilities.getMaxAnisotropy();
@@ -8461,7 +8461,8 @@ function syncExteriorWallPanel(){
 
 function getExteriorWallsByFloor(){
   ensureExteriorWallSettings();
-  var rows={};
+  // 階はプランの値(壁の floor)。継承した鍵(constructor など)でも空の行から始まるよう、継承元の無い表にする
+  var rows=Object.create(null);
   DATA.walls.forEach(function(w){
     if((w.thick||0)<120) return;
     if(!getWallExteriorSpans(w).length) return;
@@ -8539,7 +8540,7 @@ function presetTextureSelectHtml(kind,current,call,disabled){
   var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(disabled?0.45:1)+'"><span style="font-size:10px;color:#cce">素材</span>';
   html+='<select class="preset-texture-select" aria-label="素材" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'"'+(disabled?' disabled':'')+'>';
   html+='<option value=""'+(current?'':' selected')+'>素材なし（色だけ）</option>';
-  if(current&&!known) html+='<option value="'+escHtml(current.indexOf('data:')===0?'':current)+'" selected disabled>読み込んだ画像</option>';
+  if(current&&!known) html+='<option value="'+escHtml(String(current).indexOf('data:')===0?'':current)+'" selected disabled>読み込んだ画像</option>';
   list.forEach(function(o){ html+='<option value="'+escHtml(o[0])+'"'+(o[0]===current?' selected':'')+'>'+escHtml(o[1])+'</option>'; });
   return html+'</select></div>';
 }
@@ -8820,7 +8821,7 @@ function isPlacementSurfaceItem(it){
   if(!canSetItemElevation(it)) return false;
   var fmp=getFmpItem(it.type);
   if(fmp && ITEM_SURFACE_CATEGORIES[fmp.category]) return true;
-  return !!ITEM_SURFACE_TYPES[it.type];
+  return !!ownGet(ITEM_SURFACE_TYPES,it.type);
 }
 function getItemTopElevation(it){
   return (Number(it&&it.elev)||0) + getItemHeightValue(it);

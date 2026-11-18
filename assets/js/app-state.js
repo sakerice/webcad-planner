@@ -35,7 +35,7 @@ function isPlanAnnotationType(type){
   return type==='memo' || type==='ruler' || type==='walk-route';
 }
 function isLightItemType(type){
-  return !!LIGHT_ITEM_TYPES[type];
+  return !!ownGet(LIGHT_ITEM_TYPES,type);
 }
 function lightKindFromType(type){
   if(type==='light-down') return 'down';
@@ -200,7 +200,7 @@ function defaultLightElevationMm(floor,cx,cy){
 function ensureLightDefaults(it){
   if(!it || !isLightItemType(it.type)) return it;
   var kind=lightKindFromType(it.type);
-  if(!it.lightKind || !LIGHT_KIND_TO_TYPE[it.lightKind]) it.lightKind=kind;
+  if(!it.lightKind || !ownGet(LIGHT_KIND_TO_TYPE,it.lightKind)) it.lightKind=kind;
   if(!it.lightShape) it.lightShape='point';
   if(!it.lightColor) it.lightColor=it.color&&/^#/.test(String(it.color))?it.color:'#fff6dd';
   if(!isFinite(Number(it.lightIntensity))) it.lightIntensity=it.lightKind==='spot'?0.9:(it.lightKind==='down'?0.72:0.56);
@@ -302,12 +302,12 @@ function getLockFmpItem(it){
 function isLockFixtureItem(it){
   if(!it || !it.type) return false;
   var fmp=getLockFmpItem(it);
-  return !!(LOCK_FIXTURE_TYPES[it.type] || (fmp && fmp.group==='住設'));
+  return !!(ownGet(LOCK_FIXTURE_TYPES,it.type) || (fmp && fmp.group==='住設'));
 }
 function isLockFurnitureItem(it){
   if(!it || !it.type) return false;
   var fmp=getLockFmpItem(it);
-  return !!(LOCK_FURNITURE_TYPES[it.type] || (fmp && fmp.group==='家具' && !isBuildingComponentFmpItem(fmp)));
+  return !!(ownGet(LOCK_FURNITURE_TYPES,it.type) || (fmp && fmp.group==='家具' && !isBuildingComponentFmpItem(fmp)));
 }
 function isLockJoineryItem(it){
   if(!it || !it.type) return false;
