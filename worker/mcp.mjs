@@ -391,8 +391,12 @@ async function callTool(name, args, env, request, origin) {
     return text(lines.join("\n"));
   }
   // 操作。plan を外した残りをルームへ渡す（引数の検査はルームの側）。
+  // 鍵は外から来るので、代入でなく自分の欄として写す(鍵が __proto__ でも rest の継承元を差し替えない。
+  // 危ない鍵はルームの /op が断る)。
   const rest = {};
-  for (const key of Object.keys(args)) if (key !== "plan") rest[key] = args[key];
+  for (const key of Object.keys(args)) {
+    if (key !== "plan") Object.defineProperty(rest, key, { value: args[key], enumerable: true, writable: true, configurable: true });
+  }
   const res = await roomOp(env, roomId, name, rest);
   if (!res || !res.ok) return text(failureText(res, origin, roomId), true);
   return text(opSuccessText(name, res, origin, roomId));

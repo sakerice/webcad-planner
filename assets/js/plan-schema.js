@@ -246,8 +246,9 @@
   // 触らない。二重に既定値を入れる場所を作らないため。
   function normalizePlan(plan) {
     var out = { walls: [], rooms: [], items: [] };
+    // 鍵 __proto__ は写さない(JSON.parse が自分の鍵として作る。代入すると写しの継承元を差し替える)。
     Object.keys(plan).forEach(function (k) {
-      if (COLLECTIONS.indexOf(k) < 0) out[k] = plan[k];
+      if (COLLECTIONS.indexOf(k) < 0 && k !== '__proto__') out[k] = plan[k];
     });
     var nextId = 1;
     function idFor(o) {
@@ -256,7 +257,7 @@
     }
     function base(o) {
       var c = {};
-      Object.keys(o).forEach(function (k) { c[k] = o[k]; });
+      Object.keys(o).forEach(function (k) { if (k !== '__proto__') c[k] = o[k]; });
       c.id = idFor(o);
       c.floor = num(o.floor) === null ? 1 : Math.round(num(o.floor));
       return c;
