@@ -136,11 +136,13 @@ test('/save のあと id の無い物・null の物に当てる upsert は断ら
   }
 });
 
-test('差分の当て方: id の無い物・null の物には upsert を当てない(古い Worker が積んだ差分でも膨らまない)', async () => {
+test('差分の当て方: プランの id の無い物・null の物には upsert を当てない(古い Worker が積んだ差分でも膨らまない)', async () => {
   const p = noIdPlan(5, (_, i) => (i % 2 ? {} : { id: null }));
   P.applyPatch(p, { collections: { items: { upserts: [{ id: 'undefined', v: 1 }, { id: 'null', v: 2 }, { v: 3 }], removes: [] } } });
-  assert.equal(p.items.length, 7, '当たらない upsert は新しい物として1つずつ足す(id の無い upsert の物は足さない)');
-  assert.deepEqual(p.items.slice(5), [{ id: 'undefined', v: 1 }, { id: 'null', v: 2 }]);
+  // 当たらない upsert は新しい物として足す。id の無い upsert の物は、今までどおり "undefined" の鍵で1つにまとまる(後の物が勝つ)
+  assert.equal(p.items.length, 7);
+  assert.deepEqual(p.items.slice(5), [{ v: 3 }, { id: 'null', v: 2 }]);
+  assert.ok(p.items.slice(0, 5).every((x) => Object.keys(x).length <= 1), 'id の無い物・null の物が置き換わった');
   // removes は今までどおり idOf で当てる(画面は id を振る前の物を "undefined" で消す)
   P.applyPatch(p, { collections: { items: { upserts: [], removes: ['undefined'] } } });
   assert.deepEqual(p.items.map((x) => x.id), [null, null, null, 'null']);

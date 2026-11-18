@@ -80,7 +80,8 @@
   //   - 集まり(walls・items・rooms)以外の名前、素のオブジェクトでない変更、配列でない upserts・removes
   //   - 素のオブジェクトでない物、文字と有限の数以外の removes の id
   //   - id が UNSAFE_KEYS の名前(constructor・toString など)の物と removes の id
-  //   - id の無い・null の物を指す upsert(upsertKey。id の無い物には当てない。id の無い upsert の物も足さない)
+  //   - プランの id の無い・null の物には upsert を当てない(upsertKey)。id の無い upsert の物は、今までどおり
+  //     新しい物として足す(プランの id の無い物を置き換えないだけ)
   //   - Object.prototype にある名前の欄(__proto__・constructor・toString など。プランの継承元や関数を差し替えるため)
   //   - 値のどこかに __proto__・constructor・prototype の鍵を含む物と欄
   // 差分のうち当てる部分を取り出す。applyPatch と patchGrowthBound が同じものを使う(数え方が当て方とずれないため)。
@@ -92,12 +93,12 @@
     var removed = new Set((Array.isArray(change.removes) ? change.removes : [])
       .filter(function (id) { return (typeof id === 'string' && !unsafeId(id)) || (typeof id === 'number' && isFinite(id)); })
       .map(String));
-    // 鍵 → 物。同じ鍵が2つあれば後の物が勝つ。id の無い物・使えない名前の id の物・危ない鍵を含む物は当てない
+    // 鍵(idOf)→ 物。同じ鍵が2つあれば後の物が勝つ(id の無い upsert の物どうしも "undefined" で1つにまとまる。今までどおり)。
+    // 使えない名前の id の物・危ない鍵を含む物は当てない。
     var upserts = new Map();
     (Array.isArray(change.upserts) ? change.upserts : []).forEach(function (item) {
       if (!isPlainObject(item) || unsafeId(item.id) || hasUnsafeKey(item)) return;
-      var key = upsertKey(item);
-      if (key !== null) upserts.set(key, item);
+      upserts.set(idOf(item), item);
     });
     return { removed: removed, upserts: upserts };
   }
