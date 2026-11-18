@@ -207,6 +207,31 @@ test('要約: 種類名が constructor・__proto__ の物があっても例外�
   for (const t of ['constructor', '__proto__', 'toString']) assert.ok(s.includes('id=odd-' + t + '-1 ' + t + ' 1階'), t);
 });
 
+test('斜線制限: 欄があっても効かない敷地では照明を断らない。効く敷地では断る', async () => {
+  const { workerApply, REFUSAL } = await load();
+  const room = (p) => roomNamed(p, '洋室', 1);
+  const light = (p) => workerApply(p, [{ op: 'placeItem', args: { type: 'light-ceiling', x: center(room(p)).x, y: center(room(p)).y } }]);
+  const off = [
+    { zone: 'low1', road: false, north: false },   // 両方切ってある
+    { zone: 'res-other', north: true },           // 北側斜線の無い用途地域
+    { road: true, north: true },                  // 用途地域が無い
+    { zone: 'no-such-zone', road: true },
+  ];
+  for (const setback of off) {
+    const p = plan();
+    p.items.find((it) => it.type === 'site-rect').setback = setback;
+    const r = light(p);
+    assert.deepEqual(r.errors, [], JSON.stringify(setback));
+  }
+  for (const setback of [{ zone: 'low1', north: true }, { zone: 'non-res', road: true }]) {
+    const p = plan();
+    p.items.find((it) => it.type === 'site-rect').setback = setback;
+    const r = light(p);
+    assert.equal(r.errors.length, 1, JSON.stringify(setback));
+    assert.ok(r.errors[0].message.startsWith(REFUSAL), r.errors[0].message);
+  }
+});
+
 test('取付の高さの分類(レンジフード)は、調理台の上に置いても断らず、読み取りと同じ高さ', async () => {
   const { workerApply } = await load();
   const FreeApply = require('../../assets/js/plan-free-apply.js');

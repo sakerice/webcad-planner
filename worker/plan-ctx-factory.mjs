@@ -60,13 +60,14 @@ export function firstNewId(plan) {
   return maxId + 1;
 }
 
-// deps: {catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure}
+// deps: {catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure, SetbackLaw}
 //   catalog … assets/data/worker-catalog.json の中身、tags … assets/models/tags.json の中身
 //   ほかは UMD の部品(PlanCoreOperations・PlanSettable・ObjectKnowledge・PlanFreeApply・HeightModel・
-//   ChatPlanSummary・PlanCoreInspect・PlanSchema・PlanCheck・PlanStructure)
+//   ChatPlanSummary・PlanCoreInspect・PlanSchema・PlanCheck・PlanStructure・SetbackLaw)
 // 表から引く物は、ここで1回だけ作る(Worker ではモジュールの読み込み時に1回)。
 export function createPlanCtxTools(deps) {
   const { catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect } = deps;
+  const Law = deps.SetbackLaw || null;   // assets/js/setback-law.js(斜線制限の法令の表)
   const TYPES = catalog.types, OTHERS = catalog.others || {}, LEGACY = catalog.legacy || {}, C = catalog.constants;
   const TYPE_ORDER = Object.keys(TYPES);
   const TAG_ITEMS = (tags && tags.items) || {};
@@ -259,8 +260,22 @@ export function createPlanCtxTools(deps) {
   // 天井の形を式で出せない部屋か(出せないときは理由の鍵、出せるときは null)。
   // 照明を置いたときの高さ(defaultLightElevationMm → ceilingFinishElevationMm → roomCeilingElevationMm)を
   // 式で出せるのは、天井の範囲・勾配・吹き抜け・段差・斜線制限の屋根が無く、天井高の指定が階高に収まる部屋だけ。
-  function setbackActive(p) {
-    return (p.items || []).some(function (it) { return it && it.type === 'site-rect' && it.setback && typeof it.setback === 'object'; });
+  // 斜線制限が効く敷地があるか。画面の siteSetbackConfig(index.html)が null でない敷地(activeSetbackSites)と
+  // 同じ条件: 用途地域が表にあり、道路斜線が入っているか、北側斜線が入っていてその用途地域に北側斜線がある。
+  // 欄があるだけ・両方切ってある・用途地域が無いときは効かない(屋根が作られないので天井は式どおり)。
+  // 画面は、道路斜線だけで前面道路(road)が1本も無いときも屋根を作らないが、そこまでは見ずに断る側に倒す。
+  // 法令の表(SetbackLaw)が渡されないときは、欄があれば効くとみなす(断る側)。
+  function siteSetbackActive(it) {
+    if (!it || it.type !== 'site-rect') return false;
+    var s = it.setback;
+    if (!s || typeof s !== 'object') return false;
+    if (!Law) return true;
+    var z = Law.zone(s.zone);
+    if (!z) return false;
+    return !!s.road || (!!s.north && Law.hasNorthLimit(z.id));
+  }
+  function setbackActive(p) {                                     // activeSetbackSites().length > 0
+    return (p.items || []).some(siteSetbackActive);
   }
   function lightCeilingProblem(p, room) {
     if (!isFinite(room.x)) return 'lightCeiling';
