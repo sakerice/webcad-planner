@@ -15,6 +15,7 @@
   'use strict';
 
   var DIR = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
+  var ROOM_NAME_MAX = 40;
   var ROT = { N: 0, E: 90, S: 180, W: 270 };
   // 直進階段は +d へ上る。上る方角 → rot。
   var STAIR_ROT = { S: 0, W: 90, N: 180, E: 270 };
@@ -236,7 +237,8 @@
           var x0 = Math.min(num(p.x0), num(p.x1)), y0 = Math.min(num(p.y0), num(p.y1));
           var w = Math.abs(num(p.x1) - num(p.x0)), d = Math.abs(num(p.y1) - num(p.y0));
           if (w < 1 || d < 1) return;
-          plan.rooms.push({ x: x0, y: y0, w: w, d: d, floor: floor, n: String(r.name || ''), extra: JSON.parse(JSON.stringify(roomSet)) });
+          // 部屋の名前は AI が書いた文字。見えない文字・制御文字を落とし、40 字に切って入れる(チャットの操作の上限と同じ)。
+          plan.rooms.push({ x: x0, y: y0, w: w, d: d, floor: floor, n: PlanSettable.tidyText(r.name || '', ROOM_NAME_MAX), extra: JSON.parse(JSON.stringify(roomSet)) });
         });
       });
 

@@ -349,8 +349,11 @@ test('/op・/read 引数と本文の大きさの上限: 当てずに失敗で返
     assert.equal(res.ok, false, op);
     assert.match(res.errors[0].message, re);
   }
-  // ちょうど上限は通る(検査の段まで進む)
-  const okName = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'addRoom', { name: 'あ'.repeat(500), x: 20000, y: 20000, w: 1000, d: 1000 });
+  // ちょうど上限(500 字)は大きさの検査を通り、操作の検査の段まで進む(部屋の名前は操作の側で 40 字までなので、そこで断られる)
+  const atLimit = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'addRoom', { name: 'あ'.repeat(500), x: 20000, y: 20000, w: 1000, d: 1000 });
+  assert.equal(atLimit.ok, false);
+  assert.match(atLimit.errors[0].message, /40 字まで/);
+  const okName = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'addRoom', { name: 'あ'.repeat(40), x: 20000, y: 20000, w: 1000, d: 1000 });
   assert.equal(okName.ok, true);
   const snap2 = snapshotRoom(ctx.env, ctx.room);
   assert.notEqual(snap2, snap);

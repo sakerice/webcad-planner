@@ -222,7 +222,7 @@
         if (n == null) { reject(); return; }
         value = Math.max(def.num[0], Math.min(def.num[1], Math.round(n)));
       } else if (def.text) {
-        value = String(kv.value).slice(0, def.text);
+        value = tidyText(kv.value, def.text);
         if (!value) { reject(); return; }
       } else {
         value = String(kv.value);
@@ -252,7 +252,22 @@
     return out;
   }
 
+  // 名前などの文字を書き込むときの掃除。見えない文字(書式文字 \p{Cf}・片割れのサロゲート)を落とし、制御文字と
+  // 行の区切りを空白にして、空白をまとめる(assets/js/plan-core/operations.js の tidyName と同じ決まり)。
+  // max があれば文字(コードポイント)単位で max 字に切る(読み取りの答えは失敗にできないので切る。… は付けない)。
+  var INVISIBLE_RE = new RegExp('[\\p{Cf}\\p{Cs}]', 'gu');
+  var CONTROL_RE = new RegExp('[\\u0000-\\u001f\\u007f-\\u009f\\u2028\\u2029]', 'g');
+  function tidyText(s, max) {
+    var t = String(s === undefined || s === null ? '' : s).replace(INVISIBLE_RE, '').replace(CONTROL_RE, ' ').replace(/\s+/g, ' ').trim();
+    if (max >= 0 && t.length > max) {
+      var chars = Array.from(t);
+      if (chars.length > max) t = chars.slice(0, max).join('').trim();
+    }
+    return t;
+  }
+
   return {
+    tidyText: tidyText,
     OPENINGS: OPENINGS, SWING_TYPES: SWING_TYPES, EXTERIOR: EXTERIOR, SITE: SITE, SETTINGS: SETTINGS,
     FLOOR_MATERIALS: FLOOR_MATERIALS, SITE_SURFACES: SITE_SURFACES,
     NOT_PASSED: NOT_PASSED, TYPES_NOT_PLACED: TYPES_NOT_PLACED,
