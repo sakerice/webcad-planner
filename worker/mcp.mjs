@@ -224,7 +224,8 @@ function failureText(res, origin, roomId) {
   if (!errors.length) lines.push("- " + ROOM_UNAVAILABLE_MESSAGE);
   const messages = errors.map((e) => String((e && e.message) || e));
   if (messages.some((m) => m.includes(REFUSAL))) {
-    lines.push("", "この操作は house-planner の画面でしかできません。利用者に、下の URL を開いて画面で行うよう伝えてください。");
+    lines.push("", "この操作はここではできません。理由に別のやり方（別の種類など）が書かれていればそれで呼び直し、"
+      + "無ければ、利用者に下の URL を開いて house-planner の画面で行うよう伝えてください。");
     lines.push(openLine(origin, roomId));
   } else if (!errors.length || messages.every((m) => m === ROOM_UNAVAILABLE_MESSAGE)) {
     lines.push("", "少し待ってから、同じ引数でもう一度呼んでください。");
@@ -241,8 +242,10 @@ function idList(ids) {
 }
 
 function opSuccessText(name, res, origin, roomId) {
-  const changed = Array.isArray(res.changedIds) ? res.changedIds : [];
   const removed = Array.isArray(res.removedIds) ? res.removedIds : [];
+  // 消した物は changedIds にも入ってくる。「変わった物」には残った物だけを数える。
+  const gone = new Set(removed.map(String));
+  const changed = (Array.isArray(res.changedIds) ? res.changedIds : []).filter((id) => !gone.has(String(id)));
   const warnings = Array.isArray(res.warnings) ? res.warnings : [];
   const lines = [];
   if (!changed.length && !removed.length) {

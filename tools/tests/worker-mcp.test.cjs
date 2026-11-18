@@ -304,6 +304,7 @@ test('通しの流れ: create_plan → addRoom → placeItem → get_plan に足
   const refused = await call(ctx, 'placeItem', { plan: id, type: 'opening-door-model:default', x: 100, y: 0 });
   assert.equal(refused.isError, true);
   assert.match(textOf(refused), /画面で行うよう伝えて/);
+  assert.match(textOf(refused), /別のやり方/);
   assert.match(textOf(refused), ROOM_URL_RE);
   const missingId = await call(ctx, 'deleteObjects', { plan: id, ids: ['999999'] });
   assert.equal(missingId.isError, true);
@@ -314,6 +315,7 @@ test('通しの流れ: create_plan → addRoom → placeItem → get_plan に足
   const del = await call(ctx, 'deleteObjects', { plan: id, ids: [bedId] });
   assert.equal(del.isError, false, textOf(del));
   assert.match(textOf(del), /消えた物: 1 件/);
+  assert.doesNotMatch(textOf(del), /変わった物/, '消した物を「変わった物」に数えない');
 });
 
 test('Review Focus 1: plan の形が違う・別のサイト・../・無いルームは道具の失敗で、形が違えば Durable Object を作らない', async () => {
