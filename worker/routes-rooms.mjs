@@ -54,7 +54,13 @@ export async function createRoomWithPlan(env, plan, origin) {
   if (!validPlan(plan)) return { error: "invalid_plan", status: 400 };
   const encoded = JSON.stringify(plan);
   if (encodedSize(encoded) > MAX_PLAN_BYTES) return { error: "plan_too_large", status: 413 };
+  // 共有の URL の土台を先に組み立てる。origin が URL として読めないときは、R2 に置く前にここで例外になる
+  // (置いたあとで落ちると、誰も開けないルームの中身が R2 に残るため)。
+  const shareUrl = new URL(origin);
+  shareUrl.pathname = "/";
+  shareUrl.search = "";
   const roomId = randomRoomId();
+  shareUrl.hash = `room=${roomId}`;
   const now = Date.now();
   const expiresAt = now + RETENTION_MS;
   await env.PLANS.put(roomKey(roomId), encoded, {
@@ -66,23 +72,39 @@ export async function createRoomWithPlan(env, plan, origin) {
     method: "POST",
     body: JSON.stringify({ roomId, version: 1, updatedAt: now, expiresAt, savedAt: now, dirtySince: null, checkpointDueAt: null }),
   }));
-  const shareUrl = new URL(origin);
-  shareUrl.pathname = "/";
-  shareUrl.search = "";
-  shareUrl.hash = `room=${roomId}`;
   return { roomId, url: shareUrl.toString(), version: 1, expiresAt, savedAt: now };
 }
 
 // ルームの中の経路を呼ぶ。id の形(22 文字)が違えば Durable Object を引かずに room_not_found。
+// ルームの中で例外が出た・返事が JSON でない・ルームの返事の形でない、ときは例外を外へ出さず、ROOM_UNAVAILABLE を返す。
+// ルームの返事の形: {ok:true, …}、{ok:false, code:"room_not_found"}(404)、{ok:false, errors:[…]}(本文が読めないときは 400)。
+export const ROOM_UNAVAILABLE_MESSAGE = "いまは操作できませんでした。少し待ってからもう一度お試しください。";
+function roomUnavailable() {
+  return { ok: false, errors: [{ message: ROOM_UNAVAILABLE_MESSAGE }] };
+}
+function isRoomReply(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body) || typeof body.ok !== "boolean") return false;
+  if (body.ok) return true;
+  return body.code === "room_not_found" || (Array.isArray(body.errors) && body.errors.length > 0);
+}
 async function callRoom(env, roomId, path, body) {
   if (typeof roomId !== "string" || !ROOM_ID_RE.test(roomId)) return { ok: false, code: "room_not_found" };
-  const stub = env.ROOMS.get(env.ROOMS.idFromName(roomId));
-  const res = await stub.fetch(new Request(`https://room${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-  }));
-  return res.json();
+  try {
+    const stub = env.ROOMS.get(env.ROOMS.idFromName(roomId));
+    const res = await stub.fetch(new Request(`https://room${path}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    }));
+    let reply;
+    try { reply = await res.json(); } catch { return roomUnavailable(); }
+    if (!isRoomReply(reply)) return roomUnavailable();
+    // 成功の形で返ってきても、状態が成功でなければ信用しない。失敗の形(無いルーム・本文の誤り)は状態に関わらずそのまま返す。
+    if (reply.ok && !res.ok) return roomUnavailable();
+    return reply;
+  } catch {
+    return roomUnavailable();
+  }
 }
 
 // 操作を1つ当てる。戻り値はルームの /op の返事そのまま:

@@ -364,3 +364,97 @@ test('/op・/read 引数と本文の大きさの上限: 当てずに失敗で返
   }
   assert.equal(snapshotRoom(ctx.env, ctx.room), snap2);
 });
+
+test('roomOp・roomRead: ルームの中で例外が出ても、返事が JSON でなくても、例外を外へ出さず「いまは操作できません」で返す', async () => {
+  const ctx = await setup();
+  const want = { ok: false, errors: [{ message: 'いまは操作できませんでした。少し待ってからもう一度お試しください。' }] };
+  const real = ctx.room.instance;
+  const origApply = real.applyOp;
+  const origRead = real.read;
+  // ルームの中の処理が投げる
+  real.applyOp = async () => { throw new Error('boom'); };
+  real.read = async () => { throw new Error('boom'); };
+  assert.deepEqual(await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'addRoom', { x: 0, y: 0, w: 1000, d: 1000 }), want);
+  assert.deepEqual(await ctx.rooms.roomRead(ctx.env, ctx.roomId, 'summary'), want);
+  real.applyOp = origApply;
+  real.read = origRead;
+  // 返事が JSON でない・ルームの返事の形でない・成功の形なのに状態が失敗
+  const origFetch = real.fetch;
+  const replies = [
+    () => new Response('Internal Error', { status: 500 }),
+    () => new Response(JSON.stringify({ error: 'not_found' }), { status: 500 }),
+    () => new Response(JSON.stringify([1, 2]), { status: 200 }),
+    () => new Response(JSON.stringify({ ok: true, version: 9 }), { status: 500 }),
+  ];
+  for (const reply of replies) {
+    real.fetch = async () => reply();
+    assert.deepEqual(await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'addRoom', { x: 0, y: 0, w: 1000, d: 1000 }), want);
+    assert.deepEqual(await ctx.rooms.roomRead(ctx.env, ctx.roomId, 'inspect'), want);
+  }
+  // Durable Object を引くところで投げる
+  real.fetch = origFetch;
+  const env2 = { ...ctx.env, ROOMS: { idFromName: () => { throw new Error('boom'); }, get: () => null } };
+  assert.deepEqual(await ctx.rooms.roomOp(env2, ctx.roomId, 'addRoom', { x: 0, y: 0, w: 1000, d: 1000 }), want);
+  // 無いルームと本文の誤りは、状態が 404・400 でもそのまま返す
+  const missing = await ctx.rooms.roomOp(ctx.env, 'A'.repeat(22), 'addRoom', { x: 0, y: 0, w: 1000, d: 1000 });
+  assert.deepEqual(missing, { ok: false, code: 'room_not_found' });
+  const badWhat = await ctx.rooms.roomRead(ctx.env, ctx.roomId, 'everything');
+  assert.equal(badWhat.ok, false);
+  assert.match(badWhat.errors[0].message, /summary か inspect/);
+  // 元に戻せば普通に動く
+  const ok = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'addRoom', { name: '書庫', x: 20000, y: 20000, w: 2730, d: 3640 });
+  assert.equal(ok.ok, true);
+});
+
+test('createRoomWithPlan: origin が URL として読めなければ、R2 に置く前に止まり、ルームも作らない', async () => {
+  const rooms = await mod('worker/routes-rooms.mjs');
+  const env = await makeEnv();
+  for (const bad of ['', 'not a url', '/relative/path', undefined]) {
+    await assert.rejects(() => rooms.createRoomWithPlan(env, plan(), bad));
+  }
+  assert.equal(env.PLANS.objects.size, 0);
+  assert.equal(env.PLANS.puts.length, 0);
+  assert.deepEqual(env.ROOMS.created, []);
+});
+
+test('同時の呼び出し: R2 の読み込みが遅くても、/op・/update・/op・/op は1つずつ当たり、版は抜けも重なりもなく進み、id も重ならない', async () => {
+  const ctx = await setup();
+  const ws = connect(ctx.room, 'screen-a');
+  // 偽の R2 の読み込みを遅らせる(1回ごとに少しずつ違う長さ)。ルームの中の順番待ちが無いと、ここで追い越しが起きる。
+  const realGet = ctx.env.PLANS.get.bind(ctx.env.PLANS);
+  let n = 0;
+  ctx.env.PLANS.get = async (key) => {
+    const wait = [30, 5, 20, 1][n++ % 4];
+    await new Promise((r) => setTimeout(r, wait));
+    return realGet(key);
+  };
+  const stub = ctx.env.ROOMS.get(ctx.env.ROOMS.idFromName(ctx.roomId));
+  const screenItem = { id: 800000, type: 'bed', x: 0, y: 9000, w: 1000, d: 2000, rot: 0, floor: 2 };
+  const bed = { type: 'bed', x: 1365, y: 5460, floor: 2 };
+  const [a, upd, b, c] = await Promise.all([
+    ctx.rooms.roomOp(ctx.env, ctx.roomId, 'placeItem', bed),
+    stub.fetch('https://room/update', {
+      method: 'POST',
+      body: JSON.stringify({ type: 'patch', clientId: 'screen-a', baseVersion: 1, patch: { collections: { items: { upserts: [screenItem], removes: [] } }, fields: {} } }),
+    }).then((r) => r.json()),
+    ctx.rooms.roomOp(ctx.env, ctx.roomId, 'placeItem', bed),
+    ctx.rooms.roomOp(ctx.env, ctx.roomId, 'addRoom', { name: '書庫', x: 20000, y: 20000, w: 2730, d: 3640 }),
+  ]);
+  for (const r of [a, b, c]) assert.equal(r.ok, true, JSON.stringify(r));
+  // 投げた順に1つずつ当たる
+  assert.deepEqual([a.version, upd.version, b.version, c.version], [2, 3, 4, 5]);
+  // 配信も版の順に、抜けなく1つずつ
+  assert.deepEqual(ws.messages().map((m) => m.version), [2, 3, 4, 5]);
+  // 積んだ差分も 2〜5 が1つずつ
+  const journal = Array.from(ctx.room.storage.data.keys()).filter((k) => k.startsWith('patch:')).sort();
+  assert.deepEqual(journal, [2, 3, 4, 5].map((v) => 'patch:' + String(v).padStart(12, '0')));
+  // 新しい物の id は重ならない(画面から届いた 800000 のあとは、それより大きい)
+  const ids = [a.changedIds[0], b.changedIds[0], c.changedIds[0]].map(String);
+  assert.equal(new Set(ids.concat(['800000'])).size, 4, ids.join(','));
+  assert.ok(Number(b.changedIds[0]) > 800000);
+  ctx.env.PLANS.get = realGet;
+  const got = await getPlan(ctx.env, ctx.roomId);
+  assert.equal(got.version, 5);
+  const all = got.plan.items.map((i) => String(i.id)).concat(got.plan.rooms.map((r) => String(r.id)), got.plan.walls.map((w) => String(w.id)));
+  assert.equal(new Set(all).size, all.length, '取得したプランの id に重なりが無い');
+});
