@@ -46,6 +46,8 @@
 
   function own(o, k) { return !!o && Object.prototype.hasOwnProperty.call(o, k); }
   function isPlainObject(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+  // id が UNSAFE_KEYS の名前か。画面はこの id を鍵に設定表を作るので、そういう物は受け取らない(Worker の検査と同じ決まり)。
+  function unsafeId(id) { return typeof id === 'string' && UNSAFE_KEYS.indexOf(id) >= 0; }
 
   // v のどこかに危ない鍵があるか(深すぎるときも true)。自分の鍵だけを見る。
   function hasUnsafeKey(v, depth) {
@@ -72,6 +74,7 @@
   // 受け手のプランが壊れないようにするため。飛ばすもの:
   //   - 集まり(walls・items・rooms)以外の名前、素のオブジェクトでない変更、配列でない upserts・removes
   //   - 素のオブジェクトでない物、文字と有限の数以外の removes の id
+  //   - id が UNSAFE_KEYS の名前(constructor・toString など)の物と removes の id
   //   - Object.prototype にある名前の欄(__proto__・constructor・toString など。プランの継承元や関数を差し替えるため)
   //   - 値のどこかに __proto__・constructor・prototype の鍵を含む物と欄
   function applyPatch(plan, patch, options) {
@@ -84,11 +87,11 @@
       var change = collections && own(collections, name) ? collections[name] : null;
       if (!isPlainObject(change)) return;
       var removed = new Set((Array.isArray(change.removes) ? change.removes : [])
-        .filter(function (id) { return typeof id === 'string' || (typeof id === 'number' && isFinite(id)); })
+        .filter(function (id) { return (typeof id === 'string' && !unsafeId(id)) || (typeof id === 'number' && isFinite(id)); })
         .map(String));
       var upserts = new Map();
       (Array.isArray(change.upserts) ? change.upserts : []).forEach(function (item) {
-        if (isPlainObject(item) && !hasUnsafeKey(item)) upserts.set(String(item.id), item);
+        if (isPlainObject(item) && !unsafeId(item.id) && !hasUnsafeKey(item)) upserts.set(String(item.id), item);
       });
       var next = plan[name]
         .filter(function (item) { return !removed.has(idOf(item)); })

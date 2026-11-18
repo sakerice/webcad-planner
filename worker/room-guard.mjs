@@ -37,7 +37,26 @@ export const ROOM_LIMITS = Object.freeze({
   maxKeyLength: 1000,        // 鍵の長さ
   maxIdLength: 200,          // 物の id の長さ
   maxCoord: 1e9,             // 座標の絶対値(mm。1000 km)
+  maxSameId: 8,              // 1つの集まりの中で同じ id の物の数(手元の最大は2。raised-floor-plan.json)
 });
+
+// 1つの集まりの中で、同じ id(String で同じになる物)が並ぶ数の最大。id の無い物は数えない。
+// 差分の当て方は、同じ id の物を全部その upsert の物に置き換えるので、差分の大きさはこの数だけ掛かって効く。
+export function maxSameId(plan) {
+  let most = 0;
+  for (const name of PlanCorePatch.COLLECTIONS) {
+    const list = plan && Array.isArray(plan[name]) ? plan[name] : [];
+    const count = new Map();
+    for (const item of list) {
+      if (!item || typeof item !== "object" || item.id === undefined || item.id === null) continue;
+      const k = String(item.id);
+      const n = (count.get(k) || 0) + 1;
+      count.set(k, n);
+      if (n > most) most = n;
+    }
+  }
+  return most;
+}
 
 const UNSAFE = new Set(PlanCorePatch.UNSAFE_KEYS);
 // 物の欄のうち、文字・数・真偽値・null だけを受ける欄。Worker の要約(workerSummarize)・検査(workerInspect)・
@@ -242,6 +261,7 @@ export function roomPlanProblem(plan) {
       if (m) return m;
     }
   }
+  if (maxSameId(plan) > ROOM_LIMITS.maxSameId) return `プランに同じ id の物が多すぎます（${ROOM_LIMITS.maxSameId} 個まで）`;
   for (const key of PlanCorePatch.SHARED_FIELDS) {
     if (!own(plan, key)) continue;
     const m = fieldTypeProblem(key, plan[key]);

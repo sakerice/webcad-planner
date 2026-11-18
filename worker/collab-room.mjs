@@ -16,7 +16,7 @@ import {
 import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
-import { roomPatchProblem, roomPlanProblem } from "./room-guard.mjs";
+import { roomPatchProblem, roomPlanProblem, maxSameId } from "./room-guard.mjs";
 
 // MCP 経由の差分の送り手の名前。画面の clientId は 24 桁の16進(index.html の sharedClientId)なので重ならない。
 export const MCP_CLIENT_ID = "mcp";
@@ -236,7 +236,7 @@ export class CollaborationRoom {
     if (!materialized) materialized = await this.materializePlan(meta, extraPatch);
     if (!materialized) return null;
     const savedAt = Date.now();
-    const next = { ...meta, savedAt, dirtySince: null, checkpointDueAt: null, journalBytes: 0 };
+    const next = { ...meta, savedAt, dirtySince: null, checkpointDueAt: null, journalBytes: 0, sameIdMax: maxSameId(materialized.plan) };
     next.planBytes = await this.writeSnapshot(materialized.plan, next);
     await this.clearJournal(materialized.entries);
     await this.state.storage.put("meta", next);
@@ -305,12 +305,34 @@ export class CollaborationRoom {
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  // R2 の本体の大きさ。meta に無ければ(この欄を足す前に作った部屋)R2 の物の大きさを見る。
-  async snapshotBytes(meta) {
-    const known = Number(meta.planBytes);
-    if (Number.isFinite(known) && known >= 0) return known;
-    const object = await this.env.PLANS.get(roomKey(meta.roomId));
-    return object && Number.isFinite(Number(object.size)) ? Number(object.size) : null;
+  // 大きさの見積もりに使う3つの数。meta に無い数(この欄を足す前に作った部屋)は、ここで1回だけ数え、
+  // learned に入れて返す(呼ぶ側が差分を積むときに meta へ書く。断るときは書かない)。
+  //   planBytes  … R2 の本体の大きさ(無ければ R2 の物の大きさ)
+  //   journalBytes … 積んである差分の大きさの合計(無ければ積んである差分を読んで数える)
+  //   sameIdMax  … 本体の中で同じ id の物が並ぶ数の最大(無ければ本体を読んで数える)。積んだ差分では増えない
+  //               (差分の当て方は、新しい id の物を1つ足すか、ある物を置き換えるか消すだけ)
+  async roomSizes(meta) {
+    const learned = {};
+    const finite = (v) => Number.isFinite(Number(v)) && v !== null && v !== "" && Number(v) >= 0;
+    let planBytes = finite(meta.planBytes) ? Number(meta.planBytes) : null;
+    let sameIdMax = finite(meta.sameIdMax) ? Number(meta.sameIdMax) : null;
+    if (planBytes === null || sameIdMax === null) {
+      const object = await this.env.PLANS.get(roomKey(meta.roomId));
+      if (!object) return null;
+      if (planBytes === null) planBytes = learned.planBytes = Number.isFinite(Number(object.size)) ? Number(object.size) : encodedSize(await object.text());
+      if (sameIdMax === null) {
+        let plan = null;
+        try { plan = JSON.parse(await object.text()); } catch { plan = null; }
+        sameIdMax = learned.sameIdMax = maxSameId(plan);
+      }
+    }
+    let journalBytes = finite(meta.journalBytes) ? Number(meta.journalBytes) : null;
+    if (journalBytes === null) {
+      journalBytes = 0;
+      for (const patch of (await this.listJournal()).values()) journalBytes += encodedSize(patch === undefined ? null : patch);
+      learned.journalBytes = journalBytes;
+    }
+    return { planBytes, journalBytes, sameIdMax, learned };
   }
 
   // 差分を1つ積んで全員へ流す。/update(画面)と /op(外の AI)が共用する。
@@ -318,9 +340,10 @@ export class CollaborationRoom {
   // 戻り値は進めたあとの meta。書き戻しで元の全体が R2 に無かったときは null(何も流さない)。
   // 当てたあとのプランが保存の上限(MAX_PLAN_BYTES)を超えるときは、何も変えずに {tooLarge: true} を返す
   // (受けてしまうと書き戻しが毎回失敗し、積んだ差分が増え続けて部屋が開けなくなるため)。
-  // 本体の大きさ + 積んだ差分の大きさの合計 + この差分 は、当てたあとの大きさの上の見積もり(差分は物と欄を
-  // 置き換えるだけなので、当てたあとはこれより大きくならない)。見積もりが上限を超えたときだけ、実際に当てて測り、
-  // 収まればその場で書き戻す。
+  // 当てたあとの大きさの上の見積もり(bound)は 本体 + (積んだ差分の合計 + この差分) × 同じ id の物の数の最大。
+  // 差分は物と欄を置き換えるだけだが、同じ id の物が k 個あると、upsert の物が k 個に写るため。
+  // bound が上限以下なら積む。上限の2倍を超えるなら当てずに断る(膨らんだプランをメモリに作らないため)。
+  // その間なら実際に当てて測り、収まればその場で書き戻す。
   // extraMeta(省略可)は meta に足して一緒に保存する欄(/op の nextId)。
   async commitPatch(meta, patch, clientId, extraMeta = null) {
     const now = Date.now();
@@ -339,11 +362,14 @@ export class CollaborationRoom {
     const patchBytes = encodedSize(encoded);
     // Durable Object の保存は値を V8 の形式で書き、日本語を含む文字は1字2バイトになる。積むかどうかは大きいほうで決める。
     const storedBytes = Math.max(patchBytes, encoded.length * 2);
-    const base = await this.snapshotBytes(meta);
-    const estimate = base === null ? Infinity : base + (Number(meta.journalBytes) || 0) + patchBytes;
+    const sizes = await this.roomSizes(meta);
+    if (!sizes) return null;
+    Object.assign(next, sizes.learned);
+    const bound = sizes.planBytes + (sizes.journalBytes + patchBytes) * Math.max(1, sizes.sameIdMax);
+    if (bound > 2 * MAX_PLAN_BYTES) return { tooLarge: true };
     let writeNow = storedBytes > MAX_JOURNAL_ENTRY_BYTES;
     let materialized = null;
-    if (estimate > MAX_PLAN_BYTES) {
+    if (bound > MAX_PLAN_BYTES) {
       materialized = await this.materializePlan(meta, patch);
       if (!materialized) return null;
       if (encodedSize(JSON.stringify(materialized.plan)) > MAX_PLAN_BYTES) return { tooLarge: true };
@@ -353,7 +379,7 @@ export class CollaborationRoom {
       next = await this.checkpoint(next, patch, false, materialized);
       if (!next) return null;
     } else {
-      next.journalBytes = (Number(meta.journalBytes) || 0) + patchBytes;
+      next.journalBytes = sizes.journalBytes + patchBytes;
       await this.state.storage.put(patchKey(version), patch);
       await this.state.storage.put("meta", next);
       await this.setNextAlarm(next);
@@ -515,6 +541,7 @@ export class CollaborationRoom {
       dirtySince: null,
       checkpointDueAt: null,
       journalBytes: 0,
+      sameIdMax: maxSameId(payload.plan),
     };
     next.planBytes = await this.writeSnapshot(payload.plan, next);
     await this.clearJournal(entries);
