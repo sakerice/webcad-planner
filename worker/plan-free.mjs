@@ -92,7 +92,7 @@ export function buildFreePrompt({ pages = 1, hint = "" } = {}) {
 // 利用者のひとこと（図面についての説明）。掃除して <user_hint> の囲みに入れる（500 字まで）。
 export function hintBlock(hint) {
   const text = Guard.cleanText(hint, 500);
-  return text ? "\n## 利用者の補足（図面についての説明。user_hint の囲み）\n" + Guard.wrap("user_hint", text) : "";
+  return text ? "\n## 利用者の補足（図面についての説明。user_hint の囲み）\n" + Guard.wrapSafe("user_hint", text) : "";
 }
 
 // ── 答えの形 ─────────────────────────────────────────────────────────
@@ -141,9 +141,9 @@ export function buildFreeReviewPrompt({ pages = 1, shots = [], answer = null, fa
     "家具の3Dモデルは読み込み途中で写っていないことがあります。写っていないだけの家具は消さないでください。",
     "notes には、直したことを日本語で短く書いてください。",
     facts.length ? "\n## 組み立てたときに機械で分かったこと（check_facts の囲み）\n"
-      + Guard.wrap("check_facts", facts.map((f) => "- " + Guard.clean(f, 200)).join("\n")) : "",
+      + Guard.wrapSafe("check_facts", facts.map((f) => "- " + Guard.clean(f, 200)).join("\n")) : "",
     // 前回の答えは AI の答えを画面が送り返した物（部屋の名前などに図面の文字が入る）。文字を掃除してから囲む。
-    "\n## 前回の答え（previous_answer の囲み）\n" + Guard.wrap("previous_answer", JSON.stringify(Guard.cleanDeep(answer, 2000))),
+    "\n## 前回の答え（previous_answer の囲み）\n" + Guard.wrapSafe("previous_answer", JSON.stringify(Guard.cleanDeep(answer, 2000))),
     "\n" + freeSpec(),
     hintBlock(hint),
   ].join("\n");

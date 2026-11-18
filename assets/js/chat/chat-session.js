@@ -126,7 +126,7 @@
   }
   // 道具の結果を囲む。値の文字をすべて掃除してから JSON にし、長さを切る(掃除した文字だけなので、切っても囲みは壊れない)。
   function resultText(tag, obj) {
-    return Guard.wrap(tag, cut(JSON.stringify(Guard.cleanDeep(obj, RESULT_VALUE_MAX)), RESULT_MAX_CHARS));
+    return Guard.wrapSafe(tag, cut(JSON.stringify(Guard.cleanDeep(obj, RESULT_VALUE_MAX)), RESULT_MAX_CHARS));
   }
   // UTF-8 のバイト数(TextEncoder に頼らない)。
   function utf8Bytes(str) {

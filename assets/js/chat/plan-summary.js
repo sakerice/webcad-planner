@@ -53,22 +53,34 @@
   //   - 切り詰めは文字(コードポイント)単位(絵文字を割らない)
   // 寸法や単位(6畳、2.5m×3m、3640mm、900〜1000mm)は変えない。
   var TAGS = ['plan_summary', 'user_request', 'tool_result', 'inspect_result', 'user_hint', 'previous_answer', 'check_facts'];
-  var OPEN_LIKE = '<＜﹤‹«〈〈《⟨⟪❮❬❰⧼˂ᐸ≪⋘︿︽';
-  var CLOSE_LIKE = '>＞﹥›»〉〉》⟩⟫❯❭❱⧽˃ᐳ≫⋙﹀︾';
+  var OPEN_LIKE = '<＜﹤‹«〈〈《⟨⟪❮❬❰⧼˂ᐸ≪⋘︿︽≺˱';
+  var CLOSE_LIKE = '>＞﹥›»〉〉》⟩⟫❯❭❱⧽˃ᐳ≫⋙﹀︾≻˲';
   var OPEN_RE = new RegExp('[' + OPEN_LIKE + ']|\\\\u\\{?0*3c\\}?|\\\\x3c|%3c', 'gi');
   var CLOSE_RE = new RegExp('[' + CLOSE_LIKE + ']|\\\\u\\{?0*3e\\}?|\\\\x3e|%3e', 'gi');
   // 囲みの中に残ってはいけない文字(isClean が見る)。
-  var DIRTY_RE = new RegExp('[\\p{Cf}\\p{Cs}\\u0000-\\u0009\\u000b-\\u001f\\u007f-\\u009f\\u2028\\u2029&' + OPEN_LIKE + CLOSE_LIKE + ']'
+  // 見えない文字(書式文字・片割れのサロゲート)は stripInvisible で見る(絵文字のつなぎは残すため)。
+  var DIRTY_RE = new RegExp('[\\u0000-\\u0009\\u000b-\\u001f\\u007f-\\u009f\\u2028\\u2029&' + OPEN_LIKE + CLOSE_LIKE + ']'
     + '|\\\\u\\{?0*3[ce]|\\\\x3[ce]|%3[ce]', 'iu');
   var INVISIBLE_RE = new RegExp('[\\p{Cf}\\p{Cs}]', 'gu');
+  // 絵文字のつなぎ(ZWJ、U+200D)は、絵文字(肌の色・異体字セレクタ U+FE0F が付いてもよい)と絵文字の間にあるときだけ残す
+  // (家族の絵文字（👨・👩・👧を ZWJ でつないだ物） を割らない)。それ以外の位置の ZWJ は落とす。ZWJ は山かっこを作れないので囲みの守りには関係しない。
+  var ZWJ = String.fromCharCode(0x200d);
+  var ZWJ_PREV_RE = new RegExp('\\p{Extended_Pictographic}[\\u{1F3FB}-\\u{1F3FF}\\uFE0F]*$', 'u');
+  var ZWJ_NEXT_RE = new RegExp('^\\p{Extended_Pictographic}', 'u');
+  // 決まりの見出し(worker/ai-rules.mjs の RULES_HEAD)。囲みの中に同じ見出しを書かせない。
+  var RULES_HEAD_RE = /【\s*入力の扱い\s*】/g;
+  var RULES_HEAD_ONE = /【\s*入力の扱い\s*】/;
 
   // 見えない文字(書式文字・片割れのサロゲート)を落とす。名前を書き込むとき(operations.js の tidyName、
   // plan-settable.js の tidyText)も同じ決まりで落とす(tools/tests/ai-input-guard.test.cjs が揃っていることを見る)。
   function stripInvisible(s) {
-    return String(s === undefined || s === null ? '' : s).replace(INVISIBLE_RE, '');
+    return String(s === undefined || s === null ? '' : s).replace(INVISIBLE_RE, function (ch, at, all) {
+      if (ch === ZWJ && ZWJ_PREV_RE.test(all.slice(Math.max(0, at - 8), at)) && ZWJ_NEXT_RE.test(all.slice(at + 1, at + 3))) return ch;
+      return '';
+    });
   }
   function neutralize(t) {
-    return t.replace(/&/g, '＆').replace(OPEN_RE, '〔').replace(CLOSE_RE, '〕');
+    return t.replace(/&/g, '＆').replace(OPEN_RE, '〔').replace(CLOSE_RE, '〕').replace(RULES_HEAD_RE, '〔入力の扱い〕');
   }
   // 文字(コードポイント)単位で max 字に切る。切ったら末尾に … を付ける。
   function cutChars(t, max) {
@@ -91,18 +103,22 @@
     return cutChars(t, max);
   }
   // 囲みの中に入れてよい文か(掃除で落とす・書き換える文字が無いか)。
-  function isClean(s) { return typeof s === 'string' && !DIRTY_RE.test(s); }
+  function isClean(s) { return typeof s === 'string' && !DIRTY_RE.test(s) && !RULES_HEAD_ONE.test(s) && stripInvisible(s) === s; }
   // 掃除した文を囲む。tag は TAGS のどれか。text は掃除してから渡す(wrapText は掃除もする)。
   function wrap(tag, text) {
     if (TAGS.indexOf(tag) < 0) throw new Error('知らない囲み: ' + tag);
     return '<' + tag + '>\n' + text + '\n</' + tag + '>';
   }
   function wrapText(tag, s, max) { return wrap(tag, cleanText(s, max)); }
+  // 掃除済みのはずの文を囲む。囲む直前に確かめ、掃除の決まりに合わなければ掃除し直してから囲む。
+  function wrapSafe(tag, text) { return wrap(tag, isClean(text) ? text : cleanText(text)); }
   // 値(入れ子の物)の文字をすべて1行の掃除に通した写し。鍵も掃除する。文字は maxEach 字まで。
   function cleanDeep(v, maxEach, depth) {
     depth = depth || 0;
     if (typeof v === 'string') return clean(v, maxEach);
-    if (!v || typeof v !== 'object' || depth > 8) return v;
+    if (!v || typeof v !== 'object') return v;
+    // 深すぎる入れ子は、文字にしてから掃除する(掃除しないまま返すと、深い所の文字で囲みを閉じられる)。
+    if (depth > 8) { var flat; try { flat = JSON.stringify(v); } catch (e) { flat = ''; } return clean(flat, maxEach); }
     if (Array.isArray(v)) return v.map(function (x) { return cleanDeep(x, maxEach, depth + 1); });
     var out = {};
     // 鍵が __proto__ でも継承元を差し替えないよう、自分の欄として書く。
@@ -262,6 +278,6 @@
   return {
     summarize: summarize, utf8Bytes: utf8Bytes, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES,
     clean: clean, cleanText: cleanText, cleanDeep: cleanDeep, stripInvisible: stripInvisible, cutChars: cutChars,
-    isClean: isClean, wrap: wrap, wrapText: wrapText, TAGS: TAGS
+    isClean: isClean, wrap: wrap, wrapText: wrapText, wrapSafe: wrapSafe, TAGS: TAGS
   };
 }));

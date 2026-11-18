@@ -690,8 +690,16 @@
   var ROOM_NAME_MAX = 40;
   var INVISIBLE_RE = new RegExp('[\\p{Cf}\\p{Cs}]', 'gu');
   var CONTROL_RE = new RegExp('[\\u0000-\\u001f\\u007f-\\u009f\\u2028\\u2029]', 'g');
+  // 絵文字のつなぎ(ZWJ、U+200D)は、絵文字と絵文字の間にあるときだけ残す(plan-summary.js の stripInvisible と同じ)。
+  var ZWJ = String.fromCharCode(0x200d);
+  var ZWJ_PREV_RE = new RegExp('\\p{Extended_Pictographic}[\\u{1F3FB}-\\u{1F3FF}\\uFE0F]*$', 'u');
+  var ZWJ_NEXT_RE = new RegExp('^\\p{Extended_Pictographic}', 'u');
+  function dropInvisible(ch, at, all) {
+    if (ch === ZWJ && ZWJ_PREV_RE.test(all.slice(Math.max(0, at - 8), at)) && ZWJ_NEXT_RE.test(all.slice(at + 1, at + 3))) return ch;
+    return '';
+  }
   function tidyName(s) {
-    return String(s).replace(INVISIBLE_RE, '').replace(CONTROL_RE, ' ').replace(/\s+/g, ' ').trim();
+    return String(s).replace(INVISIBLE_RE, dropInvisible).replace(CONTROL_RE, ' ').replace(/\s+/g, ' ').trim();
   }
   function nameError(name) {
     var len = Array.from(name).length;

@@ -55,7 +55,7 @@ export function buildRevisePrompt({ json, hint, page } = {}) {
 
 あなたが作ったJSON（previous_answer の囲み）:
 
-${Guard.wrap("previous_answer", answer)}
+${Guard.wrapSafe("previous_answer", answer)}
 
 2枚の画像を見比べて、**元の間取り図に合うように作り直したJSONを出力して
 ください。**
