@@ -17,6 +17,7 @@ import {
   ROOM_ID_RE, RETENTION_MS, MAX_PLAN_BYTES,
   json, roomKey, randomRoomId, validPlan, encodedSize, readJsonWithLimit,
 } from "./shared.mjs";
+import { roomPlanProblem } from "./room-guard.mjs";
 
 // この worker が扱うパスかどうか。router はこれを見て振り分ける。
 export function handlesRooms(pathname) {
@@ -52,6 +53,8 @@ async function createRoom(request, env) {
 // 戻り値: 成功 {roomId, url, version:1, expiresAt, savedAt}。失敗 {error:"invalid_plan", status:400} か {error:"plan_too_large", status:413}。
 export async function createRoomWithPlan(env, plan, origin) {
   if (!validPlan(plan)) return { error: "invalid_plan", status: 400 };
+  // 危ない鍵(__proto__ など)・深すぎ・大きすぎのプランは置かない(worker/room-guard.mjs)
+  if (roomPlanProblem(plan)) return { error: "invalid_plan", status: 400 };
   const encoded = JSON.stringify(plan);
   if (encodedSize(encoded) > MAX_PLAN_BYTES) return { error: "plan_too_large", status: 413 };
   // 共有の URL の土台を先に組み立てる。origin が URL として読めないときは、R2 に置く前にここで例外になる

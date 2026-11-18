@@ -16,6 +16,7 @@ import {
 import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
+import { roomPatchProblem, roomPlanProblem } from "./room-guard.mjs";
 
 // MCP 経由の差分の送り手の名前。画面の clientId は 24 桁の16進(index.html の sharedClientId)なので重ならない。
 export const MCP_CLIENT_ID = "mcp";
@@ -99,6 +100,8 @@ export function argsTooLarge(args) {
     const keys = Object.keys(v);
     if (keys.length > MAX_ARG_ARRAY) return `${where} の項目が多すぎます（${MAX_ARG_ARRAY} 件まで）`;
     for (const k of keys) {
+      // JSON.parse は __proto__ を自分の鍵として作る。写すときにプロトタイプを差し替えるので受け付けない。
+      if (PlanCorePatch.UNSAFE_KEYS.includes(k)) return `引数に使えない名前の項目があります（${k}）`;
       if (k.length > MAX_ARG_STRING) return `項目の名前が長すぎます（${MAX_ARG_STRING} 字まで）`;
       const m = walk(v[k], depth + 1, depth === 1 ? k : where);
       if (m) return m;
@@ -188,14 +191,21 @@ export class CollaborationRoom {
   async readSnapshot(meta) {
     const object = await this.env.PLANS.get(roomKey(meta.roomId));
     if (!object) return null;
-    try { return JSON.parse(await object.text()); } catch { return null; }
+    let plan;
+    try { plan = JSON.parse(await object.text()); } catch { return null; }
+    return plan && typeof plan === "object" && !Array.isArray(plan) ? plan : null;
   }
 
+  // 元の全体に、積んだ差分を順に当てる。
+  // 形を確かめる前(2026-11)に積まれた壊れた差分があっても、例外で落ちずに読めるようにする。
+  // applyPatch は形の合わない部分を飛ばすが、それでも例外が出た差分は飛ばして残りを当てる。
   async materializePlan(meta, extraPatch = null) {
     const plan = await this.readSnapshot(meta);
     if (!plan) return null;
     const entries = await this.listJournal();
-    for (const patch of entries.values()) applyPatch(plan, patch);
+    for (const [key, patch] of entries) {
+      try { applyPatch(plan, patch); } catch (e) { console.warn("[room] 積んだ差分を当てられないので飛ばす", key, e && e.message); }
+    }
     if (extraPatch) applyPatch(plan, extraPatch);
     return { plan, entries };
   }
@@ -331,6 +341,9 @@ export class CollaborationRoom {
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || payload.type !== "patch" || !payload.patch) return json({ error: "invalid_patch" }, 400);
+    // 形を確かめてから積む(壊れた差分を1回受けると、ルームのプランが開けなくなる・相手の画面が壊れるため)
+    const problem = roomPatchProblem(payload.patch);
+    if (problem) return json({ error: "invalid_patch", reason: problem }, 400);
     const next = await this.commitPatch(meta, payload.patch, payload.clientId);
     if (!next) return json({ error: "not_found" }, 404);
     return json({
@@ -433,6 +446,8 @@ export class CollaborationRoom {
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || !validPlan(payload.plan)) return json({ error: "invalid_plan" }, 400);
+    const problem = roomPlanProblem(payload.plan);
+    if (problem) return json({ error: "invalid_plan", reason: problem }, 400);
     const encoded = JSON.stringify(payload.plan);
     if (encodedSize(encoded) > MAX_PLAN_BYTES) return json({ error: "plan_too_large" }, 413);
     const now = Date.now();
