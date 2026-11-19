@@ -640,7 +640,8 @@ export class CollaborationRoom {
     const off = payload.off;
     if (!!meta.aiEditsOff !== off) {
       await this.state.storage.put("meta", { ...meta, aiEditsOff: off });
-      this.broadcast({ type: "ai-edits", off, clientId: String(payload.clientId || "").slice(0, 64) });
+      // 誰が切り替えたかは配らない(本文の clientId は名乗るだけの値で、他人を名乗れるため。画面は自分が押したかを手元で持つ)
+      this.broadcast({ type: "ai-edits", off });
     }
     return json({ aiEditsOff: off });
   }

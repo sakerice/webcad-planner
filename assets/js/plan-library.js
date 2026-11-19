@@ -50,6 +50,8 @@ var PlanLibrary = (function(){
   function put(entry){
     var id = entry.id || ('p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
     var meta = {id:id, name:entry.name, savedAt:Date.now(), thumb:entry.thumb||''};
+    // auto: 画面が自動で足した項目の種類(putSnapshot)。利用者が開いて保存し直す・名前を変えると付かなくなり、自動では消さない
+    if(entry.auto) meta.auto = String(entry.auto);
     // json: 書き出し済みの文字(写しを取った時点の中身を残すとき。putSnapshot)
     var json = typeof entry.json === 'string' ? entry.json : serialize(entry.plan);
     return tx(['meta','data'], 'readwrite', function(t){
@@ -60,7 +62,7 @@ var PlanLibrary = (function(){
   function rename(id, name){
     return tx(['meta'], 'readwrite', function(t){
       var s = t.objectStore('meta'), r = s.get(id);
-      r.onsuccess = function(){ if(r.result){ r.result.name = name; s.put(r.result); } };
+      r.onsuccess = function(){ if(r.result){ r.result.name = name; delete r.result.auto; s.put(r.result); } };
     });
   }
   function remove(id){
@@ -121,13 +123,23 @@ var PlanLibrary = (function(){
     }).catch(function(e){ alert('ブラウザへの保存に失敗しました: '+(e && e.message || e)); return null; });
   }
 
-  // 開いているプランをそのまま写して一覧へ足す(名前は呼ぶ側が決める。開いているプランと一覧の結び付き・未保存の印は変えない)。
+  // 開いているプランをそのまま写して一覧へ新しい項目として足す(名前は呼ぶ側が決める。開いているプランと一覧の結び付き・未保存の印は変えない)。
   // json は呼ぶ側が先に書き出した文字(書き出した時点の中身を残す)。縮小画像もここで同期に撮り始めるので、
-  // 呼んだ直後に DATA が入れ替わっても、写すのは呼んだ時点のプラン。id を渡すとその項目を上書きする。
-  // 戻り値は一覧の項目(meta)。保存できなければ失敗の Promise。
+  // 呼んだ直後に DATA が入れ替わっても、写すのは呼んだ時点のプラン。
+  // auto(種類の名前)と keep を渡すと、同じ種類の自動の項目を新しい keep 個だけ残し、古いものを消す
+  // (印が残っている項目だけ。利用者が保存し直した・名前を変えた項目は印が無いので消さない。消すのに失敗しても足した項目は残る)。
+  // 戻り値は足した項目(meta)。保存できなければ失敗の Promise。
   function putSnapshot(opts){
     var shot = thumbnail();
-    return shot.then(function(thumb){ return put({id:opts.id || null, name:opts.name, json:opts.json, thumb:thumb}); });
+    return shot.then(function(thumb){ return put({name:opts.name, json:opts.json, thumb:thumb, auto:opts.auto}); })
+      .then(function(meta){
+        if(!opts.auto || !(opts.keep > 0)) return meta;
+        return list().then(function(rows){
+          var old = rows.filter(function(m){ return m.auto === String(opts.auto) && m.id !== meta.id; })
+            .slice(Math.max(0, opts.keep - 1));
+          return Promise.all(old.map(function(m){ return remove(m.id); }));
+        }).catch(function(e){ console.warn('[WebCAD] 自動の項目を片付けられませんでした', e); }).then(function(){ return meta; });
+      });
   }
 
   // 読み込んだプランを、ファイルの読込と同じ手順で、いま編集している側へ入れる

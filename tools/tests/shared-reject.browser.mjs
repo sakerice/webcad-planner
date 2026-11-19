@@ -7,7 +7,8 @@
 // 413(本文か当てたあとのプランが保存の上限を超える)も、待っても通らないので 400 と同じ扱いにする。
 // 429(多すぎる)・5xx・通信の失敗は、これまでどおり送り直す(この挙動は変えない)。
 // 取り直す前に、手元のプラン(断られた変更と、応答待ちの間の編集を含む)を「保存一覧」に
-// 「共同編集に反映できなかった変更（日時）」として残す。5 分以内に続けて断られたら、同じ項目を上書きする。
+// 「共同編集に反映できなかった変更（日時）」として残す。断られるたびに新しい項目として足し、この自動の項目は新しい 10 個まで
+// (利用者が保存し直した・名前を変えた項目は消さない)。
 // 10MB を超えるプランも一覧に残せること。残せなかったときは、知らせに「ファイルに保存」のボタンを出す。
 // 幅 375 で知らせの写真を撮る(UI_SHOT_DIR があればそこへ)。
 //
@@ -146,19 +147,26 @@ try {
     assert.equal(kept[0].extra, otherThick + 15, '応答待ちの間の編集が一覧に残っていない');
     const s = await state(page);
     assert.equal(s.thick, serverThick, '部屋の状態に戻っていない');
-    // 続けてもう一度断られる → 同じ項目を上書き(一覧は増えない。中身は新しいほう)
+    // 続けて別の変更が断られる → 別の項目として足す(1回目の変更も残る)
     await editWall(page, serverThick + 45);
     await sleep(3500);
     kept = await keptRows(page);
-    assert.equal(kept.length, 1, `続けて断られたのに一覧が増えた: ${kept.length}`);
-    assert.equal(kept[0].thick, serverThick + 45, '上書きした中身が新しいほうでない');
-    // 5 分を過ぎたあとなら、別の項目として足す
-    await page.evaluate(() => { SHARED.rejectKeep.at -= 6 * 60 * 1000; });
-    await editWall(page, serverThick + 50);
-    await sleep(3500);
-    kept = await keptRows(page);
-    assert.equal(kept.length, 2, `5 分を過ぎたのに上書きした: ${kept.length}`);
-    console.log('ok  応答待ちの間の編集も一覧に残り、5 分以内の繰り返しは上書き、過ぎたら別の項目にした');
+    assert.equal(kept.length, 2, `続けて断られた変更が別の項目になっていない: ${kept.length}`);
+    assert.deepEqual(kept.map((k) => k.thick).sort(), [serverThick + 30, serverThick + 45].sort(), '1回目の変更が残っていない');
+    // 自動の項目は新しい 10 個まで。利用者が名前を変えた項目と、自分で保存した項目は消さない
+    const kept0 = kept.find((k) => k.thick === serverThick + 30);
+    await page.evaluate(async (id) => {
+      await PlanLibrary.rename(id, '大事な変更');
+      await PlanLibrary.put({ name: '共同編集に反映できなかった変更（1/1 00:00）', plan: DATA });
+    }, kept0.id);
+    await page.evaluate(async () => {
+      for (let i = 0; i < 12; i++) { await PlanLibrary.putSnapshot({ name: '共同編集に反映できなかった変更（1/1 00:0' + (i % 10) + '）', json: JSON.stringify(DATA), auto: 'shared-rejected', keep: 10 }); await new Promise((r) => setTimeout(r, 3)); }
+    });
+    const rows = await page.evaluate(async () => (await PlanLibrary.list()).map((m) => ({ name: m.name, auto: m.auto || '' })));
+    assert.equal(rows.filter((r) => r.auto === 'shared-rejected').length, 10, '自動の項目が 10 個になっていない: ' + JSON.stringify(rows));
+    assert.ok(rows.some((r) => r.name === '大事な変更'), '名前を変えた項目が消えた');
+    assert.ok(rows.some((r) => r.name === '共同編集に反映できなかった変更（1/1 00:00）' && !r.auto), '利用者が保存した項目が消えた');
+    console.log('ok  応答待ちの間の編集も一覧に残り、続けて断られた変更は別の項目になり、自動の項目は 10 個まで(利用者の項目は消さない)');
     await context.close();
   }
 

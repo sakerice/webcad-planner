@@ -2304,6 +2304,9 @@ var StorageAdapter = (function(){
   // 溜まり続けないよう、最後に保存した時刻の新しい ROOM_KEEP 個だけ残し、それより古い部屋の枠は消す(saveRoom のたび)。
   // 部屋の本体はクラウドにあり(最後の更新から 60 日)、この枠はこのブラウザの写し。
   var ROOM_PREFIX='webcad-room-', ROOM_INDEX_KEY='webcad-room-index', ROOM_KEEP=5;
+  // 前回のプラン(KEY)を最後に保存した時刻。部屋の枠の時刻と比べ、このブラウザで最後に使ったのが共同編集かを見る(savedAt)。
+  // この欄を足す前に保存したプランには無い(0 として扱う)。
+  var SAVED_AT_KEY='webcad-plan-v1-at';
   function roomIndexFrom(raw){
     var list=[];
     try{ list=raw?JSON.parse(raw):[]; }catch(e){ list=[]; }
@@ -2327,7 +2330,9 @@ var StorageAdapter = (function(){
       var json=serialize(data);
       return openDB().then(function(db){
         return new Promise(function(resolve,reject){
-          var r=store(db,'readwrite').put(json,KEY);
+          var s=store(db,'readwrite');
+          var r=s.put(json,KEY);
+          try{ s.put(Date.now(),SAVED_AT_KEY); }catch(e){}
           r.onsuccess=function(){ try{ localStorage.removeItem(LEGACY_LS_KEY); }catch(e){} resolve(true); };
           r.onerror=function(){ reject(r.error); };
         });
@@ -2417,6 +2422,16 @@ var StorageAdapter = (function(){
       }).catch(function(){ return []; });
     },
     ROOM_KEEP: ROOM_KEEP,
+    // 前回のプランを最後に保存した時刻(無ければ 0)
+    savedAt: function(){
+      return openDB().then(function(db){
+        return new Promise(function(resolve){
+          var r=store(db,'readonly').get(SAVED_AT_KEY);
+          r.onsuccess=function(){ resolve(Number(r.result)||0); };
+          r.onerror=function(){ resolve(0); };
+        });
+      }).catch(function(){ return 0; });
+    },
     hasData: function(){
       return openDB().then(function(db){
         return new Promise(function(resolve){
@@ -2541,7 +2556,7 @@ function planTidyNoticeText(lost){
 // 画面の上に出す1行の知らせ。閉じるボタンか 12 秒で消える。
 // action(省略可)は {label, run}。知らせの中にボタンを1つ出し、押すと run を呼ぶ(押したあとも知らせは残す)。
 // ボタンのある知らせは、押す前に消えないよう 30 秒にする。
-var PLAN_NOTICE_TIMER=null;
+var PLAN_NOTICE_TIMER=null, PLAN_NOTICE_ONCLOSE=null;
 function showPlanNotice(text,action){
   if(typeof document==='undefined') return;
   var box=document.getElementById('plan-notice');
@@ -2554,9 +2569,16 @@ function showPlanNotice(text,action){
     b.textContent=action?action.label:'';
     b.onclick=action?function(){ try{ action.run(); }catch(e){ console.warn('[WebCAD] 知らせのボタン',e); } }:null;
   }
+  PLAN_NOTICE_ONCLOSE=(action&&action.onClose)||null;
   box.hidden=false;
   clearTimeout(PLAN_NOTICE_TIMER);
   PLAN_NOTICE_TIMER=setTimeout(hidePlanNotice,action?30000:12000);
+}
+// 知らせの「×」。action.onClose があれば呼んでから閉じる(時間で消えたときは呼ばない)
+function closePlanNotice(){
+  var f=PLAN_NOTICE_ONCLOSE; PLAN_NOTICE_ONCLOSE=null;
+  if(f){ try{ f(); }catch(e){} }
+  hidePlanNotice();
 }
 function hidePlanNotice(){
   clearTimeout(PLAN_NOTICE_TIMER);

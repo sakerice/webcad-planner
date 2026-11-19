@@ -31,14 +31,15 @@ const ROOM = 'FriendsRoomForOwnPlan1';
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const SHOT_DIR = process.env.UI_SHOT_DIR || '';
 
 const browser = await chromium.launch();
 const errors = [];
 
 // 1つのブラウザ(IndexedDB を共有する)。dialogs は出た確認の文、answer は次の確認への答え(既定ははい)。
-async function openBrowser() {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  const st = { roomStatus: 200, gets: 0, updates: 0, saves: 0, creates: 0, dialogs: [], answer: true };
+async function openBrowser(width = 1280) {
+  const context = await browser.newContext({ viewport: { width, height: width < 700 ? 812 : 900 } });
+  const st = { roomStatus: 200, updateStatus: 200, gets: 0, updates: 0, updateBodies: [], saves: 0, creates: 0, dialogs: [], answer: true };
   await context.addInitScript(() => {
     class FakeWS { constructor() { this.readyState = 1; window.__ws = this; setTimeout(() => this.onopen && this.onopen(), 0); } send() {} close() { this.readyState = 3; } }
     window.WebSocket = FakeWS;
@@ -48,7 +49,11 @@ async function openBrowser() {
     if (st.roomStatus !== 200) return route.fulfill({ status: st.roomStatus, contentType: 'application/json', body: '{"error":"expired"}' });
     return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'x-room-version': '1', 'x-room-expires-at': String(Date.now() + 1e9), 'x-room-saved-at': String(Date.now()) }, body: JSON.stringify(ROOM_PLAN) });
   });
-  await context.route(/\/api\/rooms\/[A-Za-z0-9_-]{22}\/update$/, (route) => { st.updates++; return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ version: 1 + st.updates, expiresAt: Date.now() + 1e9 }) }); });
+  await context.route(/\/api\/rooms\/[A-Za-z0-9_-]{22}\/update$/, (route) => {
+    st.updates++; st.updateBodies.push({ url: route.request().url(), body: JSON.parse(route.request().postData()) });
+    if (st.updateStatus !== 200) return route.fulfill({ status: st.updateStatus, contentType: 'application/json', body: '{"error":"x"}' });
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ version: 1 + st.updates, expiresAt: Date.now() + 1e9 }) });
+  });
   await context.route(/\/api\/rooms\/[A-Za-z0-9_-]{22}\/save$/, (route) => { st.saves++; return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ version: 50 + st.saves, expiresAt: Date.now() + 1e9, savedAt: Date.now() }) }); });
   await context.route(/\/api\/rooms$/, (route) => {
     st.creates++;
@@ -114,6 +119,15 @@ try {
   await ready(page);
   await page.waitForFunction((sig) => JSON.stringify([DATA.walls.length, DATA.walls[0].x1, DATA.walls[0].y1, DATA.walls[0].x2, DATA.walls[0].y2]) === sig, ownSig, T);
   assert.ok(st.dialogs.some((d) => /前回保存したプランがあります/.test(d)), '前回のプランを開く確認が出ていない');
+  // 最後に使ったのが共同編集なので、「前回は共同編集をしていました。」と[共同編集を開く]が出る。「×」で閉じると、その部屋は次から出さない
+  const lastNotice = () => page.evaluate(() => ({ hidden: document.getElementById('plan-notice').hidden, text: document.getElementById('plan-notice-text').textContent, action: document.getElementById('plan-notice-action').hidden ? '' : document.getElementById('plan-notice-action').textContent }));
+  await page.waitForFunction(() => !document.getElementById('plan-notice').hidden, null, T);
+  assert.deepEqual(await lastNotice(), { hidden: false, text: '前回は共同編集をしていました。', action: '共同編集を開く' });
+  await page.click('#plan-notice .plan-notice-close');
+  await page.reload();
+  await ready(page);
+  await sleep(2500);
+  assert.equal((await lastNotice()).hidden, true, '閉じた部屋の知らせがまた出た');
   assert.equal(await page.evaluate(() => SHARED.roomId), null);
   console.log('ok  自宅のプラン → 知人の共有リンクで編集・保存 → 普通に開き直すと自宅のプランが出た');
 
@@ -183,6 +197,8 @@ try {
   await page.waitForFunction((sig) => JSON.stringify([DATA.walls.length, DATA.walls[0].x1, DATA.walls[0].y1, DATA.walls[0].x2, DATA.walls[0].y2]) === sig, ownSig, T);
   await page.evaluate(() => createSharedRoom());
   await page.waitForFunction(() => SHARED.roomId === 'MyOwnCreatedRoom000000', null, T);
+  // 作った時点で部屋の枠に入る(編集せずに閉じても、保存一覧の「共同編集」から開ける)
+  await page.waitForFunction(() => new Promise((r) => StorageAdapter.loadRoom('MyOwnCreatedRoom000000').then((p) => r(!!p))), null, T);
   await page.evaluate(async () => { DATA.walls[0].thick = 177; sharedMarkIdsDirty([DATA.walls[0].id]); markDirty(); await sharedAutoSaveLocal(); });
   const own = await idb(page, 'webcad-plan-v1');
   assert.equal(sigOf(own), ownSig);
@@ -204,6 +220,69 @@ try {
   console.log('ok  部屋の枠は新しい 5 つだけ残り、前回のプランの枠には触れない');
 
   await context.close();
+
+  // ── 7. 幅 375: 起動時の「前回は共同編集をしていました。」→[共同編集を開く]で入り直す。写真 ──
+  //       そのあと保存一覧から別の部屋を開くとき、まだ送っていない変更を先に送る。送れなければ確かめ、写しに残す
+  {
+    const ROOM2 = 'SecondFriendsRoom00000';
+    const { context: c2, st: s2 } = await openBrowser(375);
+    let p2 = await c2.newPage();
+    // 自分のプランを先に保存しておく(ふつうの場面。保存が無いと、起動時に既定の間取りを選ぶ画面が重なる)
+    await p2.goto(APP + '?preset=blank');
+    await ready(p2);
+    await p2.evaluate(() => { window.__before = DATA; });
+    await p2.setInputFiles('#import-file', OWN_FILE);
+    await p2.waitForFunction(() => window.DATA !== window.__before && DATA.walls.length > 4, null, T);
+    await p2.evaluate(() => savePlanToStorage());
+    await p2.close();
+    await sleep(20);
+    // 2つの部屋を順に開いて自動保存させる(部屋の写しは、編集か保存の知らせで書かれる)
+    for (const id of [ROOM2, ROOM]) {
+      p2 = await c2.newPage();
+      await p2.goto(APP + '#room=' + id);
+      await p2.waitForFunction((id) => window.SHARED && SHARED.roomId === id, id, T);
+      await p2.evaluate(() => sharedAutoSaveLocal());
+      await p2.close();
+      await sleep(20);
+    }
+    p2 = await c2.newPage();
+    await p2.goto(APP);
+    await ready(p2);
+    await p2.waitForFunction(() => DATA.walls.length > 4, null, T); // 自分のプランが開く
+    await sleep(1500);
+    await p2.waitForFunction(() => !document.getElementById('plan-notice').hidden && /前回は共同編集をしていました/.test(document.getElementById('plan-notice-text').textContent), null, T);
+    const box = await p2.evaluate(() => {
+      const r = (id) => { const e = document.getElementById(id); if (!e || getComputedStyle(e).display === 'none') return null; const b = e.getBoundingClientRect(); return { left: b.left, right: b.right, top: b.top, bottom: b.bottom }; };
+      return { n: r('plan-notice'), nav: r('bottom-nav'), fab: r('chat-fab'), vw: innerWidth };
+    });
+    const over = (a, b) => a && b && !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+    assert.ok(box.n.left >= 0 && box.n.right <= box.vw && !over(box.n, box.nav) && !over(box.n, box.fab), '知らせがほかの部品に重なる: ' + JSON.stringify(box));
+    if (SHOT_DIR) await p2.screenshot({ path: join(SHOT_DIR, 'last-shared-notice-375.png') });
+    await p2.click('#plan-notice-action');
+    await p2.waitForFunction((id) => SHARED.roomId === id, ROOM, T);
+    console.log('ok  幅 375: 起動時に「前回は共同編集をしていました。」を出し、[共同編集を開く]で入り直した');
+
+    // 送れる場合: 別の部屋を開く前に、まだ送っていない変更を送る
+    await p2.evaluate(() => { DATA.walls[0].thick = 181; sharedMarkIdsDirty([DATA.walls[0].id]); clearTimeout(SHARED.timer); SHARED.timer = null; });
+    const sent0 = s2.updateBodies.length;
+    await p2.evaluate((id) => openSharedRoomFromList(id), ROOM2);
+    await p2.waitForFunction((id) => SHARED.roomId === id, ROOM2, T);
+    const sent = s2.updateBodies.slice(sent0);
+    assert.ok(sent.some((u) => u.url.includes(ROOM + '/update') && u.body.patch.collections.walls.upserts.some((w) => w.thick === 181)), '別の部屋を開く前に、まだ送っていない変更を送っていない');
+    // 送れない場合: 確かめ、「いいえ」なら今の部屋に残る。「はい」なら抜け、変更は写しに残る
+    s2.updateStatus = 503;
+    await p2.evaluate(() => { DATA.walls[0].thick = 182; sharedMarkIdsDirty([DATA.walls[0].id]); clearTimeout(SHARED.timer); SHARED.timer = null; });
+    s2.dialogs.length = 0; s2.answer = false;
+    await p2.evaluate((id) => openSharedRoomFromList(id), ROOM);
+    assert.ok(s2.dialogs.some((d) => /まだ送れていない変更があります/.test(d)), '送れなかったことを確かめていない: ' + JSON.stringify(s2.dialogs));
+    assert.equal(await p2.evaluate(() => SHARED.roomId), ROOM2, '「いいえ」なのに部屋を移った');
+    s2.answer = true;
+    await p2.evaluate((id) => openSharedRoomFromList(id), ROOM);
+    await p2.waitForFunction((id) => SHARED.roomId === id, ROOM, T);
+    assert.equal((await idb(p2, 'webcad-room-' + ROOM2)).walls[0].thick, 182, '送れなかった変更が写しに残っていない');
+    console.log('ok  別の部屋を開く前にまだ送っていない変更を送り、送れなければ確かめて、写しに残した');
+    await c2.close();
+  }
   assert.deepEqual(errors, [], 'ページの例外:\n' + errors.join('\n'));
 } finally {
   await browser.close();

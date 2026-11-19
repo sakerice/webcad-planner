@@ -177,6 +177,13 @@ try {
     await aiPatch(page, W[2], T0[2] + 30);
     await page.click('#ai-edit-undo');
     assert.equal((await thicks(page))[2], T0[2], '知らせの「元に戻す」で戻らない');
+    // AI の変更のあとに自分が編集したら、知らせの「元に戻す」は消える(押すと自分の編集が戻るため)。「止める」は残す
+    await aiPatch(page, W[2], T0[2] + 35);
+    assert.equal(await page.evaluate(() => document.getElementById('ai-edit-undo').hidden), false);
+    await ownEdit(page, 0, T0[0] + 3);
+    await sleep(50);
+    const btns = await page.evaluate(() => ({ undo: document.getElementById('ai-edit-undo').hidden, stop: document.getElementById('ai-edit-stop').hidden }));
+    assert.deepEqual(btns, { undo: true, stop: false }, '自分の編集のあとも知らせの「元に戻す」が残っている');
     console.log('ok  知らせの「止める」で部屋へ止める知らせを送り、「元に戻す」で戻り、60 秒で消えた');
     await context.close();
   }
@@ -189,11 +196,15 @@ try {
     assert.deepEqual(await sw(), { checked: true, vis: true }, '既定は「受け付ける」');
     await page.click('#share-ai-allow');
     await page.waitForFunction(() => SHARED.aiEditsOff === true && /止めました/.test(document.getElementById('share-ai-status').textContent), null, T);
-    assert.deepEqual(st.toggles, [{ off: true, clientId: await page.evaluate(() => sharedClientId()) }]);
+    assert.deepEqual(st.toggles, [{ off: true }], '名乗るだけの clientId を送っている');
+    // 自分が押した切り替えの知らせが部屋から戻っても、「ほかの参加者が」とは出さない
+    await page.evaluate(() => window.__ws.onmessage({ data: JSON.stringify({ type: 'ai-edits', off: true }) }));
+    assert.doesNotMatch(await page.evaluate(() => document.getElementById('share-ai-status').textContent), /ほかの参加者/);
     assert.equal((await sw()).checked, false);
     // ほかの人が戻した知らせが映る
-    await page.evaluate(() => window.__ws.onmessage({ data: JSON.stringify({ type: 'ai-edits', off: false, clientId: 'x' }) }));
+    await page.evaluate(() => window.__ws.onmessage({ data: JSON.stringify({ type: 'ai-edits', off: false }) }));
     assert.equal((await sw()).checked, true);
+    assert.match(await page.evaluate(() => document.getElementById('share-ai-status').textContent), /ほかの参加者が、外部の AI からの変更を受け付けるようにしました/);
     // 失敗したら元に戻して知らせる
     st.toggleStatus = 500;
     await page.click('#share-ai-allow');

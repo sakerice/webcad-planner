@@ -370,8 +370,9 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   animation:app-loading-spin .72s linear infinite;
 }
 @keyframes app-loading-spin{to{transform:rotate(360deg)}}
-/* プランを開いたときの1行の知らせ(app-state.js の showPlanNotice) */
-.plan-notice{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px + var(--ai-bar-space,0px));left:12px;right:12px;margin:0 auto;width:fit-content;z-index:970;
+/* プランを開いたときの1行の知らせ(app-state.js の showPlanNotice)。起動時の既定プランの選択(#preset-choice-modal 1000)より手前に出す
+   (自分のプランが無いとき、「前回は共同編集をしていました。」のボタンが押せるように)。共有のダイアログ(15000)よりは奥 */
+.plan-notice{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px + var(--ai-bar-space,0px));left:12px;right:12px;margin:0 auto;width:fit-content;z-index:1002;
   display:flex;align-items:center;gap:10px;max-width:min(560px,calc(100vw - 24px));box-sizing:border-box;padding:10px 8px 10px 14px;
   border-radius:12px;background:rgba(255,255,255,0.98);border:1px solid var(--hp-border,#d6dde4);color:var(--hp-text,#2d2a27);
   font-size:13px;font-weight:700;line-height:1.5;box-shadow:0 8px 22px rgba(24,20,18,0.16)}
@@ -3205,7 +3206,7 @@ input[type="reset"]:focus-visible{
   </div>
 </div>
 <div id="ai-edit-bar" class="ai-edit-bar" role="status" aria-live="polite" hidden><div class="ai-edit-text"><strong id="ai-edit-title">外部の AI が編集中です</strong><span id="ai-edit-sub">「元に戻す」で、AI が直す前に戻せます。</span></div><div class="ai-edit-actions"><button type="button" id="ai-edit-undo" class="ai-edit-btn" onclick="sharedUndoAiFromBar()">元に戻す</button><button type="button" id="ai-edit-stop" class="ai-edit-btn ai-edit-stop" onclick="sharedSetAiEdits(true)">止める</button><button type="button" class="plan-notice-close" onclick="sharedHideAiBar()" aria-label="閉じる">×</button></div></div>
-<div id="plan-notice" class="plan-notice" role="status" aria-live="polite" hidden><span id="plan-notice-text"></span><button type="button" id="plan-notice-action" class="plan-notice-action" hidden></button><button type="button" class="plan-notice-close" onclick="hidePlanNotice()" aria-label="閉じる">×</button></div>
+<div id="plan-notice" class="plan-notice" role="status" aria-live="polite" hidden><span id="plan-notice-text"></span><button type="button" id="plan-notice-action" class="plan-notice-action" hidden></button><button type="button" class="plan-notice-close" onclick="closePlanNotice()" aria-label="閉じる">×</button></div>
 <div id="share-overlay" class="share-overlay" role="dialog" aria-modal="true" aria-labelledby="share-title" onclick="closeShareDialogOnBackdrop(event)">
   <div class="share-card">
     <div class="share-head">
@@ -20022,6 +20023,22 @@ async function loadPlanFromStorageButton(){
     alert('保存されたプランが空のため読み込みませんでした。');
   }
 }
+// 共有リンクなしで開いたとき、このブラウザで最後に使ったのが共同編集だった(いちばん新しい部屋の写しが、前回のプランの
+// 保存より新しい)なら、「前回は共同編集をしていました。」と[共同編集を開く]を出す(自分のプランは今までどおり開く)。
+// 「×」で閉じると、その部屋については次から出さない(SHARED_LAST_NOTICE_OFF_KEY。最近の 20 部屋まで覚える)。
+var SHARED_LAST_NOTICE_OFF_KEY='webcad-last-shared-notice-off';
+function sharedLastNoticeOff(){try{var v=JSON.parse(localStorage.getItem(SHARED_LAST_NOTICE_OFF_KEY)||'[]');return Array.isArray(v)?v:[];}catch(e){return [];}}
+async function offerLastSharedRoom(){
+  if(SHARED.roomId||sharedRoomFromLocation())return false;
+  var rooms=await StorageAdapter.listRooms();var top=rooms[0];if(!top)return false;
+  var ownAt=await StorageAdapter.savedAt();
+  if(!(Number(top.at)>ownAt)||sharedLastNoticeOff().indexOf(top.roomId)>=0)return false;
+  showPlanNotice('前回は共同編集をしていました。',{label:'共同編集を開く',run:function(){hidePlanNotice();openSharedRoomFromList(top.roomId);},onClose:function(){
+    var list=sharedLastNoticeOff().filter(function(id){return id!==top.roomId;});list.unshift(top.roomId);
+    try{localStorage.setItem(SHARED_LAST_NOTICE_OFF_KEY,JSON.stringify(list.slice(0,20)));}catch(e){}
+  }});
+  return true;
+}
 async function checkStorageOnInit(){
   if(!(await StorageAdapter.hasData())) return;
   if(confirm('前回保存したプランがあります。読み込みますか？')){
@@ -20087,6 +20104,8 @@ function sharedMarkIdsDirty(ids){
 }
 function sharedRememberEditTargets(){
   if(!SHARED.roomId||SHARED.applying)return;
+  // 自分の編集で履歴が積まれたあと、外部 AI の知らせの「元に戻す」を出し直す(saveState はこのあと履歴を積む)
+  if(SHARED.aiBarUntil>Date.now())setTimeout(sharedRenderAiBar,0);
   var targets=[];
   if(ST.selected)targets.push(ST.selected);
   if(Array.isArray(ST.multiSelected))targets=targets.concat(ST.multiSelected);
@@ -20412,7 +20431,8 @@ function sharedRenderAiBar(){
     var title=document.getElementById('ai-edit-title'),sub=document.getElementById('ai-edit-sub');
     if(title)title.textContent=stopped?'外部の AI からの変更を止めました':'外部の AI が編集中です';
     if(sub)sub.textContent=stopped?'共同編集の画面で、また受け付けるようにできます。':'「元に戻す」で、AI が直す前に戻せます。';
-    var undo=document.getElementById('ai-edit-undo');if(undo)undo.hidden=!HISTORY.length;
+    // 「元に戻す」は、履歴のいちばん上が AI の変更の前の写しのときだけ出す(AI のあとに自分が編集したら、押すと自分の編集が戻るため消す)
+    var g=SHARED.aiGroup;var undo=document.getElementById('ai-edit-undo');if(undo)undo.hidden=!(g&&HISTORY.length&&HISTORY[HISTORY.length-1]===g.snap);
     var stop=document.getElementById('ai-edit-stop');if(stop)stop.hidden=stopped;
     SHARED.aiBarTimer=setTimeout(sharedRenderAiBar,Math.max(200,SHARED.aiBarUntil-now));
   }
@@ -20421,7 +20441,7 @@ function sharedRenderAiBar(){
   document.documentElement.style.setProperty('--ai-bar-space',show?(bar.offsetHeight+8)+'px':'0px');
 }
 function sharedHideAiBar(){SHARED.aiBarHidden=true;sharedRenderAiBar();}
-function sharedUndoAiFromBar(){undoAction();sharedRenderAiBar();}
+function sharedUndoAiFromBar(){var g=SHARED.aiGroup;if(g&&HISTORY.length&&HISTORY[HISTORY.length-1]===g.snap)undoAction();sharedRenderAiBar();}
 // 外部の AI からの変更を止める(off=true)・受け付ける。部屋の meta に持ち、部屋にいる全員へ配られる(type "ai-edits")。
 // 先に画面を切り替え、失敗したら元に戻して知らせる。返事を待つ間に、ほかの人の切り替えの知らせ(type "ai-edits")や
 // 次の切り替えが来ていたら、そちらが新しいので返事では上書きしない(SHARED.aiEditsSeq)。
@@ -20429,11 +20449,15 @@ async function sharedSetAiEdits(off){
   if(!SHARED.roomId)return;
   off=!!off;var prev=!!SHARED.aiEditsOff,roomId=SHARED.roomId;
   SHARED.aiEditsOff=off;var seq=SHARED.aiEditsSeq=(SHARED.aiEditsSeq||0)+1;renderSharedUi();sharedRenderAiBar();
+  // 自分が押したことを覚える(部屋からの知らせは誰が押したかを持たない)。知らせは返事より先に届く。
+  // 値が変わらず知らせが来なかったときのため、返事のあと少し待って忘れる。
+  var expect=SHARED.aiEditsExpect=SHARED.aiEditsExpect||[];expect.push(off);
   var ok=false;
   try{
-    var res=await fetch('/api/rooms/'+roomId+'/ai-edits',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({off:off,clientId:sharedClientId()})});
+    var res=await fetch('/api/rooms/'+roomId+'/ai-edits',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({off:off})});
     ok=res.ok;
   }catch(e){}
+  setTimeout(function(){var i=expect.indexOf(off);if(i>=0)expect.splice(i,1);},ok?3000:0);
   if(SHARED.roomId!==roomId)return;
   if(ok){aiAppSetStatus(off?'外部の AI からの変更を止めました。':'外部の AI からの変更を受け付けます。');}
   else{
@@ -20478,18 +20502,16 @@ async function sharedSyncNow(){
   return SHARED.sendPromise;
 }
 // 共同編集で変更が断られて部屋の最新へ戻す直前に、手元のプランを保存一覧へ写す。
-// 名前は「共同編集に反映できなかった変更（11/20 14:05）」。同じ部屋で 5 分以内に続けて断られたときは、直前に足した項目を
-// 上書きする(同じ大きな画像を貼り直す、など同じことの繰り返しで一覧が埋まらないように。上書きするのは、この画面が足した項目だけ)。
+// 名前は「共同編集に反映できなかった変更（11/20 14:05）」。断られるたびに新しい項目として足す(上書きすると前の変更が残らない)。
+// 一覧が埋まらないよう、この自動の項目は新しい SHARED_REJECT_KEEP 個だけ残し、古いものから消す(PlanLibrary.putSnapshot の auto)。
+// 利用者が開いて保存し直した・名前を変えた項目は自動の印が外れるので消さない。
 // 戻り値: {ok, json(写した中身の文字), at}。ok が false なら呼ぶ側がファイルへの書き出しを勧める。
-var SHARED_REJECT_KEEP_MS=5*60*1000;
+var SHARED_REJECT_KEEP=10;
 async function sharedKeepRejectedLocal(){
   var at=Date.now(),json=serializeDataSnapshot();
-  var prev=SHARED.rejectKeep;
-  var reuse=prev&&prev.roomId===SHARED.roomId&&at-prev.at<SHARED_REJECT_KEEP_MS?prev.id:null;
   try{
     if(typeof PlanLibrary==='undefined'||!PlanLibrary.putSnapshot)throw new Error('no library');
-    var meta=await PlanLibrary.putSnapshot({id:reuse,name:'共同編集に反映できなかった変更（'+PlanLibrary.nowLabel(at)+'）',json:json});
-    SHARED.rejectKeep={id:meta.id,at:at,roomId:SHARED.roomId};
+    await PlanLibrary.putSnapshot({name:'共同編集に反映できなかった変更（'+PlanLibrary.nowLabel(at)+'）',json:json,auto:'shared-rejected',keep:SHARED_REJECT_KEEP});
     return {ok:true,json:json,at:at};
   }catch(err){
     console.warn('[WebCAD] 断られた変更を保存一覧へ写せませんでした',err);
@@ -20543,7 +20565,10 @@ function connectSharedSocket(){
     }
     if(message.type==='presence'){SHARED.people=message.people||[];renderSharedUi();return;}
     if(message.type==='ai-edits'){SHARED.aiEditsOff=message.off===true;SHARED.aiEditsSeq=(SHARED.aiEditsSeq||0)+1;
-      if(message.clientId!==sharedClientId())aiAppSetStatus(SHARED.aiEditsOff?'ほかの参加者が、外部の AI からの変更を止めました。':'ほかの参加者が、外部の AI からの変更を受け付けるようにしました。');renderSharedUi();sharedRenderAiBar();return;}
+      // 自分が押した切り替えの知らせなら、ほかの参加者の知らせは出さない(部屋は誰が押したかを配らない。SHARED.aiEditsExpect)
+      var mine=(SHARED.aiEditsExpect||[]).indexOf(SHARED.aiEditsOff);
+      if(mine>=0)SHARED.aiEditsExpect.splice(mine,1);
+      else aiAppSetStatus(SHARED.aiEditsOff?'ほかの参加者が、外部の AI からの変更を止めました。':'ほかの参加者が、外部の AI からの変更を受け付けるようにしました。');renderSharedUi();sharedRenderAiBar();return;}
     if(message.type==='patch'&&Number(message.version||0)>SHARED.version){
       SHARED.version=Number(message.version);SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
       var own=message.clientId===sharedClientId();if(own)SHARED.lastLocalVersion=SHARED.version;
@@ -20640,6 +20665,7 @@ function openSharedRoomCopy(){
 async function openSharedRoomFromList(roomId){
   if(SHARED.roomId===roomId)return true;
   if(!SHARED.roomId&&DIRTY&&!confirm('いま開いているプランに、保存していない変更があります。開くと失われます。開きますか？'))return false;
+  if(SHARED.roomId&&!(await sharedFlushBeforeLeaving('ほかの共同編集を開くと')))return false;
   if(SHARED.roomId)await sharedDetach();
   var url=new URL(location.href);url.searchParams.delete('room');url.hash='room='+roomId;history.replaceState(null,'',url.toString());
   var ok=await initSharedRoomFromUrl();
@@ -20664,14 +20690,23 @@ async function createSharedRoom(){
     normalizeLegacyFurnitureItems();ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();captureViewState();
     var response=await fetch('/api/rooms',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;})});
     if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'共同編集ルームを作成できませんでした。');
-    var result=await response.json();SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();history.replaceState(null,'',result.url);connectSharedSocket();clearDirty();renderSharedUi();sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();
+    var result=await response.json();SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();history.replaceState(null,'',result.url);connectSharedSocket();clearDirty();renderSharedUi();
+    // 作った時点で部屋の枠へ入れる(編集せずに閉じても、保存一覧の「共同編集」と起動時の知らせから開けるように)
+    StorageAdapter.saveRoom(result.roomId,DATA).catch(function(){});sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();
   }catch(e){sharedSetStatus(e.message||'共同編集ルームを作成できませんでした。',true);}
   finally{if(button)button.disabled=false;}
+}
+// 部屋を抜ける前に、まだ送っていない変更を送る。送れなかったら確かめる(はいなら抜ける。変更は部屋の写しに残る)。
+// 抜けてよければ true。
+async function sharedFlushBeforeLeaving(what){
+  try{await flushSharedChanges();}catch(e){}
+  if(!SHARED.roomId||!sharedHasTrackedChanges())return true;
+  return confirm('共同編集に、まだ送れていない変更があります。'+what+'、その変更はほかの参加者に届かず、このブラウザの写し(保存一覧の「共同編集」)にだけ残ります。続けますか？');
 }
 // 部屋から抜ける(この端末だけ)。抜ける前に、部屋の枠へ今の中身を入れておく。
 async function sharedDetach(){
   var roomId=SHARED.roomId;
-  closeSharedSocket();clearTimeout(SHARED.localAutoTimer);SHARED.localAutoTimer=null;clearTimeout(SHARED.rebuildTimer);
+  closeSharedSocket();clearTimeout(SHARED.localAutoTimer);SHARED.localAutoTimer=null;clearTimeout(SHARED.rebuildTimer);clearTimeout(SHARED.timer);SHARED.timer=null;
   if(roomId){try{await StorageAdapter.saveRoom(roomId,DATA);}catch(e){}}
   SHARED.roomId=null;SHARED.version=0;SHARED.expiresAt=0;SHARED.savedAt=0;SHARED.baseline=null;SHARED.people=[];sharedResetDirtyTracking();
   SHARED.aiEditsOff=false;SHARED.aiGroup=null;SHARED.aiBarUntil=0;sharedRenderAiBar();
@@ -20681,6 +20716,7 @@ async function sharedDetach(){
 }
 async function leaveSharedRoom(){
   if(!confirm('この端末で共同編集を終了しますか？\nクラウド上のプランと、ほかの参加者の接続は維持されます。'))return;
+  if(!(await sharedFlushBeforeLeaving('終了すると')))return;
   await sharedDetach();
   sharedSetStatus('共同編集を終了しました。このプランは「保存一覧」の「共同編集」からまた開けます。');
 }
@@ -25393,7 +25429,7 @@ function jisPrint(){
 // ─── Init storage / shared room ───────────────────
 // URLの共同編集プランを、端末内の保存データより優先する。
 initSharedRoomFromUrl().then(async function(joined){
-  if(!joined) await checkStorageOnInit();
+  if(!joined){ await checkStorageOnInit(); await offerLastSharedRoom().catch(function(){}); }
   // 既定間取りで始まる起動なら、どの間取りで始めるかを選んでもらう
   maybeOfferPresetChoice();
 });

@@ -73,7 +73,7 @@ test('止めると meta に残って全員へ届き、/op を断る。/read は�
   assert.equal(meta.version, metaBefore.version, '版が進んだ');
   assert.equal(meta.expiresAt, metaBefore.expiresAt, '期限が変わった');
   for (const ws of [a, b]) {
-    assert.deepEqual(ws.messages(), [{ type: 'ai-edits', off: true, clientId: 'screen-a' }]);
+    assert.deepEqual(ws.messages(), [{ type: 'ai-edits', off: true }], '本文の clientId を配った');
     ws.clear();
   }
   // 同じ値をもう一度: 書かず、配らない
@@ -98,7 +98,7 @@ test('止めると meta に残って全員へ届き、/op を断る。/read は�
   // 戻すと通る
   const on = await http(env, 'POST', `/api/rooms/${roomId}/ai-edits`, { off: false });
   assert.deepEqual(await on.json(), { aiEditsOff: false });
-  assert.deepEqual(b.messages().filter((m) => m.type === 'ai-edits'), [{ type: 'ai-edits', off: false, clientId: '' }]);
+  assert.deepEqual(b.messages().filter((m) => m.type === 'ai-edits'), [{ type: 'ai-edits', off: false }]);
   const ok = await rooms.roomOp(env, roomId, 'placeItem', { type: 'bed', x: 1365, y: 5460, floor: 2 });
   assert.equal(ok.ok, true, JSON.stringify(ok));
 });
