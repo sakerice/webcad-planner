@@ -99,7 +99,7 @@
     max_tokens: '返事が長くなりすぎて、途中で止まりました。依頼を小さく分けて頼み直してください。',
     refusal: 'AI がこの依頼を断りました。間取りをどう直したいかを書いて、頼み直してください。',
     pause_turn: 'AI の返事が途中で止まりました。もう一度お試しください。',
-    request_too_long: '頼む文は500字までにしてください。',
+    request_too_long: Guard.REQUEST_TOO_LONG_MESSAGE,   // 字数は ChatPlanSummary.REQUEST_MAX_CHARS から作る
     too_long: '頼みごとが多すぎて、途中で続けられなくなりました。少しずつ分けてお試しください。',
     failed: '依頼を最後まで進められませんでした。もう一度お試しください。'
   };

@@ -212,6 +212,7 @@
           var inp = $('chat-input');
           if (!inp || S.busy) return;
           inp.value = t;
+          if (inp._charLimitUpdate) inp._charLimitUpdate();
           inp.focus();
         });
         ex.appendChild(b);
@@ -570,15 +571,15 @@
 
   // ── AI に渡す文の字数の上限 ───────────────────────────────────────────
   // 利用者の文が AI に渡る入力欄(チャット・読み取りの補足・画像AI と動画AI の仕上げメモ)は、
-  // ChatPlanSummary.REQUEST_MAX_CHARS 字(500。文字=コードポイントで数える。Worker も同じ値を見る)まで。
+  // ChatPlanSummary.REQUEST_MAX_CHARS 字(文字=コードポイントで数える。Worker も同じ値を見る)まで。
   //   - ふだんは何も出さない。残りが CHAR_NEAR 字を切ったら「あと 32 字」を出す
   //   - 上限を超える分は入れない(貼り付けは入る分だけ入れ、打ち込みは末尾を戻す)。そのときは
-  //     「500字までです。超えた分は入りませんでした。」と出す(黙って切らない)
+  //     「(上限)字までです。超えた分は入りませんでした。」と出す(黙って切らない。字数は上限の値から作る)
   //   - 読み上げは、見せている文が「残りわずか」「超えた分を入れなかった」に変わったときだけ(1字ごとには読まない)
   var CHAR_NEAR = 50;
   function charMax() {
     var G = root.ChatPlanSummary;
-    return G && G.REQUEST_MAX_CHARS > 0 ? G.REQUEST_MAX_CHARS : 500;
+    return G && G.REQUEST_MAX_CHARS > 0 ? G.REQUEST_MAX_CHARS : 300;   // 予備(plan-summary.js が読めないとき)。値は plan-summary.js と同じ
   }
   function charCount(v) { return Array.from(String(v || '')).length; }
   function attachCharLimit(input, note) {

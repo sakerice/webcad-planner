@@ -472,7 +472,7 @@ test('今日の回数を使い切ったら quota_exceeded で、Claude を呼ば
 });
 
 // ── 本文の大きさ ───────────────────────────────────────────────────
-// 大きい本文は要約の側で作る(依頼の文は 500 字まで)。
+// 大きい本文は要約の側で作る(依頼の文は 300 字まで)。
 const bigAsk = (n) => '<plan_summary>\n' + 'a'.repeat(n) + '\n</plan_summary>\n\n<user_request>\nx\n</user_request>';
 
 test('本文が 160KB を超えたら too_large（Claude も回数も使わない）', async () => {
@@ -484,7 +484,7 @@ test('本文が 160KB を超えたら too_large（Claude も回数も使わな�
   assert.equal((await res.json()).error, 'too_large');
   assert.equal(sent.length, 0);
   assert.equal(q.calls.length, 0);
-  // 依頼の文は 500 字までなので、大きさは要約の側で作る
+  // 依頼の文は 300 字までなので、大きさは要約の側で作る
   const ok = await chat({ messages: [{ role: 'user', content: bigAsk(150 * 1024) }] }, env({ AI_QUOTA: q.AI_QUOTA }), fetchImpl);
   assert.equal(ok.status, 200, '160KB 以内が通らない');
 });
@@ -677,19 +677,19 @@ test('本文の文字列は JSON.stringify(buildConversationRequest(...)) と同
   assert.equal(viaText, viaObj);
 });
 
-// ── 依頼の文の長さ(1件 500 字。文字=コードポイントで数える) ──────────────
-test('依頼の文は 500 字まで。501 字は 400(Claude も回数も使わない)。絵文字は1字。古い形・前の依頼にも効く', async () => {
+// ── 依頼の文の長さ(1件 300 字。文字=コードポイントで数える) ──────────────
+test('依頼の文は 300 字まで。301 字は 400(Claude も回数も使わない)。絵文字は1字。古い形・前の依頼にも効く', async () => {
   const wrap = (t) => '<plan_summary>\n要約\n</plan_summary>\n\n<user_request>\n' + t + '\n</user_request>';
   const cases = [
-    ['500字', [{ role: 'user', content: wrap('あ'.repeat(500)) }], 200],
-    ['絵文字500個', [{ role: 'user', content: wrap('😀'.repeat(500)) }], 200],
-    ['501字', [{ role: 'user', content: wrap('あ'.repeat(501)) }], 400],
-    ['絵文字501個', [{ role: 'user', content: wrap('😀'.repeat(501)) }], 400],
-    ['古い形 500字', [{ role: 'user', content: '<plan_summary>\n' + 'い'.repeat(3000) + '\n</plan_summary>\n\n' + 'あ'.repeat(500) }], 200],
-    ['古い形 501字', [{ role: 'user', content: '<plan_summary>\n要約\n</plan_summary>\n\n' + 'あ'.repeat(501) }], 400],
-    ['囲みなし 501字', [{ role: 'user', content: 'あ'.repeat(501) }], 400],
-    ['text ブロック 501字', [{ role: 'user', content: [{ type: 'text', text: 'あ'.repeat(501) }] }], 400],
-    ['前の依頼 501字', [{ role: 'user', content: '<user_request>\n' + 'あ'.repeat(501) + '\n</user_request>' }, { role: 'assistant', content: 'はい' }, { role: 'user', content: wrap('次') }], 400],
+    ['300字', [{ role: 'user', content: wrap('あ'.repeat(300)) }], 200],
+    ['絵文字300個', [{ role: 'user', content: wrap('😀'.repeat(300)) }], 200],
+    ['301字', [{ role: 'user', content: wrap('あ'.repeat(301)) }], 400],
+    ['絵文字301個', [{ role: 'user', content: wrap('😀'.repeat(301)) }], 400],
+    ['古い形 300字', [{ role: 'user', content: '<plan_summary>\n' + 'い'.repeat(3000) + '\n</plan_summary>\n\n' + 'あ'.repeat(300) }], 200],
+    ['古い形 301字', [{ role: 'user', content: '<plan_summary>\n要約\n</plan_summary>\n\n' + 'あ'.repeat(301) }], 400],
+    ['囲みなし 301字', [{ role: 'user', content: 'あ'.repeat(301) }], 400],
+    ['text ブロック 301字', [{ role: 'user', content: [{ type: 'text', text: 'あ'.repeat(301) }] }], 400],
+    ['前の依頼 301字', [{ role: 'user', content: '<user_request>\n' + 'あ'.repeat(301) + '\n</user_request>' }, { role: 'assistant', content: 'はい' }, { role: 'user', content: wrap('次') }], 400],
   ];
   for (const [name, messages, want] of cases) {
     const q = await realQuota();
@@ -699,7 +699,7 @@ test('依頼の文は 500 字まで。501 字は 400(Claude も回数も使わ�
     if (want === 400) {
       const body = await res.json();
       assert.equal(body.code, 'request_too_long', name);
-      assert.match(body.message, /500字まで/, name);
+      assert.equal(body.message, '頼む文は300字までにしてください。', name);
       assert.equal(sent.length, 0, name + ': Claude を呼んだ');
       assert.equal(q.calls.length, 0, name + ': 回数を数えた');
     }

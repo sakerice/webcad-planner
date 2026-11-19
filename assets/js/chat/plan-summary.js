@@ -55,7 +55,9 @@
   // 利用者が AI に渡す文(チャットの依頼1件、読み取りのひとこと)の長さの上限。文字(コードポイント)で数える。
   // 画面の入力欄(chat-ui.js の attachCharLimit)と Worker(worker/chat.mjs、routes-ai.mjs のひとこと)が同じこの値を見る。
   // 攻撃の文を長く送らせないため、AI の利用量を抑えるため。
-  var REQUEST_MAX_CHARS = 500;
+  // 値を変えるときはここだけを変える(利用者向けの文もこの値から作る: REQUEST_TOO_LONG_MESSAGE、chat-ui.js の表示)。
+  var REQUEST_MAX_CHARS = 300;
+  var REQUEST_TOO_LONG_MESSAGE = '頼む文は' + REQUEST_MAX_CHARS + '字までにしてください。';
   function countChars(s) { return Array.from(String(s === undefined || s === null ? '' : s)).length; }
   var TAGS = ['plan_summary', 'user_request', 'tool_result', 'inspect_result', 'user_hint', 'previous_answer', 'check_facts'];
   var OPEN_LIKE = '<＜﹤‹«〈〈《⟨⟪❮❬❰⧼˂ᐸ≪⋘︿︽≺˱';
@@ -283,7 +285,7 @@
   return {
     summarize: summarize, utf8Bytes: utf8Bytes, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES,
     clean: clean, cleanText: cleanText, cleanDeep: cleanDeep, stripInvisible: stripInvisible, cutChars: cutChars,
-    REQUEST_MAX_CHARS: REQUEST_MAX_CHARS, countChars: countChars,
+    REQUEST_MAX_CHARS: REQUEST_MAX_CHARS, REQUEST_TOO_LONG_MESSAGE: REQUEST_TOO_LONG_MESSAGE, countChars: countChars,
     isClean: isClean, wrap: wrap, wrapText: wrapText, wrapSafe: wrapSafe, TAGS: TAGS
   };
 }));

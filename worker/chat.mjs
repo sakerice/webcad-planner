@@ -114,7 +114,7 @@ export function chatConfig(env) {
 // 失敗の返事。既存の /api/ai/* と同じ { error, message } に、同じ値の code を足す。
 const MESSAGES = {
   bad_request: "依頼の形が正しくありません。",
-  request_too_long: "頼む文は500字までにしてください。",
+  request_too_long: Guard.REQUEST_TOO_LONG_MESSAGE,   // 字数は REQUEST_MAX_CHARS から作る(画面と同じ文)
   too_large: "会話が長すぎます。新しい会話で頼み直してください。",
   quota_exceeded: "本日ぶんのチャットを使い切りました。明日またお試しください。",
   ticket_invalid: "依頼の期限が切れました。もう一度頼み直してください。",

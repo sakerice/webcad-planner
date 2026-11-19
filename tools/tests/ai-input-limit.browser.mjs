@@ -1,7 +1,7 @@
-// AI に渡す文の入力欄の字数の上限(500 字。文字=コードポイント)と、個人情報の注意を、実物の画面で確かめる。
+// AI に渡す文の入力欄の字数の上限(300 字。文字=コードポイント)と、個人情報の注意を、実物の画面で確かめる。
 //
-//   1. 「AIに頼む」の入力欄: ふだんは字数を出さない。残り 50 字を切ると「あと N 字」を出す。500 字で止まり、
-//      貼り付け・打ち込みで超えた分は入らず「500字までです。超えた分は入りませんでした。」を出す。絵文字は1字と数える。
+//   1. 「AIに頼む」の入力欄: ふだんは字数を出さない。残り 50 字を切ると「あと N 字」を出す。300 字で止まり、
+//      貼り付け・打ち込みで超えた分は入らず「300字までです。超えた分は入りませんでした。」を出す。絵文字は1字と数える。
 //      送ったあとは字数の表示を消す。
 //   2. 読み取りの補足・画像AI と動画AI の仕上げメモの入力欄も、同じ上限と同じ見せ方。
 //   3. 個人情報の注意が、チャットの入力欄のそばと読み取りの画面に見えている。スマホ幅(375px)で送るボタンが画面の中にある。
@@ -17,7 +17,7 @@ const SHOT_DIR = process.env.SHOT_DIR || '';
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 const T = { timeout: 60000 };
-const MAX = 500;
+const MAX = 300;
 
 async function open(browser, viewport) {
   const page = await browser.newPage({ viewport });
@@ -53,9 +53,9 @@ const setValue = (page, id, text) => page.evaluate(({ i, t }) => {
 async function checkField(page, input, note, label) {
   await setValue(page, input, '');
   assert.equal((await count(page, note)).hidden, true, label + ': 空のときに字数が出ている');
-  await setValue(page, input, 'あ'.repeat(440));
+  await setValue(page, input, 'あ'.repeat(MAX - 60));
   assert.equal((await count(page, note)).hidden, true, label + ': 残り 60 字で字数が出ている');
-  await setValue(page, input, 'あ'.repeat(468));
+  await setValue(page, input, 'あ'.repeat(MAX - 32));
   let c = await count(page, note);
   assert.equal(c.hidden, false, label + ': 残り 32 字で字数が出ていない');
   assert.equal(c.text, 'あと 32 字', label);
@@ -69,13 +69,13 @@ async function checkField(page, input, note, label) {
   if (await page.isVisible('#' + input)) { await page.focus('#' + input); await page.keyboard.insertText('い'); }
   else await setValue(page, input, '😀'.repeat(MAX) + 'い');
   assert.equal(await valueLen(page, input), MAX, label + ': 打ち込みで上限を超えた');
-  assert.match((await count(page, note)).text, /500字までです。超えた分は入りませんでした。/, label);
+  assert.match((await count(page, note)).text, /300字までです。超えた分は入りませんでした。/, label);
   // 貼り付けは入る分だけ入れる
-  await setValue(page, input, 'あ'.repeat(490));
+  await setValue(page, input, 'あ'.repeat(MAX - 10));
   await paste(page, input, 'い'.repeat(100));
   assert.equal(await valueLen(page, input), MAX, label + ': 貼り付けで上限を超えた');
   assert.ok((await page.inputValue('#' + input)).endsWith('い'.repeat(10)), label + ': 貼り付けた先頭の 10 字が入っていない');
-  assert.match((await count(page, note)).text, /500字までです/, label);
+  assert.match((await count(page, note)).text, /300字までです/, label);
   // 読み上げの欄は、上限に近づいた・超えた分を入れなかったときに書かれる
   const live = await page.evaluate((i) => { const n = document.getElementById(i).nextElementSibling; return n && n.getAttribute('aria-live') + ':' + n.textContent; }, note);
   assert.match(live, /^polite:/, label);
@@ -113,7 +113,7 @@ try {
       assert.ok(box && box.y >= 0 && box.y + box.height <= vp.height + 1 && box.x >= 0 && box.x + box.width <= vp.width + 1, `${name}: #${id} が画面の外にある ${JSON.stringify(box)}`);
     }
     if (SHOT_DIR) await p.screenshot({ path: join(SHOT_DIR, `${name}-chat.png`) });
-    await setValue(p, 'chat-input', '寝室にベッドを置いて。'.repeat(43) + 'あ'.repeat(4));
+    await setValue(p, 'chat-input', '寝室にベッドを置いて。'.repeat(25) + 'あ'.repeat(2));
     assert.equal((await count(p, 'chat-input-count')).text, 'あと 23 字', name);
     const sendBox = await p.locator('#chat-send').boundingBox();
     assert.ok(sendBox && sendBox.y + sendBox.height <= vp.height + 1, `${name}: 字数を出すと送るボタンが押し出される`);

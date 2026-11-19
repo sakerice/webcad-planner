@@ -417,21 +417,20 @@ test('道具の名前と利用者向けの文の表は、操作 10 個と検査�
 
 // ── 送る量の決まり ───────────────────────────────────────────────────
 
-test('前の依頼は直近 6 件まで、文はそれぞれ 400 字までに切る', async () => {
+test('前の依頼は直近 6 件まで、文はそれぞれ 400 字までに切る(利用者の文は依頼の上限 300 字なので切れない)', async () => {
   const script = [];
   for (let i = 0; i < 8; i++) script.push({ sse: sseFor([{ type: 'text', text: 'い'.repeat(500) + i }]) });
   const { s, fetch } = makeSession(script);
-  for (let i = 0; i < 8; i++) assert.equal((await s.send('あ'.repeat(450) + i)).ok, true);
+  for (let i = 0; i < 8; i++) assert.equal((await s.send('あ'.repeat(299) + i)).ok, true);
   const msgs = fetch.calls[7].body.messages;
   assert.equal(msgs.length, 13);
   const u0 = inner(msgs[0].content, 'user_request');
-  assert.ok(u0.startsWith('あ'.repeat(10)));
-  assert.equal(u0.length, 400);
-  assert.ok(u0.endsWith('…'));
+  assert.equal(u0, 'あ'.repeat(299) + '1');   // 前の依頼は直近 6 件(1〜6 回め。0 回めは落ちる)。切れずにそのまま
   assert.equal(msgs[1].content.length, 400);
+  assert.ok(msgs[1].content.endsWith('…'));
   // 直近 6 件は 2〜7 回めの依頼(0・1 回めは落ちる)
   assert.equal(fetch.calls[6].body.messages.length, 13);
-  assert.ok(msgs[12].content.endsWith(userRequest('あ'.repeat(450) + '7')));
+  assert.ok(msgs[12].content.endsWith(userRequest('あ'.repeat(299) + '7')));
 });
 
 test('道具の結果の文は 2,000 字まで。検査の指摘と警告は 10 件ずつ、残りは「ほか N 件」', async () => {
@@ -558,12 +557,12 @@ test('グローバルに触らない', () => {
   assert.ok(!/[^.\w]fetch\(/.test(src), 'グローバルの fetch を呼んでいる');
 });
 
-test('依頼の文は 500 字まで。超えたら送らずに request_too_long(絵文字は1字)', async () => {
+test('依頼の文は 300 字まで。超えたら送らずに request_too_long(絵文字は1字)', async () => {
   const { s, fetch } = makeSession([{ sse: sseFor([{ type: 'text', text: 'はい' }]) }]);
-  const r = await s.send('あ'.repeat(501));
+  const r = await s.send('あ'.repeat(301));
   assert.equal(r.ok, false);
   assert.equal(r.reason, 'request_too_long');
-  assert.match(r.message, /500字まで/);
+  assert.equal(r.message, '頼む文は300字までにしてください。');
   assert.equal(fetch.calls.length, 0);
-  assert.equal((await s.send('😀'.repeat(500))).ok, true);
+  assert.equal((await s.send('😀'.repeat(300))).ok, true);
 });

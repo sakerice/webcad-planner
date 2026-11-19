@@ -195,8 +195,8 @@ test('画面のチャット: どの攻撃の文でも、AI に渡る system と 
     const pc = await mod('worker/plan-ctx.mjs');
     let plan = attackPlan(a);
     const s = Session.create({ fetch: w.fetch, getPlan: () => plan, ctxFor: () => pc.workerOpsCtx(plan, {}), tools, summarize, AbortController });
-    // 依頼の文は 500 字まで(画面と Worker が断る)。名前などのプランの中の文には長いまま入れる
-    const ask = Array.from(a).slice(0, 500).join('');
+    // 依頼の文は REQUEST_MAX_CHARS(300)字まで(画面と Worker が断る)。名前などのプランの中の文には長いまま入れる
+    const ask = Array.from(a).slice(0, require('../../assets/js/chat/plan-summary.js').REQUEST_MAX_CHARS).join('');
     const r1 = await s.send(ask);
     assert.equal(r1.ok, true, `${id}: ${JSON.stringify(r1)}`);
     const r2 = await s.send(ask);
@@ -226,7 +226,7 @@ test('画面のチャット: 寸法つきのふつうの依頼は、掃除で変
 test('Worker: 囲みの形になっていない messages(古い画面・直接の呼び出し)は Worker が囲んで送る', async () => {
   for (const { id, value: a } of ATTACKS) {
     const w = await workerFetch([{ content: [{ type: 'text', text: 'はい' }], stop: 'end_turn' }]);
-    const ask = Array.from(a).slice(0, 400).join('');   // 依頼の文は 500 字まで
+    const ask = Array.from(a).slice(0, require('../../assets/js/chat/plan-summary.js').REQUEST_MAX_CHARS).join('');   // 依頼の文の上限まで
     const messages = [
       { role: 'user', content: '<plan_summary>\n部屋「' + a + '」\n</plan_summary>\n\n' + ask },
       { role: 'assistant', content: [{ type: 'tool_use', id: 'x1', name: 'renameRoom', input: { id: 'rm_a', name: a } }] },
