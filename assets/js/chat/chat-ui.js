@@ -383,7 +383,7 @@
     S.entries.push(entry);
     S.current = entry;
     var inp = $('chat-input');
-    if (inp) inp.value = '';
+    if (inp) { inp.value = ''; if (inp._charLimitUpdate) inp._charLimitUpdate(); }
     appendEntry(entry);
     setBusy(true);
     var M = root.ChatSession.MESSAGES;
@@ -568,8 +568,83 @@
     appendEntry(note);
   }
 
+  // ── AI に渡す文の字数の上限 ───────────────────────────────────────────
+  // 利用者の文が AI に渡る入力欄(チャット・読み取りの補足・画像AI と動画AI の仕上げメモ)は、
+  // ChatPlanSummary.REQUEST_MAX_CHARS 字(500。文字=コードポイントで数える。Worker も同じ値を見る)まで。
+  //   - ふだんは何も出さない。残りが CHAR_NEAR 字を切ったら「あと 32 字」を出す
+  //   - 上限を超える分は入れない(貼り付けは入る分だけ入れ、打ち込みは末尾を戻す)。そのときは
+  //     「500字までです。超えた分は入りませんでした。」と出す(黙って切らない)
+  //   - 読み上げは、見せている文が「残りわずか」「超えた分を入れなかった」に変わったときだけ(1字ごとには読まない)
+  var CHAR_NEAR = 50;
+  function charMax() {
+    var G = root.ChatPlanSummary;
+    return G && G.REQUEST_MAX_CHARS > 0 ? G.REQUEST_MAX_CHARS : 500;
+  }
+  function charCount(v) { return Array.from(String(v || '')).length; }
+  function attachCharLimit(input, note) {
+    if (!input || !note || input._charLimit) return;
+    var max = charMax();
+    var live = root.document.createElement('span');
+    live.className = 'chat-sr-only';
+    live.setAttribute('aria-live', 'polite');
+    note.parentNode.insertBefore(live, note.nextSibling);
+    if (note.id) {
+      var by = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+      if (by.indexOf(note.id) < 0) by.push(note.id);
+      input.setAttribute('aria-describedby', by.join(' '));
+    }
+    var state = '';
+    function show(cut) {
+      var left = Math.max(0, max - charCount(input.value));
+      var next = cut ? 'cut' : left < CHAR_NEAR ? 'near' : '';
+      if (cut) note.textContent = max + '字までです。超えた分は入りませんでした。';
+      else if (next) note.textContent = 'あと ' + left + ' 字';
+      note.hidden = !next;
+      note.classList.toggle('is-limit', cut || (!!next && left === 0));
+      if (next && next !== state) live.textContent = cut ? note.textContent : 'あと ' + left + ' 字で上限です';
+      state = next;
+    }
+    function update(e) {
+      if (e && e.isComposing) return;   // 日本語入力の変換中は数えない(確定したときに見る)
+      var chars = Array.from(String(input.value || ''));
+      if (chars.length > max) {
+        input.value = chars.slice(0, max).join('');
+        try { input.setSelectionRange(input.value.length, input.value.length); } catch (err) { /* 無視 */ }
+        show(true);
+        return;
+      }
+      show(false);
+    }
+    input.addEventListener('paste', function (e) {
+      var data = e.clipboardData && e.clipboardData.getData('text');
+      if (typeof data !== 'string' || typeof input.setRangeText !== 'function') return;
+      var a = input.selectionStart, b = input.selectionEnd;
+      if (typeof a !== 'number' || typeof b !== 'number') return;
+      var v = String(input.value || '');
+      var room = max - (charCount(v) - charCount(v.slice(a, b)));
+      if (charCount(data) <= room) return;
+      e.preventDefault();
+      input.setRangeText(Array.from(data).slice(0, Math.max(0, room)).join(''), a, b, 'end');
+      show(true);
+    });
+    input.addEventListener('input', update);
+    input.addEventListener('compositionend', function () { update(null); });
+    input._charLimit = true;
+    input._charLimitUpdate = function () { update(null); };
+  }
+  var CHAR_LIMITED = [
+    ['chat-input', 'chat-input-count'],
+    ['plan-import-hint', 'plan-import-hint-count'],
+    ['ai-render-style-input', 'ai-render-style-count'],
+    ['video-render-note', 'video-render-note-count']
+  ];
+  function wireCharLimits() {
+    CHAR_LIMITED.forEach(function (p) { attachCharLimit($(p[0]), $(p[1])); });
+  }
+
   // ── 開く・閉じる ───────────────────────────────────────────────────
   function wirePanel() {
+    wireCharLimits();
     var inp = $('chat-input');
     if (inp && !inp._chatWired) {
       inp._chatWired = true;
@@ -630,6 +705,9 @@
     if (fab) { fab.classList.remove('is-open'); fab.setAttribute('aria-expanded', 'false'); }
   }
 
+  // 読み取り・画像AI・動画AI の入力欄は、チャットを開かなくても上限を効かせる(要素は index.html でこのファイルより前にある)。
+  try { wireCharLimits(); } catch (e) { if (root.console && console.error) console.error('[chat] 字数の上限を付けられませんでした', e); }
+  root.attachCharLimit = attachCharLimit;
   root.openChat = openChat;
   root.closeChat = closeChat;
   root.applyChatResult = applyChatResult;
