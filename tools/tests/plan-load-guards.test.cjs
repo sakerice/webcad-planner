@@ -156,7 +156,6 @@ test('手元の正当なプランは1バイトも変わらない', () => {
 test('大きいプランは確認の文を出し、画面が扱えない桁だけ断る', () => {
   const warnAt = PlanSchema.LIMITS.MAX_LOAD_OBJECTS;
   const refuseAt = PlanSchema.LIMITS.MAX_OPEN_OBJECTS;
-  const make = (n) => ({ walls: [], rooms: [], items: { length: n } });
   const real = (n) => ({ walls: [], rooms: [], items: Array.from({ length: n }, (_, i) => ({ id: i + 1, type: 'sofa', x: i, y: 0 })) });
   assert.equal(PlanSchema.loadWarning(real(warnAt)), null);
   assert.equal(PlanSchema.loadProblem(real(warnAt)), null);
@@ -168,7 +167,6 @@ test('大きいプランは確認の文を出し、画面が扱えない桁だ�
   const big = { walls: [], rooms: [], items: new Array(refuseAt + 1).fill(null) };
   assert.match(PlanSchema.loadProblem(big), /大きすぎるため開けません/);
   assert.equal(PlanSchema.loadProblem({ walls: [], rooms: [], items: new Array(refuseAt).fill(null) }), null);
-  void make;
   assert.match(PlanSchema.loadProblem('abc'), /開けません/);
   assert.match(PlanSchema.loadProblem(null), /開けません/);
   assert.match(PlanSchema.loadProblem([]), /開けません/);
@@ -227,7 +225,7 @@ test('どの入口も、形をそろえる処理と大きさの確かめを通�
     }
   }
   // 起動時の復元で開かなかったら、保存の枠を自動では上書きしない
-  assert.match(functionBody(read('index.html'), 'async function loadPlanFromStorage('), /STORAGE_KEEP_SAVED=true; return null;/);
+  assert.match(functionBody(read('index.html'), 'async function loadPlanFromStorage('), /STORAGE_KEEP_SAVED=\(d&&typeof d==='object'&&!Array.isArray\(d\)\)\?'big':'broken'; return null;/);
   assert.match(functionBody(read('index.html'), 'async function sharedAutoSaveLocal('), /if\(STORAGE_KEEP_SAVED\)return;/);
   assert.match(functionBody(read('index.html'), 'async function savePlanToStorage('), /if\(STORAGE_KEEP_SAVED\)\{\s*if\(!confirm\(/);
   // 形をそろえる: normalizeLoadedPlan の最初・共有の部屋・写し
@@ -285,9 +283,30 @@ test('画面の normalizeLoadedPlan は、ensure* より先に形をそろえる
   assert.ok(seen.includes('ensureObjectIds'));
   assert.equal(vm.runInContext('({}).polluted', sb), undefined);
   // 捨てた・消した部分があった固定集では、利用者向けの1行の知らせが出る(開発の用語なし)。変えない固定集では出ない
-  const lossy = FIX.plans.filter((c) => !c.expect.unchanged).length;
-  assert.ok(notices.length >= lossy - 2, '知らせが出ていない: ' + notices.length);
+  const lossy = FIX.plans.filter((c) => PlanSchema.tidyPlan(c.json !== undefined ? JSON.parse(c.json) : JSON.parse(JSON.stringify(c.plan))).lost > 0).length;
+  assert.ok(lossy >= 8, '外す部分のある固定集が少ない: ' + lossy);
+  assert.equal(notices.length, lossy, '知らせの数が外す部分のある固定集の数と違う');
   for (const t of notices) {
     assert.match(t, /^開けない部分が \d+ 個あったため、その部分を除いて開きました。$/);
   }
+});
+
+// 起動時に開かなかった保存があるときの、保存ボタンの確認の文。場面で文を分け、開発の用語を出さない
+test('保存ボタンの確認の文は、開かなかった理由と共同編集かどうかで分かれ、ファイルへの書き出しを添える', () => {
+  const vm = require('node:vm');
+  const sb = {};
+  vm.createContext(sb);
+  vm.runInContext(functionBody(read('index.html'), 'function storageKeepSavedText('), sb);
+  const big = vm.runInContext("storageKeepSavedText('big',false)", sb);
+  const broken = vm.runInContext("storageKeepSavedText('broken',false)", sb);
+  const shared = vm.runInContext("storageKeepSavedText('big',true)", sb);
+  assert.match(big, /大きいため開かなかったプラン/);
+  assert.match(broken, /形が正しくなかったため開けなかったプラン/);
+  for (const t of [big, broken, shared]) {
+    assert.match(t, /「JSON保存」でファイルに書き出して/);
+    assert.match(t, /保存しますか？$/);
+    assert.doesNotMatch(t, /webcad|IndexedDB|JSON\.|STORAGE|tidy|座標|鍵/);
+  }
+  assert.doesNotMatch(big, /クラウド/);
+  assert.match(shared, /共同編集のクラウドへの保存もしません/);
 });

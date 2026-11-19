@@ -32,7 +32,7 @@ const browser = await chromium.launch();
 const failures = [];
 const note = (where, what) => failures.push(`${where}: ${what}`);
 
-async function openPage(label, { room = null, storage = null, preset = 'blank', answer = null, viewport = { width: 1280, height: 900 } } = {}) {
+async function openPage(label, { room = null, storage = null, preset = 'blank', answer = null, viewport = { width: 1280, height: 900 }, failBackup = false } = {}) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
   // answer(文) → true で受ける・false で閉じる。既定は、起動時の「前回保存したプランがあります」だけ受ける
@@ -42,6 +42,17 @@ async function openPage(label, { room = null, storage = null, preset = 'blank', 
   watch3dSkips(page, st.errors);
   // 起動時の「前回保存したプランがあります。読み込みますか？」は受ける(自動保存の復元の道を通すため)。ほかは閉じる。
   page.on('dialog', (d) => { const m = d.message(); st.dialogs.push(m.slice(0, 200)); (st.answer(m) ? d.accept() : d.dismiss()).catch(() => {}); });
+  // failBackup: 写し(webcad-plan-v1-before-tidy)を書く取引を、要求の成功のあとで中止させる(容量の超過と同じ起き方)
+  if (failBackup) {
+    await page.addInitScript(() => {
+      const put = IDBObjectStore.prototype.put;
+      IDBObjectStore.prototype.put = function (value, key) {
+        const req = put.apply(this, arguments);
+        if (key === 'webcad-plan-v1-before-tidy') { const tx = this.transaction; req.addEventListener('success', () => { try { tx.abort(); } catch (e) { /* 既に終わった */ } }); }
+        return req;
+      };
+    });
+  }
   await page.addInitScript(() => {
     class FakeWS { constructor(url) { this.url = url; this.readyState = 1; window.__ws = this; setTimeout(() => this.onopen && this.onopen(), 0); } send() {} close() { this.readyState = 3; } }
     window.WebSocket = FakeWS;
@@ -346,7 +357,7 @@ const total = (page) => page.evaluate(() => DATA.walls.length + DATA.items.lengt
         // 保存ボタン: 上書きの前に確かめる。いいえなら保存は残る
         await page.evaluate(() => savePlanToStorage());
         await page.waitForTimeout(500);
-        if (!st.dialogs.some((d) => /開かなかった大きなプランが保存されています/.test(d))) note('大きい 自動保存 いいえ', '保存ボタンで確かめない: ' + JSON.stringify(st.dialogs));
+        if (!st.dialogs.some((d) => /大きいため開かなかったプランが保存されています/.test(d) && /「JSON保存」/.test(d))) note('大きい 自動保存 いいえ', '保存ボタンで確かめない: ' + JSON.stringify(st.dialogs));
         if ((await idbRaw(page)) !== text) note('大きい 自動保存 いいえ', '保存ボタンのいいえで保存が上書きされた');
       }
       st.errors.splice(0).forEach((e) => note('大きい 自動保存 ' + label, 'pageerror ' + e));
@@ -421,6 +432,48 @@ const total = (page) => page.evaluate(() => DATA.walls.length + DATA.items.lengt
   st.errors.splice(0).forEach((e) => note('自動保存の写し', 'pageerror ' + e));
   await context.close();
   console.log('ok storage backup');
+}
+
+// 写しの取引が中止されたら、写せなかったと扱い、知らせに「保存する前に、中身を確かめてください。」を足す
+{
+  const plan = JSON.parse(readFileSync(join(HERE, 'fixtures', 'house-2f.json'), 'utf8'));
+  plan.items.push({ id: 'bad-floor', type: 'sofa', x: 0, y: 0, floor: 1e9 });
+  const { context, page, st } = await openPage('backup fail', { storage: JSON.stringify(plan), failBackup: true });
+  const r = await page.evaluate(() => new Promise((resolve) => {
+    const req = indexedDB.open('webcad', 1);
+    req.onsuccess = () => { const g = req.result.transaction('plans', 'readonly').objectStore('plans').get('webcad-plan-v1-before-tidy'); g.onsuccess = () => resolve({ backup: g.result || null, notice: document.getElementById('plan-notice-text').textContent }); };
+  }));
+  if (r.backup !== null) note('写しの失敗', '中止したのに写しが残った');
+  if (!/保存する前に、中身を確かめてください。/.test(r.notice)) note('写しの失敗', '確かめを促す文が出ない: ' + r.notice);
+  st.errors.splice(0).forEach((e) => note('写しの失敗', 'pageerror ' + e));
+  await context.close();
+  console.log('ok backup fail');
+}
+// 外した結果が空になる保存も、元を写し、知らせてから既定プランで始める
+{
+  const text = JSON.stringify({ walls: [{ id: 1, x1: 0, y1: 0, x2: 3000, y2: 0, floor: 5000 }], items: [{ id: 2, type: 'sofa', x: 0, y: 0, floor: 5000 }], rooms: [] });
+  const { context, page, st } = await openPage('backup empty', { storage: text });
+  const r = await page.evaluate(() => new Promise((resolve) => {
+    const req = indexedDB.open('webcad', 1);
+    req.onsuccess = () => { const g = req.result.transaction('plans', 'readonly').objectStore('plans').get('webcad-plan-v1-before-tidy'); g.onsuccess = () => resolve({ backup: g.result || null, notice: document.getElementById('plan-notice-text').textContent, hidden: document.getElementById('plan-notice').hidden }); };
+  }));
+  if (r.backup !== text) note('空になる保存', '元が写されていない');
+  if (r.hidden || !/開けない部分が 2 個あり、ほかに開ける部分が無かったため、開かずに始めました。/.test(r.notice)) note('空になる保存', '知らせが違う: ' + r.notice);
+  if (await page.evaluate(() => DATA.walls.some((w) => w.floor === 5000))) note('空になる保存', '外した物が入った');
+  st.errors.splice(0).forEach((e) => note('空になる保存', 'pageerror ' + e));
+  await context.close();
+  console.log('ok backup empty');
+}
+// 形が正しくない保存(配列)は開かず、保存ボタンは「形が正しくなかった」の文で確かめる
+{
+  const { context, page, st } = await openPage('broken storage', { storage: '[1,2,3]' });
+  await page.waitForTimeout(800);
+  await page.evaluate(() => savePlanToStorage());
+  await page.waitForTimeout(500);
+  if (!st.dialogs.some((d) => /形が正しくなかったため開けなかったプラン/.test(d))) note('形の違う保存', '保存ボタンの文が違う: ' + JSON.stringify(st.dialogs));
+  if ((await idbRaw(page)) !== '[1,2,3]') note('形の違う保存', '保存の中身が変わった');
+  await context.close();
+  console.log('ok broken storage');
 }
 
 // 共有の部屋: 相手の差分で来て手元で外した物を、こちらの差分で部屋から消さない

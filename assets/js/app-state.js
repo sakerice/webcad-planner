@@ -2335,26 +2335,28 @@ var StorageAdapter = (function(){
     },
     // 起動時の復元で形をそろえて何かを捨てたときに、保存の枠の今の中身(文字のまま)を BACKUP_KEY へ1度だけ写す。
     // 既に写しがあれば上書きしない(最初の元の中身を残す)。写せた・既にあれば true、写せなければ false。
+    // 写せたかは取引の完了(oncomplete)で決める。容量の超過は要求の成功のあとに取引の中止(onabort)で出るため。
     backupOnce: function(){
       return openDB().then(function(db){
         return new Promise(function(resolve){
-          var t=db.transaction(STORE,'readwrite'), s=t.objectStore(STORE);
+          var result=false, t;
+          try{ t=db.transaction(STORE,'readwrite'); }catch(e){ resolve(false); return; }
+          var s=t.objectStore(STORE);
+          t.oncomplete=function(){ resolve(result); };
+          t.onabort=function(){ resolve(false); };
+          t.onerror=function(){ resolve(false); };
           var have=s.getKey(BACKUP_KEY);
           have.onsuccess=function(){
-            if(have.result!==undefined&&have.result!==null){ resolve(true); return; }
+            if(have.result!==undefined&&have.result!==null){ result=true; return; }
             var cur=s.get(KEY);
             cur.onsuccess=function(){
               var raw=cur.result;
               if(raw===undefined||raw===null){ try{ raw=localStorage.getItem(LEGACY_LS_KEY); }catch(e){ raw=null; } }
-              if(raw===undefined||raw===null){ resolve(false); return; }
+              if(raw===undefined||raw===null) return;
               var put=s.put(raw,BACKUP_KEY);
-              put.onsuccess=function(){ resolve(true); };
-              put.onerror=function(){ resolve(false); };
+              put.onsuccess=function(){ result=true; };
             };
-            cur.onerror=function(){ resolve(false); };
           };
-          have.onerror=function(){ resolve(false); };
-          t.onerror=function(){ resolve(false); };
         });
       }).catch(function(){ return false; });
     },

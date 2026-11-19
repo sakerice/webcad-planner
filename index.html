@@ -19857,12 +19857,21 @@ function planExportFileName(){
   var d=new Date(), p=function(n){return (n<10?'0':'')+n;};
   return name+'_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'.json';
 }
-// 起動時に、保存されていたプランを開かなかった(大きさの確かめで「いいえ」・開けない桁)ときに true。
-// この起動のあいだ、自動保存はその枠を上書きせず、保存ボタンは上書きの前に確かめる。
+// 起動時に、保存されていたプランを開かなかったときの理由。'big'(大きさの確かめで「いいえ」・開けない桁)か
+// 'broken'(形が正しくなく開けなかった)。開いたときは false。
+// この起動のあいだ、自動保存はその枠を上書きせず、保存ボタンは上書きの前に確かめる(storageKeepSavedText)。
 var STORAGE_KEEP_SAVED=false;
+function storageKeepSavedText(reason,shared){
+  return (reason==='broken'
+      ?'このブラウザには、形が正しくなかったため開けなかったプランが保存されています。'
+      :'このブラウザには、大きいため開かなかったプランが保存されています。')
+    +'保存すると、そのプランは今の画面の内容に置き換わります。\n両方残したいときは、先に「JSON保存」でファイルに書き出してください。'
+    +(shared?'\n保存をやめると、共同編集のクラウドへの保存もしません。':'')
+    +'\n\n保存しますか？';
+}
 async function savePlanToStorage(){
   if(STORAGE_KEEP_SAVED){
-    if(!confirm('ブラウザには、開かなかった大きなプランが保存されています。保存すると、そのプランは今のプランに置き換わります。保存しますか？')) return;
+    if(!confirm(storageKeepSavedText(STORAGE_KEEP_SAVED,!!SHARED.roomId))) return;
     STORAGE_KEEP_SAVED=false;
   }
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
@@ -19922,17 +19931,21 @@ async function loadPlanFromStorage(){
   // 開けない形・桁なら断り、時間がかかる大きさなら確かめる。開かないときは null を返す(空の保存の false と分ける)。
   // 開かなかった保存は消さない。この起動のあいだ、自動保存はこの枠を上書きせず、保存ボタンは上書きの前に確かめる
   // (STORAGE_KEEP_SAVED。savePlanToStorage・sharedAutoSaveLocal)。
-  if(!planLoadAllowed(d)){ STORAGE_KEEP_SAVED=true; return null; }
+  if(!planLoadAllowed(d)){ STORAGE_KEEP_SAVED=(d&&typeof d==='object'&&!Array.isArray(d))?'big':'broken'; return null; }
   // 形を先にそろえてから空かどうかを見る(walls が文字などの壊れた保存は、そろえると空になり、今までどおり既定プランで始める)。
   // 捨てた・消した部分があれば、保存の枠の今の中身を一度だけ別の鍵へ写してから知らせる(次の保存で元が消えないように)。
   var tidied=tidyLoadedPlan(d,{quiet:true});
   // Explicitly saved blank starts are intentional; ignore unmarked legacy empty saves.
   var isEmpty=(!d.walls||!d.walls.length)&&(!d.items||!d.items.length)&&(!d.rooms||!d.rooms.length);
-  if(isEmpty && d.startMode!=='blank') return false;
+  // 外した部分があれば、元を写して知らせる(外した結果が空になり既定プランで始めるときも、先に写して知らせる)
   if(tidied&&tidied.lost>0){
     var kept=await StorageAdapter.backupOnce().catch(function(){ return false; });
-    showPlanNotice(planTidyNoticeText(tidied.lost)+(kept?'':' 保存する前に、中身を確かめてください。'));
+    var emptied=isEmpty&&d.startMode!=='blank';
+    showPlanNotice((emptied
+      ?'保存されていたプランは、開けない部分が '+tidied.lost+' 個あり、ほかに開ける部分が無かったため、開かずに始めました。'
+      :planTidyNoticeText(tidied.lost))+(kept?'':' 保存する前に、中身を確かめてください。'));
   }
+  if(isEmpty && d.startMode!=='blank') return false;
   _defaultPlanPending=false;
   DATA=d;
   try{
