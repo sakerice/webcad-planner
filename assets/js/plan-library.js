@@ -135,6 +135,7 @@ var PlanLibrary = (function(){
     // 開けない形・桁なら断り、時間がかかる大きさなら確かめる。やめたら今のプランが残る
     if(typeof planLoadAllowed === 'function' && !planLoadAllowed(plan)) return;
     _defaultPlanPending = false;
+    if(typeof clearStorageFromRoom==='function') clearStorageFromRoom();
     DATA = plan;
     normalizeLoadedPlan(); clearEditHistory();
     if(typeof sharedForceFullSync==='function') sharedForceFullSync();
@@ -257,7 +258,7 @@ var PlanLibrary = (function(){
     var baseLoadStorage = loadPlanFromStorage;
     loadPlanFromStorage = async function(){ var ok = await baseLoadStorage.apply(this, arguments); if(ok){ PLAN_LIBRARY_ID = null; PLAN_SAVE_INFO = {where:'last', at:null}; } return ok; };
     var basePreset = loadPreset;
-    loadPreset = function(){ PLAN_LIBRARY_ID = null; PLAN_SAVE_INFO = null; return basePreset.apply(this, arguments); };
+    loadPreset = function(){ PLAN_LIBRARY_ID = null; PLAN_SAVE_INFO = null; if(typeof clearStorageFromRoom==='function') clearStorageFromRoom(); return basePreset.apply(this, arguments); };
   }
   window.addEventListener('load', install);
 

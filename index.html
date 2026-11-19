@@ -19893,10 +19893,13 @@ function storageKeepSavedText(reason){
     +'保存すると、そのプランは今の画面の内容に置き換わります。\n両方残したいときは、先に「JSON保存」でファイルに書き出してください。'
     +'\n\n保存しますか？';
 }
-// 共同編集を終えたとき、画面に残った部屋のプラン(DATA そのもの)。これを「保存」で前回のプランへ入れる前に確かめる
-// (共有リンクで人のプランを開いて終えたあと、何気なく保存すると、自分の前回のプランが置き換わるため)。
-// 別のプランを開く・取り消しで戻すと DATA が別の物になり、確かめなくなる。
-var STORAGE_FROM_ROOM=null;
+// 画面のプランが共同編集の部屋から来た物か(共同編集を終えたとき・部屋の写しを開いたときに true)。
+// true の間は「保存」で前回のプランへ入れる前に確かめる(共有リンクで人のプランを開いて終えたあと、何気なく保存すると、
+// 自分の前回のプランが置き換わるため)。取り消し・やり直しでは外さない(戻しても部屋から来たプランのまま)。
+// 外すのは、別のプランを開く所だけ(ファイルの読込・前回のプラン・保存一覧・既定プラン・白紙・別の部屋に入る)と、確かめて保存したとき。
+// 比較の左右では作業面ごとに持つ(compare-mode.js の GLOBALS)。
+var STORAGE_FROM_ROOM=false;
+function clearStorageFromRoom(){STORAGE_FROM_ROOM=false;}
 var STORAGE_FROM_ROOM_TEXT='いま画面にあるのは、共同編集で開いたプランです。保存すると、このブラウザの「前回のプラン」がこのプランに置き換わります。\n前回のプランも残したいときは、先に「保存一覧」の「今のプランを名前を付けて保存」を使ってください。\n\n保存しますか？';
 async function savePlanToStorage(){
   var inRoom=!!SHARED.roomId;
@@ -19904,9 +19907,9 @@ async function savePlanToStorage(){
     if(!confirm(storageKeepSavedText(STORAGE_KEEP_SAVED))) return;
     STORAGE_KEEP_SAVED=false;
   }
-  if(!inRoom&&STORAGE_FROM_ROOM&&STORAGE_FROM_ROOM===DATA){
+  if(!inRoom&&STORAGE_FROM_ROOM){
     if(!confirm(STORAGE_FROM_ROOM_TEXT)) return;
-    STORAGE_FROM_ROOM=null;
+    STORAGE_FROM_ROOM=false;
   }
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
   if(!DATA.walls.length && !DATA.items.length && !DATA.rooms.length){
@@ -19982,6 +19985,7 @@ async function loadPlanFromStorage(){
   }
   if(isEmpty && d.startMode!=='blank') return false;
   _defaultPlanPending=false;
+  clearStorageFromRoom();
   DATA=d;
   try{
     // 方位の写し・id・外壁/内壁/屋根・階・高さの既定・古い家具・視点をまとめて整える。
@@ -20587,7 +20591,7 @@ function installSharedPlan(loaded,roomId,resuming){
   if(SHARED.roomId!==roomId&&typeof PLAN_LIBRARY_ID!=='undefined'){PLAN_LIBRARY_ID=null;PLAN_SAVE_INFO=null;}
   // 別の部屋に入るときは、外部 AI の状態を持ち越さない(入った部屋の状態は welcome で届く)
   if(SHARED.roomId!==roomId){SHARED.aiEditsOff=false;SHARED.aiGroup=null;SHARED.aiBarUntil=0;}
-  _defaultPlanPending=false;DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
+  _defaultPlanPending=false;clearStorageFromRoom();DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
   ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
 }
 async function refreshSharedPlan(){
@@ -20627,7 +20631,7 @@ function openSharedRoomCopy(){
   SHARED.copyOffer=null;
   var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());
   PlanLibrary.loadIntoEditor(offer.plan,null,null);
-  PLAN_SAVE_INFO=null;STORAGE_FROM_ROOM=DATA;
+  PLAN_SAVE_INFO=null;STORAGE_FROM_ROOM=true;
   sharedSetStatus('共同編集の写しを開きました。共同編集にはつながっていません。');
   renderSharedUi();closeShareDialog();
 }
@@ -20672,7 +20676,7 @@ async function sharedDetach(){
   SHARED.roomId=null;SHARED.version=0;SHARED.expiresAt=0;SHARED.savedAt=0;SHARED.baseline=null;SHARED.people=[];sharedResetDirtyTracking();
   SHARED.aiEditsOff=false;SHARED.aiGroup=null;SHARED.aiBarUntil=0;sharedRenderAiBar();
   // 画面に残る部屋のプランを「保存」で前回のプランへ入れる前に確かめる(STORAGE_FROM_ROOM)
-  STORAGE_FROM_ROOM=DATA;
+  STORAGE_FROM_ROOM=true;
   var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());renderSharedUi();
 }
 async function leaveSharedRoom(){
@@ -23046,7 +23050,7 @@ function doImport(inp){
     try{ plan=JSON.parse(e.target.result); }catch(ex){ alert('読み込みエラー:'+ex.message); return; }
     // 開けない形・桁なら断り、時間がかかる大きさなら確かめる。やめたら今のプランが残る
     if(!planLoadAllowed(plan)) return;
-    try{ _defaultPlanPending=false; DATA=plan; normalizeLoadedPlan(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; clearStorageFromRoom(); DATA=plan; normalizeLoadedPlan(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);

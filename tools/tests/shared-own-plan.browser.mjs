@@ -134,6 +134,9 @@ try {
   console.log('ok  保存一覧の「共同編集」から部屋に入り直せた。共有リンクで開き直しても部屋が開く');
 
   // ── 4. 共同編集を終えて「保存」→ 前回のプランが置き換わる前に確かめる ──
+  // 部屋の中で1つ編集しておく(終えたあとの「元に戻す」で戻す履歴)
+  await page.evaluate(() => { saveState(); DATA.walls[0].thick = 166; markDirty(); });
+  await sleep(1200);
   st.dialogs.length = 0;
   await page.evaluate(() => leaveSharedRoom());
   await page.waitForFunction(() => !SHARED.roomId, null, T);
@@ -143,7 +146,18 @@ try {
   st.answer = true;
   assert.ok(st.dialogs.some((d) => /共同編集で開いたプランです。保存すると、このブラウザの「前回のプラン」が/.test(d)), '前回のプランが置き換わる前に確かめていない: ' + JSON.stringify(st.dialogs));
   assert.equal(sigOf(await idb(page, 'webcad-plan-v1')), ownSig, '「いいえ」なのに前回のプランが置き換わった');
-  console.log('ok  共同編集を終えたあとの「保存」は、前回のプランを置き換える前に確かめ、いいえなら置き換えない');
+  // 終えたあと「元に戻す」・「やり直し」をしてから保存しても、確かめる(戻しても部屋から来たプランのまま)
+  for (const step of ['undoAction', 'redoAction']) {
+    st.dialogs.length = 0;
+    const moved = await page.evaluate((step) => { const n = (step === 'undoAction' ? HISTORY : REDO_HISTORY).length; window[step](); return n; }, step);
+    assert.ok(moved > 0, `${step}: 戻す履歴が無い(テストの前提が崩れた)`);
+    st.answer = false;
+    await page.evaluate(() => savePlanToStorage());
+    st.answer = true;
+    assert.ok(st.dialogs.some((d) => /共同編集で開いたプランです/.test(d)), `${step} のあとの保存で確かめていない: ` + JSON.stringify(st.dialogs));
+    assert.equal(sigOf(await idb(page, 'webcad-plan-v1')), ownSig, `${step} のあとの保存で前回のプランが置き換わった`);
+  }
+  console.log('ok  共同編集を終えたあとの「保存」は、元に戻す・やり直しのあとも、前回のプランを置き換える前に確かめ、いいえなら置き換えない');
   await page.close();
 
   // ── 3. 部屋が期限切れなら、写しを開けると知らせる ──

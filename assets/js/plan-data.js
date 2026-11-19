@@ -310,6 +310,7 @@ function chooseBlankPlan(){
   if(!_defaultPlanPending)return;
   closePresetChoice();
   _defaultPlanPending=false;_presetLoadRevision++;
+  if(typeof clearStorageFromRoom==='function') clearStorageFromRoom();
   DATA={walls:[],items:[],rooms:[],floors:{},heightDefaults:{modelVersion:2,floorThickness:180},floorMetadata:{},exteriorWallSettings:null,interiorWallSettings:null,roofAppearance:null,startMode:'blank'};
   resetHeightGlobalsForPlanLoad();
   PRESET_CURRENT='blank';nextId=1;ST.selected=null;ST.floor=1;
