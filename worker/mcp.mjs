@@ -255,6 +255,7 @@ function failureKind(res, messages) {
   if (res && res.code === "op_limit") return "limit";
   if (res && res.code === "delete_limit") return "delete_limit";
   if (res && res.code === "read_limit") return "busy";
+  if (res && res.code === "ai_edits_off") return "stopped";
   if (!messages.length || messages.every((m) => m === ROOM_UNAVAILABLE_MESSAGE)) return "busy";
   if (messages.some((m) => m.includes(REFUSAL))) return "refused";
   return "args";
@@ -265,6 +266,7 @@ const KIND_LINE = {
   limit: "失敗の種類: 回数の上限（このプランは、きょうはこの受け口から直せません）",
   delete_limit: "失敗の種類: 消す数の上限（このプランは、きょうはこの受け口からこれ以上消せません。消さない操作はできます）",
   busy: "失敗の種類: 一時的な失敗",
+  stopped: "失敗の種類: 利用者が外部 AI からの変更を止めています（プランを読むことはできます）",
 };
 
 // 失敗の返事の文（先頭の決まりは dataText が付ける）。
@@ -289,6 +291,10 @@ function failureText(res, origin, roomId) {
     lines.push(openLine(origin, roomId));
   } else if (kind === "limit" || kind === "delete_limit") {
     lines.push("利用者に、あすまた試すか、下の URL を開いて house-planner の画面で直すよう伝えてください。");
+    lines.push(openLine(origin, roomId));
+  } else if (kind === "stopped") {
+    lines.push("同じ呼び出しを繰り返しても通りません。直す必要があれば、利用者に、下の URL を開いて house-planner の共同編集の画面で"
+      + "外部の AI からの変更を受け付けるように戻してもらうよう伝えてください。");
     lines.push(openLine(origin, roomId));
   } else if (kind === "busy") {
     lines.push("少し待ってから、同じ引数でもう一度呼んでください。");

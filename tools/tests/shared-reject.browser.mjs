@@ -198,10 +198,12 @@ try {
     const box = await page.evaluate(() => {
       const r = document.getElementById('plan-notice').getBoundingClientRect();
       const nav = document.getElementById('bottom-nav'); const nr = nav && getComputedStyle(nav).display !== 'none' ? nav.getBoundingClientRect() : null;
-      return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, vw: innerWidth, navTop: nr ? nr.top : null };
+      const f = document.getElementById('chat-fab'); const fr = f && getComputedStyle(f).display !== 'none' ? f.getBoundingClientRect() : null;
+      return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, vw: innerWidth, navTop: nr ? nr.top : null, fab: fr ? { left: fr.left, right: fr.right, top: fr.top, bottom: fr.bottom } : null };
     });
     assert.ok(box.left >= 0 && box.right <= box.vw, `知らせが画面からはみ出す: ${JSON.stringify(box)}`);
     if (box.navTop !== null) assert.ok(box.bottom <= box.navTop, `知らせが下の操作の段に重なる: ${JSON.stringify(box)}`);
+    if (box.fab) assert.ok(box.right <= box.fab.left || box.bottom <= box.fab.top || box.top >= box.fab.bottom, `知らせが「AIに頼む」のボタンを隠す: ${JSON.stringify(box)}`);
     if (SHOT_DIR) await page.screenshot({ path: join(SHOT_DIR, fail ? 'reject-notice-file-375.png' : 'reject-notice-375.png') });
     console.log(`ok  ${fail ? '一覧に残せなかったときは「ファイルに保存」を出し、押すと戻す前のプランを書き出した' : '幅 375 で知らせが画面に収まる'}`);
     await context.close();

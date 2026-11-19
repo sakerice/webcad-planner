@@ -7,6 +7,10 @@
 // 段5で、外の AI(MCP)から間取りを直すための、ルームの中だけの経路を足した(外の /api/rooms/:id/… には出さない)。
 //   POST /op    {op, args}            操作を1つ当て、変わった物を画面の共同編集と同じ差分として積み、全員へ流す(clientId "mcp")
 //   POST /read  {what:"summary"|"inspect"}  今のプランの要約か検査
+// /op で積んだ差分は、配るときに source:"ai" の印を付ける(印はルームが自分で付ける。画面の /update の差分には付かない)。
+// 画面はこの印を見て、外の AI の変更を「元に戻す」で戻せるようにする。印を知らない古い画面は今までどおり相手の差分として当てる。
+// 外の AI からの変更を受け付けるかどうか(meta.aiEditsOff。既定は受け付ける)は、画面から POST /ai-edits {off} で切り替える
+// (外の /api/rooms/:id/ai-edits。routes-rooms.mjs が転送する)。止めている間の /op は断る(/read は通す)。
 // 呼ぶのは worker/routes-rooms.mjs の roomOp・roomRead(id の形を確かめてから Durable Object を引く)。
 import {
   RETENTION_MS, AUTO_SAVE_IDLE_MS, AUTO_SAVE_MAX_MS,
@@ -84,6 +88,12 @@ export const MCP_DELETE_LIMIT_MESSAGE = "このプランは、きょう AI か�
 export const MCP_READS_PER_MINUTE = 60;
 export const MCP_OP_LIMIT_MESSAGE = "このプランは、きょう AI から直せる回数の上限に達しました。あすまたお試しいただくか、house-planner の画面で直してください。";
 export const MCP_READ_LIMIT_MESSAGE = "このプランを読む回数が多すぎます。少し待ってからもう一度お試しください。";
+// 外の AI からの変更を止めているときの /op の失敗の文(mcp.mjs が「止められている」種類として返す)。
+export const MCP_AI_EDITS_OFF_MESSAGE = "利用者が外部 AI からの変更を止めています。プランを読むことはできますが、直すことはできません。";
+// POST /ai-edits の本文の上限({off:true} だけなので小さい)。
+const MAX_AI_EDITS_BODY_BYTES = 1024;
+// 外の AI の変更として配る差分の印(broadcast の source)。
+export const AI_SOURCE = "ai";
 const utcDay = (now) => new Date(now).toISOString().slice(0, 10);
 
 // 操作の前(before)と後(after)のプランから、画面の共同編集(index.html の buildSharedPatch)と同じ形の差分を作る。
@@ -308,6 +318,7 @@ export class CollaborationRoom {
     if (url.pathname === "/plan" && request.method === "GET") return this.enqueue(() => this.getPlan());
     if (url.pathname === "/update" && request.method === "POST") return this.enqueue(() => this.update(request));
     if (url.pathname === "/save" && request.method === "POST") return this.enqueue(() => this.manualSave(request));
+    if (url.pathname === "/ai-edits" && request.method === "POST") return this.enqueue(() => this.setAiEdits(request));
     // ここから下はルームの中だけの経路(routes-rooms.mjs の転送の一覧には無い。roomOp・roomRead が直接呼ぶ)
     if (url.pathname === "/op" && request.method === "POST") return this.enqueue(() => this.applyOp(request));
     if (url.pathname === "/read" && request.method === "POST") return this.enqueue(() => this.read(request));
@@ -351,6 +362,7 @@ export class CollaborationRoom {
       expiresAt: meta.expiresAt,
       savedAt: meta.savedAt || meta.updatedAt || 0,
       checkpointPending: !!meta.checkpointDueAt,
+      aiEditsOff: !!meta.aiEditsOff,
     }));
     this.broadcastPresence();
     return new Response(null, { status: 101, webSocket: client });
@@ -413,7 +425,8 @@ export class CollaborationRoom {
   // bound が上限以下なら積む。上限の2倍を超えるなら当てずに断る(膨らんだプランをメモリに作らないため)。
   // その間なら実際に当てて測り、収まればその場で書き戻す。
   // extraMeta(省略可)は meta に足して一緒に保存する欄(/op の nextId)。
-  async commitPatch(meta, patch, clientId, extraMeta = null) {
+  // source(省略可)は配る差分に付ける印(/op だけが AI_SOURCE を渡す。/update は渡さないので、画面が名乗っても付かない)。
+  async commitPatch(meta, patch, clientId, extraMeta = null, source = null) {
     const now = Date.now();
     const version = Number(meta.version || 0) + 1;
     const dirtySince = Number(meta.dirtySince || now);
@@ -459,13 +472,15 @@ export class CollaborationRoom {
       await this.state.storage.put("meta", next);
       await this.setNextAlarm(next);
     }
-    this.broadcast({
+    const message = {
       type: "patch",
       version: next.version,
       expiresAt: next.expiresAt,
       clientId: String(clientId || "").slice(0, 64),
       patch,
-    });
+    };
+    if (source) message.source = source;
+    this.broadcast(message);
     if (writeNow) {
       this.broadcast({ type: "checkpoint", version: next.version, savedAt: next.savedAt, expiresAt: next.expiresAt });
     }
@@ -510,6 +525,8 @@ export class CollaborationRoom {
   async applyOp(request) {
     const meta = await this.liveMeta();
     if (!meta) return roomNotFound();
+    // 利用者が外の AI からの変更を止めている。回数は数えない(止めている間に呼ばれても、あとの上限を減らさない)
+    if (meta.aiEditsOff) return json({ ok: false, code: "ai_edits_off", errors: [{ message: MCP_AI_EDITS_OFF_MESSAGE }] }, 403);
     const counted = this.takeMcpOp(meta);
     if (!counted) return json({ ok: false, code: "op_limit", errors: [{ message: MCP_OP_LIMIT_MESSAGE }] }, 429);
     let payload;
@@ -579,7 +596,7 @@ export class CollaborationRoom {
     if (roomPatchProblem(patch)) return opFailure([BROKEN_PLAN_MESSAGE]);
     const nextId = Math.max(Number(meta.nextId) || 0, Number(result.nextId) || 0);
     const mcpOps = { ...counted, del: counted.del + removedCount };
-    const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId, mcpOps });
+    const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId, mcpOps }, AI_SOURCE);
     if (!next) return roomNotFound();
     if (next.tooLarge) return opFailure(["この操作をするとプランが保存できる大きさ（10MB）を超えるため、行いませんでした"]);
     if (this.mcpOps.day === mcpOps.day) this.mcpOps = { ...this.mcpOps, del: Math.max(Number(this.mcpOps.del) || 0, mcpOps.del) };
@@ -607,6 +624,25 @@ export class CollaborationRoom {
       console.warn("[room] /read で例外", e && e.message);
       return opFailure([BROKEN_PLAN_MESSAGE]);
     }
+  }
+
+  // POST /ai-edits {off: true|false}: 外の AI からの変更を止める・受け付ける。meta.aiEditsOff に持ち、全員へ配る。
+  // 版・期限・書き戻しの予約は変えない(プランは変わらない)。同じ値なら書かずにそのまま返す。
+  // 返事 {aiEditsOff}。本文が読めない・形が違う 400、大きすぎ 413、ルームが無い・期限切れ 410。
+  async setAiEdits(request) {
+    const meta = await this.getMeta();
+    if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    let payload;
+    try { payload = await readJsonWithLimit(request, MAX_AI_EDITS_BODY_BYTES); } catch (response) { return response; }
+    if (!payload || typeof payload !== "object" || Array.isArray(payload) || typeof payload.off !== "boolean") {
+      return json({ error: "invalid_request" }, 400);
+    }
+    const off = payload.off;
+    if (!!meta.aiEditsOff !== off) {
+      await this.state.storage.put("meta", { ...meta, aiEditsOff: off });
+      this.broadcast({ type: "ai-edits", off, clientId: String(payload.clientId || "").slice(0, 64) });
+    }
+    return json({ aiEditsOff: off });
   }
 
   async manualSave(request) {

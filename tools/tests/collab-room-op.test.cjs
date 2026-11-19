@@ -54,7 +54,9 @@ async function applyAndCheck(ctx, op, args) {
   const msgs = ws.messages();
   assert.equal(msgs.length, 1, '差分が1つだけ届く');
   const msg = msgs[0];
-  assert.deepEqual(Object.keys(msg), ['type', 'version', 'expiresAt', 'clientId', 'patch']);
+  // source は外の AI の変更の印(ルームが付ける。collab-room-ai-edits.test.cjs)。古い画面は知らない欄として読み飛ばす
+  assert.deepEqual(Object.keys(msg), ['type', 'version', 'expiresAt', 'clientId', 'patch', 'source']);
+  assert.equal(msg.source, 'ai');
   assert.equal(msg.type, 'patch');
   assert.equal(msg.clientId, 'mcp');
   assert.equal(msg.version, res.version);

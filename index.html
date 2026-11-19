@@ -371,14 +371,32 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 }
 @keyframes app-loading-spin{to{transform:rotate(360deg)}}
 /* プランを開いたときの1行の知らせ(app-state.js の showPlanNotice) */
-.plan-notice{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);left:12px;right:12px;margin:0 auto;width:fit-content;z-index:970;
+.plan-notice{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px + var(--ai-bar-space,0px));left:12px;right:12px;margin:0 auto;width:fit-content;z-index:970;
   display:flex;align-items:center;gap:10px;max-width:min(560px,calc(100vw - 24px));box-sizing:border-box;padding:10px 8px 10px 14px;
   border-radius:12px;background:rgba(255,255,255,0.98);border:1px solid var(--hp-border,#d6dde4);color:var(--hp-text,#2d2a27);
   font-size:13px;font-weight:700;line-height:1.5;box-shadow:0 8px 22px rgba(24,20,18,0.16)}
 .plan-notice[hidden]{display:none}
 .plan-notice-close{flex:none;min-width:36px;min-height:36px;border:0;border-radius:8px;background:transparent;color:inherit;font-size:18px;cursor:pointer}
-.plan-notice-action{flex:none;min-height:36px;padding:0 12px;border:1px solid #9fb6d3;border-radius:8px;background:#eef4fb;color:#1f4f86;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+/* ボタンのある知らせは、狭い幅ではボタンを文の下の行へ送る(文を細く刻まない) */
+.plan-notice{flex-wrap:wrap}
+#plan-notice-text{flex:1 1 200px;min-width:0}
+.plan-notice-action{flex:none;margin-left:auto;min-height:36px;padding:0 12px;border:1px solid #9fb6d3;border-radius:8px;background:#eef4fb;color:#1f4f86;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 .plan-notice-action[hidden]{display:none}
+/* 外部の AI の変更が届いたときの知らせ(index.html の sharedRenderAiBar)。画面の下の知らせ(.plan-notice)はこの上に積む */
+.ai-edit-bar{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);left:12px;right:12px;margin:0 auto;width:fit-content;z-index:971;
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;max-width:min(560px,calc(100vw - 24px));box-sizing:border-box;padding:8px 8px 8px 14px;
+  border-radius:12px;background:#fff8e8;border:1px solid #e6c46e;color:#4a3a12;font-size:12px;line-height:1.45;box-shadow:0 8px 22px rgba(24,20,18,0.16)}
+.ai-edit-bar[hidden]{display:none}
+.ai-edit-text{display:flex;flex-direction:column;min-width:0;flex:1 1 180px}
+.ai-edit-text strong{font-size:13px;font-weight:800}
+.ai-edit-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
+.ai-edit-btn{flex:none;min-height:36px;padding:0 12px;border:1px solid #c9a650;border-radius:8px;background:#fff;color:#4a3a12;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.ai-edit-btn[hidden]{display:none}
+.ai-edit-stop{background:#a2242d;border-color:#a2242d;color:#fff}
+/* 電話・タブレットの幅では、右下の「AIに頼む」の丸いボタン(assets/chat.css の #chat-fab。右 12px・幅 48px)を隠さないよう、右に空ける */
+@media(max-width:768px){.plan-notice,.ai-edit-bar{right:calc(68px + var(--safe-r,0px));max-width:calc(100vw - 80px - var(--safe-r,0px))}}
+.share-ai-allow{display:flex;align-items:center;gap:10px;margin-top:14px;min-height:40px;font-size:13px;font-weight:750;color:#24324a;cursor:pointer}
+.share-ai-allow input{width:20px;height:20px;flex:none;margin:0;accent-color:#24507f}
 @media (pointer:coarse){
   /* タブレットでは背景blur自体がGPU負荷になるため、半透明色だけで軽く覆う */
   #app-loading{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,0.58)}
@@ -3186,6 +3204,7 @@ input[type="reset"]:focus-visible{
     <span id="app-loading-text">読み込み中</span>
   </div>
 </div>
+<div id="ai-edit-bar" class="ai-edit-bar" role="status" aria-live="polite" hidden><div class="ai-edit-text"><strong id="ai-edit-title">外部の AI が編集中です</strong><span id="ai-edit-sub">「元に戻す」で、AI が直す前に戻せます。</span></div><div class="ai-edit-actions"><button type="button" id="ai-edit-undo" class="ai-edit-btn" onclick="sharedUndoAiFromBar()">元に戻す</button><button type="button" id="ai-edit-stop" class="ai-edit-btn ai-edit-stop" onclick="sharedSetAiEdits(true)">止める</button><button type="button" class="plan-notice-close" onclick="sharedHideAiBar()" aria-label="閉じる">×</button></div></div>
 <div id="plan-notice" class="plan-notice" role="status" aria-live="polite" hidden><span id="plan-notice-text"></span><button type="button" id="plan-notice-action" class="plan-notice-action" hidden></button><button type="button" class="plan-notice-close" onclick="hidePlanNotice()" aria-label="閉じる">×</button></div>
 <div id="share-overlay" class="share-overlay" role="dialog" aria-modal="true" aria-labelledby="share-title" onclick="closeShareDialogOnBackdrop(event)">
   <div class="share-card">
@@ -3214,6 +3233,8 @@ input[type="reset"]:focus-visible{
       <div class="share-actions"><button id="share-ai-btn" class="share-secondary" type="button" onclick="openPlanInAiApp()">AIアプリで開く</button></div>
       <textarea id="share-ai-text" class="share-input share-ai-text" rows="3" readonly aria-label="AIアプリに貼る文" style="display:none"></textarea>
       <div id="share-ai-status" class="share-status" role="status" style="display:none"></div>
+      <label id="share-ai-allow-row" class="share-ai-allow" style="display:none"><input type="checkbox" id="share-ai-allow" checked onchange="sharedSetAiEdits(!this.checked)"><span>外部の AI からの変更を受け付ける</span></label>
+      <p id="share-ai-allow-note" class="share-ai-note" style="display:none">切ると、AIアプリはプランを読めますが、直せなくなります。共同編集中の全員に同じ設定が反映されます。</p>
       <details id="share-ai-setup" class="share-ai-setup">
         <summary>はじめて使うとき</summary>
         <p class="share-copy">AIアプリの設定で、次の住所を連携先として1度だけ登録します。</p>
@@ -3221,7 +3242,7 @@ input[type="reset"]:focus-visible{
         <div class="share-url-row"><input id="share-ai-address" class="share-input" readonly><button id="share-ai-address-btn" class="share-secondary" type="button" onclick="copyAiAppAddress()">住所をコピー</button></div>
         <p class="share-copy share-ai-gap">登録のしかたはAIアプリによって違います。ChatGPT は Plugins の「＋」から、Claude は設定のコネクタから追加します。</p>
       </details>
-      <p class="share-ai-note">AIが直すと、この画面の「元に戻す」の履歴は消えます。AIアプリによっては、直す操作が使えないことがあります。</p>
+      <p class="share-ai-note">AIが直した分は、この画面を開いている間なら「元に戻す」で戻せます。AIアプリによっては、直す操作が使えないことがあります。</p>
     </section>
   </div>
 </div>
@@ -20010,7 +20031,7 @@ async function checkStorageOnInit(){
 // ─── URL共同編集 ───────────────────────────────
 // プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
 // 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
-var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null,echoWait:[],sendEntry:null};
+var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null,echoWait:[],sendEntry:null,aiEditsOff:false,aiGroup:null,aiBarUntil:0,aiBarTimer:null,aiBarHidden:false};
 // 丸ごと送り合う欄の一覧と、差分の当て方は assets/js/plan-core/patch.js にある（Worker と同じもの）。
 var SHARED_FIELDS=PlanCorePatch.SHARED_FIELDS;
 function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
@@ -20108,6 +20129,9 @@ function renderSharedUi(){
   // URLに共有ルームがあるのに未参加＝参加に失敗した状態。新規作成ではなく再接続を促す。
   var pendingJoin=!connected&&!!sharedRoomFromLocation();
   var retry=document.getElementById('share-retry-btn');if(retry)retry.style.display=pendingJoin?'inline-block':'none';
+  var allowRow=document.getElementById('share-ai-allow-row');if(allowRow)allowRow.style.display=connected?'flex':'none';
+  var allowNote=document.getElementById('share-ai-allow-note');if(allowNote)allowNote.style.display=connected?'block':'none';
+  var allow=document.getElementById('share-ai-allow');if(allow)allow.checked=!SHARED.aiEditsOff;
   var copyBtn=document.getElementById('share-copy-btn');if(copyBtn)copyBtn.style.display=pendingJoin&&SHARED.copyOffer&&SHARED.copyOffer.roomId===sharedRoomFromLocation()?'inline-block':'none';
   var url=document.getElementById('share-url');if(url)url.value=connected?sharedUrl():'';
   var expiry=document.getElementById('share-expiry');if(expiry)expiry.textContent=sharedFormatExpiry();
@@ -20329,7 +20353,8 @@ function sharedOwnEchoRemainder(patch){
   Object.keys(patch.fields||{}).forEach(function(key){if(entry.overwritten.fields[key]&&!sentLater(null,key)){out.fields[key]=patch.fields[key];any=true;}});
   return any?out:null;
 }
-function applySharedPatch(patch,isOwn){
+// opts.keepHistory: 取り消しの履歴を消さない(外部 AI の変更。sharedApplyAiPatch が当てる前の状態を履歴に積んでから呼ぶ)
+function applySharedPatch(patch,isOwn,opts){
   if(!patch)return;SHARED.applying=true;
   if(!isOwn)sharedNoteOverwrites(patch);
   var selectedName=sharedCollectionNameFor(ST.selected),selectedId=ST.selected&&ST.selected.id!==undefined?String(ST.selected.id):null;
@@ -20343,13 +20368,77 @@ function applySharedPatch(patch,isOwn){
     // 当て直す物が無ければ、複数選択もそのまま残す。相手の差分のときは今までどおり両方消す。
     var ownEmpty=isOwn&&!Object.keys(patch.collections||{}).length&&!Object.keys(patch.fields||{}).length;
     if(!ownEmpty)clearMultiSelection();
-    if(!isOwn)clearEditHistory();
+    if(!isOwn&&!(opts&&opts.keepHistory))clearEditHistory();
     draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
     // 照明パネルの「自動照明」のチェック(DATA.autoRoomLights)も相手の値で描き直す
     if(typeof syncLightPanelUi==='function')syncLightPanelUi();
     if(!isOwn)sharedSchedule3DRefresh();
     sharedAdvanceBaseline(patch,beforeFix,normalized&&normalized.tidy&&normalized.tidy.droppedIds);if(!isOwn)markDirtyUiOnly();
   }finally{SHARED.applying=false;}
+}
+// 外部 AI(MCP の受け口から部屋の /op)の変更。部屋が source:"ai" の印を付けて配る(画面が名乗る値ではない)。
+// 当てる直前の状態を取り消しの履歴に積み、「元に戻す」で AI が直す前に戻せるようにする(戻した結果は、ふつうの編集と同じく
+// restoreHistorySnapshot → 全体の見直しで部屋へ送られ、ほかの人にも映る)。
+// 続けて届く AI の変更は1回の「元に戻す」にまとめる。まとめるのは、履歴のいちばん上がこのまとまりの写しのまま
+// (自分の編集・ほかの人の変更が挟まっていない。ほかの人の変更は今までどおり履歴を消す)で、前の AI の変更から
+// SHARED_AI_GROUP_MS 以内のとき。ほかの人の変更を受けると履歴が消えるので、「元に戻す」がほかの人の変更を巻き戻すことは無い。
+var SHARED_AI_GROUP_MS=2*60*1000;
+// 外部の AI の変更が届いてから、知らせ(「外部の AI が編集中です」と「元に戻す」「止める」)を出しておく時間
+var SHARED_AI_BAR_MS=60*1000;
+function sharedApplyAiPatch(patch){
+  if(!patch)return;
+  var now=Date.now(),g=SHARED.aiGroup,top=HISTORY.length?HISTORY[HISTORY.length-1]:null;
+  if(!(g&&top!==null&&top===g.snap&&now-g.lastAt<SHARED_AI_GROUP_MS)){
+    var snap=serializeDataSnapshot();
+    pushHistorySnapshot(HISTORY,snap);
+    SHARED.aiGroup=g={snap:snap,lastAt:now};
+  }
+  g.lastAt=now;
+  REDO_HISTORY.length=0;
+  applySharedPatch(patch,false,{keepHistory:true});
+  SHARED.aiBarUntil=now+SHARED_AI_BAR_MS;SHARED.aiBarHidden=false;
+  sharedRenderAiBar();
+}
+function sharedRenderAiBar(){
+  var bar=document.getElementById('ai-edit-bar');if(!bar)return;
+  var now=Date.now(),show=!!SHARED.roomId&&!SHARED.aiBarHidden&&now<SHARED.aiBarUntil;
+  clearTimeout(SHARED.aiBarTimer);SHARED.aiBarTimer=null;
+  if(show){
+    var stopped=!!SHARED.aiEditsOff;
+    var title=document.getElementById('ai-edit-title'),sub=document.getElementById('ai-edit-sub');
+    if(title)title.textContent=stopped?'外部の AI からの変更を止めました':'外部の AI が編集中です';
+    if(sub)sub.textContent=stopped?'共同編集の画面で、また受け付けるようにできます。':'「元に戻す」で、AI が直す前に戻せます。';
+    var undo=document.getElementById('ai-edit-undo');if(undo)undo.hidden=!HISTORY.length;
+    var stop=document.getElementById('ai-edit-stop');if(stop)stop.hidden=stopped;
+    SHARED.aiBarTimer=setTimeout(sharedRenderAiBar,Math.max(200,SHARED.aiBarUntil-now));
+  }
+  bar.hidden=!show;
+  // 画面の下の知らせ(.plan-notice)を、この知らせの上に積む
+  document.documentElement.style.setProperty('--ai-bar-space',show?(bar.offsetHeight+8)+'px':'0px');
+}
+function sharedHideAiBar(){SHARED.aiBarHidden=true;sharedRenderAiBar();}
+function sharedUndoAiFromBar(){undoAction();sharedRenderAiBar();}
+// 外部の AI からの変更を止める(off=true)・受け付ける。部屋の meta に持ち、部屋にいる全員へ配られる(type "ai-edits")。
+// 先に画面を切り替え、失敗したら元に戻して知らせる。返事を待つ間に、ほかの人の切り替えの知らせ(type "ai-edits")や
+// 次の切り替えが来ていたら、そちらが新しいので返事では上書きしない(SHARED.aiEditsSeq)。
+async function sharedSetAiEdits(off){
+  if(!SHARED.roomId)return;
+  off=!!off;var prev=!!SHARED.aiEditsOff,roomId=SHARED.roomId;
+  SHARED.aiEditsOff=off;var seq=SHARED.aiEditsSeq=(SHARED.aiEditsSeq||0)+1;renderSharedUi();sharedRenderAiBar();
+  var ok=false;
+  try{
+    var res=await fetch('/api/rooms/'+roomId+'/ai-edits',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({off:off,clientId:sharedClientId()})});
+    ok=res.ok;
+  }catch(e){}
+  if(SHARED.roomId!==roomId)return;
+  if(ok){aiAppSetStatus(off?'外部の AI からの変更を止めました。':'外部の AI からの変更を受け付けます。');}
+  else{
+    if(SHARED.aiEditsSeq===seq)SHARED.aiEditsOff=prev;
+    var text=off?'外部の AI からの変更を止められませんでした。通信を確かめて、もう一度お試しください。':'外部の AI からの変更を受け付けるように切り替えられませんでした。通信を確かめて、もう一度お試しください。';
+    aiAppSetStatus('切り替えられませんでした。通信を確かめて、もう一度お試しください。',true);
+    var overlay=document.getElementById('share-overlay');if(!(overlay&&overlay.classList.contains('show')))showPlanNotice(text);
+  }
+  renderSharedUi();sharedRenderAiBar();
 }
 function queueSharedSync(delay){
   if(!SHARED.roomId||SHARED.applying)return;
@@ -20375,7 +20464,7 @@ async function sharedSyncNow(){
       // 取り直す前に、手元のプラン(送れなかった変更と、応答待ちの間の編集を含む)を保存一覧へ写す(sharedKeepRejectedLocal)。
       var keep=await sharedKeepRejectedLocal();
       var head=e.tooLarge?'この変更をするとプランが保存できる大きさ（10MB）を超えるため、共同編集に反映できなかった変更を取り消して、最新の状態に戻しました。':'この変更は共同編集に反映できなかったため、取り消して最新の状態に戻しました。';
-      var tail=keep.ok?'戻す前のプランは「保存一覧」に残しました。':'戻す前のプランを「保存一覧」に残せませんでした。残すときは「ファイルに保存」を押してください。';
+      var tail=keep.ok?'戻す前のプランは「保存一覧」に残しました。':'戻す前のプランを「保存一覧」に残せませんでした。「ファイルに保存」で残せます。';
       sharedSetStatus(head+tail,true);
       showPlanNotice(head+tail,keep.ok?null:{label:'ファイルに保存',run:function(){downloadJsonFile(keep.json,sharedKeepFileName(keep.at));}});
       await refreshSharedPlan();
@@ -20439,6 +20528,8 @@ function connectSharedSocket(){
     if(message.type==='welcome'){
       SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
       SHARED.savedAt=message.savedAt||SHARED.savedAt;
+      // 外部の AI からの変更を止めているか(この欄を知らない部屋では無い = 受け付ける)
+      SHARED.aiEditsOff=message.aiEditsOff===true;
       // 接続中はサーバと版が一致するので、welcomeの版が自分より進んでいたら
       // 切断中のパッチを取りこぼしている。そのパッチはもう再送されないため全体を取り直す。
       // (以前は version+1 まで許容しており、欠落が1件のときだけ静かに同期が壊れていた)
@@ -20447,6 +20538,8 @@ function connectSharedSocket(){
       sharedSetStatus(message.checkpointPending?'変更を同期済みです。操作が止まると自動保存します。':'共同編集に接続しました。自動保存済みです。');renderSharedUi();return;
     }
     if(message.type==='presence'){SHARED.people=message.people||[];renderSharedUi();return;}
+    if(message.type==='ai-edits'){SHARED.aiEditsOff=message.off===true;SHARED.aiEditsSeq=(SHARED.aiEditsSeq||0)+1;
+      if(message.clientId!==sharedClientId())aiAppSetStatus(SHARED.aiEditsOff?'ほかの参加者が、外部の AI からの変更を止めました。':'ほかの参加者が、外部の AI からの変更を受け付けるようにしました。');renderSharedUi();sharedRenderAiBar();return;}
     if(message.type==='patch'&&Number(message.version||0)>SHARED.version){
       SHARED.version=Number(message.version);SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
       var own=message.clientId===sharedClientId();if(own)SHARED.lastLocalVersion=SHARED.version;
@@ -20455,7 +20548,8 @@ function connectSharedSocket(){
         // 走らせないと、相手の画面でだけ補完が効いて、開き直すまで食い違う。
         var rest=sharedOwnEchoRemainder(message.patch);
         applySharedPatch(rest||{collections:{},fields:{}},true);if(rest)sharedSchedule3DRefresh();
-      }else applySharedPatch(message.patch,false);
+      }else if(message.source==='ai')sharedApplyAiPatch(message.patch);
+      else applySharedPatch(message.patch,false);
       renderSharedUi();return;
     }
     if(message.type==='checkpoint'){
@@ -20491,6 +20585,8 @@ function installSharedPlan(loaded,roomId,resuming){
   tidyLoadedPlan(loaded.plan);
   // 別の部屋・自分のプランから入るときは、保存一覧の項目との結び付きを外す(部屋のプランで一覧の項目を上書きしないように)
   if(SHARED.roomId!==roomId&&typeof PLAN_LIBRARY_ID!=='undefined'){PLAN_LIBRARY_ID=null;PLAN_SAVE_INFO=null;}
+  // 別の部屋に入るときは、外部 AI の状態を持ち越さない(入った部屋の状態は welcome で届く)
+  if(SHARED.roomId!==roomId){SHARED.aiEditsOff=false;SHARED.aiGroup=null;SHARED.aiBarUntil=0;}
   _defaultPlanPending=false;DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
   ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
 }
@@ -20574,6 +20670,7 @@ async function sharedDetach(){
   closeSharedSocket();clearTimeout(SHARED.localAutoTimer);SHARED.localAutoTimer=null;clearTimeout(SHARED.rebuildTimer);
   if(roomId){try{await StorageAdapter.saveRoom(roomId,DATA);}catch(e){}}
   SHARED.roomId=null;SHARED.version=0;SHARED.expiresAt=0;SHARED.savedAt=0;SHARED.baseline=null;SHARED.people=[];sharedResetDirtyTracking();
+  SHARED.aiEditsOff=false;SHARED.aiGroup=null;SHARED.aiBarUntil=0;sharedRenderAiBar();
   // 画面に残る部屋のプランを「保存」で前回のプランへ入れる前に確かめる(STORAGE_FROM_ROOM)
   STORAGE_FROM_ROOM=DATA;
   var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());renderSharedUi();
