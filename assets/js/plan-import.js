@@ -1034,7 +1034,10 @@
     });
     (plan.rooms || []).forEach(function (r) {
       var floor = r.floor || 1;
-      var made = PlanCoreFactories.makeRoom({x: r.x, y: r.y, w: r.w, d: r.d, floor: floor, n: r.n || ''}, planCoreCtx());
+      // 部屋の名前は AI が書いた文字。新しい読み取り(plan-free-apply.js の ROOM_NAME_MAX)と同じく、
+      // 見えない文字・制御文字を落として 40 字に切る(古い読み取り import-plan・revise-plan もここを通る)。
+      var name = (typeof PlanSettable !== 'undefined' && PlanSettable.tidyText) ? PlanSettable.tidyText(r.n || '', 40) : String(r.n || '').slice(0, 40);
+      var made = PlanCoreFactories.makeRoom({x: r.x, y: r.y, w: r.w, d: r.d, floor: floor, n: name}, planCoreCtx());
       // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
       // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
       if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;
