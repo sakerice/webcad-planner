@@ -50,7 +50,9 @@ test('名前の改行と囲みの記号は書き換え、長い名前は切る',
   assert.ok(!s.includes('</plan_summary>'));
   assert.ok(!s.includes('<b>'));
   const line = s.split('\n').find((l) => l.includes('id=r1 '));
-  assert.ok(line.includes('＜/plan_summary＞'));
+  // 山かっこ(全角の ＜ ＞ も囲みに似るので)は 〔 〕 に書き換える
+  assert.ok(line.includes('〔/plan_summary〕'));
+  assert.ok(!/[<>＜＞]/.test(line));
   assert.ok(line.length < 120);
 });
 

@@ -264,7 +264,7 @@ try {
     assert.equal(await page.evaluate(() => document.getElementById('chat-log').hasAttribute('aria-live')), false, '一覧全体が読み上げの対象になっている');
     // 送った本文には要約と依頼文が入り、考えの要約は画面に出さない
     const call0 = await page.evaluate(() => window.__chat.calls[0]);
-    assert.match(call0.messages[0].content, /^<plan_summary>[\s\S]*<\/plan_summary>\n\n寝室にベッドを置いて$/);
+    assert.match(call0.messages[0].content, /^<plan_summary>[\s\S]*<\/plan_summary>\n\n<user_request>\n寝室にベッドを置いて\n<\/user_request>$/);
     assert.ok(!/寝室を探します/.test(await page.locator('#chat-panel').textContent()), '考えの要約を出している');
 
     await page.locator('.chat-undo').last().click();

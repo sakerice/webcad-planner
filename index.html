@@ -3580,6 +3580,7 @@ input[type="reset"]:focus-visible{
       <input type="file" id="plan-import-file" accept="application/pdf,image/*" onchange="onPlanImportFile(this)">
       <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="resetPlanImport()">やり直す</button>
     </div>
+    <p id="plan-import-privacy-note" class="ai-input-note">図面に氏名や住所が写っている場合は、隠してから選んでください。補足にも個人情報は書かないでください。</p>
 
     <div id="plan-import-step2" style="display:none">
       <!-- 囲む操作は**任意**。何もせずそのまま読み取れる。紙面の一部にしか
@@ -3601,6 +3602,7 @@ input[type="reset"]:focus-visible{
         <div>
           <label for="plan-import-hint">補足（任意）</label>
           <input id="plan-import-hint" type="text" placeholder="例: 2階の平面図です / 尺モジュールです">
+          <div id="plan-import-hint-count" class="ai-input-count" hidden></div>
         </div>
       </div>
       <div class="unity-render-actions">
@@ -3661,6 +3663,7 @@ input[type="reset"]:focus-visible{
         <div class="airx-field">
           <label for="ai-render-style-input">任意の仕上げメモ</label>
           <input id="ai-render-style-input" type="text" placeholder="例: 明るい昼、モデルハウス風、白い壁紙を自然に">
+          <div id="ai-render-style-count" class="ai-input-count" hidden></div>
           <small>空欄でもOKです。プリセットの後ろに足されます（プリセットを置き換えません）。</small>
         </div>
       </div>
@@ -3752,6 +3755,7 @@ input[type="reset"]:focus-visible{
         <div class="airx-field">
           <label for="video-render-note">任意の仕上げメモ</label>
           <input id="video-render-note" type="text" placeholder="例: 明るい昼、静かな冬の朝、木の質感を強めに">
+          <div id="video-render-note-count" class="ai-input-count" hidden></div>
           <small>空欄でもOKです。プリセットの後ろに足されます（プリセットを置き換えません）。</small>
         </div>
         <div class="airx-field">
@@ -3847,6 +3851,7 @@ input[type="reset"]:focus-visible{
   <div id="chat-announce" class="chat-sr-only" aria-live="polite"></div>
   <div id="chat-progress" class="chat-progress" role="status" hidden></div>
   <textarea id="chat-input" class="chat-input" rows="2" placeholder="例：寝室にベッドを置いて" aria-label="AIに頼むこと"></textarea>
+  <div id="chat-input-count" class="ai-input-count" hidden></div>
   <div class="chat-actions">
     <button id="chat-attach" class="pbtn sec chat-attach" type="button" aria-label="図面の画像を付ける"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v14H4ZM4 15l5-5 4 4 2-2 5 5"/><circle cx="15.5" cy="9" r="1.4"/></svg>図面の画像</button>
     <input id="chat-file" class="chat-file-input" type="file" accept="application/pdf,image/*" tabindex="-1" aria-hidden="true">
@@ -3854,6 +3859,7 @@ input[type="reset"]:focus-visible{
     <button id="chat-stop" class="pbtn sec chat-stop" type="button" hidden>やめる</button>
     <button id="chat-send" class="pbtn chat-send" type="button">送る</button>
   </div>
+  <p id="chat-privacy-note" class="ai-input-note">氏名・住所・電話番号などの個人情報は入力しないでください。</p>
   <div id="chat-remaining" class="chat-remaining" hidden></div>
 </div>
 

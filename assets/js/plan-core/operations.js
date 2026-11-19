@@ -287,6 +287,8 @@
     var fe = floorError(a.floor, ctx);
     if (fe) return fe;
     if (a.name !== undefined && typeof a.name !== 'string') return fail('name は文字で渡してください');
+    var name = a.name !== undefined ? tidyName(a.name) : undefined;
+    if (name !== undefined && nameError(name)) return fail(nameError(name));
     // 部屋の id が既にある部屋と重なったら(画面の 'rm_'+時刻は同じミリ秒に2回呼ぶと重なる)、連番で作り直す。
     var id = typeof ctx.roomId === 'function' ? ctx.roomId() : 'rm_' + ctx.newId();
     var rooms = plan.rooms || [];
@@ -297,7 +299,7 @@
     }
     checkScale(ctx, rec, '部屋', [['w', a.w], ['d', a.d]], [['x', a.x], ['y', a.y]]);
     var args = { id: id, x: a.x - a.w / 2, y: a.y - a.d / 2, w: a.w, d: a.d, floor: a.floor || 1 };
-    if (a.name !== undefined) args.n = a.name;
+    if (name !== undefined) args.n = name;
     var room = Factories.makeRoom(args, ctx);
     if (!plan.rooms) plan.rooms = [];
     plan.rooms.push(room);
@@ -338,8 +340,10 @@
     var f = findRoom(plan, a, ctx);
     if (f.error) return fail(f.error);
     if (typeof a.name !== 'string') return fail('name は文字で渡してください');
+    var name = tidyName(a.name);
+    if (nameError(name)) return fail(nameError(name));
     if (isLocked(f.obj, ctx)) return lockedError(f.obj);
-    f.obj.n = a.name;
+    f.obj.n = name;
     rec.change(f.obj.id);
   }
 
@@ -677,6 +681,31 @@
     applySetList(o, rs.list, plan, ctx, rec);
   }
 
+  // ── 名前を書き込むときの掃除 ───────────────────────────────────────
+  // 部屋の名前は AI(チャット・外の AI)が書く。共有相手の画面にも、AI に渡る要約にも出る。
+  // 書き込む時点で、見えない文字(書式文字 \p{Cf}・片割れのサロゲート)を落とし、制御文字と行の区切りを空白にして、
+  // 空白をまとめる(assets/js/chat/plan-summary.js の stripInvisible と同じ決まり。tools/tests/ai-input-guard.test.cjs が揃っていることを見る)。
+  // 長さは掃除した後の文字(コードポイント)で数え、ROOM_NAME_MAX 字を超えたら切らずに失敗にする(AI が直して呼び直せるように)。
+  // 既に保存されている長い名前は、ほかの操作では触らない(開ける・直せる)。
+  var ROOM_NAME_MAX = 40;
+  var INVISIBLE_RE = new RegExp('[\\p{Cf}\\p{Cs}]', 'gu');
+  var CONTROL_RE = new RegExp('[\\u0000-\\u001f\\u007f-\\u009f\\u2028\\u2029]', 'g');
+  // 絵文字のつなぎ(ZWJ、U+200D)は、絵文字と絵文字の間にあるときだけ残す(plan-summary.js の stripInvisible と同じ)。
+  var ZWJ = String.fromCharCode(0x200d);
+  var ZWJ_PREV_RE = new RegExp('\\p{Extended_Pictographic}[\\u{1F3FB}-\\u{1F3FF}\\uFE0F]*$', 'u');
+  var ZWJ_NEXT_RE = new RegExp('^\\p{Extended_Pictographic}', 'u');
+  function dropInvisible(ch, at, all) {
+    if (ch === ZWJ && ZWJ_PREV_RE.test(all.slice(Math.max(0, at - 8), at)) && ZWJ_NEXT_RE.test(all.slice(at + 1, at + 3))) return ch;
+    return '';
+  }
+  function tidyName(s) {
+    return String(s).replace(INVISIBLE_RE, dropInvisible).replace(CONTROL_RE, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function nameError(name) {
+    var len = Array.from(name).length;
+    return len > ROOM_NAME_MAX ? 'name は ' + ROOM_NAME_MAX + ' 字までにしてください（' + len + ' 字が来ました）' : null;
+  }
+
   var OPS = {
     addRoom: addRoom, resizeRoom: resizeRoom, renameRoom: renameRoom,
     addWall: addWall, removeWall: removeWall,
@@ -739,5 +768,5 @@
   // プランの写し(applyOperations が写しに当てるときと同じ写し方)。チャットが依頼の始めに使う。
   function clonePlan(plan) { return cloneDeep(plan, new Map()); }
 
-  return { applyOperations: applyOperations, applyProp: applyProp, clonePlan: clonePlan, OPS: OPS };
+  return { applyOperations: applyOperations, applyProp: applyProp, clonePlan: clonePlan, OPS: OPS, tidyName: tidyName, ROOM_NAME_MAX: ROOM_NAME_MAX };
 }));

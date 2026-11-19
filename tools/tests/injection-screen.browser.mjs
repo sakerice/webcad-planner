@@ -36,8 +36,9 @@ const ORIGIN = new URL(APP).origin;
 const T = { timeout: 60000 };
 // 攻撃の文字と、それを入れたプランの作り方は injection-plan.cjs(node の単体テストと共用)
 const { PAYLOADS, BASE, clone, stringPayloads, tagged, sparse, inheritedValue, evilPlan } = createRequire(import.meta.url)('./injection-plan.cjs');
-// index.html が自分で読む外部(書体)。これ以外のオリジン外への要求は失敗にする。どれも実際には送らない。
-const APP_EXTERNAL = new Set(['fonts.googleapis.com', 'fonts.gstatic.com']);
+// index.html が自分で読む外部(書体)と、本番で Cloudflare が配信時に足す計測(Web Analytics の beacon)。
+// これ以外のオリジン外への要求は失敗にする。どれも実際には送らない。
+const APP_EXTERNAL = new Set(['fonts.googleapis.com', 'fonts.gstatic.com', 'static.cloudflareinsights.com']);
 const ROOM = 'InjectionTestRoom00001';
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);

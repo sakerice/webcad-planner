@@ -28,6 +28,7 @@ import { planSpec } from "./plan-spec.mjs";
 import { planKnowledge } from "./plan-knowledge.mjs";
 import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./plan-locate.mjs";
 import { REVISE_SYSTEM, buildRevisePrompt } from "./plan-revise.mjs";
+import Guard from "../assets/js/chat/plan-summary.js";
 import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
 import { nameRooms, pickModels, judgeMarks, missingByRoom, MAX_ROOMS, MAX_SLOTS, MAX_MARKS } from "./plan-finish.mjs";
 import { knowledgeWarnings } from "./plan-check.mjs";
@@ -59,7 +60,12 @@ const COST_REVISE_PAGE = 10;
 // 1回に読むページ数の上限。各ページが各階になる。
 const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
-const MAX_HINT_CHARS = 500;
+// 利用者のひとこと(図面の補足)の長さ。チャットの依頼と同じ値(assets/js/chat/plan-summary.js の REQUEST_MAX_CHARS)。
+// 画面の入力欄も同じ値で止める。ここでは超えた分を文字(コードポイント)単位で切る(今までどおり断らない)。
+const MAX_HINT_CHARS = Guard.REQUEST_MAX_CHARS;
+function hintOf(payload) {
+  return Array.from(String((payload && payload.hint) || "")).slice(0, MAX_HINT_CHARS).join("");
+}
 const MAX_AI_REQUEST_BYTES = MAX_IMAGE_BYTES * 4 + 256 * 1024;
 // Claude が受け取れる画像の大きさ（1枚あたり約5MB・1回の送信全体で約32MB）。超えると断られ、
 // 何度試しても通らない。送る前にこちらで断り、利用者に次の一手（ページを減らす・囲む）を伝える。
@@ -296,7 +302,7 @@ async function aiImportPlan(payload, env, deps, request) {
     images.push(one);
   }
 
-  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  const hint = hintOf(payload);
 
   // **数を引く前に、投げられる状態かを確かめる。**
   // 鍵が無い・リージョンが日本でない、といった断り方は AI を一度も呼ばない。
@@ -317,7 +323,7 @@ async function aiImportPlan(payload, env, deps, request) {
 
   const asks = images.map((img, i) => ({
     system: SYSTEM_PROMPT,
-    text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
+    text: buildPlanPrompt({ hint, page: pageLine(i, images.length) }),
     images: [{ mimeType: img.mimeType, base64: img.base64 }],
     fetchImpl: deps.fetchImpl,
   }));
@@ -356,7 +362,7 @@ async function aiReadPlan(payload, env, deps, request) {
     if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
     images.push(one);
   }
-  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  const hint = hintOf(payload);
   if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
   const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
@@ -413,7 +419,7 @@ async function aiReviewPlan3d(payload, env, deps, request) {
   const answerText = JSON.stringify((payload && payload.answer) || null);
   if (answerText.length > MAX_REVIEW_ANSWER_CHARS) return json({ error: "invalid_request", message: "answer が大きすぎる" }, 400);
   const facts = (Array.isArray(payload && payload.facts) ? payload.facts : []).slice(0, 30).map((f) => String(f).slice(0, 200));
-  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  const hint = hintOf(payload);
   if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
   // 撮った画像（最大10枚）も入力になるので、1枚1点で足して数える。
@@ -463,7 +469,7 @@ async function aiRevisePlan(payload, env, deps, request) {
     pairs.push({ original, drawn, page: pagesIn[i] });
   }
 
-  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+  const hint = hintOf(payload);
 
   const provider = resolveImportProvider(env);
   if (provider.error) return provider.error;
@@ -481,7 +487,8 @@ async function aiRevisePlan(payload, env, deps, request) {
     system: REVISE_SYSTEM,
     text: buildRevisePrompt({
       json: JSON.stringify(pair.page),
-      hint: pageHint(hint, i, pairs.length),
+      hint,
+      page: pageLine(i, pairs.length),
     }),
     // **手順も渡す。** 見直しは全体を作り直させるので、読み取りと同じ手順が要る。
     // 渡さずに作り直させたところ、室名から畳数を除くという手順7の決まりが
@@ -723,11 +730,10 @@ async function takeQuota(request, env, count, peek) {
   }
 }
 
-// ページごとの補足。何ページ目かを伝えると、階の取り違えが減る。
-function pageHint(hint, index, total) {
-  if (total <= 1) return hint;
-  const page = `この画像はPDFの${index + 1}ページ目です（全${total}ページ）。`;
-  return hint ? `${page}\n${hint}` : page;
+// ページごとの文。何ページ目かを伝えると、階の取り違えが減る。こちらが作る文なので、利用者の補足の囲みには入れない。
+function pageLine(index, total) {
+  if (total <= 1) return "";
+  return `この画像はPDFの${index + 1}ページ目です（全${total}ページ）。`;
 }
 
 // ページごとの読み取りを、1つの家にまとめる。

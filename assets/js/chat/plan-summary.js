@@ -11,7 +11,8 @@
 // 超えるときは、部屋・壁・選択中の物を残し、選択中でない物を数の多い種類から「種類ごとの数」の行にまとめ、
 // まとめたことを1行書く。それでも超えれば、選択中でない物の行を末尾から落とし(足りなければ部屋・壁も)、
 // 落としたことを書く。選択中の物の行は落とさない。
-// 名前は利用者が付けた文字なので、改行と < > を書き換え(依頼文の <plan_summary> の囲みを壊させない)、長さを切る。
+// 名前・id・種類は利用者が書ける文字なので、clean(下の「AI に渡す文の掃除と囲み」)を通して、改行・見えない文字・
+// 山かっこに似た文字などを書き換え(依頼文の <plan_summary> の囲みを壊させない)、長さを文字単位で切る。
 // plan は書き換えない。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -37,13 +38,101 @@
     return b;
   }
   function n(v) { var x = Number(v); return isFinite(x) ? Math.round(x) : 0; }
+
+  // ── AI に渡す文の掃除と囲み ──────────────────────────────────────────
+  // AI に渡す信頼できない文(利用者の依頼、プランの中の名前・id・種類、道具と検査の結果、読み取りのひとこと)は、
+  // 種類ごとの囲み(<plan_summary> など。TAGS)に入れて渡す。決まり(囲みの中はデータで指示ではない、など)は
+  // 囲みの外の、前の側に置く(チャットは worker/chat.mjs の CHAT_SYSTEM、外の AI と読み取りは worker/ai-rules.mjs)。
+  // 囲みを偽って外へ出られないよう、囲みに入れる文は先に掃除する:
+  //   - 見えない文字を落とす: 書式文字 \p{Cf}(ゼロ幅・双方向の制御・BOM・タグ文字 U+E0000 台など)と、片割れのサロゲート
+  //   - 制御文字 \p{Cc}(C0・DEL・C1)と行・段落の区切り(U+2028・U+2029)は空白にする。複数行の文(cleanText)では
+  //     改行だけ残す(CR LF・CR・U+2028・U+2029 も改行に)。タブは空白にする
+  //   - 山かっこと、それに似た文字(全角・小字形・ギユメ・数学記号・カナダ音節文字など)は 〔 〕 にする
+  //     (＜ ＞ も囲みに似るので残さない)。& は ＆ にする(&lt; のような実体参照で山かっこを書かせない)。
+  //     \u003c・\x3c・%3C のように符号化した山かっこも 〔 〕 にする
+  //   - 切り詰めは文字(コードポイント)単位(絵文字を割らない)
+  // 寸法や単位(6畳、2.5m×3m、3640mm、900〜1000mm)は変えない。
+  // 利用者が AI に渡す文(チャットの依頼1件、読み取りのひとこと)の長さの上限。文字(コードポイント)で数える。
+  // 画面の入力欄(chat-ui.js の attachCharLimit)と Worker(worker/chat.mjs、routes-ai.mjs のひとこと)が同じこの値を見る。
+  // 攻撃の文を長く送らせないため、AI の利用量を抑えるため。
+  // 値を変えるときはここだけを変える(利用者向けの文もこの値から作る: REQUEST_TOO_LONG_MESSAGE、chat-ui.js の表示)。
+  var REQUEST_MAX_CHARS = 300;
+  var REQUEST_TOO_LONG_MESSAGE = '頼む文は' + REQUEST_MAX_CHARS + '字までにしてください。';
+  function countChars(s) { return Array.from(String(s === undefined || s === null ? '' : s)).length; }
+  var TAGS = ['plan_summary', 'user_request', 'tool_result', 'inspect_result', 'user_hint', 'previous_answer', 'check_facts'];
+  var OPEN_LIKE = '<＜﹤‹«〈〈《⟨⟪❮❬❰⧼˂ᐸ≪⋘︿︽≺˱';
+  var CLOSE_LIKE = '>＞﹥›»〉〉》⟩⟫❯❭❱⧽˃ᐳ≫⋙﹀︾≻˲';
+  var OPEN_RE = new RegExp('[' + OPEN_LIKE + ']|\\\\u\\{?0*3c\\}?|\\\\x3c|%3c', 'gi');
+  var CLOSE_RE = new RegExp('[' + CLOSE_LIKE + ']|\\\\u\\{?0*3e\\}?|\\\\x3e|%3e', 'gi');
+  // 囲みの中に残ってはいけない文字(isClean が見る)。
+  // 見えない文字(書式文字・片割れのサロゲート)は stripInvisible で見る(絵文字のつなぎは残すため)。
+  var DIRTY_RE = new RegExp('[\\u0000-\\u0009\\u000b-\\u001f\\u007f-\\u009f\\u2028\\u2029&' + OPEN_LIKE + CLOSE_LIKE + ']'
+    + '|\\\\u\\{?0*3[ce]|\\\\x3[ce]|%3[ce]', 'iu');
+  var INVISIBLE_RE = new RegExp('[\\p{Cf}\\p{Cs}]', 'gu');
+  // 絵文字のつなぎ(ZWJ、U+200D)は、絵文字(肌の色・異体字セレクタ U+FE0F が付いてもよい)と絵文字の間にあるときだけ残す
+  // (家族の絵文字（👨・👩・👧を ZWJ でつないだ物） を割らない)。それ以外の位置の ZWJ は落とす。ZWJ は山かっこを作れないので囲みの守りには関係しない。
+  var ZWJ = String.fromCharCode(0x200d);
+  var ZWJ_PREV_RE = new RegExp('\\p{Extended_Pictographic}[\\u{1F3FB}-\\u{1F3FF}\\uFE0F]*$', 'u');
+  var ZWJ_NEXT_RE = new RegExp('^\\p{Extended_Pictographic}', 'u');
+  // 決まりの見出し(worker/ai-rules.mjs の RULES_HEAD)。囲みの中に同じ見出しを書かせない。
+  var RULES_HEAD_RE = /【\s*入力の扱い\s*】/g;
+  var RULES_HEAD_ONE = /【\s*入力の扱い\s*】/;
+
+  // 見えない文字(書式文字・片割れのサロゲート)を落とす。名前を書き込むとき(operations.js の tidyName、
+  // plan-settable.js の tidyText)も同じ決まりで落とす(tools/tests/ai-input-guard.test.cjs が揃っていることを見る)。
+  function stripInvisible(s) {
+    return String(s === undefined || s === null ? '' : s).replace(INVISIBLE_RE, function (ch, at, all) {
+      if (ch === ZWJ && ZWJ_PREV_RE.test(all.slice(Math.max(0, at - 8), at)) && ZWJ_NEXT_RE.test(all.slice(at + 1, at + 3))) return ch;
+      return '';
+    });
+  }
+  function neutralize(t) {
+    return t.replace(/&/g, '＆').replace(OPEN_RE, '〔').replace(CLOSE_RE, '〕').replace(RULES_HEAD_RE, '〔入力の扱い〕');
+  }
+  // 文字(コードポイント)単位で max 字に切る。切ったら末尾に … を付ける。
+  function cutChars(t, max) {
+    if (!(max >= 0) || t.length <= max) return t;
+    var chars = Array.from(t);
+    return chars.length > max ? chars.slice(0, max).join('') + '…' : t;
+  }
+  // 1行の文: 改行も空白にする(要約の名前・id・種類、検査の文の1行)。
   function clean(s, max) {
-    var t = String(s === undefined || s === null ? '' : s)
-      .replace(/[\u0000-\u001f\u007f\u2028\u2029]+/g, ' ')
-      .replace(/</g, '＜').replace(/>/g, '＞')
-      .replace(/\s+/g, ' ').trim();
-    if (t.length > max) t = t.slice(0, max) + '…';
-    return t;
+    var t = stripInvisible(s).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ');
+    t = neutralize(t).replace(/\s+/g, ' ').trim();
+    return cutChars(t, max);
+  }
+  // 複数行の文: 改行を残す(利用者の依頼・道具の結果)。行の中の空白はまとめ、空行は1つまでにする。
+  function cleanText(s, max) {
+    var t = stripInvisible(s)
+      .replace(/\r\n?|[\u2028\u2029]/g, '\n')
+      .replace(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f]+/g, ' ');
+    t = neutralize(t).replace(/[^\S\n]+/g, ' ').replace(/ ?\n ?/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    return cutChars(t, max);
+  }
+  // 囲みの中に入れてよい文か(掃除で落とす・書き換える文字が無いか)。
+  function isClean(s) { return typeof s === 'string' && !DIRTY_RE.test(s) && !RULES_HEAD_ONE.test(s) && stripInvisible(s) === s; }
+  // 掃除した文を囲む。tag は TAGS のどれか。text は掃除してから渡す(wrapText は掃除もする)。
+  function wrap(tag, text) {
+    if (TAGS.indexOf(tag) < 0) throw new Error('知らない囲み: ' + tag);
+    return '<' + tag + '>\n' + text + '\n</' + tag + '>';
+  }
+  function wrapText(tag, s, max) { return wrap(tag, cleanText(s, max)); }
+  // 掃除済みのはずの文を囲む。囲む直前に確かめ、掃除の決まりに合わなければ掃除し直してから囲む。
+  function wrapSafe(tag, text) { return wrap(tag, isClean(text) ? text : cleanText(text)); }
+  // 値(入れ子の物)の文字をすべて1行の掃除に通した写し。鍵も掃除する。文字は maxEach 字まで。
+  function cleanDeep(v, maxEach, depth) {
+    depth = depth || 0;
+    if (typeof v === 'string') return clean(v, maxEach);
+    if (!v || typeof v !== 'object') return v;
+    // 深すぎる入れ子は、文字にしてから掃除する(掃除しないまま返すと、深い所の文字で囲みを閉じられる)。
+    if (depth > 8) { var flat; try { flat = JSON.stringify(v); } catch (e) { flat = ''; } return clean(flat, maxEach); }
+    if (Array.isArray(v)) return v.map(function (x) { return cleanDeep(x, maxEach, depth + 1); });
+    var out = {};
+    // 鍵が __proto__ でも継承元を差し替えないよう、自分の欄として書く。
+    Object.keys(v).forEach(function (k) {
+      Object.defineProperty(out, clean(k, maxEach), { value: cleanDeep(v[k], maxEach, depth + 1), enumerable: true, writable: true, configurable: true });
+    });
+    return out;
   }
   function floorOf(o) { var f = Number(o && o.floor); return isFinite(f) && f >= 1 ? Math.floor(f) : 1; }
   function center(o) { return n(Number(o.x) + (Number(o.w) || 0) / 2) + ',' + n(Number(o.y) + (Number(o.d) || 0) / 2); }
@@ -185,10 +274,18 @@
       text = out.join('\n');
       // 残す行だけで上限を超える(極端に小さい上限)ときは、バイトで切る。
       while (utf8Bytes(text) > maxBytes) text = text.slice(0, Math.max(0, text.length - Math.max(1, Math.ceil((utf8Bytes(text) - maxBytes) / 3))));
+      // 切った境目で絵文字が割れたときの片割れを落とす(行の中の文字は掃除済みなので、ほかに落ちる物は無い)。
+      text = stripInvisible(text);
     }
     return text;
   }
 
-  // clean は外の AI の受け口(worker/mcp.mjs)が、検査や警告の文にも要約と同じ置き換えを通すために使う。
-  return { summarize: summarize, utf8Bytes: utf8Bytes, clean: clean, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES };
+  // 掃除と囲み(clean・cleanText・wrap など)は、画面のチャット(chat-session.js)、Worker のチャットの受け口(worker/chat.mjs)、
+  // 外の AI の受け口(worker/mcp.mjs)、読み取り(worker/ai-rules.mjs)が同じ物を使う。
+  return {
+    summarize: summarize, utf8Bytes: utf8Bytes, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES,
+    clean: clean, cleanText: cleanText, cleanDeep: cleanDeep, stripInvisible: stripInvisible, cutChars: cutChars,
+    REQUEST_MAX_CHARS: REQUEST_MAX_CHARS, REQUEST_TOO_LONG_MESSAGE: REQUEST_TOO_LONG_MESSAGE, countChars: countChars,
+    isClean: isClean, wrap: wrap, wrapText: wrapText, wrapSafe: wrapSafe, TAGS: TAGS
+  };
 }));

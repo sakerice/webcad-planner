@@ -40,6 +40,11 @@
   var n = function (description) { return { type: 'number', description: description }; };
   var int = function (description) { return { type: 'integer', description: description }; };
   var str = function (description) { return { type: 'string', description: description }; };
+  // 部屋の名前の長さの上限(文字。operations.js の ROOM_NAME_MAX と同じ)。checkArgs は maxLength を文字(コードポイント)で数える。
+  var ROOM_NAME_MAX = 40;
+  var NAME = function (description) {
+    return { type: 'string', maxLength: ROOM_NAME_MAX, description: description + '。' + ROOM_NAME_MAX + ' 字まで。部屋の名前だけを書く' };
+  };
   // checkArgs はこの ID を指す欄だけ、数も受ける(上の決めごと)。
   var ID = { type: 'string', description: '物・壁・部屋の id。数の id は "12" のように文字で渡す' };
   // 階の上限は operations.js の ctx.maxFloor(省けば 4)。AI に渡す範囲は、画面で階を選べる 1〜4。
@@ -60,7 +65,7 @@
       name: 'addRoom',
       description: '部屋を1つ足す。部屋は床の範囲を表す長方形で、壁は作らない（壁は addWall で足す）。' + SCALE,
       inputSchema: obj({
-        name: str('部屋の名前（洋室・LDK など）'),
+        name: NAME('部屋の名前（洋室・LDK など）'),
         floor: FLOOR,
         x: n('部屋の中心の x（mm）'), y: n('部屋の中心の y（mm）'),
         w: n('東西の幅（mm）'), d: n('南北の奥行き（mm）')
@@ -79,7 +84,7 @@
     {
       name: 'renameRoom',
       description: '部屋の名前を変える。',
-      inputSchema: obj({ id: ID, name: str('新しい名前') }, ['id', 'name'])
+      inputSchema: obj({ id: ID, name: NAME('新しい名前') }, ['id', 'name'])
     },
     {
       name: 'addWall',
@@ -144,7 +149,8 @@
 
   // ── 引数の検査 ─────────────────────────────────────────────────────
   // Schema から機械的に判定する(操作ごとの手書きはしない)。使っている形は
-  // type・properties・required・items・additionalProperties だけなので、それだけを見る。
+  // type・properties・required・items・additionalProperties・maxLength だけなので、それだけを見る。
+  // maxLength は文字(コードポイント)の数で比べる(絵文字1つを1字と数える)。
   function typeName(v) {
     if (v === null) return 'null';
     if (Array.isArray(v)) return '配列';
@@ -185,6 +191,10 @@
     }
     if (schema.type === 'array' && schema.items) {
       v.forEach(function (x, i) { checkValue(schema.items, x, at + '[' + i + ']', errors); });
+    }
+    if (typeof v === 'string' && typeof schema.maxLength === 'number') {
+      var len = Array.from(v).length;
+      if (len > schema.maxLength) errors.push(at + ' は ' + schema.maxLength + ' 字までにしてください（' + len + ' 字が来ました）');
     }
   }
   function checkArgs(name, args) {

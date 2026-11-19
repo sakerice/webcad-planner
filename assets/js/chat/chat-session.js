@@ -38,18 +38,26 @@
 // API が受け付けないため、文字が空か空白だけの text ブロックは返す前に外す(thinking・tool_use・知らない種類は必ず残す)。
 // user のメッセージは、文字列(最初の依頼文)と tool_result(中身は文字列)だけで作る。
 // 前の依頼までのやり取りは、「利用者の文」と「AI の最後の文」だけを文字で入れる(考え・道具の呼び出しは入れない)。
+//
+// AI に渡す信頼できない文は、掃除して種類ごとの囲みに入れる(plan-summary.js の「AI に渡す文の掃除と囲み」。
+// 決まりは worker/chat.mjs の CHAT_SYSTEM の先頭):
+//   依頼の文     '<plan_summary>\n要約\n</plan_summary>\n\n<user_request>\n利用者の文\n</user_request>'
+//   前の依頼の文 '<user_request>\n利用者の文\n</user_request>'(AI の文は囲まずに掃除だけする)
+//   道具の結果   '<tool_result>\n{…JSON…}\n</tool_result>'、inspect_plan は <inspect_result>。JSON の文字はすべて掃除してから作る
+// Worker は、この形でない user の文を自分で囲み直す(worker/chat.mjs の guardMessages)。この形で送れば包み直されない。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./claude-stream.js'));
+    module.exports = factory(require('./claude-stream.js'), require('./plan-summary.js'));
   } else {
-    root.ChatSession = factory(root.ChatClaudeStream);
+    root.ChatSession = factory(root.ChatClaudeStream, root.ChatPlanSummary);
   }
-}(typeof self !== 'undefined' ? self : this, function (ChatClaudeStream) {
+}(typeof self !== 'undefined' ? self : this, function (ChatClaudeStream, Guard) {
 
   var MAX_ROUNDS = 8;   // 1回の依頼の呼び出しは、最初を含めて 8 回まで(Worker と同じ)
   // 送る量の決まり(Worker の上限は1回 160KB、1回の依頼の合計 1MB)。
   var LIST_MAX = 10;               // 検査の結果に入れる指摘と警告の数(それぞれ)。残りは「ほか N 件」
   var RESULT_MAX_CHARS = 2000;     // 道具の結果の文1件の長さ
+  var RESULT_VALUE_MAX = 300;      // 道具の結果の中の文字1つの長さ(名前・id・検査の文)
   var HISTORY_MAX = 6;             // 前の依頼のやり取りを入れる件数(直近から)
   var HISTORY_TEXT_MAX = 400;      // 前の依頼の、利用者の文と AI の文それぞれの長さ
   var BODY_MAX_BYTES = 150 * 1024; // 1回の本文の上限(Worker の 160KB より少し手前で止める)
@@ -91,11 +99,12 @@
     max_tokens: '返事が長くなりすぎて、途中で止まりました。依頼を小さく分けて頼み直してください。',
     refusal: 'AI がこの依頼を断りました。間取りをどう直したいかを書いて、頼み直してください。',
     pause_turn: 'AI の返事が途中で止まりました。もう一度お試しください。',
+    request_too_long: Guard.REQUEST_TOO_LONG_MESSAGE,   // 字数は ChatPlanSummary.REQUEST_MAX_CHARS から作る
     too_long: '頼みごとが多すぎて、途中で続けられなくなりました。少しずつ分けてお試しください。',
     failed: '依頼を最後まで進められませんでした。もう一度お試しください。'
   };
   // サーバの失敗の code のうち、そのまま理由にするもの(ほかは http_error)。
-  var SERVER_CODES = ['quota_exceeded', 'rounds_exceeded', 'ticket_invalid', 'too_large', 'bad_request',
+  var SERVER_CODES = ['request_too_long', 'quota_exceeded', 'rounds_exceeded', 'ticket_invalid', 'too_large', 'bad_request',
     'quota_unavailable', 'ai_unavailable', 'ai_upstream_error'];
   // 組み立ての失敗 → 理由。
   var STREAM_REASONS = { stream_error: 'ai_error', incomplete: 'interrupted', bad_json: 'bad_response', bad_event: 'bad_response' };
@@ -109,7 +118,17 @@
   }
   function hasOwn(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
   function labelFor(name) { return typeof name === 'string' && hasOwn(TOOL_LABELS, name) ? TOOL_LABELS[name] : TOOL_LABEL_OTHER; }
-  function cut(str, max) { str = String(str); return str.length > max ? str.slice(0, max - 1) + '…' : str; }
+  // 文字(コードポイント)単位で max 字に切る(末尾の … を含めて max 字)。絵文字を割らない。
+  function cut(str, max) {
+    str = String(str);
+    if (str.length <= max) return str;
+    var chars = Array.from(str);
+    return chars.length > max ? chars.slice(0, max - 1).join('') + '…' : str;
+  }
+  // 道具の結果を囲む。値の文字をすべて掃除してから JSON にし、長さを切る(掃除した文字だけなので、切っても囲みは壊れない)。
+  function resultText(tag, obj) {
+    return Guard.wrapSafe(tag, cut(JSON.stringify(Guard.cleanDeep(obj, RESULT_VALUE_MAX)), RESULT_MAX_CHARS));
+  }
   // UTF-8 のバイト数(TextEncoder に頼らない)。
   function utf8Bytes(str) {
     var b = 0;
@@ -199,10 +218,12 @@
       var messages = [];
       // 前の依頼は直近 HISTORY_MAX 件まで、文はそれぞれ HISTORY_TEXT_MAX 字までに切って入れる。
       history.slice(-HISTORY_MAX).forEach(function (h) {
-        messages.push({ role: 'user', content: cut(h.user, HISTORY_TEXT_MAX) });
-        messages.push({ role: 'assistant', content: cut(h.assistant, HISTORY_TEXT_MAX) });
+        messages.push({ role: 'user', content: Guard.wrap('user_request', Guard.cleanText(cut(h.user, HISTORY_TEXT_MAX))) });
+        messages.push({ role: 'assistant', content: Guard.cleanText(cut(h.assistant, HISTORY_TEXT_MAX)) || '（文の返事はありませんでした）' });
       });
-      messages.push({ role: 'user', content: '<plan_summary>\n' + summary + '\n</plan_summary>\n\n' + text });
+      // 要約の文字は summarize が1つずつ掃除している。念のため、掃除の決まりに合わない文字が残っていれば全体を掃除する。
+      if (!Guard.isClean(summary)) summary = Guard.cleanText(summary);
+      messages.push({ role: 'user', content: Guard.wrap('plan_summary', summary) + '\n\n' + Guard.wrap('user_request', Guard.cleanText(text)) });
       var retried = false;
       var ticket = null;
       var round = 0;
@@ -218,7 +239,7 @@
       function runTool(block) {
         var name = block.name, input = block.input;
         var result = function (obj, isError) {
-          var r = { type: 'tool_result', tool_use_id: block.id, content: cut(JSON.stringify(obj), RESULT_MAX_CHARS) };
+          var r = { type: 'tool_result', tool_use_id: block.id, content: resultText(name === 'inspect_plan' && !isError ? 'inspect_result' : 'tool_result', obj) };
           if (isError) r.is_error = true;
           return r;
         };
@@ -341,6 +362,8 @@
       if (current) return Promise.resolve(failure('busy'));
       text = String(text === undefined || text === null ? '' : text).trim();
       if (!text) return Promise.resolve(failure('empty'));
+      // 1件の依頼の文は REQUEST_MAX_CHARS 字まで(画面の入力欄も止めるが、ここでも送らずに断る。Worker も 400 で断る)。
+      if (Guard.countChars(text) > Guard.REQUEST_MAX_CHARS) return Promise.resolve(failure('request_too_long'));
       var job = { cancelled: false, reader: null, abort: null, cancelResolve: null };
       if (deps.AbortController) { try { job.abort = new deps.AbortController(); } catch (e) { job.abort = null; } }
       current = job;

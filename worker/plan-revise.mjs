@@ -28,14 +28,24 @@
 // 実際に置く物ではないから、アプリのカタログで選んでもらう。無いと教えれば、
 // 図面のベッドや下駄箱を、許された14種類のどれかに押し込めかねない。
 import { INSTRUCTION_BOUNDARY, userNote } from "./plan-prompt.mjs";
+import Guard from "../assets/js/chat/plan-summary.js";
+import { READ_INPUT_RULES } from "./ai-rules.mjs";
 
+// 先頭は入力の扱いの決まり（worker/ai-rules.mjs）。
 export const REVISE_SYSTEM = [
+  READ_INPUT_RULES,
+  "",
   "あなたは日本の住宅の間取り図を読み取り、住宅設計アプリが読み込めるJSONデータに変換する専門家です。",
   "自分が変換したJSONを図面と見比べ、仕様の範囲で作り直します。出力はJSONだけで説明文や前置きは書きません。",
   INSTRUCTION_BOUNDARY,
 ].join("\n");
 
-export function buildRevisePrompt({ json, hint } = {}) {
+// json は画面が送り返した前回の答え(部屋の名前などに図面の文字が入る)。文字を掃除して <previous_answer> の囲みに入れる。
+// page は PDF の何ページ目かの文(こちらが作る。囲まない)。
+export function buildRevisePrompt({ json, hint, page } = {}) {
+  let answer;
+  try { answer = JSON.stringify(Guard.cleanDeep(JSON.parse(json), 2000)); } catch (e) { answer = Guard.cleanText(json); }
+  const note = userNote(hint);
   return `さきほどあなたがこの図面から作ったJSONを、見直してください。
 
 **1枚目の画像**は、元の間取り図です。
@@ -43,9 +53,9 @@ export function buildRevisePrompt({ json, hint } = {}) {
 部屋は長方形と室名、置いた物は種類の名前と向きで描いてあります。上辺と左辺の
 数字は、あなたが答えた width と depth です。
 
-あなたが作ったJSON:
+あなたが作ったJSON（previous_answer の囲み）:
 
-${json}
+${Guard.wrapSafe("previous_answer", answer)}
 
 2枚の画像を見比べて、**元の間取り図に合うように作り直したJSONを出力して
 ください。**
@@ -59,5 +69,5 @@ ${json}
 直すところが無ければ、同じJSONをそのまま出力してください。
 
 仕様書と手順は、読み取りのときと同じものを一緒に渡してあります。出力は全体を
-作り直した完全なJSONとし、差分では書きません。${hint ? `\n\n${userNote(hint)}` : ""}`;
+作り直した完全なJSONとし、差分では書きません。${page ? `\n\n${page}` : ""}${note ? `\n\n${note}` : ""}`;
 }
