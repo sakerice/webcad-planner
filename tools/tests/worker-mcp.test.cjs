@@ -647,6 +647,25 @@ test('消す数の上限: deleteObjects は1回に 20 件まで。消えた物�
   assert.equal(moved.isError, false, textOf(moved));
 });
 
+test('消す数: 数えた後の検査(保存の大きさ)で断った操作では増えない', async () => {
+  const ctx = await setup();
+  const rooms = await mod('worker/routes-rooms.mjs');
+  const items = Array.from({ length: 3 }, (_, i) => ({ id: 100 + i, type: 'chair', x: i * 600, y: 0, w: 500, d: 500, floor: 1, rot: 0 }));
+  const made = await rooms.createRoomWithPlan(ctx.env, { walls: [], rooms: [], items }, HOST);
+  const id = made.roomId;
+  const room = ctx.env.room(id);
+  // 積む段で「保存できる大きさを超える」と断られるようにする(ほかの検査はすべて通った後の道)
+  const real = room.instance.commitPatch.bind(room.instance);
+  room.instance.commitPatch = async () => ({ tooLarge: true });
+  const refused = await call(ctx, 'deleteObjects', { plan: id, ids: ['100', '101'] });
+  assert.equal(refused.isError, true, textOf(refused));
+  room.instance.commitPatch = real;
+  const ok = await call(ctx, 'deleteObjects', { plan: id, ids: ['102'] });
+  assert.equal(ok.isError, false, textOf(ok));
+  const meta = await room.storage.get('meta');
+  assert.equal(meta.mcpOps.del, 1, '断った操作の 2 件まで数えている');
+});
+
 test('消す数: 断った操作では増えない。removeWall で消えた壁も数える', async () => {
   const ctx = await setup();
   const rooms = await mod('worker/routes-rooms.mjs');
@@ -664,19 +683,20 @@ test('消す数: 断った操作では増えない。removeWall で消えた壁�
   assert.equal(meta.mcpOps.del, 1, '壁1本だけを数える(断った操作は数えない)');
 });
 
-test('範囲: 外の AI からは、原点から 200m を超える座標・455mm 未満の部屋の辺・100m を超える大きさを断る', async () => {
+test('範囲: 外の AI からは、原点から 200m を超える座標・100mm 未満の部屋の辺・100m を超える大きさを断る', async () => {
   const ctx = await setup();
   const rooms = await mod('worker/routes-rooms.mjs');
   const made = await rooms.createRoomWithPlan(ctx.env, {
-    walls: [], rooms: [{ id: 'rm_1', n: '洋室', x: 0, y: 0, w: 3640, d: 3640, floor: 1 }],
+    walls: [], rooms: [{ id: 'rm_1', n: '洋室', x: 0, y: 0, w: 3640, d: 3640, floor: 1 }, { id: 'rm_ps', n: 'PS', x: 4000, y: 0, w: 150, d: 150, floor: 1 }],
     items: [{ id: 10, type: 'chair', x: 0, y: 0, w: 500, d: 500, floor: 1, rot: 0 }],
   }, HOST);
   const id = made.roomId;
   const bad = [
     ['moveObject', { id: '10', dx: 250000, dy: 0 }, /±200000mm/],
     ['moveObject', { id: 'rm_1', x: 0, y: 250000 }, /±200000mm/],
-    ['resizeRoom', { id: 'rm_1', w: 1 }, /455〜100000mm/],
-    ['addRoom', { x: 0, y: 0, w: 300, d: 3000 }, /455〜100000mm/],
+    ['resizeRoom', { id: 'rm_1', w: 1 }, /100〜100000mm/],
+    ['addRoom', { x: 0, y: 0, w: 99, d: 3000 }, /100〜100000mm/],
+    ['placeItem', { type: 'chair', x: 20000, y: 20000, w: 150000, d: 500 }, /100000mm まで/],
     ['addWall', { x1: 0, y1: 0, x2: 300000, y2: 0 }, /±200000mm/],
     ['placeItem', { type: 'chair', x: -300000, y: 0 }, /±200000mm/],
   ];
@@ -690,6 +710,9 @@ test('範囲: 外の AI からは、原点から 200m を超える座標・455mm
   for (const [op, args] of [
     ['moveObject', { id: '10', x: 15000, y: -5000 }],
     ['resizeRoom', { id: 'rm_1', w: 455 }],
+    // パイプスペースのような小さな部屋も足せ、画面で作った小さな部屋を動かすだけの操作は断らない
+    ['addRoom', { x: 6000, y: 0, w: 300, d: 300 }],
+    ['moveObject', { id: 'rm_ps', dx: 100, dy: 0 }],
     ['addWall', { x1: 0, y1: 0, x2: 30000, y2: 0 }],
   ]) {
     const r = await call(ctx, op, { plan: id, ...args });

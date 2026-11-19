@@ -36,7 +36,7 @@ const MAX_OP_BODY_BYTES = 64 * 1024;
 //          画面の操作(/update)には掛けない。画面の正当な使い方では、1度に消すのは選んだ数個〜十数個。
 //   範囲 … 動かす・置く・足す・大きさを変える操作(moveObject・placeItem・addRoom・resizeRoom・addWall)で、
 //          変わった物が現実の家としてあり得ない値になるものは断る(mcpRangeProblem)。座標は原点から ±200m、
-//          部屋の辺は 455mm〜100m、物の大きさは 100m まで。
+//          部屋の辺は 100mm〜100m(下限は足す・大きさを変えるときだけ見る)、物の大きさは 100m まで。
 // これらで守れるのは「1日に消せる数」と「敷地から遠く離れた所へ動かす・桁外れの大きさにする」ことまで。
 // 名前の書き換え・設定の変更・範囲の中での移動や大きさの変更は数えていないので、名前の中の指示に乗せられた
 // 外の AI が 1日 600 回の操作でプランを大きく作り替えることは、この上限では防げない。
@@ -44,9 +44,11 @@ export const MCP_OPS_PER_DAY = 600;
 export const MCP_DELETE_PER_CALL = 20;
 export const MCP_DELETES_PER_DAY = 100;
 // 範囲の値の根拠: 手元の fixtures と既定のプラン(64 件)で、座標の絶対値の最大は約 16.4m(周辺のビル)、
-// 物の大きさの最大は 30m(道路)、部屋の辺の最小は 900mm(トイレ)。部屋の辺の下限 455mm は四半間。
+// 物の大きさの最大は 30m(道路)、部屋の辺の最小は 900mm(トイレ)。部屋の辺の下限 100mm は、画面で部屋を描くときの
+// 下限(index.html の handleRoomClick は幅・奥行きとも 100mm を超える部屋だけを作る)に合わせた(パイプスペースなどの小さな部屋を弾かない)。
 export const MCP_COORD_MAX = 200000;
-export const MCP_ROOM_SIDE_MIN = 455;
+export const MCP_ROOM_SIDE_MIN = 100;
+const ROOM_SIZE_OPS = new Set(["addRoom", "resizeRoom"]);
 export const MCP_SIZE_MAX = 100000;
 const RANGE_OPS = new Set(["moveObject", "placeItem", "addRoom", "resizeRoom", "addWall"]);
 
@@ -65,7 +67,8 @@ export function mcpRangeProblem(op, result) {
     if (!r || !ids.has(String(r.id))) continue;
     const w = Number(r.w), d = Number(r.d);
     if (far(Number(r.x) + w / 2) || far(Number(r.y) + d / 2)) return `${where}（部屋）`;
-    if (!(w >= MCP_ROOM_SIDE_MIN && d >= MCP_ROOM_SIDE_MIN && w <= MCP_SIZE_MAX && d <= MCP_SIZE_MAX)) {
+    // 大きさは、足す・大きさを変える操作のときだけ見る(画面で作った小さな部屋を動かすだけの操作は断らない)。
+    if (ROOM_SIZE_OPS.has(op) && !(w >= MCP_ROOM_SIDE_MIN && d >= MCP_ROOM_SIDE_MIN && w <= MCP_SIZE_MAX && d <= MCP_SIZE_MAX)) {
       return `この受け口からは、部屋の幅と奥行きは ${MCP_ROOM_SIDE_MIN}〜${MCP_SIZE_MAX}mm で渡してください`;
     }
   }
