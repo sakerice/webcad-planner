@@ -1,0 +1,724 @@
+{
+  "status": "outfit-direction review pending; keep PR103 Draft",
+  "source_review": {
+    "message_id": "Sentinel_e332edf471ac8191882c1d17b302d069",
+    "time": "2026-10-14 10:31 JST",
+    "long_skirt": "latest reference direction takes precedence over earlier above-knee constraint"
+  },
+  "art_method": "Official image_gen.imagegen for all6 calls. Same previous adult male02a/female02c anatomy/face guides; reference4 abstract silhouette/layering/material/large-plane observations. No actual reference pixel copied into repo; no specific-work names in generation prompts.",
+  "layout_method": "Only crop blank margins, isotropic scaling, place unredrawn figures and labels. Raw4 fronts unchanged. 6px/cm, sole baseline1190.",
+  "references": [
+    {
+      "library_file_id": "libfile_3253ef69c3e48191adcad3d317d9f8e2",
+      "file_id": "file_000000002acc81fd9f8b75bb01161424",
+      "name": "IMG_2852.jpeg",
+      "size_bytes": 122393,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2852.jpeg",
+      "visually_displayed": true,
+      "sha256": "dd8a0304cc9add3f4b31e1c32f47c0600396aaeddd1e7fb846a4579b5e04ece6",
+      "image_size": [
+        500,
+        667
+      ],
+      "local_library_id_verified": true
+    },
+    {
+      "library_file_id": "libfile_f3276731259881918d6185fa5d19d48e",
+      "file_id": "file_0000000038d481fd91b67058c062618e",
+      "name": "IMG_2851.jpeg",
+      "size_bytes": 106741,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2851.jpeg",
+      "visually_displayed": true,
+      "sha256": "adaaf3bd01a4ce60ba5312c4757c88c8ec59df63669e372c4ae98325ce5dea02",
+      "image_size": [
+        900,
+        1200
+      ],
+      "local_library_id_verified": true
+    },
+    {
+      "library_file_id": "libfile_a0c7eb07fefc8191960510321cfea30d",
+      "file_id": "file_0000000000c481f4a97db762de5d7bae",
+      "name": "IMG_2853.png",
+      "size_bytes": 366448,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2853.png",
+      "visually_displayed": true,
+      "sha256": "03915bd52a5b993fc888d835448c4ee65a4d63b3056abe38775067a36b5d91c8",
+      "image_size": [
+        514,
+        709
+      ],
+      "local_library_id_verified": true
+    },
+    {
+      "library_file_id": "libfile_778e637f86b8819199948d11c1aaeae8",
+      "file_id": "file_00000000a74c81f88f3dd83a937a88dd",
+      "name": "IMG_2854.webp",
+      "size_bytes": 376218,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2854.webp",
+      "visually_displayed": true,
+      "sha256": "e575c1470cf9f79d537be45fdf52e0c494a13c4bd687d90f26845566253eb190",
+      "image_size": [
+        1200,
+        1800
+      ],
+      "local_library_id_verified": true
+    }
+  ],
+  "images": [
+    {
+      "id": "homewear-male-a",
+      "file": "homewear-male-a-front.png",
+      "sha256": "2381c369eae4fa4d5438e8a2c8776b25e7147dcf7c32ca557990c631ebe9f81a",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "homewear-male-a",
+        "height_cm": 172,
+        "name": "短丈スウェット＋ワイドパンツ",
+        "intent": "肩を落とした柔らかな短丈スウェット、白いインナーの20px段差、太めのイージーパンツ。丸みのある上と直線的な下の形を対比。",
+        "sex": "male"
+      },
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "front_head_measurement": {
+        "crown_y": 15,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          34,
+          36,
+          33
+        ],
+        "sole_y": 1211,
+        "head_px": 181,
+        "full_height_px": 1196,
+        "head_units": 6.607735,
+        "hair_crown_not_hidden_skull": true
+      },
+      "a_pose_review": "Source adult A-pose retained visually; roomy rounded or3/4 sleeves alter silhouette slope. Sleeve-edge slopes below are garment observations, not joint-angle acceptance.",
+      "garment_edge_observation": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "x_edges": [
+          [
+            383,
+            856
+          ],
+          [
+            312,
+            928
+          ]
+        ],
+        "slope_degrees_from_vertical": [
+          30.6114,
+          30.9638
+        ]
+      },
+      "layout": {
+        "height_cm": 172,
+        "target_distance_px": 1032,
+        "position_xy": [
+          77,
+          158
+        ],
+        "size": [
+          646,
+          1033
+        ],
+        "uniform_scale": 0.862876254180602
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FEE4CC",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#5A534E",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・瞳/虹彩の単純形",
+          "median_hex": "#27221F",
+          "xy": [
+            595,
+            132
+          ]
+        },
+        {
+          "part": "スウェット",
+          "median_hex": "#FEEDA4",
+          "xy": [
+            620,
+            400
+          ]
+        },
+        {
+          "part": "インナー",
+          "median_hex": "#FEF9F2",
+          "xy": [
+            620,
+            550
+          ]
+        },
+        {
+          "part": "パンツ",
+          "median_hex": "#4E5650",
+          "xy": [
+            548,
+            895
+          ]
+        },
+        {
+          "part": "ソックス",
+          "median_hex": "#FBF8F1",
+          "xy": [
+            530,
+            1115
+          ]
+        },
+        {
+          "part": "室内履き",
+          "median_hex": "#AB7B4F",
+          "xy": [
+            490,
+            1165
+          ]
+        },
+        {
+          "part": "靴底",
+          "median_hex": "#E9D8C0",
+          "xy": [
+            480,
+            1203
+          ]
+        }
+      ]
+    },
+    {
+      "id": "homewear-male-b",
+      "file": "homewear-male-b-front.png",
+      "sha256": "0af9bffaab709d3150b482f0a175f56aecc5e58f35ffc3b54165be7a0db8691d",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "homewear-male-b",
+        "sex": "male",
+        "height_cm": 172,
+        "name": "五分袖ポロ＋イージーパンツ",
+        "intent": "柔らかな五分袖ハーフジップ、肩を落とした広い身幅、白インナーの丈差、太くゆるい腰回りと足首への緩いテーパー。"
+      },
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "front_head_measurement": {
+        "crown_y": 15,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          48,
+          47,
+          41
+        ],
+        "sole_y": 1215,
+        "head_px": 181,
+        "full_height_px": 1200,
+        "head_units": 6.629834,
+        "hair_crown_not_hidden_skull": true
+      },
+      "a_pose_review": "Source adult A-pose retained visually; roomy rounded or3/4 sleeves alter silhouette slope. Sleeve-edge slopes below are garment observations, not joint-angle acceptance.",
+      "garment_edge_observation": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "x_edges": [
+          [
+            382,
+            855
+          ],
+          [
+            322,
+            917
+          ]
+        ],
+        "slope_degrees_from_vertical": [
+          26.5651,
+          27.3239
+        ]
+      },
+      "layout": {
+        "height_cm": 172,
+        "target_distance_px": 1032,
+        "position_xy": [
+          878,
+          158
+        ],
+        "size": [
+          644,
+          1033
+        ],
+        "uniform_scale": 0.86
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FEE4CB",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#5A524C",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・瞳/虹彩の単純形",
+          "median_hex": "#2A231F",
+          "xy": [
+            595,
+            132
+          ]
+        },
+        {
+          "part": "ポロ",
+          "median_hex": "#C9DACF",
+          "xy": [
+            620,
+            400
+          ]
+        },
+        {
+          "part": "インナー",
+          "median_hex": "#FEFEFF",
+          "xy": [
+            620,
+            575
+          ]
+        },
+        {
+          "part": "パンツ",
+          "median_hex": "#AC9C8F",
+          "xy": [
+            548,
+            895
+          ]
+        },
+        {
+          "part": "ソックス",
+          "median_hex": "#F7EFE4",
+          "xy": [
+            530,
+            1120
+          ]
+        },
+        {
+          "part": "室内履き",
+          "median_hex": "#3B4353",
+          "xy": [
+            490,
+            1170
+          ]
+        },
+        {
+          "part": "靴底",
+          "median_hex": "#BBBCBC",
+          "xy": [
+            475,
+            1205
+          ]
+        }
+      ]
+    },
+    {
+      "id": "homewear-female-a",
+      "file": "homewear-female-a-front.png",
+      "sha256": "2ab9c7fde4efd8fc0f84fcced0559889934c531bb5bd881a007742ab79827061",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "homewear-female-a",
+        "sex": "female",
+        "height_cm": 160,
+        "name": "短丈スウェット＋ロングスカート",
+        "intent": "白裾の丈差と柔らかな丸い袖、足首丈のスカートを3つの大きな面に簡略化。重い上と軽い下の量感/素材差でおしゃれさを作る。最新参考によりロング丈を優先。 補足に合わせ深緑トップス＋クリーム色ロングスカート。"
+      },
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "front_head_measurement": {
+        "crown_y": 19,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          59,
+          55,
+          48
+        ],
+        "sole_y": 1213,
+        "head_px": 178,
+        "full_height_px": 1194,
+        "head_units": 6.707865,
+        "hair_crown_not_hidden_skull": true
+      },
+      "a_pose_review": "Source adult A-pose retained visually; roomy rounded or3/4 sleeves alter silhouette slope. Sleeve-edge slopes below are garment observations, not joint-angle acceptance.",
+      "garment_edge_observation": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "x_edges": [
+          [
+            406,
+            839
+          ],
+          [
+            339,
+            906
+          ]
+        ],
+        "slope_degrees_from_vertical": [
+          29.1761,
+          29.1761
+        ]
+      },
+      "layout": {
+        "height_cm": 160,
+        "target_distance_px": 960,
+        "position_xy": [
+          1728,
+          230
+        ],
+        "size": [
+          544,
+          961
+        ],
+        "uniform_scale": 0.8040201005025126
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FEE8D5",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#664F41",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・瞳/虹彩の単純形",
+          "median_hex": "#553F31",
+          "xy": [
+            598,
+            132
+          ]
+        },
+        {
+          "part": "スウェット",
+          "median_hex": "#3A6353",
+          "xy": [
+            620,
+            400
+          ]
+        },
+        {
+          "part": "インナー",
+          "median_hex": "#FDF9F0",
+          "xy": [
+            620,
+            521
+          ]
+        },
+        {
+          "part": "スカート中央面",
+          "median_hex": "#FDF4E8",
+          "xy": [
+            620,
+            700
+          ]
+        },
+        {
+          "part": "スカート側面",
+          "median_hex": "#F2E7D6",
+          "xy": [
+            484,
+            900
+          ]
+        },
+        {
+          "part": "ソックス",
+          "median_hex": "#FDF8EE",
+          "xy": [
+            540,
+            1116
+          ]
+        },
+        {
+          "part": "室内履き",
+          "median_hex": "#A5A4B7",
+          "xy": [
+            514,
+            1166
+          ]
+        },
+        {
+          "part": "靴底",
+          "median_hex": "#F5EBDB",
+          "xy": [
+            500,
+            1208
+          ]
+        }
+      ]
+    },
+    {
+      "id": "homewear-female-b",
+      "file": "homewear-female-b-front.png",
+      "sha256": "10a35d53afda27788b25464b7e2f4915e4cf7348569ed713ea4959b30d4a18d9",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "homewear-female-b",
+        "sex": "female",
+        "height_cm": 160,
+        "name": "短いカーディガン＋長いインナー",
+        "intent": "短いゆったりした七分袖カーディガンと長い白Tの丈差、柔らかいニットとすっきりしたテーパードパンツの形を対比。ソックスと簡単な室内履き。"
+      },
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "front_head_measurement": {
+        "crown_y": 19,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          74,
+          76,
+          72
+        ],
+        "sole_y": 1211,
+        "head_px": 178,
+        "full_height_px": 1192,
+        "head_units": 6.696629,
+        "hair_crown_not_hidden_skull": true
+      },
+      "a_pose_review": "Source adult A-pose retained visually; roomy rounded or3/4 sleeves alter silhouette slope. Sleeve-edge slopes below are garment observations, not joint-angle acceptance.",
+      "garment_edge_observation": {
+        "rows_y": [
+          400,
+          520
+        ],
+        "x_edges": [
+          [
+            407,
+            838
+          ],
+          [
+            348,
+            897
+          ]
+        ],
+        "slope_degrees_from_vertical": [
+          26.1818,
+          26.1818
+        ]
+      },
+      "layout": {
+        "height_cm": 160,
+        "target_distance_px": 960,
+        "position_xy": [
+          2528,
+          230
+        ],
+        "size": [
+          545,
+          961
+        ],
+        "uniform_scale": 0.8053691275167785
+      },
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FEE7D4",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#634F44",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・瞳/虹彩の単純形",
+          "median_hex": "#554334",
+          "xy": [
+            598,
+            132
+          ]
+        },
+        {
+          "part": "カーディガン",
+          "median_hex": "#B1B5CC",
+          "xy": [
+            548,
+            386
+          ]
+        },
+        {
+          "part": "インナー",
+          "median_hex": "#FEFAF3",
+          "xy": [
+            620,
+            345
+          ]
+        },
+        {
+          "part": "インナー裾",
+          "median_hex": "#FDF9F2",
+          "xy": [
+            620,
+            550
+          ]
+        },
+        {
+          "part": "パンツ",
+          "median_hex": "#F2E7D9",
+          "xy": [
+            550,
+            895
+          ]
+        },
+        {
+          "part": "ソックス",
+          "median_hex": "#FDF8F0",
+          "xy": [
+            540,
+            1107
+          ]
+        },
+        {
+          "part": "室内履き",
+          "median_hex": "#A99081",
+          "xy": [
+            519,
+            1170
+          ]
+        },
+        {
+          "part": "靴底",
+          "median_hex": "#FDF6EF",
+          "xy": [
+            511,
+            1205
+          ]
+        }
+      ]
+    }
+  ],
+  "unperformed": [
+    "final human outfit approval",
+    "side/back expansion intentionally pending outfit decision",
+    "3D/rig/motion/app integration outside scope",
+    "long-skirt leg/cloth collision untested",
+    "strict all-pixel flat-color equality (low-amplitude raster variation/antialiasing remain)"
+  ],
+  "comparison": {
+    "file": "homewear-front-comparison.png",
+    "size": [
+      3200,
+      1420
+    ],
+    "sha256": "89987a79f38aa82326d3608658857e6a423b17ed211dabb96214acc3072e4bfa",
+    "bytes": 2164652,
+    "measured_male_height_px": [
+      1032,
+      1032
+    ],
+    "measured_female_height_px": [
+      960,
+      960
+    ],
+    "sole_y": 1190,
+    "height_difference_px": 72,
+    "height_difference_cm": 12,
+    "visually_displayed": true
+  },
+  "library": {
+    "status": "succeeded",
+    "artifact": "homewear-front-comparison.png",
+    "library_file_id": "libfile_e643160b30008191ba17b0f6e93dcce8",
+    "file_id": "file_000000000bac8230834b9dd8f4f622c6",
+    "file_name": "homewear-front-comparison.png",
+    "path": "/homewear-front-comparison.png",
+    "current_version_number": 0,
+    "library_artifact_type": "image",
+    "file_size_bytes": 2164652,
+    "official_route": "Current Library skill single local-file fast path for primary4-front comparison artifact",
+    "local_metadata_writeback_exit": 0,
+    "exact_readback_verification": "succeeded; official prepare_materialize and current official transfer helper; downloaded current saved file bytes match Mac original",
+    "sha256": "89987a79f38aa82326d3608658857e6a423b17ed211dabb96214acc3072e4bfa",
+    "raw_single_fronts": "supporting originals preserved in sameDraft PR; the completed comparison image is the Library deliverable"
+  },
+  "verification": {
+    "all4_raw_outputs_match_official_outputs": true,
+    "all6_generation_prompts_and_input_snapshots_recorded": true,
+    "all4_references_officially_materialized_and_visually_displayed": true,
+    "old_assets_not_replaced": true
+  }
+}
