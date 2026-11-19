@@ -2407,6 +2407,8 @@ function undoSaveState(mark){
 function normalizeLoadedPlan(options){
   var o=options||{};
   var warnings=[];
+  // 外から来た形をそろえる(配列でない集まり・数でない座標・桁外れの値・危ない鍵など)。中身は plan-schema.js の tidyPlan。
+  tidyLoadedPlan(DATA);
   if(o.resetHeights!==false) resetHeightGlobalsForPlanLoad();
   syncNorthFromPlan();
   ensureObjectIds();
@@ -2432,6 +2434,20 @@ function normalizeLoadedPlan(options){
   }
   if(warnings.length) console.warn('[WebCAD] plan load warnings',warnings);
   return {warnings:warnings};
+}
+
+// プランを画面に入れる前に形をそろえる(PlanSchema.tidyPlan)。捨てた物があれば console に1行出す。
+// プランを丸ごと入れ替える入口は、先に planLoadProblem で大きさを見て、超えていれば入れずに断る。
+function tidyLoadedPlan(plan){
+  if(typeof PlanSchema==='undefined'||!PlanSchema||typeof PlanSchema.tidyPlan!=='function') return null;
+  var r=PlanSchema.tidyPlan(plan);
+  if(r&&r.notes&&r.notes.length) console.warn('[WebCAD] プランの形をそろえました',r.notes);
+  return r;
+}
+// 丸ごと入れ替える前の確かめ。開けるなら null、開けないなら利用者に見せる文。
+function planLoadProblem(plan){
+  if(typeof PlanSchema==='undefined'||!PlanSchema||typeof PlanSchema.loadProblem!=='function') return null;
+  return PlanSchema.loadProblem(plan);
 }
 
 function ensureObjectIds(){

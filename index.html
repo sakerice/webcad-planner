@@ -19904,6 +19904,9 @@ async function savePlanToStorage(){
 async function loadPlanFromStorage(){
   var d=await StorageAdapter.load();
   if(!d) return false;
+  // 開けない大きさ・形の保存は開かない(保存の中身は消さない)。ここで知らせて null を返す(空の保存の false と分ける)
+  var problem=planLoadProblem(d);
+  if(problem){ alert(problem); return null; }
   // Explicitly saved blank starts are intentional; ignore unmarked legacy empty saves.
   var isEmpty=(!d.walls||!d.walls.length)&&(!d.items||!d.items.length)&&(!d.rooms||!d.rooms.length);
   if(isEmpty && d.startMode!=='blank') return false;
@@ -19933,13 +19936,14 @@ async function loadPlanFromStorageButton(){
     return;
   }
   if(!confirm('ブラウザ保存されたプランを読み込みますか？\n現在の未保存の編集内容は上書きされます。')) return;
-  if(await loadPlanFromStorage()){
+  var loaded=await loadPlanFromStorage();
+  if(loaded){
     clearDirty();
     ST.selected=null;
     document.getElementById('props').classList.remove('show');
     draw2d();
     if(ren) rebuild3D();
-  }else{
+  }else if(loaded===false){
     alert('保存されたプランが空のため読み込みませんでした。');
   }
 }
@@ -20390,6 +20394,11 @@ async function fetchSharedPlan(roomId){
 // resuming=true は「既に参加中のセッションで取り直しただけ」の意味。
 // 生きているソケットを張り直さず、編集中の視点も動かさない。
 function installSharedPlan(loaded,roomId,resuming){
+  // 開けない大きさ・形なら入れずに断る(呼ぶ側が文を共有の欄に出す)。形は入れる前にそろえる。
+  // 基準(baseline)はそろえた後の形から作る(そろえただけの違いを部屋へ送り返さない)。
+  var problem=planLoadProblem(loaded&&loaded.plan);
+  if(problem)throw new Error(problem);
+  tidyLoadedPlan(loaded.plan);
   _defaultPlanPending=false;DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
   ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
 }
@@ -22800,7 +22809,12 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); normalizeLoadedPlan(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
+    var plan;
+    try{ plan=JSON.parse(e.target.result); }catch(ex){ alert('読み込みエラー:'+ex.message); return; }
+    // 開けない大きさ・形なら、今のプランを残したまま断る
+    var problem=planLoadProblem(plan);
+    if(problem){ alert(problem); return; }
+    try{ _defaultPlanPending=false; DATA=plan; normalizeLoadedPlan(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);

@@ -36,7 +36,12 @@
     MAX_SKIP_LEVEL_MM: 2400,  // スキップフロアの段差。これを超えるともう1つの階
     MIN_FLOOR: 1,
     MAX_FLOOR: 5,             // 3階建て + その上に載る屋根アイテムぶんの余裕
-    MAX_OBJECTS: 20000        // 1プランの総数。これ以上は描画が実用にならない
+    MAX_OBJECTS: 20000,       // 1プランの総数。これ以上は描画が実用にならない
+    // 画面へ丸ごと入れるプランの総数(壁・部屋・物)。超えたら開かずに断る(loadProblem)。
+    // 手元の正当なプランの最大は 287 個(固定プラン house-2f)。headless の画面で測ると、3D の組み立てが数の2乗で
+    // 重くなる(300 個 1.4 秒・1000 個 8 秒・1500 個 19 秒・5000 個 297 秒。読み込みは 5000 個で 25 秒)。
+    // 正当な最大の約7倍で、3D が数十秒で終わる所に置いた(MAX_OBJECTS は形の検査の上限で、別の物)。
+    MAX_LOAD_OBJECTS: 2000
   };
 
   var COLLECTIONS = ['walls', 'rooms', 'items'];
@@ -301,11 +306,186 @@
     };
   }
 
+  // ── 他人のプランを画面に入れる前に形をそろえる ──────────────────────────
+  //
+  // プランはファイル・共有 URL・共同編集の部屋・自動保存・AI の結果など、外から入る。中の欄は誰でも
+  // 決められるので、画面が例外で止まったり固まったりする形を、入れる前にここでそろえる。
+  // 呼ぶ所: 画面の normalizeLoadedPlan(開く経路と、相手の差分を当てたあと)・installSharedPlan・
+  // PlanSnapshot。プランを丸ごと入れ替える入口(ファイル・自動保存・一覧・共有)は、先に loadProblem で
+  // 大きさを見て、超えていれば入れずに断る。
+  //
+  // 決まり(どれも「型と範囲」だけを見る。利用者の手直しを潰さないため、座標の端数は丸めず、物は寄せない):
+  //   - walls・items・rooms が配列でなければ空の配列にする。要素が素のオブジェクトでなければ捨てる。
+  //   - 座標・大きさ(壁の両端、部屋の位置と大きさ、物の位置): 数の文字は数に直す。直せない・有限でない・
+  //     絶対値が TIDY_MAX_ABS を超えるときは、その物を捨てる(validatePlan が「読み込めない」とする物と同じ)。
+  //   - 省いてよい数の欄(物の幅・奥行き・回転・高さ、壁の厚さ・高さ): 有限でない・桁外れ・数にならない
+  //     値は欄を消して既定値で読む。数の文字は残す(既存の保存に壁厚 "120" があり、画面はそのまま読めている)。
+  //     null は「自動」の意味で使う欄があるので残す。
+  //   - 階: 数の文字は数に直す。MIN_FLOOR〜MAX_FLOOR に入らなければその物を捨てる(階 1e9 で読み込みが
+  //     2 分半かかった)。省略は今までどおり1階。端数のある階は変えない。
+  //   - 物・壁・部屋の一段めの文字で TIDY_MAX_TEXT 字を超える物は切る(画像の data: URL は切らない)。
+  //     名前はふつう数十字なので、ふつうのプランでは何も変わらない。
+  //   - プランのどの深さでも、自分の鍵 __proto__・constructor・prototype は消す。id が __proto__ などの物は捨てる。
+  //   - 全体の設定の入れ物(外壁・内壁・屋根・階の設定など)は、素のオブジェクトか null でなければ消して、
+  //     画面の ensure* に既定を作らせる。入れ物の中の表(階ごと・壁ごと・面ごと)の値も同じ。
+  //   - 知らない欄は消さない(新しい版で保存したプランを古い版が壊さないため)。
+  //
+  // 戻り値: { changed: 変えた数, dropped: {walls, items, rooms}, notes: [理由の文] }。plan はその場で直す。
+  var TIDY_MAX_ABS = 1e9;          // 座標・大きさの絶対値(mm)。共同編集の部屋の検査(worker/room-guard.mjs)と同じ
+  var TIDY_MAX_TEXT = 10000;       // 1つの文字の欄の長さ。2百万字の部屋の名前で起動が 30 秒を超えた
+  var TIDY_UNSAFE = ['__proto__', 'constructor', 'prototype'];
+  // id がこの名前の物は捨てる。画面と Worker はこの id を鍵に設定の表を作るため(差分の当て方
+  // assets/js/plan-core/patch.js の UNSAFE_KEYS と同じ一覧。plan-load-guards.test.cjs が一致を見る)。
+  var TIDY_UNSAFE_IDS = ['__proto__', 'constructor', 'prototype', 'toString', 'toLocaleString', 'valueOf',
+    'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+    '__defineGetter__', '__defineSetter__', '__lookupGetter__', '__lookupSetter__'];
+  var TIDY_COORDS = { walls: ['x1', 'y1', 'x2', 'y2'], rooms: ['x', 'y', 'w', 'd'], items: ['x', 'y'] };
+  var TIDY_OPTIONAL = { walls: ['thick', 'h', 'elev'], rooms: ['skipLevelMm'], items: ['w', 'd', 'rot', 'elev', 'h'] };
+  // 全体の設定の入れ物。値は 'object'(素のオブジェクトか null)。入れ物の中の表の名前を並べた物は、
+  // その表の値も素のオブジェクトか null に限る('*' は入れ物の値そのものが表)。
+  // 'whole' のように表でない物は、その値だけを見る(TIDY_INNER_OBJECTS)。
+  var TIDY_FIELDS = {
+    exteriorWallSettings: ['whole', 'floors', 'walls', 'faces'],
+    interiorWallSettings: ['whole', 'floors', 'walls', 'faces'],
+    roofAppearance: ['whole', 'floors'],
+    floorMetadata: ['*'],
+    exteriorDetail: [],
+    heightDefaults: [],
+    viewState: []
+  };
+  var TIDY_INNER_OBJECTS = ['whole'];
+
+  function isPlain(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+  function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+
+  // どの深さでも危ない鍵を消す。入れ子が深すぎるプランは JSON.parse が作れないので、深さで止めない。
+  function dropUnsafeKeys(root) {
+    var n = 0, stack = [root];
+    while (stack.length) {
+      var v = stack.pop();
+      if (!v || typeof v !== 'object') continue;
+      for (var i = 0; i < TIDY_UNSAFE.length; i++) {
+        if (own(v, TIDY_UNSAFE[i])) { delete v[TIDY_UNSAFE[i]]; n++; }
+      }
+      if (Array.isArray(v)) { for (var j = 0; j < v.length; j++) if (v[j] && typeof v[j] === 'object') stack.push(v[j]); }
+      else { var ks = Object.keys(v); for (var k = 0; k < ks.length; k++) { var c = v[ks[k]]; if (c && typeof c === 'object') stack.push(c); } }
+    }
+    return n;
+  }
+
+  // 数の欄の値を見る。戻り値: 'ok'(そのまま)・数(この数に置き換える)・null(使えない)。
+  function numCheck(v, convert) {
+    if (typeof v === 'number') return (isFinite(v) && Math.abs(v) <= TIDY_MAX_ABS) ? 'ok' : null;
+    if (typeof v === 'string' && v.trim() !== '') {
+      var n = Number(v);
+      if (!isFinite(n) || Math.abs(n) > TIDY_MAX_ABS) return null;
+      return convert ? n : 'ok';
+    }
+    return null;
+  }
+
+  function tidyPlan(plan) {
+    var out = { changed: 0, dropped: { walls: 0, items: 0, rooms: 0 }, notes: [] };
+    if (!isPlain(plan)) return out;
+    var removedKeys = dropUnsafeKeys(plan);
+    if (removedKeys) { out.changed += removedKeys; out.notes.push('危ない鍵を ' + removedKeys + ' 個消した'); }
+    COLLECTIONS.forEach(function (name) {
+      if (!Array.isArray(plan[name])) {
+        if (plan[name] !== undefined && plan[name] !== null) out.notes.push(name + ' が配列でないので空にした');
+        plan[name] = []; out.changed++;
+        return;
+      }
+      var list = plan[name], kept = [];
+      for (var i = 0; i < list.length; i++) {
+        var o = list[i];
+        if (!isPlain(o)) { out.dropped[name]++; continue; }
+        if (!tidyElement(name, o, out)) { out.dropped[name]++; continue; }
+        kept.push(o);
+      }
+      if (kept.length !== list.length) {
+        out.changed += list.length - kept.length;
+        out.notes.push(name + ' から読めない物を ' + (list.length - kept.length) + ' 個捨てた');
+        list.length = 0;
+        for (var j = 0; j < kept.length; j++) list.push(kept[j]);
+      }
+    });
+    Object.keys(TIDY_FIELDS).forEach(function (key) {
+      if (!own(plan, key)) return;
+      var v = plan[key];
+      if (v === null) return;
+      if (!isPlain(v)) { delete plan[key]; out.changed++; out.notes.push(key + ' が入れ物でないので消した'); return; }
+      TIDY_FIELDS[key].forEach(function (inner) {
+        var map = inner === '*' ? v : v[inner];
+        if (inner !== '*' && !own(v, inner)) return;
+        if (inner !== '*' && map !== null && !isPlain(map)) { delete v[inner]; out.changed++; return; }
+        if (!map || TIDY_INNER_OBJECTS.indexOf(inner) >= 0) return;
+        Object.keys(map).forEach(function (k) {
+          if (map[k] !== null && !isPlain(map[k])) { delete map[k]; out.changed++; }
+        });
+      });
+    });
+    if (own(plan, 'floors') && plan.floors !== null && typeof plan.floors !== 'object') { delete plan.floors; out.changed++; }
+    if (own(plan, 'northDeg') && plan.northDeg !== undefined && plan.northDeg !== null && numCheck(plan.northDeg, false) === null) {
+      delete plan.northDeg; out.changed++;
+    }
+    if (typeof plan.planName === 'string' && plan.planName.length > TIDY_MAX_TEXT) {
+      plan.planName = plan.planName.slice(0, TIDY_MAX_TEXT); out.changed++;
+    }
+    return out;
+  }
+
+  // 1つの物を直す。捨てるべき物なら false。
+  function tidyElement(name, o, out) {
+    if (typeof o.id === 'string' && TIDY_UNSAFE_IDS.indexOf(o.id) >= 0) return false;
+    var coords = TIDY_COORDS[name];
+    for (var i = 0; i < coords.length; i++) {
+      var r = numCheck(o[coords[i]], true);
+      if (r === null) return false;
+      if (r !== 'ok') { o[coords[i]] = r; out.changed++; }
+    }
+    if (o.floor !== undefined && o.floor !== null) {
+      var f = numCheck(o.floor, true);
+      if (f === null) return false;
+      var fv = f === 'ok' ? Number(o.floor) : f;
+      if (fv < LIMITS.MIN_FLOOR || fv > LIMITS.MAX_FLOOR) return false;
+      if (f !== 'ok') { o.floor = f; out.changed++; }
+    }
+    var opt = TIDY_OPTIONAL[name];
+    for (var j = 0; j < opt.length; j++) {
+      var k = opt[j];
+      if (!own(o, k) || o[k] === undefined || o[k] === null) continue;
+      if (numCheck(o[k], false) === null) { delete o[k]; out.changed++; }
+    }
+    var keys = Object.keys(o);
+    for (var m = 0; m < keys.length; m++) {
+      var s = o[keys[m]];
+      if (typeof s === 'string' && s.length > TIDY_MAX_TEXT && s.slice(0, 5) !== 'data:') {
+        o[keys[m]] = s.slice(0, TIDY_MAX_TEXT); out.changed++;
+      }
+    }
+    return true;
+  }
+
+  // 丸ごと入れ替える前に、画面が扱える大きさかを見る。収まっていれば null、超えていれば利用者に見せる文。
+  // 上限の根拠は LIMITS.MAX_LOAD_OBJECTS の注釈。
+  function loadProblem(plan) {
+    if (!isPlain(plan)) return 'プランの形が正しくないため、開けませんでした。';
+    var total = 0;
+    COLLECTIONS.forEach(function (name) { if (Array.isArray(plan[name])) total += plan[name].length; });
+    if (total > LIMITS.MAX_LOAD_OBJECTS) {
+      return 'このプランは大きすぎるため開けません。壁・部屋・物は合わせて ' + LIMITS.MAX_LOAD_OBJECTS + ' 個までです。';
+    }
+    return null;
+  }
+
   return {
     LIMITS: LIMITS,
     COLLECTIONS: COLLECTIONS,
     validatePlan: validatePlan,
     normalizePlan: normalizePlan,
-    summarize: summarize
+    summarize: summarize,
+    tidyPlan: tidyPlan,
+    TIDY_UNSAFE_IDS: TIDY_UNSAFE_IDS,
+    loadProblem: loadProblem
   };
 }));
