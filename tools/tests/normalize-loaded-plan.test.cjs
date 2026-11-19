@@ -25,7 +25,7 @@ function grabFunction(name) {
   throw new Error('波括弧が閉じない: ' + name);
 }
 
-const NAMES = ['resetHeightGlobalsForPlanLoad', 'syncNorthFromPlan', 'ensureObjectIds',
+const NAMES = ['tidyLoadedPlan', 'resetHeightGlobalsForPlanLoad', 'syncNorthFromPlan', 'ensureObjectIds',
   'ensureExteriorWallSettings', 'ensureInteriorWallSettings', 'ensureRoofAppearance',
   'ensureFloorMetadata', 'ensureHeightDefaults', 'syncHeightDefaultsUI',
   'syncExteriorWallSettings', 'normalizeLegacyFurnitureItems', 'restoreViewState'];

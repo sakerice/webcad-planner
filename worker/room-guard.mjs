@@ -27,6 +27,7 @@
 // (interiorWallSettings.faces)・文字 1,738,626 字(壁の画像の data URL)・鍵の長さ 82 字・id 16 字・座標 30000。
 // 外の AI の /op の引数の上限(collab-room.mjs の argsTooLarge)と同じく、根を1段と数え、超えたら理由の文を返す。
 import PlanCorePatch from "../assets/js/plan-core/patch.js";
+import PlanSchema from "../assets/js/plan-schema.js";
 
 export const ROOM_LIMITS = Object.freeze({
   maxPlanDepth: 20,          // プランの根を1段。手元の最大は 5 段
@@ -66,10 +67,9 @@ export function maxSameId(plan) {
 }
 
 const UNSAFE = new Set(PlanCorePatch.UNSAFE_KEYS);
-// 物の欄のうち、文字・数・真偽値・null だけを受ける欄。Worker の要約(workerSummarize)・検査(workerInspect)・
-// 操作(workerApply)と画面の描画が、文字や数として読む欄。手元の全プランでこの型だった
-// (オブジェクトや配列を持つ欄は finishColors・finishTextures・kitchenWorkPoint・ceiling・siteZones など)。
-const SCALAR_KEYS = ["type", "floor", "n", "name", "label", "rot", "thick", "elev", "h", "locked", "detached", "baseRoom", "stairTo", "color", "texture", "model", "lightKind"];
+// 物の欄のうち、文字・数・真偽値・null だけを受ける欄。表は assets/js/plan-schema.js の SCALAR_KEYS の1か所にあり、
+// 画面が開く前に形をそろえる処理(PlanSchema.tidyPlan)も同じ表を見る。
+const SCALAR_KEYS = PlanSchema.SCALAR_KEYS;
 const COLLECTIONS = new Set(PlanCorePatch.COLLECTIONS);
 const SHARED_FIELDS = new Set(PlanCorePatch.SHARED_FIELDS);
 const own = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);

@@ -1,0 +1,133 @@
+{
+  "about": "壊れた・攻撃のプランの固定集。プランを画面へ入れる入口(ファイルの読み込み・共有の部屋・相手の差分・自動保存・一覧・比較・読み取りとチャットの取り込み)に通し、例外が出ない・固まらない・形がそろう・Object.prototype が汚れないことを確かめる。単体は tools/tests/plan-load-guards.test.cjs、画面は tools/tests/plan-load-guards.browser.mjs。__proto__ を自分の鍵として持たせるため、使う側は文字のまま JSON.parse すること。expect はそろえたあとの数(walls・items・rooms)と、残っているべき欄・消えているべき欄。巨大な名前・物の数の上限は大きいので使う側が作る。",
+  "plans": [
+    {
+      "id": "collections-not-arrays",
+      "plan": {"walls": "abc", "items": {"0": {"type": "sofa", "x": 0, "y": 0}}, "rooms": 5},
+      "expect": {"walls": 0, "items": 0, "rooms": 0}
+    },
+    {
+      "id": "collections-missing",
+      "plan": {"planName": "集まりが無い"},
+      "expect": {"walls": 0, "items": 0, "rooms": 0}
+    },
+    {
+      "id": "non-object-elements",
+      "plan": {
+        "walls": [null, 1, "w", [], {"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1}],
+        "items": [null, true, ["sofa"], {"id": 2, "type": "sofa", "x": 1500, "y": 1500, "floor": 1}],
+        "rooms": [0, {"id": "rm3", "n": "居間", "x": 1500, "y": 1500, "w": 3000, "d": 3000, "floor": 1}]
+      },
+      "expect": {"walls": 1, "items": 1, "rooms": 1}
+    },
+    {
+      "id": "string-and-bad-coords",
+      "plan": {
+        "walls": [
+          {"id": 1, "x1": "0", "y1": "0", "x2": "3000", "y2": "0", "floor": 1},
+          {"id": 2, "x1": "abc", "y1": 0, "x2": 3000, "y2": 0, "floor": 1},
+          {"id": 3, "x1": 0, "y1": 0, "x2": {"n": 1}, "y2": 0, "floor": 1}
+        ],
+        "items": [
+          {"id": 4, "type": "sofa", "x": "1500", "y": "1500", "floor": 1},
+          {"id": 5, "type": "sofa", "x": "東", "y": 0, "floor": 1},
+          {"id": 6, "type": "sofa", "y": 0, "floor": 1}
+        ],
+        "rooms": [
+          {"id": "rm7", "n": "居間", "x": 1500, "y": 1500, "w": "3000", "d": "3000", "floor": 1},
+          {"id": "rm8", "n": "壊れ", "x": 1500, "y": 1500, "w": null, "d": 3000, "floor": 1}
+        ]
+      },
+      "expect": {"walls": 1, "items": 2, "rooms": 2, "numbers": [["walls", 0, "x2", 3000], ["items", 0, "x", 1500], ["rooms", 0, "w", 3000]]}
+    },
+    {
+      "id": "huge-values",
+      "plan": {
+        "walls": [
+          {"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1, "thick": 1e300},
+          {"id": 2, "x1": 0, "y1": 0, "x2": 1e10, "y2": 0, "floor": 1},
+          {"id": 3, "x1": 0, "y1": 0, "x2": 3000, "y2": 3000, "floor": 1, "h": "Infinity"}
+        ],
+        "items": [
+          {"id": 4, "type": "sofa", "x": 1e300, "y": 0, "floor": 1},
+          {"id": 5, "type": "sofa", "x": 1000, "y": 1000, "floor": 1, "w": 1e300, "d": -1e301, "rot": "abc", "elev": {"a": 1}},
+          {"id": 6, "type": "sofa", "x": -900000000, "y": 900000000, "floor": 1}
+        ],
+        "rooms": [
+          {"id": "rm7", "n": "広すぎ", "x": 0, "y": 0, "w": 1e300, "d": 1000, "floor": 1}
+        ]
+      },
+      "expect": {"walls": 2, "items": 2, "rooms": 0, "absent": [["walls", 0, "thick"], ["walls", 1, "h"], ["items", 0, "w"], ["items", 0, "d"], ["items", 0, "rot"], ["items", 0, "elev"]]}
+    },
+    {
+      "id": "floor-out-of-range",
+      "plan": {
+        "walls": [
+          {"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": "2"},
+          {"id": 2, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1e9},
+          {"id": 3, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 0}
+        ],
+        "items": [
+          {"id": 4, "type": "sofa", "x": 0, "y": 0, "floor": -1},
+          {"id": 5, "type": "sofa", "x": 0, "y": 0, "floor": "二階"},
+          {"id": 6, "type": "sofa", "x": 0, "y": 0}
+        ],
+        "rooms": [
+          {"id": "rm7", "n": "上", "x": 0, "y": 0, "w": 1000, "d": 1000, "floor": 6}
+        ]
+      },
+      "expect": {"walls": 2, "items": 2, "rooms": 1, "numbers": [["walls", 0, "floor", "2"], ["walls", 1, "floor", 0], ["items", 0, "floor", -1], ["rooms", 0, "floor", 6]]}
+    },
+    {
+      "id": "proto-keys",
+      "json": "{\"__proto__\":{\"polluted\":\"plan\"},\"constructor\":{\"prototype\":{\"polluted\":\"ctor\"}},\"walls\":[{\"id\":1,\"x1\":0,\"y1\":0,\"x2\":3000,\"y2\":0,\"floor\":1,\"__proto__\":{\"polluted\":\"wall\"}}],\"items\":[{\"id\":\"__proto__\",\"type\":\"constructor\",\"x\":1000,\"y\":1000,\"floor\":1,\"prototype\":{\"polluted\":\"item\"},\"finishColors\":{\"__proto__\":{\"polluted\":\"finish\"}}}],\"rooms\":[],\"exteriorWallSettings\":{\"walls\":{\"__proto__\":{\"polluted\":\"ext\"}},\"floors\":{},\"faces\":{}},\"floorMetadata\":{\"__proto__\":{\"polluted\":\"meta\"}}}",
+      "expect": {"walls": 1, "items": 0, "rooms": 0, "noOwn": ["__proto__", "constructor", "prototype"]}
+    },
+    {
+      "id": "settings-wrong-types",
+      "plan": {
+        "walls": [{"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1}],
+        "items": [],
+        "rooms": [],
+        "exteriorWallSettings": "abc",
+        "interiorWallSettings": {"whole": "x", "floors": [1, 2], "walls": {"1": "red", "2": {"color": "#ffffff"}}, "faces": 5},
+        "roofAppearance": {"floors": "x"},
+        "floorMetadata": {"1": "str", "2": {"use": "living"}},
+        "heightDefaults": 5,
+        "exteriorDetail": [],
+        "viewState": "x",
+        "floors": "abc",
+        "northDeg": "北"
+      },
+      "expect": {"walls": 1, "items": 0, "rooms": 0}
+    },
+    {
+      "id": "scalar-objects",
+      "plan": {
+        "walls": [{"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1, "color": {"toString": 1}, "thick": [120]}],
+        "items": [{"id": 2, "type": "sofa", "x": 1500, "y": 1500, "floor": {"n": 1}, "label": ["ソファ"], "color": {"r": 1}}],
+        "rooms": [{"id": "rm3", "n": {"toString": 1}, "x": 1500, "y": 1500, "w": 3000, "d": 3000, "floor": 1}]
+      },
+      "expect": {"walls": 1, "items": 1, "rooms": 1, "absent": [["walls", 0, "color"], ["walls", 0, "thick"], ["items", 0, "floor"], ["items", 0, "label"], ["items", 0, "color"], ["rooms", 0, "n"]]}
+    },
+    {
+      "id": "old-null-coords",
+      "plan": {
+        "walls": [{"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1}],
+        "items": [{"id": 2, "type": "sofa", "x": null, "y": 1500, "floor": 1}, {"id": 3, "type": "sofa", "x": "", "y": 500, "floor": 1}],
+        "rooms": [{"id": "rm4", "n": "居間", "x": null, "y": 1500, "w": 3000, "d": 3000, "floor": 1}]
+      },
+      "expect": {"walls": 1, "items": 2, "rooms": 1, "unchanged": true}
+    },
+    {
+      "id": "unknown-fields-kept",
+      "plan": {
+        "futureField": {"a": 1},
+        "walls": [{"id": 1, "x1": 0.25, "y1": 0, "x2": 3000.125, "y2": 0, "floor": 1, "thick": "120", "futureWallProp": [1, 2]}],
+        "items": [{"id": 2, "type": "sofa", "x": 1500.5, "y": 1499.75, "floor": 1, "futureProp": "x", "baseRoom": null, "elev": null}],
+        "rooms": [{"id": "rm3", "n": "居間", "x": 1500, "y": 1500, "w": 3000, "d": 3000, "floor": 1.5}]
+      },
+      "expect": {"walls": 1, "items": 1, "rooms": 1, "unchanged": true}
+    }
+  ]
+}

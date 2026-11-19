@@ -23,6 +23,8 @@ node tools/check_plan_schema.cjs assets/default_plan.json assets/default_plan_3f
 rm -rf dist
 mkdir -p dist/assets/env dist/assets/textures dist/assets/models
 cp index.html dist/
+# 静的アセットに付ける見出し(CSP の報告だけ)。中身と根拠は _headers の冒頭。
+cp _headers dist/
 cp -r assets/. dist/assets/
 # 編集用の元データと macOS のごみは配信しない。
 find dist \( -name '*.blend' -o -name '.DS_Store' \) -delete

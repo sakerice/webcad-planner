@@ -25,6 +25,8 @@ const ROOT_ALLOWED = [
   'wrangler.toml',
   'wrangler.default-plans.toml',
   '.gitignore',
+  // 静的アセットに付ける見出し(CSP の報告だけ)。Workers の静的アセットは dist/_headers を読むので、build.sh が写す。
+  '_headers',
 ];
 
 test('リポジトリ直下には決まったファイルだけがある', () => {

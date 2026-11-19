@@ -66,6 +66,7 @@ var PlanSnapshot = (function () {
       var f = CompareMode.freshWorkspace();
       Object.keys(f).forEach(function (k) { window[k] = f[k]; });
       DATA = JSON.parse(JSON.stringify(plan));
+      if (typeof tidyLoadedPlan === 'function') tidyLoadedPlan(DATA, { quiet: true });
       ST.selected = null; ST.multiSelected = []; ST.selectAll = false;
       syncPlanGlobals(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings();
       ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings();

@@ -61,7 +61,9 @@ try {
     await page.waitForFunction(() => Array.isArray(DATA.walls) && DATA.walls.length > 4 && window.PRESET_CURRENT === '2f',
       null, { timeout: 30000 });
     assert.ok(dialogs.some((m) => /前回保存したプランがあります/.test(m)), '起動時の確認が出ていない: ' + JSON.stringify(dialogs));
-    assert.equal(restoreFailures.length, 1, '復元の失敗が記録されていない（壊れたデータが通ってしまった）');
+    // 壊れた集まり(walls が文字)は、開く前の形をそろえる処理(PlanSchema.tidyPlan)で空になり、空の保存として既定プランで始める。
+    // 以前は復元の途中で例外になって既定プランへ戻っていた(どちらでも、壊れたデータが DATA に入らないことが意図)。
+    assert.equal(restoreFailures.length, 0, '形をそろえたのに復元の途中で例外になった: ' + restoreFailures.join(' / '));
     const state = await page.evaluate(() => ({
       walls: Array.isArray(DATA.walls), items: Array.isArray(DATA.items), rooms: Array.isArray(DATA.rooms),
       pending: _defaultPlanPending,
