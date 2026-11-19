@@ -19907,6 +19907,8 @@ async function loadPlanFromStorage(){
   // 開けない大きさ・形の保存は開かない(保存の中身は消さない)。ここで知らせて null を返す(空の保存の false と分ける)
   var problem=planLoadProblem(d);
   if(problem){ alert(problem); return null; }
+  // 形を先にそろえてから空かどうかを見る(walls が文字などの壊れた保存は、そろえると空になり、今までどおり既定プランで始める)
+  tidyLoadedPlan(d);
   // Explicitly saved blank starts are intentional; ignore unmarked legacy empty saves.
   var isEmpty=(!d.walls||!d.walls.length)&&(!d.items||!d.items.length)&&(!d.rooms||!d.rooms.length);
   if(isEmpty && d.startMode!=='blank') return false;
