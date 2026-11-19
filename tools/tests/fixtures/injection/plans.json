@@ -38,7 +38,7 @@
           {"id": "rm8", "n": "壊れ", "x": 1500, "y": 1500, "w": null, "d": 3000, "floor": 1}
         ]
       },
-      "expect": {"walls": 1, "items": 1, "rooms": 1, "numbers": [["walls", 0, "x2", 3000], ["items", 0, "x", 1500], ["rooms", 0, "w", 3000]]}
+      "expect": {"walls": 1, "items": 2, "rooms": 2, "numbers": [["walls", 0, "x2", 3000], ["items", 0, "x", 1500], ["rooms", 0, "w", 3000]]}
     },
     {
       "id": "huge-values",
@@ -76,7 +76,7 @@
           {"id": "rm7", "n": "上", "x": 0, "y": 0, "w": 1000, "d": 1000, "floor": 6}
         ]
       },
-      "expect": {"walls": 1, "items": 1, "rooms": 0, "numbers": [["walls", 0, "floor", 2]]}
+      "expect": {"walls": 2, "items": 2, "rooms": 1, "numbers": [["walls", 0, "floor", "2"], ["walls", 1, "floor", 0], ["items", 0, "floor", -1], ["rooms", 0, "floor", 6]]}
     },
     {
       "id": "proto-keys",
@@ -100,6 +100,24 @@
         "northDeg": "北"
       },
       "expect": {"walls": 1, "items": 0, "rooms": 0}
+    },
+    {
+      "id": "scalar-objects",
+      "plan": {
+        "walls": [{"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1, "color": {"toString": 1}, "thick": [120]}],
+        "items": [{"id": 2, "type": "sofa", "x": 1500, "y": 1500, "floor": {"n": 1}, "label": ["ソファ"], "color": {"r": 1}}],
+        "rooms": [{"id": "rm3", "n": {"toString": 1}, "x": 1500, "y": 1500, "w": 3000, "d": 3000, "floor": 1}]
+      },
+      "expect": {"walls": 1, "items": 1, "rooms": 1, "absent": [["walls", 0, "color"], ["walls", 0, "thick"], ["items", 0, "floor"], ["items", 0, "label"], ["items", 0, "color"], ["rooms", 0, "n"]]}
+    },
+    {
+      "id": "old-null-coords",
+      "plan": {
+        "walls": [{"id": 1, "x1": 0, "y1": 0, "x2": 3000, "y2": 0, "floor": 1}],
+        "items": [{"id": 2, "type": "sofa", "x": null, "y": 1500, "floor": 1}, {"id": 3, "type": "sofa", "x": "", "y": 500, "floor": 1}],
+        "rooms": [{"id": "rm4", "n": "居間", "x": null, "y": 1500, "w": 3000, "d": 3000, "floor": 1}]
+      },
+      "expect": {"walls": 1, "items": 2, "rooms": 1, "unchanged": true}
     },
     {
       "id": "unknown-fields-kept",
