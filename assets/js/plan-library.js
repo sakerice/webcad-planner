@@ -50,7 +50,8 @@ var PlanLibrary = (function(){
   function put(entry){
     var id = entry.id || ('p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
     var meta = {id:id, name:entry.name, savedAt:Date.now(), thumb:entry.thumb||''};
-    var json = serialize(entry.plan);
+    // json: 書き出し済みの文字(写しを取った時点の中身を残すとき。putSnapshot)
+    var json = typeof entry.json === 'string' ? entry.json : serialize(entry.plan);
     return tx(['meta','data'], 'readwrite', function(t){
       t.objectStore('meta').put(meta);
       t.objectStore('data').put(json, id);
@@ -118,6 +119,15 @@ var PlanLibrary = (function(){
         return meta;
       });
     }).catch(function(e){ alert('ブラウザへの保存に失敗しました: '+(e && e.message || e)); return null; });
+  }
+
+  // 開いているプランをそのまま写して一覧へ足す(名前は呼ぶ側が決める。開いているプランと一覧の結び付き・未保存の印は変えない)。
+  // json は呼ぶ側が先に書き出した文字(書き出した時点の中身を残す)。縮小画像もここで同期に撮り始めるので、
+  // 呼んだ直後に DATA が入れ替わっても、写すのは呼んだ時点のプラン。id を渡すとその項目を上書きする。
+  // 戻り値は一覧の項目(meta)。保存できなければ失敗の Promise。
+  function putSnapshot(opts){
+    var shot = thumbnail();
+    return shot.then(function(thumb){ return put({id:opts.id || null, name:opts.name, json:opts.json, thumb:thumb}); });
   }
 
   // 読み込んだプランを、ファイルの読込と同じ手順で、いま編集している側へ入れる
@@ -239,7 +249,7 @@ var PlanLibrary = (function(){
   window.addEventListener('load', install);
 
   var api = {
-    list:list, get:get, put:put, rename:rename, remove:remove, saveCurrent:saveCurrent, openList:openList, askName:askName,
+    list:list, get:get, put:put, putSnapshot:putSnapshot, rename:rename, remove:remove, saveCurrent:saveCurrent, openList:openList, askName:askName,
     loadIntoEditor:loadIntoEditor, nowLabel:nowLabel,
     saveAs:function(){ return saveCurrent({asNew:true}); }
   };

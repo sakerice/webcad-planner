@@ -2482,16 +2482,24 @@ function planTidyNoticeText(lost){
   return '開けない部分が '+lost+' 個あったため、その部分を除いて開きました。';
 }
 // 画面の上に出す1行の知らせ。閉じるボタンか 12 秒で消える。
+// action(省略可)は {label, run}。知らせの中にボタンを1つ出し、押すと run を呼ぶ(押したあとも知らせは残す)。
+// ボタンのある知らせは、押す前に消えないよう 30 秒にする。
 var PLAN_NOTICE_TIMER=null;
-function showPlanNotice(text){
+function showPlanNotice(text,action){
   if(typeof document==='undefined') return;
   var box=document.getElementById('plan-notice');
   if(!box) return;
   var t=document.getElementById('plan-notice-text');
   if(t) t.textContent=text;
+  var b=document.getElementById('plan-notice-action');
+  if(b){
+    b.hidden=!action;
+    b.textContent=action?action.label:'';
+    b.onclick=action?function(){ try{ action.run(); }catch(e){ console.warn('[WebCAD] 知らせのボタン',e); } }:null;
+  }
   box.hidden=false;
   clearTimeout(PLAN_NOTICE_TIMER);
-  PLAN_NOTICE_TIMER=setTimeout(hidePlanNotice,12000);
+  PLAN_NOTICE_TIMER=setTimeout(hidePlanNotice,action?30000:12000);
 }
 function hidePlanNotice(){
   clearTimeout(PLAN_NOTICE_TIMER);

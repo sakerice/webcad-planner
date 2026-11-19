@@ -377,6 +377,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   font-size:13px;font-weight:700;line-height:1.5;box-shadow:0 8px 22px rgba(24,20,18,0.16)}
 .plan-notice[hidden]{display:none}
 .plan-notice-close{flex:none;min-width:36px;min-height:36px;border:0;border-radius:8px;background:transparent;color:inherit;font-size:18px;cursor:pointer}
+.plan-notice-action{flex:none;min-height:36px;padding:0 12px;border:1px solid #9fb6d3;border-radius:8px;background:#eef4fb;color:#1f4f86;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.plan-notice-action[hidden]{display:none}
 @media (pointer:coarse){
   /* タブレットでは背景blur自体がGPU負荷になるため、半透明色だけで軽く覆う */
   #app-loading{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,0.58)}
@@ -3184,7 +3186,7 @@ input[type="reset"]:focus-visible{
     <span id="app-loading-text">読み込み中</span>
   </div>
 </div>
-<div id="plan-notice" class="plan-notice" role="status" aria-live="polite" hidden><span id="plan-notice-text"></span><button type="button" class="plan-notice-close" onclick="hidePlanNotice()" aria-label="閉じる">×</button></div>
+<div id="plan-notice" class="plan-notice" role="status" aria-live="polite" hidden><span id="plan-notice-text"></span><button type="button" id="plan-notice-action" class="plan-notice-action" hidden></button><button type="button" class="plan-notice-close" onclick="hidePlanNotice()" aria-label="閉じる">×</button></div>
 <div id="share-overlay" class="share-overlay" role="dialog" aria-modal="true" aria-labelledby="share-title" onclick="closeShareDialogOnBackdrop(event)">
   <div class="share-card">
     <div class="share-head">
@@ -20357,12 +20359,40 @@ async function sharedSyncNow(){
       // 送り直さず、部屋の最新の状態を取り直して画面を合わせる。
       // 取り直すと、この画面の送れなかった変更は消える。取り直しに失敗したときは、その知らせが上書きする。
       // 413 は理由を添える(理由が分からないと、同じ大きな画像を貼り直して同じことを繰り返すため)。
-      sharedSetStatus(e.tooLarge?'この変更をするとプランが保存できる大きさ（10MB）を超えるため、共同編集に反映できなかった変更を取り消して、最新の状態に戻しました。':'この変更は共同編集に反映できなかったため、取り消して最新の状態に戻しました。',true);
+      // 取り直す前に、手元のプラン(送れなかった変更と、応答待ちの間の編集を含む)を保存一覧へ写す(sharedKeepRejectedLocal)。
+      var keep=await sharedKeepRejectedLocal();
+      var head=e.tooLarge?'この変更をするとプランが保存できる大きさ（10MB）を超えるため、共同編集に反映できなかった変更を取り消して、最新の状態に戻しました。':'この変更は共同編集に反映できなかったため、取り消して最新の状態に戻しました。';
+      var tail=keep.ok?'戻す前のプランは「保存一覧」に残しました。':'戻す前のプランを「保存一覧」に残せませんでした。残すときは「ファイルに保存」を押してください。';
+      sharedSetStatus(head+tail,true);
+      showPlanNotice(head+tail,keep.ok?null:{label:'ファイルに保存',run:function(){downloadJsonFile(keep.json,sharedKeepFileName(keep.at));}});
       await refreshSharedPlan();
     }else{SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
   }
   finally{SHARED.sending=false;if(SHARED.sendEntry===sendEntry)SHARED.sendEntry=null;if(SHARED.pending||sharedHasTrackedChanges()){SHARED.pending=false;queueSharedSync(600);}}})();
   return SHARED.sendPromise;
+}
+// 共同編集で変更が断られて部屋の最新へ戻す直前に、手元のプランを保存一覧へ写す。
+// 名前は「共同編集に反映できなかった変更（11/20 14:05）」。同じ部屋で 5 分以内に続けて断られたときは、直前に足した項目を
+// 上書きする(同じ大きな画像を貼り直す、など同じことの繰り返しで一覧が埋まらないように。上書きするのは、この画面が足した項目だけ)。
+// 戻り値: {ok, json(写した中身の文字), at}。ok が false なら呼ぶ側がファイルへの書き出しを勧める。
+var SHARED_REJECT_KEEP_MS=5*60*1000;
+async function sharedKeepRejectedLocal(){
+  var at=Date.now(),json=serializeDataSnapshot();
+  var prev=SHARED.rejectKeep;
+  var reuse=prev&&prev.roomId===SHARED.roomId&&at-prev.at<SHARED_REJECT_KEEP_MS?prev.id:null;
+  try{
+    if(typeof PlanLibrary==='undefined'||!PlanLibrary.putSnapshot)throw new Error('no library');
+    var meta=await PlanLibrary.putSnapshot({id:reuse,name:'共同編集に反映できなかった変更（'+PlanLibrary.nowLabel(at)+'）',json:json});
+    SHARED.rejectKeep={id:meta.id,at:at,roomId:SHARED.roomId};
+    return {ok:true,json:json,at:at};
+  }catch(err){
+    console.warn('[WebCAD] 断られた変更を保存一覧へ写せませんでした',err);
+    return {ok:false,json:json,at:at};
+  }
+}
+function sharedKeepFileName(at){
+  var d=new Date(at),p=function(n){return (n<10?'0':'')+n;};
+  return '共同編集に反映できなかった変更_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.json';
 }
 async function flushSharedChanges(){
   clearTimeout(SHARED.timer);SHARED.timer=null;
