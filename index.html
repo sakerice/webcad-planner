@@ -20025,7 +20025,8 @@ async function loadPlanFromStorageButton(){
 }
 // 共有リンクなしで開いたとき、このブラウザで最後に使ったのが共同編集だった(いちばん新しい部屋の写しが、前回のプランの
 // 保存より新しい)なら、「前回は共同編集をしていました。」と[共同編集を開く]を出す(自分のプランは今までどおり開く)。
-// 「×」で閉じると、その部屋については次から出さない(SHARED_LAST_NOTICE_OFF_KEY。最近の 20 部屋まで覚える)。
+// 1つの部屋につき1度だけ出す(出した時点で覚える。SHARED_LAST_NOTICE_OFF_KEY。最近の 20 部屋まで)。その後も保存一覧の「共同編集」から入り直せる。
+// ボタンを押すと、起動時の既定の間取りを選ぶ画面を閉じて部屋に入る。入れなかったら、選ぶ画面を出し直す(空の画面で取り残さない)。
 var SHARED_LAST_NOTICE_OFF_KEY='webcad-last-shared-notice-off';
 function sharedLastNoticeOff(){try{var v=JSON.parse(localStorage.getItem(SHARED_LAST_NOTICE_OFF_KEY)||'[]');return Array.isArray(v)?v:[];}catch(e){return [];}}
 async function offerLastSharedRoom(){
@@ -20033,9 +20034,13 @@ async function offerLastSharedRoom(){
   var rooms=await StorageAdapter.listRooms();var top=rooms[0];if(!top)return false;
   var ownAt=await StorageAdapter.savedAt();
   if(!(Number(top.at)>ownAt)||sharedLastNoticeOff().indexOf(top.roomId)>=0)return false;
-  showPlanNotice('前回は共同編集をしていました。',{label:'共同編集を開く',run:function(){hidePlanNotice();openSharedRoomFromList(top.roomId);},onClose:function(){
-    var list=sharedLastNoticeOff().filter(function(id){return id!==top.roomId;});list.unshift(top.roomId);
-    try{localStorage.setItem(SHARED_LAST_NOTICE_OFF_KEY,JSON.stringify(list.slice(0,20)));}catch(e){}
+  var list=sharedLastNoticeOff().filter(function(id){return id!==top.roomId;});list.unshift(top.roomId);
+  try{localStorage.setItem(SHARED_LAST_NOTICE_OFF_KEY,JSON.stringify(list.slice(0,20)));}catch(e){}
+  showPlanNotice('前回は共同編集をしていました。',{label:'共同編集を開く',run:async function(){
+    hidePlanNotice();
+    if(typeof closePresetChoice==='function')closePresetChoice();
+    var ok=await openSharedRoomFromList(top.roomId);
+    if(!ok&&_defaultPlanPending&&!SHARED.roomId&&typeof maybeOfferPresetChoice==='function')maybeOfferPresetChoice();
   }});
   return true;
 }
@@ -20698,9 +20703,13 @@ async function createSharedRoom(){
 }
 // 部屋を抜ける前に、まだ送っていない変更を送る。送れなかったら確かめる(はいなら抜ける。変更は部屋の写しに残る)。
 // 抜けてよければ true。
+// 送る待ちは SHARED_LEAVE_FLUSH_MS まで。応答が来なければ、送れなかったときと同じく確かめる(変更は部屋の写しに残る)。
+var SHARED_LEAVE_FLUSH_MS=8000;
 async function sharedFlushBeforeLeaving(what){
-  try{await flushSharedChanges();}catch(e){}
-  if(!SHARED.roomId||!sharedHasTrackedChanges())return true;
+  var timer=null;
+  try{await Promise.race([flushSharedChanges(),new Promise(function(r){timer=setTimeout(r,SHARED_LEAVE_FLUSH_MS);})]);}catch(e){}
+  clearTimeout(timer);
+  if(!SHARED.roomId||(!SHARED.sending&&!sharedHasTrackedChanges()))return true;
   return confirm('共同編集に、まだ送れていない変更があります。'+what+'、その変更はほかの参加者に届かず、このブラウザの写し(保存一覧の「共同編集」)にだけ残ります。続けますか？');
 }
 // 部屋から抜ける(この端末だけ)。抜ける前に、部屋の枠へ今の中身を入れておく。

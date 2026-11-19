@@ -51,6 +51,7 @@ async function openBrowser(width = 1280) {
   });
   await context.route(/\/api\/rooms\/[A-Za-z0-9_-]{22}\/update$/, (route) => {
     st.updates++; st.updateBodies.push({ url: route.request().url(), body: JSON.parse(route.request().postData()) });
+    if (st.updateStatus === 'hang') return; // 応答を返さない(通信が止まった場面)
     if (st.updateStatus !== 200) return route.fulfill({ status: st.updateStatus, contentType: 'application/json', body: '{"error":"x"}' });
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ version: 1 + st.updates, expiresAt: Date.now() + 1e9 }) });
   });
@@ -119,15 +120,14 @@ try {
   await ready(page);
   await page.waitForFunction((sig) => JSON.stringify([DATA.walls.length, DATA.walls[0].x1, DATA.walls[0].y1, DATA.walls[0].x2, DATA.walls[0].y2]) === sig, ownSig, T);
   assert.ok(st.dialogs.some((d) => /前回保存したプランがあります/.test(d)), '前回のプランを開く確認が出ていない');
-  // 最後に使ったのが共同編集なので、「前回は共同編集をしていました。」と[共同編集を開く]が出る。「×」で閉じると、その部屋は次から出さない
+  // 最後に使ったのが共同編集なので、「前回は共同編集をしていました。」と[共同編集を開く]が出る。1つの部屋につき1度だけ(閉じなくても次は出さない)
   const lastNotice = () => page.evaluate(() => ({ hidden: document.getElementById('plan-notice').hidden, text: document.getElementById('plan-notice-text').textContent, action: document.getElementById('plan-notice-action').hidden ? '' : document.getElementById('plan-notice-action').textContent }));
   await page.waitForFunction(() => !document.getElementById('plan-notice').hidden, null, T);
   assert.deepEqual(await lastNotice(), { hidden: false, text: '前回は共同編集をしていました。', action: '共同編集を開く' });
-  await page.click('#plan-notice .plan-notice-close');
   await page.reload();
   await ready(page);
   await sleep(2500);
-  assert.equal((await lastNotice()).hidden, true, '閉じた部屋の知らせがまた出た');
+  assert.equal((await lastNotice()).hidden, true, '1度出した部屋の知らせがまた出た');
   assert.equal(await page.evaluate(() => SHARED.roomId), null);
   console.log('ok  自宅のプラン → 知人の共有リンクで編集・保存 → 普通に開き直すと自宅のプランが出た');
 
@@ -280,9 +280,46 @@ try {
     await p2.evaluate((id) => openSharedRoomFromList(id), ROOM);
     await p2.waitForFunction((id) => SHARED.roomId === id, ROOM, T);
     assert.equal((await idb(p2, 'webcad-room-' + ROOM2)).walls[0].thick, 182, '送れなかった変更が写しに残っていない');
-    console.log('ok  別の部屋を開く前にまだ送っていない変更を送り、送れなければ確かめて、写しに残した');
+    // 応答が来ない: 8 秒待って、送れなかったときと同じく確かめる。変更は写しに残る
+    s2.updateStatus = 'hang';
+    await p2.evaluate(() => { DATA.walls[0].thick = 183; sharedMarkIdsDirty([DATA.walls[0].id]); clearTimeout(SHARED.timer); SHARED.timer = null; });
+    s2.dialogs.length = 0; s2.answer = true;
+    const t0 = Date.now();
+    await p2.evaluate((id) => openSharedRoomFromList(id), ROOM2);
+    const waited = Date.now() - t0;
+    assert.ok(s2.dialogs.some((d) => /まだ送れていない変更があります/.test(d)), '応答が来ないのに確かめていない: ' + JSON.stringify(s2.dialogs));
+    assert.ok(waited >= 7500 && waited < 20000, `待ちの上限が効いていない(${waited}ms)`);
+    await p2.waitForFunction((id) => SHARED.roomId === id, ROOM2, T);
+    assert.equal((await idb(p2, 'webcad-room-' + ROOM)).walls[0].thick, 183, '応答が来なかった変更が写しに残っていない');
+    s2.updateStatus = 200;
+    console.log(`ok  別の部屋を開く前にまだ送っていない変更を送り、送れない・応答が来ない(${(waited / 1000).toFixed(1)} 秒で打ち切り)ときは確かめて、写しに残した`);
     await c2.close();
   }
+  // ── 8. 自分のプランが無い起動: 知らせのボタンで、はじめる間取りを選ぶ画面を閉じて部屋に入る。入れなければ選ぶ画面を出し直す ──
+  for (const expired of [false, true]) {
+    const RM = expired ? 'NoOwnPlanExpiredRoom00' : 'NoOwnPlanLiveRoom00000';
+    const { context: c3, st: s3 } = await openBrowser(375);
+    let p3 = await c3.newPage();
+    await p3.goto(APP + '#room=' + RM);
+    await p3.waitForFunction((id) => window.SHARED && SHARED.roomId === id, RM, T);
+    await p3.evaluate(() => sharedAutoSaveLocal());
+    await p3.close();
+    if (expired) s3.roomStatus = 410;
+    p3 = await c3.newPage();
+    await p3.goto(APP);
+    await p3.waitForFunction(() => !document.getElementById('plan-notice').hidden && document.getElementById('preset-choice-modal').classList.contains('show'), null, T);
+    await p3.click('#plan-notice-action');
+    if (!expired) {
+      await p3.waitForFunction((id) => SHARED.roomId === id, RM, T);
+      assert.equal(await p3.evaluate(() => document.getElementById('preset-choice-modal').classList.contains('show')), false, '部屋に入ったのに、はじめる間取りを選ぶ画面が残っている');
+    } else {
+      await p3.waitForFunction(() => document.getElementById('preset-choice-modal').classList.contains('show') && document.getElementById('share-overlay').classList.contains('show'), null, T);
+      assert.equal(await p3.evaluate(() => SHARED.roomId), null);
+    }
+    console.log(expired ? 'ok  自分のプランが無い起動で部屋が期限切れなら、選ぶ画面を出し直した(写しを開く道も出る)' : 'ok  自分のプランが無い起動で[共同編集を開く]を押すと、選ぶ画面を閉じて部屋に入った');
+    await c3.close();
+  }
+
   assert.deepEqual(errors, [], 'ページの例外:\n' + errors.join('\n'));
 } finally {
   await browser.close();
