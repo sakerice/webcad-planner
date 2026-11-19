@@ -295,9 +295,8 @@ var CompareMode = (function(){
   function start(planB, from){
     from = from || {};
     if(on || !canStart()) return;
-    // 開けない大きさ・形のプランは並べずに断る(ほかの入口と同じ文)
-    var problem = (typeof planLoadProblem === 'function') ? planLoadProblem(planB) : null;
-    if(problem){ alert(problem); return; }
+    // 開けない形・桁なら断り、時間がかかる大きさなら確かめる(ほかの入口と同じ文)
+    if(typeof planLoadAllowed === 'function' && !planLoadAllowed(planB)) return;
     if(ST.view!=='2d') setView('2d');
     var a = area();
     peer = document.createElement('canvas');

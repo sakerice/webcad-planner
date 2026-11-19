@@ -47,13 +47,19 @@ function assertShape(plan, label) {
     plan[name].forEach((o, i) => {
       assert.ok(o && typeof o === 'object' && !Array.isArray(o), `${label}: ${name}[${i}] が素のオブジェクトでない`);
       for (const k of COORDS[name]) {
-        assert.ok(typeof o[k] === 'number' && Number.isFinite(o[k]) && Math.abs(o[k]) <= 1e9, `${label}: ${name}[${i}].${k}=${o[k]}`);
+        const v = o[k];
+        if (v === undefined || v === null || v === '') continue;   // 古い保存データ(部屋の検査と同じく残す)
+        assert.ok(typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= 1e9, `${label}: ${name}[${i}].${k}=${v}`);
       }
       if (o.floor !== undefined && o.floor !== null) {
-        assert.ok(typeof o.floor === 'number' && o.floor >= PlanSchema.LIMITS.MIN_FLOOR && o.floor <= PlanSchema.LIMITS.MAX_FLOOR, `${label}: ${name}[${i}].floor=${o.floor}`);
+        const f = Number(o.floor);
+        assert.ok((typeof o.floor === 'number' || typeof o.floor === 'string') && Number.isFinite(f) && f >= PlanSchema.TIDY_FLOOR_MIN && f <= PlanSchema.TIDY_FLOOR_MAX, `${label}: ${name}[${i}].floor=${o.floor}`);
+      }
+      for (const k of PlanSchema.SCALAR_KEYS) {
+        assert.ok(!(o[k] !== null && typeof o[k] === 'object'), `${label}: ${name}[${i}].${k} がオブジェクトのまま`);
       }
       for (const [k, v] of Object.entries(o)) {
-        if (typeof v === 'string' && !v.startsWith('data:')) assert.ok(v.length <= 10000, `${label}: ${name}[${i}].${k} が長すぎる`);
+        if (typeof v === 'string' && !v.startsWith('data:')) assert.ok(v.length <= PlanSchema.TIDY_MAX_TEXT, `${label}: ${name}[${i}].${k} が長すぎる`);
       }
     });
   }
@@ -81,6 +87,9 @@ test('固定集: 例外が出ず、形がそろい、Object.prototype が汚れ�
     } else {
       assert.ok(r.changed > 0, c.id + ': 何も変えていない');
     }
+    // 捨てた物の数は dropped と同じで、知らせる数 lost に入る
+    const dropped = r.dropped.walls + r.dropped.items + r.dropped.rooms;
+    assert.ok(r.lost >= dropped, c.id + ': lost が捨てた数より少ない');
   }
 });
 
@@ -109,18 +118,20 @@ test('知らない欄・端数・壁厚の数の文字は変えない', () => {
   assert.equal(plan.rooms[0].floor, 1.5);
 });
 
-test('長すぎる文字は 1 万字で切り、画像の data: URL と 1 万字までの名前は切らない', () => {
+test('長すぎる文字は TIDY_MAX_TEXT 字で切り、画像の data: URL とそれまでの長さの名前は切らない', () => {
+  const MAX = PlanSchema.TIDY_MAX_TEXT;
   const longName = 'あ'.repeat(2000000);
-  const dataUrl = 'data:image/png;base64,' + 'A'.repeat(50000);
-  const name40 = '名'.repeat(40);
-  const plan = { walls: [], items: [{ id: 1, type: 'sofa', x: 0, y: 0, texture: dataUrl, label: name40 }], rooms: [{ id: 'rm2', n: longName, x: 0, y: 0, w: 1000, d: 1000 }], planName: longName };
+  const dataUrl = 'data:image/png;base64,' + 'A'.repeat(MAX + 50000);
+  const atMax = '名'.repeat(MAX);
+  const plan = { walls: [], items: [{ id: 1, type: 'sofa', x: 0, y: 0, texture: dataUrl, label: atMax }], rooms: [{ id: 'rm2', n: longName, x: 0, y: 0, w: 1000, d: 1000 }], planName: longName };
   const t0 = Date.now();
-  PlanSchema.tidyPlan(plan);
+  const r = PlanSchema.tidyPlan(plan);
   assert.ok(Date.now() - t0 < 2000, 'そろえるのに時間がかかりすぎる');
-  assert.equal(plan.rooms[0].n.length, 10000);
-  assert.equal(plan.planName.length, 10000);
+  assert.equal(plan.rooms[0].n.length, MAX);
+  assert.equal(plan.planName.length, MAX);
   assert.equal(plan.items[0].texture, dataUrl);
-  assert.equal(plan.items[0].label, name40);
+  assert.equal(plan.items[0].label, atMax);
+  assert.equal(r.lost, 2, '切った2つを知らせる数に入れる');
 });
 
 test('手元の正当なプランは1バイトも変わらない', () => {
@@ -142,19 +153,34 @@ test('手元の正当なプランは1バイトも変わらない', () => {
   }
 });
 
-test('大きすぎるプランは利用者向けの文で断り、上限ちょうどは通す', () => {
-  const max = PlanSchema.LIMITS.MAX_LOAD_OBJECTS;
-  const make = (n) => ({ walls: [], rooms: [], items: Array.from({ length: n }, (_, i) => ({ id: i + 1, type: 'sofa', x: i, y: 0 })) });
-  assert.equal(PlanSchema.loadProblem(make(max)), null);
-  const msg = PlanSchema.loadProblem(make(max + 1));
-  assert.match(msg, /大きすぎる/);
-  assert.match(msg, new RegExp(String(max)));
-  assert.doesNotMatch(msg, /items|walls|rooms|JSON|undefined/);
+test('大きいプランは確認の文を出し、画面が扱えない桁だけ断る', () => {
+  const warnAt = PlanSchema.LIMITS.MAX_LOAD_OBJECTS;
+  const refuseAt = PlanSchema.LIMITS.MAX_OPEN_OBJECTS;
+  const make = (n) => ({ walls: [], rooms: [], items: { length: n } });
+  const real = (n) => ({ walls: [], rooms: [], items: Array.from({ length: n }, (_, i) => ({ id: i + 1, type: 'sofa', x: i, y: 0 })) });
+  assert.equal(PlanSchema.loadWarning(real(warnAt)), null);
+  assert.equal(PlanSchema.loadProblem(real(warnAt)), null);
+  const warn = PlanSchema.loadWarning(real(warnAt + 1));
+  assert.match(warn, /時間がかかります。開きますか？/);
+  assert.match(warn, new RegExp(String(warnAt + 1)));
+  assert.doesNotMatch(warn, /items|walls|rooms|JSON|undefined/);
+  assert.equal(PlanSchema.loadProblem(real(warnAt + 1)), null, '確認の大きさでは断らない');
+  const big = { walls: [], rooms: [], items: new Array(refuseAt + 1).fill(null) };
+  assert.match(PlanSchema.loadProblem(big), /大きすぎるため開けません/);
+  assert.equal(PlanSchema.loadProblem({ walls: [], rooms: [], items: new Array(refuseAt).fill(null) }), null);
+  void make;
   assert.match(PlanSchema.loadProblem('abc'), /開けません/);
   assert.match(PlanSchema.loadProblem(null), /開けません/);
   assert.match(PlanSchema.loadProblem([]), /開けません/);
-  // 上限は手元の正当なプランの最大(287 個)より十分大きい
-  assert.ok(max >= 287 * 5);
+  // 確認の線は手元の正当なプランの最大(287 個)より十分大きく、断る線は部屋の検査の配列の上限と同じ
+  assert.ok(warnAt >= 287 * 5);
+  assert.equal(refuseAt, 50000);
+});
+
+test('文字・数のはずの欄の表は1か所(部屋の検査も同じ表を見る)', () => {
+  const guard = read('worker/room-guard.mjs');
+  assert.match(guard, /const SCALAR_KEYS = PlanSchema\.SCALAR_KEYS;/);
+  assert.ok(PlanSchema.SCALAR_KEYS.includes('n') && PlanSchema.SCALAR_KEYS.includes('floor'));
 });
 
 test('危ない id の一覧は差分の当て方(patch.js)と同じ', () => {
@@ -193,14 +219,23 @@ test('どの入口も、形をそろえる処理と大きさの確かめを通�
   ];
   for (const [file, header] of replace) {
     const body = functionBody(read(file), header);
-    assert.match(body, /planLoadProblem\(/, `${file} ${header} が大きさを見ていない`);
+    if (header === 'function installSharedPlan(') {
+      assert.match(body, /PlanSchema\.loadProblem\(plan\)/, '共有の部屋が開けない桁を見ていない');
+      assert.match(body, /!resuming&&[^;]*PlanSchema\.loadWarning\(plan\)/, '共有の部屋に初めて入るときだけ確かめていない');
+    } else {
+      assert.match(body, /planLoadAllowed\(/, `${file} ${header} が大きさを見ていない`);
+    }
   }
+  // 起動時の復元で開かなかったら、保存の枠を自動では上書きしない
+  assert.match(functionBody(read('index.html'), 'async function loadPlanFromStorage('), /STORAGE_KEEP_SAVED=true; return null;/);
+  assert.match(functionBody(read('index.html'), 'async function sharedAutoSaveLocal('), /if\(STORAGE_KEEP_SAVED\)return;/);
+  assert.match(functionBody(read('index.html'), 'async function savePlanToStorage('), /if\(STORAGE_KEEP_SAVED\)\{\s*if\(!confirm\(/);
   // 形をそろえる: normalizeLoadedPlan の最初・共有の部屋・写し
   const norm = functionBody(read('assets/js/app-state.js'), 'function normalizeLoadedPlan(');
   assert.match(norm, /tidyLoadedPlan\(DATA\)/);
   assert.ok(norm.indexOf('tidyLoadedPlan(DATA)') < norm.indexOf('ensureObjectIds()'), 'ensure* より先にそろえる');
   assert.match(functionBody(read('index.html'), 'function installSharedPlan('), /tidyLoadedPlan\(loaded\.plan\)/);
-  assert.match(read('assets/js/plan-snapshot.js'), /tidyLoadedPlan\(DATA\)/);
+  assert.match(read('assets/js/plan-snapshot.js'), /tidyLoadedPlan\(DATA, \{ quiet: true \}\)/);
   // そのほかの入口は normalizeLoadedPlan を呼ぶ(相手の差分・読み取り・チャット・既定プラン・自動保存・一覧・ファイル)
   assert.match(functionBody(read('index.html'), 'function applySharedPatch('), /normalizeLoadedPlan\(/);
   assert.match(read('assets/js/plan-import.js'), /normalizeLoadedPlan\(\{ resetHeights: false, restoreView: false \}\)/);
@@ -228,9 +263,12 @@ test('画面の normalizeLoadedPlan は、ensure* より先に形をそろえる
   const vm = require('node:vm');
   const grab = (name) => functionBody(src, '\nfunction ' + name + '(').slice(1);
   const seen = [];
-  const sb = { PlanSchema, console: { warn() {}, log() {}, info() {}, error() {} } };
+  const notices = [];
+  const sb = { PlanSchema, console: { warn() {}, log() {}, info() {}, error() {} }, showPlanNotice: (t) => notices.push(t) };
   vm.createContext(sb);
+  vm.runInContext('var PLAN_TIDY_LAST=null;', sb);
   vm.runInContext(grab('tidyLoadedPlan'), sb);
+  vm.runInContext(grab('planTidyNoticeText'), sb);
   vm.runInContext(grab('normalizeLoadedPlan'), sb);
   sb.__check = (label) => { assertShape(sb.DATA, label); seen.push(label); };
   for (const n of ['resetHeightGlobalsForPlanLoad', 'syncNorthFromPlan', 'ensureObjectIds', 'ensureExteriorWallSettings', 'ensureInteriorWallSettings',
@@ -246,4 +284,10 @@ test('画面の normalizeLoadedPlan は、ensure* より先に形をそろえる
   }
   assert.ok(seen.includes('ensureObjectIds'));
   assert.equal(vm.runInContext('({}).polluted', sb), undefined);
+  // 捨てた・消した部分があった固定集では、利用者向けの1行の知らせが出る(開発の用語なし)。変えない固定集では出ない
+  const lossy = FIX.plans.filter((c) => !c.expect.unchanged).length;
+  assert.ok(notices.length >= lossy - 2, '知らせが出ていない: ' + notices.length);
+  for (const t of notices) {
+    assert.match(t, /^開けない部分が \d+ 個あったため、その部分を除いて開きました。$/);
+  }
 });

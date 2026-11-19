@@ -122,9 +122,8 @@ var PlanLibrary = (function(){
 
   // 読み込んだプランを、ファイルの読込と同じ手順で、いま編集している側へ入れる
   function loadIntoEditor(plan, id, name){
-    // 開けない大きさ・形なら、今のプランを残したまま断る
-    var problem = (typeof planLoadProblem === 'function') ? planLoadProblem(plan) : null;
-    if(problem){ alert(problem); return; }
+    // 開けない形・桁なら断り、時間がかかる大きさなら確かめる。やめたら今のプランが残る
+    if(typeof planLoadAllowed === 'function' && !planLoadAllowed(plan)) return;
     _defaultPlanPending = false;
     DATA = plan;
     normalizeLoadedPlan(); clearEditHistory();

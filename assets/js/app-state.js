@@ -2296,6 +2296,8 @@ var DIRTY = false;
 // quota and is built for blob-sized data. All methods are async (Promise-based).
 var StorageAdapter = (function(){
   var DB_NAME='webcad', STORE='plans', VERSION=1, KEY='webcad-plan-v1';
+  // 起動時の復元で形をそろえて何かを捨てたとき、元の中身を1度だけ写しておく鍵(backupOnce)
+  var BACKUP_KEY='webcad-plan-v1-before-tidy';
   var LEGACY_LS_KEY='webcad-plan-v1';
   function serialize(data){ return JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;}); }
   function legacyGet(){ try{ var s=localStorage.getItem(LEGACY_LS_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
@@ -2330,6 +2332,31 @@ var StorageAdapter = (function(){
           r.onerror=function(){ resolve(legacyGet()); };
         });
       }).catch(function(){ return legacyGet(); });
+    },
+    // 起動時の復元で形をそろえて何かを捨てたときに、保存の枠の今の中身(文字のまま)を BACKUP_KEY へ1度だけ写す。
+    // 既に写しがあれば上書きしない(最初の元の中身を残す)。写せた・既にあれば true、写せなければ false。
+    backupOnce: function(){
+      return openDB().then(function(db){
+        return new Promise(function(resolve){
+          var t=db.transaction(STORE,'readwrite'), s=t.objectStore(STORE);
+          var have=s.getKey(BACKUP_KEY);
+          have.onsuccess=function(){
+            if(have.result!==undefined&&have.result!==null){ resolve(true); return; }
+            var cur=s.get(KEY);
+            cur.onsuccess=function(){
+              var raw=cur.result;
+              if(raw===undefined||raw===null){ try{ raw=localStorage.getItem(LEGACY_LS_KEY); }catch(e){ raw=null; } }
+              if(raw===undefined||raw===null){ resolve(false); return; }
+              var put=s.put(raw,BACKUP_KEY);
+              put.onsuccess=function(){ resolve(true); };
+              put.onerror=function(){ resolve(false); };
+            };
+            cur.onerror=function(){ resolve(false); };
+          };
+          have.onerror=function(){ resolve(false); };
+          t.onerror=function(){ resolve(false); };
+        });
+      }).catch(function(){ return false; });
     },
     hasData: function(){
       return openDB().then(function(db){
@@ -2401,14 +2428,14 @@ function undoSaveState(mark){
 // 対象はグローバルの DATA。履歴・描画・保存・_defaultPlanPending には触らない。
 //
 // options(すべて省略可): resetHeights(既定 true) / syncUi(既定 true) / restoreView(既定 true)
-// 戻り値: { warnings: string[] } -- PlanSchema.validatePlan が見つけた問題の文。
+// 戻り値: { warnings: string[], tidy } -- warnings は PlanSchema.validatePlan が見つけた問題の文、tidy は形をそろえた結果。
 // validatePlan の例外は読み込みを止めず警告にする。ensure* の例外は握りつぶさない
 // (呼ぶ側の catch が既定プランに戻す)。
 function normalizeLoadedPlan(options){
   var o=options||{};
   var warnings=[];
   // 外から来た形をそろえる(配列でない集まり・数でない座標・桁外れの値・危ない鍵など)。中身は plan-schema.js の tidyPlan。
-  tidyLoadedPlan(DATA);
+  var tidied=tidyLoadedPlan(DATA);
   if(o.resetHeights!==false) resetHeightGlobalsForPlanLoad();
   syncNorthFromPlan();
   ensureObjectIds();
@@ -2433,21 +2460,51 @@ function normalizeLoadedPlan(options){
     }
   }
   if(warnings.length) console.warn('[WebCAD] plan load warnings',warnings);
-  return {warnings:warnings};
+  // tidy は形をそろえた結果(捨てた物の id など。相手の差分を当てたあと、捨てた物を部屋から消さないために使う)
+  return {warnings:warnings,tidy:tidied||null};
 }
 
-// プランを画面に入れる前に形をそろえる(PlanSchema.tidyPlan)。捨てた物があれば console に1行出す。
-// プランを丸ごと入れ替える入口は、先に planLoadProblem で大きさを見て、超えていれば入れずに断る。
-function tidyLoadedPlan(plan){
+// プランを画面に入れる前に形をそろえる(PlanSchema.tidyPlan)。捨てた物・消した欄・切った文字があれば(lost)、
+// 画面に1行知らせる(showPlanNotice)。opts.quiet で知らせない(呼ぶ側がまとめて知らせるとき)。
+// 戻り値は tidyPlan の結果(PlanSchema が無ければ null)。
+var PLAN_TIDY_LAST=null;
+function tidyLoadedPlan(plan,opts){
   if(typeof PlanSchema==='undefined'||!PlanSchema||typeof PlanSchema.tidyPlan!=='function') return null;
   var r=PlanSchema.tidyPlan(plan);
+  PLAN_TIDY_LAST=r;
   if(r&&r.notes&&r.notes.length) console.warn('[WebCAD] プランの形をそろえました',r.notes);
+  if(r&&r.lost>0&&!(opts&&opts.quiet)) showPlanNotice(planTidyNoticeText(r.lost));
   return r;
 }
-// 丸ごと入れ替える前の確かめ。開けるなら null、開けないなら利用者に見せる文。
-function planLoadProblem(plan){
-  if(typeof PlanSchema==='undefined'||!PlanSchema||typeof PlanSchema.loadProblem!=='function') return null;
-  return PlanSchema.loadProblem(plan);
+function planTidyNoticeText(lost){
+  return '開けない部分が '+lost+' 個あったため、その部分を除いて開きました。';
+}
+// 画面の上に出す1行の知らせ。閉じるボタンか 12 秒で消える。
+var PLAN_NOTICE_TIMER=null;
+function showPlanNotice(text){
+  if(typeof document==='undefined') return;
+  var box=document.getElementById('plan-notice');
+  if(!box) return;
+  var t=document.getElementById('plan-notice-text');
+  if(t) t.textContent=text;
+  box.hidden=false;
+  clearTimeout(PLAN_NOTICE_TIMER);
+  PLAN_NOTICE_TIMER=setTimeout(hidePlanNotice,12000);
+}
+function hidePlanNotice(){
+  clearTimeout(PLAN_NOTICE_TIMER);
+  var box=typeof document!=='undefined'&&document.getElementById('plan-notice');
+  if(box) box.hidden=true;
+}
+// 丸ごと入れ替える前の確かめ。開けない桁なら知らせて false、開くのに時間がかかる大きさなら確認して、
+// いいえなら false。開いてよいなら true。
+function planLoadAllowed(plan){
+  if(typeof PlanSchema==='undefined'||!PlanSchema) return true;
+  var problem=PlanSchema.loadProblem?PlanSchema.loadProblem(plan):null;
+  if(problem){ alert(problem); return false; }
+  var warning=PlanSchema.loadWarning?PlanSchema.loadWarning(plan):null;
+  if(warning&&!confirm(warning)) return false;
+  return true;
 }
 
 function ensureObjectIds(){

@@ -19,7 +19,8 @@ import { watch3dSkips } from './build3d-skips.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const APP = process.env.APP_URL || 'http://localhost:8932/';
 const FIX = JSON.parse(readFileSync(join(HERE, 'fixtures', 'injection', 'plans.json'), 'utf8'));
-const LIMITS = createRequire(import.meta.url)('../../assets/js/plan-schema.js').LIMITS;
+const Schema = createRequire(import.meta.url)('../../assets/js/plan-schema.js');
+const LIMITS = Schema.LIMITS;
 const ROOM = 'PlanLoadGuardRoom00001';
 const T = { timeout: 90000 };
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -31,14 +32,16 @@ const browser = await chromium.launch();
 const failures = [];
 const note = (where, what) => failures.push(`${where}: ${what}`);
 
-async function openPage(label, { room = null, storage = null, preset = 'blank' } = {}) {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+async function openPage(label, { room = null, storage = null, preset = 'blank', answer = null, viewport = { width: 1280, height: 900 } } = {}) {
+  const context = await browser.newContext({ viewport });
   const page = await context.newPage();
-  const st = { label, errors: [], dialogs: [] };
+  // answer(文) → true で受ける・false で閉じる。既定は、起動時の「前回保存したプランがあります」だけ受ける
+  const st = { label, errors: [], dialogs: [], answer: (m) => /前回保存したプラン/.test(m) };
+  if (answer) st.answer = answer;
   page.on('pageerror', (e) => st.errors.push(e.message.slice(0, 300)));
   watch3dSkips(page, st.errors);
   // 起動時の「前回保存したプランがあります。読み込みますか？」は受ける(自動保存の復元の道を通すため)。ほかは閉じる。
-  page.on('dialog', (d) => { const m = d.message(); st.dialogs.push(m.slice(0, 200)); (/前回保存したプラン/.test(m) ? d.accept() : d.dismiss()).catch(() => {}); });
+  page.on('dialog', (d) => { const m = d.message(); st.dialogs.push(m.slice(0, 200)); (st.answer(m) ? d.accept() : d.dismiss()).catch(() => {}); });
   await page.addInitScript(() => {
     class FakeWS { constructor(url) { this.url = url; this.readyState = 1; window.__ws = this; setTimeout(() => this.onopen && this.onopen(), 0); } send() {} close() { this.readyState = 3; } }
     window.WebSocket = FakeWS;
@@ -82,9 +85,11 @@ const SHAPE = (max) => {
     if (!Array.isArray(DATA[n])) { out.push(n + ' が配列でない'); continue; }
     DATA[n].forEach((o, i) => {
       if (!o || typeof o !== 'object' || Array.isArray(o)) { out.push(`${n}[${i}] が素のオブジェクトでない`); return; }
-      C[n].forEach((k) => { if (typeof o[k] !== 'number' || !isFinite(o[k]) || Math.abs(o[k]) > 1e9) out.push(`${n}[${i}].${k}=${String(o[k]).slice(0, 30)}`); });
-      if (o.floor !== undefined && o.floor !== null && !(typeof o.floor === 'number' && o.floor >= 1 && o.floor <= max)) out.push(`${n}[${i}].floor=${o.floor}`);
-      Object.keys(o).forEach((k) => { const v = o[k]; if (typeof v === 'string' && v.length > 10000 && v.slice(0, 5) !== 'data:') out.push(`${n}[${i}].${k} が長い`); });
+      // 座標の無い・null・空の文字は古い保存データとして残す(部屋の検査と同じ)
+      C[n].forEach((k) => { const v = o[k]; if (v === undefined || v === null || v === '') return; if (typeof v !== 'number' || !isFinite(v) || Math.abs(v) > 1e9) out.push(`${n}[${i}].${k}=${String(v).slice(0, 30)}`); });
+      if (o.floor !== undefined && o.floor !== null && !((typeof o.floor === 'number' || typeof o.floor === 'string') && Number(o.floor) >= max[0] && Number(o.floor) <= max[1])) out.push(`${n}[${i}].floor=${o.floor}`);
+      Object.keys(o).forEach((k) => { const v = o[k]; if (typeof v === 'string' && v.length > max[2] && v.slice(0, 5) !== 'data:') out.push(`${n}[${i}].${k} が長い`); });
+      max[3].forEach((k) => { if (o[k] !== null && typeof o[k] === 'object') out.push(`${n}[${i}].${k} がオブジェクトのまま`); });
     });
   }
   const stack = [DATA];
@@ -117,7 +122,7 @@ async function check(where, page, st, { sweep = true } = {}) {
   let alive = false;
   try { alive = await Promise.race([page.evaluate(() => true), new Promise((r) => setTimeout(() => r(false), 30000))]); } catch (e) { alive = false; }
   if (!alive) { note(where, 'ページが 30 秒応えない(固まった)'); return; }
-  const shape = await page.evaluate(SHAPE, LIMITS.MAX_FLOOR);
+  const shape = await page.evaluate(SHAPE, [Schema.TIDY_FLOOR_MIN, Schema.TIDY_FLOOR_MAX, Schema.TIDY_MAX_TEXT, Schema.SCALAR_KEYS]);
   shape.forEach((s) => note(where, s));
   if (sweep) {
     const errs = await page.evaluate(SWEEP);
@@ -154,6 +159,11 @@ for (const c of FIX.plans.filter((x) => !process.env.MEASURE && (!ONLY.length ||
     const { context, page, st } = await openPage('file ' + c.id);
     await importText(page, text);
     await expectCounts('ファイル ' + c.id, page);
+    // 捨てた・消した・切った部分があれば、画面に1行知らせる(無ければ出さない)
+    const lost = Schema.tidyPlan(JSON.parse(text)).lost;
+    const notice = await page.evaluate(() => ({ hidden: document.getElementById('plan-notice').hidden, text: document.getElementById('plan-notice-text').textContent }));
+    if (lost > 0 && (notice.hidden || notice.text !== `開けない部分が ${lost} 個あったため、その部分を除いて開きました。`)) note('ファイル ' + c.id, '知らせが違う: ' + JSON.stringify(notice) + ' 期待の数 ' + lost);
+    if (lost === 0 && !notice.hidden) note('ファイル ' + c.id, '何も外していないのに知らせが出た');
     await check('ファイル ' + c.id, page, st);
     await context.close();
   }
@@ -214,7 +224,9 @@ if (!process.env.MEASURE) {
   await importText(page, JSON.stringify(base));
   const ms = Date.now() - t0;
   const len = await page.evaluate(() => DATA.rooms[0].n.length);
-  if (len !== 10000) note('長い名前', `名前が ${len} 字(期待 10000)`);
+  if (len !== Schema.TIDY_MAX_TEXT) note('長い名前', `名前が ${len} 字(期待 ${Schema.TIDY_MAX_TEXT})`);
+  const notice = await page.evaluate(() => ({ hidden: document.getElementById('plan-notice').hidden, text: document.getElementById('plan-notice-text').textContent }));
+  if (notice.hidden || notice.text !== '開けない部分が 1 個あったため、その部分を除いて開きました。') note('長い名前', '切ったことを知らせていない: ' + JSON.stringify(notice));
   if (ms > 15000) note('長い名前', `読み込みに ${ms}ms`);
   await check('長い名前', page, st);
   console.log('ok long-name', ms + 'ms');
@@ -238,6 +250,34 @@ function bigPlan(n) {
 }
 const MAX = LIMITS.MAX_LOAD_OBJECTS;
 // MEASURE=300,1000 で、その数のプランの読み込みと 3D の組み立ての時間だけを測って終わる(上限を決めるとき)。
+// MEASURE_FLOORS=50,1000 / MEASURE_TEXT=100000,1000000 で、整える処理を外した画面に、壁1本の階・部屋の名前の長さを
+// 変えたプランを入れ、読み込みと 3D の時間を測って終わる(どこから固まるかを決めるとき)。
+if (process.env.MEASURE_FLOORS || process.env.MEASURE_TEXT) {
+  const base = JSON.parse(readFileSync(join(HERE, 'fixtures', 'house-2f.json'), 'utf8'));
+  const runs = [];
+  for (const f of (process.env.MEASURE_FLOORS || '').split(',').filter(Boolean)) runs.push(['階 ' + f, (p) => { p.walls[0].floor = Number(f); }]);
+  for (const n of (process.env.MEASURE_TEXT || '').split(',').filter(Boolean)) runs.push(['名前 ' + n + ' 字', (p) => { p.rooms[0].n = 'あ'.repeat(Number(n)); }]);
+  for (const [label, edit] of runs) {
+    const plan = JSON.parse(JSON.stringify(base));
+    edit(plan);
+    const { context, page } = await openPage('measure ' + label);
+    const r = await Promise.race([
+      page.evaluate((t) => {
+        PlanSchema.tidyPlan = () => ({ changed: 0, dropped: { walls: 0, items: 0, rooms: 0 }, notes: [] });
+        const s = performance.now(); DATA = JSON.parse(t); normalizeLoadedPlan(); draw2d();
+        const a = performance.now(); setView('3d-ext'); rebuild3D(); const b = performance.now();
+        updateProps && (ST.selected = DATA.rooms[0], updateProps());
+        const c = performance.now();
+        return `読み込みと2D ${Math.round(a - s)}ms・3D ${Math.round(b - a)}ms・部屋の欄 ${Math.round(c - b)}ms`;
+      }, JSON.stringify(plan)).catch((e) => 'ERR ' + e.message.slice(0, 120)),
+      new Promise((res) => setTimeout(() => res('120 秒で終わらない'), 120000)),
+    ]);
+    console.log(`MEASURE ${label}: ${r}`);
+    await context.close().catch(() => {});
+  }
+  await browser.close();
+  process.exit(0);
+}
 if (process.env.MEASURE) {
   for (const n of process.env.MEASURE.split(',').map(Number)) {
     const { context, page } = await openPage('measure ' + n);
@@ -271,50 +311,152 @@ if (process.env.MEASURE) {
   st.errors.splice(0).forEach((e) => note('上限ちょうど', 'pageerror ' + e));
   await context.close();
 }
+// 上限を超える(2001 個): どの入口でも確認を出し、いいえなら今のプラン(と保存)が残り、はいなら開く
+const idbRaw = (page) => page.evaluate(() => new Promise((resolve) => {
+  const req = indexedDB.open('webcad', 1);
+  req.onsuccess = () => { const r = req.result.transaction('plans', 'readonly').objectStore('plans').get('webcad-plan-v1'); r.onsuccess = () => resolve(r.result || null); r.onerror = () => resolve(null); };
+  req.onerror = () => resolve(null);
+}));
+const total = (page) => page.evaluate(() => DATA.walls.length + DATA.items.length + DATA.rooms.length);
 {
-  // 上限を超える: どの入口でも入れずに断る
   const text = JSON.stringify(bigPlan(MAX + 1));
-  const msg = /大きすぎるため開けません/;
-  {
-    const { context, page, st } = await openPage('over file');
-    const before = await page.evaluate(() => { window.__keep = DATA; return DATA.walls.length; });
-    await page.setInputFiles('#import-file', { name: 'plan.json', mimeType: 'application/json', buffer: Buffer.from(text) });
-    await page.waitForTimeout(1500);
-    if (!st.dialogs.some((d) => msg.test(d))) note('上限超え ファイル', '断りの文が出ない: ' + JSON.stringify(st.dialogs));
-    if (!(await page.evaluate(() => DATA === window.__keep))) note('上限超え ファイル', '今のプランが入れ替わった');
-    st.errors.splice(0).forEach((e) => note('上限超え ファイル', 'pageerror ' + e));
-    void before;
-    await context.close();
+  const ask = /大きいため.*時間がかかります。開きますか？/;
+  for (const yes of [false, true]) {
+    const label = yes ? 'はい' : 'いいえ';
+    // ファイル
+    {
+      const { context, page, st } = await openPage('big file ' + label, { answer: (m) => ask.test(m) ? yes : false });
+      await page.evaluate(() => { window.__keep = DATA; });
+      await page.setInputFiles('#import-file', { name: 'plan.json', mimeType: 'application/json', buffer: Buffer.from(text) });
+      await page.waitForTimeout(yes ? 6000 : 1500);
+      if (!st.dialogs.some((d) => ask.test(d))) note('大きい ファイル ' + label, '確認が出ない: ' + JSON.stringify(st.dialogs));
+      if (yes && (await total(page)) !== MAX + 1) note('大きい ファイル はい', '開けていない');
+      if (!yes && !(await page.evaluate(() => DATA === window.__keep))) note('大きい ファイル いいえ', '今のプランが入れ替わった');
+      st.errors.splice(0).forEach((e) => note('大きい ファイル ' + label, 'pageerror ' + e));
+      await context.close();
+    }
+    // 自動保存の復元(起動時)
+    {
+      const { context, page, st } = await openPage('big storage ' + label, { storage: text, answer: (m) => /前回保存したプラン/.test(m) || (ask.test(m) ? yes : false) });
+      await page.waitForTimeout(yes ? 6000 : 1500);
+      if (!st.dialogs.some((d) => ask.test(d))) note('大きい 自動保存 ' + label, '確認が出ない: ' + JSON.stringify(st.dialogs));
+      if (yes && (await total(page)) !== MAX + 1) note('大きい 自動保存 はい', '開けていない');
+      if (!yes) {
+        if ((await idbRaw(page)) !== text) note('大きい 自動保存 いいえ', '保存の中身が変わった');
+        // 保存ボタン: 上書きの前に確かめる。いいえなら保存は残る
+        await page.evaluate(() => savePlanToStorage());
+        await page.waitForTimeout(500);
+        if (!st.dialogs.some((d) => /開かなかった大きなプランが保存されています/.test(d))) note('大きい 自動保存 いいえ', '保存ボタンで確かめない: ' + JSON.stringify(st.dialogs));
+        if ((await idbRaw(page)) !== text) note('大きい 自動保存 いいえ', '保存ボタンのいいえで保存が上書きされた');
+      }
+      st.errors.splice(0).forEach((e) => note('大きい 自動保存 ' + label, 'pageerror ' + e));
+      await context.close();
+    }
+    // 共有の部屋に入る
+    {
+      const { context, page, st } = await openPage('big room ' + label, { room: text, answer: (m) => ask.test(m) ? yes : false });
+      await page.waitForTimeout(yes ? 6000 : 500);
+      const s2 = await page.evaluate(() => ({ room: SHARED.roomId, status: document.getElementById('share-status').textContent }));
+      if (!st.dialogs.some((d) => ask.test(d))) note('大きい 共有 ' + label, '確認が出ない');
+      if (yes && (!s2.room || (await total(page)) !== MAX + 1)) note('大きい 共有 はい', '入れていない');
+      if (!yes && s2.room) note('大きい 共有 いいえ', '入ってしまった');
+      st.errors.splice(0).forEach((e) => note('大きい 共有 ' + label, 'pageerror ' + e));
+      await context.close();
+    }
+    // 一覧・比較
+    {
+      const { context, page, st } = await openPage('big others ' + label, { answer: (m) => ask.test(m) ? yes : false });
+      await page.evaluate(() => { window.__keep = DATA; });
+      await page.evaluate((t) => PlanLibrary.loadIntoEditor(JSON.parse(t), null, null), text);
+      if (yes && (await total(page)) !== MAX + 1) note('大きい 一覧 はい', '開けていない');
+      if (!yes && !(await page.evaluate(() => DATA === window.__keep))) note('大きい 一覧 いいえ', '今のプランが入れ替わった');
+      if (!yes) {
+        await page.evaluate((t) => CompareMode.start(JSON.parse(t)), text);
+        if (await page.evaluate(() => CompareMode.isOn())) note('大きい 比較 いいえ', '並べてしまった');
+      }
+      st.errors.splice(0).forEach((e) => note('大きい 一覧・比較 ' + label, 'pageerror ' + e));
+      await context.close();
+    }
   }
+  console.log('ok big-plan confirm');
+}
+// 画面が扱えない桁(50001 個)は断り、自動保存の中身は消さない
+{
+  const items = Array.from({ length: LIMITS.MAX_OPEN_OBJECTS + 1 }, (_, i) => ({ id: i + 1, type: 'sofa', x: i, y: 0 }));
+  const text = JSON.stringify({ walls: [], rooms: [], items });
+  const refuse = /大きすぎるため開けません/;
   {
-    const { context, page, st } = await openPage('over room', { room: text });
-    const s = await page.evaluate(() => ({ room: SHARED.roomId, status: document.getElementById('share-status').textContent, n: DATA.items.length }));
-    if (s.room) note('上限超え 共有', '部屋に入ってしまった');
-    if (!msg.test(s.status)) note('上限超え 共有', '断りの文が出ない: ' + s.status.slice(0, 120));
-    st.errors.splice(0).forEach((e) => note('上限超え 共有', 'pageerror ' + e));
-    await context.close();
-  }
-  {
-    const { context, page, st } = await openPage('over storage', { storage: text });
-    await page.waitForTimeout(1500);
-    if (!st.dialogs.some((d) => msg.test(d))) note('上限超え 自動保存', '断りの文が出ない: ' + JSON.stringify(st.dialogs));
-    const n = await page.evaluate(() => DATA.walls.length + DATA.items.length + DATA.rooms.length);
-    if (n > MAX) note('上限超え 自動保存', '入ってしまった');
-    st.errors.splice(0).forEach((e) => note('上限超え 自動保存', 'pageerror ' + e));
-    await context.close();
-  }
-  {
-    const { context, page, st } = await openPage('over others');
+    const { context, page, st } = await openPage('huge file');
     await page.evaluate(() => { window.__keep = DATA; });
-    await page.evaluate((t) => PlanLibrary.loadIntoEditor(JSON.parse(t), null, null), text);
-    if (!(await page.evaluate(() => DATA === window.__keep))) note('上限超え 一覧', '今のプランが入れ替わった');
-    await page.evaluate((t) => CompareMode.start(JSON.parse(t)), text);
-    if (await page.evaluate(() => CompareMode.isOn())) note('上限超え 比較', '並べてしまった');
-    if (st.dialogs.filter((d) => msg.test(d)).length < 2) note('上限超え 一覧・比較', '断りの文が出ない: ' + JSON.stringify(st.dialogs));
-    st.errors.splice(0).forEach((e) => note('上限超え 一覧・比較', 'pageerror ' + e));
+    await page.setInputFiles('#import-file', { name: 'plan.json', mimeType: 'application/json', buffer: Buffer.from(text) });
+    await page.waitForTimeout(2000);
+    if (!st.dialogs.some((d) => refuse.test(d))) note('桁外れ ファイル', '断りの文が出ない: ' + JSON.stringify(st.dialogs));
+    if (!(await page.evaluate(() => DATA === window.__keep))) note('桁外れ ファイル', '今のプランが入れ替わった');
     await context.close();
   }
-  console.log('ok over-limit');
+  {
+    const { context, page, st } = await openPage('huge storage', { storage: text });
+    await page.waitForTimeout(2000);
+    if (!st.dialogs.some((d) => refuse.test(d))) note('桁外れ 自動保存', '断りの文が出ない: ' + JSON.stringify(st.dialogs));
+    if ((await idbRaw(page)) !== text) note('桁外れ 自動保存', '保存の中身が変わった');
+    if (!(await page.evaluate(() => STORAGE_KEEP_SAVED))) note('桁外れ 自動保存', '自動保存の上書きを止めていない');
+    await context.close();
+  }
+  console.log('ok huge-plan refuse');
+}
+
+// 自分の自動保存から開いて何かを外したときは、元の中身を別の鍵に1度だけ写し、知らせを出す
+{
+  const plan = JSON.parse(readFileSync(join(HERE, 'fixtures', 'house-2f.json'), 'utf8'));
+  plan.items.push({ id: 'bad-floor', type: 'sofa', x: 0, y: 0, floor: 1e9 });
+  const text = JSON.stringify(plan);
+  const { context, page, st } = await openPage('backup', { storage: text });
+  const r = await page.evaluate(() => new Promise((resolve) => {
+    const req = indexedDB.open('webcad', 1);
+    req.onsuccess = () => { const g = req.result.transaction('plans', 'readonly').objectStore('plans').get('webcad-plan-v1-before-tidy'); g.onsuccess = () => resolve({ backup: g.result || null, notice: document.getElementById('plan-notice-text').textContent, hidden: document.getElementById('plan-notice').hidden }); };
+  }));
+  if (r.backup !== text) note('自動保存の写し', '元の中身が写されていない');
+  if (r.hidden || !/開けない部分が 1 個あったため/.test(r.notice)) note('自動保存の写し', '知らせが出ない: ' + r.notice);
+  if (await page.evaluate(() => DATA.items.some((it) => it.id === 'bad-floor'))) note('自動保存の写し', '外していない');
+  st.errors.splice(0).forEach((e) => note('自動保存の写し', 'pageerror ' + e));
+  await context.close();
+  console.log('ok storage backup');
+}
+
+// 共有の部屋: 相手の差分で来て手元で外した物を、こちらの差分で部屋から消さない
+// (取り消しの直後で全体を見直す最中・その物に未送信の変更があるときも)
+{
+  const { context, page, st } = await openPage('shared keep', { room: readFileSync(join(HERE, 'fixtures', 'house-2f.json'), 'utf8') });
+  const sent = [];
+  page.on('request', (req) => { if (/\/update$/.test(req.url())) sent.push(req.postData() || ''); });
+  // 先に、その id の物を手元で編集した印を付け、全体を見直す最中にする
+  await page.evaluate(() => { sharedForceFullSync(); if (SHARED.dirtyIds) { (SHARED.dirtyIds.items = SHARED.dirtyIds.items || {})['bad-floor'] = true; } });
+  const patch = { collections: { items: { upserts: [{ id: 'bad-floor', type: 'sofa', x: 0, y: 0, floor: 1e9 }, { id: 'ok-sofa', type: 'sofa', x: 1000, y: 1000, floor: 1 }], removes: [] } }, fields: {} };
+  await page.evaluate((m) => window.__ws.onmessage({ data: m }), JSON.stringify({ type: 'patch', version: 2, clientId: 'someone-else', patch }));
+  await page.waitForTimeout(300);
+  // 手元で壁を1本動かして送る
+  await page.evaluate(() => { saveState(); DATA.walls[0].x1 += 10; markDirty(); return sharedSyncNow(); });
+  await page.waitForTimeout(1500);
+  const removed = sent.some((b) => { try { const p = JSON.parse(b).patch; return Object.values(p.collections || {}).some((c) => (c.removes || []).map(String).includes('bad-floor')); } catch (e) { return false; } });
+  if (!sent.length) note('共有の部屋で外した物', '差分が送られていない(確かめられない)');
+  if (removed) note('共有の部屋で外した物', '部屋から消す差分を送った');
+  if (!(await page.evaluate(() => DATA.items.some((it) => it.id === 'ok-sofa')))) note('共有の部屋で外した物', '正しい物まで入っていない');
+  st.errors.splice(0).forEach((e) => note('共有の部屋で外した物', 'pageerror ' + e));
+  await context.close();
+  console.log('ok shared keep');
+}
+
+// 持ち主に見せる写真(SHOT_DIR を渡したとき): スマホ幅で、知らせの表示。確認はブラウザの標準の確認なので、headless では写らない
+if (process.env.SHOT_DIR) {
+  const { mkdirSync } = await import('node:fs');
+  mkdirSync(process.env.SHOT_DIR, { recursive: true });
+  const { context, page } = await openPage('shot notice', { viewport: { width: 375, height: 812 } });
+  const plan = JSON.parse(readFileSync(join(HERE, 'fixtures', 'house-2f.json'), 'utf8'));
+  plan.items.push({ id: 'b1', type: 'sofa', x: 0, y: 0, floor: 1e9 }, { id: 'b2', type: 'sofa', x: '東', y: 0 }, { id: 'b3', type: 'sofa', x: 1e300, y: 0 });
+  await importText(page, JSON.stringify(plan));
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: join(process.env.SHOT_DIR, 'phone-375-tidy-notice.png') });
+  await context.close();
 }
 
 await browser.close();
