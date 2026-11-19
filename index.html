@@ -3204,6 +3204,7 @@ input[type="reset"]:focus-visible{
     <div id="share-status" class="share-status">共同編集を開始すると、現在のプランがクラウドへ保存されます。</div>
     <div class="share-actions">
       <button id="share-retry-btn" class="share-primary" type="button" style="display:none" onclick="retrySharedJoin()">共有URLに再接続</button>
+      <button id="share-copy-btn" class="share-secondary" type="button" style="display:none" onclick="openSharedRoomCopy()">写しを開く</button>
       <button id="share-create-btn" class="share-primary" type="button" onclick="createSharedRoom()">共同編集を開始</button>
       <button id="share-leave-btn" class="share-danger" type="button" style="display:none" onclick="leaveSharedRoom()">共同編集を終了</button>
     </div>
@@ -19863,18 +19864,28 @@ function planExportFileName(){
 // 'broken'(形が正しくなく開けなかった)。開いたときは false。
 // この起動のあいだ、自動保存はその枠を上書きせず、保存ボタンは上書きの前に確かめる(storageKeepSavedText)。
 var STORAGE_KEEP_SAVED=false;
-function storageKeepSavedText(reason,shared){
+// 共同編集の部屋にいる間は、保存は部屋の枠(StorageAdapter.saveRoom)とクラウドへ入れ、この枠は書かないので、確かめない。
+function storageKeepSavedText(reason){
   return (reason==='broken'
       ?'このブラウザには、形が正しくなかったため開けなかったプランが保存されています。'
       :'このブラウザには、大きいため開かなかったプランが保存されています。')
     +'保存すると、そのプランは今の画面の内容に置き換わります。\n両方残したいときは、先に「JSON保存」でファイルに書き出してください。'
-    +(shared?'\n保存をやめると、共同編集のクラウドへの保存もしません。':'')
     +'\n\n保存しますか？';
 }
+// 共同編集を終えたとき、画面に残った部屋のプラン(DATA そのもの)。これを「保存」で前回のプランへ入れる前に確かめる
+// (共有リンクで人のプランを開いて終えたあと、何気なく保存すると、自分の前回のプランが置き換わるため)。
+// 別のプランを開く・取り消しで戻すと DATA が別の物になり、確かめなくなる。
+var STORAGE_FROM_ROOM=null;
+var STORAGE_FROM_ROOM_TEXT='いま画面にあるのは、共同編集で開いたプランです。保存すると、このブラウザの「前回のプラン」がこのプランに置き換わります。\n前回のプランも残したいときは、先に「保存一覧」の「今のプランを名前を付けて保存」を使ってください。\n\n保存しますか？';
 async function savePlanToStorage(){
-  if(STORAGE_KEEP_SAVED){
-    if(!confirm(storageKeepSavedText(STORAGE_KEEP_SAVED,!!SHARED.roomId))) return;
+  var inRoom=!!SHARED.roomId;
+  if(STORAGE_KEEP_SAVED&&!inRoom){
+    if(!confirm(storageKeepSavedText(STORAGE_KEEP_SAVED))) return;
     STORAGE_KEEP_SAVED=false;
+  }
+  if(!inRoom&&STORAGE_FROM_ROOM&&STORAGE_FROM_ROOM===DATA){
+    if(!confirm(STORAGE_FROM_ROOM_TEXT)) return;
+    STORAGE_FROM_ROOM=null;
   }
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
   if(!DATA.walls.length && !DATA.items.length && !DATA.rooms.length){
@@ -19899,7 +19910,8 @@ async function savePlanToStorage(){
   setSaveButtonBusy(true);
   var browserSaved=false;
   try{
-    await StorageAdapter.save(DATA);
+    // 部屋にいる間は、部屋の枠へ入れる(自分の前回のプランは書き換えない)
+    if(inRoom)await StorageAdapter.saveRoom(SHARED.roomId,DATA);else await StorageAdapter.save(DATA);
     browserSaved=true;
     if(SHARED.roomId){
       await flushSharedChanges();
@@ -20096,6 +20108,7 @@ function renderSharedUi(){
   // URLに共有ルームがあるのに未参加＝参加に失敗した状態。新規作成ではなく再接続を促す。
   var pendingJoin=!connected&&!!sharedRoomFromLocation();
   var retry=document.getElementById('share-retry-btn');if(retry)retry.style.display=pendingJoin?'inline-block':'none';
+  var copyBtn=document.getElementById('share-copy-btn');if(copyBtn)copyBtn.style.display=pendingJoin&&SHARED.copyOffer&&SHARED.copyOffer.roomId===sharedRoomFromLocation()?'inline-block':'none';
   var url=document.getElementById('share-url');if(url)url.value=connected?sharedUrl():'';
   var expiry=document.getElementById('share-expiry');if(expiry)expiry.textContent=sharedFormatExpiry();
   var people=document.getElementById('share-people');
@@ -20406,11 +20419,12 @@ function queueSharedLocalAutoSave(){
   clearTimeout(SHARED.localAutoTimer);
   SHARED.localAutoTimer=setTimeout(function(){SHARED.localAutoTimer=null;sharedAutoSaveLocal();},10000);
 }
+// 部屋のプランを、このブラウザの部屋ごとの枠へ自動で保存する(StorageAdapter.saveRoom)。
+// 自分の「前回のプラン」の枠は書かない(人の共有リンクを開いても、自分のプランが置き換わらないように)。
+// 起動時に開かなかった大きな保存(STORAGE_KEEP_SAVED)も前回のプランの枠なので、ここでは書かれない。
 async function sharedAutoSaveLocal(){
   if(!SHARED.roomId)return;
-  // 起動時に開かなかった大きな保存があれば、自動では上書きしない(savePlanToStorage の STORAGE_KEEP_SAVED)
-  if(STORAGE_KEEP_SAVED)return;
-  try{await StorageAdapter.save(DATA);}catch(e){sharedSetStatus('ブラウザへの自動保存に失敗しました。保存ボタンを押してください。',true);}
+  try{await StorageAdapter.saveRoom(SHARED.roomId,DATA);}catch(e){sharedSetStatus('ブラウザへの自動保存に失敗しました。保存ボタンを押してください。',true);}
 }
 function closeSharedSocket(){
   clearTimeout(SHARED.reconnectTimer);SHARED.reconnectTimer=null;
@@ -20475,6 +20489,8 @@ function installSharedPlan(loaded,roomId,resuming){
   var warning=(!resuming&&typeof PlanSchema!=='undefined'&&PlanSchema.loadWarning)?PlanSchema.loadWarning(plan):null;
   if(warning&&!confirm(warning))throw new Error('共同編集のプランを開くのをやめました。開くときは「共有URLに再接続」を押してください。');
   tidyLoadedPlan(loaded.plan);
+  // 別の部屋・自分のプランから入るときは、保存一覧の項目との結び付きを外す(部屋のプランで一覧の項目を上書きしないように)
+  if(SHARED.roomId!==roomId&&typeof PLAN_LIBRARY_ID!=='undefined'){PLAN_LIBRARY_ID=null;PLAN_SAVE_INFO=null;}
   _defaultPlanPending=false;DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
   ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
 }
@@ -20495,7 +20511,40 @@ async function refreshSharedPlan(){
 async function initSharedRoomFromUrl(){
   var roomId=sharedRoomFromLocation();if(!roomId)return false;
   try{installSharedPlan(await fetchSharedPlan(roomId),roomId);return true;}
-  catch(e){sharedSetStatus(e.message,true);openShareDialog();return false;}
+  catch(e){sharedSetStatus(e.message,true);openShareDialog();sharedOfferRoomCopy(roomId);return false;}
+}
+// 部屋を開けなかった(期限切れ・通信の失敗など)とき、このブラウザに部屋の写し(StorageAdapter.saveRoom)があれば、
+// 共有のダイアログ(開けなかったときに開く)に「写しを開く」を出す(SHARED.copyOffer。renderSharedUi)。
+async function sharedOfferRoomCopy(roomId){
+  var copy=await StorageAdapter.loadRoom(roomId);
+  if(!copy||SHARED.roomId||sharedRoomFromLocation()!==roomId)return false;
+  SHARED.copyOffer={roomId:roomId,plan:copy};
+  var el=document.getElementById('share-status');
+  sharedSetStatus((el&&el.textContent?el.textContent+' ':'')+'このブラウザに残っている写しを、共同編集なしで開けます。',true);
+  renderSharedUi();
+  return true;
+}
+// 「写しを開く」: 部屋の写しを共同編集なしで開く。URL から部屋を外す(部屋とはつながない)。
+function openSharedRoomCopy(){
+  var offer=SHARED.copyOffer;if(!offer||SHARED.roomId)return;
+  if(DIRTY&&!confirm('いま開いているプランに、保存していない変更があります。開くと失われます。開きますか？'))return;
+  SHARED.copyOffer=null;
+  var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());
+  PlanLibrary.loadIntoEditor(offer.plan,null,null);
+  PLAN_SAVE_INFO=null;STORAGE_FROM_ROOM=DATA;
+  sharedSetStatus('共同編集の写しを開きました。共同編集にはつながっていません。');
+  renderSharedUi();closeShareDialog();
+}
+// 保存一覧の「共同編集」の項目から、その部屋を開く。今いる部屋は抜け(クラウドとほかの人の接続はそのまま)、
+// URL をその部屋に変えて入る。開けなければ、写しを開けることを知らせる(sharedOfferRoomCopy)。
+async function openSharedRoomFromList(roomId){
+  if(SHARED.roomId===roomId)return true;
+  if(!SHARED.roomId&&DIRTY&&!confirm('いま開いているプランに、保存していない変更があります。開くと失われます。開きますか？'))return false;
+  if(SHARED.roomId)await sharedDetach();
+  var url=new URL(location.href);url.searchParams.delete('room');url.hash='room='+roomId;history.replaceState(null,'',url.toString());
+  var ok=await initSharedRoomFromUrl();
+  if(ok){sharedSetStatus('共有されたプランに接続しました。');renderSharedUi();}
+  return ok;
 }
 // 参加に失敗したときの復帰導線。新規ルームを作らずに、共有されたURLへもう一度つなぐ。
 async function retrySharedJoin(){
@@ -20519,9 +20568,20 @@ async function createSharedRoom(){
   }catch(e){sharedSetStatus(e.message||'共同編集ルームを作成できませんでした。',true);}
   finally{if(button)button.disabled=false;}
 }
-function leaveSharedRoom(){
+// 部屋から抜ける(この端末だけ)。抜ける前に、部屋の枠へ今の中身を入れておく。
+async function sharedDetach(){
+  var roomId=SHARED.roomId;
+  closeSharedSocket();clearTimeout(SHARED.localAutoTimer);SHARED.localAutoTimer=null;clearTimeout(SHARED.rebuildTimer);
+  if(roomId){try{await StorageAdapter.saveRoom(roomId,DATA);}catch(e){}}
+  SHARED.roomId=null;SHARED.version=0;SHARED.expiresAt=0;SHARED.savedAt=0;SHARED.baseline=null;SHARED.people=[];sharedResetDirtyTracking();
+  // 画面に残る部屋のプランを「保存」で前回のプランへ入れる前に確かめる(STORAGE_FROM_ROOM)
+  STORAGE_FROM_ROOM=DATA;
+  var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());renderSharedUi();
+}
+async function leaveSharedRoom(){
   if(!confirm('この端末で共同編集を終了しますか？\nクラウド上のプランと、ほかの参加者の接続は維持されます。'))return;
-  closeSharedSocket();clearTimeout(SHARED.localAutoTimer);clearTimeout(SHARED.rebuildTimer);SHARED.roomId=null;SHARED.version=0;SHARED.expiresAt=0;SHARED.savedAt=0;SHARED.baseline=null;SHARED.people=[];sharedResetDirtyTracking();var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());renderSharedUi();sharedSetStatus('共同編集を終了しました。現在の内容はこのブラウザに残っています。');
+  await sharedDetach();
+  sharedSetStatus('共同編集を終了しました。このプランは「保存一覧」の「共同編集」からまた開けます。');
 }
 function isUnityRenderableView(){
   return ST.view==='3d-ext'||ST.view==='3d-int';

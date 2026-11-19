@@ -203,13 +203,24 @@ var PlanLibrary = (function(){
       return r;
     }
     function confirmReplace(){ return !DIRTY || confirm('いま開いているプランに、保存していない変更があります。開くと失われます。開きますか？'); }
-    Promise.all([list(), StorageAdapter.hasData()]).then(function(res){
-      var rows = res[0], hasLast = res[1];
+    Promise.all([list(), StorageAdapter.hasData(), StorageAdapter.listRooms ? StorageAdapter.listRooms() : Promise.resolve([])]).then(function(res){
+      var rows = res[0], hasLast = res[1], rooms = res[2] || [];
       if(hasLast){
         listEl.append(row({name:'前回のプラン', date:'「保存」ボタンで残したプラン', thumb:'', buttons: pick
           ? [['右に開く', function(){ StorageAdapter.load().then(function(p){ d.close(); if(p) opts.onPick(p, null, '前回のプラン'); }); }, 'primary']]
           : [['開く', function(){ if(!confirmReplace()) return; StorageAdapter.load().then(function(p){ d.close(); if(p) loadIntoEditor(p, null, null); }); }, 'primary']]}));
       }
+      // 共同編集の部屋の写し(このブラウザで開いていた部屋。新しい順に StorageAdapter.ROOM_KEEP 個まで)。
+      // 「開く」はその部屋に入り直す(開けなければ写しを開けると知らせる)。比べるときは写しを右に開く。
+      rooms.forEach(function(r){
+        var label = '共同編集: ' + (r.name || '名前なし');
+        var copy = function(){ return StorageAdapter.loadRoom(r.roomId).then(function(p){ if(!p) alert('読み込めませんでした。'); return p; }); };
+        listEl.append(row({name:label, date:nowLabel(r.at)+' にこのブラウザで保存', thumb:'', buttons: pick
+          ? [['右に開く', function(){ copy().then(function(p){ if(!p) return; d.close(); opts.onPick(p, null, label); }); }, 'primary']]
+          : [['開く', function(){ d.close(); if(typeof openSharedRoomFromList==='function') openSharedRoomFromList(r.roomId); }, 'primary'],
+             ['JSON', function(){ copy().then(function(p){ if(!p) return; var t = new Date(r.at), z = function(n){ return (n<10?'0':'')+n; };
+               downloadJsonFile(JSON.stringify(p, null, 2), (r.name||'共同編集').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_')+'_'+t.getFullYear()+z(t.getMonth()+1)+z(t.getDate())+'.json'); }); }]]}));
+      });
       rows.forEach(function(m){
         var open = function(){ get(m.id).then(function(p){ if(!p) return alert('読み込めませんでした。'); d.close(); if(pick) opts.onPick(p, m.id, m.name); else if(confirmReplace()) loadIntoEditor(p, m.id, m.name); }); };
         listEl.append(row({name:m.name, date:nowLabel(m.savedAt)+' に保存', thumb:m.thumb, buttons: pick
@@ -223,7 +234,7 @@ var PlanLibrary = (function(){
              ['削除', function(){ if(!confirm('「'+m.name+'」を一覧から削除しますか？元に戻せません。')) return;
                remove(m.id).then(function(){ if(PLAN_LIBRARY_ID===m.id){ PLAN_LIBRARY_ID = null; PLAN_SAVE_INFO = null; } openList(opts); }); }, 'danger']]}));
       });
-      if(!hasLast && !rows.length) listEl.append(el('div', 'plan-library-empty', 'まだ保存したプランがありません。'));
+      if(!hasLast && !rows.length && !rooms.length) listEl.append(el('div', 'plan-library-empty', 'まだ保存したプランがありません。'));
     });
   }
 
@@ -234,6 +245,8 @@ var PlanLibrary = (function(){
     savePlanToStorage = async function(){
       var r = await baseSave.apply(this, arguments);
       if(DIRTY) return r;                         // 失敗・空のプランなど
+      // 共同編集の部屋にいる間は、部屋の枠とクラウドへ保存した。前回のプランと一覧の項目は書き換えない
+      if(typeof SHARED!=='undefined' && SHARED.roomId){ PLAN_SAVE_INFO = {where:'room', at:Date.now()}; return r; }
       PLAN_SAVE_INFO = {where:'last', at:Date.now()};
       if(PLAN_LIBRARY_ID){ var meta = await saveCurrent({}); if(meta) PLAN_SAVE_INFO = {where:'list', name:meta.name, at:meta.savedAt, alsoLast:true}; }
       return r;

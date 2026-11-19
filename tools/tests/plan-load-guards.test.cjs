@@ -226,8 +226,11 @@ test('どの入口も、形をそろえる処理と大きさの確かめを通�
   }
   // 起動時の復元で開かなかったら、保存の枠を自動では上書きしない
   assert.match(functionBody(read('index.html'), 'async function loadPlanFromStorage('), /STORAGE_KEEP_SAVED=\(d&&typeof d==='object'&&!Array.isArray\(d\)\)\?'big':'broken'; return null;/);
-  assert.match(functionBody(read('index.html'), 'async function sharedAutoSaveLocal('), /if\(STORAGE_KEEP_SAVED\)return;/);
-  assert.match(functionBody(read('index.html'), 'async function savePlanToStorage('), /if\(STORAGE_KEEP_SAVED\)\{\s*if\(!confirm\(/);
+  // 共有中の自動保存は部屋の枠だけに書き、前回のプランの枠(開かなかった保存の入っている枠)には書かない
+  const autoSave = functionBody(read('index.html'), 'async function sharedAutoSaveLocal(');
+  assert.match(autoSave, /StorageAdapter\.saveRoom\(SHARED\.roomId,DATA\)/);
+  assert.doesNotMatch(autoSave, /StorageAdapter\.save\(/);
+  assert.match(functionBody(read('index.html'), 'async function savePlanToStorage('), /if\(STORAGE_KEEP_SAVED&&!inRoom\)\{\s*if\(!confirm\(/);
   // 形をそろえる: normalizeLoadedPlan の最初・共有の部屋・写し
   const norm = functionBody(read('assets/js/app-state.js'), 'function normalizeLoadedPlan(');
   assert.match(norm, /tidyLoadedPlan\(DATA\)/);
@@ -292,21 +295,19 @@ test('画面の normalizeLoadedPlan は、ensure* より先に形をそろえる
 });
 
 // 起動時に開かなかった保存があるときの、保存ボタンの確認の文。場面で文を分け、開発の用語を出さない
-test('保存ボタンの確認の文は、開かなかった理由と共同編集かどうかで分かれ、ファイルへの書き出しを添える', () => {
+test('保存ボタンの確認の文は、開かなかった理由で分かれ、ファイルへの書き出しを添える', () => {
   const vm = require('node:vm');
   const sb = {};
   vm.createContext(sb);
   vm.runInContext(functionBody(read('index.html'), 'function storageKeepSavedText('), sb);
   const big = vm.runInContext("storageKeepSavedText('big',false)", sb);
   const broken = vm.runInContext("storageKeepSavedText('broken',false)", sb);
-  const shared = vm.runInContext("storageKeepSavedText('big',true)", sb);
   assert.match(big, /大きいため開かなかったプラン/);
   assert.match(broken, /形が正しくなかったため開けなかったプラン/);
-  for (const t of [big, broken, shared]) {
+  for (const t of [big, broken]) {
     assert.match(t, /「JSON保存」でファイルに書き出して/);
     assert.match(t, /保存しますか？$/);
     assert.doesNotMatch(t, /webcad|IndexedDB|JSON\.|STORAGE|tidy|座標|鍵/);
   }
   assert.doesNotMatch(big, /クラウド/);
-  assert.match(shared, /共同編集のクラウドへの保存もしません/);
 });

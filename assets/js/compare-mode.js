@@ -86,7 +86,7 @@ var CompareMode = (function(){
   function saveLine(i){
     var info = saveInfo(i);
     if(!info) return 'ブラウザ: まだ保存していません';
-    var where = info.where==='list' ? '一覧「'+(info.name||'名前なし')+'」' : '前回のプラン';
+    var where = info.where==='list' ? '一覧「'+(info.name||'名前なし')+'」' : info.where==='room' ? '共同編集' : '前回のプラン';
     if(isDirty(i)) return 'ブラウザ: '+where+'に保存後、変更あり';
     return 'ブラウザ: '+where+'に保存済み'+(info.at ? '（'+PlanLibrary.nowLabel(info.at)+'）' : '');
   }
