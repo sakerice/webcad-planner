@@ -421,7 +421,7 @@ test('前の依頼は直近 6 件まで、文はそれぞれ 400 字までに切
   const script = [];
   for (let i = 0; i < 8; i++) script.push({ sse: sseFor([{ type: 'text', text: 'い'.repeat(500) + i }]) });
   const { s, fetch } = makeSession(script);
-  for (let i = 0; i < 8; i++) assert.equal((await s.send('あ'.repeat(500) + i)).ok, true);
+  for (let i = 0; i < 8; i++) assert.equal((await s.send('あ'.repeat(450) + i)).ok, true);
   const msgs = fetch.calls[7].body.messages;
   assert.equal(msgs.length, 13);
   const u0 = inner(msgs[0].content, 'user_request');
@@ -431,7 +431,7 @@ test('前の依頼は直近 6 件まで、文はそれぞれ 400 字までに切
   assert.equal(msgs[1].content.length, 400);
   // 直近 6 件は 2〜7 回めの依頼(0・1 回めは落ちる)
   assert.equal(fetch.calls[6].body.messages.length, 13);
-  assert.ok(msgs[12].content.endsWith(userRequest('あ'.repeat(500) + '7')));
+  assert.ok(msgs[12].content.endsWith(userRequest('あ'.repeat(450) + '7')));
 });
 
 test('道具の結果の文は 2,000 字まで。検査の指摘と警告は 10 件ずつ、残りは「ほか N 件」', async () => {
@@ -556,4 +556,14 @@ test('グローバルに触らない', () => {
     .split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
   for (const w of ['DATA', 'ST.', 'document', 'window.', 'localStorage', 'PlanCoreOperations', 'itemTypeLabel']) assert.ok(!src.includes(w), w + ' が残っている');
   assert.ok(!/[^.\w]fetch\(/.test(src), 'グローバルの fetch を呼んでいる');
+});
+
+test('依頼の文は 500 字まで。超えたら送らずに request_too_long(絵文字は1字)', async () => {
+  const { s, fetch } = makeSession([{ sse: sseFor([{ type: 'text', text: 'はい' }]) }]);
+  const r = await s.send('あ'.repeat(501));
+  assert.equal(r.ok, false);
+  assert.equal(r.reason, 'request_too_long');
+  assert.match(r.message, /500字まで/);
+  assert.equal(fetch.calls.length, 0);
+  assert.equal((await s.send('😀'.repeat(500))).ok, true);
 });

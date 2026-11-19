@@ -114,6 +114,7 @@ export function chatConfig(env) {
 // 失敗の返事。既存の /api/ai/* と同じ { error, message } に、同じ値の code を足す。
 const MESSAGES = {
   bad_request: "依頼の形が正しくありません。",
+  request_too_long: "頼む文は500字までにしてください。",
   too_large: "会話が長すぎます。新しい会話で頼み直してください。",
   quota_exceeded: "本日ぶんのチャットを使い切りました。明日またお試しください。",
   ticket_invalid: "依頼の期限が切れました。もう一度頼み直してください。",
@@ -123,7 +124,7 @@ const MESSAGES = {
   ai_upstream_error: "AI から返事を受け取れませんでした。少し時間をおいてお試しください。",
 };
 const STATUS = {
-  bad_request: 400, too_large: 413, quota_exceeded: 429, ticket_invalid: 401,
+  bad_request: 400, request_too_long: 400, too_large: 413, quota_exceeded: 429, ticket_invalid: 401,
   rounds_exceeded: 429, quota_unavailable: 503, ai_unavailable: 503, ai_upstream_error: 502,
 };
 function fail(code, extra, headers) {
@@ -136,6 +137,8 @@ export async function handleChat(request, env, deps = {}) {
   if (read.error) return fail(read.error);
   const payload = read.payload;
   if (!validPayload(payload)) return fail("bad_request");
+  // 利用者の依頼の文(今回と前の依頼)は1件 Guard.REQUEST_MAX_CHARS 字まで。AI を呼ぶ前・回数を数える前に断る。
+  if (requestTooLong(payload.messages)) return fail("request_too_long");
   // 利用者の文と道具の結果が囲みの形になっていなければ、ここで囲む（下の guardMessages）。札の数え方・
   // プロンプトキャッシュは囲んだ後の messages で行う（同じ入力からは毎回同じバイト列になる）。
   const messages = guardMessages(payload.messages);
@@ -313,6 +316,25 @@ function userContentOk(content) {
 // system の役割はブラウザから足せない（role は user と assistant だけを通し、payload.system などほかの欄は使わない）。
 const USER_FORM = /^(?:<plan_summary>\n([\s\S]*)\n<\/plan_summary>\n\n)?<user_request>\n([\s\S]*)\n<\/user_request>$/;
 const RESULT_FORM = /^<(tool_result|inspect_result)>\n([\s\S]*)\n<\/\1>$/;
+
+// 利用者の依頼の文の部分。囲みの形なら <user_request> の中、古い画面の形
+// ('<plan_summary>\n…\n</plan_summary>\n\n依頼')なら要約を除いた後ろ、どちらでもなければ全体。
+const OLD_FORM_SPLIT = "\n</plan_summary>\n\n";
+function requestPart(text) {
+  const m = USER_FORM.exec(text);
+  if (m) return m[2];
+  if (text.startsWith("<plan_summary>\n")) {
+    const at = text.indexOf(OLD_FORM_SPLIT);
+    if (at >= 0) return text.slice(at + OLD_FORM_SPLIT.length);
+  }
+  return text;
+}
+function requestTooLong(messages) {
+  const over = (t) => typeof t === "string" && Guard.countChars(requestPart(t)) > Guard.REQUEST_MAX_CHARS;
+  return messages.some((m) => m.role === "user" && (typeof m.content === "string"
+    ? over(m.content)
+    : m.content.some((b) => b.type === "text" && over(b.text))));
+}
 
 function guardUserText(text) {
   const m = USER_FORM.exec(text);

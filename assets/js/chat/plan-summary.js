@@ -52,6 +52,11 @@
   //     \u003c・\x3c・%3C のように符号化した山かっこも 〔 〕 にする
   //   - 切り詰めは文字(コードポイント)単位(絵文字を割らない)
   // 寸法や単位(6畳、2.5m×3m、3640mm、900〜1000mm)は変えない。
+  // 利用者が AI に渡す文(チャットの依頼1件、読み取りのひとこと)の長さの上限。文字(コードポイント)で数える。
+  // 画面の入力欄(chat-ui.js の attachCharLimit)と Worker(worker/chat.mjs、routes-ai.mjs のひとこと)が同じこの値を見る。
+  // 攻撃の文を長く送らせないため、AI の利用量を抑えるため。
+  var REQUEST_MAX_CHARS = 500;
+  function countChars(s) { return Array.from(String(s === undefined || s === null ? '' : s)).length; }
   var TAGS = ['plan_summary', 'user_request', 'tool_result', 'inspect_result', 'user_hint', 'previous_answer', 'check_facts'];
   var OPEN_LIKE = '<＜﹤‹«〈〈《⟨⟪❮❬❰⧼˂ᐸ≪⋘︿︽≺˱';
   var CLOSE_LIKE = '>＞﹥›»〉〉》⟩⟫❯❭❱⧽˃ᐳ≫⋙﹀︾≻˲';
@@ -278,6 +283,7 @@
   return {
     summarize: summarize, utf8Bytes: utf8Bytes, DEFAULT_MAX_BYTES: DEFAULT_MAX_BYTES,
     clean: clean, cleanText: cleanText, cleanDeep: cleanDeep, stripInvisible: stripInvisible, cutChars: cutChars,
+    REQUEST_MAX_CHARS: REQUEST_MAX_CHARS, countChars: countChars,
     isClean: isClean, wrap: wrap, wrapText: wrapText, wrapSafe: wrapSafe, TAGS: TAGS
   };
 }));

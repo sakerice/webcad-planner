@@ -195,9 +195,11 @@ test('画面のチャット: どの攻撃の文でも、AI に渡る system と 
     const pc = await mod('worker/plan-ctx.mjs');
     let plan = attackPlan(a);
     const s = Session.create({ fetch: w.fetch, getPlan: () => plan, ctxFor: () => pc.workerOpsCtx(plan, {}), tools, summarize, AbortController });
-    const r1 = await s.send(a);
+    // 依頼の文は 500 字まで(画面と Worker が断る)。名前などのプランの中の文には長いまま入れる
+    const ask = Array.from(a).slice(0, 500).join('');
+    const r1 = await s.send(ask);
     assert.equal(r1.ok, true, `${id}: ${JSON.stringify(r1)}`);
-    const r2 = await s.send(a);
+    const r2 = await s.send(ask);
     assert.equal(r2.ok, true, `${id}: ${JSON.stringify(r2)}`);
     assert.equal(w.upstream.length, 3, id);
     w.upstream.forEach((b, i) => checkUpstream(b, `${id} 呼び出し${i + 1}`));
@@ -224,11 +226,12 @@ test('画面のチャット: 寸法つきのふつうの依頼は、掃除で変
 test('Worker: 囲みの形になっていない messages(古い画面・直接の呼び出し)は Worker が囲んで送る', async () => {
   for (const { id, value: a } of ATTACKS) {
     const w = await workerFetch([{ content: [{ type: 'text', text: 'はい' }], stop: 'end_turn' }]);
+    const ask = Array.from(a).slice(0, 400).join('');   // 依頼の文は 500 字まで
     const messages = [
-      { role: 'user', content: '<plan_summary>\n部屋「' + a + '」\n</plan_summary>\n\n' + a },
+      { role: 'user', content: '<plan_summary>\n部屋「' + a + '」\n</plan_summary>\n\n' + ask },
       { role: 'assistant', content: [{ type: 'tool_use', id: 'x1', name: 'renameRoom', input: { id: 'rm_a', name: a } }] },
       { role: 'user', content: [{ type: 'tool_result', tool_use_id: 'x1', content: JSON.stringify({ errors: [a] }) },
-        { type: 'text', text: a }] },
+        { type: 'text', text: ask }] },
     ];
     const res = await w.fetch('/api/ai/chat', { body: JSON.stringify({ messages }) });
     assert.equal(res.status, 200, id);

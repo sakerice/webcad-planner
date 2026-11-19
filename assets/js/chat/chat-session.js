@@ -99,11 +99,12 @@
     max_tokens: '返事が長くなりすぎて、途中で止まりました。依頼を小さく分けて頼み直してください。',
     refusal: 'AI がこの依頼を断りました。間取りをどう直したいかを書いて、頼み直してください。',
     pause_turn: 'AI の返事が途中で止まりました。もう一度お試しください。',
+    request_too_long: '頼む文は500字までにしてください。',
     too_long: '頼みごとが多すぎて、途中で続けられなくなりました。少しずつ分けてお試しください。',
     failed: '依頼を最後まで進められませんでした。もう一度お試しください。'
   };
   // サーバの失敗の code のうち、そのまま理由にするもの(ほかは http_error)。
-  var SERVER_CODES = ['quota_exceeded', 'rounds_exceeded', 'ticket_invalid', 'too_large', 'bad_request',
+  var SERVER_CODES = ['request_too_long', 'quota_exceeded', 'rounds_exceeded', 'ticket_invalid', 'too_large', 'bad_request',
     'quota_unavailable', 'ai_unavailable', 'ai_upstream_error'];
   // 組み立ての失敗 → 理由。
   var STREAM_REASONS = { stream_error: 'ai_error', incomplete: 'interrupted', bad_json: 'bad_response', bad_event: 'bad_response' };
@@ -361,6 +362,8 @@
       if (current) return Promise.resolve(failure('busy'));
       text = String(text === undefined || text === null ? '' : text).trim();
       if (!text) return Promise.resolve(failure('empty'));
+      // 1件の依頼の文は REQUEST_MAX_CHARS 字まで(画面の入力欄も止めるが、ここでも送らずに断る。Worker も 400 で断る)。
+      if (Guard.countChars(text) > Guard.REQUEST_MAX_CHARS) return Promise.resolve(failure('request_too_long'));
       var job = { cancelled: false, reader: null, abort: null, cancelResolve: null };
       if (deps.AbortController) { try { job.abort = new deps.AbortController(); } catch (e) { job.abort = null; } }
       current = job;
