@@ -377,11 +377,13 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   border-radius:12px;background:rgba(255,255,255,0.98);border:1px solid var(--hp-border,#d6dde4);color:var(--hp-text,#2d2a27);
   font-size:13px;font-weight:700;line-height:1.5;box-shadow:0 8px 22px rgba(24,20,18,0.16)}
 .plan-notice[hidden]{display:none}
-.plan-notice-close{flex:none;min-width:36px;min-height:36px;border:0;border-radius:8px;background:transparent;color:inherit;font-size:18px;cursor:pointer}
-/* ボタンのある知らせは、狭い幅ではボタンを文の下の行へ送る(文を細く刻まない) */
+.plan-notice-close{flex:none;min-width:40px;min-height:40px;border:0;border-radius:8px;background:transparent;color:inherit;font-size:18px;cursor:pointer}
+/* ボタンのある知らせは、狭い幅ではボタンを文の下の行へ送る(文を細く刻まない)。
+   文の幅は文の長さ(auto)から始め、×の分(50px)を空けて止める。以前は 200px から始めていたため、200px より短い文
+   (「前回は共同編集をしていました。」)では知らせの幅が足りず、×だけが次の行に落ちた(幅の広い画面) */
 .plan-notice{flex-wrap:wrap}
-#plan-notice-text{flex:1 1 200px;min-width:0}
-.plan-notice-action{flex:none;margin-left:auto;min-height:36px;padding:0 12px;border:1px solid #9fb6d3;border-radius:8px;background:#eef4fb;color:#1f4f86;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+#plan-notice-text{flex:1 1 auto;min-width:0;max-width:calc(100% - 50px)}
+.plan-notice-action{flex:none;margin-left:auto;min-height:40px;padding:0 12px;border:1px solid #9fb6d3;border-radius:8px;background:#eef4fb;color:#1f4f86;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 .plan-notice-action[hidden]{display:none}
 /* 外部の AI の変更が届いたときの知らせ(index.html の sharedRenderAiBar)。画面の下の知らせ(.plan-notice)はこの上に積む */
 .ai-edit-bar{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);left:12px;right:12px;margin:0 auto;width:fit-content;z-index:971;
@@ -391,11 +393,14 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .ai-edit-text{display:flex;flex-direction:column;min-width:0;flex:1 1 180px}
 .ai-edit-text strong{font-size:13px;font-weight:800}
 .ai-edit-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
-.ai-edit-btn{flex:none;min-height:36px;padding:0 12px;border:1px solid #c9a650;border-radius:8px;background:#fff;color:#4a3a12;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.ai-edit-btn{flex:none;min-width:40px;min-height:40px;padding:0 12px;border:1px solid #c9a650;border-radius:8px;background:#fff;color:#4a3a12;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 .ai-edit-btn[hidden]{display:none}
 .ai-edit-stop{background:#a2242d;border-color:#a2242d;color:#fff}
 /* 電話・タブレットの幅では、右下の「AIに頼む」の丸いボタン(assets/chat.css の #chat-fab。右 12px・幅 48px)を隠さないよう、右に空ける */
 @media(max-width:768px){.plan-notice,.ai-edit-bar{right:calc(68px + var(--safe-r,0px));max-width:calc(100vw - 80px - var(--safe-r,0px))}}
+/* 幅が 769 以上では左に操作の枠(#sidebar。左 10〜14px・幅 208px)が出ている。電話の横向き(844x390 など)では知らせが
+   その上に重なり、「Redo」「貼付」などが押せなかったので、枠の右から並べる */
+@media(min-width:769px){.plan-notice,.ai-edit-bar{left:calc(244px + var(--safe-l,0px));max-width:min(560px,calc(100vw - 256px - var(--safe-l,0px)))}}
 .share-ai-allow{display:flex;align-items:center;gap:10px;margin-top:14px;min-height:40px;font-size:13px;font-weight:750;color:#24324a;cursor:pointer}
 .share-ai-allow input{width:20px;height:20px;flex:none;margin:0;accent-color:#24507f}
 @media (pointer:coarse){
