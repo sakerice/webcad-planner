@@ -84,12 +84,14 @@
     empty: '頼みたいことを書いてください。',
     cancelled: '依頼を取り消しました。',
     network: '通信できませんでした。通信の状態を確かめて、もう一度お試しください。',
-    quota_exceeded: '本日ぶんのチャットを使い切りました。明日またお試しください。',
+    // 本日ぶん(1日の回数・1日の額)は、日本時間の朝9時に戻る。文は時刻で変わるので dayLimitMessage で作る。
+    quota_exceeded: '',
+    month_exceeded: '今月ぶんの AI の受付を終えました。来月1日から再開します。画面の操作では引き続き作れます。',
     rounds_exceeded: '1回の依頼で直せる回数を超えました。依頼を分けて頼み直してください。',
     ticket_invalid: '依頼の期限が切れました。もう一度頼み直してください。',
     too_large: 'やり取りが長くなりました。チャットを新しく始めてからお試しください。',
     bad_request: '依頼をうまく送れませんでした。チャットを新しく始めてからお試しください。',
-    quota_unavailable: 'いまチャットを使えません。少し時間をおいてお試しください。',
+    quota_unavailable: 'いま AI が混み合っています。少し待ってから、もう一度お試しください。',
     ai_unavailable: 'この環境ではチャットを使えません。',
     ai_upstream_error: 'AI から返事を受け取れませんでした。少し時間をおいてお試しください。',
     http_error: 'いまチャットを使えません。少し時間をおいてお試しください。',
@@ -104,12 +106,22 @@
     failed: '依頼を最後まで進められませんでした。もう一度お試しください。'
   };
   // サーバの失敗の code のうち、そのまま理由にするもの(ほかは http_error)。
-  var SERVER_CODES = ['request_too_long', 'quota_exceeded', 'rounds_exceeded', 'ticket_invalid', 'too_large', 'bad_request',
+  var SERVER_CODES = ['request_too_long', 'quota_exceeded', 'month_exceeded', 'rounds_exceeded', 'ticket_invalid', 'too_large', 'bad_request',
     'quota_unavailable', 'ai_unavailable', 'ai_upstream_error'];
   // 組み立ての失敗 → 理由。
   var STREAM_REASONS = { stream_error: 'ai_error', incomplete: 'interrupted', bad_json: 'bad_response', bad_event: 'bad_response' };
 
-  function failure(reason) { return { ok: false, reason: reason, message: MESSAGES[reason] || MESSAGES.failed }; }
+  // 1日の数は UTC の日付で切っている(worker/ai-quota.mjs)ので、日本時間の朝9時に戻る。0時〜9時は「明日」ではない。
+  // worker/ai-budget.mjs の dayLimitMessage と同じ文。
+  function dayLimitMessage(now) {
+    var jstHour = new Date(now + 9 * 60 * 60 * 1000).getUTCHours();
+    return '本日ぶんの AI は受付を終えました。' + (jstHour < 9 ? '朝9時から再開します。' : '明日の朝9時から再開します。')
+      + '画面の操作では引き続き作れます。';
+  }
+  function failure(reason) {
+    var message = reason === 'quota_exceeded' ? dayLimitMessage(Date.now()) : MESSAGES[reason];
+    return { ok: false, reason: reason, message: message || MESSAGES.failed };
+  }
   function idKey(id) { return String(id); }
   function isBlankText(b) { return b && b.type === 'text' && !(typeof b.text === 'string' && b.text.trim()); }
   function textOf(content) {
