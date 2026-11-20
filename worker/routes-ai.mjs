@@ -32,8 +32,14 @@ import Guard from "../assets/js/chat/plan-summary.js";
 import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
 import { nameRooms, pickModels, judgeMarks, missingByRoom, MAX_ROOMS, MAX_SLOTS, MAX_MARKS } from "./plan-finish.mjs";
 import { knowledgeWarnings } from "./plan-check.mjs";
-import { quotaLimits, POINTS_PER_IMPORT } from "./ai-quota.mjs";
+import { POINTS_PER_IMPORT } from "./ai-quota.mjs";
 import { handleChat } from "./chat.mjs";
+import {
+  reserve, settle, takeJev, refusal, meterStream, originAllowed, askQuota, whoOf, moneyParams,
+  dayLimitMessage, MONTH_LIMIT_MESSAGE,
+} from "./ai-budget.mjs";
+import { holdUsd, imageTokens, textTokens, anthropicUsageUsd, otherUsageUsd } from "./ai-price.mjs";
+import { quotaLimits } from "./ai-quota.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -48,8 +54,8 @@ const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 // **1点あたりおよそ ¥4。** 3ページのPDFを1回取り込むと 3 + 30 = 33点 ≒ ¥120。
 //
 // /api/ai/* には認証が無い。URLを知っていれば誰でも呼べ、そのまま請求される。
-// ここが費用の歯止めになる。環境変数 AI_DAILY_TOTAL / AI_DAILY_PER_USER で
-// 上書きできる。モデルを変えたら COST を見直すこと。
+// 点は1日の歯止め。財布の砦は月の金額の枠（worker/ai-budget.mjs・worker/ai-price.mjs。既定 $80）で、
+// 呼ぶ前に最悪の額を仮押さえし、usage で精算する。モデルを変えたら COST と worker/ai-price.mjs の単価を見直すこと。
 const COST_LOCATE = 1;
 const COST_IMPORT_PAGE = 10;
 // 見直しは、元の図面と「答えを描き直した絵」の2枚を見て、全体を作り直させる。
@@ -92,18 +98,21 @@ export async function handleAi(request, env, url, deps = {}) {
 
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
+  // 他サイトのページから、利用者のブラウザ越しに使われないようにする（worker/ai-budget.mjs の originAllowed）。
+  if (!originAllowed(request)) return json({ error: "forbidden_origin", message: "このサイトの外からは使えません。" }, 403);
+
   // チャットは本文が小さい（256KB まで）。下の「約40MBまで読む」より前で分け、自分の上限で読む。
   if (url.pathname === "/api/ai/chat") return handleChat(request, env, deps);
 
   let payload;
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
-  if (url.pathname === "/api/ai/finish-plan") return aiFinishPlan(payload, env, deps);
+  if (url.pathname === "/api/ai/finish-plan") return aiFinishPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/read-plan") return aiReadPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/review-plan-3d") return aiReviewPlan3d(payload, env, deps, request);
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
-  if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps);
+  if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps, request);
   if (url.pathname === "/api/ai/find-plan") return aiFindPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/render") return aiRender(payload, env, deps);
   return json({ error: "not_found" }, 404);
@@ -135,27 +144,98 @@ function readImage(value, field) {
 //
 // 全体の上限があるので、自分が使っていなくても使えないことがある。
 // 押してから断られるより、押す前に分かっているほうがよい。
+//
+// 応答の形は前と同じ { left, perUser, total, counted }（更新前に開いたままの画面が読む）。足した欄:
+//   limit   … "month"（今月の枠が尽きた）・"day"（本日の額の枠が尽きた）。このときは left: 0 と message を付ける
+//   message … 断るときの文（画面はそのまま出す）
+// **残りが分からないときは数を出さない。** 金額の枠は1回ごとの額で減り方が違う。金額の枠で先に止まりうる
+// （残りの額で、点の残りぶんの最悪の読み取りをまかなえない）ときは left: null・counted: false にし、画面は欄を隠す。
+// 金額そのものは返さない（外から金額が見える窓口は作らない）。
 async function aiQuota(env, request) {
   const limits = quotaLimits(env);
-  const seen = await takeQuota(request, env, 0, true);
-  const left = Number(seen.remaining);
-  // **数えられなかったことを「残り0回」と言わない。**
-  //
-  // 数の仕組み(Durable Object)が詰まったときは、takeQuota が「通す」を返して
-  // 機能を止めない。ところがその返事の remaining は 0 で、ここがそれを
-  // 「本日あと0回」として返していた。画面はその0を見て読み取りボタンを
-  // 使えなくする。**Worker は通しているのに、画面だけが閉じる。**
-  // 実測で、数えられない環境で機能そのものが押せなくなった。
-  //
-  // 数が分からないときは counted: false を返す。画面は残り回数の欄を
-  // 隠すだけで、ボタンには触らない。
-  const counted = Boolean(env && env.AI_QUOTA) && seen.scope !== "error" && seen.scope !== "none";
-  return json({
-    // 残りを回数にする。1回ぶんに満たない端数は切り捨てる。
-    left: counted && Number.isFinite(left) ? Math.floor(left / POINTS_PER_IMPORT) : null,
-    perUser: limits.imports.perUser,
-    total: limits.imports.total,
-    counted: counted,
+  const hidden = { left: null, perUser: limits.imports.perUser, total: limits.imports.total, counted: false };
+  if (!env || !env.AI_QUOTA) return json(hidden);
+  const seen = await askQuota(env, "/take", {
+    cost: "0", peek: "1", who: whoOf(request),
+    perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
+    ...moneyParams(env, 0, ""),
+  });
+  // 数えられなかったことを「残り0回」と言わない（画面がボタンを閉じてしまう）。
+  if (!seen || seen.scope !== "peek") return json(hidden);
+  if (Number(seen.monthLeft) <= 0) {
+    return json({ ...hidden, left: 0, counted: true, limit: "month", message: MONTH_LIMIT_MESSAGE });
+  }
+  if (Number(seen.dayLeft) <= 0) {
+    return json({ ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() });
+  }
+  // 残りを回数にする。1回ぶんに満たない端数は切り捨てる。
+  const byPoints = Math.floor(Number(seen.remaining) / POINTS_PER_IMPORT);
+  if (!Number.isFinite(byPoints)) return json(hidden);
+  if (byPoints <= 0) return json({ ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() });
+  const usdLeft = Math.min(Number(seen.monthLeft), Number(seen.dayLeft)) / 1e6;
+  const byMoney = Math.floor(usdLeft / readingRefUsd(env));
+  if (!(byMoney >= byPoints)) return json(hidden);
+  return json({ ...hidden, left: byPoints, counted: true });
+}
+
+// 「本日あと何回」を出してよいかの目安にする、1ページの読み取り（短い指示・Claude）の仮押さえの額。
+function readingRefUsd(env) {
+  return holdUsd({
+    model: anthropicConfig(env).model,
+    inputTokens: imageTokens([{ mimeType: "image/png" }]) + textTokens(FREE_SYSTEM) + textTokens(JSON.stringify(FREE_SCHEMA)) + 4000,
+    maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
+  });
+}
+
+// 1回の呼び出しの出力の上限（仮押さえの額に使う。呼び出しの設定と同じ値）。
+const READ_MAX_OUTPUT_TOKENS = 64000;
+const ANTHROPIC_PLAN_OUTPUT_TOKENS = 32000;   // worker/anthropic.mjs の buildRequest の既定
+const OTHER_PLAN_OUTPUT_TOKENS = 32768 + 8192; // OpenAI・Vertex の既定（Vertex は考える分を足す）
+const LOCATE_MAX_OUTPUT_TOKENS = 512;
+
+// 断るとき・数えられないときの返事を作る。
+function refuse(result) {
+  return refusal(json, result);
+}
+
+// 1回の問い合わせの仮押さえの額。
+function askHoldUsd(provider, ask) {
+  const other = provider.kind !== "anthropic";
+  const docs = (ask.docs || [planKnowledge(), planSpec()]).map((d) => textTokens(String(d))).reduce((a, b) => a + b, 0);
+  return holdUsd({
+    model: provider.config && provider.config.model, other,
+    inputTokens: imageTokens(ask.images) + textTokens(ask.system) + textTokens(ask.text) + docs
+      + textTokens(JSON.stringify(PLAN_RESPONSE_SCHEMA)),
+    maxOutputTokens: other ? OTHER_PLAN_OUTPUT_TOKENS : ANTHROPIC_PLAN_OUTPUT_TOKENS,
+  });
+}
+
+// 返ってきた1回ぶんの実額。分からなければ、その1回の仮押さえの額（安全側）。
+function resultUsd(provider, result, holdShare) {
+  if (!result || !result.ok || !result.usage) return holdShare;
+  if (provider.kind === "anthropic") {
+    const u = result.usage;
+    const cw = Number(u.cacheWriteTokens) || 0, cr = Number(u.cacheReadTokens) || 0;
+    return anthropicUsageUsd({
+      requested: provider.config.model, model: result.model,
+      input: Math.max(0, (Number(u.inputTokens) || 0) - cw - cr), cacheWrite: cw, cacheRead: cr, output: u.outputTokens,
+    });
+  }
+  const usd = otherUsageUsd(result.usage);
+  return usd === null ? holdShare : usd;
+}
+
+// 流れてくる答え（Claude）を数えながら流し、終わったら精算する。
+function meteredStream(env, body, hold, requestedModel) {
+  if (!hold) return body;
+  return meterStream(body, async (segments) => {
+    if (!segments) return;   // 実額が分からない。仮押さえのまま残す
+    let usd = 0;
+    for (const s of segments) {
+      usd += anthropicUsageUsd({ requested: requestedModel, model: s.model, input: s.input,
+        cacheWrite: s.cacheWrite, cacheRead: s.cacheRead, output: s.output });
+    }
+    await settle(env, hold, usd);
   });
 }
 
@@ -227,22 +307,24 @@ async function aiFindPlan(payload, env, deps, request) {
     provider.config = { ...config, model: (env && env.AI_LOCATE_MODEL) || "gemini-2.5-flash" };
   }
 
-  const quota = await takeQuota(request, env, COST_LOCATE);
-  if (!quota.ok) {
-    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
-  }
+  // 位置探しは OpenAI か Vertex（予備の経路の単価で、高めに数える）。
+  const hold = holdUsd({ other: true, maxOutputTokens: LOCATE_MAX_OUTPUT_TOKENS,
+    inputTokens: imageTokens([image]) + textTokens(LOCATE_SYSTEM) + textTokens(LOCATE_PROMPT) });
+  const quota = await reserve(request, env, { points: COST_LOCATE, usd: hold });
+  if (!quota.ok) return refuse(quota);
 
   const common = {
     system: LOCATE_SYSTEM,
     text: LOCATE_PROMPT,
     image: { mimeType: image.mimeType, base64: image.base64 },
     // 位置が分かればよく、寸法の文字は読まない。考える必要も無い。
-    maxOutputTokens: 512,
+    maxOutputTokens: LOCATE_MAX_OUTPUT_TOKENS,
     fetchImpl: deps.fetchImpl,
   };
   const result = provider.kind === "openai"
     ? await openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(LOCATE_SCHEMA) } })
     : await generate({ ...common, config: provider.config, responseSchema: LOCATE_SCHEMA, thinkingBudget: 0 });
+  await settle(env, quota.hold, resultUsd({ kind: provider.kind }, result, hold));
 
   if (!result.ok) return json({ error: "ai_upstream_error", status: result.status, message: result.message }, 502);
 
@@ -255,14 +337,11 @@ async function aiFindPlan(payload, env, deps, request) {
 //
 // 部屋の種別と、設備のモデルを決める。足りないものは種別から計算で出る。
 //
-// **回数を数えない。** ここが呼ぶのは Jev だけで、1回の判断が入力数百
-// トークン、出力は無料。読み取り(¥40/ページ)とは桁が3つ違う。数の仕組みは
-// 1つの Durable Object に集まるので、安い呼び出しまで通すと、そこが
-// 高い呼び出しの待ち行列になる。
-//
-// 代わりに**1回で投げられる判断の数を抑える**(部屋40・設備24・候補8)。
-// 認証が無い窓口なので、上限は要求の形のほうで持つ。
-async function aiFinishPlan(payload, env, deps) {
+// ここが呼ぶのは Jev だけで、1回の判断が入力数百トークン、出力は無料。読み取り(¥40/ページ)とは桁が3つ違う。
+// それでも認証の無い窓口なので、**1回で投げられる判断の数を抑え**(部屋40・設備24・候補8)、
+// 加えて1人・全体の1日の回数を数える(worker/ai-quota.mjs の jevLimits。AI の点とは別の数)。
+// 画面は1回の読み取りでここを多くて2回呼ぶ(assets/js/plan-finish.js の analyze)。
+async function aiFinishPlan(payload, env, deps, request) {
   const rooms = Array.isArray(payload && payload.rooms) ? payload.rooms : [];
   const slots = Array.isArray(payload && payload.slots) ? payload.slots : [];
   const marks = Array.isArray(payload && payload.marks) ? payload.marks : [];
@@ -272,6 +351,8 @@ async function aiFinishPlan(payload, env, deps) {
   if (rooms.length > MAX_ROOMS || slots.length > MAX_SLOTS || marks.length > MAX_MARKS) {
     return json({ error: "invalid_request", message: "1回に送れる数を超えている" }, 400);
   }
+  const counted = await takeJev(request, env);
+  if (!counted.ok) return refuse(counted);
 
   const [named, picks, reads] = await Promise.all([
     nameRooms(rooms, env, deps),
@@ -311,25 +392,22 @@ async function aiImportPlan(payload, env, deps, request) {
   const provider = resolveImportProvider(env);
   if (provider.error) return provider.error;
 
-  // 使う前に数える。**送ってから断ると費用は戻らない。**
-  const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
-  if (!quota.ok) {
-    return json({
-      error: "ai_quota_exceeded",
-      scope: quota.scope,
-      message: "本日ぶんの読み取りを使い切りました。明日またお試しください。",
-    }, 429);
-  }
-
   const asks = images.map((img, i) => ({
     system: SYSTEM_PROMPT,
     text: buildPlanPrompt({ hint, page: pageLine(i, images.length) }),
     images: [{ mimeType: img.mimeType, base64: img.base64 }],
     fetchImpl: deps.fetchImpl,
   }));
+
+  // 使う前に数える。**送ってから断ると費用は戻らない。**
+  const holds = asks.map((ask) => askHoldUsd(provider, ask));
+  const quota = await reserve(request, env, { points: images.length * COST_IMPORT_PAGE, usd: sum(holds) });
+  if (!quota.ok) return refuse(quota);
+  // OpenAI は投げるだけで答えは後から取りに行くので、実額が分からない。仮押さえのまま残す。
   if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
+  await settle(env, quota.hold, sum(results.map((r, i) => resultUsd(provider, r, holds[i]))));
   const pages = collectPages(results);
   if (pages.error) return withNextStep(pages.error, env, deps, { images });
   return withNextStep(finishImportedPlan(
@@ -365,22 +443,24 @@ async function aiReadPlan(payload, env, deps, request) {
   const hint = hintOf(payload);
   if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
-  const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
-  if (!quota.ok) {
-    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
-  }
+  const text = buildFreePrompt({ pages: images.length, hint });
+  const hold = holdUsd({ model: config.model, maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
+    inputTokens: imageTokens(images) + textTokens(FREE_SYSTEM) + textTokens(text) + textTokens(JSON.stringify(FREE_SCHEMA)) });
+  const quota = await reserve(request, env, { points: images.length * COST_IMPORT_PAGE, usd: hold });
+  if (!quota.ok) return refuse(quota);
 
   const started = await startStream({
     // 考える深さは medium が既定（2026-10-19 実測: high と点数は変わらず 222秒→181秒）。
     config: { ...config, effort: (env && env.ANTHROPIC_EFFORT) || "medium", schema: FREE_SCHEMA },
     system: FREE_SYSTEM,
-    text: buildFreePrompt({ pages: images.length, hint }),
+    text,
     images,
-    maxOutputTokens: 64000,
+    maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
     fetchImpl: deps.fetchImpl,
   });
+  // 上流が断った（4xx・5xx）ときは、費用がかかっていないとは言い切れないので仮押さえのまま残す。
   if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
-  return new Response(started.body, {
+  return new Response(meteredStream(env, started.body, quota.hold, config.model), {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
   });
@@ -422,21 +502,22 @@ async function aiReviewPlan3d(payload, env, deps, request) {
   const hint = hintOf(payload);
   if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
+  const text = buildFreeReviewPrompt({ pages: rawPages.length, shots: labels, answer: JSON.parse(answerText), facts, hint });
+  const hold = holdUsd({ model: config.model, maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
+    inputTokens: imageTokens(images) + textTokens(FREE_REVIEW_SYSTEM) + textTokens(text) + textTokens(JSON.stringify(FREE_SCHEMA)) });
   // 撮った画像（最大10枚）も入力になるので、1枚1点で足して数える。
-  const quota = await takeQuota(request, env, rawPages.length * COST_REVISE_PAGE + rawShots.length);
-  if (!quota.ok) {
-    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
-  }
+  const quota = await reserve(request, env, { points: rawPages.length * COST_REVISE_PAGE + rawShots.length, usd: hold });
+  if (!quota.ok) return refuse(quota);
   const started = await startStream({
     config: { ...config, effort: (env && env.ANTHROPIC_EFFORT) || "medium", schema: FREE_SCHEMA },
     system: FREE_REVIEW_SYSTEM,
-    text: buildFreeReviewPrompt({ pages: rawPages.length, shots: labels, answer: JSON.parse(answerText), facts, hint }),
+    text,
     images,
-    maxOutputTokens: 64000,
+    maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
     fetchImpl: deps.fetchImpl,
   });
   if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
-  return new Response(started.body, {
+  return new Response(meteredStream(env, started.body, quota.hold, config.model), {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
   });
@@ -474,15 +555,6 @@ async function aiRevisePlan(payload, env, deps, request) {
   const provider = resolveImportProvider(env);
   if (provider.error) return provider.error;
 
-  const quota = await takeQuota(request, env, pairs.length * COST_REVISE_PAGE);
-  if (!quota.ok) {
-    return json({
-      error: "ai_quota_exceeded",
-      scope: quota.scope,
-      message: "本日ぶんの読み取りを使い切りました。明日またお試しください。",
-    }, 429);
-  }
-
   const asks = pairs.map((pair, i) => ({
     system: REVISE_SYSTEM,
     text: buildRevisePrompt({
@@ -501,9 +573,14 @@ async function aiRevisePlan(payload, env, deps, request) {
     ],
     fetchImpl: deps.fetchImpl,
   }));
+
+  const holds = asks.map((ask) => askHoldUsd(provider, ask));
+  const quota = await reserve(request, env, { points: pairs.length * COST_REVISE_PAGE, usd: sum(holds) });
+  if (!quota.ok) return refuse(quota);
   if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
+  await settle(env, quota.hold, sum(results.map((r, i) => resultUsd(provider, r, holds[i]))));
   const pages = collectPages(results);
   if (pages.error) return pages.error;
   return finishImportedPlan(
@@ -614,8 +691,9 @@ async function readJobToken(token, env) {
 // ブラウザが数秒おきに呼ぶ。**1回につき、受付番号の数だけしか通信しない。**
 // まだなら pending を返す。全部そろったところで間取りに組み立てる。
 //
-// 回数はここでは数えない。投げるときに数え終えている。
-async function aiPlanResult(payload, env, deps) {
+// AI の点と金額はここでは数えない。投げるときに数え終えている。
+// ただし全部そろったときは見直しの門と次の一手で jev を呼ぶので、そのときだけ jev の回数を1回数える。
+async function aiPlanResult(payload, env, deps, request) {
   const tokens = Array.isArray(payload && payload.jobs) ? payload.jobs.slice(0, MAX_PAGES) : [];
   if (!tokens.length) return json({ error: "invalid_request", message: "jobs が無い" }, 400);
 
@@ -638,6 +716,8 @@ async function aiPlanResult(payload, env, deps) {
 
   const done = got.filter((g) => g.done).length;
   if (done < got.length) return json({ pending: true, done, total: got.length });
+  const counted = await takeJev(request, env);
+  if (!counted.ok) return refuse(counted);
 
   const results = got.map((g) => readResult(g.data));
   const pages = collectPages(results);
@@ -701,33 +781,11 @@ function collectPages(results) {
   return { list };
 }
 
-// 使った枚数を数える。Durable Object が数の持ち主。
-//
+// 数え方（点・金額の仮押さえ・精算）は worker/ai-budget.mjs にある。
 // 数える相手は接続元のIPアドレス。利用者の口座の仕組みがまだ無いため。
-// 定額サブスクと使用回数制限を入れるときは、ここを口座ごとに替える。
-async function takeQuota(request, env, count, peek) {
-  if (!env || !env.AI_QUOTA) return { ok: true, scope: "none", limit: 0, remaining: 0 };
-  const who = (request && request.headers.get("cf-connecting-ip")) || "unknown";
-  const limits = quotaLimits(env);
-  const id = env.AI_QUOTA.idFromName("ai-usage");
-  const url = `https://ai-quota/take?cost=${count}&who=${encodeURIComponent(who)}`
-    + `&perDay=${limits.points.perUser}&totalPerDay=${limits.points.total}`
-    + (peek ? "&peek=1" : "");
-  // **数の仕組みが止まっても、機能まで止めない。**
-  // 数は1つの Durable Object に集まるので、そこが詰まると全員が待たされる。
-  // 実測で、詰まったときに要求がハンドラまで届かず40秒返らないことがあった。
-  // 待つのは短くし、返ってこなければ通す。
-  const pass = { ok: true, scope: "error", limit: 0, remaining: 0 };
-  try {
-    const res = await Promise.race([
-      env.AI_QUOTA.get(id).fetch(url),
-      new Promise((resolve) => setTimeout(() => resolve(null), 5000)),
-    ]);
-    if (!res) return pass;
-    return await res.json();
-  } catch (e) {
-    return pass;
-  }
+
+function sum(list) {
+  return list.reduce((a, b) => a + (Number(b) || 0), 0);
 }
 
 // ページごとの文。何ページ目かを伝えると、階の取り違えが減る。こちらが作る文なので、利用者の補足の囲みには入れない。

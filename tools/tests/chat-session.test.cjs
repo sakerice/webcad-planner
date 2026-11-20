@@ -260,7 +260,9 @@ for (const stop of ['refusal', 'max_tokens', 'pause_turn']) {
 
 test('HTTP の失敗は code ごとの文で終える(回数切れ・長すぎ・札の期限切れ・その他)', async () => {
   const cases = [
-    [429, { error: 'quota_exceeded', code: 'quota_exceeded', message: 'x', scope: 'who' }, 'quota_exceeded', /本日ぶんのチャットを使い切りました。明日またお試しください。/],
+    [429, { error: 'quota_exceeded', code: 'quota_exceeded', message: 'x', scope: 'who' }, 'quota_exceeded', /^本日ぶんの AI は受付を終えました。(明日の)?朝9時から再開します。画面の操作では引き続き作れます。$/],
+    [429, { error: 'month_exceeded', code: 'month_exceeded', message: 'x' }, 'month_exceeded', /^今月ぶんの AI の受付を終えました。来月1日から再開します。画面の操作では引き続き作れます。$/],
+    [503, { error: 'quota_unavailable', code: 'quota_unavailable', message: 'x' }, 'quota_unavailable', /^いま AI が混み合っています。少し待ってから、もう一度お試しください。$/],
     [413, { error: 'too_large', code: 'too_large', message: 'x' }, 'too_large', /チャットを新しく始めて/],
     [401, { error: 'ticket_invalid', code: 'ticket_invalid', message: 'x' }, 'ticket_invalid', /期限/],
     [429, { error: 'rounds_exceeded', code: 'rounds_exceeded', message: 'x' }, 'rounds_exceeded', /回数を超え/],

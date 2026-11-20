@@ -16,7 +16,8 @@
 // 費用の歯止め
 // ------------
 // この受け口は誰でも呼べ、呼ぶたびに運営者の費用がかかる。そこで:
-//   - 回数を数えられないときは止める（読み取りの takeQuota は通すが、チャットは止める。設計書 3.5）
+//   - 回数を数えられないときは止める（読み取りも同じく止める。worker/ai-budget.mjs）
+//   - 往復ごとに月の金額の枠・1日の額の枠で仮押さえし、答えの usage で精算する。1依頼の出力の合計は既定 24,000 まで
 //   - 送れるのは文字と道具の結果だけ（画像・PDF・外部の資料は断る。1回の費用が跳ねるため）
 //   - 札は会話に結び付ける（前の messages に足しただけの会話でなければ断る。1回ぶんの点で別々の
 //     会話を何度もさせないため。足すだけなのでプロンプトキャッシュも効く）
@@ -28,6 +29,8 @@ import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { json } from "./shared.mjs";
 import { anthropicConfig, conversationBodyText, sendConversation } from "./anthropic.mjs";
 import { quotaLimits } from "./ai-quota.mjs";
+import { askQuota, settle, meterStream, moneyParams, whoOf, randomId as holdId, dayLimitMessage, MONTH_LIMIT_MESSAGE, BUSY_MESSAGE } from "./ai-budget.mjs";
+import { holdUsd, textTokens, anthropicUsageUsd } from "./ai-price.mjs";
 import Guard from "../assets/js/chat/plan-summary.js";
 import { CHAT_INPUT_RULES } from "./ai-rules.mjs";
 
@@ -37,9 +40,11 @@ const MAX_ROUNDS = 8;
 const MAX_DEPTH = 12;
 const TICKET_TTL_MS = 10 * 60 * 1000;
 const MAX_OUTPUT_TOKENS = 8000;
+// 1つの依頼（札）の出力の合計の上限。往復をまたいで数える（各回の上限 8,000 とは別）。
+// 環境変数 AI_CHAT_MAX_OUTPUT_TOKENS で変えられる。札にも書き、Worker と AiQuota の両方で検める。
+const DEFAULT_REQUEST_OUTPUT_TOKENS = 24000;
 // チャット1回（1回の依頼）の点数。読み取り（1回の取り込み = 63点）と同じ枠を使う。
 const DEFAULT_CHAT_POINTS = 21;
-const QUOTA_TIMEOUT_MS = 5000;
 const TICKET_SIG_PREFIX = "chat-ticket:";
 
 // 依頼の役割と約束。日本語で書く（worker/plan-free.mjs の FREE_SYSTEM と同じ）。
@@ -116,19 +121,31 @@ const MESSAGES = {
   bad_request: "依頼の形が正しくありません。",
   request_too_long: Guard.REQUEST_TOO_LONG_MESSAGE,   // 字数は REQUEST_MAX_CHARS から作る(画面と同じ文)
   too_large: "会話が長すぎます。新しい会話で頼み直してください。",
-  quota_exceeded: "本日ぶんのチャットを使い切りました。明日またお試しください。",
+  quota_exceeded: "",   // 時刻で変わる（dayLimitMessage）
+  month_exceeded: MONTH_LIMIT_MESSAGE,
   ticket_invalid: "依頼の期限が切れました。もう一度頼み直してください。",
   rounds_exceeded: "1回の依頼で直せる回数を超えました。依頼を分けて頼み直してください。",
-  quota_unavailable: "いまチャットを使えません。少し時間をおいてお試しください。",
+  quota_unavailable: BUSY_MESSAGE,
   ai_unavailable: "この環境ではチャットを使えません。",
   ai_upstream_error: "AI から返事を受け取れませんでした。少し時間をおいてお試しください。",
 };
 const STATUS = {
-  bad_request: 400, request_too_long: 400, too_large: 413, quota_exceeded: 429, ticket_invalid: 401,
+  bad_request: 400, request_too_long: 400, too_large: 413, quota_exceeded: 429, month_exceeded: 429, ticket_invalid: 401,
   rounds_exceeded: 429, quota_unavailable: 503, ai_unavailable: 503, ai_upstream_error: 502,
 };
 function fail(code, extra, headers) {
-  return json({ error: code, code, message: MESSAGES[code], ...(extra || {}) }, STATUS[code], headers || {});
+  const message = code === "quota_exceeded" ? dayLimitMessage() : MESSAGES[code];
+  return json({ error: code, code, message, ...(extra || {}) }, STATUS[code], headers || {});
+}
+
+function requestOutputCap(env) {
+  const n = Math.round(Number(env && env.AI_CHAT_MAX_OUTPUT_TOKENS));
+  return n >= 1024 && n <= 128000 ? n : DEFAULT_REQUEST_OUTPUT_TOKENS;
+}
+
+// 1往復の仮押さえの額。本文（system・道具・会話）を全部入力として、出力は1回の上限まで出たとして数える。
+function roundHoldUsd(config, bodyBytes) {
+  return holdUsd({ model: config.model, inputTokens: textTokens(bodyBytes), maxOutputTokens: MAX_OUTPUT_TOKENS });
 }
 
 export async function handleChat(request, env, deps = {}) {
@@ -160,54 +177,90 @@ export async function handleChat(request, env, deps = {}) {
   const count = messages.length;
   const hash = await sha256Hex(messagesJson);
 
-  // 2. 数える。
+  // 2. 数える。往復ごとに、月の枠・1日の額の枠で仮押さえする（worker/ai-budget.mjs）。
   const headers = { "cache-control": "no-store" };
-  let ticket;
+  const hold = holdId();
+  const holdAmount = roundHoldUsd(config, bodyBytes.byteLength);
+  const money = moneyParams(env, holdAmount, hold);
+  const outCap = requestOutputCap(env);
+  let ticket, grant;
   if (payload.ticket !== undefined) {
-    // 同じ依頼の続き。点は使わず、札の id ごとに往復の数・本文の合計・会話のつながりを確かめる。
+    // 同じ依頼の続き。点は使わず、札の id ごとに往復の数・本文の合計・出力の合計・会話のつながりを確かめる。
     const prev = await readTicket(payload.ticket, secret);
     if (!prev || prev.count > count) return fail("ticket_invalid");
     const prefix = prev.count === count ? hash : await sha256Hex("[" + parts.slice(0, prev.count).join(",") + "]");
-    const counted = await askQuota(env, "https://ai-quota/ticket?" + new URLSearchParams({
+    const counted = await askQuota(env, "/ticket", {
       id: prev.id, exp: String(prev.exp), count: String(count), hash, bytes: String(bodyBytes.byteLength),
       prevCount: String(prev.count), prefix, max: String(prev.max), maxBytes: String(MAX_TICKET_BYTES),
-    }));
-    if (!counted || typeof counted.ok !== "boolean") return fail("quota_unavailable");
+      // 出力の合計の上限は、札に書いた値と今の設定の小さい方（札を作り変えると署名で断られる）。
+      outCap: String(Math.min(prev.out, outCap)), want: String(MAX_OUTPUT_TOKENS), ...money,
+    });
+    if (!counted) return fail("quota_unavailable");
     if (!counted.ok) {
       if (counted.reason === "unknown" || counted.reason === "mismatch") return fail("ticket_invalid");
-      if (counted.reason === "rounds" || counted.reason === "bytes") return fail("rounds_exceeded");
+      if (counted.reason === "rounds" || counted.reason === "bytes" || counted.reason === "output") return fail("rounds_exceeded");
+      if (counted.reason === "month") return fail("month_exceeded");
+      if (counted.reason === "day") return fail("quota_exceeded", { scope: "day" });
       return fail("quota_unavailable");
     }
     const left = Number(counted.left);
-    if (!Number.isFinite(left)) return fail("quota_unavailable");
-    ticket = { id: prev.id, exp: prev.exp, max: prev.max, count };
+    grant = Number(counted.grant);
+    if (!Number.isFinite(left) || !(grant >= 1)) return fail("quota_unavailable");
+    ticket = { id: prev.id, exp: prev.exp, max: prev.max, count, out: prev.out };
     headers["x-chat-rounds-left"] = String(Math.max(0, left));
   } else {
-    // 依頼の最初。点を使い、同じ書き込みで札の記録（件数・SHA-256・本文のバイト数）を作る。
+    // 依頼の最初。点を使い、同じ書き込みで札の記録（件数・SHA-256・本文のバイト数・出力の合計）を作る。
     const points = chatPoints(env);
     const limits = quotaLimits(env);
-    const who = request.headers.get("cf-connecting-ip") || "unknown";
-    ticket = { id: randomId(), exp: Date.now() + TICKET_TTL_MS, max: MAX_ROUNDS, count };
-    const taken = await askQuota(env, "https://ai-quota/take?" + new URLSearchParams({
-      cost: String(points), who, perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
+    ticket = { id: randomId(), exp: Date.now() + TICKET_TTL_MS, max: MAX_ROUNDS, count, out: outCap };
+    const taken = await askQuota(env, "/take", {
+      cost: String(points), who: whoOf(request), perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
       ticket: ticket.id, exp: String(ticket.exp), count: String(count), hash, bytes: String(bodyBytes.byteLength),
-    }));
-    if (!taken || typeof taken.ok !== "boolean") return fail("quota_unavailable");
-    if (!taken.ok) return fail("quota_exceeded", { scope: taken.scope });
+      outCap: String(outCap), want: String(MAX_OUTPUT_TOKENS), ...money,
+    });
+    if (!taken) return fail("quota_unavailable");
+    if (!taken.ok) {
+      if (taken.scope === "month") return fail("month_exceeded");
+      if (taken.scope === "total" || taken.scope === "who" || taken.scope === "day") return fail("quota_exceeded", { scope: taken.scope });
+      return fail("quota_unavailable");
+    }
+    grant = Number(taken.grant);
+    if (!(grant >= 1)) return fail("quota_unavailable");
     headers["x-chat-rounds-left"] = String(MAX_ROUNDS - 1);
-    const remaining = Number(taken.remaining);
-    if (Number.isFinite(remaining)) headers["x-chat-remaining"] = String(Math.max(0, Math.floor(remaining / points)));
+    // 「本日あと N 回」は、金額の枠で先に止まりうるときは出さない（嘘にしない）。
+    const byPoints = Math.floor(Number(taken.remaining) / points);
+    const byMoney = Math.floor(Number(taken.usdLeft) / Math.max(1, Number(money.usd)));
+    if (Number.isFinite(byPoints) && byMoney >= byPoints) headers["x-chat-remaining"] = String(Math.max(0, byPoints));
   }
   // 札は呼び出しのたびに作り直す（今回の messages の件数を入れる）。次の呼び出しはこの札で、
   // 今回の messages に足した会話を送る。古い札は件数が合わないので通らない。
   headers["x-chat-ticket"] = await signTicket(ticket, secret);
 
+  // 出力の合計の上限に近いときは、この往復の出力の上限を下げる。
+  if (grant < MAX_OUTPUT_TOKENS) {
+    bodyBytes = new TextEncoder().encode(conversationBodyText({
+      config, system: SYSTEM, tools: TOOLS, messagesJson, maxOutputTokens: Math.floor(grant),
+    }));
+  }
+
   // 3. 送る。Claude が失敗しても、使った回数は戻さない（読み取りの read-plan と同じ扱い）。
   // 失敗の返事にも札を付ける。同じ本文のやり直しは、点を使わずに札で通る（往復とバイト数は数える）。
   const started = await sendConversation({ config, body: bodyBytes, fetchImpl: deps.fetchImpl });
   // 上流の本文はそのまま出さない（鍵が混ざる恐れ・開発の都合の文言）。状態の番号だけ返す。
+  // 上流が断ったときは、費用がかかっていないとは言い切れないので仮押さえのまま残す。
   if (!started.ok) return fail("ai_upstream_error", { status: Number(started.status) || 502 }, headers);
-  return new Response(started.body, {
+  // 流しながら usage を拾い、終わったら実額で精算する（出力の合計も実際の値に直す）。
+  const body = meterStream(started.body, async (segments) => {
+    if (!segments) return;
+    let usd = 0, out = 0;
+    for (const s of segments) {
+      usd += anthropicUsageUsd({ requested: config.model, model: s.model, input: s.input,
+        cacheWrite: s.cacheWrite, cacheRead: s.cacheRead, output: s.output });
+      out += s.output;
+    }
+    await settle(env, hold, usd, out);
+  });
+  return new Response(body, {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", ...headers },
   });
@@ -401,34 +454,14 @@ function treeOk(node, depth) {
   return true;
 }
 
-// 数の持ち主（AiQuota）に聞く。返らない・例外・形が違うときは null（呼び出し側が止める）。
-async function askQuota(env, url) {
-  if (!env || !env.AI_QUOTA) return null;
-  let timer;
-  try {
-    const stub = env.AI_QUOTA.get(env.AI_QUOTA.idFromName("ai-usage"));
-    const res = await Promise.race([
-      stub.fetch(url),
-      new Promise((resolve) => { timer = setTimeout(() => resolve(null), QUOTA_TIMEOUT_MS); }),
-    ]);
-    if (!res || !res.ok) return null;
-    const data = await res.json();
-    return isObject(data) ? data : null;
-  } catch (e) {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function sha256Hex(text) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 // ── 札 ──────────────────────────────────────────────────────────────
-// 形: base64url(JSON{id, exp, max, count}) + "." + base64url(HMAC-SHA256(秘密, "chat-ticket:" + 前半))
-// count はその呼び出しの messages の件数。中身は秘密ではない。改ざんは署名で分かる。
+// 形: base64url(JSON{id, exp, max, count, out}) + "." + base64url(HMAC-SHA256(秘密, "chat-ticket:" + 前半))
+// count はその呼び出しの messages の件数。out は依頼全体の出力の合計の上限。中身は秘密ではない。改ざんは署名で分かる。
 function b64url(bytes) {
   let s = "";
   for (const b of bytes) s += String.fromCharCode(b);
@@ -481,5 +514,7 @@ async function readTicket(token, secret) {
   if (!Number.isFinite(data.exp) || data.exp <= now || data.exp > now + TICKET_TTL_MS + 60 * 1000) return null;
   if (!Number.isInteger(data.max) || data.max < 1) return null;
   if (!Number.isInteger(data.count) || data.count < 1) return null;
-  return { id: data.id, exp: data.exp, max: Math.min(data.max, MAX_ROUNDS), count: data.count };
+  // out は出力の合計の上限（この欄の無い札は、欄を足す前に出した札。既定の上限で数える）。
+  const out = Number.isInteger(data.out) && data.out >= 1 ? data.out : DEFAULT_REQUEST_OUTPUT_TOKENS;
+  return { id: data.id, exp: data.exp, max: Math.min(data.max, MAX_ROUNDS), count: data.count, out };
 }
