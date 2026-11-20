@@ -675,6 +675,10 @@ test('chat.mjs が出すもの: CHAT_SYSTEM・chatTools()', async () => {
   assert.match(m.CHAT_SYSTEM, /敷地 → 基礎 → 床（部屋）→ 壁 → 屋根 → ドア・窓・住設/);
   assert.match(m.CHAT_SYSTEM, /12 個まで/);
   assert.match(m.CHAT_SYSTEM, /Markdown の記号は使わず/);
+  // 屋根も道具で作れる(画面で作るよう頼む文は外した)。段階ごとの道具を書く
+  assert.ok(!/道具で作れない段階/.test(m.CHAT_SYSTEM));
+  for (const op of ['addRoomWalls', 'addRoof', 'placeOpening']) assert.ok(m.CHAT_SYSTEM.includes(op), op);
+  assert.ok(m.chatTools().some((t) => t.name === 'addRoof'));
   assert.ok(!/できるだけ1回の返事にまとめて/.test(m.CHAT_SYSTEM), '1回の返事に詰め込ませる文が残っている');
   assert.ok(m.CHAT_SYSTEM.includes(require('../../assets/js/chat/chat-session.js').MORE_MARK));
   // 基礎は置ける物の一覧に載り、調理台は「置けない」の文だけ

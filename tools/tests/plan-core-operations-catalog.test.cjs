@@ -45,10 +45,13 @@ test('setProps は set の形だけを載せる(props は画面用で、AI に�
   assert.deepEqual(s.required.slice().sort(), ['id', 'set']);
 });
 
-test('toClaudeTools は 8,000 文字以内で、enum と anyOf は合わせて 10 個以下', () => {
+// 道具の定義は毎回の呼び出しで送る(システムプロンプトと一緒にキャッシュされる)。2026-11-21 に、白紙から家を作る
+// 操作(addRoomWalls・placeOpening・addRoof)を足して 8,000 から 10,000 に上げた(壁を1本ずつ・扉の座標を計算して
+// 呼ぶより、往復と出力が減るため)。
+test('toClaudeTools は 10,000 文字以内で、enum と anyOf は合わせて 10 個以下', () => {
   const tools = C.toClaudeTools(deps);
   const text = JSON.stringify(tools);
-  assert.ok(text.length <= 8000, 'Claude の道具の定義が ' + text.length + ' 文字ある');
+  assert.ok(text.length <= 10000, 'Claude の道具の定義が ' + text.length + ' 文字ある');
   const n = countKeys(tools, ['enum', 'anyOf']);
   assert.ok(n <= 10, 'enum と anyOf が ' + n + ' 個ある');
   assert.equal(tools.length, C.OPERATIONS.length);
@@ -82,6 +85,9 @@ test('deps を省いても道具の定義は作れる(語彙の一覧が付か�
 const SUCCESS = [
   ['addRoom', { name: '寝室', floor: 2, x: 3000, y: 2000, w: 2000, d: 1000 }],
   ['addRoom', { x: 0, y: 0, w: 1000, d: 1000 }],
+  ['addRoomWalls', { ids: ['rm_a'], thick: 105, outerThick: 150 }],
+  ['placeOpening', { type: 'door-swing', room: 'rm_a', side: 'S', hinge: 'E', opens: 'S', offset: 100 }],
+  ['addRoof', { floor: 2, shape: 'gable', ridge: 'NS', pitch: 30, overhang: 450 }],
   ['resizeRoom', { id: 'rm_a', w: 3000 }],
   ['resizeRoom', { id: 'rm_a', x: 5000, y: 6000, d: 2000 }],
   ['renameRoom', { id: 'rm_a', name: '書斎' }],

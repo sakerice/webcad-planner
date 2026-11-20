@@ -96,6 +96,9 @@
     rotateObject: '向きを変えています',
     deleteObjects: '消しています',
     setProps: '設定を変えています',
+    addRoomWalls: '部屋を壁で囲んでいます',
+    placeOpening: '窓や扉を付けています',
+    addRoof: '屋根をかけています',
     inspect_plan: '間取りを確かめています'
   };
   var TOOL_LABEL_OTHER = '間取りを直しています';
