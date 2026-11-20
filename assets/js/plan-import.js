@@ -68,10 +68,11 @@
     fetch('/api/ai/quota').then(function (r) { return r.json(); }).then(function (q) {
       if (!q || !q.counted || q.left === null || q.left === undefined) { box.style.display = 'none'; return; }
       box.style.display = '';
+      // 尽きたときの文はサーバが付ける（今月ぶん・本日ぶんで再開の時が違う）。古いサーバは付けないので、そのときだけ手元の文。
       box.textContent = q.left > 0
         // 使う人に要るのは「あと何回できるか」だけ。上限の内訳（ひとり・全体）は運営側の事情なので出さない。
         ? '本日あと ' + q.left + ' 回 読み取れます'
-        : '本日ぶんの読み取りを使い切りました。明日またお試しください。';
+        : (typeof q.message === 'string' && q.message ? q.message : '本日ぶんの読み取りを使い切りました。明日またお試しください。');
       var run = $('plan-import-run');
       if (run && q.left <= 0) run.disabled = true;
     }).catch(function () { box.style.display = 'none'; });
@@ -903,7 +904,8 @@
       ai_truncated: '図面の情報が多く、AIの答えが途中で切れました。ページを分けて読み取ってください。',
       ai_refused: 'AIがこの図面の読み取りを断りました。間取り図のページか確かめてください。',
       ai_upstream_error: 'AI側でエラーが起きました。少し待ってからもう一度お試しください。',
-      ai_quota_exceeded: '',   // message をそのまま出す（残り回数を含むため）
+      ai_quota_exceeded: '',   // message をそのまま出す（本日ぶん・今月ぶんで文が違うため）
+      ai_quota_unavailable: 'いま AI が混み合っています。少し待ってから、もう一度お試しください。',
       invalid_request: '送った画像に問題がありました。',
       no_image: '読み取る範囲がありません。図面の部分を囲み直してください。',
       image_too_large: '図面の画像が大きすぎます。ページ数を減らすか、図面の部分だけを囲んでからお試しください。',

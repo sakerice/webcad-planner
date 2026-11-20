@@ -20,7 +20,10 @@ const ROOT = join(__dirname, '..', '..');
 const mod = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
 
 const KEY = 'sk-test-chat-secret-key';
-const SSE = 'event: message_start\ndata: {"type":"message_start"}\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n';
+// usage を載せる（Worker が流しながら拾い、仮押さえを実額で精算する。worker/ai-budget.mjs の meterStream）。
+const SSE = 'event: message_start\ndata: {"type":"message_start","message":{"model":"claude-opus-5-5","usage":{"input_tokens":100,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":1}}}\n\n'
+  + 'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":50}}\n\n'
+  + 'event: message_stop\ndata: {"type":"message_stop"}\n\n';
 
 // 本物の AiQuota を、偽の storage で動かす（札の数え方まで本物を通す）。
 async function realQuota() {
@@ -147,8 +150,8 @@ test('最初の呼び出し: 道具とシステムプロンプトを付けて1�
   const ticket = res.headers.get('x-chat-ticket');
   assert.ok(ticket && ticket.includes('.'), 'x-chat-ticket が無い');
   assert.equal(res.headers.get('x-chat-rounds-left'), '7');
-  // 1人1日 126 点、21 点使って 105 点 = あと 5 回
-  assert.equal(res.headers.get('x-chat-remaining'), '5');
+  // 1人1日 168 点、21 点使って 147 点 = あと 7 回
+  assert.equal(res.headers.get('x-chat-remaining'), '7');
   assert.equal(q.takes().length, 1);
   const take = new URL(q.takes()[0]).searchParams;
   assert.equal(take.get('cost'), '21');
@@ -192,6 +195,7 @@ test('2回呼んでも、Claude へ送る system と tools は1バイトも違�
 async function runRounds(e, fetchImpl, rounds, first = ASK) {
   let messages = first;
   const res1 = await chat({ messages }, e, fetchImpl);
+  if (res1.status === 200) await res1.clone().text();
   const out = [res1];
   let ticket = res1.headers.get('x-chat-ticket');
   for (let i = 2; i <= rounds; i++) {
@@ -199,6 +203,8 @@ async function runRounds(e, fetchImpl, rounds, first = ASK) {
     const res = await chat({ ticket, messages }, e, fetchImpl);
     out.push(res);
     if (res.status !== 200) break;
+    // 画面と同じく答えを最後まで読む（読み終えたところで精算され、出力の合計が実際の値に直る）。
+    await res.clone().text();
     ticket = res.headers.get('x-chat-ticket');
   }
   return { out, messages, ticket };
@@ -467,7 +473,7 @@ test('今日の回数を使い切ったら quota_exceeded で、Claude を呼ば
   assert.equal(res.status, 429);
   const body = await res.json();
   assert.equal(body.error, 'quota_exceeded');
-  assert.match(body.message, /使い切りました/);
+  assert.match(body.message, /本日ぶんの AI は受付を終えました。.*9時から再開します。画面の操作では引き続き作れます。/);
   assert.equal(sent.length, 3);
 });
 
