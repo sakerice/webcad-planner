@@ -126,16 +126,15 @@ test('Google の鍵が無ければ、間取り読み取りは呼ばずに 503 �
   assert.match(body.message, /wrangler secret/, '何をすればよいかが書いてあること');
 });
 
-test('OpenAI の鍵が無ければ、レンダーは呼ばずに 503', async () => {
-  const res = await post('/api/ai/render', { image: PNG, prompt: 'x' }, {});
-  assert.equal(res.status, 503);
-  assert.equal((await res.json()).error, 'ai_not_configured');
+test('未実装だったレンダーの窓口(/api/ai/render)は無い', async () => {
+  const res = await post('/api/ai/render', { image: PNG, prompt: 'x' }, { OPENAI_API_KEY: 'k' });
+  assert.equal(res.status, 404);
+  assert.equal((await res.json()).error, 'not_found');
 });
 
 test('鍵はどの応答にも出てこない', async () => {
   const env = { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-secret-value' };
   const cases = [
-    ['/api/ai/render', { image: PNG, prompt: 'x' }],
     ['/api/ai/import-plan', { image: 'こわれた' }],
   ];
   for (const [path, body] of cases) {
@@ -154,12 +153,6 @@ test('画像が data URL でなければ、モデルを呼ぶ前に 400', async 
     assert.equal(res.status, 400, JSON.stringify(image) + ' が通ってしまった');
   }
   assert.equal(called, false, '弾くべきものでモデルを呼んでいる（お金がかかる）');
-});
-
-test('レンダーは指示文が無い・長すぎるものを 400 で弾く', async () => {
-  const env = { OPENAI_API_KEY: 'k' };
-  assert.equal((await post('/api/ai/render', { image: PNG, prompt: '   ' }, env)).status, 400);
-  assert.equal((await post('/api/ai/render', { image: PNG, prompt: 'あ'.repeat(9000) }, env)).status, 400);
 });
 
 // ── 国内処理の担保 ────────────────────────────────────────────────────

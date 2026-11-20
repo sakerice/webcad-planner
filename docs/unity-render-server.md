@@ -1,5 +1,7 @@
 # Unity render server
 
+> 2026-11-20: 画面(index.html)からこのサーバーを呼ぶ処理は消した。画面の入口(接続先の欄と接続確認)は 2026-05-29 の時点で既に無く、呼ぶ関数だけが残っていた。下はサーバー側(tools/unity-render-server.cjs)の記録として残す。
+
 WebCAD can send the current plan and camera to a Unity render server. The web app is static, so Unity rendering must run on a separate machine that can start Unity in batch mode.
 
 ## Local development
