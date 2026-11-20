@@ -968,6 +968,9 @@
     var it = plan.items[before];
     if (flipX !== undefined) it.flipX = flipX;
     if (flipY !== undefined) it.flipY = flipY;
+    // 扉は閉じた状態で置く(読み取りの plan-free-apply.js と同じ。開いた扉が並ぶと間取りが読みにくく、外観では玄関が開いて見える)。
+    // 画面の道具で人が置くとき(placeItem)の既定は変えない。
+    if (/^door-|^window-door/.test(baseType)) it.doorOpenState = 'closed';
   }
 
   // 屋根をかける。画面の屋根の道具と同じ物(placeItem の roof)を置き、画面の設定欄と同じ roofType・pitch を書く。

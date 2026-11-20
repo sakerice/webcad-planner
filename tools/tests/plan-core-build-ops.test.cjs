@@ -167,6 +167,20 @@ test('placeOpening: 吊り元と開く向きは、読み取り・lint と同じ�
   assert.ok(run(walled(), [{ op: 'placeOpening', args: { type: 'window', room: 'rm_l', side: 'S', hinge: 'E' } }]).errors.length);
 });
 
+test('placeOpening: 扉と掃き出し窓は閉じた状態で置く(読み取りと同じ)。窓と、画面の道具で置く扉(placeItem)は今までどおり', () => {
+  const p = run(walled(), [
+    { op: 'placeOpening', args: { type: 'door-swing', room: 'rm_l', to: 'rm_b' } },
+    { op: 'placeOpening', args: { type: 'window-door', room: 'rm_l', side: 'S' } },
+    { op: 'placeOpening', args: { type: 'window', room: 'rm_b', side: 'S' } },
+  ]).plan;
+  const [door, wd, win] = p.items.slice(-3);
+  assert.equal(door.doorOpenState, 'closed');
+  assert.equal(wd.doorOpenState, 'closed');
+  assert.equal(win.doorOpenState, undefined);
+  const placed = run(walled(), [{ op: 'placeItem', args: { type: 'door-swing', x: 5000, y: 2000, rot: 90 } }]).plan.items.at(-1);
+  assert.equal(placed.doorOpenState, 'open', '画面の道具で置く扉の既定(開いた状態)を変えた');
+});
+
 test('placeOpening: 同じ壁の同じ所に開口が既にあれば断る', () => {
   const p = run(walled(), [{ op: 'placeOpening', args: { type: 'window', room: 'rm_l', side: 'S' } }]).plan;
   const r = run(p, [{ op: 'placeOpening', args: { type: 'window-door', room: 'rm_l', side: 'S' } }]);

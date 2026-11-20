@@ -77,7 +77,7 @@ try {
       sameData, cmp,
       wallCount: walls.length,
       walls: walls.map((w) => [w.x1, w.y1, w.x2, w.y2, w.floor, w.thick]),
-      items: items.map((it) => ({ type: it.type, cx: it.x + it.w / 2, cy: it.y + it.d / 2, w: it.w, rot: it.rot, flipX: it.flipX, flipY: it.flipY, floor: it.floor })),
+      items: items.map((it) => ({ type: it.type, cx: it.x + it.w / 2, cy: it.y + it.d / 2, w: it.w, rot: it.rot, flipX: it.flipX, flipY: it.flipY, floor: it.floor, open: it.doorOpenState })),
       roof: { x: roof.x, y: roof.y, w: roof.w, d: roof.d, floor: roof.floor, roofType: roof.roofType, pitch: roof.pitch },
       roofId: roofInData && roofInData.id,
     };
@@ -102,6 +102,8 @@ try {
   assert.equal(front.cy, 4550);
   assert.equal(front.cx, 7280);
   assert.deepEqual([front.flipX, front.flipY], [true, false]);
+  assert.equal(door.open, 'closed', '部屋のあいだの扉が閉じていない');
+  assert.equal(front.open, 'closed', '玄関ドアが閉じていない(外観で開いて見える)');
   // 2. 屋根: 画面で作った屋根と同じ欄・同じ値
   assert.deepEqual(out.cmp.roofKeys, out.cmp.screenKeys, '屋根の欄の並びが画面と違う');
   assert.deepEqual(out.cmp.ai, out.cmp.screen, '屋根の値が画面と違う');
