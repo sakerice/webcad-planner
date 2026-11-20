@@ -3,8 +3,9 @@
 //
 //   var a = ChatClaudeStream.createAssembler({onText, onThinking, onToolStart});
 //   a.push(文字列) … 届いた順に何度でも。出来事の途中で切れていてよい。
-//   a.end() → {message, error?}
+//   a.end() → {message, error?, dropped}
 //     message = {role:'assistant', content:[…ブロック], stop_reason, usage}
+//     dropped = 出力の上限で切れて外したブロックの数(下の「出力の上限で切れた返事」)
 //     error   = {code, message, type?}
 //       stream_error … SSE の error の出来事が来た(type は error.type。overloaded_error など)
 //       incomplete   … message_stop が来ないまま終わった(通信が途中で切れた)
@@ -16,6 +17,13 @@
 // 知らない種類のブロックは start の形のまま保ち、知らない delta・出来事は無視する(捨てずに読み飛ばす)。
 // tool_use の input は、ためた partial_json を content_block_stop で JSON.parse する(空なら {})。
 // push・end は例外を投げない(画面が止まらないように)。onText などの中の例外も外へ出さない。
+//
+// 出力の上限で切れた返事(stop_reason が max_tokens)
+// ------------------------------------------------------
+// 返事が上限に達すると、最後のブロックが途中で切れる。道具の入力は JSON の途中で終わり、考えは署名が付かない。
+// このときは壊れた最後のブロック(入力の読めない道具・署名の無い考え)だけを外し、完結したブロックは残す
+// (完結した道具の呼び出しは当てられる。外した数は dropped)。文の途中で切れた文のブロックは、そのまま残す。
+// max_tokens でないのに入力が読めなければ、今までどおり bad_json。
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory();
@@ -44,6 +52,7 @@
     var error = null;
     var stopped = false;
     var ended = null;
+    var broken = {};        // index → 入力の JSON が読めなかった道具
 
     function setError(code, msg, type) {
       if (error) return;
@@ -102,7 +111,8 @@
               if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('not object');
               blk.input = parsed;
             } catch (e) {
-              setError('bad_json', '道具の入力が読めません');
+              // 出力の上限で切れたかは、このあとの message_delta で分かる。ここでは印だけ付け、end で決める。
+              broken[i] = true;
             }
           }
           return;
@@ -166,6 +176,22 @@
       }
     }
 
+    // 出力の上限で切れた返事の、壊れた最後のブロックを外す。外した数を返す。
+    function dropCut() {
+      var n = 0;
+      // content_block_stop が来ないまま終わった道具(ためた入力が残っている)も、壊れた物として数える。
+      Object.keys(json).forEach(function (k) { broken[k] = true; });
+      while (content.length) {
+        var at = content.length - 1, last = content[at];
+        var cut = broken[at] || (last && last.type === 'thinking' && !last.signature);
+        if (!cut) break;
+        content.pop();
+        delete broken[at];
+        n++;
+      }
+      return n;
+    }
+
     function end() {
       if (ended) return ended;
       try { drain(true); } catch (e) { setError('bad_event', '返事を読めませんでした'); }
@@ -174,7 +200,11 @@
       for (var i = 0; i < content.length; i++) {
         if (!content[i]) { setError('bad_event', 'ブロックの番号が飛んでいます'); break; }
       }
-      ended = error ? { message: message, error: error } : { message: message };
+      var dropped = 0;
+      if (!error && message.stop_reason === 'max_tokens') dropped = dropCut();
+      // 残った壊れた入力(上限で切れた最後のブロックでない物)は、今までどおり読めない返事。
+      if (!error && Object.keys(broken).length) setError('bad_json', '道具の入力が読めません');
+      ended = error ? { message: message, error: error, dropped: dropped } : { message: message, dropped: dropped };
       return ended;
     }
 

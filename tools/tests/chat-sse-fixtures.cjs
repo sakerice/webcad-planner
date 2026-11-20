@@ -51,4 +51,33 @@ function sseFor(content, opts) {
   return s;
 }
 
-module.exports = { sseFor, eventText };
+// 出力の上限で切れた返事(stop_reason が max_tokens)。content の最後のブロックだけが途中で切れる。
+// 最後が道具なら入力の JSON を半分で切り、考えなら署名を付けずに切る。文は半分で切る。
+// opts: noBlockStop(切れたブロックの content_block_stop を出さない)、textPiece・jsonPiece は sseFor と同じ。
+function sseMaxTokens(content, opts) {
+  opts = opts || {};
+  const whole = content.slice(0, -1);
+  const last = content[content.length - 1];
+  let s = sseFor(whole, Object.assign({}, opts, { noStop: true }));
+  const index = whole.length;
+  if (last) {
+    let start;
+    if (last.type === 'text') start = { type: 'text', text: '' };
+    else if (last.type === 'thinking') start = { type: 'thinking', thinking: '', signature: '' };
+    else start = { type: 'tool_use', id: last.id, name: last.name, input: {} };
+    s += eventText('content_block_start', { type: 'content_block_start', index, content_block: start });
+    const delta = (d) => { s += eventText('content_block_delta', { type: 'content_block_delta', index, delta: d }); };
+    if (last.type === 'text') delta({ type: 'text_delta', text: last.text.slice(0, Math.ceil(last.text.length / 2)) });
+    else if (last.type === 'thinking') delta({ type: 'thinking_delta', thinking: last.thinking.slice(0, Math.ceil(last.thinking.length / 2)) });
+    else {
+      const json = JSON.stringify(last.input);
+      pieces(json.slice(0, Math.max(1, Math.floor(json.length / 2))), opts.jsonPiece).forEach((t) => delta({ type: 'input_json_delta', partial_json: t }));
+    }
+    if (!opts.noBlockStop) s += eventText('content_block_stop', { type: 'content_block_stop', index });
+  }
+  s += eventText('message_delta', { type: 'message_delta', delta: { stop_reason: 'max_tokens', stop_sequence: null }, usage: { output_tokens: 8000 } });
+  s += eventText('message_stop', { type: 'message_stop' });
+  return s;
+}
+
+module.exports = { sseFor, sseMaxTokens, eventText };

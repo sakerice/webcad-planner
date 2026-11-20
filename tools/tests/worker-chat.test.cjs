@@ -671,6 +671,15 @@ test('chat.mjs が出すもの: CHAT_SYSTEM・chatTools()', async () => {
   assert.match(m.CHAT_SYSTEM, /半間は 910mm/);
   assert.equal(JSON.stringify(m.chatTools()), JSON.stringify(m.chatTools()));
   assert.equal(m.chatTools().at(-1).name, 'inspect_plan');
+  // 大きな依頼は段階ごとに区切る。区切りで止めた印は、画面の部品(chat-session.js)が読む文字と同じ。
+  assert.match(m.CHAT_SYSTEM, /敷地 → 基礎 → 床（部屋）→ 壁 → 屋根 → ドア・窓・住設/);
+  assert.match(m.CHAT_SYSTEM, /12 個まで/);
+  assert.ok(!/できるだけ1回の返事にまとめて/.test(m.CHAT_SYSTEM), '1回の返事に詰め込ませる文が残っている');
+  assert.ok(m.CHAT_SYSTEM.includes(require('../../assets/js/chat/chat-session.js').MORE_MARK));
+  // 基礎は置ける物の一覧に載り、調理台は「置けない」の文だけ
+  const sys = m.chatSystem()[0].text;
+  assert.match(sys, /foundation = 基礎/);
+  assert.ok(!/kitchen-unit（例/.test(sys));
 });
 
 test('本文の文字列は JSON.stringify(buildConversationRequest(...)) と同じ', async () => {

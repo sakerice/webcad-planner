@@ -26,12 +26,27 @@
 //   {type:'remaining', left}       … 今日あと何回頼めるか(最初の呼び出しの返事に付いたときだけ)
 //
 // 結果:
-//   成功 {ok:true, plan: 写し, changedIds, removedIds, text, changed, warnings, rounds}
+//   成功 {ok:true, plan: 写し, changedIds, removedIds, text, changed, warnings, rounds, partial?, stop?, more?}
 //     plan は当て終えた写し。本物のプランには入れていない(入れるのは画面の側)。
 //     changedIds は写しにある、足した・変えた物の id。removedIds は元のプランにあって消した物の id
 //     (この依頼で置いてから消した物はどちらにも入らない)。changed はその合計の件数。
 //     changed が 0 なら、AI は何も変えずに返事をした(聞き返しなど)。
 //   失敗 {ok:false, reason, message} … plan は無い(写しは捨てる)。message は利用者向けの文(MESSAGES)。
+//
+// 途中で止まった依頼(partial)
+// ----------------------------
+// 白紙から家を作るような大きな依頼は、1つの依頼の上限(返事の回数・出力の合計・本文の大きさ)に届くことがある。
+// 以前はそこで写しを捨てていたので、それまでに当てた変更も残らず、履歴にも入らなかった。今は:
+//   - 返事が出力の上限で切れた(stop_reason が max_tokens)ときは、完結した道具の呼び出しだけを当て、
+//     切れた最後の1つは捨てる(claude-stream.js が外す)。最後に当てた結果に「切れた」ことを書き、続きを呼ぶ
+//     (AI は残りを小さく分けて呼び直せる)。続きを呼べない(完結した呼び出しが無い・呼べる回が無い)ときは止まる
+//   - 止まる理由が何であれ(回数・出力の合計・通信・AI の失敗など。利用者の取り消しは除く)、それまでに1つでも
+//     変えていれば、成功の結果に partial:true と stop(止まった理由)を付けて返す。画面はそれをプランに入れ、
+//     「続きを頼む」を出す。何も変えていなければ、今までどおり失敗
+//   - 途中で止まった依頼も履歴に入れる(AI の文の頭に「途中で止まりました」を付ける)。次の依頼(「続けて」)で、
+//     AI は前の依頼と、そこで止まったことを知り、今のプランの要約から続きを作れる
+//   - AI が自分で区切りのよい所で止めたときは、最後の文の末尾に MORE_MARK を書く決まり(worker/chat.mjs の
+//     CHAT_SYSTEM)。印は文から外し、more:true で知らせる(画面は同じく「続きを頼む」を出す)
 //
 // 会話の履歴は足すだけ: 1回の依頼の中では、送った messages の配列を作り直さず同じ配列に足していく。
 // 受け取った assistant の content は、そのままの物を次の呼び出しに入れる。例外は空の text ブロックだけで、
@@ -61,6 +76,13 @@
   var HISTORY_MAX = 6;             // 前の依頼のやり取りを入れる件数(直近から)
   var HISTORY_TEXT_MAX = 400;      // 前の依頼の、利用者の文と AI の文それぞれの長さ
   var BODY_MAX_BYTES = 150 * 1024; // 1回の本文の上限(Worker の 160KB より少し手前で止める)
+  // AI が区切りで止めたときに最後の文の末尾に書く印(worker/chat.mjs の CHAT_SYSTEM と同じ文字)。
+  var MORE_MARK = '［続きあり］';
+  // 途中で止まった依頼を履歴に入れるときに、AI の文の頭に付ける文(AI に渡る。利用者の画面には出さない)。
+  var PARTIAL_HISTORY_NOTE = '（この依頼は途中で止まりました。ここまでの変更はプランに入っています。残りはまだ作っていません。）';
+  // 出力の上限で切れた最後の呼び出しを捨てたことを、最後に当てた道具の結果に書く文。
+  var CUT_NOTE = 'この返事は長すぎて途中で切れました。切れた最後の道具の呼び出しは当てていません。'
+    + '残りは、1回の返事で呼ぶ道具を少なくして呼び直してください。';
 
   // 道具の名前 → 利用者向けの進み具合の文。
   var TOOL_LABELS = {
@@ -248,9 +270,10 @@
         });
       }
 
-      function runTool(block) {
+      function runTool(block, note) {
         var name = block.name, input = block.input;
         var result = function (obj, isError) {
+          if (note) obj.note = note;
           var r = { type: 'tool_result', tool_use_id: block.id, content: resultText(name === 'inspect_plan' && !isError ? 'inspect_result' : 'tool_result', obj) };
           if (isError) r.is_error = true;
           return r;
@@ -288,21 +311,38 @@
         }
       }
 
-      function finish(lastText) {
+      var lastText = '';   // ここまでに届いた AI の文のうち、最後の物(途中で止まったときに使う)
+
+      function finish(text) {
         var changedIds = Object.keys(changed).map(function (k) { return changed[k]; });
         var removedIds = Object.keys(removed).map(function (k) { return removed[k]; });
-        return { ok: true, plan: work, changedIds: changedIds, removedIds: removedIds, text: lastText,
+        var out = { ok: true, plan: work, changedIds: changedIds, removedIds: removedIds, text: text,
           changed: changedIds.length + removedIds.length, warnings: warnings, rounds: round };
+        var t = String(text || '').replace(/\s+$/, '');
+        if (t.slice(-MORE_MARK.length) === MORE_MARK) {
+          out.text = t.slice(0, -MORE_MARK.length).replace(/\s+$/, '');
+          out.more = true;
+        }
+        return out;
+      }
+      // 途中で止まった。1つでも変えていれば、ここまでを partial の成功として返す。何も変えていなければ失敗。
+      function stopped(reason) {
+        var r = finish(lastText);
+        if (!(r.changed > 0)) return failure(reason);
+        r.partial = true;
+        r.stop = reason;
+        delete r.more;
+        return r;
       }
 
       function step() {
         if (job.cancelled) return Promise.resolve(failure('cancelled'));
-        if (round >= MAX_ROUNDS) return Promise.resolve(failure('rounds_exceeded'));
+        if (round >= MAX_ROUNDS) return Promise.resolve(stopped('rounds_exceeded'));
         var body = JSON.stringify(ticket ? { ticket: ticket, messages: messages } : { messages: messages });
         if (utf8Bytes(body) > BODY_MAX_BYTES) {
           // 最初の呼び出しなら、前の依頼のやり取りを古い順に落として収める(まだ何も送っていないので変えてよい)。
           // 続きの呼び出しでは送った messages を変えられないので、依頼を終える。
-          if (round > 0) return Promise.resolve(failure('too_long'));
+          if (round > 0) return Promise.resolve(stopped('too_long'));
           while (messages.length > 1 && utf8Bytes(body) > BODY_MAX_BYTES) {
             messages.splice(0, 2);
             body = JSON.stringify({ messages: messages });
@@ -330,7 +370,7 @@
                 retried = true;
                 return step();
               }
-              return f;
+              return job.cancelled ? f : stopped(f.reason);
             });
           }
           var assembler = Stream.createAssembler({
@@ -343,27 +383,30 @@
             return { message: r.message, error: r.error || { code: 'incomplete' } };
           }).then(function (r) {
             if (job.cancelled) return failure('cancelled');
-            if (r.error) return failure(STREAM_REASONS[r.error.code] || 'bad_response');
+            if (r.error) return stopped(STREAM_REASONS[r.error.code] || 'bad_response');
             var msg = r.message;
             var stop = msg.stop_reason;
-            if (stop === 'max_tokens' || stop === 'refusal' || stop === 'pause_turn') return failure(stop);
-            if (stop === 'end_turn' || stop === 'stop_sequence') return finish(textOf(msg.content));
-            if (stop !== 'tool_use') return failure('bad_response');
+            var said = textOf(msg.content);
+            if (said) lastText = said;
+            if (stop === 'refusal' || stop === 'pause_turn') return stopped(stop);
+            if (stop === 'end_turn' || stop === 'stop_sequence') return finish(said);
+            if (stop !== 'tool_use' && stop !== 'max_tokens') return stopped('bad_response');
             var calls = msg.content.filter(function (b) { return b && b.type === 'tool_use'; });
-            if (!calls.length) return failure('bad_response');
-            // この返事のあとに呼べる回が残っていなければ、道具を当てずに終える。
-            if ((roundsLeft !== null && isFinite(roundsLeft) && roundsLeft <= 0) || round >= MAX_ROUNDS) return failure('rounds_exceeded');
+            if (!calls.length) return stopped(stop === 'max_tokens' ? 'max_tokens' : 'bad_response');
+            // この返事のあとに呼べる回が残っていなければ、道具を当てて終える(続きは呼ばない)。
+            var last = (roundsLeft !== null && isFinite(roundsLeft) && roundsLeft <= 0) || round >= MAX_ROUNDS;
             messages.push({ role: 'assistant', content: msg.content.filter(function (b) { return !isBlankText(b); }) });
             var results = [];
             for (var i = 0; i < calls.length; i++) {
               if (job.cancelled) return failure('cancelled');
-              results.push(runTool(calls[i]));
+              results.push(runTool(calls[i], stop === 'max_tokens' && r.dropped > 0 && i === calls.length - 1 ? CUT_NOTE : null));
             }
+            if (last) return stopped('rounds_exceeded');
             messages.push({ role: 'user', content: results });
             return step();
           });
         }, function () {
-          return failure(job.cancelled ? 'cancelled' : 'network');
+          return job.cancelled ? failure('cancelled') : stopped('network');
         });
       }
 
@@ -385,7 +428,11 @@
       return Promise.race([running, cancelled]).then(function (r) {
         if (current === job) current = null;
         if (job.cancelled) r = failure('cancelled');
-        if (r && r.ok) history.push({ user: text, assistant: r.text || '（文の返事はありませんでした）' });
+        if (r && r.ok) {
+          history.push({ user: text, assistant: r.partial
+            ? PARTIAL_HISTORY_NOTE + (r.text ? '\n' + r.text : '')
+            : (r.text || '（文の返事はありませんでした）') });
+        }
         return r;
       });
     }
@@ -412,5 +459,5 @@
     };
   }
 
-  return { create: create, TOOL_LABELS: TOOL_LABELS, MESSAGES: MESSAGES, MAX_ROUNDS: MAX_ROUNDS };
+  return { create: create, TOOL_LABELS: TOOL_LABELS, MESSAGES: MESSAGES, MAX_ROUNDS: MAX_ROUNDS, MORE_MARK: MORE_MARK };
 }));
