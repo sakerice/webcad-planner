@@ -10,7 +10,7 @@
 //   2. 「元に戻す」1回で依頼の前のプランに戻り、「続きを頼む」も消える
 //   3. もう一度頼んで途中で止まる → 「続きを頼む」を押すと「続けて」を新しい依頼で送る。本文の先頭に前の依頼の文と
 //      「途中で止まりました」が入っている。AI が区切りで止めた印(［続きあり］)は画面に出さず、新しい依頼の下に
-//      「続きを頼む」が出る(前の依頼のボタンは消える)
+//      「続きを頼む」が出る(前の依頼のボタンは消える)。AI の文の Markdown の太字(**)・見出し(#)は画面に出さない
 //   4. 幅 375 でも、ボタン2つがパネルの中に収まる
 //
 // 画面写真を output/test-shots/chat-partial-*.png に残す(git の管理外)。
@@ -156,7 +156,7 @@ try {
   assert.equal(mid.walls, before.walls + 2);
   await script(page, [
     ok([txt('残りの外壁を足します。'), wall('b1', 9100, 7280, 0, 7280), wall('b2', 0, 7280, 0, 0)], 'tool_use'),
-    ok([txt('外壁まで作りました。次は窓とドアです。\n［続きあり］')], 'end_turn'),
+    ok([txt('**外壁**まで作りました。\n## まだのところ\n次は窓とドアです。\n［続きあり］')], 'end_turn'),
   ]);
   const n0 = (await page.evaluate(() => window.__chat.calls.length));
   await page.locator('.chat-continue').last().click();
@@ -171,7 +171,8 @@ try {
   es = await entries(page);
   e = es[es.length - 1];
   assert.equal(e.user, '続けて');
-  assert.ok(e.ai.includes('外壁まで作りました。次は窓とドアです。'), e.ai);
+  assert.ok(e.ai.includes('外壁まで作りました。\nまだのところ\n次は窓とドアです。'), e.ai);
+  assert.ok(!/\*\*|#/.test(e.ai), 'Markdown の記号が画面に出ている: ' + e.ai);
   assert.ok(!e.ai.includes('［続きあり］'), '区切りの印が画面に出ている');
   assert.ok(e.more, 'AI が区切りで止めたのに「続きを頼む」が出ていない');
   assert.ok(!es[es.length - 2].more, '前の依頼の「続きを頼む」が残っている');

@@ -140,6 +140,12 @@
     return '本日ぶんの AI は受付を終えました。' + (jstHour < 9 ? '朝9時から再開します。' : '明日の朝9時から再開します。')
       + '画面の操作では引き続き作れます。';
   }
+  // AI の文を画面に出す前に、Markdown の太字(**…**)と行頭の見出しの印(#)を取り除く。
+  // AI には Markdown を使わないよう指示している(worker/chat.mjs)が、守られなかったときの保険。HTML としては扱わない。
+  function plainText(text) {
+    if (text === null || text === undefined) return '';
+    return String(text).replace(/\*\*([^*\n]+?)\*\*/g, '$1').replace(/^([ \t]*)#{1,6}[ \t]+/gm, '$1');
+  }
   function failure(reason) {
     var message = reason === 'quota_exceeded' ? dayLimitMessage(Date.now()) : MESSAGES[reason];
     return { ok: false, reason: reason, message: message || MESSAGES.failed };
@@ -459,5 +465,5 @@
     };
   }
 
-  return { create: create, TOOL_LABELS: TOOL_LABELS, MESSAGES: MESSAGES, MAX_ROUNDS: MAX_ROUNDS, MORE_MARK: MORE_MARK };
+  return { create: create, TOOL_LABELS: TOOL_LABELS, MESSAGES: MESSAGES, MAX_ROUNDS: MAX_ROUNDS, MORE_MARK: MORE_MARK, plainText: plainText };
 }));

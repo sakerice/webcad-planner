@@ -686,3 +686,15 @@ test('依頼の文は 300 字まで。超えたら送らずに request_too_long(
   assert.equal(fetch.calls.length, 0);
   assert.equal((await s.send('😀'.repeat(300))).ok, true);
 });
+
+test('plainText: AI の文から Markdown の太字(**)と行頭の見出し(#)を取り除く。ほかの文字は変えない', () => {
+  const P = Session.plainText;
+  assert.equal(P('**今回できたこと**\n- **敷地**：東西13m'), '今回できたこと\n- 敷地：東西13m');
+  assert.equal(P('## まだのところ\n# 壁\n1. 屋根'), 'まだのところ\n壁\n1. 屋根');
+  assert.equal(P('  ### 見出し'), '  見出し');
+  // 対になっていない * や、文の途中の # はそのまま
+  assert.equal(P('2*3 の部屋、#12 の壁'), '2*3 の部屋、#12 の壁');
+  assert.equal(P('<b>そのまま</b>'), '<b>そのまま</b>');
+  assert.equal(P(''), '');
+  assert.equal(P(null), '');
+});

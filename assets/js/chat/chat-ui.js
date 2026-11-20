@@ -195,10 +195,11 @@
   }
 
   // ── 一覧の描画 ─────────────────────────────────────────────────────
-  // AI が区切りで止めた印(ChatSession.MORE_MARK)は画面に出さない。
+  // AI が区切りで止めた印(ChatSession.MORE_MARK)と、Markdown の太字・見出しの印(ChatSession.plainText)は画面に出さない。
   function stripMark(text) {
-    var mark = root.ChatSession && root.ChatSession.MORE_MARK;
-    var t = String(text || '');
+    var CS = root.ChatSession;
+    var mark = CS && CS.MORE_MARK;
+    var t = CS && CS.plainText ? CS.plainText(text) : String(text || '');
     if (!mark) return t;
     return t.split(mark).join('').replace(/\s+$/, '');
   }
