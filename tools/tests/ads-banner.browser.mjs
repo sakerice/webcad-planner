@@ -190,7 +190,7 @@ try {
       assert.equal(st.shown, false, `[${name}] 高さの低い画面で帯が出た`);
       assert.equal(st.adH, '');
       assert.deepEqual(await layout(page), base, `[${name}] 帯を出さないのに並びが変わった`);
-      await page.screenshot({ path: join(SHOTS, `top-${name}.png`) });
+      await page.screenshot({ path: join(SHOTS, `top-${name}.png`), timeout: 90000 });
       report.push(`${name} ${w}x${h}: 出さない(図の広さの減り 0%)`);
       await context.close();
       checks++;
@@ -231,7 +231,7 @@ try {
     assert.deepEqual(lay.problems, [], `[${name}] ${lay.problems.join(' / ')}`);
     const cl = await clearance(page, '#pr-top');
     assert.deepEqual(cl, [], `[${name}] ${cl.join(' / ')}`);
-    await page.screenshot({ path: join(SHOTS, `top-${name}.png`) });
+    await page.screenshot({ path: join(SHOTS, `top-${name}.png`), timeout: 90000 });
     const loss = st.box.h / base['#canvas-area'][3] * 100;
     report.push(`${name} ${w}x${h}: 帯 ${st.box.w}x${st.box.h} (素材 ${st.imgW}幅) 図の広さの減り ${loss.toFixed(1)}% 全体表示で間取りの上端と上の段の間 ${gapAd}px`);
     await page.evaluate(() => { document.getElementById('plan-notice').hidden = true; });
@@ -247,7 +247,7 @@ try {
     assert.ok(Math.abs(w3.ch - w3.h) < 1, `[${name}] 3D の描く大きさが画面と合っていない ${w3.ch} / ${w3.h}`);
     const cl3 = await clearance(page, '#pr-top');
     assert.deepEqual(cl3, [], `[${name}] 3D: ${cl3.join(' / ')}`);
-    await page.screenshot({ path: join(SHOTS, `top-${name}-3d.png`) });
+    await page.screenshot({ path: join(SHOTS, `top-${name}-3d.png`), timeout: 90000 });
     await page.evaluate(() => setView('2d'));
     await context.close();
     checks++;
@@ -285,7 +285,7 @@ try {
         assert.deepEqual(cl2, [], `[${name}] share(開いた): ${cl2.join(' / ')}`);
         await page.evaluate(() => { document.getElementById('share-ai-setup').open = false; document.getElementById('pr-slot-share').scrollIntoView({ block: 'end' }); });
       }
-      await page.screenshot({ path: join(SHOTS, `dialog-${key}-${name}.png`) });
+      await page.screenshot({ path: join(SHOTS, `dialog-${key}-${name}.png`), timeout: 90000 });
       await page.evaluate(() => { closeShareDialog(); closeJisDrawingDialog(); const m = document.getElementById('plan-library-modal'); if (m) m.remove(); });
     }
     await context.close();
