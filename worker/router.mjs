@@ -9,16 +9,35 @@ import { handlesAi, handleAi } from "./routes-ai.mjs";
 import { handlesMcp, handleMcp } from "./mcp.mjs";
 import { handlesCspReport, handleCspReport } from "./csp-report.mjs";
 
+// /api/ の応答に X-Content-Type-Options: nosniff を付ける。_headers の見出しは静的アセットにしか付かず、
+// Worker が返す応答には付かないため。WebSocket への切り替え(101)はそのまま返す。
+// Durable Object から返った応答は見出しを書き換えられないので、写しを作って付ける。
+export function withNosniff(res) {
+  if (!(res instanceof Response) || res.status === 101 || res.webSocket) return res;
+  try {
+    res.headers.set("x-content-type-options", "nosniff");
+    return res;
+  } catch {
+    const copy = new Response(res.body, res);
+    copy.headers.set("x-content-type-options", "nosniff");
+    return copy;
+  }
+}
+
+async function route(request, env, url) {
+  if (handlesRooms(url.pathname)) return handleRooms(request, env, url);
+  if (handlesAi(url.pathname)) return handleAi(request, env, url);
+  // 外の AI(MCP)の受け口。/mcp でないのは run_worker_first が /api/* だけのため(worker/mcp.mjs の冒頭)。
+  if (handlesMcp(url.pathname)) return handleMcp(request, env);
+  // CSP の「報告だけ」の違反の報告(_headers)。ログに決まりと先の種類だけ出す(worker/csp-report.mjs の冒頭)。
+  if (handlesCspReport(url.pathname)) return handleCspReport(request);
+  return json({ error: "not_found" }, 404);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
-    if (handlesRooms(url.pathname)) return handleRooms(request, env, url);
-    if (handlesAi(url.pathname)) return handleAi(request, env, url);
-    // 外の AI(MCP)の受け口。/mcp でないのは run_worker_first が /api/* だけのため(worker/mcp.mjs の冒頭)。
-    if (handlesMcp(url.pathname)) return handleMcp(request, env);
-    // CSP の「報告だけ」の違反の報告(_headers)。ログに決まりと先の種類だけ出す(worker/csp-report.mjs の冒頭)。
-    if (handlesCspReport(url.pathname)) return handleCspReport(request);
-    return json({ error: "not_found" }, 404);
+    return withNosniff(await route(request, env, url));
   },
 };
