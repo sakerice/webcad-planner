@@ -2299,6 +2299,21 @@ var StorageAdapter = (function(){
   // 起動時の復元で形をそろえて何かを捨てたとき、元の中身を1度だけ写しておく鍵(backupOnce)
   var BACKUP_KEY='webcad-plan-v1-before-tidy';
   var LEGACY_LS_KEY='webcad-plan-v1';
+  // 共同編集の部屋のプランは、部屋ごとの別の枠に置く(ROOM_PREFIX + 部屋の id)。自分の「前回のプラン」(KEY)は、部屋にいる間は書かない。
+  // 枠の一覧(ROOM_INDEX_KEY)は [{roomId, at(このブラウザで最後に保存した時刻), name}] の JSON の文字。
+  // 溜まり続けないよう、最後に保存した時刻の新しい ROOM_KEEP 個だけ残し、それより古い部屋の枠は消す(saveRoom のたび)。
+  // 部屋の本体はクラウドにあり(最後の更新から 60 日)、この枠はこのブラウザの写し。
+  var ROOM_PREFIX='webcad-room-', ROOM_INDEX_KEY='webcad-room-index', ROOM_KEEP=5;
+  // 前回のプラン(KEY)を最後に保存した時刻。部屋の枠の時刻と比べ、このブラウザで最後に使ったのが共同編集かを見る(savedAt)。
+  // この欄を足す前に保存したプランには無い(0 として扱う)。
+  var SAVED_AT_KEY='webcad-plan-v1-at';
+  function roomIndexFrom(raw){
+    var list=[];
+    try{ list=raw?JSON.parse(raw):[]; }catch(e){ list=[]; }
+    if(!Array.isArray(list)) list=[];
+    return list.filter(function(r){ return r&&typeof r.roomId==='string'&&/^[A-Za-z0-9_-]{22}$/.test(r.roomId); })
+      .sort(function(a,b){ return (Number(b.at)||0)-(Number(a.at)||0); });
+  }
   function serialize(data){ return JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;}); }
   function legacyGet(){ try{ var s=localStorage.getItem(LEGACY_LS_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
   function openDB(){
@@ -2315,7 +2330,9 @@ var StorageAdapter = (function(){
       var json=serialize(data);
       return openDB().then(function(db){
         return new Promise(function(resolve,reject){
-          var r=store(db,'readwrite').put(json,KEY);
+          var s=store(db,'readwrite');
+          var r=s.put(json,KEY);
+          try{ s.put(Date.now(),SAVED_AT_KEY); }catch(e){}
           r.onsuccess=function(){ try{ localStorage.removeItem(LEGACY_LS_KEY); }catch(e){} resolve(true); };
           r.onerror=function(){ reject(r.error); };
         });
@@ -2359,6 +2376,61 @@ var StorageAdapter = (function(){
           };
         });
       }).catch(function(){ return false; });
+    },
+    // 部屋のプランを、その部屋の枠へ保存する。枠の一覧の時刻と名前を更新し、新しい ROOM_KEEP 個より古い部屋の枠を消す。
+    // 保存できたかは取引の完了(oncomplete)で決める(容量の超過は取引の中止で出るため)。
+    saveRoom: function(roomId, data){
+      if(!/^[A-Za-z0-9_-]{22}$/.test(String(roomId||''))) return Promise.reject(new Error('room id'));
+      var json=serialize(data);
+      var name=String((data&&data.planName)||'').slice(0,80);
+      return openDB().then(function(db){
+        return new Promise(function(resolve,reject){
+          var t;
+          try{ t=db.transaction(STORE,'readwrite'); }catch(e){ reject(e); return; }
+          var s=t.objectStore(STORE);
+          t.oncomplete=function(){ resolve(true); };
+          t.onabort=function(){ reject(t.error||new Error('保存できませんでした')); };
+          s.put(json,ROOM_PREFIX+roomId);
+          var idx=s.get(ROOM_INDEX_KEY);
+          idx.onsuccess=function(){
+            var list=roomIndexFrom(idx.result).filter(function(r){ return r.roomId!==roomId; });
+            list.unshift({roomId:roomId,at:Date.now(),name:name});
+            list.slice(ROOM_KEEP).forEach(function(r){ s.delete(ROOM_PREFIX+r.roomId); });
+            s.put(JSON.stringify(list.slice(0,ROOM_KEEP)),ROOM_INDEX_KEY);
+          };
+        });
+      });
+    },
+    // 部屋の枠のプラン(無ければ null)
+    loadRoom: function(roomId){
+      return openDB().then(function(db){
+        return new Promise(function(resolve){
+          var r=store(db,'readonly').get(ROOM_PREFIX+String(roomId||''));
+          r.onsuccess=function(){ if(!r.result){ resolve(null); return; } try{ resolve(JSON.parse(r.result)); }catch(e){ resolve(null); } };
+          r.onerror=function(){ resolve(null); };
+        });
+      }).catch(function(){ return null; });
+    },
+    // 部屋の枠の一覧(新しい順。[{roomId, at, name}])
+    listRooms: function(){
+      return openDB().then(function(db){
+        return new Promise(function(resolve){
+          var r=store(db,'readonly').get(ROOM_INDEX_KEY);
+          r.onsuccess=function(){ resolve(roomIndexFrom(r.result)); };
+          r.onerror=function(){ resolve([]); };
+        });
+      }).catch(function(){ return []; });
+    },
+    ROOM_KEEP: ROOM_KEEP,
+    // 前回のプランを最後に保存した時刻(無ければ 0)
+    savedAt: function(){
+      return openDB().then(function(db){
+        return new Promise(function(resolve){
+          var r=store(db,'readonly').get(SAVED_AT_KEY);
+          r.onsuccess=function(){ resolve(Number(r.result)||0); };
+          r.onerror=function(){ resolve(0); };
+        });
+      }).catch(function(){ return 0; });
     },
     hasData: function(){
       return openDB().then(function(db){
@@ -2482,16 +2554,31 @@ function planTidyNoticeText(lost){
   return '開けない部分が '+lost+' 個あったため、その部分を除いて開きました。';
 }
 // 画面の上に出す1行の知らせ。閉じるボタンか 12 秒で消える。
-var PLAN_NOTICE_TIMER=null;
-function showPlanNotice(text){
+// action(省略可)は {label, run}。知らせの中にボタンを1つ出し、押すと run を呼ぶ(押したあとも知らせは残す)。
+// ボタンのある知らせは、押す前に消えないよう 30 秒にする。
+var PLAN_NOTICE_TIMER=null, PLAN_NOTICE_ONCLOSE=null;
+function showPlanNotice(text,action){
   if(typeof document==='undefined') return;
   var box=document.getElementById('plan-notice');
   if(!box) return;
   var t=document.getElementById('plan-notice-text');
   if(t) t.textContent=text;
+  var b=document.getElementById('plan-notice-action');
+  if(b){
+    b.hidden=!action;
+    b.textContent=action?action.label:'';
+    b.onclick=action?function(){ try{ action.run(); }catch(e){ console.warn('[WebCAD] 知らせのボタン',e); } }:null;
+  }
+  PLAN_NOTICE_ONCLOSE=(action&&action.onClose)||null;
   box.hidden=false;
   clearTimeout(PLAN_NOTICE_TIMER);
-  PLAN_NOTICE_TIMER=setTimeout(hidePlanNotice,12000);
+  PLAN_NOTICE_TIMER=setTimeout(hidePlanNotice,action?30000:12000);
+}
+// 知らせの「×」。action.onClose があれば呼んでから閉じる(時間で消えたときは呼ばない)
+function closePlanNotice(){
+  var f=PLAN_NOTICE_ONCLOSE; PLAN_NOTICE_ONCLOSE=null;
+  if(f){ try{ f(); }catch(e){} }
+  hidePlanNotice();
 }
 function hidePlanNotice(){
   clearTimeout(PLAN_NOTICE_TIMER);

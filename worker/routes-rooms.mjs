@@ -5,6 +5,7 @@
 // /api/rooms/:id/socket GET    WebSocket をつなぐ
 // /api/rooms/:id/update POST   差分を送る
 // /api/rooms/:id/save   POST   手動保存
+// /api/rooms/:id/ai-edits POST 外の AI からの変更を止める・受け付ける({off})
 //
 // ルームの実体は Durable Object (worker/collab-room.mjs) なので、ここは
 // ルームIDを検め、正しい Durable Object へ渡すところまでを受け持つ。
@@ -29,7 +30,7 @@ export async function handleRooms(request, env, url) {
     return createRoom(request, env);
   }
 
-  const match = url.pathname.match(/^\/api\/rooms\/([A-Za-z0-9_-]+)(\/socket|\/update|\/save)?$/);
+  const match = url.pathname.match(/^\/api\/rooms\/([A-Za-z0-9_-]+)(\/socket|\/update|\/save|\/ai-edits)?$/);
   if (!match || !ROOM_ID_RE.test(match[1])) return json({ error: "not_found" }, 404);
   const roomId = match[1];
   const action = match[2] || "/plan";

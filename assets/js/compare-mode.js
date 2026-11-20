@@ -14,7 +14,8 @@
 var CompareMode = (function(){
   // 作業面ごとに入れ替える全体の変数。ST はこの項目だけ（ツールや吸着の設定は左右で共通）
   // PLAN_LIBRARY_ID / PLAN_SAVE_INFO は「ブラウザのどこに保存した物か」（plan-library.js）
-  var GLOBALS = ['DATA','HISTORY','REDO_HISTORY','DIRTY','nextId','PLAN_LIBRARY_ID','PLAN_SAVE_INFO'];
+  // STORAGE_FROM_ROOM は「部屋から来たプランか」(index.html。保存の前に確かめるか)
+  var GLOBALS = ['DATA','HISTORY','REDO_HISTORY','DIRTY','nextId','PLAN_LIBRARY_ID','PLAN_SAVE_INFO','STORAGE_FROM_ROOM'];
   // 3D の場面と、組み立てのたびに作り直す作業用の変数・間取りから求めた値の控え。
   // 左右それぞれが自分の場面(sc3)を持ち、描くときと組み立てるときに入れ替える（描画の窓 ren は1つ）
   var SCENE_GLOBALS = ['sc3','_skyMesh','_gndMesh','_doorAnims','_fmpInstancePools','_downspoutRegistry',
@@ -86,7 +87,7 @@ var CompareMode = (function(){
   function saveLine(i){
     var info = saveInfo(i);
     if(!info) return 'ブラウザ: まだ保存していません';
-    var where = info.where==='list' ? '一覧「'+(info.name||'名前なし')+'」' : '前回のプラン';
+    var where = info.where==='list' ? '一覧「'+(info.name||'名前なし')+'」' : info.where==='room' ? '共同編集' : '前回のプラン';
     if(isDirty(i)) return 'ブラウザ: '+where+'に保存後、変更あり';
     return 'ブラウザ: '+where+'に保存済み'+(info.at ? '（'+PlanLibrary.nowLabel(info.at)+'）' : '');
   }
@@ -310,7 +311,7 @@ var CompareMode = (function(){
     panes[0] = capture();
     // 右の作業面: Undo の履歴は空から。中身は読み込みと同じ手順で整える
     panes[1] = {g:Object.assign(freshSceneState(), {DATA:planB, HISTORY:[], REDO_HISTORY:[], DIRTY:false, nextId:1,
-        PLAN_LIBRARY_ID:from.libId||null, PLAN_SAVE_INFO:from.libId ? {where:'list', name:from.name, at:null} : null}),
+        PLAN_LIBRARY_ID:from.libId||null, PLAN_SAVE_INFO:from.libId ? {where:'list', name:from.name, at:null} : null, STORAGE_FROM_ROOM:false}),
       needsBuild:true,
       v:Object.assign({}, panes[0].v, {selected:null, multiSelected:[], selectAll:false, drawing:false, drawPts:[]})};
     on = true; active = 0;
@@ -523,7 +524,7 @@ var CompareMode = (function(){
   api.swapGlobals = function(){ return GLOBALS.slice(); };
   api.freshWorkspace = function(){
     return Object.assign(freshSceneState(), {DATA:null, HISTORY:[], REDO_HISTORY:[], DIRTY:false, nextId:window.nextId,
-      PLAN_LIBRARY_ID:null, PLAN_SAVE_INFO:null});
+      PLAN_LIBRARY_ID:null, PLAN_SAVE_INFO:null, STORAGE_FROM_ROOM:false});
   };
   return api;
 })();

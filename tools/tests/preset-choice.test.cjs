@@ -41,7 +41,8 @@ test('ダイアログは既定間取りで始まる起動にだけ出る(作業�
 });
 
 test('起動の流れ(共同編集→保存復元→既定)の最後に選択が挟まっている', () => {
-  const at = html.indexOf('maybeOfferPresetChoice();');
+  // 起動の流れの中の呼び出しを見る(部屋に入れなかったとき選ぶ画面を出し直す呼び出しは、起動の流れより前に書かれている)
+  const at = html.indexOf('maybeOfferPresetChoice();', html.indexOf('initSharedRoomFromUrl().then('));
   assert.notEqual(at, -1, '起動時に maybeOfferPresetChoice が呼ばれていない');
   const around = html.slice(at - 300, at);
   assert.match(around, /initSharedRoomFromUrl/, '共同編集の判定より前に出てしまう');
