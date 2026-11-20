@@ -24,7 +24,7 @@
 //
 // 道具
 // ----
-// 段3の操作 10 個（assets/js/plan-core/operations-catalog.js の toMcpTools に、対象のルームを指す必須の
+// 段3の操作 10 個と、白紙から作る操作 3 つ（addRoomWalls・placeOpening・addRoof。assets/js/plan-core/operations-catalog.js の toMcpTools に、対象のルームを指す必須の
 // 引数 plan を足した物）と、create_plan・open_plan・get_plan・inspect_plan。操作の引数の検査（checkArgs・
 // 大きさの上限）はルームの側（/op）が行う。ここでは plan を外した残りをそのまま渡す。
 //

@@ -141,6 +141,41 @@
       description: '物・壁・部屋の設定を変える。set に書ける項目は物の種類で決まり、カタログの家具・照明など set を受け付けない種類もある。'
         + '範囲の外の数は端に寄せて warnings に書く。',
       inputSchema: obj({ id: ID, set: SET }, ['id', 'set'])
+    },
+    {
+      name: 'addRoomWalls',
+      description: '部屋（ids）か多角形（points と floor）の外周に壁を作る。既にある壁と重なる区間と、隣の部屋と共有する辺の二重の壁は作らない。'
+        + '他の部屋と接する辺は thick、外に面する辺は outerThick（省くと thick。どちらも省くと 120）。',
+      inputSchema: obj({
+        ids: { type: 'array', items: ID, description: '部屋の id の配列' },
+        points: { type: 'array', items: obj({ x: n('x'), y: n('y') }, ['x', 'y']), description: '多角形の頂点（mm）' },
+        floor: FLOOR,
+        thick: n('間仕切りの厚さ（mm）'), outerThick: n('外周の厚さ（mm）')
+      })
+    },
+    {
+      name: 'placeOpening',
+      description: '窓・扉を、部屋 room と部屋 to の共有する壁の上、または room の side（N/E/S/W）の外壁の上に置く（to は省くか "outside"）。'
+        + '壁が無ければ失敗する。既定は壁の中央。offset は北か西の端から開口の端までの距離（mm）。'
+        + 'hinge は吊元の側（壁に沿う向き）、opens は開く側（壁と直角の向き）。どちらも N/E/S/W で、開き戸・玄関ドア・折戸だけ。',
+      inputSchema: obj({
+        type: str('窓・扉の種類（置ける物の種類の一覧の窓・扉）'),
+        room: ID, to: str('隣の部屋の id か "outside"'), side: str('N/E/S/W'),
+        width: n('開口の幅（mm）。省くと種類の既定'), offset: n('端からの距離（mm）'),
+        hinge: str('N/E/S/W'), opens: str('N/E/S/W')
+      }, ['type', 'room'])
+    },
+    {
+      name: 'addRoof',
+      description: '屋根をかける（画面の屋根の道具と同じ物）。floor は屋根が載る階。範囲 x,y,w,d（中心と大きさ）を省くと、その階の壁の外周'
+        + '（長方形でなければ失敗するので、部分ごとに範囲を渡す）。overhang（軒の出 mm、省くと 450）を四方に足す。'
+        + 'shape: gable（切妻。ridge=EW/NS、省くと長い辺に沿う）/ hip（寄棟・方形）/ hip-ridge / hip-ridge-long（大棟あり）/ flat（陸屋根）/ mono（片流れ。low=低い側 N/E/S/W）。'
+        + 'pitch は勾配（度、5〜60。省くと 30）。同じ範囲に屋根があれば失敗する。',
+      inputSchema: obj({
+        floor: FLOOR, shape: str('屋根の形'), ridge: str('EW か NS'), low: str('N/E/S/W'),
+        pitch: n('勾配（度）'), overhang: n('軒の出（mm）'),
+        x: n('中心の x（mm）'), y: n('中心の y（mm）'), w: n('東西の幅（mm）'), d: n('南北の奥行き（mm）')
+      }, ['floor', 'shape'])
     }
   ];
 
@@ -238,7 +273,7 @@
   ];
   // 画面の道具で人が置けて、AI の ctx も受け付けるが、一覧に載せない種類と、その理由。
   var UNLISTED = {
-    roof: '屋根は勾配や形を渡す欄が無く、置いても形を決められない。屋根の操作は別に足す',
+    roof: '屋根は addRoof でかける(形・勾配・向きを渡せる)',
     'custom-block': '利用者が形と寸法を決める任意の箱で、形を渡す欄が無い',
     memo: '図面への書き込みで、建物の物ではない',
     washer: '古い種類名。洗濯機は分類 laundry で置く',
@@ -312,7 +347,7 @@
       'ロックされた物は変えられない。',
       '',
       '## 置ける物の種類（placeItem の type）',
-      '- 窓・扉（中心を壁の芯の上に置く。吊元と開く向きは指定できない）:'
+      '- 窓・扉（中心を壁の芯の上に置く。placeItem では吊元と開く向きは指定できないので、部屋の壁に付けるときは placeOpening を使う）:'
     ];
     (settable.OPENINGS || []).forEach(function (o) { rows.push('  ' + o.type + ' = ' + o.ja + '（' + o.what + '）'); });
     rows.push('- 階段:');
