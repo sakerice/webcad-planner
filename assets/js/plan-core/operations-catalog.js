@@ -212,11 +212,48 @@
   // 家具・設備の分類のうち、placeItem の type に出さないもの。
   //   fence: アプリの種類名 fence(ブロック塀)と同じ綴りで取り違えるため。フェンスは wood-fence で置く。
   //   other: 何にも当たらない受け皿。
-  var SKIP_KINDS = { fence: true, other: true };
+  //   kitchen-unit: 調理台は部品の台を並べて作る物で、1つの物としては置けない(画面のチャットの ctx も Worker の ctx も断る)。
+  //     一覧には載せず、作り方の文(KITCHEN_UNIT_LINE)だけを書く。2026-11-20 まで載っていて、置こうとすると断られていた。
+  var SKIP_KINDS = { fence: true, other: true, 'kitchen-unit': true };
+  var KITCHEN_UNIT_LINE = '  調理台（kitchen-unit）は1つの物としては置けない。流し（kitchen-sink）・コンロ（cooktop）・'
+    + '引出しの台（original-kitchen-box-drawer600 など。幅は 450・600・750・900）を横に並べて作る。';
   var STAIRS = [
     { type: 'stair', ja: '階段の直進部', what: 'w は幅、d は上る方向の長さ' },
-    { type: 'stair-corner', ja: '階段の曲がる部分', what: 'w・d は一辺' }
+    { type: 'stair-corner', ja: '階段の曲がる部分', what: 'w・d は一辺' },
+    { type: 'stair-landing', ja: '階段の踊り場', what: '平らな床の段。w・d は一辺' }
   ];
+  // 組み込みの種類のうち、PlanSettable の表(窓・扉・外構・敷地)と家具・設備の分類のどちらにも無い物。
+  // 画面の道具で人が置ける物は、AI にも置けるよう一覧に載せる(載せない物は下の UNLISTED に理由を書く)。
+  // tools/tests/plan-vocabulary-match.test.cjs が、画面の道具と突き合わせる。
+  var BUILTINS = [
+    { group: '構造', type: 'foundation', ja: '基礎', what: '建物の下の基礎。1階の外壁の外周に合わせた長方形で置く。w は東西、d は南北の長さ' },
+    { group: '構造', type: 'column', ja: '柱（角）', what: 'w・d は断面' },
+    { group: '構造', type: 'column-round', ja: '柱（丸）', what: 'w は直径' },
+    { group: '外まわりの設備', type: 'sewer-pit', ja: '桝', what: '汚水・雨水の点検口。地面に置く' },
+    { group: '外まわりの設備', type: 'downspout', ja: '縦樋', what: '雨樋の縦の管。外壁の角の外側に置く' },
+    { group: '敷地のまわり', type: 'road', ja: '道路', what: '敷地の外の道路。w は長さ、d は幅' },
+    { group: '敷地のまわり', type: 'utility-pole', ja: '電柱', what: '' },
+    { group: '敷地のまわり', type: 'neighbor-house', ja: '隣の家', what: '敷地の外の建物' },
+    { group: '敷地のまわり', type: 'neighbor-building', ja: '隣のビル', what: '敷地の外の建物' }
+  ];
+  // 画面の道具で人が置けて、AI の ctx も受け付けるが、一覧に載せない種類と、その理由。
+  var UNLISTED = {
+    roof: '屋根は勾配や形を渡す欄が無く、置いても形を決められない。屋根の操作は別に足す',
+    'custom-block': '利用者が形と寸法を決める任意の箱で、形を渡す欄が無い',
+    memo: '図面への書き込みで、建物の物ではない',
+    washer: '古い種類名。洗濯機は分類 laundry で置く',
+    'futon_set': '古い種類名。布団は分類 bedding で置く',
+    tree: '古い種類名。庭木は分類 garden-plant で置く',
+    'bicycle-fold': '自転車は bicycle で置く',
+    'shelf-built-in': '造作棚は分類 shelf で置く',
+    'light-ceiling': '照明は分類 light で置く',
+    'light-down': '照明は分類 light で置く',
+    'light-spot': '照明は分類 light で置く',
+    'ac-outdoor': '室外機は分類 utility-equipment で置く',
+    'water-heater': '給湯器は分類 utility-equipment で置く',
+    'gas-heater': '給湯器は分類 utility-equipment で置く',
+    'meter-box': 'メーターは分類 utility-equipment で置く'
+  };
 
   function knowledgeKinds(knowledge) {
     var K = (knowledge && knowledge.KNOWLEDGE) || {};
@@ -285,11 +322,17 @@
       var what = stripFace(e.what);
       rows.push('  ' + e.type + ' = ' + e.ja + (what ? '（' + what + '）' : ''));
     });
+    var group = null;
+    BUILTINS.forEach(function (b) {
+      if (b.group !== group) { group = b.group; rows.push('- ' + group + ':'); }
+      rows.push('  ' + b.type + ' = ' + b.ja + (b.what ? '（' + b.what + '）' : ''));
+    });
     rows.push('- 家具・設備（分類名）:');
     rows.push('  ' + knowledgeKinds(deps.knowledge).map(function (k) {
       var size = K[k] && K[k].size && K[k].size.what ? '（例 ' + K[k].size.what + '）' : '';
       return k + size;
     }).join(', '));
+    rows.push(KITCHEN_UNIT_LINE);
     rows.push('');
     rows.push('## set に書ける項目（setProps と placeItem の set。{項目: 値} の形）');
     rows.push('ここに無い種類（カタログの家具・設備、照明など）は set を受け付けない。');
@@ -306,9 +349,7 @@
     var settable = deps && deps.settable;
     if (!settable) return '';
     if (name === 'placeItem') {
-      var types = (settable.OPENINGS || []).map(function (o) { return o.type; })
-        .concat(STAIRS.map(function (s) { return s.type; }))
-        .concat(exteriorTypes(settable).map(function (e) { return e.type; }));
+      var types = builtinTypes(settable);
       var kinds = knowledgeKinds(deps.knowledge);
       return '\n種類: ' + types.join(', ') + (kinds.length ? '\n家具・設備の分類: ' + kinds.join(', ') : '');
     }
@@ -323,6 +364,19 @@
       }).join(' / ');
     }
     return '';
+  }
+
+  // 一覧に載せる組み込みの種類(窓・扉 → 階段 → 外構・敷地 → BUILTINS の順)。
+  function builtinTypes(settable) {
+    return (settable.OPENINGS || []).map(function (o) { return o.type; })
+      .concat(STAIRS.map(function (s) { return s.type; }))
+      .concat(exteriorTypes(settable).map(function (e) { return e.type; }))
+      .concat(BUILTINS.map(function (b) { return b.type; }));
+  }
+  // AI に見せる「置ける物の種類」の全部(組み込みの種類と、家具・設備の分類名)。検査が受け付ける側と突き合わせる。
+  function listedTypes(deps) {
+    deps = deps || {};
+    return builtinTypes(deps.settable || {}).concat(knowledgeKinds(deps.knowledge));
   }
 
   function toolDescription(op, deps) {
@@ -346,6 +400,8 @@
     checkArgs: checkArgs,
     toClaudeTools: toClaudeTools,
     toMcpTools: toMcpTools,
-    describeVocabulary: describeVocabulary
+    describeVocabulary: describeVocabulary,
+    listedTypes: listedTypes,
+    UNLISTED: UNLISTED
   };
 }));

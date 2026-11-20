@@ -15,6 +15,11 @@
 // 依頼の始め(ChatSession が getPlan を呼んだとき)の印と、取り込む直前の印を比べて見つける。
 //
 // やり取りの一覧はページを開いている間だけ持つ(閉じて開き直すと見える。保存はしない)。
+//
+// 大きな依頼の続き: ChatSession が「途中で止まった」(partial)か「AI が区切りで止めた」(more)を返したら、
+// ここまでの変更をいつもどおりプランに入れ(「元に戻す」1回で全部戻る)、その依頼の下に「続きを頼む」を出す。
+// 押すと「続けて」を送る(前の依頼は ChatSession の履歴に入っているので、AI は続きから作る)。
+// 「続きを頼む」は最後の依頼にだけ出し、次の依頼を始めたとき・「元に戻す」を押したときに消す。
 (function (root) {
   'use strict';
 
@@ -26,6 +31,9 @@
   var UNDO_BLOCKED_MESSAGE = 'そのあとにプランが変わったため、元に戻せませんでした。';
   var DRAGGING_MESSAGE = '動かしている途中です。動かし終えてから送ってください。';
   var NO_TEXT = '（文の返事はありませんでした）';
+  var PARTIAL_NOTE = 'ここまで作ったところで止まりました。作った分はプランに入れてあります。「続きを頼む」で続きを作れます。';
+  var CONTINUE_LABEL = '続きを頼む';
+  var CONTINUE_TEXT = '続けて';
   var UNDONE_NOTE = '元に戻しました';
   var THINKING = '考えています…';
   var TAGS_WAITING = '家具の一覧を読み込んでいます…';
@@ -41,7 +49,7 @@
     session: null,     // ChatSession(初めて開いたときに作る)
     open: false,
     busy: false,
-    entries: [],       // やり取りの一覧 {kind:'chat'|'note', user, ai, status, undoable, note, cancelled}
+    entries: [],       // やり取りの一覧 {kind:'chat'|'note', user, ai, status, undoable, continuable, note, cancelled}
     current: null,     // 依頼中のやり取り
     fp: null,          // 依頼の始めの本物のプランの印
     undo: null,        // 最後に取り込んだ依頼の取り消しの印 {len, top, fp, entry}
@@ -187,6 +195,14 @@
   }
 
   // ── 一覧の描画 ─────────────────────────────────────────────────────
+  // AI が区切りで止めた印(ChatSession.MORE_MARK)と、Markdown の太字・見出しの印(ChatSession.plainText)は画面に出さない。
+  function stripMark(text) {
+    var CS = root.ChatSession;
+    var mark = CS && CS.MORE_MARK;
+    var t = CS && CS.plainText ? CS.plainText(text) : String(text || '');
+    if (!mark) return t;
+    return t.split(mark).join('').replace(/\s+$/, '');
+  }
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -252,11 +268,22 @@
     if (e.note) ai.appendChild(el('span', 'chat-ai-undone', e.note));
     ai.hidden = !(e.ai || e.note);
     box.appendChild(ai);
+    var row = null;
+    if (e.undoable || e.continuable) {
+      row = el('div', 'chat-actions');
+      box.appendChild(row);
+    }
+    if (e.continuable) {
+      var c = el('button', 'pbtn chat-continue', CONTINUE_LABEL);
+      c.type = 'button';
+      c.addEventListener('click', function () { continueEntry(e); });
+      row.appendChild(c);
+    }
     if (e.undoable) {
       var u = el('button', 'pbtn sec chat-undo', '元に戻す');
       u.type = 'button';
       u.addEventListener('click', function () { undoEntry(e); });
-      box.appendChild(u);
+      row.appendChild(u);
     }
   }
   function updateEntry(e) {
@@ -266,8 +293,9 @@
   // 届いている途中の AI の文だけを書き換える。
   function updateStreamingText(e) {
     if (!e.textNode) { updateEntry(e); return; }
-    e.textNode.textContent = e.ai;
-    if (e.textNode.parentNode) e.textNode.parentNode.hidden = !e.ai;
+    var shown = stripMark(e.ai);
+    e.textNode.textContent = shown;
+    if (e.textNode.parentNode) e.textNode.parentNode.hidden = !shown;
     scrollLog();
   }
 
@@ -380,6 +408,8 @@
       return;
     }
     var session = ensureSession();
+    // 前の依頼の「続きを頼む」は、新しい依頼を始めたら消す(続きはいちばん新しい依頼にだけ頼める)。
+    S.entries.forEach(function (x) { if (x.continuable) { x.continuable = false; updateEntry(x); } });
     var entry = { kind: 'chat', user: text, ai: '', status: 'pending' };
     S.entries.push(entry);
     S.current = entry;
@@ -407,7 +437,10 @@
         r = { ok: false, reason: 'cancelled', message: M.cancelled };
       }
       if (r.ok) {
-        var text = entry.ai.replace(/\s+$/, '') || r.text || NO_TEXT;
+        var text = stripMark(entry.ai) || r.text || (r.partial ? '' : NO_TEXT);
+        // 途中で止まった依頼は、AI の文(あれば)のあとに、止まったことと続きの頼み方を書く。
+        if (r.partial) text = (text ? text + '\n' : '') + PARTIAL_NOTE;
+        var more = !!(r.partial || r.more);
         if (r.changed > 0) {
           // 新しく取り込む前に、前の「元に戻す」を片付ける(古いボタンで新しい取り込みを戻さないように)。
           dropUndo();
@@ -416,6 +449,7 @@
             entry.ai = text;
             entry.status = 'done';
             entry.undoable = true;
+            entry.continuable = more;
             S.undo.entry = entry;
             startUndoWatch();
           } else {
@@ -427,6 +461,7 @@
         } else {
           entry.ai = text;
           entry.status = 'done';
+          entry.continuable = more;
         }
       } else {
         // 失敗の文は部品の文そのまま。途中まで届いた AI の文は、変わっていない間取りを「直した」と読めるので出さない。
@@ -551,9 +586,16 @@
     dropUndo();
     call('undoAction');
     entry.undoable = false;
+    entry.continuable = false;
     entry.note = UNDONE_NOTE;
     updateEntry(entry);
     announce(UNDONE_NOTE);
+  }
+
+  // 「続きを頼む」: 「続けて」を送る。ボタンは押したら消す(送った依頼が終われば、必要なら新しい依頼の下にまた出る)。
+  function continueEntry(entry) {
+    if (S.busy || !entry.continuable) return;
+    sendChat(CONTINUE_TEXT);
   }
 
   // ── 図面の画像 ─────────────────────────────────────────────────────
