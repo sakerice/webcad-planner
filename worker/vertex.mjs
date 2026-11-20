@@ -115,7 +115,7 @@ export async function generate({ config, system, text, docs, image, images, maxO
       const err = JSON.parse(raw);
       message = (err.error && err.error.message) || message;
     } catch { /* 本文が JSON でないことがある */ }
-    return { ok: false, status: response.status, message };
+    return { ok: false, unbilled: true, status: response.status, message };
   }
 
   let parsed;

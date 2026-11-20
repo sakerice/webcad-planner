@@ -258,6 +258,38 @@ try {
   await page2.locator('#plan-import-run').click();
   await page2.waitForFunction(() => window.__seen.some((u) => u.includes('/api/ai/import-plan')), null, { timeout: 5000 });
   await page2.close();
+
+  // ── 見直しが上限で断られても、最初の答えのまま先へ進める（2026-11 月の金額の枠） ──
+  const page3 = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const errors3 = [];
+  page3.on('pageerror', (e) => errors3.push(e.message));
+  await openWithPng(page3);
+  await page3.evaluate((answer) => {
+    const text = JSON.stringify(answer);
+    const ev = (o) => 'event: ' + o.type + '\ndata: ' + JSON.stringify(o) + '\n\n';
+    let body = ev({ type: 'message_start', message: { usage: { input_tokens: 6000 } } });
+    for (let i = 0; i < text.length; i += 200) body += ev({ type: 'content_block_delta', index: 1, delta: { type: 'text_delta', text: text.slice(i, i + 200) } });
+    body += ev({ type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 3000 } });
+    window.__asked = [];
+    window.fetch = async (url) => {
+      const u = String(url);
+      window.__asked.push(u);
+      if (u.includes('/api/ai/quota')) return new Response(JSON.stringify({ left: null, counted: false }));
+      if (u.includes('/api/ai/read-plan')) return new Response(body, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+      if (u.includes('/api/ai/review-plan-3d')) {
+        return new Response(JSON.stringify({ error: 'ai_quota_exceeded', limit: 'day', scope: 'day',
+          message: '本日ぶんの AI は受付を終えました。明日の朝9時から再開します。画面の操作では引き続き作れます。' }), { status: 429 });
+      }
+      return new Response('{}', { status: 404 });
+    };
+  }, ANSWER);
+  await page3.locator('#plan-import-run').click();
+  await page3.waitForSelector('#plan-import-step3', { state: 'visible', timeout: 20000 });
+  assert.ok((await page3.evaluate(() => window.__asked)).some((u) => u.includes('/api/ai/review-plan-3d')), '見直しを頼んでいない');
+  assert.match(await page3.textContent('#plan-import-summary'), /壁 4 \/ 部屋 2/, '見直しが断られたあと、最初の答えで下書きができていない');
+  assert.equal(await page3.isDisabled('#plan-import-apply'), false, '取り込めない');
+  assert.deepEqual(errors3, []);
+  await page3.close();
   console.log('plan-import-stream: ok');
 } finally {
   await browser.close();
