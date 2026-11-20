@@ -679,6 +679,14 @@ test('chat.mjs が出すもの: CHAT_SYSTEM・chatTools()', async () => {
   assert.ok(!/道具で作れない段階/.test(m.CHAT_SYSTEM));
   for (const op of ['addRoomWalls', 'addRoof', 'placeOpening']) assert.ok(m.CHAT_SYSTEM.includes(op), op);
   assert.ok(m.chatTools().some((t) => t.name === 'addRoof'));
+  // 順番どおりでない頼まれ方: 頼まれたことを先に。土台が無ければ足りない物と次の一手を伝える。最後に次の段階を1つだけ勧める
+  assert.match(m.CHAT_SYSTEM, /頼まれたことを先に行ってください/);
+  assert.match(m.CHAT_SYSTEM, /何が足りないかと、次に頼むとよいことを1〜2文で/);
+  assert.match(m.CHAT_SYSTEM, /次に勧める段階として1つだけ/);
+  // 土台が無くて頼みを果たせなかったときは、決まった順の次の段階でなく、頼みにいちばん近い不足を勧める
+  assert.match(m.CHAT_SYSTEM, /頼みを果たせなかったときは、「次の段階の目安」ではなく、その頼みを果たすのにいちばん近い不足/);
+  assert.match(m.CHAT_SYSTEM, /家具なら部屋、窓や扉なら部屋と壁/);
+  assert.match(m.CHAT_SYSTEM, /進み具合（プランから数えた値）/);
   assert.ok(!/できるだけ1回の返事にまとめて/.test(m.CHAT_SYSTEM), '1回の返事に詰め込ませる文が残っている');
   assert.ok(m.CHAT_SYSTEM.includes(require('../../assets/js/chat/chat-session.js').MORE_MARK));
   // 基礎は置ける物の一覧に載り、調理台は「置けない」の文だけ

@@ -1,6 +1,7 @@
 // プランの検査をまとめて行う。チャットの AI と ChatGPT(MCP)の「検査」の道具が使う。
 //
-// 既にある検査3つを束ねるだけで、検査の中身はここに書かない:
+// 既にある検査3つと、家づくりの段階の不足(PlanCoreProgress.progressIssues、assets/js/plan-core/progress.js)を
+// 束ねるだけで、検査の中身はここに書かない:
 //   PlanSchema.validatePlan     assets/js/plan-schema.js    形(型・必須の欄・id の重複)
 //   PlanCheck.knowledgeWarnings  assets/js/plan-check.js     物の置かれ方の知識(浴槽が浴室に無い など)
 //   PlanStructure.floorsOverlap  assets/js/plan-structure.js 上下の階が同じ位置に積まれているか
@@ -20,6 +21,7 @@
       if (name === 'PlanSchema') return require('../plan-schema.js');
       if (name === 'PlanCheck') return require('../plan-check.js');
       if (name === 'PlanStructure') return require('../plan-structure.js');
+      if (name === 'PlanCoreProgress') return require('./progress.js');
       return null;
     });
   } else {
@@ -72,6 +74,16 @@
         }
       } catch (e) {
         errors.push('階の重なりの検査の途中で誤りが起きました: ' + errorText(e));
+      }
+      // 家づくりの段階で足りない所(壁で囲まれていない部屋・外に出る扉が無い・屋根が無い・窓の無い居室)。
+      // 形や置かれ方の誤りではないので warnings に入れる(plan-core/progress.js)。
+      var progress = deps.progress || find('PlanCoreProgress');
+      if (progress && typeof progress.stageProgress === 'function') {
+        try {
+          progress.progressIssues(progress.stageProgress(plan)).forEach(function (w) { warnings.push(w); });
+        } catch (e) {
+          errors.push('段階の出来具合の検査の途中で誤りが起きました: ' + errorText(e));
+        }
       }
     }
 

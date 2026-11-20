@@ -117,10 +117,13 @@
         inspectPlan: function (plan) { return root.PlanCoreInspect.inspectPlan(plan, { defaults: g('ISIZES') }); }
       },
       summarize: function (plan) {
+        var PG = root.PlanCoreProgress;
         return root.ChatPlanSummary.summarize(plan, {
           selectedIds: selectedIds(),
           labelOf: function (t) { return typeof root.itemTypeLabel === 'function' ? root.itemTypeLabel(t) : t; },
-          kindOf: kindOf
+          kindOf: kindOf,
+          // 段階ごとの出来具合(分類が引けないうちは、住設・家具の行は出ない)
+          progressLines: PG ? PG.progressLines(PG.stageProgress(plan, { kindOf: g('CATALOGUE_TAGS') ? kindOf : null })) : []
         });
       },
       onEvent: onEvent,
