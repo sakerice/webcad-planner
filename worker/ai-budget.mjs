@@ -132,7 +132,8 @@ export async function reserve(request, env, { points, usd, minUsd, extra }) {
   if (!data.ok) {
     if (data.scope === "month") return { ok: false, kind: "month", scope: "month" };
     if (data.scope === "busy" || data.scope === "pending") return { ok: false, kind: "busy", scope: data.scope };
-    if (data.scope === "total" || data.scope === "who" || data.scope === "day") return { ok: false, kind: "day", scope: data.scope };
+    // spent … その人の1日の使用額（精算した額）が上限を超えた。その人だけ「本日ぶん」
+    if (data.scope === "total" || data.scope === "who" || data.scope === "day" || data.scope === "spent") return { ok: false, kind: "day", scope: data.scope };
     return { ok: false, kind: "unavailable" };
   }
   return { ok: true, hold, holdUsd: usd, remaining: Number(data.remaining), usdLeft: Number(data.usdLeft), raw: data };

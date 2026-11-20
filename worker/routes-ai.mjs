@@ -158,7 +158,7 @@ async function aiQuota(env, request) {
   const seen = await askQuota(env, "/take", {
     cost: "0", peek: "1", who: whoOf(request),
     perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
-    ...moneyParams(env, 0, ""),
+    ...moneyParams(env, 0, "", { who: whoOf(request) }),
   });
   // 数えられなかったことを「残り0回」と言わない（画面がボタンを閉じてしまう）。
   if (!seen || seen.scope !== "peek") return json(hidden);
@@ -167,7 +167,8 @@ async function aiQuota(env, request) {
   if (Number(seen.monthLeft) < min) {
     return json({ ...hidden, left: 0, counted: true, limit: "month", message: MONTH_LIMIT_MESSAGE });
   }
-  if (Number(seen.dayLeft) < min) {
+  // その人の1日の使用額が上限を超えていれば、その人には「本日ぶん」（画面の残りの表示を断り方と合わせる）。
+  if (Number(seen.dayLeft) < min || seen.spentOver === true) {
     return json({ ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() });
   }
   // 残りを回数にする。1回ぶんに満たない端数は切り捨てる。

@@ -79,11 +79,14 @@ export function jevLimits(env) {
 //   hold:<id>                            仮押さえ。精算で消える。精算されなければ額はそのまま残る（安全側）
 //   pend:<UTCの日付>:<人>                 その人の、その日の「精算されずに残った額」（見積もりで精算した額と、
 //                                        精算されないまま期限の過ぎた仮押さえ）。1日の額の上限の 1/3 を超えると、その人だけ断る
+//   spent:<UTCの日付>:<人>                その人の、その日の使用額（これまでに精算した額）。1日の額の上限の 1/3 を超えると、
+//                                        その人だけ「本日ぶん」で断る。仮押さえの大きさでは断らない（大きな1回は通し、次から断る）
 // 月の区切りは日本時間の暦月（来月1日の0時に戻る）。
 const MONTH_PREFIX = "usd-month:";
 const DAY_PREFIX = "usd-day:";
 const HOLD_PREFIX = "hold:";
 const PEND_PREFIX = "pend:";
+const SPENT_PREFIX = "spent:";
 const DEFAULT_DAY_MIN = 4000000;   // 1日の額の上限の下限 $4（worker/ai-price.mjs の DEFAULT_DAILY_BUDGET_MIN_USD）
 const HOLD_ID_RE = /^[A-Za-z0-9_-]{16,64}$/;
 // 精算されない仮押さえの記録を消すまでの時間。消しても額は戻さない（使われたものとして残す）。
@@ -201,7 +204,7 @@ export class AiQuota {
       return this.reply({ ok: leftTotal > 0 && leftMine > 0, scope: "peek",
         limit: perDay, remaining: Math.min(leftMine, leftTotal),
         totalLimit: totalPerDay, totalRemaining: leftTotal,
-        ...(budget ? { monthLeft: budget.monthLeft, dayLeft: budget.dayLeft } : {}) });
+        ...(budget ? { monthLeft: budget.monthLeft, dayLeft: budget.dayLeft, spentOver: budget.spent > budget.pendCap } : {}) });
     }
     // 月の枠を先に見る。月が尽きているのに「明日また」と言わないため。
     if (budget && money.usd > budget.monthLeft) return this.reply({ ok: false, scope: shortScope(budget.monthLeft, money, "month") });
@@ -211,6 +214,7 @@ export class AiQuota {
     if (mine + cost > perDay) {
       return this.reply({ ok: false, scope: "who", limit: perDay, remaining: leftMine });
     }
+    if (budget && budget.spent > budget.pendCap) return this.reply({ ok: false, scope: "spent" });
     if (budget && budget.pend > budget.pendCap) return this.reply({ ok: false, scope: "pending" });
     if (budget && money.usd > budget.dayLeft) return this.reply({ ok: false, scope: shortScope(budget.dayLeft, money, "day") });
 
@@ -245,7 +249,8 @@ export class AiQuota {
     const monthKey = MONTH_PREFIX + month;
     const dayKey = `${DAY_PREFIX}${day}:${month}`;
     const pendKey = `${PEND_PREFIX}${day}:${money.who}`;
-    const got = await this.state.storage.get([monthKey, dayKey, pendKey]);
+    const spentKey = `${SPENT_PREFIX}${day}:${money.who}`;
+    const got = await this.state.storage.get([monthKey, dayKey, pendKey, spentKey]);
     const monthUsed = Number(got.get(monthKey) || 0);
     const dayUsed = Number(got.get(dayKey) || 0);
     // 1日の額の上限は、その日の始まりの時点の月の残りから決める（その日のうちに上限が動かないように）。
@@ -259,6 +264,7 @@ export class AiQuota {
       dayLeft: Math.max(0, dayCap - dayUsed),
       pend: Number(got.get(pendKey) || 0),
       pendCap: Math.floor(dayCap / 3),
+      spent: Number(got.get(spentKey) || 0),
     };
   }
 
@@ -290,12 +296,16 @@ export class AiQuota {
     const exact = p.get("exact") !== "0";
     const pendKey = !exact && rec.who ? `${PEND_PREFIX}${rec.day}:${rec.who}` : null;
     if (pendKey) keys.push(pendKey);
+    // その人の、その日の使用額（精算した額。見積もりで精算した額も含む）。
+    const spentKey = rec.who ? `${SPENT_PREFIX}${rec.day}:${rec.who}` : null;
+    if (spentKey) keys.push(spentKey);
     const got = await this.state.storage.get(keys);
     const delta = usd - Number(rec.usd || 0);
     const writes = {};
     if (got.has(monthKey)) writes[monthKey] = Math.max(0, Number(got.get(monthKey)) + delta);
     if (got.has(dayKey)) writes[dayKey] = Math.max(0, Number(got.get(dayKey)) + delta);
     if (pendKey && usd > 0) writes[pendKey] = Number(got.get(pendKey) || 0) + usd;
+    if (spentKey && usd > 0) writes[spentKey] = Number(got.get(spentKey) || 0) + usd;
     const out = intParam(p, "out");
     const t = ticketKey ? got.get(ticketKey) : null;
     if (t && out !== null) writes[ticketKey] = { ...t, out: Math.max(0, Number(t.out || 0) - Number(rec.out || 0) + out) };
@@ -414,6 +424,7 @@ export class AiQuota {
     }
     const budget = money ? await this.readBudget(now, money) : null;
     if (budget && money.usd > budget.monthLeft) return this.reply({ ok: false, reason: shortScope(budget.monthLeft, money, "month") });
+    if (budget && budget.spent > budget.pendCap) return this.reply({ ok: false, reason: "spent" });
     if (budget && budget.pend > budget.pendCap) return this.reply({ ok: false, reason: "pending" });
     if (budget && money.usd > budget.dayLeft) return this.reply({ ok: false, reason: shortScope(budget.dayLeft, money, "day") });
     const n = used + 1;

@@ -214,7 +214,7 @@ export async function handleChat(request, env, deps = {}) {
       if (counted.reason === "unknown" || counted.reason === "mismatch") return fail("ticket_invalid");
       if (counted.reason === "rounds" || counted.reason === "bytes" || counted.reason === "output") return fail("rounds_exceeded");
       if (counted.reason === "month") return fail("month_exceeded");
-      if (counted.reason === "day") return fail("quota_exceeded", { scope: "day" });
+      if (counted.reason === "day" || counted.reason === "spent") return fail("quota_exceeded", { scope: counted.reason });
       // busy（大きな往復だけが額の枠に入らない）・pending（この人の精算されずに残った額が上限を超えた）も「混み合っています」
       return fail("quota_unavailable");
     }
@@ -236,7 +236,7 @@ export async function handleChat(request, env, deps = {}) {
     if (!taken) return fail("quota_unavailable");
     if (!taken.ok) {
       if (taken.scope === "month") return fail("month_exceeded");
-      if (taken.scope === "total" || taken.scope === "who" || taken.scope === "day") return fail("quota_exceeded", { scope: taken.scope });
+      if (taken.scope === "total" || taken.scope === "who" || taken.scope === "day" || taken.scope === "spent") return fail("quota_exceeded", { scope: taken.scope });
       return fail("quota_unavailable");
     }
     grant = Number(taken.grant);

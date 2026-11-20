@@ -40,7 +40,7 @@ export const OTHER_PRICE = UNKNOWN_PRICE;
 // やり直しの先は、Claude Opus 5.5 では claude-opus-5 と claude-opus-4-8 だけ（Anthropic の移行の手引き
 // 「the permitted fallback targets are claude-opus-4-8 and claude-opus-5」、2026-11-20 に Skill claude-api で確かめた）。
 // どちらに行くかは断られた種類で決まり、公表されていないので、仮押さえは2つの高い方の単価で取る。
-// 途中で断られた試行（それまでの入力と出力）も、やり直しの試行も、それぞれ課金されうるので、仮押さえは両方を足す。
+// 途中で断られた試行とやり直しの試行は、それぞれ課金されうる（仮押さえは1回分。下の holdUsd の割り切りを見ること）。
 export const FALLBACK_MODELS = Object.freeze(["claude-opus-5", "claude-opus-4-8"]);
 const FALLBACK_PRICE = maxOf(FALLBACK_MODELS.map((m) => PRICES[m]));
 
@@ -75,15 +75,18 @@ export function imageTokens(images) {
 }
 
 // 仮押さえの額（米ドル）。入力は全部「キャッシュ書き込み」の単価（入力より高い）で、出力は上限まで出たとして数える。
-// Claude は「頼んだモデルでの試行」＋「別のモデルでのやり直し」の2回分。表に無いモデルは、どちらも表のいちばん高い単価。
-// OpenAI・Vertex（other）はやり直しをしないので1回分。
+// 仮押さえは1回分。単価は「頼んだモデル」と「切り替わりうる先」（FALLBACK_MODELS）の高い方。表に無いモデルは、
+// 表のいちばん高い単価。OpenAI・Vertex（other）は表のいちばん高い単価。
+// 割り切り: 途中で断られて別のモデルでやり直すと2回分課金されうるが、2回分を仮押さえすると1日の額の上限
+// （月初め約 $5.3）に読み取りが2回ほどしか入らず、普通の利用が止まる。そこで仮押さえは1回分にし、2回分
+// 課金されたときは精算で usage どおりの実額（2回分）を月と日に足す。仮押さえを超えた分で枠をはみ出すのは、
+// 同時に走っている要求の分だけ（1日の額の上限以内）なので、月の枠 $80 と $100 の間の余裕で受ける。
 export function holdUsd({ model, inputTokens, maxOutputTokens, other }) {
   const input = Math.min(MAX_INPUT_TOKENS, Math.max(0, Number(inputTokens) || 0) + OVERHEAD_TOKENS);
   const out = Math.max(0, Number(maxOutputTokens) || 0);
-  const attempt = (p) => (input * Math.max(p.in, p.cacheWrite) + out * p.out) / 1e6;
-  if (other) return attempt(OTHER_PRICE);
   const own = priceOf(model);
-  return attempt(own) + attempt(own === UNKNOWN_PRICE ? UNKNOWN_PRICE : FALLBACK_PRICE);
+  const p = other ? OTHER_PRICE : (own === UNKNOWN_PRICE ? UNKNOWN_PRICE : maxOf([own, FALLBACK_PRICE]));
+  return (input * Math.max(p.in, p.cacheWrite) + out * p.out) / 1e6;
 }
 
 // 1回分の入力だけの額（途中で切れたとき、入力の実数が分からなければこれで数える）。
@@ -132,7 +135,8 @@ export function toMicro(usd) {
 // 1日の額の上限 = min(月の残り, max(下限, min(天井, 2 × その日の始まりの時点の月の残り ÷ 月の残り日数（その日を含む））))。
 // 月の初めは 1日 $5.3 ほど。前半で使われなかった分は後半へ回り、1日で月の枠を使い切られない。
 // 下限は、月の後半に1日の上限が見直し1回の仮押さえを下回り、見直しだけが毎日断られるのを防ぐため。
-// 1人の1日の「精算されずに残った額」（途中で切れて見積もりで精算した額など）の上限は、1日の額の上限の 1/3。
+// 1人の1日の「精算されずに残った額」（途中で切れて見積もりで精算した額など）の上限と、1人の1日の使用額
+// （これまでに精算した額）の上限は、どちらも1日の額の上限の 1/3。
 export const DEFAULT_MONTHLY_BUDGET_USD = 80;
 export const DEFAULT_DAILY_BUDGET_MAX_USD = 8;
 export const DEFAULT_DAILY_BUDGET_MIN_USD = 4;
