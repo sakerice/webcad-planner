@@ -29,7 +29,7 @@ import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { json } from "./shared.mjs";
 import { anthropicConfig, conversationBodyText, sendConversation } from "./anthropic.mjs";
 import { quotaLimits } from "./ai-quota.mjs";
-import { askQuota, settle, meterStream, moneyParams, whoOf, randomId as holdId, dayLimitMessage, MONTH_LIMIT_MESSAGE, BUSY_MESSAGE } from "./ai-budget.mjs";
+import { askQuota, settle, meterStream, streamCharge, moneyParams, whoOf, randomId as holdId, dayLimitMessage, MONTH_LIMIT_MESSAGE, BUSY_MESSAGE } from "./ai-budget.mjs";
 import { holdUsd, textTokens, anthropicUsageUsd } from "./ai-price.mjs";
 import Guard from "../assets/js/chat/plan-summary.js";
 import { CHAT_INPUT_RULES } from "./ai-rules.mjs";
@@ -148,6 +148,20 @@ function roundHoldUsd(config, bodyBytes) {
   return holdUsd({ model: config.model, inputTokens: textTokens(bodyBytes), maxOutputTokens: MAX_OUTPUT_TOKENS });
 }
 
+// いちばん小さな依頼（短い文1つのチャット1往復）の仮押さえの額。「今月ぶん」「本日ぶん」と言い切ってよいかの目安
+// （これも入らないときだけ言い切る。worker/ai-quota.mjs の shortScope）。モデルごとに1回だけ計算する。
+const minHoldCache = new Map();
+export function minChatHoldUsd(env) {
+  const config = chatConfig(env);
+  if (!minHoldCache.has(config.model)) {
+    const bytes = new TextEncoder().encode(conversationBodyText({
+      config, system: SYSTEM, tools: TOOLS, messagesJson: JSON.stringify([{ role: "user", content: "x" }]), maxOutputTokens: MAX_OUTPUT_TOKENS,
+    })).byteLength;
+    minHoldCache.set(config.model, roundHoldUsd(config, bytes));
+  }
+  return minHoldCache.get(config.model);
+}
+
 export async function handleChat(request, env, deps = {}) {
   // 1. 読む・確かめる・送る文字列を作る。ここまでは点も札の回数も使わない。
   const read = await readBody(request);
@@ -181,7 +195,7 @@ export async function handleChat(request, env, deps = {}) {
   const headers = { "cache-control": "no-store" };
   const hold = holdId();
   const holdAmount = roundHoldUsd(config, bodyBytes.byteLength);
-  const money = moneyParams(env, holdAmount, hold);
+  const money = moneyParams(env, holdAmount, hold, { minUsd: minChatHoldUsd(env), who: whoOf(request) });
   const outCap = requestOutputCap(env);
   let ticket, grant;
   if (payload.ticket !== undefined) {
@@ -201,6 +215,7 @@ export async function handleChat(request, env, deps = {}) {
       if (counted.reason === "rounds" || counted.reason === "bytes" || counted.reason === "output") return fail("rounds_exceeded");
       if (counted.reason === "month") return fail("month_exceeded");
       if (counted.reason === "day") return fail("quota_exceeded", { scope: "day" });
+      // busy（大きな往復だけが額の枠に入らない）・pending（この人の精算されずに残った額が上限を超えた）も「混み合っています」
       return fail("quota_unavailable");
     }
     const left = Number(counted.left);
@@ -214,7 +229,7 @@ export async function handleChat(request, env, deps = {}) {
     const limits = quotaLimits(env);
     ticket = { id: randomId(), exp: Date.now() + TICKET_TTL_MS, max: MAX_ROUNDS, count, out: outCap };
     const taken = await askQuota(env, "/take", {
-      cost: String(points), who: whoOf(request), perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
+      cost: String(points), perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
       ticket: ticket.id, exp: String(ticket.exp), count: String(count), hash, bytes: String(bodyBytes.byteLength),
       outCap: String(outCap), want: String(MAX_OUTPUT_TOKENS), ...money,
     });
@@ -243,23 +258,31 @@ export async function handleChat(request, env, deps = {}) {
     }));
   }
 
-  // 3. 送る。Claude が失敗しても、使った回数は戻さない（読み取りの read-plan と同じ扱い）。
-  // 失敗の返事にも札を付ける。同じ本文のやり直しは、点を使わずに札で通る（往復とバイト数は数える）。
+  // 3. 送る。Claude が失敗しても、使った点は戻さない（読み取りの read-plan と同じ扱い）。
+  // 失敗の返事にも札を付ける。同じ本文のやり直しは、点を使わずに札で通る（往復・バイト数・出力の合計は数える）。
+  // 上流が 2xx 以外を返したときは、額と札の出力の合計を 0 で精算する（生成が始まっていないので課金されない、
+  // という前提）。やり直しは札の往復の上限（8回）と出力の合計の上限の中でだけできるので、この抜け道は広がらない。
+  const startedAt = Date.now();
+  const inputTokens = textTokens(bodyBytes.byteLength);
   const started = await sendConversation({ config, body: bodyBytes, fetchImpl: deps.fetchImpl });
-  // 上流の本文はそのまま出さない（鍵が混ざる恐れ・開発の都合の文言）。状態の番号だけ返す。
-  // 上流が断ったときは、費用がかかっていないとは言い切れないので仮押さえのまま残す。
-  if (!started.ok) return fail("ai_upstream_error", { status: Number(started.status) || 502 }, headers);
-  // 流しながら usage を拾い、終わったら実額で精算する（出力の合計も実際の値に直す）。
-  const body = meterStream(started.body, async (segments) => {
-    if (!segments) return;
-    let usd = 0, out = 0;
-    for (const s of segments) {
-      usd += anthropicUsageUsd({ requested: config.model, model: s.model, input: s.input,
-        cacheWrite: s.cacheWrite, cacheRead: s.cacheRead, output: s.output });
-      out += s.output;
+  // 上流の本文はそのまま出さない（鍵が混ざる恐れ・開発の都合の文言）。状態の番号だけ返し、元の文はログにだけ出す。
+  if (!started.ok) {
+    console.log(JSON.stringify({ ai_upstream_error: { where: "chat", status: Number(started.status) || 0,
+      message: String(started.message || "").slice(0, 300) } }));
+    if (started.unbilled) {
+      await settle(env, hold, 0, 0, true);
+    } else {
+      const c = streamCharge({ requested: config.model, done: false, segments: [], elapsedMs: Date.now() - startedAt,
+        maxOutputTokens: grant, inputTokens });
+      await settle(env, hold, c.usd, c.out, false);
     }
-    await settle(env, hold, usd, out);
-  });
+    return fail("ai_upstream_error", { status: Number(started.status) || 502 }, headers);
+  }
+  // 流しながら usage を拾い、終わったら実額で精算する（出力の合計も実際の値に直す）。途中で切れたら見積もりで。
+  const body = meterStream(started.body, async ({ done, segments, elapsedMs }) => {
+    const c = streamCharge({ requested: config.model, done, segments, elapsedMs, maxOutputTokens: grant, inputTokens });
+    await settle(env, hold, c.usd, c.out, c.exact);
+  }, { waitUntil: deps.waitUntil });
   return new Response(body, {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", ...headers },

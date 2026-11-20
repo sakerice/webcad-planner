@@ -9,7 +9,7 @@
 //   - env.AI_QUOTA が無いときは、手元の開発のホスト（localhost・127.0.0.1・*.localhost・*.test）だけ
 //     数えずに通す（手元の検査のため）。それ以外のホストで束縛が無いのは設定の事故なので断る
 //   - 仮押さえ（最悪の額）を取ってから呼び、返事の usage で精算する。usage が取れなければ仮押さえのまま
-import { budgetConfig, toMicro } from "./ai-price.mjs";
+import { budgetConfig, toMicro, anthropicUsageUsd, inputHoldUsd, interruptedOutputTokens, priceOf } from "./ai-price.mjs";
 import { quotaLimits, jevLimits } from "./ai-quota.mjs";
 
 export const QUOTA_TIMEOUT_MS = 5000;
@@ -30,7 +30,8 @@ export const BUSY_MESSAGE = "いま AI が混み合っています。少し待�
 // ブラウザの外からの呼び出しは止まらない。そちらは上の数え方で止める）。
 // 通すのは: Origin が無い（ブラウザの外・同じ出どころの GET など）・要求先と同じ出どころ（本番・プレビューの
 // *.workers.dev は自分のホストへ送るのでここで通る）・本番のホスト・手元の開発のホスト。
-const SITE_ORIGINS = new Set(["https://cad-planner.srapps.us"]);
+// capacitor://localhost は iOS 版（Capacitor）の画面の出どころ。
+const SITE_ORIGINS = new Set(["https://cad-planner.srapps.us", "capacitor://localhost"]);
 export function isLocalHost(hostname) {
   const h = String(hostname || "").toLowerCase();
   return h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h.endsWith(".localhost") || h.endsWith(".test");
@@ -38,6 +39,8 @@ export function isLocalHost(hostname) {
 export function originAllowed(request) {
   const origin = request.headers.get("origin");
   if (origin === null) return true;
+  // capacitor: のような特別でない形の URL は origin が "null" になるので、文字のまま比べる。
+  if (SITE_ORIGINS.has(origin)) return true;
   let o;
   try { o = new URL(origin); } catch (e) { return false; }
   if (o.origin === "null") return false;
@@ -73,8 +76,26 @@ export function quotaOptional(request, env) {
   try { return isLocalHost(new URL(request.url).hostname); } catch (e) { return false; }
 }
 
+// 「1人」。IPv4 は1アドレス、IPv6 は /64 ごと（1つの回線に /64 がまるごと配られることが多く、
+// アドレスを替えるだけで別人になれないように）。
 export function whoOf(request) {
-  return (request && request.headers.get("cf-connecting-ip")) || "unknown";
+  const ip = String((request && request.headers.get("cf-connecting-ip")) || "unknown");
+  if (!ip.includes(":")) return ip;
+  return ipv6Prefix64(ip) || "unknown";
+}
+function ipv6Prefix64(ip) {
+  const [head, tail] = ip.toLowerCase().split("::");
+  const a = head ? head.split(":") : [];
+  const b = tail !== undefined && tail ? tail.split(":") : [];
+  if (ip.includes("::")) {
+    const fill = 8 - a.length - b.length;
+    if (fill < 0) return null;
+    a.push(...Array(fill).fill("0"), ...b);
+  }
+  if (a.length < 4) return null;
+  const groups = a.slice(0, 4).map((g) => (/^[0-9a-f]{1,4}$/.test(g) ? g.replace(/^0+(?=.)/, "") : null));
+  if (groups.includes(null)) return null;
+  return groups.join(":") + "::/64";
 }
 
 export function randomId() {
@@ -85,28 +106,32 @@ export function randomId() {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-// 金額の欄（仮押さえの額と枠）。usd は米ドル。
-export function moneyParams(env, usd, hold) {
+// 金額の欄（仮押さえの額と枠）。usd・minUsd は米ドル。minUsd はいちばん小さな依頼の仮押さえ（言い切ってよいかの目安）。
+export function moneyParams(env, usd, hold, { minUsd = 0, who } = {}) {
   const b = budgetConfig(env);
-  const micro = toMicro(usd);
-  return { usd: String(micro), hold, monthCap: String(b.monthCap), dayMax: String(b.dayMax), factor: String(b.factor) };
+  return {
+    usd: String(toMicro(usd)), hold, monthCap: String(b.monthCap), dayMax: String(b.dayMax), dayMin: String(b.dayMin),
+    factor: String(b.factor), minUsd: String(toMicro(minUsd)), ...(who ? { who } : {}),
+  };
 }
 
 // 点と金額をまとめて数える。
 //   { ok: true, hold, holdUsd, remaining, usdLeft, raw } … 通す（hold は精算に使う。数えない環境では null）
-//   { ok: false, kind: "day" | "month" | "unavailable", scope }
-export async function reserve(request, env, { points, usd, extra }) {
+//   { ok: false, kind: "day" | "month" | "busy" | "unavailable", scope }
+//   busy … 大きな依頼だけが額の枠に入らない・その人の「精算されずに残った額」が上限を超えた（「混み合っています」）
+export async function reserve(request, env, { points, usd, minUsd, extra }) {
   if (quotaOptional(request, env)) return { ok: true, hold: null, holdUsd: usd, remaining: null, usdLeft: null, raw: null };
   const limits = quotaLimits(env);
   const hold = randomId();
   const data = await askQuota(env, "/take", {
     cost: String(points), who: whoOf(request),
     perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
-    ...moneyParams(env, usd, hold), ...(extra || {}),
+    ...moneyParams(env, usd, hold, { minUsd }), ...(extra || {}),
   });
   if (!data) return { ok: false, kind: "unavailable" };
   if (!data.ok) {
     if (data.scope === "month") return { ok: false, kind: "month", scope: "month" };
+    if (data.scope === "busy" || data.scope === "pending") return { ok: false, kind: "busy", scope: data.scope };
     if (data.scope === "total" || data.scope === "who" || data.scope === "day") return { ok: false, kind: "day", scope: data.scope };
     return { ok: false, kind: "unavailable" };
   }
@@ -114,9 +139,10 @@ export async function reserve(request, env, { points, usd, extra }) {
 }
 
 // 精算。usd が null（実額が分からない）なら何もしない（仮押さえのまま残す）。失敗しても呼び出し元は止めない。
-export async function settle(env, hold, usd, out) {
+// exact が false（usage どおりでなく見積もり）なら、その額はその人の「精算されずに残った額」にも積まれる。
+export async function settle(env, hold, usd, out, exact = true) {
   if (!hold || usd === null || usd === undefined || !Number.isFinite(Number(usd))) return;
-  const params = { hold, usd: String(toMicro(usd)) };
+  const params = { hold, usd: String(toMicro(usd)), exact: exact ? "1" : "0" };
   if (Number.isFinite(Number(out)) && out !== null && out !== undefined) params.out = String(Math.max(0, Math.floor(Number(out))));
   await askQuota(env, "/settle", params);
 }
@@ -149,11 +175,13 @@ export function refusal(json, result) {
 // 答えは読み解かずに画面へ流す（Worker の CPU 時間の上限のため）。ここでも全部を JSON として読まず、
 // message_start（入力の量・モデル）と message_delta（出力の量。累計）の行だけを探して読む。
 // 安全側の判定で別のモデルにやり直したときは message_start が2度来うるので、区切りごとに足す。
-// 最後まで流れ、どの区切りにも message_delta があったときだけ onUsage に usage を渡す。途中で切れた・
-// 利用者が閉じた・上流がエラーを返したときは onUsage(null)（仮押さえのまま残す）。
+// 終わったら onDone({ done, segments, elapsedMs }) を呼ぶ。done は「最後まで流れ、どの区切りにも
+// message_delta があった」とき。途中で切れた（利用者が閉じた・上流の流れが途切れた・上流がエラーの出来事を
+// 返した）ときは done: false で、呼び出し側が streamCharge で見積もって精算する。
+// 利用者が閉じたあとの精算は waitUntil で走らせる（応答が終わっても Worker が精算を待つように）。
 const EVENT_RE = /"type"\s*:\s*"message_(start|delta)"/g;
 const MAX_CARRY = 256 * 1024;
-export function meterStream(body, onUsage) {
+export function meterStream(body, onDone, { waitUntil } = {}) {
   const decoder = new TextDecoder();
   let carry = "";
   const segments = [];
@@ -202,16 +230,68 @@ export function meterStream(body, onUsage) {
       readLine(lines.slice(start, end).replace(/\r$/, ""));
     }
   };
-  const meter = new TransformStream({
-    transform(chunk, controller) {
-      controller.enqueue(chunk);
-      try { scan(carry + decoder.decode(chunk, { stream: true })); } catch (e) { /* 数えられなくても流すのは止めない */ }
+  const reader = body.getReader();
+  const startedAt = Date.now();
+  let finished = null;
+  const finish = (cut) => {
+    if (finished) return finished;
+    try { scan(carry + decoder.decode() + "\n"); } catch (e) { /* 数えられなくても止めない */ }
+    const done = !cut && segments.length > 0 && segments.every((s) => s.known && s.done);
+    finished = Promise.resolve().then(() => onDone({ done, segments, elapsedMs: Date.now() - startedAt }))
+      .catch(() => { /* 精算の失敗で答えを止めない */ });
+    if (waitUntil) { try { waitUntil(finished); } catch (e) { /* 無ければ待つだけ */ } }
+    return finished;
+  };
+  return new ReadableStream({
+    async pull(controller) {
+      let r;
+      try {
+        r = await reader.read();
+      } catch (e) {
+        await finish(true);
+        controller.error(e);
+        return;
+      }
+      if (r.done) {
+        await finish(false);
+        controller.close();
+        return;
+      }
+      controller.enqueue(r.value);
+      try { scan(carry + decoder.decode(r.value, { stream: true })); } catch (e) { /* 同上 */ }
     },
-    async flush() {
-      try { scan(carry + decoder.decode() + "\n"); } catch (e) { /* 同上 */ }
-      const ok = segments.length > 0 && segments.every((s) => s.known && s.done);
-      try { await onUsage(ok ? segments : null); } catch (e) { /* 精算の失敗で答えを止めない */ }
+    async cancel(reason) {
+      try { await reader.cancel(reason); } catch (e) { /* 上流がもう閉じている */ }
+      await finish(true);
     },
   });
-  return body.pipeThrough(meter);
+}
+
+// 流れてくる答えの実額。最後まで流れたら usage どおり（exact）。途中で切れたら見積もり（exact: false）:
+//   入力 … message_start の usage が取れていればその実数、取れていなければ見積もり（inputTokens）
+//   出力 … max(届いた usage の出力, min(出力の上限, 経過秒数 × 300 + 1,000))（worker/ai-price.mjs の
+//          interruptedOutputTokens。厳密な保証ではなく、Opus の生成の速さの3倍以上の余裕を見た上限）
+export function streamCharge({ requested, done, segments, elapsedMs, maxOutputTokens, inputTokens }) {
+  let usd = 0, out = 0;
+  if (done) {
+    for (const s of segments) {
+      usd += anthropicUsageUsd({ requested, model: s.model, input: s.input, cacheWrite: s.cacheWrite, cacheRead: s.cacheRead, output: s.output });
+      out += s.output;
+    }
+    return { usd, out, exact: true };
+  }
+  const known = segments.filter((s) => s.known);
+  if (known.length) {
+    for (const s of known) {
+      usd += anthropicUsageUsd({ requested, model: s.model, input: s.input, cacheWrite: s.cacheWrite, cacheRead: s.cacheRead, output: 0 });
+    }
+  } else {
+    usd += inputHoldUsd({ model: requested, inputTokens });
+  }
+  const reported = segments.reduce((n, s) => n + (Number(s.output) || 0), 0);
+  out = Math.max(reported, interruptedOutputTokens(maxOutputTokens, elapsedMs));
+  const models = segments.map((s) => s.model).filter(Boolean);
+  const perOut = Math.max(...[requested].concat(models).map((m) => priceOf(m).out));
+  usd += out * perOut / 1e6;
+  return { usd, out, exact: false };
 }

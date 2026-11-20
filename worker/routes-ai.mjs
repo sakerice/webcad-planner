@@ -33,9 +33,9 @@ import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
 import { nameRooms, pickModels, judgeMarks, missingByRoom, MAX_ROOMS, MAX_SLOTS, MAX_MARKS } from "./plan-finish.mjs";
 import { knowledgeWarnings } from "./plan-check.mjs";
 import { POINTS_PER_IMPORT } from "./ai-quota.mjs";
-import { handleChat } from "./chat.mjs";
+import { handleChat, minChatHoldUsd } from "./chat.mjs";
 import {
-  reserve, settle, takeJev, refusal, meterStream, originAllowed, askQuota, whoOf, moneyParams,
+  reserve, settle, takeJev, refusal, meterStream, streamCharge, originAllowed, askQuota, whoOf, moneyParams,
   dayLimitMessage, MONTH_LIMIT_MESSAGE,
 } from "./ai-budget.mjs";
 import { holdUsd, imageTokens, textTokens, anthropicUsageUsd, otherUsageUsd } from "./ai-price.mjs";
@@ -162,10 +162,12 @@ async function aiQuota(env, request) {
   });
   // 数えられなかったことを「残り0回」と言わない（画面がボタンを閉じてしまう）。
   if (!seen || seen.scope !== "peek") return json(hidden);
-  if (Number(seen.monthLeft) <= 0) {
+  // いちばん小さな依頼も入らないときだけ「今月ぶん」「本日ぶん」と言い切る（大きな依頼だけが入らないなら数を隠す）。
+  const min = minChatHoldUsd(env) * 1e6;
+  if (Number(seen.monthLeft) < min) {
     return json({ ...hidden, left: 0, counted: true, limit: "month", message: MONTH_LIMIT_MESSAGE });
   }
-  if (Number(seen.dayLeft) <= 0) {
+  if (Number(seen.dayLeft) < min) {
     return json({ ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() });
   }
   // 残りを回数にする。1回ぶんに満たない端数は切り捨てる。
@@ -198,6 +200,20 @@ function refuse(result) {
   return refusal(json, result);
 }
 
+// 点と金額を数える。いちばん小さな依頼（チャット1往復）の額を添える（「今月ぶん」と言い切ってよいかに使う）。
+function reserveAi(request, env, points, usd) {
+  return reserve(request, env, { points, usd, minUsd: minChatHoldUsd(env) });
+}
+
+// 上流（AI の提供元）の失敗。元の文（残高不足などの内部の状態を含みうる）は Worker のログにだけ出し、
+// 画面へは決まった文だけを返す。
+const UPSTREAM_MESSAGE = "AI から返事を受け取れませんでした。少し待ってから、もう一度お試しください。";
+function upstreamError(where, failed) {
+  console.log(JSON.stringify({ ai_upstream_error: { where, status: Number(failed && failed.status) || 0,
+    message: String((failed && failed.message) || "").slice(0, 300) } }));
+  return json({ error: "ai_upstream_error", status: Number(failed && failed.status) || 502, message: UPSTREAM_MESSAGE }, 502);
+}
+
 // 1回の問い合わせの仮押さえの額。
 function askHoldUsd(provider, ask) {
   const other = provider.kind !== "anthropic";
@@ -210,9 +226,16 @@ function askHoldUsd(provider, ask) {
   });
 }
 
-// 返ってきた1回ぶんの実額。分からなければ、その1回の仮押さえの額（安全側）。
+// 返ってきた1回ぶんの額と、usage どおりか（exact）。
+//   上流が 2xx 以外を返した（unbilled）… 0。生成が始まっていないので課金されない、という前提
+//   usage が付いている（成功・2xx で断られた）… usage どおり
+//   どちらでもない（届かなかった・読めなかった）… その1回の仮押さえの額のまま（exact: false）
 function resultUsd(provider, result, holdShare) {
-  if (!result || !result.ok || !result.usage) return holdShare;
+  if (result && result.unbilled) return { usd: 0, exact: true };
+  if (!result || !result.usage) return { usd: holdShare, exact: false };
+  return { usd: usageUsd(provider, result, holdShare), exact: true };
+}
+function usageUsd(provider, result, holdShare) {
   if (provider.kind === "anthropic") {
     const u = result.usage;
     const cw = Number(u.cacheWriteTokens) || 0, cr = Number(u.cacheReadTokens) || 0;
@@ -224,19 +247,27 @@ function resultUsd(provider, result, holdShare) {
   const usd = otherUsageUsd(result.usage);
   return usd === null ? holdShare : usd;
 }
+// 何回分かの結果をまとめて精算する。
+async function settleResults(env, hold, provider, results, holds) {
+  const each = results.map((r, i) => resultUsd(provider, r, holds[i]));
+  await settle(env, hold, sum(each.map((e) => e.usd)), undefined, each.every((e) => e.exact));
+}
 
-// 流れてくる答え（Claude）を数えながら流し、終わったら精算する。
-function meteredStream(env, body, hold, requestedModel) {
+// 流れてくる答え（Claude）を数えながら流し、終わったら精算する（途中で切れたら見積もりで。worker/ai-budget.mjs）。
+function meteredStream(env, deps, body, hold, requestedModel, inputTokens, maxOutputTokens) {
   if (!hold) return body;
-  return meterStream(body, async (segments) => {
-    if (!segments) return;   // 実額が分からない。仮押さえのまま残す
-    let usd = 0;
-    for (const s of segments) {
-      usd += anthropicUsageUsd({ requested: requestedModel, model: s.model, input: s.input,
-        cacheWrite: s.cacheWrite, cacheRead: s.cacheRead, output: s.output });
-    }
-    await settle(env, hold, usd);
-  });
+  return meterStream(body, async ({ done, segments, elapsedMs }) => {
+    const c = streamCharge({ requested: requestedModel, done, segments, elapsedMs, maxOutputTokens, inputTokens });
+    await settle(env, hold, c.usd, undefined, c.exact);
+  }, { waitUntil: deps.waitUntil });
+}
+
+// 流す答えを始められなかったとき。上流が 2xx 以外なら 0、届かなかったなら見積もりで精算する。
+async function settleNotStarted(env, hold, started, requestedModel, inputTokens, maxOutputTokens, startedAt) {
+  if (started.unbilled) return settle(env, hold, 0, undefined, true);
+  const c = streamCharge({ requested: requestedModel, done: false, segments: [], elapsedMs: Date.now() - startedAt,
+    maxOutputTokens, inputTokens });
+  return settle(env, hold, c.usd, undefined, false);
 }
 
 // 位置を探すほうは、安いモデルでよい。大きな領域を1つ答えるだけ。
@@ -310,7 +341,7 @@ async function aiFindPlan(payload, env, deps, request) {
   // 位置探しは OpenAI か Vertex（予備の経路の単価で、高めに数える）。
   const hold = holdUsd({ other: true, maxOutputTokens: LOCATE_MAX_OUTPUT_TOKENS,
     inputTokens: imageTokens([image]) + textTokens(LOCATE_SYSTEM) + textTokens(LOCATE_PROMPT) });
-  const quota = await reserve(request, env, { points: COST_LOCATE, usd: hold });
+  const quota = await reserveAi(request, env, COST_LOCATE, hold);
   if (!quota.ok) return refuse(quota);
 
   const common = {
@@ -324,9 +355,9 @@ async function aiFindPlan(payload, env, deps, request) {
   const result = provider.kind === "openai"
     ? await openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(LOCATE_SCHEMA) } })
     : await generate({ ...common, config: provider.config, responseSchema: LOCATE_SCHEMA, thinkingBudget: 0 });
-  await settle(env, quota.hold, resultUsd({ kind: provider.kind }, result, hold));
+  await settleResults(env, quota.hold, { kind: provider.kind }, [result], [hold]);
 
-  if (!result.ok) return json({ error: "ai_upstream_error", status: result.status, message: result.message }, 502);
+  if (!result.ok) return upstreamError("find-plan", result);
 
   const parsed = extractJson(result.text);
   const box = normalizeBox(parsed);
@@ -401,13 +432,13 @@ async function aiImportPlan(payload, env, deps, request) {
 
   // 使う前に数える。**送ってから断ると費用は戻らない。**
   const holds = asks.map((ask) => askHoldUsd(provider, ask));
-  const quota = await reserve(request, env, { points: images.length * COST_IMPORT_PAGE, usd: sum(holds) });
+  const quota = await reserveAi(request, env, images.length * COST_IMPORT_PAGE, sum(holds));
   if (!quota.ok) return refuse(quota);
   // OpenAI は投げるだけで答えは後から取りに行くので、実額が分からない。仮押さえのまま残す。
   if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
-  await settle(env, quota.hold, sum(results.map((r, i) => resultUsd(provider, r, holds[i]))));
+  await settleResults(env, quota.hold, provider, results, holds);
   const pages = collectPages(results);
   if (pages.error) return withNextStep(pages.error, env, deps, { images });
   return withNextStep(finishImportedPlan(
@@ -444,9 +475,10 @@ async function aiReadPlan(payload, env, deps, request) {
   if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
   const text = buildFreePrompt({ pages: images.length, hint });
-  const hold = holdUsd({ model: config.model, maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
-    inputTokens: imageTokens(images) + textTokens(FREE_SYSTEM) + textTokens(text) + textTokens(JSON.stringify(FREE_SCHEMA)) });
-  const quota = await reserve(request, env, { points: images.length * COST_IMPORT_PAGE, usd: hold });
+  const inputTokens = imageTokens(images) + textTokens(FREE_SYSTEM) + textTokens(text) + textTokens(JSON.stringify(FREE_SCHEMA));
+  const hold = holdUsd({ model: config.model, maxOutputTokens: READ_MAX_OUTPUT_TOKENS, inputTokens });
+  const quota = await reserveAi(request, env, images.length * COST_IMPORT_PAGE, hold);
+  const startedAt = Date.now();
   if (!quota.ok) return refuse(quota);
 
   const started = await startStream({
@@ -458,9 +490,11 @@ async function aiReadPlan(payload, env, deps, request) {
     maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
     fetchImpl: deps.fetchImpl,
   });
-  // 上流が断った（4xx・5xx）ときは、費用がかかっていないとは言い切れないので仮押さえのまま残す。
-  if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
-  return new Response(meteredStream(env, started.body, quota.hold, config.model), {
+  if (!started.ok) {
+    await settleNotStarted(env, quota.hold, started, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS, startedAt);
+    return upstreamError("read-plan", started);
+  }
+  return new Response(meteredStream(env, deps, started.body, quota.hold, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS), {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
   });
@@ -503,10 +537,11 @@ async function aiReviewPlan3d(payload, env, deps, request) {
   if (claudeImagesTooLarge(images)) return json(IMAGE_TOO_LARGE, 413);
 
   const text = buildFreeReviewPrompt({ pages: rawPages.length, shots: labels, answer: JSON.parse(answerText), facts, hint });
-  const hold = holdUsd({ model: config.model, maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
-    inputTokens: imageTokens(images) + textTokens(FREE_REVIEW_SYSTEM) + textTokens(text) + textTokens(JSON.stringify(FREE_SCHEMA)) });
+  const inputTokens = imageTokens(images) + textTokens(FREE_REVIEW_SYSTEM) + textTokens(text) + textTokens(JSON.stringify(FREE_SCHEMA));
+  const hold = holdUsd({ model: config.model, maxOutputTokens: READ_MAX_OUTPUT_TOKENS, inputTokens });
   // 撮った画像（最大10枚）も入力になるので、1枚1点で足して数える。
-  const quota = await reserve(request, env, { points: rawPages.length * COST_REVISE_PAGE + rawShots.length, usd: hold });
+  const quota = await reserveAi(request, env, rawPages.length * COST_REVISE_PAGE + rawShots.length, hold);
+  const startedAt = Date.now();
   if (!quota.ok) return refuse(quota);
   const started = await startStream({
     config: { ...config, effort: (env && env.ANTHROPIC_EFFORT) || "medium", schema: FREE_SCHEMA },
@@ -516,8 +551,11 @@ async function aiReviewPlan3d(payload, env, deps, request) {
     maxOutputTokens: READ_MAX_OUTPUT_TOKENS,
     fetchImpl: deps.fetchImpl,
   });
-  if (!started.ok) return json({ error: "ai_upstream_error", status: started.status, message: started.message }, 502);
-  return new Response(meteredStream(env, started.body, quota.hold, config.model), {
+  if (!started.ok) {
+    await settleNotStarted(env, quota.hold, started, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS, startedAt);
+    return upstreamError("review-plan-3d", started);
+  }
+  return new Response(meteredStream(env, deps, started.body, quota.hold, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS), {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
   });
@@ -575,12 +613,12 @@ async function aiRevisePlan(payload, env, deps, request) {
   }));
 
   const holds = asks.map((ask) => askHoldUsd(provider, ask));
-  const quota = await reserve(request, env, { points: pairs.length * COST_REVISE_PAGE, usd: sum(holds) });
+  const quota = await reserveAi(request, env, pairs.length * COST_REVISE_PAGE, sum(holds));
   if (!quota.ok) return refuse(quota);
   if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
-  await settle(env, quota.hold, sum(results.map((r, i) => resultUsd(provider, r, holds[i]))));
+  await settleResults(env, quota.hold, provider, results, holds);
   const pages = collectPages(results);
   if (pages.error) return pages.error;
   return finishImportedPlan(
@@ -652,7 +690,7 @@ function startPlanJob(provider, { system, text, images, docs, fetchImpl }) {
 async function startPlanJobs(provider, asks, env) {
   const started = await Promise.all(asks.map((ask) => startPlanJob(provider, ask)));
   const failed = started.find((r) => !r.ok);
-  if (failed) return json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502);
+  if (failed) return upstreamError("start-job", failed);
   const jobs = [];
   for (const one of started) jobs.push(await jobToken(one.id, env));
   return json({ jobs });
@@ -712,7 +750,7 @@ async function aiPlanResult(payload, env, deps, request) {
 
   const got = await Promise.all(ids.map((id) => fetchJob({ config: provider.config, id, fetchImpl: deps.fetchImpl })));
   const failed = got.find((g) => !g.ok);
-  if (failed) return json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502);
+  if (failed) return upstreamError("plan-result", failed);
 
   const done = got.filter((g) => g.done).length;
   if (done < got.length) return json({ pending: true, done, total: got.length });
@@ -768,7 +806,7 @@ async function withNextStep(res, env, deps, context) {
 function collectPages(results) {
   const failed = results.find((r) => !r.ok);
   if (failed) {
-    return { error: json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502) };
+    return { error: upstreamError("plan", failed) };
   }
   const list = [];
   for (const r of results) {

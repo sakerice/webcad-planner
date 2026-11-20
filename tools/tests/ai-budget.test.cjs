@@ -68,6 +68,10 @@ function claude(opts) {
   return { sent, fetchImpl };
 }
 
+// 利用者が切ったあとの精算は waitUntil で走らせる（Worker の ctx.waitUntil と同じ）。検査はここに集めて待つ。
+const pendingWork = [];
+const waitUntil = (p) => { pendingWork.push(p); };
+async function drain() { while (pendingWork.length) await pendingWork.shift(); }
 async function callAi(path, body, env, fetchImpl, { headers, host = 'https://example.test' } = {}) {
   const { handleAi } = await mod('worker/routes-ai.mjs');
   const url = new URL(host + path);
@@ -76,7 +80,7 @@ async function callAi(path, body, env, fetchImpl, { headers, host = 'https://exa
     headers: { 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.7', ...(headers || {}) },
     body: JSON.stringify(body),
   });
-  return handleAi(request, env, url, { fetchImpl });
+  return handleAi(request, env, url, { fetchImpl, waitUntil });
 }
 
 const ASK = [{ role: 'user', content: '<plan_summary>\n…\n</plan_summary>\n\n<user_request>\nLDK を東へ半間広げて\n</user_request>' }];
@@ -151,13 +155,14 @@ test('仮押さえ → 精算: 実額が小さければ差が戻る。usage が�
   assert.equal(q.data.get('usd-day:2026-11-20:2026-11'), micro(0.044));
   assert.equal([...q.data.keys()].filter((k) => k.startsWith('hold:')).length, 0, '精算した仮押さえが残っている');
 
-  // 途中で切れた（message_delta が来ない）→ 仮押さえのまま
+  // 途中で切れた（message_delta が来ない）→ 入力は message_start の実数、出力は min(上限, 経過秒数×300+1000)
   const q2 = await realQuota();
   const res2 = await callAi('/api/ai/read-plan', { images: [PNG] }, { ANTHROPIC_API_KEY: KEY, AI_QUOTA: q2.AI_QUOTA },
     claude({ cut: true }).fetchImpl);
-  const before = q2.data.get('usd-month:2026-11');
   await res2.text();
-  assert.equal(q2.data.get('usd-month:2026-11'), before, 'usage が分からないのに額を戻している');
+  await drain();
+  // 1,000 × $4 ＋ (0秒 × 300 + 1,000) × $20 = $0.024
+  assert.equal(q2.data.get('usd-month:2026-11'), micro(0.024), '途中で切れたときの見積もりが決めた式と違う');
 });
 
 test('仮押さえ → 精算（まとめて受け取る読み取り）。表に無いモデルは高い単価で数える', async () => {
@@ -184,17 +189,17 @@ test('同時に 50 件来ても、枠を超えて通さない', async () => {
     callAi('/api/ai/read-plan', { images: [PNG] }, env, fetchImpl, { headers: { 'cf-connecting-ip': '198.51.100.' + i } })));
   const passed = results.filter((r) => r.status === 200).length;
   assert.ok(passed > 0, '1件も通らない');
-  assert.ok(results.every((r) => r.status === 200 || r.status === 429));
+  // 断るのは「混み合っています」（1日の額の残りに小さな依頼はまだ入るので、「本日ぶん」とは言い切らない）。
+  assert.ok(results.every((r) => r.status === 200 || r.status === 503));
   assert.equal(sent.length, passed);
-  // 月 $10・残り 11 日 → 1日の額の上限は $10 × 2 / 11 ≒ $1.82（月より先にこちらが効く）。
-  const cap = Math.floor(2 * micro(10) / 11);
+  // 月 $10・残り 11 日 → 2 × 10 / 11 ≒ $1.82 だが、下限 $4 が効く（月より先にこちらが効く）。
+  const cap = micro(4);
   const held = q.data.get('usd-month:2026-11');
   assert.ok(held <= cap, `1日の上限 ${cap / 1e6} ドルを超えて仮押さえした（${held / 1e6} ドル）`);
   const one = held / passed;
   assert.ok(held + one > cap, 'まだ入るのに断っている');
-  // 断った理由は「本日ぶん」。
-  const refused = results.find((r) => r.status === 429);
-  assert.equal((await refused.json()).limit, 'day');
+  const refused = results.find((r) => r.status === 503);
+  assert.match((await refused.json()).message, /混み合って/);
 });
 
 // ── 数えられないときは断る ───────────────────────────────────────────
@@ -407,4 +412,161 @@ test('/api/ai/quota: 月の枠が尽きたら 0 と月の文。金額の枠で�
   assert.equal(thin.left, null, '金額の枠で先に止まりうるのに回数を出している');
   assert.equal(thin.counted, false);
   for (const v of [full, fresh, thin]) assert.ok(!JSON.stringify(v).match(/usd|dollar/i));
+});
+
+// ── レビューの指摘（2026-11-20）: 失敗・途中で切れたときの精算、1人の残る額、1日の額の下限 ──────────
+
+// 上流が 2xx 以外を返す偽物。本文には内部の状態らしい文を入れる（画面へ出さないこと）。
+function upstreamFails(status) {
+  const sent = [];
+  return { sent, fetchImpl: async (req) => { sent.push(JSON.parse(await req.text()));
+    return new Response(JSON.stringify({ type: 'error', error: { type: 'x', message: 'Your credit balance is too low' } }), { status }); } };
+}
+
+test('上流が 4xx・5xx を返した要求は 0 で精算する（読み取り・チャット。札の出力の合計も戻る）。元の文は画面へ返さない', async () => {
+  at(T);
+  for (const status of [400, 500, 529]) {
+    const q = await realQuota();
+    const env = { ANTHROPIC_API_KEY: KEY, AI_QUOTA: q.AI_QUOTA };
+    const read = await callAi('/api/ai/read-plan', { images: [PNG] }, env, upstreamFails(status).fetchImpl);
+    assert.equal(read.status, 502);
+    const rb = await read.json();
+    assert.ok(!JSON.stringify(rb).includes('credit'), '上流の文を画面へ返している: ' + JSON.stringify(rb));
+    assert.equal(q.data.get('usd-month:2026-11') || 0, 0, `上流 ${status} の仮押さえが残っている`);
+    const chat = await callAi('/api/ai/chat', { messages: ASK }, env, upstreamFails(status).fetchImpl);
+    assert.equal(chat.status, 502);
+    assert.equal(q.data.get('usd-month:2026-11') || 0, 0, `チャットで上流 ${status} の仮押さえが残っている`);
+    const t = [...q.data.entries()].find(([k]) => k.startsWith('chat-ticket:'));
+    assert.equal(t[1].out, 0, '失敗した往復の出力を札に積んだまま');
+    const imp = await callAi('/api/ai/import-plan', { images: [PNG] }, { ...env, AI_IMPORT_PROVIDER: 'anthropic' }, upstreamFails(status).fetchImpl);
+    assert.equal(imp.status, 502);
+    assert.ok(!JSON.stringify(await imp.json()).includes('credit'));
+    assert.equal(q.data.get('usd-month:2026-11') || 0, 0, `まとめて受け取る読み取りで上流 ${status} の仮押さえが残っている`);
+  }
+});
+
+// 最初の出来事を流したあと止まる上流（利用者が切るまで返らない）。
+function hangingUpstream() {
+  return async () => new Response(new ReadableStream({
+    start(c) {
+      c.enqueue(new TextEncoder().encode('event: message_start\ndata: {"type":"message_start","message":{"model":"claude-opus-5-5","usage":{"input_tokens":1000,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":1}}}\n\n'));
+    },
+  }), { status: 200, headers: { 'content-type': 'text/event-stream' } });
+}
+
+test('利用者が途中で切ったら、入力は実数・出力は min(上限, 経過秒数×300+1000) で精算し、その人の「残った額」に積む', async () => {
+  at(T);
+  const q = await realQuota();
+  const env = { ANTHROPIC_API_KEY: KEY, AI_QUOTA: q.AI_QUOTA };
+  const res = await callAi('/api/ai/read-plan', { images: [PNG] }, env, hangingUpstream());
+  assert.equal(res.status, 200);
+  const reader = res.body.getReader();
+  await reader.read();
+  at(T + 10000);
+  await reader.cancel();
+  await drain();
+  // 入力 1,000 × $4 ＋ 出力 (10秒 × 300 + 1,000 = 4,000) × $20 = $0.084
+  assert.equal(q.data.get('usd-month:2026-11'), micro(0.084), '切ったときの精算が決めた式と違う');
+  assert.equal(q.data.get('pend:2026-11-20:203.0.113.7'), micro(0.084), '精算しきれなかった額をその人に積んでいない');
+  assert.equal([...q.data.keys()].filter((k) => k.startsWith('hold:')).length, 0);
+});
+
+test('message_start が 2 回来る（別のモデルでやり直した）ときは、区切りごとにそのモデルの単価で足す', async () => {
+  at(T);
+  const q = await realQuota();
+  const env = { ANTHROPIC_API_KEY: KEY, AI_QUOTA: q.AI_QUOTA };
+  const two = 'event: message_start\ndata: {"type":"message_start","message":{"model":"claude-opus-5-5","usage":{"input_tokens":1000,"output_tokens":1}}}\n\n'
+    + 'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"refusal"},"usage":{"output_tokens":500}}\n\n'
+    + 'event: message_start\ndata: {"type":"message_start","message":{"model":"claude-opus-5","usage":{"input_tokens":1000,"output_tokens":1}}}\n\n'
+    + 'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":2000}}\n\n'
+    + 'event: message_stop\ndata: {"type":"message_stop"}\n\n';
+  const res = await callAi('/api/ai/read-plan', { images: [PNG] }, env, async () => new Response(two, { status: 200 }));
+  await res.text();
+  await drain();
+  // (1,000×$4 + 500×$20) + (1,000×$5 + 2,000×$25) = $0.069
+  assert.equal(q.data.get('usd-month:2026-11'), micro(0.069));
+  assert.equal(q.data.get('pend:2026-11-20:203.0.113.7') || 0, 0, 'usage どおりに精算できたのに「残った額」に積んでいる');
+});
+
+test('仮押さえは、元の試行と別のモデルでのやり直し（やり直し先の高い方の単価）の両方を入れる', async () => {
+  const price = await mod('worker/ai-price.mjs');
+  const one = (out) => price.holdUsd({ model: 'claude-opus-5-5', inputTokens: 0, maxOutputTokens: out });
+  // 出力 100万トークンあたり: 元の試行 $20 ＋ やり直しの先（claude-opus-5・claude-opus-4-8 の高い方）$25
+  assert.equal(Math.round((one(1e6) - one(0)) * 1000) / 1000, 45);
+  const unknown = (out) => price.holdUsd({ model: 'claude-unknown', inputTokens: 0, maxOutputTokens: out });
+  assert.equal(Math.round((unknown(1e6) - unknown(0)) * 1000) / 1000, 100, '表に無いモデルは両方とも表のいちばん高い単価');
+  assert.deepEqual(price.FALLBACK_MODELS, ['claude-opus-5', 'claude-opus-4-8']);
+});
+
+test('日本時間の月初め 0〜9 時の1日の額: 新しい月の日数で割る（前の月の最後の1日として $8 にしない）', async () => {
+  at(Date.UTC(2026, 10, 30, 16, 0));   // 12/1 1:00（日本時間）。UTC の日付はまだ 11/30
+  const q = await realQuota({ seed: { 'usd-day:2026-11-30:2026-12': micro(5.0) } });
+  const env = { ANTHROPIC_API_KEY: KEY, AI_QUOTA: q.AI_QUOTA };
+  const { sent, fetchImpl } = claude();
+  // $80 × 2 / 31 ≒ $5.16。使った $5 に読み取り1回は入らない。
+  const res = await callAi('/api/ai/read-plan', { images: [PNG] }, env, fetchImpl);
+  assert.equal(res.status, 429);
+  assert.equal((await res.json()).limit, 'day');
+  assert.equal(sent.length, 0);
+});
+
+test('1日の額の上限に下限 $4（月の残りを超えない）', async () => {
+  at(T);
+  const peek = async (seed) => {
+    const q = await realQuota({ seed });
+    const r = await q.AI_QUOTA.get().fetch('https://ai-quota/take?' + new URLSearchParams({
+      cost: '0', peek: '1', who: 'x', perDay: '168', totalPerDay: '700', usd: '0', hold: '', monthCap: String(micro(80)), dayMax: String(micro(8)), factor: '2' }));
+    return (await r.json()).dayLeft;
+  };
+  // 月の残り $20・11日 → 2×20/11 ≒ $3.6 → 下限 $4
+  assert.equal(await peek({ 'usd-month:2026-11': micro(60) }), micro(4));
+  // 月の残り $1.5 → $1.5（月の残りを超えない）
+  assert.equal(await peek({ 'usd-month:2026-11': micro(78.5) }), micro(1.5));
+});
+
+test('1人（IPv4 は1アドレス、IPv6 は /64）の「精算されずに残った額」が1日の額の上限の 1/3 を超えたら、その人だけ断る', async () => {
+  at(T);
+  // 11/20 の1日の額の上限は $8 → 1人 $2.67
+  const q = await realQuota({ seed: { 'pend:2026-11-20:203.0.113.7': micro(2.7), 'pend:2026-11-20:2001:db8:1:2::/64': micro(2.7) } });
+  const env = { ANTHROPIC_API_KEY: KEY, AI_QUOTA: q.AI_QUOTA };
+  const { sent, fetchImpl } = claude();
+  const mine = await callAi('/api/ai/read-plan', { images: [PNG] }, env, fetchImpl);
+  assert.equal(mine.status, 503);
+  assert.equal((await mine.json()).message, 'いま AI が混み合っています。少し待ってから、もう一度お試しください。');
+  const v6 = await callAi('/api/ai/chat', { messages: ASK }, env, fetchImpl, { headers: { 'cf-connecting-ip': '2001:db8:1:2:aaaa::5' } });
+  assert.equal(v6.status, 503, '同じ /64 の別のアドレスで通っている');
+  assert.equal(sent.length, 0);
+  const other = await callAi('/api/ai/read-plan', { images: [PNG] }, env, fetchImpl, { headers: { 'cf-connecting-ip': '198.51.100.9' } });
+  assert.equal(other.status, 200, 'ほかの人まで止まっている');
+  await other.text();
+});
+
+test('仮押さえが月の残りより大きいだけなら「混み合っています」。小さな依頼も通らないときだけ「今月ぶん」', async () => {
+  at(T);
+  const chatMod = await mod('worker/chat.mjs');
+  const min = chatMod.minChatHoldUsd({ ANTHROPIC_API_KEY: KEY });
+  assert.ok(min > 0 && min < 1.5, `小さな依頼の仮押さえ ${min}`);
+  const q = await realQuota({ seed: { 'usd-month:2026-11': micro(80 - min - 0.05) } });
+  const env = { ANTHROPIC_API_KEY: KEY, AI_QUOTA: q.AI_QUOTA };
+  const read = await callAi('/api/ai/read-plan', { images: [PNG] }, env, claude().fetchImpl);
+  assert.equal(read.status, 503, '小さな依頼はまだ通るのに「今月ぶん」と言っている');
+  assert.match((await read.json()).message, /混み合って/);
+  const chat = await callAi('/api/ai/chat', { messages: ASK }, env, claude().fetchImpl);
+  assert.equal(chat.status, 200, '小さな依頼が通らない');
+  await chat.text();
+  q.data.set('usd-month:2026-11', micro(80) - 10);
+  const done = await callAi('/api/ai/read-plan', { images: [PNG] }, env, claude().fetchImpl);
+  assert.equal(done.status, 429);
+  assert.equal((await done.json()).limit, 'month');
+});
+
+test('Origin: iOS 版（capacitor://localhost）を通す', async () => {
+  at(T);
+  const res = await callAi('/api/ai/read-plan', { images: [PNG] }, { ANTHROPIC_API_KEY: KEY }, claude().fetchImpl,
+    { headers: { origin: 'capacitor://localhost' } });
+  assert.equal(res.status, 200);
+  await res.text();
+  const bad = await callAi('/api/ai/read-plan', { images: [PNG] }, { ANTHROPIC_API_KEY: KEY }, claude().fetchImpl,
+    { headers: { origin: 'capacitor://evil' } });
+  assert.equal(bad.status, 403);
 });

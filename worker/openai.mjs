@@ -60,7 +60,7 @@ export async function fetchJob({ config, id, fetchImpl = fetch }) {
     return { ok: false, status: 502, message: "OpenAI へ届きませんでした。" };
   }
   const raw = await res.text();
-  if (!res.ok) return { ok: false, status: res.status, message: safeReason(raw) };
+  if (!res.ok) return { ok: false, unbilled: true, status: res.status, message: safeReason(raw) };
   let data;
   try { data = JSON.parse(raw); } catch (e) {
     return { ok: false, status: 502, message: "OpenAI の返事を JSON として読めませんでした。" };
@@ -185,7 +185,7 @@ async function postRequest({
   }
 
   const raw = await response.text();
-  if (!response.ok) return { ok: false, status: response.status, message: safeReason(raw) };
+  if (!response.ok) return { ok: false, unbilled: true, status: response.status, message: safeReason(raw) };
 
   let data;
   try { data = JSON.parse(raw); } catch (e) {

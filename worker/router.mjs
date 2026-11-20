@@ -10,11 +10,14 @@ import { handlesMcp, handleMcp } from "./mcp.mjs";
 import { handlesCspReport, handleCspReport } from "./csp-report.mjs";
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     if (handlesRooms(url.pathname)) return handleRooms(request, env, url);
-    if (handlesAi(url.pathname)) return handleAi(request, env, url);
+    // waitUntil: 利用者が答えの途中で切ったあとも、AI の費用の精算を最後まで走らせるため（worker/ai-budget.mjs）。
+    if (handlesAi(url.pathname)) {
+      return handleAi(request, env, url, { waitUntil: ctx && typeof ctx.waitUntil === "function" ? (p) => ctx.waitUntil(p) : null });
+    }
     // 外の AI(MCP)の受け口。/mcp でないのは run_worker_first が /api/* だけのため(worker/mcp.mjs の冒頭)。
     if (handlesMcp(url.pathname)) return handleMcp(request, env);
     // CSP の「報告だけ」の違反の報告(_headers)。ログに決まりと先の種類だけ出す(worker/csp-report.mjs の冒頭)。

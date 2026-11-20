@@ -507,8 +507,8 @@ test('残り回数は、数えずに見るだけ', async () => {
     const u = new URL(url);
     seen.push({ peek: u.searchParams.get('peek'), cost: Number(u.searchParams.get('cost')),
                 perDay: Number(u.searchParams.get('perDay')), totalPerDay: Number(u.searchParams.get('totalPerDay')) });
-    // 金額の残りは十分（$5・$70）。金額の枠で先に止まらないときだけ回数を出す。
-    return new Response(JSON.stringify({ ok: true, scope: 'peek', remaining: 126, totalRemaining: 630, dayLeft: 5e6, monthLeft: 70e6 }));
+    // 金額の残りは十分（$20・$70）。金額の枠で先に止まらないときだけ回数を出す。
+    return new Response(JSON.stringify({ ok: true, scope: 'peek', remaining: 126, totalRemaining: 630, dayLeft: 20e6, monthLeft: 70e6 }));
   } };
   const env = { ...VERTEX_ENV, AI_QUOTA: { idFromName: () => 'id', get: () => stub } };
   const { handleAi } = await mod('worker/routes-ai.mjs');

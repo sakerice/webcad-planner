@@ -119,7 +119,8 @@ async function sendStream(config, bodyText, fetchImpl) {
   } catch (e) {
     return { ok: false, status: 502, message: "Anthropic へ届きませんでした: " + (e && e.message ? e.message : e) };
   }
-  if (!response.ok) return { ok: false, status: response.status, message: safeReason(await response.text()) };
+  // unbilled: 上流が 2xx 以外を返した（生成が始まっていないので課金されない、という前提。worker/ai-budget.mjs が 0 で精算する）。
+  if (!response.ok) return { ok: false, unbilled: true, status: response.status, message: safeReason(await response.text()) };
   return { ok: true, body: response.body };
 }
 
@@ -194,7 +195,7 @@ export async function generate({
   }
 
   const raw = await response.text();
-  if (!response.ok) return { ok: false, status: response.status, message: safeReason(raw) };
+  if (!response.ok) return { ok: false, unbilled: true, status: response.status, message: safeReason(raw) };
 
   let data;
   try { data = JSON.parse(raw); } catch (e) {
@@ -206,33 +207,39 @@ export async function generate({
 // 返事を、こちらの形（openai.mjs / vertex.mjs と同じ）に直す。
 export function readResult(data) {
   // 断られたときは中身が出力の形に合っていない。読まずに返す。
+  const u = data.usage || {};
+  // 断られても（2xx）入力と途中までの出力は課金されうるので、usage は付けて返す（精算に使う）。
   if (data.stop_reason === "refusal") {
     const why = data.stop_details && data.stop_details.explanation;
-    return { ok: false, status: 502, message: "Claude がこの依頼を断りました。" + (why ? ` (${String(why).slice(0, 200)})` : "") };
+    return { ok: false, status: 502, model: data.model || "", usage: usageOf(u),
+      message: "Claude がこの依頼を断りました。" + (why ? ` (${String(why).slice(0, 200)})` : "") };
   }
   const out = [];
   for (const block of data.content || []) {
     if (block && block.type === "text" && typeof block.text === "string") out.push(block.text);
   }
-  const u = data.usage || {};
-  const cacheWrite = Number(u.cache_creation_input_tokens || 0);
-  const cacheRead = Number(u.cache_read_input_tokens || 0);
-  const input = Number(u.input_tokens || 0) + cacheWrite + cacheRead;
-  const output = Number(u.output_tokens || 0);
   return {
     ok: true,
     text: out.join(""),
     stopReason: data.stop_reason || "",
     model: data.model || "",
-    usage: {
-      inputTokens: input,
-      outputTokens: output,
-      // 考えた量は出力に含まれて別には数えられない。0 として、合計は出力で見る。
-      thoughtTokens: 0,
-      answerTokens: output,
-      totalTokens: input + output,
-      cacheWriteTokens: cacheWrite,
-      cacheReadTokens: cacheRead,
-    },
+    usage: usageOf(u),
+  };
+}
+
+function usageOf(u) {
+  const cacheWrite = Number(u.cache_creation_input_tokens || 0);
+  const cacheRead = Number(u.cache_read_input_tokens || 0);
+  const input = Number(u.input_tokens || 0) + cacheWrite + cacheRead;
+  const output = Number(u.output_tokens || 0);
+  return {
+    inputTokens: input,
+    outputTokens: output,
+    // 考えた量は出力に含まれて別には数えられない。0 として、合計は出力で見る。
+    thoughtTokens: 0,
+    answerTokens: output,
+    totalTokens: input + output,
+    cacheWriteTokens: cacheWrite,
+    cacheReadTokens: cacheRead,
   };
 }

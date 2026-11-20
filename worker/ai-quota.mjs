@@ -77,10 +77,14 @@ export function jevLimits(env) {
 //   usd-month:<日本時間の年月>            その月の使用額（仮押さえ中の分を含む）
 //   usd-day:<UTCの日付>:<日本時間の年月>   その日の使用額。日の区切りは点と同じ UTC（日本時間の朝9時）
 //   hold:<id>                            仮押さえ。精算で消える。精算されなければ額はそのまま残る（安全側）
+//   pend:<UTCの日付>:<人>                 その人の、その日の「精算されずに残った額」（見積もりで精算した額と、
+//                                        精算されないまま期限の過ぎた仮押さえ）。1日の額の上限の 1/3 を超えると、その人だけ断る
 // 月の区切りは日本時間の暦月（来月1日の0時に戻る）。
 const MONTH_PREFIX = "usd-month:";
 const DAY_PREFIX = "usd-day:";
 const HOLD_PREFIX = "hold:";
+const PEND_PREFIX = "pend:";
+const DEFAULT_DAY_MIN = 4000000;   // 1日の額の上限の下限 $4（worker/ai-price.mjs の DEFAULT_DAILY_BUDGET_MIN_USD）
 const HOLD_ID_RE = /^[A-Za-z0-9_-]{16,64}$/;
 // 精算されない仮押さえの記録を消すまでの時間。消しても額は戻さない（使われたものとして残す）。
 const HOLD_TTL_MS = 2 * 60 * 60 * 1000;
@@ -90,11 +94,13 @@ const JST_MS = 9 * 60 * 60 * 1000;
 
 export function jstMonth(now) { return new Date(now + JST_MS).toISOString().slice(0, 7); }
 export function utcDay(now) { return new Date(now).toISOString().slice(0, 10); }
-// UTC の日（日本時間の朝9時に始まる日）を含めた、その月の残りの日数。
-function daysLeftInMonth(day) {
-  const [y, m, d] = day.split("-").map(Number);
+// UTC の日（日本時間の朝9時に始まる日）を含めた、その月（日本時間の年月 month）の残りの日数。
+// 日本時間の月初め 0〜9 時は、UTC の日付がまだ前の月の最後の日なので、新しい月の日数をそのまま使う。
+function daysLeftInMonth(day, month) {
+  const [y, m] = month.split("-").map(Number);
   const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
-  return Math.max(1, last - d + 1);
+  if (day.slice(0, 7) !== month) return last;
+  return Math.max(1, last - Number(day.slice(8, 10)) + 1);
 }
 
 function intParam(p, name) {
@@ -104,17 +110,27 @@ function intParam(p, name) {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
-// 金額の欄（usd・hold・monthCap・dayMax・factor）を読む。無ければ null（金額は数えない呼び出し）。形が違えば { bad: true }。
+// 金額の欄（usd・hold・monthCap・dayMax・dayMin・factor・minUsd・who）を読む。無ければ null（金額は数えない呼び出し）。
+// 形が違えば { bad: true }。minUsd はいちばん小さな依頼の仮押さえの額で、「今月ぶん」「本日ぶん」と言い切ってよいかに使う。
 function readMoneyParams(url) {
   const p = url.searchParams;
   if (!p.has("monthCap")) return null;
   const monthCap = intParam(p, "monthCap");
   const dayMax = intParam(p, "dayMax");
+  const dayMinRaw = intParam(p, "dayMin");
   const factor = Number(p.get("factor")) || 2;
   const usd = intParam(p, "usd") || 0;
+  const minUsd = intParam(p, "minUsd") || 0;
   const hold = p.get("hold") || "";
+  const who = p.get("who") || "unknown";
   if (monthCap === null || dayMax === null || (usd > 0 && !HOLD_ID_RE.test(hold))) return { bad: true };
-  return { monthCap, dayMax, factor, usd, hold };
+  return { monthCap, dayMax, dayMin: dayMinRaw === null ? DEFAULT_DAY_MIN : dayMinRaw, factor, usd, minUsd, hold, who };
+}
+
+// 額が足りないときの断り方。いちばん小さな依頼も入らないときだけ「今月ぶん」「本日ぶん」と言い切る。
+// 大きな依頼だけが入らないときは「混み合っています」（busy）にする（小さな依頼は通るので、言い切ると嘘になる）。
+function shortScope(left, money, scope) {
+  return left < money.minUsd ? scope : "busy";
 }
 
 // 札の記録の鍵。forgetOldDays（日付で古い数を捨てる）はこの前置きの鍵に触らない。
@@ -188,14 +204,15 @@ export class AiQuota {
         ...(budget ? { monthLeft: budget.monthLeft, dayLeft: budget.dayLeft } : {}) });
     }
     // 月の枠を先に見る。月が尽きているのに「明日また」と言わないため。
-    if (budget && money.usd > budget.monthLeft) return this.reply({ ok: false, scope: "month" });
+    if (budget && money.usd > budget.monthLeft) return this.reply({ ok: false, scope: shortScope(budget.monthLeft, money, "month") });
     if (total + cost > totalPerDay) {
       return this.reply({ ok: false, scope: "total", limit: totalPerDay, remaining: leftTotal });
     }
     if (mine + cost > perDay) {
       return this.reply({ ok: false, scope: "who", limit: perDay, remaining: leftMine });
     }
-    if (budget && money.usd > budget.dayLeft) return this.reply({ ok: false, scope: "day" });
+    if (budget && budget.pend > budget.pendCap) return this.reply({ ok: false, scope: "pending" });
+    if (budget && money.usd > budget.dayLeft) return this.reply({ ok: false, scope: shortScope(budget.dayLeft, money, "day") });
 
     // チャットの最初の呼び出しは、点を使うのと同じ書き込みで札の記録を作る（Durable Object への
     // 問い合わせを1回にし、点だけ使って札の記録が無い、という途中の状態を作らない）。
@@ -227,16 +244,21 @@ export class AiQuota {
     const day = utcDay(now);
     const monthKey = MONTH_PREFIX + month;
     const dayKey = `${DAY_PREFIX}${day}:${month}`;
-    const got = await this.state.storage.get([monthKey, dayKey]);
+    const pendKey = `${PEND_PREFIX}${day}:${money.who}`;
+    const got = await this.state.storage.get([monthKey, dayKey, pendKey]);
     const monthUsed = Number(got.get(monthKey) || 0);
     const dayUsed = Number(got.get(dayKey) || 0);
     // 1日の額の上限は、その日の始まりの時点の月の残りから決める（その日のうちに上限が動かないように）。
+    // 下限（既定 $4）を付けるが、その日の始まりの月の残りは超えない。
     const atDayStart = Math.max(0, money.monthCap - (monthUsed - dayUsed));
-    const dayCap = Math.min(money.dayMax, Math.floor(money.factor * atDayStart / daysLeftInMonth(day)));
+    const byPace = Math.min(money.dayMax, Math.floor(money.factor * atDayStart / daysLeftInMonth(day, month)));
+    const dayCap = Math.min(atDayStart, Math.max(money.dayMin, byPace));
     return {
-      month, day, monthKey, dayKey, monthUsed, dayUsed,
+      month, day, monthKey, dayKey, pendKey, monthUsed, dayUsed, dayCap,
       monthLeft: Math.max(0, money.monthCap - monthUsed),
       dayLeft: Math.max(0, dayCap - dayUsed),
+      pend: Number(got.get(pendKey) || 0),
+      pendCap: Math.floor(dayCap / 3),
     };
   }
 
@@ -244,12 +266,14 @@ export class AiQuota {
     return {
       [budget.monthKey]: budget.monthUsed + money.usd,
       [budget.dayKey]: budget.dayUsed + money.usd,
-      [HOLD_PREFIX + money.hold]: { usd: money.usd, month: budget.month, day: budget.day, exp: now + HOLD_TTL_MS, ...(extra || {}) },
+      [HOLD_PREFIX + money.hold]: { usd: money.usd, month: budget.month, day: budget.day, who: money.who,
+        exp: now + HOLD_TTL_MS, ...(extra || {}) },
     };
   }
 
-  // 仮押さえを実額で精算する。?hold=<id>&usd=<実額>（&out=<この往復の実際の出力トークン>）
+  // 仮押さえを実額で精算する。?hold=<id>&usd=<額>&exact=<1|0>（&out=<この往復の実際の出力トークン>）
   // 実額が小さければ差を戻し、大きければ足す。仮押さえの記録が無ければ（消えた・二度目）何もしない。
+  // exact=0（usage どおりではなく見積もりで精算した）のときは、その額をその人の「精算されずに残った額」に積む。
   async settle(url) {
     const p = url.searchParams;
     const id = p.get("hold") || "";
@@ -263,11 +287,15 @@ export class AiQuota {
     const keys = [monthKey, dayKey];
     const ticketKey = rec.ticket ? TICKET_PREFIX + rec.ticket : null;
     if (ticketKey) keys.push(ticketKey);
+    const exact = p.get("exact") !== "0";
+    const pendKey = !exact && rec.who ? `${PEND_PREFIX}${rec.day}:${rec.who}` : null;
+    if (pendKey) keys.push(pendKey);
     const got = await this.state.storage.get(keys);
     const delta = usd - Number(rec.usd || 0);
     const writes = {};
     if (got.has(monthKey)) writes[monthKey] = Math.max(0, Number(got.get(monthKey)) + delta);
     if (got.has(dayKey)) writes[dayKey] = Math.max(0, Number(got.get(dayKey)) + delta);
+    if (pendKey && usd > 0) writes[pendKey] = Number(got.get(pendKey) || 0) + usd;
     const out = intParam(p, "out");
     const t = ticketKey ? got.get(ticketKey) : null;
     if (t && out !== null) writes[ticketKey] = { ...t, out: Math.max(0, Number(t.out || 0) - Number(rec.out || 0) + out) };
@@ -296,11 +324,19 @@ export class AiQuota {
     let yesterdayUsd = 0;
     let monthUsd = 0;
     let money = false;
+    const pendAdd = {};
     for (const [rawKey, value] of all) {
       const key = String(rawKey);
       if (key.startsWith(TICKET_PREFIX)) continue;
       if (key.startsWith(HOLD_PREFIX)) {
-        if (!value || !(Number(value.exp) > now)) stale.push(rawKey);
+        if (!value || !(Number(value.exp) > now)) {
+          stale.push(rawKey);
+          // 精算されないまま期限が過ぎた仮押さえは、その人の「精算されずに残った額」に積む（額は戻さない）。
+          if (value && value.who && keepDays.has(value.day)) {
+            const k = `${PEND_PREFIX}${value.day}:${value.who}`;
+            pendAdd[k] = (pendAdd[k] || 0) + (Number(value.usd) || 0);
+          }
+        }
         continue;
       }
       if (key.startsWith(MONTH_PREFIX)) {
@@ -316,6 +352,13 @@ export class AiQuota {
       if (d && !keepDays.has(d)) stale.push(rawKey);
     }
     if (stale.length) await this.state.storage.delete(stale);
+    const pendKeys = Object.keys(pendAdd);
+    if (pendKeys.length) {
+      const got = await this.state.storage.get(pendKeys);
+      const writes = {};
+      for (const k of pendKeys) writes[k] = Number(got.get(k) || 0) + pendAdd[k];
+      await this.state.storage.put(writes);
+    }
     if (money) {
       console.log(JSON.stringify({ ai_usage: {
         day: yesterday, day_usd: +(yesterdayUsd / 1e6).toFixed(4),
@@ -370,8 +413,9 @@ export class AiQuota {
       if (grant < Math.min(want, MIN_OUTPUT_GRANT)) return this.reply({ ok: false, reason: "output", n: used, left: max - used });
     }
     const budget = money ? await this.readBudget(now, money) : null;
-    if (budget && money.usd > budget.monthLeft) return this.reply({ ok: false, reason: "month" });
-    if (budget && money.usd > budget.dayLeft) return this.reply({ ok: false, reason: "day" });
+    if (budget && money.usd > budget.monthLeft) return this.reply({ ok: false, reason: shortScope(budget.monthLeft, money, "month") });
+    if (budget && budget.pend > budget.pendCap) return this.reply({ ok: false, reason: "pending" });
+    if (budget && money.usd > budget.dayLeft) return this.reply({ ok: false, reason: shortScope(budget.dayLeft, money, "day") });
     const n = used + 1;
     const writes = { [key]: { n, exp: rec.exp, count: t.count, hash: t.hash, bytes, out: outUsed + grant } };
     if (budget && money.usd > 0) Object.assign(writes, this.holdWrites(budget, money, now, { ticket: t.id, out: grant }));

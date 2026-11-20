@@ -37,8 +37,12 @@ export const UNKNOWN_PRICE = Object.freeze({ ...TOP, cacheRead: TOP.in });
 // OpenAI・Vertex（予備の経路）の単価。実際の単価をここで追わず、表のいちばん高い値で数える（高めの概算）。
 export const OTHER_PRICE = UNKNOWN_PRICE;
 // 安全側の判定で断られたとき、Anthropic が別のモデルでやり直す（worker/anthropic.mjs の fallbacks: "default"）。
-// どのモデルになるかは返事を見るまで分からないので、仮押さえはこのモデルの単価との高い方で取る。
-const FALLBACK_PRICE = PRICES["claude-opus-5"];
+// やり直しの先は、Claude Opus 5.5 では claude-opus-5 と claude-opus-4-8 だけ（Anthropic の移行の手引き
+// 「the permitted fallback targets are claude-opus-4-8 and claude-opus-5」、2026-11-20 に Skill claude-api で確かめた）。
+// どちらに行くかは断られた種類で決まり、公表されていないので、仮押さえは2つの高い方の単価で取る。
+// 途中で断られた試行（それまでの入力と出力）も、やり直しの試行も、それぞれ課金されうるので、仮押さえは両方を足す。
+export const FALLBACK_MODELS = Object.freeze(["claude-opus-5", "claude-opus-4-8"]);
+const FALLBACK_PRICE = maxOf(FALLBACK_MODELS.map((m) => PRICES[m]));
 
 export function priceOf(model) {
   return Object.prototype.hasOwnProperty.call(PRICES, String(model || "")) ? PRICES[model] : UNKNOWN_PRICE;
@@ -71,11 +75,31 @@ export function imageTokens(images) {
 }
 
 // 仮押さえの額（米ドル）。入力は全部「キャッシュ書き込み」の単価（入力より高い）で、出力は上限まで出たとして数える。
+// Claude は「頼んだモデルでの試行」＋「別のモデルでのやり直し」の2回分。表に無いモデルは、どちらも表のいちばん高い単価。
+// OpenAI・Vertex（other）はやり直しをしないので1回分。
 export function holdUsd({ model, inputTokens, maxOutputTokens, other }) {
-  const p = other ? OTHER_PRICE : maxOf([priceOf(model), FALLBACK_PRICE]);
   const input = Math.min(MAX_INPUT_TOKENS, Math.max(0, Number(inputTokens) || 0) + OVERHEAD_TOKENS);
   const out = Math.max(0, Number(maxOutputTokens) || 0);
-  return (input * Math.max(p.in, p.cacheWrite) + out * p.out) / 1e6;
+  const attempt = (p) => (input * Math.max(p.in, p.cacheWrite) + out * p.out) / 1e6;
+  if (other) return attempt(OTHER_PRICE);
+  const own = priceOf(model);
+  return attempt(own) + attempt(own === UNKNOWN_PRICE ? UNKNOWN_PRICE : FALLBACK_PRICE);
+}
+
+// 1回分の入力だけの額（途中で切れたとき、入力の実数が分からなければこれで数える）。
+export function inputHoldUsd({ model, inputTokens }) {
+  const p = priceOf(model);
+  const input = Math.min(MAX_INPUT_TOKENS, Math.max(0, Number(inputTokens) || 0) + OVERHEAD_TOKENS);
+  return input * Math.max(p.in, p.cacheWrite) / 1e6;
+}
+
+// 途中で切れた答えの出力の見積もり（トークン）。min(出力の上限, 経過秒数 × 300 + 1,000)。
+// 300 トークン/秒は Opus の生成の速さの3倍以上の余裕を見た値で、厳密な保証ではない（それより速く出た分は
+// 数え漏れる）。漏れは、月の枠 $80 と運営者が避けたい $100 の間の余裕で受ける。
+export const STREAM_TOKENS_PER_SECOND = 300;
+export function interruptedOutputTokens(maxOutputTokens, elapsedMs) {
+  const guess = Math.ceil(Math.max(0, Number(elapsedMs) || 0) / 1000 * STREAM_TOKENS_PER_SECOND) + 1000;
+  return Math.min(Math.max(0, Number(maxOutputTokens) || 0), guess);
 }
 
 // Anthropic の usage から実額を出す。model は返事のモデル。頼んだモデルとの高い方の単価で数える。
@@ -104,10 +128,14 @@ export function toMicro(usd) {
 //
 //   AI_MONTHLY_BUDGET_USD   月の枠。既定 $80（$100 に対して、精算の取りこぼしと他の用途の分の余裕を取る）
 //   AI_DAILY_BUDGET_MAX_USD 1日の額の上限の天井。既定 $8
-// 1日の額の上限 = min(天井, 2 × その日の始まりの時点の月の残り ÷ 月の残り日数（その日を含む）)。
+//   AI_DAILY_BUDGET_MIN_USD 1日の額の上限の下限。既定 $4（ただし月の残りを超えない）
+// 1日の額の上限 = min(月の残り, max(下限, min(天井, 2 × その日の始まりの時点の月の残り ÷ 月の残り日数（その日を含む））))。
 // 月の初めは 1日 $5.3 ほど。前半で使われなかった分は後半へ回り、1日で月の枠を使い切られない。
+// 下限は、月の後半に1日の上限が見直し1回の仮押さえを下回り、見直しだけが毎日断られるのを防ぐため。
+// 1人の1日の「精算されずに残った額」（途中で切れて見積もりで精算した額など）の上限は、1日の額の上限の 1/3。
 export const DEFAULT_MONTHLY_BUDGET_USD = 80;
 export const DEFAULT_DAILY_BUDGET_MAX_USD = 8;
+export const DEFAULT_DAILY_BUDGET_MIN_USD = 4;
 export const DAILY_BUDGET_FACTOR = 2;
 
 function money(value, fallback) {
@@ -120,6 +148,7 @@ export function budgetConfig(env) {
   return {
     monthCap: toMicro(money(env && env.AI_MONTHLY_BUDGET_USD, DEFAULT_MONTHLY_BUDGET_USD)),
     dayMax: toMicro(money(env && env.AI_DAILY_BUDGET_MAX_USD, DEFAULT_DAILY_BUDGET_MAX_USD)),
+    dayMin: toMicro(money(env && env.AI_DAILY_BUDGET_MIN_USD, DEFAULT_DAILY_BUDGET_MIN_USD)),
     factor: DAILY_BUDGET_FACTOR,
   };
 }
