@@ -132,8 +132,8 @@ try {
   assert.ok(!/token|トークン|\$|円|秒/.test(e.ai), '開発の都合の言葉が出ている: ' + e.ai);
   const calls = await page.evaluate(() => window.__chat.calls);
   assert.equal(calls.length, 3);
-  // 画面の要約に段階ごとの出来具合が入る(白紙なので、足りない最初の段階は敷地)
-  assert.match(calls[0].messages[0].content, /進み具合（プランから数えた値）:[\s\S]*- 足りない最初の段階: 敷地/);
+  // 画面の要約に段階ごとの出来具合が入る(白紙なので、次の段階の目安は敷地)
+  assert.match(calls[0].messages[0].content, /進み具合（プランから数えた値）:[\s\S]*- 次の段階の目安: 敷地/);
   const asst = calls[2].messages[3];
   assert.equal(asst.role, 'assistant');
   assert.deepEqual(asst.content.filter((b) => b.type === 'tool_use').map((b) => b.id), ['a3', 'a4'], '切れた道具を送り返している');

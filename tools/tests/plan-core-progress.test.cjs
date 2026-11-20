@@ -135,15 +135,33 @@ test('Worker の要約(MCP の get_plan・チャットと同じ形)に進み具�
   const W = await import(pathToFileURL(path.join(__dirname, '../../worker/plan-ctx.mjs')).href);
   const text = W.workerSummarize(walled);
   assert.match(text, /進み具合（プランから数えた値）:/);
-  assert.match(text, /- 足りない最初の段階: 屋根/);
+  assert.match(text, /- 次の段階の目安: 屋根/);
   assert.match(text, /住設 トイレ 0/, 'Worker は分類の表があるので住設を数える');
   assert.ok(W.workerInspect(walled).warnings.includes('2階の上に屋根がありません'));
+});
+
+test('次に勧める段階は、出来ているいちばん先の段階の次。それより前に抜けた段階は「まだ無い段階」として別に書く', () => {
+  // 敷地・基礎が無いまま部屋と壁を作ったプラン: 次は屋根(敷地に戻らない)。敷地と基礎は抜けとして書く
+  const noSite = apply(empty, [
+    { op: 'addRoom', args: { name: 'LDK', floor: 1, x: 2500, y: 2000, w: 5000, d: 4000 } },
+  ]);
+  const w = apply(noSite, [{ op: 'addRoomWalls', args: { ids: [noSite.rooms[0].id] } }]);
+  const p = P.stageProgress(w);
+  assert.equal(P.nextStage(p), '屋根');
+  assert.deepEqual(P.missingStages(p), ['敷地', '基礎', '屋根', 'ドア・窓']);
+  const lines = P.progressLines(p);
+  assert.ok(lines.includes('- 次の段階の目安: 屋根'), lines.join('\n'));
+  assert.ok(lines.includes('- まだ無い段階: 敷地・基礎・屋根・ドア・窓'), lines.join('\n'));
+  // 床だけ(敷地なし): 次は壁
+  assert.equal(P.nextStage(P.stageProgress(noSite)), '壁');
+  // 空: 敷地。全部あれば null
+  assert.equal(P.nextStage(P.stageProgress(empty)), '敷地');
 });
 
 test('要約の行: 数と足りない最初の段階を書き、開発の都合の言葉を書かない', () => {
   const lines = P.progressLines(P.stageProgress(walled));
   assert.equal(lines[0], '進み具合（プランから数えた値）:');
   assert.ok(lines.some((l) => l.includes('屋根 0（2階の上に屋根なし）')));
-  assert.ok(lines.some((l) => l === '- 足りない最初の段階: 屋根'));
+  assert.ok(lines.some((l) => l === '- 次の段階の目安: 屋根'));
   assert.ok(!lines.join('\n').match(/トークン|費用|点数|\$/));
 });

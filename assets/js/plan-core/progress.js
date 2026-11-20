@@ -20,6 +20,7 @@
 //   PlanCoreProgress.progressLines(progress)       → 要約に入れる行の配列
 //   PlanCoreProgress.progressIssues(progress)      → 点検(inspect_plan)の指摘の文の配列
 //   PlanCoreProgress.nextStage(progress)           → 次に勧める段階の名前(完成に近ければ null)
+//   PlanCoreProgress.missingStages(progress)       → まだ無い段階の名前の配列
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory();
@@ -220,17 +221,32 @@
       + (list.length > 8 ? ' ほか ' + (list.length - 8) + ' 部屋' : '');
   }
 
-  // 次に勧める段階。足りない最初の段階(運営者の想定の順)。家具まであれば null。
+  // 段階ごとに出来ているか(運営者の想定の順)。null は数えられない(分類が引けない)。
+  function stageDone(p) {
+    return [
+      ['敷地', p.site > 0],
+      ['基礎', p.foundation > 0],
+      ['床（部屋）', p.rooms > 0],
+      ['壁', p.walls > 0 && !p.unwalled.length],
+      ['屋根', p.roofOverTop === true],
+      ['ドア・窓', p.exteriorDoors > 0 && !p.windowless.length],
+      ['住設', p.fixtures ? !!(p.fixtures.toilet && p.fixtures.bath && p.fixtures.kitchen && p.fixtures.vanity) : null],
+      ['家財（家具）', p.furniture === null ? null : p.furniture > 0]
+    ];
+  }
+  // まだ無い段階(数えられない段階は入れない)。
+  function missingStages(p) {
+    return stageDone(p).filter(function (s) { return s[1] === false; }).map(function (s) { return s[0]; });
+  }
+  // 次に勧める段階: 出来ているいちばん先の段階より後で、まだ無い最初の段階。後に無ければ、前に抜けた最初の段階。
+  // (敷地を作らずに壁まで作った人に、敷地へ戻るより屋根を勧める。抜けた段階は missingStages で別に書く)
+  // 全部あれば null。
   function nextStage(p) {
-    if (!p.site) return '敷地';
-    if (!p.foundation) return '基礎';
-    if (!p.rooms) return '床（部屋）';
-    if (!p.walls || p.unwalled.length) return '壁';
-    if (p.roofOverTop === false) return '屋根';
-    if (p.exteriorDoors === 0 || p.windowless.length) return 'ドア・窓';
-    if (p.fixtures && (!p.fixtures.toilet || !p.fixtures.bath || !p.fixtures.kitchen || !p.fixtures.vanity)) return '住設';
-    if (p.furniture === 0) return '家財（家具）';
-    return null;
+    var st = stageDone(p), last = -1;
+    st.forEach(function (s, i) { if (s[1] === true) last = i; });
+    for (var i = last + 1; i < st.length; i++) if (st[i][1] === false) return st[i][0];
+    var miss = missingStages(p);
+    return miss.length ? miss[0] : null;
   }
 
   function progressLines(p) {
@@ -249,7 +265,9 @@
       lines.push('- 家具 ' + p.furniture);
     }
     var next = nextStage(p);
-    lines.push('- 足りない最初の段階: ' + (next || 'なし（家具まである）'));
+    var miss = missingStages(p);
+    lines.push('- 次の段階の目安: ' + (next || 'なし（家具まである）'));
+    if (miss.length) lines.push('- まだ無い段階: ' + miss.join('・'));
     return lines;
   }
 
@@ -266,5 +284,5 @@
     return out;
   }
 
-  return { stageProgress: stageProgress, progressLines: progressLines, progressIssues: progressIssues, nextStage: nextStage, LIVING_RE: LIVING_RE };
+  return { stageProgress: stageProgress, progressLines: progressLines, progressIssues: progressIssues, nextStage: nextStage, missingStages: missingStages, LIVING_RE: LIVING_RE };
 }));

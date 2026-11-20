@@ -682,7 +682,7 @@ test('chat.mjs が出すもの: CHAT_SYSTEM・chatTools()', async () => {
   // 順番どおりでない頼まれ方: 頼まれたことを先に。土台が無ければ足りない物と次の一手を伝える。最後に次の段階を1つだけ勧める
   assert.match(m.CHAT_SYSTEM, /頼まれたことを先に行ってください/);
   assert.match(m.CHAT_SYSTEM, /何が足りないかと、次に頼むとよいことを1〜2文で/);
-  assert.match(m.CHAT_SYSTEM, /次に勧める段階を1つだけ/);
+  assert.match(m.CHAT_SYSTEM, /次に勧める段階として1つだけ/);
   assert.match(m.CHAT_SYSTEM, /進み具合（プランから数えた値）/);
   assert.ok(!/できるだけ1回の返事にまとめて/.test(m.CHAT_SYSTEM), '1回の返事に詰め込ませる文が残っている');
   assert.ok(m.CHAT_SYSTEM.includes(require('../../assets/js/chat/chat-session.js').MORE_MARK));
