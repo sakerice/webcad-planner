@@ -18535,8 +18535,9 @@ function syncDimToolButton(){
   if(b) b.className='stool'+(ST.showDim?' active':'');
 }
 function toggleDim(){ST.showDim=!ST.showDim;draw2d();applySetbackDimVisibility();syncDimToolButton();}
-function resetView(){
-  var fp=FOOTPRINTS[ST.floor], area=document.getElementById('canvas-area');
+// 平面図の欄(#canvas-area)のうち、上・左・下の操作の枠と案内の箱に隠れない所の、四辺からの幅(CSS の画素)。
+// 「全体表示」(resetView)が間取りを収める所で、開いた直後の見え方の判定(planViewOffscreen)も同じ所を見る。
+function planViewSafeInsets(){
   var isMobile=window.matchMedia&&window.matchMedia('(max-width:768px)').matches;
   var isNarrow=window.matchMedia&&window.matchMedia('(max-width:920px)').matches;
   var safeLeft=isMobile?18:(isNarrow?236:256);
@@ -18550,6 +18551,12 @@ function resetView(){
     if(!isMobile) safeLeft=Math.max(safeLeft, help.offsetLeft+guideW+36);
     safeTop=Math.max(safeTop, help.offsetTop+guideH+36);
   }
+  return {left:safeLeft,top:safeTop,right:safeRight,bottom:safeBottom};
+}
+function resetView(){
+  var fp=FOOTPRINTS[ST.floor], area=document.getElementById('canvas-area');
+  var safe=planViewSafeInsets();
+  var safeLeft=safe.left, safeTop=safe.top, safeRight=safe.right, safeBottom=safe.bottom;
   var bounds=planSubjectBoundsMm(ST.floor);
   if(!bounds && fp) bounds={minX:0,minY:0,maxX:fp.w,maxY:fp.h};
   if(area&&bounds){
@@ -19809,9 +19816,61 @@ function restoreViewState(){
     ST.zoom=Math.max(0.05,Math.min(40,Number(vs.twoD.zoom)));
     if(isFinite(Number(vs.twoD.panX))) ST.panX=Number(vs.twoD.panX);
     if(isFinite(Number(vs.twoD.panY))) ST.panY=Number(vs.twoD.panY);
+    scheduleFitIfPlanOffscreen();
   }
   if(vs.ext&&vs.ext.pos&&vs.ext.target) ST._camStash.ext=vs.ext;
   if(vs.int&&vs.int.pos&&vs.int.target) ST._camStash.int=vs.int;
+}
+// 保存した平面図の表示位置を戻した直後に、いまの階の間取りが画面に少しも入っていなければ「全体表示」にする。
+//
+// 表示位置(viewState.twoD)は保存した画面の大きさのまま戻る。幅 1280 で保存したプランを幅 375 で開くと、
+// 間取りが画面の右の外に描かれ、方眼だけが見えて間取りが消えたように見える。一部でも見えていれば、
+// 利用者が意図して寄せた表示かもしれないので、保存した位置のままにする。知らせは出さない。
+//
+// 戻した直後に1度だけ判定する(取り消し・階の切り替え・相手の変更・回転やリサイズでは呼ばれない)。
+// 判定は呼んだ側が開く処理を終えたあとのフレームで行う。それまでに別のプランへ替わった・階を替えた・
+// 表示を動かした(比較表示が左にそろえた など)ときは何もしない。起動直後などで平面図の欄の大きさが
+// まだ 0 なら、大きさが決まるまでフレームを待つ。
+var PLAN_OFFSCREEN_MIN_PX=24;   // これより狭い重なりは「入っていない」と見る(間取りがこれより小さく描かれていれば、その大きさ)
+var PLAN_OFFSCREEN_CHECK=null;
+function scheduleFitIfPlanOffscreen(){
+  var token={data:DATA,floor:ST.floor,zoom:ST.zoom,panX:ST.panX,panY:ST.panY,frames:0};
+  PLAN_OFFSCREEN_CHECK=token;
+  var raf=(typeof requestAnimationFrame==='function')?requestAnimationFrame:function(f){return setTimeout(f,16);};
+  function run(){
+    if(PLAN_OFFSCREEN_CHECK!==token) return;
+    if(DATA!==token.data||ST.floor!==token.floor||ST.zoom!==token.zoom||ST.panX!==token.panX||ST.panY!==token.panY){
+      PLAN_OFFSCREEN_CHECK=null; return;
+    }
+    var area=document.getElementById('canvas-area');
+    if(!area||!(area.clientWidth>0)||!(area.clientHeight>0)){
+      if(++token.frames<600) raf(run); else PLAN_OFFSCREEN_CHECK=null;
+      return;
+    }
+    PLAN_OFFSCREEN_CHECK=null;
+    if(planViewOffscreen()) resetView();
+  }
+  raf(run);
+}
+// いまの階の間取り(壁・部屋・物の外接の範囲)が、平面図の見える所(planViewSafeInsets の内側)に
+// 縦横とも PLAN_OFFSCREEN_MIN_PX 以上重なっていなければ true。間取りが無い階(白紙)は false。
+function planViewOffscreen(){
+  var b=planSubjectBoundsMm(ST.floor);
+  var area=document.getElementById('canvas-area');
+  if(!b||!area) return false;
+  var W=area.clientWidth, H=area.clientHeight;
+  if(!(W>0)||!(H>0)) return false;
+  var safe=planViewSafeInsets();
+  var vx0=safe.left, vx1=W-safe.right, vy0=safe.top, vy1=H-safe.bottom;
+  // 見える所が狭すぎる(小さな窓)ときは欄全体で見る
+  if(vx1-vx0<48){ vx0=0; vx1=W; }
+  if(vy1-vy0<48){ vy0=0; vy1=H; }
+  var sc=ST.zoom*0.05;
+  var x0=ST.panX+b.minX*sc, x1=ST.panX+b.maxX*sc, y0=ST.panY+b.minY*sc, y1=ST.panY+b.maxY*sc;
+  if(![x0,x1,y0,y1].every(isFinite)) return false;
+  var ow=Math.min(x1,vx1)-Math.max(x0,vx0), oh=Math.min(y1,vy1)-Math.max(y0,vy0);
+  var needW=Math.min(PLAN_OFFSCREEN_MIN_PX,x1-x0), needH=Math.min(PLAN_OFFSCREEN_MIN_PX,y1-y0);
+  return !(ow>0&&oh>0&&ow>=needW&&oh>=needH);
 }
 function applyStashedCamera(s){
   if(!camExt||!orbit||!s||!s.pos||!s.target) return false;
