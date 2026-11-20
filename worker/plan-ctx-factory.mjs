@@ -700,11 +700,13 @@ export function createPlanCtxTools(deps) {
   }
   function kindOf(t) { return has(TAG_ITEMS, t) && TAG_ITEMS[t] ? TAG_ITEMS[t].kind : null; }
   function workerSummarize(plan) {
-    return '<plan_summary>\n' + Summary.summarize(plan, { labelOf: labelOf, kindOf: kindOf }) + '\n</plan_summary>';
+    var Progress = deps.Progress;
+    var progressLines = Progress ? Progress.progressLines(Progress.stageProgress(plan, { kindOf: kindOf })) : [];
+    return '<plan_summary>\n' + Summary.summarize(plan, { labelOf: labelOf, kindOf: kindOf, progressLines: progressLines }) + '\n</plan_summary>';
   }
   // 検査(画面のチャットの inspect_plan と同じ。既定の寸法は画面の ISIZES)。
   function workerInspect(plan) {
-    return Inspect.inspectPlan(plan, { defaults: ISIZES, schema: deps.Schema, check: deps.Check, structure: deps.Structure });
+    return Inspect.inspectPlan(plan, { defaults: ISIZES, schema: deps.Schema, check: deps.Check, structure: deps.Structure, progress: deps.Progress });
   }
 
   return { workerOpsCtx, workerApply, workerSummarize, workerInspect, firstNewId, REFUSAL };
