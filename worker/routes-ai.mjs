@@ -9,7 +9,6 @@
 // 2つの機能で提供元が違う理由
 // --------------------------
 //   POST /api/ai/import-plan  間取り図 → プランJSON  … Vertex AI Gemini (東京)
-//   POST /api/ai/render       3Dの画像 → 写実的な画像 … OpenAI (未実装)
 //
 // 間取り図には施主名・敷地住所が入りうるので、東京リージョンで処理を閉じ
 // られる Vertex AI の Gemini を使う。一方レンダーの入力は利用者自身が作った
@@ -65,7 +64,6 @@ const COST_REVISE_PAGE = 10;
 // quotaLimits にある。チャット（worker/chat.mjs）も同じ枠を使うので、そちらに置いた。
 // 1回に読むページ数の上限。各ページが各階になる。
 const MAX_PAGES = 8;
-const MAX_PROMPT_CHARS = 8000;
 // 利用者のひとこと(図面の補足)の長さ。チャットの依頼と同じ値(assets/js/chat/plan-summary.js の REQUEST_MAX_CHARS)。
 // 画面の入力欄も同じ値で止める。ここでは超えた分を文字(コードポイント)単位で切る(今までどおり断らない)。
 const MAX_HINT_CHARS = Guard.REQUEST_MAX_CHARS;
@@ -114,7 +112,6 @@ export async function handleAi(request, env, url, deps = {}) {
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps, request);
   if (url.pathname === "/api/ai/find-plan") return aiFindPlan(payload, env, deps, request);
-  if (url.pathname === "/api/ai/render") return aiRender(payload, env, deps);
   return json({ error: "not_found" }, 404);
 }
 
@@ -910,25 +907,4 @@ export function finishImportedPlan(parsed, usage, extra) {
     usage: usage || null,
     ...(extra || {}),
   });
-}
-
-// ── 3Dの画像 → 写実的な画像 (未実装) ──────────────────────────────────
-async function aiRender(payload, env) {
-  const image = readImage(payload && payload.image, "image");
-  if (image.error) return json({ error: "invalid_request", message: image.error }, 400);
-  const prompt = String((payload && payload.prompt) || "");
-  if (!prompt.trim()) return json({ error: "invalid_request", message: "prompt が無い" }, 400);
-  if (prompt.length > MAX_PROMPT_CHARS) {
-    return json({ error: "invalid_request", message: `prompt が長すぎる(上限 ${MAX_PROMPT_CHARS} 文字)` }, 400);
-  }
-  if (!(env && env.OPENAI_API_KEY)) {
-    return json({
-      error: "ai_not_configured",
-      message: "OpenAI の鍵がこの環境に設定されていません。wrangler secret put OPENAI_API_KEY で設定してください。",
-    }, 503);
-  }
-  return json({
-    error: "ai_not_implemented",
-    message: "画像レンダーの呼び出しはまだ実装されていません。",
-  }, 501);
 }
