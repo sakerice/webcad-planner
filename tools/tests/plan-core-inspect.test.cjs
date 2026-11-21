@@ -61,6 +61,7 @@ test('deps に偽物を渡すとそれが使われる', () => {
     schema: { validatePlan: (p, opts) => { calls.push(['schema', opts]); return { ok: false, errors: ['形の誤り'], warnings: ['形の注意'] }; } },
     check: { knowledgeWarnings: (p) => { calls.push(['check']); return ['知識の注意']; } },
     structure: { floorsOverlap: (walls) => { calls.push(['structure', walls]); return { ok: false, floors: [1, 3], detached: [3] }; } },
+    progress: { stageProgress: (p) => { calls.push(['progress']); return { fake: true }; }, progressIssues: (g) => (g.fake ? ['段階の注意'] : []) },
     knownItemTypes: new Set(['sofa']),
   };
   const plan = { walls: [{ id: 1 }], rooms: [], items: [] };
@@ -69,8 +70,8 @@ test('deps に偽物を渡すとそれが使われる', () => {
   assert.equal(r.errors[0], '形の誤り');
   assert.equal(r.errors.length, 2);
   assert.ok(r.errors[1].includes('3階'));
-  assert.deepEqual(r.warnings, ['形の注意', '知識の注意']);
-  assert.deepEqual(calls.map((c) => c[0]), ['schema', 'check', 'structure']);
+  assert.deepEqual(r.warnings, ['形の注意', '知識の注意', '段階の注意']);
+  assert.deepEqual(calls.map((c) => c[0]), ['schema', 'check', 'structure', 'progress']);
   assert.equal(calls[0][1].knownItemTypes, deps.knownItemTypes);
   assert.equal(calls[2][1], plan.walls, 'floorsOverlap には plan でなく walls を渡す');
 });
@@ -148,7 +149,8 @@ test('deps.defaults は knowledgeWarnings の options.defaults にそのまま�
   const room = plan.rooms.find((r) => r.n === '浴室');
   plan.items.push({ id: 99999, type: 'bath', x: room.x + room.w / 2 - 800, y: room.y + room.d / 2 - 800, w: 1600, d: 1600, rot: 0, floor: 1 });
   assert.equal(I.inspectPlan(plan).warnings.filter((w) => w.includes('1600×1600')).length, 1);
-  assert.deepEqual(I.inspectPlan(plan, { defaults: table }).warnings, []);
+  // 残るのは段階の不足だけ(凍結間取りの2階の書斎は本当に窓が無い。plan-core-progress.test.cjs と tools/lint_plan.py も同じ部屋を指す)
+  assert.deepEqual(I.inspectPlan(plan, { defaults: table }).warnings, ['居室「書斎」(id=r1088、2階)に、外に面した窓がありません']);
 });
 
 test('plan-core/inspect.js はグローバルに触らない', () => {

@@ -22,6 +22,7 @@ const EXTRACTED = [
   'assets/js/plan-core/snap.js',
   'assets/js/plan-core/operations.js',
   'assets/js/plan-core/operations-catalog.js',
+  'assets/js/plan-core/progress.js',
   'assets/js/plan-core/inspect.js',
   'assets/js/plan-core/patch.js',
   'assets/js/app-constants.js',

@@ -22,10 +22,11 @@ import Schema from "../assets/js/plan-schema.js";
 import Check from "../assets/js/plan-check.js";
 import Structure from "../assets/js/plan-structure.js";
 import SetbackLaw from "../assets/js/setback-law.js";
+import Progress from "../assets/js/plan-core/progress.js";
 import { createPlanCtxTools, REFUSAL, firstNewId } from "./plan-ctx-factory.mjs";
 
 const tools = createPlanCtxTools({
-  catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure, SetbackLaw,
+  catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure, SetbackLaw, Progress,
 });
 
 export const workerOpsCtx = tools.workerOpsCtx;

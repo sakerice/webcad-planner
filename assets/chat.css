@@ -168,7 +168,9 @@ body:has(#jis-drawing-overlay:not([style*="none"])) #chat-fab{
 .chat-ai-undone{display:block;color:var(--hp-text-soft);font-size:var(--airx-fs-help)}
 .chat-ai-text + .chat-ai-undone{margin-top:4px}
 .chat-entry-note .chat-ai{background:transparent;padding:0 4px;color:var(--hp-text-soft);font-size:var(--airx-fs-help)}
-#chat-panel .chat-undo{align-self:flex-start;width:auto;min-height:40px;margin:0;padding:0 16px}
+#chat-panel .chat-undo,
+#chat-panel .chat-continue{align-self:flex-start;width:auto;min-height:40px;margin:0;padding:0 16px}
+.chat-actions{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start}
 
 .chat-progress{flex:0 0 auto;color:var(--hp-text-soft);font-size:var(--airx-fs-label);padding:0 4px}
 .chat-progress[hidden]{display:none}
