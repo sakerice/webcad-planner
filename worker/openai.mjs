@@ -164,7 +164,10 @@ async function postRequest({
     input: [{ role: "user", content }],
     max_output_tokens: maxOutputTokens,
     background: true,
-    store: true,
+    // 保存しない。background は store: false でも動き、答えは取りに行けるよう約10分だけ置かれて消える
+    // （OpenAI の文書 guides/your-data の Background mode、guides/background。2026-11-21 に確かめた）。
+    // 画面は3秒おきに取りに行くので（assets/js/plan-import.js の waitForJobs）、10分の間に受け取れる。
+    store: false,
     text: config.schema ? {
       format: { type: "json_schema", name: "plan", strict: true, schema: config.schema },
     } : { format: { type: "json_object" } },
@@ -181,7 +184,7 @@ async function postRequest({
     }));
   } catch (e) {
     const why = (e && e.cause && (e.cause.code || e.cause.message)) || "";
-    return { ok: false, status: 502, message: "OpenAI へ届きませんでした: " + (e && e.message ? e.message : e) + (why ? ` (${why})` : "") };
+    return { ok: false, network: true, status: 502, message: "OpenAI へ届きませんでした: " + (e && e.message ? e.message : e) + (why ? ` (${why})` : "") };
   }
 
   const raw = await response.text();

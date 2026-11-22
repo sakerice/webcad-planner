@@ -147,6 +147,11 @@ OpenAI は**先払いのクレジット**。残高が $0 になると API が止
 | `OPENAI_MODEL` | `gpt-6-astra` | 読み取りのモデル |
 | `AI_LOCATE_PROVIDER` | vertex | 位置探しの提供元 |
 | `AI_LOCATE_MODEL` | `gemini-2.5-flash` | 位置探しのモデル |
+| `AI_FALLBACK` | （切り替える） | `off` にすると、提供元が一時的に失敗しても別の提供元へ切り替えない |
+
+提供元が一時的に失敗したとき（通信の失敗・429・5xx・529・401・403）は、OpenAI の鍵があれば1回だけ OpenAI へ切り替える
+（worker/ai-fallback.mjs）。読み取りは Claude → これまでの読み取り（import-plan）→ OpenAI、位置探しは Vertex → OpenAI。
+`AI_IMPORT_PROVIDER`・`AI_LOCATE_PROVIDER` で名指ししているときは切り替えない。チャットと、組み立てた家の見直し（review-plan-3d）は切り替えない。
 
 ### 他の選択肢を採らなかった理由
 

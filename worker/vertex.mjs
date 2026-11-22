@@ -65,8 +65,15 @@ export function vertexConfig(env) {
 // 「こういうJSONで返してください」と書くだけでは守られないことがある
 // (実測で、位置の項目名が box_2d から box へ勝手に変わって返った)。
 export async function generate({ config, system, text, docs, image, images, maxOutputTokens = 32768, thinkingBudget = 8192, responseSchema = null, fetchImpl = fetch, now }) {
-  const auth = await getAccessToken(config.credentials, { fetchImpl, now });
-  if (!auth.ok) return { ok: false, status: auth.status, message: "認証に失敗しました: " + auth.message };
+  // 届かなかった（例外）は network、トークンを取れなかったは authFailed として返す
+  // （どちらも worker/ai-fallback.mjs が一時的な失敗として扱う）。以前は例外がそのまま上へ抜けていた。
+  let auth;
+  try {
+    auth = await getAccessToken(config.credentials, { fetchImpl, now });
+  } catch (e) {
+    return { ok: false, network: true, status: 502, message: "Google の認証窓口へ届きませんでした。" };
+  }
+  if (!auth.ok) return { ok: false, authFailed: true, unbilled: true, status: auth.status, message: "認証に失敗しました: " + auth.message };
 
   let url;
   try {
@@ -103,12 +110,17 @@ export async function generate({ config, system, text, docs, image, images, maxO
     },
   });
 
-  const response = await fetchImpl(new Request(url, {
-    method: "POST",
-    headers: { authorization: "Bearer " + auth.token, "content-type": "application/json" },
-    body,
-  }));
-  const raw = await response.text();
+  let response, raw;
+  try {
+    response = await fetchImpl(new Request(url, {
+      method: "POST",
+      headers: { authorization: "Bearer " + auth.token, "content-type": "application/json" },
+      body,
+    }));
+    raw = await response.text();
+  } catch (e) {
+    return { ok: false, network: true, status: 502, message: "Vertex AI へ届きませんでした。" };
+  }
   if (!response.ok) {
     let message = raw.slice(0, 300);
     try {

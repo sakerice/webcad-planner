@@ -39,6 +39,7 @@ import {
 } from "./ai-budget.mjs";
 import { holdUsd, imageTokens, textTokens, anthropicUsageUsd, otherUsageUsd } from "./ai-price.mjs";
 import { quotaLimits } from "./ai-quota.mjs";
+import { fallbackEnabled, transientKind, logFallback } from "./ai-fallback.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -292,6 +293,27 @@ function locateProvider(env) {
   return { kind: "vertex" };
 }
 
+// 位置探しの切り替え先（Vertex が一時的に失敗したとき。worker/ai-fallback.mjs）。
+// 名指し（AI_LOCATE_PROVIDER）があるとき・AI_FALLBACK=off・OpenAI の鍵が無いときは切り替えない。
+// モデルは上の locateProvider で OpenAI へ回すときと同じ考え（安いモデルで外すより、読み取りと同じモデルで当てる）。
+// AI_LOCATE_MODEL は Vertex のモデル名を入れる欄でもあるので、ここでは見ない。
+function locateFallback(env) {
+  if (!fallbackEnabled(env) || (env && env.AI_LOCATE_PROVIDER)) return null;
+  const openai = openaiConfig(env);
+  if (!openai.configured) return null;
+  return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
+}
+
+// 読み取り・見直し（これまでの読み取り）の切り替え先。Claude が一時的に失敗したとき OpenAI へ回す。
+// 名指し（AI_IMPORT_PROVIDER）があるとき・AI_FALLBACK=off・OpenAI の鍵が無いときは切り替えない。
+// モデルは importProvider で OpenAI を選ぶときと同じ既定（gpt-6-astra）。
+function importFallback(env) {
+  if (!fallbackEnabled(env) || (env && env.AI_IMPORT_PROVIDER)) return null;
+  const openai = openaiConfig(env);
+  if (!openai.configured) return null;
+  return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
+}
+
 // 図面の読み取りを、どこへ投げるか。
 //
 // 実測（同じ切り出し画像・同じ指示文・同じ仕様書、1階の図面1枚）:
@@ -350,10 +372,27 @@ async function aiFindPlan(payload, env, deps, request) {
     maxOutputTokens: LOCATE_MAX_OUTPUT_TOKENS,
     fetchImpl: deps.fetchImpl,
   };
-  const result = provider.kind === "openai"
-    ? await openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(LOCATE_SCHEMA) } })
-    : await generate({ ...common, config: provider.config, responseSchema: LOCATE_SCHEMA, thinkingBudget: 0 });
+  const locate = (p) => p.kind === "openai"
+    ? openaiGenerate({ ...common, config: { ...p.config, schema: toJsonSchema(LOCATE_SCHEMA) } })
+    : generate({ ...common, config: p.config, responseSchema: LOCATE_SCHEMA, thinkingBudget: 0 });
+  let result = await locate(provider);
   await settleResults(env, quota.hold, { kind: provider.kind }, [result], [hold]);
+
+  // Vertex が一時的に失敗したら、OpenAI で1回だけやり直す（worker/ai-fallback.mjs）。
+  // 切り替え先の費用は別に仮押さえし（月・1日の額の枠をもう一度確かめる）、別に精算する。
+  // 点は1点だけ足す（数の持ち主は 0 点の確保を受けないため）。
+  const kind = provider.kind === "vertex" ? transientKind(result) : null;
+  const to = kind ? locateFallback(env) : null;
+  if (to) {
+    const second = await reserveAi(request, env, 1, hold);
+    if (second.ok) {
+      logFallback("find-plan", "vertex", "openai", kind);
+      const retried = await locate(to);
+      await settleResults(env, second.hold, { kind: to.kind }, [retried], [hold]);
+      if (retried.ok) result = retried;
+      else console.log(JSON.stringify({ ai_fallback_failed: { route: "find-plan", to: "openai", status: Number(retried.status) || 0 } }));
+    }
+  }
 
   if (!result.ok) return upstreamError("find-plan", result);
 
@@ -437,6 +476,8 @@ async function aiImportPlan(payload, env, deps, request) {
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
   await settleResults(env, quota.hold, provider, results, holds);
+  const switched = await switchPlanJobs("import-plan", provider, results, asks, env, request);
+  if (switched) return switched;
   const pages = collectPages(results);
   if (pages.error) return withNextStep(pages.error, env, deps, { images });
   return withNextStep(finishImportedPlan(
@@ -490,6 +531,15 @@ async function aiReadPlan(payload, env, deps, request) {
   });
   if (!started.ok) {
     await settleNotStarted(env, quota.hold, started, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS, startedAt);
+    // Claude が一時的に失敗したら、画面をこれまでの読み取り（import-plan）へ回す。
+    // ここの答えは Claude の流れ（SSE）のまま画面が読むので、OpenAI の答えをこの窓口から同じ形では返せない。
+    // 画面は 404 を見て import-plan へ移る（assets/js/plan-import.js の runLegacyPlanImport）。import-plan は
+    // Claude（これまでの指示）を1回試し、そこでも一時的に失敗すれば OpenAI へ切り替える（switchPlanJobs）。
+    const kind = transientKind(started);
+    if (kind && importFallback(env)) {
+      logFallback("read-plan", "anthropic", "import-plan", kind);
+      return json({ error: "not_available", fallback: "import-plan", message: "これまでの読み取りで続けます。" }, 404);
+    }
     return upstreamError("read-plan", started);
   }
   return new Response(meteredStream(env, deps, started.body, quota.hold, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS), {
@@ -617,6 +667,8 @@ async function aiRevisePlan(payload, env, deps, request) {
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
   await settleResults(env, quota.hold, provider, results, holds);
+  const switched = await switchPlanJobs("revise-plan", provider, results, asks, env, request);
+  if (switched) return switched;
   const pages = collectPages(results);
   if (pages.error) return pages.error;
   return finishImportedPlan(
@@ -654,6 +706,38 @@ function resolveImportProvider(env) {
     }, 500) };
   }
   return { ...provider, config };
+}
+
+// Claude が一時的に失敗したとき、同じ依頼を OpenAI へ投げ直して受付番号を返す（worker/ai-fallback.mjs）。
+// 切り替えないときは null（呼び出し側がこれまでどおりの返事を作る）。
+//
+// 1ページでも一時的に失敗したら全ページを投げ直す（返事は「全ページの間取り」か「全ページの受付番号」の
+// どちらかで、混ぜられないため）。Claude で済んだページの費用は、呼び出し側が精算済み。
+// 切り替え先の費用は別に仮押さえする（月・1日の額の枠をもう一度確かめる。点は1点だけ足す）。
+// 受け付けられたら、これまでの OpenAI の読み取りと同じく仮押さえのまま残す（答えは後から取りに行くので実額が分からない）。
+// 投げ直しも失敗したら、受け付けられなかったぶんを 0 で精算し、null を返す（これまでどおりのエラーになる）。
+async function switchPlanJobs(route, provider, results, asks, env, request) {
+  if (provider.kind !== "anthropic") return null;
+  const kind = results.map(transientKind).find(Boolean);
+  if (!kind) return null;
+  const to = importFallback(env);
+  if (!to) return null;
+  const holds = asks.map((ask) => askHoldUsd(to, ask));
+  const second = await reserveAi(request, env, 1, sum(holds));
+  if (!second.ok) return null;
+  logFallback(route, "anthropic", "openai", kind);
+  const started = await Promise.all(asks.map((ask) => startPlanJob(to, ask)));
+  if (started.every((r) => r.ok)) {
+    const jobs = [];
+    for (const one of started) jobs.push(await jobToken(one.id, env));
+    return json({ jobs });
+  }
+  // 受け付けられたページは生成が進むので仮押さえの額、受け付けられなかったページは上流の返事どおり（2xx 以外なら 0）。
+  const usd = started.map((r, i) => (r.ok ? holds[i] : resultUsd(to, r, holds[i]).usd));
+  await settle(env, second.hold, sum(usd), undefined, started.every((r) => !r.ok && r.unbilled));
+  console.log(JSON.stringify({ ai_fallback_failed: { route, to: "openai",
+    status: Number((started.find((r) => !r.ok) || {}).status) || 0 } }));
+  return null;
 }
 
 // 1回ぶんの問い合わせ。提供元による書き方の違いは、ここだけに閉じる。
@@ -733,8 +817,11 @@ async function aiPlanResult(payload, env, deps, request) {
   const tokens = Array.isArray(payload && payload.jobs) ? payload.jobs.slice(0, MAX_PAGES) : [];
   if (!tokens.length) return json({ error: "invalid_request", message: "jobs が無い" }, 400);
 
-  const provider = resolveImportProvider(env);
+  let provider = resolveImportProvider(env);
   if (provider.error) return provider.error;
+  // Claude から OpenAI へ切り替えた読み取り（switchPlanJobs）の受付番号も、ここで取りに行く。
+  // 受付番号には署名があるので、こちらが出した番号しか通らない。
+  if (provider.kind === "anthropic") provider = importFallback(env) || provider;
   if (provider.kind !== "openai") {
     return json({ error: "invalid_request", message: "この提供元は受付番号を使わない" }, 400);
   }
