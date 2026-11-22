@@ -12,8 +12,13 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const indexPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', 'index.html');
-const LINES = readFileSync(indexPath, 'utf8').split('\n');
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
+const indexPath = join(ROOT, 'index.html');
+// PV の撮影用の口は assets/js/pv-capture.js に切り出してある(?pvCapture=1 のときだけ index.html が読み込む)。
+// index.html の後ろにつないで1つの行の並びとして扱う(フックはいちばん後ろに来る)。
+const pvCapturePath = join(ROOT, 'assets', 'js', 'pv-capture.js');
+const INDEX_LINES = readFileSync(indexPath, 'utf8').split('\n');
+const LINES = INDEX_LINES.concat(readFileSync(pvCapturePath, 'utf8').split('\n'));
 
 // index.html 内で一意に決まる1行を取り出す。複数ヒット/ゼロヒットは、
 // 取り違えたまま「何も検証していないテスト」になるのを防ぐため即失敗にする。
@@ -259,7 +264,7 @@ test('スイッチの既定値は null(通常の利用者には無効)', () => {
 
 test('スイッチを立てるのは PV キャプチャフックの中だけ', () => {
   const hookStart = LINES.findIndex(l => l.includes('PV capture hook (guarded'));
-  assert.ok(hookStart > 0, 'PV capture hook のブロックが見つからない');
+  assert.ok(hookStart >= INDEX_LINES.length, 'PV capture hook のブロックが assets/js/pv-capture.js に見つからない');
   const assignments = LINES
     .map((l, i) => ({ l, i }))
     .filter(({ l }) => /PV_INTERIOR_DAYLIGHT\s*=[^=]/.test(l));

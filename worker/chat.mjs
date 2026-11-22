@@ -16,7 +16,8 @@
 // 費用の歯止め
 // ------------
 // この受け口は誰でも呼べ、呼ぶたびに運営者の費用がかかる。そこで:
-//   - 回数を数えられないときは止める（読み取りの takeQuota は通すが、チャットは止める。設計書 3.5）
+//   - 回数を数えられないときは止める（読み取りも同じく止める。worker/ai-budget.mjs）
+//   - 往復ごとに月の金額の枠・1日の額の枠で仮押さえし、答えの usage で精算する。1依頼の出力の合計は既定 24,000 まで
 //   - 送れるのは文字と道具の結果だけ（画像・PDF・外部の資料は断る。1回の費用が跳ねるため）
 //   - 札は会話に結び付ける（前の messages に足しただけの会話でなければ断る。1回ぶんの点で別々の
 //     会話を何度もさせないため。足すだけなのでプロンプトキャッシュも効く）
@@ -28,6 +29,8 @@ import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { json } from "./shared.mjs";
 import { anthropicConfig, conversationBodyText, sendConversation } from "./anthropic.mjs";
 import { quotaLimits } from "./ai-quota.mjs";
+import { askQuota, settle, meterStream, streamCharge, moneyParams, whoOf, randomId as holdId, dayLimitMessage, MONTH_LIMIT_MESSAGE, BUSY_MESSAGE } from "./ai-budget.mjs";
+import { holdUsd, textTokens, anthropicUsageUsd } from "./ai-price.mjs";
 import Guard from "../assets/js/chat/plan-summary.js";
 import { CHAT_INPUT_RULES } from "./ai-rules.mjs";
 
@@ -37,9 +40,11 @@ const MAX_ROUNDS = 8;
 const MAX_DEPTH = 12;
 const TICKET_TTL_MS = 10 * 60 * 1000;
 const MAX_OUTPUT_TOKENS = 8000;
+// 1つの依頼（札）の出力の合計の上限。往復をまたいで数える（各回の上限 8,000 とは別）。
+// 環境変数 AI_CHAT_MAX_OUTPUT_TOKENS で変えられる。札にも書き、Worker と AiQuota の両方で検める。
+const DEFAULT_REQUEST_OUTPUT_TOKENS = 24000;
 // チャット1回（1回の依頼）の点数。読み取り（1回の取り込み = 63点）と同じ枠を使う。
 const DEFAULT_CHAT_POINTS = 21;
-const QUOTA_TIMEOUT_MS = 5000;
 const TICKET_SIG_PREFIX = "chat-ticket:";
 
 // 依頼の役割と約束。日本語で書く（worker/plan-free.mjs の FREE_SYSTEM と同じ）。
@@ -62,21 +67,39 @@ export const CHAT_SYSTEM = [
   "- 部屋: id=r1019 部屋「浴室」 1階 中心=910,910 大きさ=1820x1820（大きさは東西の幅x南北の奥行き）",
   "- 壁: id=1002 壁 1階 両端=0,0→8190,0 厚さ=120",
   "- 物: id=1001 foundation（基礎） 1階 中心=4095,3640 大きさ=8190x7280 回転=0（種類名と呼び名。分類名が種類名と違うときは「分類 sofa」のように添えてあります。大きさは回転する前の幅x奥行き）",
+  "- 進み具合: 見出しの次に「進み具合（プランから数えた値）」の行があり、敷地・基礎・部屋・壁・壁で囲まれていない部屋・屋根・外に出る扉・窓・窓の無い居室・住設・家具の数と、次の段階の目安と、まだ無い段階が書いてあります。プランから機械的に数えた値です（居室は部屋の名前で判定しています）。",
   "部屋と壁には回転がありません。利用者が選んでいる物は行の頭に [選択中] が付き、ロックされた物は行の末尾に「ロック」が付きます。物が多いときは、数の多い種類が（まとめ）の行に個数だけで書かれます。",
   "物を指すときは、要約にある id をそのまま使ってください。要約に無い id は使えません。「これ」「選んでいる物」は、[選択中] の付いた物のことです。",
   "",
   "## 道具の呼び方と結果",
-  "1つの依頼で、あなたが返事をできるのは、最初を含めて 8 回までです。必要な操作は、できるだけ1回の返事にまとめて呼んでください。",
+  "1つの依頼で、あなたが返事をできるのは、最初を含めて 8 回までです。1つの依頼で書ける量（考え・文・道具の呼び出しの合計）にも上限があります。",
+  "1回の返事で呼ぶ道具は 12 個までにしてください。1回の返事の長さにも上限があり、超えると返事が途中で切れて、切れた最後の呼び出しは当たりません。切れたときは、最後に当たった結果の note に書いてあるので、残りを少なく分けて呼び直してください。",
   "道具の呼び出しは、1つずつ別々にプランへ当たります。失敗した呼び出しは何も変えず、同じ返事のほかの成功した呼び出しはそのまま残ります（道具の説明にある「同じ呼び出しの操作は全部取り消され」は、その1回の呼び出しの中のことです）。",
   "道具の結果は <tool_result>、inspect_plan の結果は <inspect_result> の囲みで、JSON の形で返ります。成功すると、変わった物の id と warnings（桁の間違いらしい値など）が返ります。warnings を読み、意図と違っていれば直してください。",
   "失敗すると is_error が付き、errors に理由と、分かれば候補が返ります。理由を読み、引数を直してから呼び直してください。同じ引数で呼び直しても結果は変わりません。直しても通らないときは、できなかったことを利用者に伝えて終えてください。",
   "置けない種類の家具や設備もあります。置けないときは道具が候補を返すので、近い物を提案するか、置けないことを伝えてください。",
   "inspect_plan は、この依頼で変えた後のプランを検査し、問題の一覧を返します（プランは変えません）。使うなら、変更を終えてから多くて1回にしてください。",
   "",
+  "## 大きな依頼（白紙から家を作る など）",
+  "家を白紙から作るような大きな依頼は、1つの依頼では終わりません。次の段階の順に、区切りながら進めてください: 敷地 → 基礎 → 床（部屋）→ 壁 → 屋根 → ドア・窓・住設（キッチン・浴室・トイレ・洗面）→ 家財（家具）。",
+  "利用者がこの順で頼むとは限りません。プランの要約で、今どこまでできているかを確かめ、できている段階は飛ばして、足りない段階から進めてください。",
+  "段階ごとの道具: 床は addRoom、壁は addRoomWalls（部屋の id をまとめて渡すと、外周と間仕切りを二重にせず作ります）、屋根は addRoof（屋根が載る階を渡すと壁の外周にかけます。外周が長方形でないときは、長方形の部分ごとに範囲を渡します）、ドア・窓は placeOpening（部屋と部屋、または部屋の方角の外壁を指定します。玄関ドアと開き戸は吊元 hinge と開く側 opens も決めてください）、住設と家財は placeItem です。壁を1本ずつ addWall で足したり、扉の座標を自分で計算したりするのは、これらの道具で足りないときだけにしてください。",
+  "1つの依頼で進めるのは、1〜2 の段階までにしてください。段階を終えた区切りのよい所で止め、作った所と、まだの所を短く伝えてください。続きがあるときは、利用者への文の最後の行に ［続きあり］ とだけ書いてください（画面に「続きを頼む」が出ます）。",
+  "会話の履歴に「途中で止まりました」とある依頼の続き（「続けて」など）を頼まれたら、その依頼の残りを、今のプランの要約から確かめて進めてください。前に作った物を作り直さないでください。",
+  "",
+  "## 順番どおりでない頼まれ方",
+  "利用者は段階の順で頼むとは限りません。頼まれたことを先に行ってください。段階の順を守らせたり、頼まれていない段階を先に作ったりしないでください。",
+  "ただし、土台が無くて結果がおかしくなる頼み（部屋が1つも無いのに家具を置く、壁が無いのに窓や扉を付ける、など）は、家を勝手に大きく作り足さないでください。道具を呼ばずに、何が足りないかと、次に頼むとよいことを1〜2文で伝えてください。",
+  "このように頼みを果たせなかったときは、「次の段階の目安」ではなく、その頼みを果たすのにいちばん近い不足（家具なら部屋、窓や扉なら部屋と壁）を次の一手として勧めてください。",
+  "小さな不足（部屋はあるが、その部屋に壁が無いので窓を付けられない、など）で、頼みを果たすのに要る最小限の分（その部屋の壁など）は作ってかまいません。作ったときは、何を足したかを伝えてください。",
+  "返事の最後に、進み具合の「次の段階の目安」を、次に勧める段階として1つだけ、短い1文で書いてください（例: 「次は屋根をかけると、外観で家の形が分かります」）。目安が「なし」のときや、利用者が細かい手直しを頼んでいるときは書かないでください。［続きあり］を書くときは、勧めの文はその前の行に書いてください。",
+  "",
   "## 気をつけること",
   "頼まれていない物は、動かしたり、消したり、作り直したりしないでください。",
   "依頼があいまいで、どの物をどう変えるかが決まらないときは、道具を呼ばずに、確かめたいことを1つだけ短く聞いてください。",
   "終わったら、変えた点を短い日本語で伝えてください。利用者への文には id・座標の数値・道具の名前を書かず、「LDK を東へ半間広げました」のように書いてください。",
+  "利用者への文は、ふつうの文で書いてください。画面は Markdown を表示しないので、** や # や表などの Markdown の記号は使わず、並べるときは「・」か「1.」の番号で書いてください。",
+  "道具を呼ぶ前や途中に書く文も、そのまま利用者の画面に出ます。英語や作業のメモは書かず、日本語で書いてください。",
   "考えている内容は日本語で書いてください（要約が利用者の画面に作業の様子として出ます）。",
 ].join("\n");
 
@@ -116,19 +139,45 @@ const MESSAGES = {
   bad_request: "依頼の形が正しくありません。",
   request_too_long: Guard.REQUEST_TOO_LONG_MESSAGE,   // 字数は REQUEST_MAX_CHARS から作る(画面と同じ文)
   too_large: "会話が長すぎます。新しい会話で頼み直してください。",
-  quota_exceeded: "本日ぶんのチャットを使い切りました。明日またお試しください。",
+  quota_exceeded: "",   // 時刻で変わる（dayLimitMessage）
+  month_exceeded: MONTH_LIMIT_MESSAGE,
   ticket_invalid: "依頼の期限が切れました。もう一度頼み直してください。",
   rounds_exceeded: "1回の依頼で直せる回数を超えました。依頼を分けて頼み直してください。",
-  quota_unavailable: "いまチャットを使えません。少し時間をおいてお試しください。",
+  quota_unavailable: BUSY_MESSAGE,
   ai_unavailable: "この環境ではチャットを使えません。",
   ai_upstream_error: "AI から返事を受け取れませんでした。少し時間をおいてお試しください。",
 };
 const STATUS = {
-  bad_request: 400, request_too_long: 400, too_large: 413, quota_exceeded: 429, ticket_invalid: 401,
+  bad_request: 400, request_too_long: 400, too_large: 413, quota_exceeded: 429, month_exceeded: 429, ticket_invalid: 401,
   rounds_exceeded: 429, quota_unavailable: 503, ai_unavailable: 503, ai_upstream_error: 502,
 };
 function fail(code, extra, headers) {
-  return json({ error: code, code, message: MESSAGES[code], ...(extra || {}) }, STATUS[code], headers || {});
+  const message = code === "quota_exceeded" ? dayLimitMessage() : MESSAGES[code];
+  return json({ error: code, code, message, ...(extra || {}) }, STATUS[code], headers || {});
+}
+
+function requestOutputCap(env) {
+  const n = Math.round(Number(env && env.AI_CHAT_MAX_OUTPUT_TOKENS));
+  return n >= 1024 && n <= 128000 ? n : DEFAULT_REQUEST_OUTPUT_TOKENS;
+}
+
+// 1往復の仮押さえの額。本文（system・道具・会話）を全部入力として、出力は1回の上限まで出たとして数える。
+function roundHoldUsd(config, bodyBytes) {
+  return holdUsd({ model: config.model, inputTokens: textTokens(bodyBytes), maxOutputTokens: MAX_OUTPUT_TOKENS });
+}
+
+// いちばん小さな依頼（短い文1つのチャット1往復）の仮押さえの額。「今月ぶん」「本日ぶん」と言い切ってよいかの目安
+// （これも入らないときだけ言い切る。worker/ai-quota.mjs の shortScope）。モデルごとに1回だけ計算する。
+const minHoldCache = new Map();
+export function minChatHoldUsd(env) {
+  const config = chatConfig(env);
+  if (!minHoldCache.has(config.model)) {
+    const bytes = new TextEncoder().encode(conversationBodyText({
+      config, system: SYSTEM, tools: TOOLS, messagesJson: JSON.stringify([{ role: "user", content: "x" }]), maxOutputTokens: MAX_OUTPUT_TOKENS,
+    })).byteLength;
+    minHoldCache.set(config.model, roundHoldUsd(config, bytes));
+  }
+  return minHoldCache.get(config.model);
 }
 
 export async function handleChat(request, env, deps = {}) {
@@ -160,54 +209,99 @@ export async function handleChat(request, env, deps = {}) {
   const count = messages.length;
   const hash = await sha256Hex(messagesJson);
 
-  // 2. 数える。
+  // 2. 数える。往復ごとに、月の枠・1日の額の枠で仮押さえする（worker/ai-budget.mjs）。
   const headers = { "cache-control": "no-store" };
-  let ticket;
+  const hold = holdId();
+  const holdAmount = roundHoldUsd(config, bodyBytes.byteLength);
+  const money = moneyParams(env, holdAmount, hold, { minUsd: minChatHoldUsd(env), who: whoOf(request) });
+  const outCap = requestOutputCap(env);
+  let ticket, grant;
   if (payload.ticket !== undefined) {
-    // 同じ依頼の続き。点は使わず、札の id ごとに往復の数・本文の合計・会話のつながりを確かめる。
+    // 同じ依頼の続き。点は使わず、札の id ごとに往復の数・本文の合計・出力の合計・会話のつながりを確かめる。
     const prev = await readTicket(payload.ticket, secret);
     if (!prev || prev.count > count) return fail("ticket_invalid");
     const prefix = prev.count === count ? hash : await sha256Hex("[" + parts.slice(0, prev.count).join(",") + "]");
-    const counted = await askQuota(env, "https://ai-quota/ticket?" + new URLSearchParams({
+    const counted = await askQuota(env, "/ticket", {
       id: prev.id, exp: String(prev.exp), count: String(count), hash, bytes: String(bodyBytes.byteLength),
       prevCount: String(prev.count), prefix, max: String(prev.max), maxBytes: String(MAX_TICKET_BYTES),
-    }));
-    if (!counted || typeof counted.ok !== "boolean") return fail("quota_unavailable");
+      // 出力の合計の上限は、札に書いた値と今の設定の小さい方（札を作り変えると署名で断られる）。
+      outCap: String(Math.min(prev.out, outCap)), want: String(MAX_OUTPUT_TOKENS), ...money,
+    });
+    if (!counted) return fail("quota_unavailable");
     if (!counted.ok) {
       if (counted.reason === "unknown" || counted.reason === "mismatch") return fail("ticket_invalid");
-      if (counted.reason === "rounds" || counted.reason === "bytes") return fail("rounds_exceeded");
+      if (counted.reason === "rounds" || counted.reason === "bytes" || counted.reason === "output") return fail("rounds_exceeded");
+      if (counted.reason === "month") return fail("month_exceeded");
+      if (counted.reason === "day" || counted.reason === "spent") return fail("quota_exceeded", { scope: counted.reason });
+      // busy（大きな往復だけが額の枠に入らない）・pending（この人の精算されずに残った額が上限を超えた）も「混み合っています」
       return fail("quota_unavailable");
     }
     const left = Number(counted.left);
-    if (!Number.isFinite(left)) return fail("quota_unavailable");
-    ticket = { id: prev.id, exp: prev.exp, max: prev.max, count };
+    grant = Number(counted.grant);
+    if (!Number.isFinite(left) || !(grant >= 1)) return fail("quota_unavailable");
+    ticket = { id: prev.id, exp: prev.exp, max: prev.max, count, out: prev.out };
     headers["x-chat-rounds-left"] = String(Math.max(0, left));
   } else {
-    // 依頼の最初。点を使い、同じ書き込みで札の記録（件数・SHA-256・本文のバイト数）を作る。
+    // 依頼の最初。点を使い、同じ書き込みで札の記録（件数・SHA-256・本文のバイト数・出力の合計）を作る。
     const points = chatPoints(env);
     const limits = quotaLimits(env);
-    const who = request.headers.get("cf-connecting-ip") || "unknown";
-    ticket = { id: randomId(), exp: Date.now() + TICKET_TTL_MS, max: MAX_ROUNDS, count };
-    const taken = await askQuota(env, "https://ai-quota/take?" + new URLSearchParams({
-      cost: String(points), who, perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
+    ticket = { id: randomId(), exp: Date.now() + TICKET_TTL_MS, max: MAX_ROUNDS, count, out: outCap };
+    const taken = await askQuota(env, "/take", {
+      cost: String(points), perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
       ticket: ticket.id, exp: String(ticket.exp), count: String(count), hash, bytes: String(bodyBytes.byteLength),
-    }));
-    if (!taken || typeof taken.ok !== "boolean") return fail("quota_unavailable");
-    if (!taken.ok) return fail("quota_exceeded", { scope: taken.scope });
+      outCap: String(outCap), want: String(MAX_OUTPUT_TOKENS), ...money,
+    });
+    if (!taken) return fail("quota_unavailable");
+    if (!taken.ok) {
+      if (taken.scope === "month") return fail("month_exceeded");
+      if (taken.scope === "total" || taken.scope === "who" || taken.scope === "day" || taken.scope === "spent") return fail("quota_exceeded", { scope: taken.scope });
+      return fail("quota_unavailable");
+    }
+    grant = Number(taken.grant);
+    if (!(grant >= 1)) return fail("quota_unavailable");
     headers["x-chat-rounds-left"] = String(MAX_ROUNDS - 1);
-    const remaining = Number(taken.remaining);
-    if (Number.isFinite(remaining)) headers["x-chat-remaining"] = String(Math.max(0, Math.floor(remaining / points)));
+    // 「本日あと N 回」は、金額の枠で先に止まりうるときは出さない（嘘にしない）。
+    const byPoints = Math.floor(Number(taken.remaining) / points);
+    const byMoney = Math.floor(Number(taken.usdLeft) / Math.max(1, Number(money.usd)));
+    if (Number.isFinite(byPoints) && byMoney >= byPoints) headers["x-chat-remaining"] = String(Math.max(0, byPoints));
   }
   // 札は呼び出しのたびに作り直す（今回の messages の件数を入れる）。次の呼び出しはこの札で、
   // 今回の messages に足した会話を送る。古い札は件数が合わないので通らない。
   headers["x-chat-ticket"] = await signTicket(ticket, secret);
 
-  // 3. 送る。Claude が失敗しても、使った回数は戻さない（読み取りの read-plan と同じ扱い）。
-  // 失敗の返事にも札を付ける。同じ本文のやり直しは、点を使わずに札で通る（往復とバイト数は数える）。
+  // 出力の合計の上限に近いときは、この往復の出力の上限を下げる。
+  if (grant < MAX_OUTPUT_TOKENS) {
+    bodyBytes = new TextEncoder().encode(conversationBodyText({
+      config, system: SYSTEM, tools: TOOLS, messagesJson, maxOutputTokens: Math.floor(grant),
+    }));
+  }
+
+  // 3. 送る。Claude が失敗しても、使った点は戻さない（読み取りの read-plan と同じ扱い）。
+  // 失敗の返事にも札を付ける。同じ本文のやり直しは、点を使わずに札で通る（往復・バイト数・出力の合計は数える）。
+  // 上流が 2xx 以外を返したときは、額と札の出力の合計を 0 で精算する（生成が始まっていないので課金されない、
+  // という前提）。やり直しは札の往復の上限（8回）と出力の合計の上限の中でだけできるので、この抜け道は広がらない。
+  const startedAt = Date.now();
+  const inputTokens = textTokens(bodyBytes.byteLength);
   const started = await sendConversation({ config, body: bodyBytes, fetchImpl: deps.fetchImpl });
-  // 上流の本文はそのまま出さない（鍵が混ざる恐れ・開発の都合の文言）。状態の番号だけ返す。
-  if (!started.ok) return fail("ai_upstream_error", { status: Number(started.status) || 502 }, headers);
-  return new Response(started.body, {
+  // 上流の本文はそのまま出さない（鍵が混ざる恐れ・開発の都合の文言）。状態の番号だけ返し、元の文はログにだけ出す。
+  if (!started.ok) {
+    console.log(JSON.stringify({ ai_upstream_error: { where: "chat", status: Number(started.status) || 0,
+      message: String(started.message || "").slice(0, 300) } }));
+    if (started.unbilled) {
+      await settle(env, hold, 0, 0, true);
+    } else {
+      const c = streamCharge({ requested: config.model, done: false, segments: [], elapsedMs: Date.now() - startedAt,
+        maxOutputTokens: grant, inputTokens });
+      await settle(env, hold, c.usd, c.out, false);
+    }
+    return fail("ai_upstream_error", { status: Number(started.status) || 502 }, headers);
+  }
+  // 流しながら usage を拾い、終わったら実額で精算する（出力の合計も実際の値に直す）。途中で切れたら見積もりで。
+  const body = meterStream(started.body, async ({ done, segments, elapsedMs }) => {
+    const c = streamCharge({ requested: config.model, done, segments, elapsedMs, maxOutputTokens: grant, inputTokens });
+    await settle(env, hold, c.usd, c.out, c.exact);
+  }, { waitUntil: deps.waitUntil });
+  return new Response(body, {
     status: 200,
     headers: { "content-type": "text/event-stream; charset=utf-8", ...headers },
   });
@@ -401,34 +495,14 @@ function treeOk(node, depth) {
   return true;
 }
 
-// 数の持ち主（AiQuota）に聞く。返らない・例外・形が違うときは null（呼び出し側が止める）。
-async function askQuota(env, url) {
-  if (!env || !env.AI_QUOTA) return null;
-  let timer;
-  try {
-    const stub = env.AI_QUOTA.get(env.AI_QUOTA.idFromName("ai-usage"));
-    const res = await Promise.race([
-      stub.fetch(url),
-      new Promise((resolve) => { timer = setTimeout(() => resolve(null), QUOTA_TIMEOUT_MS); }),
-    ]);
-    if (!res || !res.ok) return null;
-    const data = await res.json();
-    return isObject(data) ? data : null;
-  } catch (e) {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function sha256Hex(text) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 // ── 札 ──────────────────────────────────────────────────────────────
-// 形: base64url(JSON{id, exp, max, count}) + "." + base64url(HMAC-SHA256(秘密, "chat-ticket:" + 前半))
-// count はその呼び出しの messages の件数。中身は秘密ではない。改ざんは署名で分かる。
+// 形: base64url(JSON{id, exp, max, count, out}) + "." + base64url(HMAC-SHA256(秘密, "chat-ticket:" + 前半))
+// count はその呼び出しの messages の件数。out は依頼全体の出力の合計の上限。中身は秘密ではない。改ざんは署名で分かる。
 function b64url(bytes) {
   let s = "";
   for (const b of bytes) s += String.fromCharCode(b);
@@ -481,5 +555,7 @@ async function readTicket(token, secret) {
   if (!Number.isFinite(data.exp) || data.exp <= now || data.exp > now + TICKET_TTL_MS + 60 * 1000) return null;
   if (!Number.isInteger(data.max) || data.max < 1) return null;
   if (!Number.isInteger(data.count) || data.count < 1) return null;
-  return { id: data.id, exp: data.exp, max: Math.min(data.max, MAX_ROUNDS), count: data.count };
+  // out は出力の合計の上限（この欄の無い札は、欄を足す前に出した札。既定の上限で数える）。
+  const out = Number.isInteger(data.out) && data.out >= 1 ? data.out : DEFAULT_REQUEST_OUTPUT_TOKENS;
+  return { id: data.id, exp: data.exp, max: Math.min(data.max, MAX_ROUNDS), count: data.count, out };
 }

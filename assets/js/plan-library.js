@@ -203,6 +203,8 @@ var PlanLibrary = (function(){
     var listEl = el('div', 'plan-library-list'); d.card.append(listEl);
     var actions = el('div', 'asset-swap-actions'); var close = el('button', 'asset-swap-cancel', '閉じる'); close.type = 'button';
     close.addEventListener('click', d.close); actions.append(close); d.card.append(actions);
+    // 保存一覧の末尾の広告の枠(Web 版で素材があるときだけ。assets/js/pr-ads.js)。比べる相手を選ぶ画面には出さない
+    if(!pick && window.PrAds){ var prSlot = el('div', 'pr-slot'); prSlot.hidden = true; d.card.append(prSlot); window.PrAds.fill(prSlot, 'library'); }
 
     function row(info){
       var r = el('div', 'plan-library-row');

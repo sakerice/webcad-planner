@@ -1,5 +1,5 @@
 // CSP の「報告だけ」の見出し(_headers)と、違反の報告を受ける口 POST /api/csp-report(worker/csp-report.mjs)。
-//   - _headers は報告だけ(強制の Content-Security-Policy を付けない)で、外の読み込み先を絞る決まりを持つ。build.sh が dist へ写す。
+//   - _headers は報告だけ(強制の Content-Security-Policy は枠の決まり frame-ancestors だけ)で、外の読み込み先を絞る決まりを持つ。build.sh が dist へ写す。
 //   - 受け口は、決まりと先のオリジンだけをログに出す(ページの URL・道・問い合わせ・コードの抜粋を出さない)。
 //   - 16KB を超える本文は読まずに捨てる。1分あたりのログの行数に上限があり、超えた数は次の分に1行で出す。
 //   - 振り分け(worker/router.mjs)から届く。POST 以外は 405。いつも 204 で返す。
@@ -24,16 +24,20 @@ test('_headers は報告だけの CSP を全部の静的アセットに付け、
   assert.equal(lines[0], '/*');
   const csp = lines.find((l) => /^\s+Content-Security-Policy-Report-Only:/.test(l));
   assert.ok(csp, '報告だけの見出しが無い');
-  assert.ok(!lines.some((l) => /^\s+Content-Security-Policy:/.test(l)), '強制の CSP を入れてはいけない');
+  // 強制の CSP は、他のサイトの枠に入れさせない frame-ancestors だけ(2026-11-20)。読み込み先を絞る決まりは
+  // 報告だけで様子を見ている途中なので、強制の側に混ぜてはいけない。
+  const enforced = lines.filter((l) => /^\s+Content-Security-Policy:/.test(l));
+  assert.deepEqual(enforced.map((l) => l.trim()), ["Content-Security-Policy: frame-ancestors 'self'"], '強制の CSP に枠の決まり以外を入れてはいけない');
   const policy = csp.replace(/^\s+Content-Security-Policy-Report-Only:\s*/, '');
   const d = Object.fromEntries(policy.split(';').map((s) => s.trim()).filter(Boolean).map((s) => { const [k, ...v] = s.split(/\s+/); return [k, v]; }));
   assert.deepEqual(d['object-src'], ["'none'"]);
   assert.deepEqual(d['base-uri'], ["'self'"]);
   assert.deepEqual(d['form-action'], ["'self'"]);
   assert.deepEqual(d['report-uri'], ['/api/csp-report']);
-  // 外のホストは、書体と Cloudflare の計測だけ
+  // 外のホストは、書体と Cloudflare の計測と、広告(A8.net)の画像だけ。広告は画像(img-src)にだけ許す
   const hosts = Object.values(d).flat().filter((v) => /^https?:\/\//.test(v)).sort();
-  assert.deepEqual(hosts, ['https://cloudflareinsights.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://static.cloudflareinsights.com']);
+  assert.deepEqual(hosts, ['https://*.a8.net', 'https://cloudflareinsights.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://static.cloudflareinsights.com']);
+  assert.deepEqual(Object.keys(d).filter((k) => d[k].includes('https://*.a8.net')), ['img-src']);
   for (const k of ['script-src', 'connect-src', 'frame-src', 'img-src', 'default-src']) {
     assert.ok(d[k], k + ' が無い');
     assert.ok(!d[k].includes('*') && !d[k].includes('https:') && !d[k].includes('http:'), k + ' がどこでも許している');

@@ -46,7 +46,10 @@ const MSG = {
   upstream: 'AI から返事を受け取れませんでした。少し時間をおいてお試しください。',
   refusal: 'AI がこの依頼を断りました。間取りをどう直したいかを書いて、頼み直してください。',
   maxTokens: '返事が長くなりすぎて、途中で止まりました。依頼を小さく分けて頼み直してください。',
-  quota: '本日ぶんのチャットを使い切りました。明日またお試しください。',
+  // 本日ぶんの文は時刻で「明日の朝9時」と「朝9時」が変わる（日本時間の 0〜9 時）。共通の部分で見る。
+  quota: '本日ぶんの AI は受付を終えました。',
+  month: '今月ぶんの AI の受付を終えました。来月1日から再開します。画面の操作では引き続き作れます。',
+  busy: 'いま AI が混み合っています。少し待ってから、もう一度お試しください。',
   cancelled: '依頼を取り消しました。',
   applyFailed: '変更を取り込めませんでした。',
   undoBlocked: 'そのあとにプランが変わったため、元に戻せませんでした。',
@@ -67,6 +70,8 @@ function fail(status, code, opts = {}) {
 
 // 寝室(主寝室 r1086: 2階 中心 1365,5460)にベッドを置く
 const BED = { type: 'bed', x: 1365, y: 5800, floor: 2 };
+// 置けない種類(道具は断られ、プランは変わらない)
+const NOPE = { type: 'kitchen-unit', x: 1365, y: 5800, floor: 2 };
 
 // /api/ai/chat を台本どおりに返す偽物。台本は window.__chat.queue に積む。
 // hold: 返事を返す前に待つ門の名前。holdBody: 本文の途中で待つ門の名前。どちらも通信の取り消し(signal)で止まる。
@@ -364,10 +369,14 @@ try {
     const { context, page, errors } = await openApp(browser, { width: 1280, height: 800 });
     await openChatPanel(page);
     const cases = [
-      { name: '2回めが 502', steps: [ok([tool('f1', 'placeItem', BED)], 'tool_use'), fail(502, 'ai_upstream_error')], msg: MSG.upstream },
+      // 途中で止まっても、それまでに1つでも変えていれば「途中で止まった」として取り込む(chat-partial で見る)。
+      // ここでは1回めの道具が断られて(置けない種類)何も変わっていない場合を見る。
+      { name: '2回めが 502', steps: [ok([tool('f1', 'placeItem', NOPE)], 'tool_use'), fail(502, 'ai_upstream_error')], msg: MSG.upstream },
       { name: '断り', steps: [ok([tool('f2', 'placeItem', BED)], 'refusal')], msg: MSG.refusal },
-      { name: '打ち切り', steps: [ok([txt('置き'), tool('f3', 'placeItem', BED)], 'tool_use'), ok([txt('置いて')], 'max_tokens')], msg: MSG.maxTokens },
+      { name: '打ち切り', steps: [ok([txt('置き'), tool('f3', 'placeItem', NOPE)], 'tool_use'), ok([txt('置いて')], 'max_tokens')], msg: MSG.maxTokens },
       { name: '回数切れ', steps: [fail(429, 'quota_exceeded')], msg: MSG.quota },
+      { name: '今月の枠', steps: [fail(429, 'month_exceeded')], msg: MSG.month },
+      { name: '数えられない', steps: [fail(503, 'quota_unavailable')], msg: MSG.busy },
     ];
     for (const c of cases) {
       const before = await plan(page);

@@ -8,7 +8,7 @@ const path = require('node:path');
 const Session = require('../../assets/js/chat/chat-session.js');
 const O = require('../../assets/js/plan-core/operations.js');
 const Catalog = require('../../assets/js/plan-core/operations-catalog.js');
-const { sseFor, eventText } = require('./chat-sse-fixtures.cjs');
+const { sseFor, sseMaxTokens, eventText } = require('./chat-sse-fixtures.cjs');
 
 function makeCtx() {
   let n = 500;
@@ -245,7 +245,8 @@ test('知らない道具名は is_error', async () => {
 
 for (const stop of ['refusal', 'max_tokens', 'pause_turn']) {
   test(stop + ' では、その回の道具を実行せず失敗で終える(plan は返さない)', async () => {
-    const c1 = [TOOL('t1', 'addRoom', { x: 0, y: 0, w: 1000, d: 1000 })];
+    // max_tokens は、完結した道具の呼び出しが無い(文の途中で切れた)ときだけ失敗になる(下の「出力の上限」の検査)。
+    const c1 = stop === 'max_tokens' ? [{ type: 'text', text: '部屋を足しま' }] : [TOOL('t1', 'addRoom', { x: 0, y: 0, w: 1000, d: 1000 })];
     const { s, applied, fetch } = makeSession([{ sse: sseFor(c1, { stop }) }]);
     const r = await s.send('部屋');
     assert.equal(r.ok, false);
@@ -258,9 +259,114 @@ for (const stop of ['refusal', 'max_tokens', 'pause_turn']) {
   });
 }
 
+// ── 出力の上限・途中で止まった依頼 ─────────────────────────────────────
+
+const WALL = (i) => TOOL('w' + i, 'addWall', { x1: 0, y1: i * 1000, x2: 4000, y2: i * 1000, floor: 1 });
+// 画面の連番と同じく、依頼の中で続けて足した物の id が重ならない ctx(makeCtx は呼ぶたびに 501 から数える)。
+function sharedCtx() {
+  let n = 500;
+  return () => Object.assign(makeCtx(), { newId: () => ++n });
+}
+
+test('出力の上限(max_tokens)で切れた返事: 完結した道具だけ当て、切れた最後の1つは捨てて続きを呼ぶ', async () => {
+  const c1 = [THINK, { type: 'text', text: '壁を足します。' }, WALL(1), WALL(2), WALL(3)];
+  const c2 = [{ type: 'text', text: '壁を2本足しました。' }];
+  const { s, fetch, applied } = makeSession([{ sse: sseMaxTokens(c1) }, { sse: sseFor(c2) }], { ctxFor: sharedCtx() });
+  const r = await s.send('壁を3本足して');
+  assert.equal(r.ok, true, JSON.stringify(r));
+  assert.equal(r.partial, undefined);
+  assert.deepEqual(applied, ['addWall', 'addWall']);
+  assert.equal(r.plan.walls.length, 3);
+  assert.equal(r.changed, 2);
+  // 次の呼び出し: assistant には完結したブロックだけ(切れた道具は無い)。結果は2つで、最後の結果に「切れた」ことを書く。
+  const msgs = fetch.calls[1].body.messages;
+  assert.equal(JSON.stringify(msgs[1].content), JSON.stringify(c1.slice(0, 4)));
+  assert.deepEqual(msgs[2].content.map((b) => b.tool_use_id), ['w1', 'w2']);
+  const note = JSON.parse(inner(msgs[2].content[1].content, 'tool_result'));
+  assert.match(note.note, /途中で切れ/);
+  assert.match(note.note, /当てていません/);
+  assert.equal(JSON.parse(inner(msgs[2].content[0].content, 'tool_result')).note, undefined);
+  checkChain(fetch.calls, [c1.slice(0, 4)]);
+  assert.deepEqual(s.history, [{ user: '壁を3本足して', assistant: '壁を2本足しました。' }]);
+});
+
+test('出力の上限で切れて、完結した道具が無い・呼べる回が無いときは「途中で止まった」で返す', async () => {
+  // 1回めで1本足し、2回めは文の途中で切れた(道具が無い)
+  const a = makeSession([{ sse: sseFor([WALL(1)], { stop: 'tool_use' }) }, { sse: sseMaxTokens([{ type: 'text', text: '続けて壁を足します' }]) }]);
+  const ra = await a.s.send('壁を足して');
+  assert.equal(ra.ok, true);
+  assert.equal(ra.partial, true);
+  assert.equal(ra.stop, 'max_tokens');
+  assert.equal(ra.plan.walls.length, 2);
+  assert.equal(a.fetch.calls.length, 2);
+  // 最後の回に切れた: 完結した道具は当て、次は呼ばない
+  const b = makeSession([{ sse: sseMaxTokens([WALL(1), WALL(2)]), headers: { 'x-chat-rounds-left': '0' } }]);
+  const rb = await b.s.send('壁を足して');
+  assert.equal(rb.ok, true);
+  assert.equal(rb.partial, true);
+  assert.deepEqual(b.applied, ['addWall']);
+  assert.equal(b.fetch.calls.length, 1);
+});
+
+test('途中で止まった依頼は履歴に残り、次の依頼(「続けて」)に前の依頼の文と「途中で止まった」ことが渡る', async () => {
+  const quota = { status: 429, json: { error: 'rounds_exceeded', code: 'rounds_exceeded', message: 'x' } };
+  const c1 = [{ type: 'text', text: '敷地と基礎を作ります。' }, WALL(1)];
+  const { s, fetch } = makeSession([{ sse: sseFor(c1, { stop: 'tool_use' }) }, quota, { sse: sseFor([{ type: 'text', text: '続きを作りました。' }]) }]);
+  const r1 = await s.send('2階建て3LDKを白紙から作って');
+  assert.equal(r1.ok, true);
+  assert.equal(r1.partial, true);
+  assert.equal(r1.stop, 'rounds_exceeded');
+  assert.equal(r1.text, '敷地と基礎を作ります。');
+  assert.equal(s.history.length, 1);
+  assert.equal(s.history[0].user, '2階建て3LDKを白紙から作って');
+  assert.match(s.history[0].assistant, /途中で止まりました/);
+  assert.match(s.history[0].assistant, /敷地と基礎を作ります。/);
+  const r2 = await s.send('続けて');
+  assert.equal(r2.ok, true);
+  const msgs = fetch.calls[2].body.messages;
+  assert.equal(fetch.calls[2].body.ticket, undefined, '続きは新しい依頼');
+  assert.equal(msgs[0].content, userRequest('2階建て3LDKを白紙から作って'));
+  assert.match(msgs[1].content, /途中で止まりました/);
+  assert.ok(msgs[2].content.endsWith(userRequest('続けて')));
+});
+
+test('通信の失敗・SSE の失敗でも、それまでに当てた変更は「途中で止まった」で返す。取り消しは捨てる', async () => {
+  const errSse = sseFor([{ type: 'text', text: '途中' }], { noStop: true }) + eventText('error', { type: 'error', error: { type: 'overloaded_error', message: 'Overloaded' } });
+  for (const [step, reason] of [[{ reject: new TypeError('Failed to fetch') }, 'network'], [{ sse: errSse }, 'ai_error']]) {
+    const { s } = makeSession([{ sse: sseFor([WALL(1)], { stop: 'tool_use' }) }, step]);
+    const r = await s.send('壁');
+    assert.equal(r.ok, true, reason);
+    assert.equal(r.partial, true);
+    assert.equal(r.stop, reason);
+    assert.equal(s.history.length, 1);
+  }
+  let session;
+  const c = makeSession([{ sse: sseFor([WALL(1)], { stop: 'tool_use' }) }, { hang: true }], {
+    onEvent: (ev) => { if (ev.type === 'round' && ev.round === 2) setTimeout(() => session.cancel(), 5); },
+  });
+  session = c.s;
+  const rc = await c.s.send('壁');
+  assert.equal(rc.ok, false);
+  assert.equal(rc.reason, 'cancelled');
+  assert.equal(c.s.history.length, 0);
+});
+
+test('AI が区切りで止めた印(［続きあり］)は文から外し、more で知らせる', async () => {
+  const { s } = makeSession([{ sse: sseFor([WALL(1)], { stop: 'tool_use' }) }, { sse: sseFor([{ type: 'text', text: '敷地と基礎まで作りました。\n［続きあり］' }]) }]);
+  const r = await s.send('家を作って');
+  assert.equal(r.ok, true);
+  assert.equal(r.more, true);
+  assert.equal(r.partial, undefined);
+  assert.equal(r.text, '敷地と基礎まで作りました。');
+  assert.deepEqual(s.history, [{ user: '家を作って', assistant: '敷地と基礎まで作りました。' }]);
+  assert.equal(Session.MORE_MARK, '［続きあり］');
+});
+
 test('HTTP の失敗は code ごとの文で終える(回数切れ・長すぎ・札の期限切れ・その他)', async () => {
   const cases = [
-    [429, { error: 'quota_exceeded', code: 'quota_exceeded', message: 'x', scope: 'who' }, 'quota_exceeded', /本日ぶんのチャットを使い切りました。明日またお試しください。/],
+    [429, { error: 'quota_exceeded', code: 'quota_exceeded', message: 'x', scope: 'who' }, 'quota_exceeded', /^本日ぶんの AI は受付を終えました。(明日の)?朝9時から再開します。画面の操作では引き続き作れます。$/],
+    [429, { error: 'month_exceeded', code: 'month_exceeded', message: 'x' }, 'month_exceeded', /^今月ぶんの AI の受付を終えました。来月1日から再開します。画面の操作では引き続き作れます。$/],
+    [503, { error: 'quota_unavailable', code: 'quota_unavailable', message: 'x' }, 'quota_unavailable', /^いま AI が混み合っています。少し待ってから、もう一度お試しください。$/],
     [413, { error: 'too_large', code: 'too_large', message: 'x' }, 'too_large', /チャットを新しく始めて/],
     [401, { error: 'ticket_invalid', code: 'ticket_invalid', message: 'x' }, 'ticket_invalid', /期限/],
     [429, { error: 'rounds_exceeded', code: 'rounds_exceeded', message: 'x' }, 'rounds_exceeded', /回数を超え/],
@@ -299,14 +405,21 @@ test('SSE の error・途中切れ・壊れた JSON は、例外を出さず失�
   }
 });
 
-test('往復の上限: rounds-left が 0 の返事でさらに道具を呼ばれたら、当てずに失敗で終える', async () => {
+test('往復の上限: rounds-left が 0 の返事で道具を呼ばれたら、当てたうえで「途中で止まった」で終える(次は呼ばない)', async () => {
   const c = [TOOL('t1', 'rotateObject', { id: '10', by: 10 })];
   const { s, applied, fetch } = makeSession([{ sse: sseFor(c, { stop: 'tool_use' }), headers: { 'x-chat-rounds-left': '0' } }]);
   const r = await s.send('回して');
-  assert.equal(r.ok, false);
-  assert.equal(r.reason, 'rounds_exceeded');
-  assert.deepEqual(applied, []);
+  assert.equal(r.ok, true);
+  assert.equal(r.partial, true);
+  assert.equal(r.stop, 'rounds_exceeded');
+  assert.equal(r.plan.items[0].rot, 10);
+  assert.deepEqual(applied, ['rotateObject']);
   assert.equal(fetch.calls.length, 1);
+  // 何も変わらなかったなら、今までどおり失敗
+  const none = makeSession([{ sse: sseFor([TOOL('t1', 'rotateObject', { id: '999', by: 10 })], { stop: 'tool_use' }), headers: { 'x-chat-rounds-left': '0' } }]);
+  const r2 = await none.s.send('回して');
+  assert.equal(r2.ok, false);
+  assert.equal(r2.reason, 'rounds_exceeded');
 });
 
 test('往復の上限: 見出しが無くても 8 回で止める', async () => {
@@ -314,10 +427,12 @@ test('往復の上限: 見出しが無くても 8 回で止める', async () => 
   for (let i = 0; i < 9; i++) script.push({ sse: sseFor([TOOL('t' + i, 'rotateObject', { id: '10', by: 10 })], { stop: 'tool_use' }), headers: { 'x-chat-rounds-left': null } });
   const { s, fetch, applied } = makeSession(script);
   const r = await s.send('回し続けて');
-  assert.equal(r.ok, false);
-  assert.equal(r.reason, 'rounds_exceeded');
+  assert.equal(r.ok, true);
+  assert.equal(r.partial, true);
+  assert.equal(r.stop, 'rounds_exceeded');
   assert.equal(fetch.calls.length, 8);
-  assert.equal(applied.length, 7);
+  assert.equal(applied.length, 8);
+  assert.equal(r.plan.items[0].rot, 80);
   checkChain(fetch.calls);
 });
 
@@ -474,14 +589,15 @@ test('今回の依頼だけで大きすぎれば送らずに too_long', async ()
   assert.equal(fetch.calls.length, 0);
 });
 
-test('続きの本文が大きすぎれば、messages を変えずに too_long で終える(写しは捨てる)', async () => {
+test('続きの本文が大きすぎれば、messages を変えずに終える(ここまでの変更は「途中で止まった」として返す)', async () => {
   const c1 = [{ type: 'text', text: 'え'.repeat(20000) }, TOOL('t1', 'rotateObject', { id: '10', by: 10 })];
   const { s, fetch } = makeSession([{ sse: sseFor(c1, { stop: 'tool_use', textPiece: 5000 }) }, { sse: sseFor([{ type: 'text', text: 'x' }]) }],
     { summarize: () => 'あ'.repeat(35000) });
   const r = await s.send('回して');
-  assert.equal(r.ok, false);
-  assert.equal(r.reason, 'too_long');
-  assert.equal(r.plan, undefined);
+  assert.equal(r.ok, true);
+  assert.equal(r.partial, true);
+  assert.equal(r.stop, 'too_long');
+  assert.equal(r.plan.items[0].rot, 10);
   assert.equal(fetch.calls.length, 1);
 });
 
@@ -506,8 +622,12 @@ test('最初の呼び出しが ai_upstream_error で札があれば、その札�
   assert.equal((await none.s.send('部屋')).reason, 'ai_upstream_error');
   assert.equal(none.fetch.calls.length, 1);
   // 続きの呼び出しの失敗はやり直さない
+  // (ここまでに当てた変更は「途中で止まった」として返す)
   const later = makeSession([{ sse: sseFor([TOOL('t1', 'rotateObject', { id: '10', by: 10 })], { stop: 'tool_use' }) }, fail, { sse: sseFor([{ type: 'text', text: 'x' }]) }]);
-  assert.equal((await later.s.send('回して')).reason, 'ai_upstream_error');
+  const rl = await later.s.send('回して');
+  assert.equal(rl.ok, true);
+  assert.equal(rl.partial, true);
+  assert.equal(rl.stop, 'ai_upstream_error');
   assert.equal(later.fetch.calls.length, 2);
 });
 
@@ -565,4 +685,16 @@ test('依頼の文は 300 字まで。超えたら送らずに request_too_long(
   assert.equal(r.message, '頼む文は300字までにしてください。');
   assert.equal(fetch.calls.length, 0);
   assert.equal((await s.send('😀'.repeat(300))).ok, true);
+});
+
+test('plainText: AI の文から Markdown の太字(**)と行頭の見出し(#)を取り除く。ほかの文字は変えない', () => {
+  const P = Session.plainText;
+  assert.equal(P('**今回できたこと**\n- **敷地**：東西13m'), '今回できたこと\n- 敷地：東西13m');
+  assert.equal(P('## まだのところ\n# 壁\n1. 屋根'), 'まだのところ\n壁\n1. 屋根');
+  assert.equal(P('  ### 見出し'), '  見出し');
+  // 対になっていない * や、文の途中の # はそのまま
+  assert.equal(P('2*3 の部屋、#12 の壁'), '2*3 の部屋、#12 の壁');
+  assert.equal(P('<b>そのまま</b>'), '<b>そのまま</b>');
+  assert.equal(P(''), '');
+  assert.equal(P(null), '');
 });

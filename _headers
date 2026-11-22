@@ -4,5 +4,24 @@
 # Content-Security-Policy-Report-Only は「報告だけ」で、何も止めない。違反はブラウザのコンソールと /api/csp-report に届く。
 # 方針の根拠と、強制に切り替える前に確かめることは .superpowers/sdd/2026-11-19-injection-hardening/task-5-report.md。
 # 書き換えたら tools/tests/csp-report-only.browser.mjs(主要な操作で違反が出ないこと)を走らせる。
+#
+# 下の守りの見出し(2026-11-20)。届き方は tools/tests/security-headers.browser.mjs が本物の Worker で確かめる。
+# - X-Content-Type-Options: 送った種類(Content-Type)と違う種類としてブラウザに読ませない。
+# - Referrer-Policy: 他のサイトへ移るときは出どころ(https://cad-planner.srapps.us)だけを渡し、?room= などの道と問いは渡さない。
+# - Permissions-Policy: このアプリが使わない機能(カメラ・マイク・位置・支払い・USB など)を、ページにも埋め込んだ物にも使わせない。
+#   使っている機能(クリップボードへの書き込み=共有リンクの写し、印刷)は書かない(既定のまま、自分のページでは使える)。
+#   新しくカメラなどを使う機能を足すときは、ここから外す。
+# - X-Frame-Options と Content-Security-Policy の frame-ancestors: 他のサイトの枠(iframe)にこのアプリを入れさせない
+#   (見た目を重ねて押させるいたずらの防ぎ)。同じ出どころの枠は許す。図面の印刷は srcdoc の枠で、見出しは掛からない。
+#   強制の CSP は frame-ancestors だけにしてある。残りの決まりは上の Report-Only で様子を見ている途中なので、ここに混ぜない。
+# - Strict-Transport-Security: https で一度開いた端末には、以後 http で繋がせない。srapps.us の他のサービスに
+#   響かないよう includeSubDomains と preload は付けない。長さは 180 日。
+# /api/* の応答(Worker が返す)には、worker/router.mjs が X-Content-Type-Options だけを付ける。
 /*
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://cloudflareinsights.com; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.a8.net; media-src 'self' data: blob:; connect-src 'self' data: blob: https://cloudflareinsights.com; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), hid=(), magnetometer=(), microphone=(), midi=(), payment=(), serial=(), usb=(), xr-spatial-tracking=()
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: frame-ancestors 'self'
+  Strict-Transport-Security: max-age=15552000

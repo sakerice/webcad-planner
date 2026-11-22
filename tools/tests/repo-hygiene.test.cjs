@@ -27,6 +27,8 @@ const ROOT_ALLOWED = [
   '.gitignore',
   // 静的アセットに付ける見出し(CSP の報告だけ)。Workers の静的アセットは dist/_headers を読むので、build.sh が写す。
   '_headers',
+  // 無いパスに返す案内(wrangler.toml の not_found_handling = "404-page")。build.sh が dist へ写す。
+  '404.html',
 ];
 
 test('リポジトリ直下には決まったファイルだけがある', () => {

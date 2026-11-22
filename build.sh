@@ -25,6 +25,8 @@ mkdir -p dist/assets/env dist/assets/textures dist/assets/models
 cp index.html dist/
 # 静的アセットに付ける見出し(CSP の報告だけ)。中身と根拠は _headers の冒頭。
 cp _headers dist/
+# 無いパスに返す案内(wrangler.toml の not_found_handling = "404-page")。
+cp 404.html dist/
 cp -r assets/. dist/assets/
 # 編集用の元データと macOS のごみは配信しない。
 find dist \( -name '*.blend' -o -name '.DS_Store' \) -delete
