@@ -35,7 +35,7 @@ const creative = (id, w, h) => ({
   name: `検査用の広告 ${w}×${h}`,
 });
 const ADS = {
-  top: [creative('top728', 728, 90), creative('top320', 320, 50)],
+  top: [creative('top728', 728, 90), creative('top468', 468, 60), creative('top320', 320, 50)],
   library: [creative('lib300', 300, 250)],
   share: [creative('share300', 300, 250)],
   export: [creative('exp320', 320, 50)],
@@ -56,7 +56,7 @@ const BAD = {
 const GIF1 = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
 const svg = (w, h) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="#3a7bd5"/><rect x="2" y="2" width="${w - 4}" height="${h - 4}" fill="none" stroke="#fff" stroke-width="2"/><text x="${w / 2}" y="${h / 2 + 6}" font-family="sans-serif" font-size="16" fill="#fff" text-anchor="middle">検査用の広告 ${w}×${h}</text></svg>`;
 
-const SIZES = [[390, 844, 'iphone-portrait'], [844, 390, 'iphone-landscape'], [820, 1180, 'ipad-portrait'], [1180, 820, 'ipad-landscape'], [1440, 900, 'pc'], [1024, 700, 'pc-small']];
+const SIZES = [[390, 844, 'iphone-portrait'], [844, 390, 'iphone-landscape'], [820, 1180, 'ipad-portrait'], [1180, 820, 'ipad-landscape'], [1440, 900, 'pc'], [1024, 700, 'pc-small-468']];
 
 const browser = await chromium.launch();
 const errors = [];
@@ -202,7 +202,8 @@ try {
     assert.equal(st.text, 'PR', `[${name}] PR 以外の文字が出ている: ${st.text}`);
     assert.match(st.href, /^https:\/\/px\.a8\.net\//);
     assert.match(st.rel, /sponsored/);
-    const expectW = w - 16 >= 728 ? 728 : 320;
+    // 高さ 800px 未満は高さ 60px 以下の素材(468×60、無ければ 320×50)。それ以外は幅に入るいちばん広い物
+    const expectW = h < 800 ? (w - 16 >= 468 ? 468 : 320) : (w - 16 >= 728 ? 728 : (w - 16 >= 468 ? 468 : 320));
     assert.equal(st.imgW, expectW, `[${name}] 画面に合う幅の素材が選ばれていない`);
     assert.ok(st.box.left >= 0 && st.box.right <= w && st.box.top >= 0, `[${name}] 帯が画面の外に出ている`);
     // 図の領域は帯の下から始まり、帯の高さだけ縮む
@@ -250,6 +251,36 @@ try {
     await page.screenshot({ path: join(SHOTS, `top-${name}-3d.png`), timeout: 90000 });
     await page.evaluate(() => setView('2d'));
     await context.close();
+    checks++;
+  }
+
+  // ── (b2) 高さ 800px 未満の画面の素材の選び方と、大きさを変えたときの選び直し ──
+  {
+    const topImg = (page) => page.evaluate(() => { const im = document.querySelector('#pr-top .pr-img'); return im ? im.width + 'x' + im.height : null; });
+    const adH = (page) => page.evaluate(() => document.documentElement.style.getPropertyValue('--ad-h'));
+    // 468×60 が無く 320×50 と 728×90 だけなら 320×50
+    let o = await open(1024, 700, { ads: { ...EMPTY, top: [creative('top728', 728, 90), creative('top320', 320, 50)] } });
+    assert.equal(await topImg(o.page), '320x50', '1024×700 で 468×60 が無いのに 320×50 が出ていない');
+    assert.equal(await adH(o.page), (6 + 50 + 18) + 'px');
+    await o.context.close();
+    // 低い素材が無ければ帯を出さない(728×90 に戻さない)
+    o = await open(1024, 700, { ads: { ...EMPTY, top: [creative('top728', 728, 90)] } });
+    assert.equal(await topImg(o.page), null, '1024×700 で 728×90 が出た');
+    assert.equal(await adH(o.page), '');
+    await o.context.close();
+    // 1024×700 → 1440×900 に広げると 728×90 に替わり、帯の高さも変わる。戻すと 468×60
+    o = await open(1024, 700);
+    assert.equal(await topImg(o.page), '468x60');
+    assert.equal(await adH(o.page), (6 + 60 + 18) + 'px');
+    await o.page.setViewportSize({ width: 1440, height: 900 });
+    await o.page.waitForFunction(() => { const im = document.querySelector('#pr-top .pr-img'); return im && im.width === 728; }, null, T);
+    assert.equal(await adH(o.page), (6 + 90 + 18) + 'px');
+    const c1 = await o.page.evaluate(() => { const c = document.getElementById('canvas-area').getBoundingClientRect(), t = document.getElementById('pr-top').getBoundingClientRect(); return Math.round(c.top - t.bottom); });
+    assert.equal(c1, 0, '広げたあと図の領域が帯の下から始まっていない');
+    await o.page.setViewportSize({ width: 1024, height: 700 });
+    await o.page.waitForFunction(() => { const im = document.querySelector('#pr-top .pr-img'); return im && im.width === 468; }, null, T);
+    assert.equal(await adH(o.page), (6 + 60 + 18) + 'px');
+    await o.context.close();
     checks++;
   }
 

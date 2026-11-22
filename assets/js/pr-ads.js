@@ -13,7 +13,7 @@
 //     px:   '1×1 の計測用 <img src="..."> の値(https://wwwNN.a8.net/0.gif?a8mat=...)',
 //     name: '広告主名(画像の代わりの文字として読み上げに使う)' }
 // 素材の画像は縮めずにそのままの大きさで出す。枠に入る幅の物だけから選ぶので、
-// 上端には 728×90(パソコン・iPad)と 320×50(iPhone の縦)を両方入れておくとよい。
+// 上端には 728×90(パソコン・iPad)・468×60(高さ 800px 未満の画面)・320×50(iPhone の縦)を入れておくとよい。
 // href は https://px.a8.net/ 、img と px は https://*.a8.net/ 以外を受け付けない(外れた物は出さない)。
 //
 // ■ 素材が0件のとき
@@ -43,6 +43,9 @@
   var TOP_PAD_T = 6, TOP_PAD_B = 18;
   // 高さの低い画面(スマートフォンの横向き)では上端の帯を出さない。見本(電話の横 844×390)と同じ線
   var LOW_SCREEN = '(max-height:500px)';
+  // 高さが SHORT_SCREEN_H 未満の画面(小さいパソコン 1024×700 など)では、上端に高さ SHORT_AD_MAX_H 以下の素材だけを使う。
+  // 728×90 だと図の領域が 16% 減るため。468×60 があればそれ、無ければ 320×50。どちらも無ければ帯を出さない(728×90 には戻さない)
+  var SHORT_SCREEN_H = 800, SHORT_AD_MAX_H = 60;
 
   // 'web': ブラウザ。A8.net の枠を出す。
   // 'app': Capacitor の中(アプリ版)。AdMob を使うので、ここの枠は出さない。
@@ -85,11 +88,15 @@
   }
   // 幅 maxW に収まる物のうち、いちばん幅の広い物から1つ選ぶ(パソコンで 320×50 を出さない)。
   // 同じ幅が複数あれば、開くたびに替わるよう無作為に選ぶ。skip は読めなかった物
-  function pick(slot, maxW, skip){
-    var ok = creatives(slot).filter(function(c){ return c.w <= maxW && !(skip && skip.indexOf(c) !== -1); });
+  // maxH を渡すと、高さがそれ以下の物だけから選ぶ。cur を渡すと、cur が選べる物の中でいちばん広い幅なら cur を返す(出し直さない)
+  function pick(slot, maxW, skip, maxH, cur){
+    var ok = creatives(slot).filter(function(c){
+      return c.w <= maxW && (!maxH || c.h <= maxH) && !(skip && skip.indexOf(c) !== -1);
+    });
     if(!ok.length) return null;
     var widest = Math.max.apply(null, ok.map(function(c){ return c.w; }));
     ok = ok.filter(function(c){ return c.w === widest; });
+    if(cur && ok.indexOf(cur) !== -1) return cur;
     return ok[Math.floor(Math.random() * ok.length)];
   }
 
@@ -159,10 +166,9 @@
   function syncTop(){
     var wanted = topWanted();
     var maxW = (root.innerWidth || 0) - 16;
-    var c = top.cur;
-    if(!wanted || !c || c.w > maxW || top.failed.indexOf(c) !== -1){
-      c = wanted ? pick('top', maxW, top.failed) : null;
-    }
+    var maxH = (root.innerHeight || 0) < SHORT_SCREEN_H ? SHORT_AD_MAX_H : 0;
+    // 回転・窓の大きさ変更のたびに選び直す。今の素材がまだいちばん合っていれば、そのまま出し続ける
+    var c = wanted ? pick('top', maxW, top.failed, maxH, top.cur) : null;
     if(!c){ removeTop(); setAdH(0); return; }
     // 帯の高さは画像を読む前に空けておく(読めてから押し下げると、押そうとしたボタンの場所に広告が来る)
     setAdH(TOP_PAD_T + c.h + TOP_PAD_B);
