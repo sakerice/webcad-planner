@@ -23,7 +23,10 @@ enabled = true
 
 [assets]
 directory = "dist"
-not_found_handling = "single-page-application"
+# 無いパスには 404 と短い案内(dist/404.html。元はリポジトリ直下の 404.html で、build.sh が写す)を返す。
+# 以前の "single-page-application" は、どんなパス(/.git/config など)にもアプリの HTML(約 1.3MB)を 200 で返していた。
+# アプリは location.pathname を使わず、共有は /?room= と /#room= で開くので、/ 以外のパスで開く必要は無い。
+not_found_handling = "404-page"
 binding = "ASSETS"
 run_worker_first = [ "/api/*" ]
 

@@ -91,6 +91,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/third-person.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
+<script src="assets/js/pr-ads.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -237,8 +238,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
    選べなかった。通り抜けさせる (#coords も同じ理由で pointer-events:none)。 */
 #help-box{position:absolute;top:8px;left:8px;background:rgba(22,33,62,0.92);padding:8px 12px;border-radius:6px;font-size:10px;color:#8a9ab0;z-index:150;line-height:1.7;border:1px solid #0f3460;pointer-events:none}
 #wall-panel.show{display:block}
-.roof-opt{display:flex;align-items:center;gap:7px;padding:5px 8px;font-size:11px;cursor:pointer;border-radius:3px;touch-action:manipulation}
-.roof-opt:active{background:#1a2a4a}
 
 /* ── MOBILE OVERLAY ────────────────────── */
 #sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:490;touch-action:manipulation}
@@ -504,8 +503,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   #props-body{padding:10px 14px calc(18px + var(--safe-bot)) 14px;}
   #props .ph{padding:10px 14px 5px;margin-bottom:6px}
   /* 2-column layout for props inputs on mobile */
-  .pr-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-  .pr-row2 .pr{margin-bottom:0}
 
   /* Canvas area fills screen */
   #canvas-area{flex:1;min-width:0}
@@ -550,7 +547,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   }
   .bnav-btn.active{color:#e94560}
   .bnav-btn:active{color:#fff}
-  .bnav-icon{font-size:20px;line-height:1}
 
   /* Stool larger tap targets */
   .stool{padding:10px 14px;min-height:44px}
@@ -571,7 +567,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 
 /* ── VERY SMALL SCREENS ─────────────────── */
 @media (max-width:380px){
-  .bnav-icon{font-size:18px}
   .bnav-btn{font-size:8px}
 }
 
@@ -960,18 +955,6 @@ body{
 .bnav-btn.active{
   color:var(--hp-primary);
 }
-.bnav-icon{
-  width:28px;
-  height:24px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:9px;
-  margin-bottom:1px;
-}
-.bnav-btn.active .bnav-icon{
-  background:var(--hp-primary-soft);
-}
 @media (max-width:768px){
   #toolbar{
     min-height:50px;
@@ -1352,11 +1335,6 @@ body{
 .pbtn.sec .sicon,.tbtn .sicon{
   border-radius:50%;
 }
-#bottom-nav .bnav-icon{
-  width:30px;
-  height:30px;
-  border-radius:50%;
-}
 @media (min-width:769px){
   #sidebar{
     max-height:calc(100dvh - 116px - var(--safe-top));
@@ -1705,17 +1683,9 @@ body{
   color:var(--hp-text-soft);
   font-weight:800;
 }
-.bnav-icon{
-  background:transparent;
-}
 .bnav-btn.active{
   background:var(--hp-primary-soft);
   color:var(--hp-primary);
-}
-.bnav-btn.active .bnav-icon{
-  background:#fff;
-  color:var(--hp-primary);
-  box-shadow:0 8px 18px rgba(255,67,40,0.16);
 }
 @media (max-width:768px){
   #toolbar{
@@ -1954,11 +1924,6 @@ body{
 .bnav-btn.active{
   background:var(--hp-primary);
   color:#fff;
-}
-.bnav-btn.active .bnav-icon{
-  background:rgba(255,255,255,0.18);
-  color:#fff;
-  box-shadow:none;
 }
 #canvas-area{
   background:
@@ -3198,6 +3163,26 @@ input[type="reset"]:focus-visible{
 /* チェックボックスの行は2つのダイアログで同じ形にする(以前は画像側だけ
    インラインの style= で書かれており、余白も 6px/8px と食い違っていた)。 */
 .airx-dialog .airx-check{display:flex;align-items:center;gap:6px;margin-top:8px}
+/* ── 広告(PR)の枠。中身と出す条件は assets/js/pr-ads.js ──
+   素材が無いあいだは #pr-top も .pr-slot の中身も作られず、has-pr-top も付かないので、ここは何も効かない。
+   上端の帯が出ている間だけ、--safe-top(上の操作の段・サイドバー・右の欄が上端の基準にする値)に帯の高さ(--ad-h)を足し、
+   body の上に同じ高さの余白を取る。図の領域(#canvas-area。3D の画面もこの中)は帯の下から始まる。 */
+html.has-pr-top{--safe-top:calc(env(safe-area-inset-top,0px) + var(--ad-h,0px))}
+html.has-pr-top body{padding-top:var(--ad-h,0px)!important}
+/* 図の領域の中で領域に対して置く物(操作ガイド・座標・壁や照明の欄 など)は、領域ごと下がるので帯の高さを足さない。
+   領域の中でも画面に対して置く物(#surface-control)は足す */
+html.has-pr-top #canvas-area{--safe-top:env(safe-area-inset-top,0px)}
+html.has-pr-top #surface-control{--safe-top:calc(env(safe-area-inset-top,0px) + var(--ad-h,0px))}
+.pr-top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:var(--ad-h,0px);z-index:460;display:flex;justify-content:center;align-items:flex-start;padding-top:6px;background:var(--hp-bg,#f7f2eb);overflow:hidden}
+.pr-box{position:relative;max-width:100%;line-height:0}
+.pr-link{display:block;line-height:0}
+.pr-img{display:block;max-width:none;border:0}
+.pr-badge{position:absolute;left:0;top:0;padding:2px 5px;border-radius:0 0 5px 0;background:rgba(45,42,39,.78);color:#fff;font:600 10px/1.2 'Noto Sans JP',sans-serif;letter-spacing:.06em;pointer-events:none}
+.pr-px{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:0;top:0}
+/* ダイアログの中の枠。ボタンとの間を 24px 以上空ける */
+.pr-slot{display:flex;justify-content:center;margin-top:24px}
+.pr-slot[hidden]{display:none}
+.jis-dialog .pr-slot{flex:0 0 auto;margin:0;padding:24px 12px 12px;border-top:1px solid #ddd;background:#fff}
 </style>
 <link rel="stylesheet" href="assets/ui-refinement.css">
 <link rel="stylesheet" href="assets/chat.css">
@@ -3250,6 +3235,7 @@ input[type="reset"]:focus-visible{
       </details>
       <p class="share-ai-note">AIが直した分は、この画面を開いている間なら「元に戻す」で戻せます。AIアプリによっては、直す操作が使えないことがあります。</p>
     </section>
+    <div id="pr-slot-share" class="pr-slot" hidden></div>
   </div>
 </div>
 <div id="toolbar">
@@ -3765,6 +3751,7 @@ input[type="reset"]:focus-visible{
       <div id="jis-sheet-list"></div>
       <div id="jis-preview"></div>
     </div>
+    <div id="pr-slot-export" class="pr-slot" hidden></div>
   </div>
 </div>
 
@@ -3908,6 +3895,7 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/plan-core/snap.js"></script>
 <script src="assets/js/plan-core/operations.js"></script>
 <script src="assets/js/plan-core/operations-catalog.js"></script>
+<script src="assets/js/plan-core/progress.js"></script>
 <script src="assets/js/plan-core/inspect.js"></script>
 <script src="assets/js/plan-core/patch.js"></script>
 <script src="assets/js/app-constants.js"></script>
@@ -7448,10 +7436,6 @@ function roofMergeMembers(){
   rejected=rejected.filter(function(r,i){return rejected.indexOf(r)===i;});
   return {lead:lead,others:others,rejected:rejected};
 }
-function roofMergeCandidateCount(){
-  var m=roofMergeMembers();
-  return m?m.others.length:0;
-}
 // 屋根のプロパティ欄に必ず出す「結合」の節。
 // 結合できないときも節ごと消さない -- 消すと、やり方も、できない理由も、
 // 画面のどこにも残らない。
@@ -7687,7 +7671,6 @@ var APPEARANCE_PANEL_MODE = 'exterior';
 function toggleInteriorColorPanel(){ toggleAppearancePanel('interior'); }
 function toggleExteriorColorPanel(){ toggleAppearancePanel('exterior'); }
 function toggleRoofColorPanel(){ toggleAppearancePanel('roof'); }
-function toggleWallPanel(){ toggleExteriorColorPanel(); }
 function toggleAppearancePanel(mode){
   if(APPEARANCE_PANEL_MODE !== mode){
     releaseAppearanceColorInput(false);
@@ -7840,18 +7823,6 @@ function refreshEnvironmentFromSky(){
 // 表示用の雲画像は全時刻で共通。太陽位置・色はシェーダーで更新する。
 // 間接光も同じ空シェーダーから生成し、操作確定時に更新する。
 var _skyPhotoCache={};
-function skyPhotoUrl(key){
-  return {morning:'assets/sky/morning.jpg',day:'assets/sky/day.jpg',evening:'assets/sky/evening.jpg',night:'assets/sky/night.jpg'}[key]||null;
-}
-function applySkyMap(tex){
-  if(!_skyMesh||!_skyMesh.material) return;
-  var old=_skyMesh.material.map;
-  _skyMesh.material.map=tex;
-  _skyMesh.material.needsUpdate=true;
-  // 手続き空(使い捨てcanvas)のみ破棄。フォト空はキャッシュ共有のため保持
-  if(old&&old!==tex&&old.dispose&&old.userData&&old.userData._procedural) old.dispose();
-  if(typeof invalidate3D==='function') invalidate3D();
-}
 var _commonSkyLoading=false;
 function updatePhotographicSky(){
   if(!_skyMesh) return;
@@ -8086,17 +8057,6 @@ function updateLightSetting(key,val){
     });
   }
   applyLightingToScene(false);
-}
-function setExteriorWallColor(floor,color){
-  saveState();
-  var s=ensureExteriorWallSettings();
-  s.floors[floor]=s.floors[floor]||defaultExteriorFloorSetting(floor);
-  s.floors[floor].linked=true;
-  s.floors[floor].color=color;
-  WALL_COLORS[floor]=color;
-  WALL_COLOR_CUSTOM[floor]=true;
-  renderExteriorWallPanel();
-  rebuild3D();
 }
 
 function defaultInteriorFloorSetting(){
@@ -8838,10 +8798,6 @@ function uploadExteriorTex(inp,scope,floor,wallId){
   r.readAsDataURL(file);
 }
 
-function isCustomWallColor(w){
-  return !!(w.color && w.color !== '#888' && w.color !== '#888888');
-}
-
 // 高さ Z (elev) を設定できるか。3D では開口以外のすべての物に効く(buildItem3D が
 // 群ごと持ち上げる)ので、ここは「設定欄に出すか」の判定である。
 // 外階段・スロープ・周辺の建物は以前は出していなかったが、地盤より下げて置く、
@@ -9010,21 +8966,6 @@ function ensureWindowProps(it){
   normalizeWindowVerticalProps(it);
 }
 
-function getFloorPlanCenter(fl){
-  var xs=[], ys=[];
-  DATA.walls.filter(function(w){return w.floor===fl;}).forEach(function(w){
-    xs.push(w.x1,w.x2); ys.push(w.y1,w.y2);
-  });
-  DATA.rooms.filter(function(r){return r.floor===fl;}).forEach(function(r){
-    xs.push(r.x,r.x+r.w); ys.push(r.y,r.y+r.d);
-  });
-  if(!xs.length) return {x:0,y:0};
-  return {
-    x:(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2,
-    y:(Math.min.apply(null,ys)+Math.max.apply(null,ys))/2
-  };
-}
-
 function getFloorWallBounds(fl){
   var xs=[], ys=[];
   DATA.walls.filter(function(w){return w.floor===fl;}).forEach(function(w){
@@ -9035,31 +8976,6 @@ function getFloorWallBounds(fl){
     minX:Math.min.apply(null,xs), maxX:Math.max.apply(null,xs),
     minY:Math.min.apply(null,ys), maxY:Math.max.apply(null,ys)
   };
-}
-
-function isWallOnExteriorShell(w){
-  var b=getFloorWallBounds(w.floor);
-  if(!b) return true;
-  var tol=Math.max((w.thick||120)+20,170);
-  function near(v,t){return Math.abs(v-t)<=tol;}
-  var x1=w.x1, x2=w.x2, y1=w.y1, y2=w.y2;
-  var vertical=Math.abs(x1-x2)<=4;
-  var horizontal=Math.abs(y1-y2)<=4;
-  if(vertical && (near(x1,b.minX)||near(x1,b.maxX))) return true;
-  if(horizontal && (near(y1,b.minY)||near(y1,b.maxY))) return true;
-  if(vertical || horizontal) return false;
-  var edgeHits=0;
-  [x1,x2].forEach(function(x){ if(near(x,b.minX)||near(x,b.maxX)) edgeHits++; });
-  [y1,y2].forEach(function(y){ if(near(y,b.minY)||near(y,b.maxY)) edgeHits++; });
-  return edgeHits>=2;
-}
-
-function isPointInsideAnyRoom(x,y,fl){
-  return DATA.rooms.some(function(r){
-    return r.floor===fl &&
-      x>=r.x-2 && x<=r.x+r.w+2 &&
-      y>=r.y-2 && y<=r.y+r.d+2;
-  });
 }
 
 function isExteriorRoom(r){
@@ -9098,47 +9014,6 @@ function isPointInsideExteriorRoom(x,y,fl){
   return getExteriorZones(fl).some(function(r){
     return isPointInsideExteriorZone(x,y,r,2);
   });
-}
-
-function isPointInsideWallEnvelope(x,y,fl,excludeWall){
-  var walls=DATA.walls.filter(function(w){return w.floor===fl && w!==excludeWall;});
-  if(!walls.length) return false;
-  var eps=1;
-  function between(v,a,b){return v>Math.min(a,b)+eps && v<Math.max(a,b)-eps;}
-  function parityRight(){
-    var c=0;
-    walls.forEach(function(w){
-      if(Math.abs(w.x1-w.x2)<=eps && w.x1>x+eps && between(y,w.y1,w.y2)) c++;
-    });
-    return c%2===1;
-  }
-  function parityLeft(){
-    var c=0;
-    walls.forEach(function(w){
-      if(Math.abs(w.x1-w.x2)<=eps && w.x1<x-eps && between(y,w.y1,w.y2)) c++;
-    });
-    return c%2===1;
-  }
-  function parityDown(){
-    var c=0;
-    walls.forEach(function(w){
-      if(Math.abs(w.y1-w.y2)<=eps && w.y1>y+eps && between(x,w.x1,w.x2)) c++;
-    });
-    return c%2===1;
-  }
-  function parityUp(){
-    var c=0;
-    walls.forEach(function(w){
-      if(Math.abs(w.y1-w.y2)<=eps && w.y1<y-eps && between(x,w.x1,w.x2)) c++;
-    });
-    return c%2===1;
-  }
-  var votes=[parityRight(),parityLeft(),parityDown(),parityUp()].filter(Boolean).length;
-  return votes>=2;
-}
-
-function isPointInsideBuilding(x,y,fl,excludeWall){
-  return isPointInsideWallEnvelope(x,y,fl,excludeWall) || isPointInsideAnyRoom(x,y,fl);
 }
 
 var _wallOutsideGridCache = {};
@@ -9237,11 +9112,6 @@ function isPointOutsideWallNetworkRaw(x,y,fl){
   return !!g.outside[j*g.cols+i];
 }
 
-function isPointOutsideWallNetwork(x,y,fl){
-  if(isPointInsideExteriorRoom(x,y,fl)) return true;
-  return isPointOutsideWallNetworkRaw(x,y,fl);
-}
-
 function classifyExteriorSampleSide(x,y,fl){
   return {
     zone:isPointInsideExteriorRoom(x,y,fl),
@@ -9257,30 +9127,6 @@ function chooseExteriorSide(plus,minus){
   if(plus.outside && !minus.outside) return 1;
   if(minus.outside && !plus.outside) return -1;
   return 0;
-}
-
-function getWallExteriorInfo(w){
-  if((w.thick||0)<120) return {isExterior:false,normalSign:0};
-  var dx=w.x2-w.x1, dy=w.y2-w.y1;
-  var len=Math.sqrt(dx*dx+dy*dy);
-  if(len<1) return {isExterior:false,normalSign:0};
-  var nx=-dy/len, ny=dx/len;
-  var off=Math.max((w.thick||120)/2+80,140);
-  var samples=Math.max(3,Math.min(9,Math.round(len/900)));
-  var plus=0, minus=0;
-  for(var i=0;i<samples;i++){
-    var t=(i+0.5)/samples;
-    var px=w.x1+dx*t, py=w.y1+dy*t;
-    var sign=chooseExteriorSide(
-      classifyExteriorSampleSide(px+nx*off,py+ny*off,w.floor),
-      classifyExteriorSampleSide(px-nx*off,py-ny*off,w.floor)
-    );
-    if(sign>0) plus++;
-    if(sign<0) minus++;
-  }
-  if(plus>0 && minus===0) return {isExterior:true,normalSign:1};
-  if(minus>0 && plus===0) return {isExterior:true,normalSign:-1};
-  return {isExterior:false,normalSign:0};
 }
 
 function addExteriorRoomBreakpoints(w,breaks){
@@ -9422,22 +9268,6 @@ function getWallExteriorSpans(w){
   });
   var minSpan=Math.min(0.22,len*U*0.18);
   return merged.filter(function(sp){return sp.b-sp.a>=minSpan;});
-}
-
-function addWallIntersectionBreakpoints(w,breaks){
-  var dx=w.x2-w.x1, dy=w.y2-w.y1;
-  var len2=dx*dx+dy*dy;
-  if(len2<1) return;
-  DATA.walls.forEach(function(o){
-    if(o===w || o.floor!==w.floor) return;
-    var odx=o.x2-o.x1, ody=o.y2-o.y1;
-    var denom=dx*ody-dy*odx;
-    if(Math.abs(denom)<1e-6) return;
-    var rx=o.x1-w.x1, ry=o.y1-w.y1;
-    var t=(rx*ody-ry*odx)/denom;
-    var u=(rx*dy-ry*dx)/denom;
-    if(t>0.0001 && t<0.9999 && u>-0.001 && u<1.001) breaks.push(t);
-  });
 }
 
 function addWallIntersectionBreakpointsBySide(w,sideBreaks){
@@ -11111,26 +10941,6 @@ function buildWinFrames(flFilt){
     mark3DSelectable(grp,it,'item');
     sc3.add(grp);
   });
-}
-
-function ptSegDist(px,py,x1,y1,x2,y2){
-  var dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;
-  if(l2<1) return Math.sqrt((px-x1)*(px-x1)+(py-y1)*(py-y1));
-  var t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/l2));
-  return Math.sqrt((px-x1-t*dx)*(px-x1-t*dx)+(py-y1-t*dy)*(py-y1-t*dy));
-}
-
-var _tex3d_1 = null, _tex3d_2 = null;
-function getSpriteTexture3D(sheet) {
-  var img = sheet === 1 ? SPRITE_IMG1 : SPRITE_IMG2;
-  if (!img.complete) return null;
-  if (sheet === 1) {
-    if (!_tex3d_1) { _tex3d_1 = new THREE.CanvasTexture(img); _tex3d_1.colorSpace = THREE.SRGBColorSpace; }
-    return _tex3d_1;
-  } else {
-    if (!_tex3d_2) { _tex3d_2 = new THREE.CanvasTexture(img); _tex3d_2.colorSpace = THREE.SRGBColorSpace; }
-    return _tex3d_2;
-  }
 }
 
 function stairBounds2D(it){
@@ -15709,9 +15519,6 @@ function applyItemColorToGroup(grp,color){
 }
 function _B(g,mat,x,y,z,w,h,d){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;g.add(m);}
 function _CY(g,mat,x,y,z,rt,rb,h,s){var m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s||8),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
-function _SP(g,mat,x,y,z,r,s){var m=new THREE.Mesh(new THREE.SphereGeometry(r,s||8,s||6),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
-function _CO(g,mat,x,y,z,r,h,s){var m=new THREE.Mesh(new THREE.ConeGeometry(r,h,s||8),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
-function _placeGrp(g,x,y,z,ry){g.position.set(x,y,z);if(ry)g.rotation.y=ry;g.userData={b:true};g.children.forEach(function(c){c.userData={b:true};});sc3.add(g);}
 // 乗用車(セダン/ハッチバック風)。側面シルエットを1枚の押し出しソリッドで表現し、
 // ラケット(前後傾斜)したフロント/リアガラスやグリル・灯火類を最小限のメッシュで追加する。
 // 低ポリ・低メッシュ数(車体1+ガラス4+灯火・トリム類約9+ホイール4輪×3=12 ≒ 30メッシュ)で
@@ -17556,79 +17363,6 @@ function walkBestFacing(xMm,zMm,fl,preferYaw){
   }
   return best;
 }
-// 立ち位置が塞がっているか。walkBlockedAt は**壁しか見ない**ので、
-// 玄関の内側は「壁は無いが立てない」場所になりやすい。実測(既定間取り):
-// 玄関ドアから内側0.9mの決め打ち位置は、内開きの玄関ドアが開いた先と重なり、
-// 開始直後の視界が平均輝度 4.8/255・正面9cmに面、という真っ暗な状態だった。
-//
-// **開き戸は障害に数える**(開いた扉が床を占めるため)。引戸と窓は数えない。
-// 上に立つもの(敷地・基礎・デッキ)と屋根は障害ではない。ここを除かないと
-// 敷地が階全体を覆っているせいでどの点も塞がり、逃げ場が無くなる。
-var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
-var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
-function walkSpawnObstructed(xMm,zMm,fl){
-  if(walkBlockedAt(xMm,zMm,fl,roomFloorAt(fl,xMm,zMm))) return true;
-  // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
-  // 点そのものは家具の外なので素通りしてしまう。
-  var r=WALK_PLAYER_RADIUS_MM;
-  var probes=[[xMm,zMm],[xMm+r,zMm],[xMm-r,zMm],[xMm,zMm+r],[xMm,zMm-r]];
-  return (DATA.items||[]).some(function(it){
-    if(!it || (it.floor||1)!==fl) return false;
-    if(isPlanAnnotationType(it.type)) return false;
-    if(isLightItemType(it.type)) return false;
-    if(ownGet(WALK_SPAWN_FLOORLIKE_TYPES,it.type)) return false;
-    if(isPlacementSurfaceItem(it)) return false;
-    var swing=isSwingDoorType(it.type);
-    if(isOpeningItemType(it.type) && !swing) return false;
-    if(!swing && getItemTopElevation(it)<WALK_SPAWN_MIN_OBSTACLE_MM) return false;
-    return probes.some(function(q){ return isInsideItem(it,q[0],q[1]); });
-  });
-}
-// 空いている立ち位置を、その階の部屋の中から探す。狙いの点に一番近いものを返す。
-function walkSpawnClearNear(xMm,zMm,fl){
-  var step=250, margin=WALK_PLAYER_RADIUS_MM+60;
-  var best=null,bestD=Infinity;
-  (DATA.rooms||[]).filter(function(r){return r.floor===fl;}).forEach(function(r){
-    var x1=r.x+r.w-margin, y1=r.y+r.d-margin;
-    for(var x=r.x+margin;x<=x1;x+=step){
-      for(var y=r.y+margin;y<=y1;y+=step){
-        var d=(x-xMm)*(x-xMm)+(y-zMm)*(y-zMm);
-        if(d>=bestD) continue;
-        if(walkSpawnObstructed(x,y,fl)) continue;
-        bestD=d; best={x:x,y:y};
-      }
-    }
-  });
-  return best;
-}
-// 立った場所から一番見通しの利く向き。壁に張り付いて始まると、正面が
-// 一色の面で埋まって「何も見えない」第一印象になる(実測: 正面0.86mが壁)。
-// 12方向へ 200mm ずつ進めて、壁に当たるまでの距離が最大の向きを選ぶ。
-// 狙いの向き(部屋の中心など)があるときは、同じくらい開けていればそちらを優先する。
-function walkBestFacing(xMm,zMm,fl,preferYaw){
-  var best=null,bestScore=-Infinity;
-  for(var i=0;i<12;i++){
-    var yaw=i*Math.PI/6;
-    var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
-    for(var d=200; d<=8000; d+=200){
-      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl, roomFloorAt(fl,xMm,zMm))) break;
-      reach=d;
-    }
-    var bonus=0;
-    if(typeof preferYaw==='number'){
-      var diff=Math.abs(((yaw-preferYaw+Math.PI*3)%(Math.PI*2))-Math.PI);
-      // **狙いから90度を超える向きは捨てる。** 玄関に立つと、一番見通しが利くのは
-      // たいてい「開けっ放しの玄関から屋外」で、そちらを向いて始まってしまう
-      // (実測: 正面894m＝ドアの開口を抜けて空が見えていた)。家の中を向く範囲で選ぶ。
-      if(diff>Math.PI/2) continue;
-      // 見通しが同等なら狙い優先。最大1.2m分のおまけ。
-      bonus=(1-diff/Math.PI)*1200;
-    }
-    var score=reach+bonus;
-    if(score>bestScore){ bestScore=score; best=yaw; }
-  }
-  return best;
-}
 function walkSpawn(){
   WALK.floor=ST.floor||1;
   var fl=WALK.floor;
@@ -18524,9 +18258,6 @@ function chooseOpeningModelTool(t){
   }
   setTool(t);
 }
-function chooseOpeningDoorModelTool(t){
-  chooseOpeningModelTool(t);
-}
 
 function toggleGrid(){ST.showGrid=!ST.showGrid;draw2d();}
 // 「寸法」ボタンの on/off 表示を合わせる。ボタンが無い幅では何もしない。
@@ -18892,9 +18623,6 @@ function handleLineAnnotationClick(tool,wx,wy,e){
   syncToolUi();
   updateProps();
   draw2d();
-}
-function handleRulerClick(wx,wy,e){
-  handleLineAnnotationClick('ruler',wx,wy,e);
 }
 function getLineAnnotationSnappedPoint(wx,wy,anchor,e){
   var end=snapRulerPoint(wx,wy);
@@ -20180,6 +19908,7 @@ function openShareDialog(){
   var name=document.getElementById('share-name');if(name){name.value=sharedDisplayName()==='ゲスト'?'':sharedDisplayName();setTimeout(function(){name.focus();},0);}
   var aiAddress=document.getElementById('share-ai-address');if(aiAddress)aiAddress.value=aiAppAddress();
   renderSharedUi();
+  if(window.PrAds) PrAds.fill(document.getElementById('pr-slot-share'),'share');
 }
 function closeShareDialog(){var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.remove('show');}
 function closeShareDialogOnBackdrop(e){if(e.target&&e.target.id==='share-overlay')closeShareDialog();}
@@ -20884,10 +20613,6 @@ function buildUnityRenderPlan(){
     return it && !isPlanAnnotationType(it.type) && !(ST.view==='3d-int' && isContextExteriorItemType(it.type));
   });
   return plan;
-}
-function exportUnityRenderRequest(){
-  var req=buildUnityRenderRequest();
-  downloadJsonFile(JSON.stringify(req,null,2),'webcad-render-request.json');
 }
 var AI_RENDER_PACKAGE=null;
 var AI_RENDER_DOWNLOAD_URLS=[];
@@ -21715,18 +21440,6 @@ async function dataUrlToBytes(dataUrl){
   var blob=await dataUrlToBlob(dataUrl);
   return new Uint8Array(await blob.arrayBuffer());
 }
-function downloadDataUrl(filename,dataUrl){
-  if(!dataUrl) return;
-  var a=document.createElement('a');
-  a.href=dataUrl;
-  a.download=filename;
-  a.style.display='none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(function(){
-    if(a.parentNode) a.parentNode.removeChild(a);
-  },1000);
-}
 var ZIP_CRC_TABLE=null;
 function zipCrc32(bytes){
   if(!ZIP_CRC_TABLE){
@@ -21983,29 +21696,6 @@ async function downloadAiRenderPrompt(){
   }
   downloadTextFile('ai-instructions.md',AI_RENDER_PACKAGE.prompt,'text/markdown;charset=utf-8');
   setUnityRenderStatus('AIへの指示文を保存しました。\nファイル名: ai-instructions.md');
-}
-async function downloadAiRenderPackageJson(){
-  if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('パッケージJSONを保存するため、先に画像AI用データを作っています...');
-    await generateAiRenderPackage();
-    if(!AI_RENDER_PACKAGE) return;
-  }
-  downloadTextFile('ai-render-package.json',aiRenderPackageJsonText(),'application/json;charset=utf-8');
-  setUnityRenderStatus('パッケージJSONを保存しました。\nファイル名: ai-render-package.json');
-}
-async function downloadAiRenderImage(kind, quiet){
-  if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('画像を保存するため、先に画像AI用データを作っています...');
-    await generateAiRenderPackage();
-    if(!AI_RENDER_PACKAGE) return;
-  }
-  var img=AI_RENDER_PACKAGE.images[kind];
-  if(img){
-    await downloadDataUrl(img.filename,img.dataUrl);
-    if(!quiet) setUnityRenderStatus('画像を保存しました。\nファイル名: '+img.filename);
-  }else if(!quiet){
-    setUnityRenderStatus('指定された画像が見つかりませんでした: '+kind);
-  }
 }
 async function downloadAiRenderBundle(){
   if(!AI_RENDER_PACKAGE){
@@ -22915,46 +22605,9 @@ async function runVideoRenderPackage(){
     setVideoRenderBusy(false);
   }
 }
-var UNITY_RENDER_SERVER_KEY='webcadUnityRenderServer';
-var unityRenderBusy=false, unityRenderTimer=null;
+var unityRenderBusy=false;
 function waitFrame(ms){
   return new Promise(function(resolve){ setTimeout(resolve, ms||30); });
-}
-function defaultUnityRenderServer(){
-  var host=(location&&location.hostname)||'';
-  if(location.protocol==='file:'||host==='127.0.0.1'||host==='localhost') return 'http://127.0.0.1:8788';
-  return '';
-}
-function normalizeUnityRenderServerUrl(url){
-  return (url||'').trim().replace(/\/+$/,'');
-}
-function getUnityRenderServer(){
-  var saved='';
-  try{ saved=localStorage.getItem(UNITY_RENDER_SERVER_KEY)||''; }catch(e){}
-  return normalizeUnityRenderServerUrl(saved||defaultUnityRenderServer());
-}
-function saveUnityRenderServer(url){
-  url=normalizeUnityRenderServerUrl(url);
-  try{
-    if(url) localStorage.setItem(UNITY_RENDER_SERVER_KEY,url);
-    else localStorage.removeItem(UNITY_RENDER_SERVER_KEY);
-  }catch(e){}
-  syncUnityRenderServerInput();
-  return url;
-}
-function saveUnityRenderServerFromInput(){
-  var inp=document.getElementById('unity-render-server-input');
-  if(!inp) return '';
-  var url=normalizeUnityRenderServerUrl(inp.value);
-  try{
-    if(url) localStorage.setItem(UNITY_RENDER_SERVER_KEY,url);
-    else localStorage.removeItem(UNITY_RENDER_SERVER_KEY);
-  }catch(e){}
-  return url;
-}
-function syncUnityRenderServerInput(){
-  var inp=document.getElementById('unity-render-server-input');
-  if(inp) inp.value=getUnityRenderServer();
 }
 function openUnityRenderModal(){
   if(!isUnityRenderFeatureEnabled()){
@@ -22962,7 +22615,6 @@ function openUnityRenderModal(){
     return;
   }
   var m=document.getElementById('unity-render-modal');
-  syncUnityRenderServerInput();
   syncAiRenderSource();
   if(m) m.classList.add('show');
 }
@@ -23000,97 +22652,6 @@ function setUnityRenderBusy(busy){
     btn.style.opacity=busy?'0.65':'';
     btn.style.cursor=busy?'wait':'';
   });
-}
-function startUnityRenderTimer(modeLabel){
-  var started=Date.now();
-  if(unityRenderTimer) clearInterval(unityRenderTimer);
-  unityRenderTimer=setInterval(function(){
-    var sec=Math.max(1,Math.round((Date.now()-started)/1000));
-    setUnityRenderStatus(modeLabel+'の現在カメラでUnityレンダリング中です...\n経過: '+sec+'秒\n通常10〜30秒ほどかかります。');
-  },1000);
-}
-function stopUnityRenderTimer(){
-  if(unityRenderTimer) clearInterval(unityRenderTimer);
-  unityRenderTimer=null;
-}
-async function checkUnityRenderServer(){
-  openUnityRenderModal();
-  var server=getUnityRenderServer();
-  if(!server){
-    setUnityRenderStatus('レンダーサーバーURLを入力してください。\n例: https://render.example.com');
-    return false;
-  }
-  setUnityRenderStatus('レンダーサーバーへ接続確認中...\n'+server);
-  try{
-    var res=await fetch(server+'/health',{method:'GET'});
-    var data=await res.json().catch(function(){return {};});
-    if(!res.ok||!data.ok) throw new Error((data&&data.error)||('HTTP '+res.status));
-    setUnityRenderStatus('接続OK\n'+server+'\nUnity project: '+(data.unityProject||'未取得'));
-    return true;
-  }catch(err){
-    setUnityRenderStatus('レンダーサーバーへ接続できませんでした。\n\nURL:\n'+server+'\n\n詳細:\n'+(err&&err.message?err.message:String(err)));
-    return false;
-  }
-}
-async function renderUnityImage(){
-  if(!isUnityRenderFeatureEnabled()){
-    alert('高画質レンダーは現在ローカル利用時のみ有効です。');
-    return;
-  }
-  if(unityRenderBusy){
-    openUnityRenderModal();
-    setUnityRenderStatus('Unityレンダーを実行中です。完了まで少しお待ちください。');
-    return;
-  }
-  openUnityRenderModal();
-  setUnityRenderImage('');
-  if(!isUnityRenderableView()){
-    setUnityRenderStatus('外観3Dまたは内観3Dを表示してから高画質レンダーを実行してください。');
-    return;
-  }
-  var camSettings=currentUnityCameraSettings();
-  var modeLabel=camSettings.mode==='interior'?'内観3D':'外観3D';
-  var server=getUnityRenderServer();
-  if(!server){
-    setUnityRenderStatus('レンダーサーバーURLを入力してください。\nUnityを実行できるレンダーサーバーの /render API に接続します。');
-    return;
-  }
-  setUnityRenderBusy(true);
-  setUnityRenderStatus(modeLabel+'の現在カメラからレンダー用データを作成しています...');
-  await waitFrame(60);
-  var req;
-  try{
-    req=buildUnityRenderRequest();
-    req.settings=camSettings;
-    setUnityRenderStatus('Unityレンダーサーバーへ送信しています...\n初回やUnity起動直後は少し時間がかかります。');
-    await waitFrame(30);
-    startUnityRenderTimer(modeLabel);
-    var res=await fetch(server+'/render',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(req)
-    });
-    var data=await res.json().catch(function(){return {};});
-    if(!res.ok || !data.ok){
-      var msg=(data&&data.error)?data.error:('HTTP '+res.status);
-      if(data&&data.logTail) msg+='\n\n'+data.logTail;
-      throw new Error(msg);
-    }
-    stopUnityRenderTimer();
-    setUnityRenderStatus(modeLabel+'の現在カメラでレンダー完了\n'+(data.outputPath||''));
-    var imgUrl=(data.url&&data.url.indexOf('http')===0)?data.url:(server+data.url);
-    setUnityRenderImage(imgUrl);
-  }catch(err){
-    stopUnityRenderTimer();
-    setUnityRenderStatus(
-      'Unityレンダーに接続できませんでした。\n\n'+
-      'レンダーサーバーURLと起動状態を確認してから、もう一度押してください。\n\n'+
-      '現在のURL:\n'+server+'\n\n'+
-      '詳細:\n'+(err&&err.message?err.message:String(err))
-    );
-  }finally{
-    setUnityRenderBusy(false);
-  }
 }
 function doImport(inp){
   var file=inp.files[0];if(!file)return;
@@ -25192,6 +24753,7 @@ function openJisDrawingDialog(){
   var sheets=JISDRAW.availableSheets();
   var ov=document.getElementById('jis-drawing-overlay');
   ov.style.display='flex';
+  if(window.PrAds) PrAds.fill(document.getElementById('pr-slot-export'),'export');
   if(!sheets.length){
     // 空プラン分岐: JIS_UI.sheetをクリアしないと、直後に閉じずに縮尺/用紙selectを操作した際
     // jisRerenderがstaleなsheetでの偽図面/古い階の出力に上書きしてしまう(印刷・DLも同様)。
@@ -25452,260 +25014,13 @@ initNativeColorInputs();
 initTouchPressFeedback();
 applyMobileUI();
 updateMobileShiftButton();
-
-/* ===== PV capture hook (guarded; no effect unless ?pvCapture=1) ===== */
-(function(){
-  try{
-    if(new URLSearchParams(location.search||'').get('pvCapture')!=='1') return;
-    // captureInstance3DData() は画像と legend を同時に返す。legend
-    // (部材ID -> 色 -> 種別・寸法) が無いと Layer 3 は「どの家具が消えたか」を
-    // 一切名指しできないので、captureGuide の呼び出しで得たものを保持し、
-    // runner が取り出して instance-legend.json として書き出せるようにする。
-    var lastInstanceLegend=null;
-
-    // ── 内観の実採光 ───────────────────────────────────────────────
-    // 内観3D(3d-int)は上から間取りを読めるよう天井を作らず、太陽も消灯している。
-    // そのまま太陽だけ点けると、天井の無い部屋へ真上から日射が降り注ぐ物理的に
-    // あり得ない絵になる。天井を「カメラには描かれないがシャドウマップには入る」
-    // オクルーダーとして生成することで、日射が窓と階段の吹き抜けからだけ入る。
-    //
-    // オクルーダー化は**生成時**に決まる(makeCeilingMaterial /
-    // buildRoomCeilingMesh)。ここフックから後付けで差し替えてはならない:
-    // GLBの読み込み完了で scheduleGltfRebuild3D() が setTimeout 経由で
-    // rebuild3D() を呼ぶため、後付けの差し替えは撮影開始前に静かに巻き戻る。
-    // 実際にそれで「部屋全体が不透明な天井で覆われた俯瞰」が撮れてしまった。
-    // ここで行うのは**観測だけ**で、状態を変えない。
-    function pvCeilingCensus(){
-      var ceilings=0, occluders=0;
-      sc3.traverse(function(o){
-        if(!o.isMesh || !o.userData || !o.userData.ceiling) return;
-        ceilings++;
-        var m=o.material;
-        // 「本当に描かれないか」をマテリアルの実値で見る。userData のフラグを
-        // 信用すると、材質だけ差し替わった場合に嘘をつく。
-        if(m && m.colorWrite===false && m.depthWrite===false && o.castShadow===true) occluders++;
-      });
-      return {ceilings:ceilings,occluders:occluders};
-    }
-    // 実際にシーンへ効いた採光状態。runner はこれを検査し、shot.json にも残す。
-    function pvDaylightState(){
-      var sun=null;
-      sc3.traverse(function(o){ if(o.isDirectionalLight) sun=o; });
-      var cam=sun&&sun.shadow?sun.shadow.camera:null;
-      var census=pvCeilingCensus();
-      return {
-        enabled:!!PV_INTERIOR_DAYLIGHT,
-        sunScale:PV_INTERIOR_DAYLIGHT?PV_INTERIOR_DAYLIGHT.sunScale:0,
-        timeOfDay:LIGHT_SETTINGS.timeOfDay,
-        sunSim:!!LIGHT_SETTINGS.sunSim,
-        sunIntensity:sun?sun.intensity:0,
-        sunCastShadow:!!(sun&&sun.castShadow),
-        sunPosition:sun?[sun.position.x,sun.position.y,sun.position.z]:null,
-        shadowMapSize:(sun&&sun.shadow)?[sun.shadow.mapSize.x,sun.shadow.mapSize.y]:null,
-        shadowCameraSpanM:cam?(cam.right-cam.left):null,
-        ceilings:census.ceilings,
-        ceilingOccluders:census.occluders
-      };
-    }
-    // 「天井はあるのにオクルーダーが1枚も無い」= 部屋が不透明な板で覆われた絵に
-    // なる、という自己矛盾。黙って描かず、その場で落とす。
-    function pvAssertNoCoveredRoom(state,when){
-      if(!state.enabled) return state;
-      if(state.ceilings>0 && state.ceilingOccluders===0){
-        throw new Error('[pv-capture] interior daylight is on and '+state.ceilings+
-          ' ceiling mesh(es) exist, but none of them is a shadow-only occluder ('+when+'). '+
-          'The overhead frame would be an opaque slab covering the room.');
-      }
-      return state;
-    }
-
-    window.__PV_CAPTURE__={
-      version:5,
-      // 内観の実採光を入れる/戻す。cfg が falsy なら元の内観(天井なし・太陽消灯)へ戻す。
-      // 戻り値は実際にシーンへ効いた状態で、太陽が点いたか・天井オクルーダーが
-      // 何枚できたかを呼び出し側が独立に検査できるようにしている。
-      setInteriorDaylight:function(cfg){
-        if(!cfg){
-          PV_INTERIOR_DAYLIGHT=null;
-        }else{
-          var s=Number(cfg.sunScale);
-          PV_INTERIOR_DAYLIGHT={sunScale:(isFinite(s)&&s>0)?s:1};
-        }
-        // 順序が重要: applyLightingToScene は太陽をプリセットの絶対座標
-        // (昼なら 100,200,100)へ置き直す。影カメラを建物へフィットさせる
-        // build3D(fitShadowCamera)より先に呼ばないと、太陽が影カメラの far の
-        // 外側に残り、影が一枚も出ない状態になる。
-        applyLightingToScene(false);
-        // rebuild3D() ではなく perform3DRebuild() を直接呼ぶ。rebuild3D は
-        // タブレット判定に当たると requestAnimationFrame まで再構築を遅らせるため、
-        // 戻った時点でまだ天井が無いことがある。ここは同期的に作り切る。
-        // 天井のオクルーダー化はこの再構築の中(生成時)で完了しており、
-        // ここから後付けで触ることは無い。
-        perform3DRebuild();
-        if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
-        if(typeof invalidate3D==='function') invalidate3D();
-        return pvAssertNoCoveredRoom(pvDaylightState(),'right after enabling');
-      },
-      // 今この瞬間のシーンを測り直す(状態は変えない)。runner は最初のフレームの
-      // 直前と最後のフレームの直後に呼び、撮影中に非同期の再構築が採光を
-      // 巻き戻していないことを確かめる。以前の実装はまさにそこで壊れた。
-      inspectInteriorDaylight:function(when){
-        return pvAssertNoCoveredRoom(pvDaylightState(),when||'on inspection');
-      },
-      ensure3D:function(){ return ensureAiRenderable3D(); },
-      // 家具GLBは ensureGltfModel() が GLTFLoader で非同期に読み込む。
-      // ロード中は _modelLoading[url]===true、完了で _modelCache[url] に
-      // 入って _modelLoading から false に落ちる(index.html 内 ensureGltfModel
-      // 参照)。この2つは three.js 本体が読み書きする唯一の権威的な状態で、
-      // 「まだ読み込み中の家具モデルURLの一覧」を過不足なく表す。
-      // ここではその2つを直接読むだけで、キャプチャ側の推測(タイマー等)を
-      // 一切足さない。何も読み込み中でなければ空配列を返す。
-      pendingModelLoads:function(){
-        return Object.keys(_modelLoading).filter(function(url){ return !!_modelLoading[url]; });
-      },
-      setView:function(v){ return setView(v); },
-      getView:function(){ return ST.view; },
-      // 実行中のプランを識別する。shot spec の "plan" と突き合わせるためのもの。
-      // アプリはプラン名を持たないが、「デフォルトプランが効いているか」は
-      // 判定できる: _defaultPlanPending は起動時 true で、IndexedDB 復元・
-      // 共同編集参加・ファイル取り込みのいずれかが起きたときだけ false になる
-      // (loadPreset は成功しても true のまま)。したがって true は
-      // 「assets/default_plan.json 以外は読まれていない」と同値である。
-      // 一致しない場合に runner 側で落とせるよう、正体の分かる文字列を返す。
-      getPlanId:function(){
-        var hasPlan=!!(DATA&&((DATA.walls&&DATA.walls.length)||(DATA.items&&DATA.items.length)||(DATA.rooms&&DATA.rooms.length)));
-        if(!hasPlan) return '(no plan loaded yet)';
-        if(typeof SHARED!=='undefined' && SHARED && SHARED.roomId) return 'shared-room:'+SHARED.roomId;
-        if(!_defaultPlanPending) return '(a saved or imported plan, not the default plan)';
-        return 'assets/default_plan.json';
-      },
-      // フロア切替はアプリ自身の既存経路(#floor-sel の onchange と同じ onFloorChange)
-      // に委譲する。ST.floor を直接書き換えると、選択解除・#st-floor 表示更新・
-      // draw2d 再描画が一切走らず、
-      // アプリの他部分が古いフロアの状態を参照し続ける恐れがあるため。
-      // getFloor は ST.floor をそのまま読み返す — setFloor の戻り値を信用せず、
-      // 呼び出し元(capture-runner.mjs)が実際に反映されたかを別途確認できるようにする。
-      setFloor:function(floor){ onFloorChange(floor); },
-      getFloor:function(){ return ST.floor; },
-      // #c3d-wrap を厳密な CSS px サイズへ固定し、既存の window resize ハンドラ
-      // (下記 window.addEventListener('resize',...) 参照)と同じ手順で
-      // ren/composer/camExt/camInt を追従させる。captureCurrent3DDataUrl 等は
-      // wrap.clientWidth/clientHeight から解像度を導出するため、これでショット
-      // 全体を通じて出力アスペクト比とピクセル寸法を固定できる。
-      setCaptureViewport:function(width,height){
-        var wrap=document.getElementById('c3d-wrap');
-        var prev={width:wrap.style.width,height:wrap.style.height};
-        wrap.style.width=width+'px';
-        wrap.style.height=height+'px';
-        try{
-          if(ren){
-            ren.setSize(wrap.clientWidth,wrap.clientHeight);
-            if(typeof composer!=='undefined' && composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
-            [camExt,camInt].forEach(function(c){
-              if(c){ c.aspect=wrap.clientWidth/wrap.clientHeight; c.updateProjectionMatrix(); }
-            });
-            invalidate3D();
-          }
-        }catch(e){
-          // ren/composer/camera 側の適用に失敗しても、wrap の inline サイズだけは
-          // 必ず呼び出し前の状態へ戻してから再送出する。呼び出し元
-          // (capture-runner.mjs) の finally 節は、この関数が prev を return
-          // して初めて復元できるため、途中で投げた場合はここで自前に戻す。
-          wrap.style.width=prev.width;
-          wrap.style.height=prev.height;
-          throw e;
-        }
-        return prev;
-      },
-      restoreCaptureViewport:function(prev){
-        var wrap=document.getElementById('c3d-wrap');
-        wrap.style.width=(prev&&prev.width)||'';
-        wrap.style.height=(prev&&prev.height)||'';
-        if(ren){
-          ren.setSize(wrap.clientWidth,wrap.clientHeight);
-          if(typeof composer!=='undefined' && composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
-          [camExt,camInt].forEach(function(c){
-            if(c){ c.aspect=wrap.clientWidth/wrap.clientHeight; c.updateProjectionMatrix(); }
-          });
-          invalidate3D();
-        }
-      },
-      // OrbitControls の damping / autoRotate はキャプチャ中は切る必要があるが、
-      // 切りっぱなしにするとキャプチャ後のユーザー操作の手触りが恒久的に変わる。
-      // 呼び出し前の値を返し、runner の finally で戻せるようにする。
-      captureOrbitState:function(){
-        if(typeof orbit==='undefined' || !orbit) return null;
-        return {enableDamping:orbit.enableDamping,autoRotate:orbit.autoRotate};
-      },
-      restoreOrbitState:function(prev){
-        if(!prev || typeof orbit==='undefined' || !orbit) return;
-        orbit.enableDamping=prev.enableDamping;
-        orbit.autoRotate=prev.autoRotate;
-      },
-      setPose:function(pos,target,fov){
-        var cam=getActive3DCamera();
-        if(!cam) throw new Error('no active 3D camera');
-        // OrbitControls の damping / autoRotate は再現性を壊すので必ず切る。
-        // 元の値は captureOrbitState() で先に控えてある前提。
-        if(typeof orbit!=='undefined' && orbit){
-          orbit.enableDamping=false;
-          orbit.autoRotate=false;
-        }
-        cam.position.set(pos[0],pos[1],pos[2]);
-        if(typeof fov==='number' && fov>0){ cam.fov=fov; }
-        cam.updateProjectionMatrix();
-        if(typeof orbit!=='undefined' && orbit && orbit.object===cam){
-          orbit.target.set(target[0],target[1],target[2]);
-          orbit.update();
-        }else{
-          cam.lookAt(new THREE.Vector3(target[0],target[1],target[2]));
-        }
-        cam.updateMatrixWorld(true);
-      },
-      renderNow:function(){
-        if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
-        var cam=getActive3DCamera();
-        if(typeof layoutSetbackDimLabels==='function') layoutSetbackDimLabels(cam);
-        if(typeof composer!=='undefined' && composer) composer.render();
-        else ren.render(sc3,cam);
-      },
-      captureBase:function(){ return Promise.resolve(captureCurrent3DDataUrl()); },
-      captureGuide:function(kind){
-        if(kind==='base') return Promise.resolve(captureCurrent3DDataUrl());
-        if(kind==='segmentation') return Promise.resolve(captureSegmentation3DDataUrl());
-        if(kind==='depth') return Promise.resolve(captureAiOverrideGuideDataUrl('depth'));
-        if(kind==='normal') return Promise.resolve(captureAiOverrideGuideDataUrl('normal'));
-        if(kind==='instance'){
-          var inst=captureInstance3DData();
-          lastInstanceLegend=inst.legend;
-          return Promise.resolve(inst.dataUrl);
-        }
-        if(kind==='edge'){
-          var forEdge=captureInstance3DData();
-          lastInstanceLegend=forEdge.legend;
-          return makeEdgeDataUrlFromSegmentation(forEdge.dataUrl);
-        }
-        return Promise.reject(new Error('unknown guide kind: '+kind));
-      },
-      // 直近の instance / edge キャプチャで得た legend。まだ一度も撮っていなければ null。
-      getInstanceLegend:function(){ return lastInstanceLegend; }
-    };
-    // 毎回モジュールを取り直す。ここは ?pvCapture=1 のときだけ通る撮影専用の
-    // 経路で、ランナーは開発中に何度も書き換わる。実際、ランナーを直した直後の
-    // 撮影2回がどちらもブラウザのキャッシュ(304)で古い実装を読み込み、出力が
-    // 1ビットも変わらないまま「修正が効かなかった」と誤読しかけた。
-    // 撮影は決定論的なので、古い実装で撮り直しても結果が同一になり、
-    // キャッシュ事故と「修正が無効」が見分けられない。
-    import('/pv/tools/truth-render/capture-runner.mjs?v='+Date.now()).catch(function(e){
-      console.error('[pv-capture] runner failed to load',e);
-    });
-  }catch(e){ console.error('[pv-capture] hook init failed',e); }
-})();
 </script>
 <script src="assets/js/ceiling-designer.js"></script>
 <script>
 // 性能の測定(?bench=1)のときだけ読む。普段は読まない。
 if(/[?&]bench=1\b/.test(location.search)){var s=document.createElement('script');s.src='assets/js/perf-bench.js';document.body.appendChild(s);}
+// PV の撮影(?pvCapture=1)のときだけ読む。普段は読まない。撮影の道具は何度も書き換わるので、毎回取り直す。
+if(new URLSearchParams(location.search||'').get('pvCapture')==='1'){var pvs=document.createElement('script');pvs.src='assets/js/pv-capture.js?v='+Date.now();document.body.appendChild(pvs);}
 </script>
 </body>
 </html>

@@ -9,6 +9,8 @@
 //   4. 当てている途中で投げても、DATA は元に戻る。
 //   5. カタログの札(tags)をまだ読んでいないときは「読み込み中」の文で断る。
 //   6. 要約の部品が、実物の呼び名と分類で動く(凍結間取り house-2f.json の文字数を出す)。
+//   7. AI に見せる「置ける物の種類」の一覧(PlanCoreOperationsCatalog.listedTypes)の種類は、どれも画面の ctx で
+//      空のプランの 1 階に置ける(Worker の ctx は tools/tests/plan-vocabulary-match.test.cjs が同じことを見る)。
 //
 // 間取りは tools/tests/fixtures/house-2f.json(凍結間取り)を白紙の起動に入れて使う。
 // sh tools/run_browser_tests.sh chat-ctx
@@ -168,6 +170,13 @@ try {
         { op: 'addRoom', args: { x: 30000, y: 0, w: 1000, d: 1000 } }, { op: 'addRoom', args: { x: 32000, y: 0, w: 1000, d: 1000 } },
       ], planChatCtx());
       res.roomIds = two.changedIds;
+      // AI に見せる一覧の種類は、どれも置ける
+      const empty = { walls: [], rooms: [], items: [] };
+      const deps = { settable: PlanSettable, knowledge: ObjectKnowledge };
+      res.listed = PlanCoreOperationsCatalog.listedTypes(deps).map((t) => {
+        const r = PlanCoreOperations.applyOperations(empty, [{ op: 'placeItem', args: { type: t, x: 2000, y: 2000, floor: 1 } }], planChatCtx());
+        return { t, error: r.errors.length ? r.errors[0].message : null };
+      });
     } finally {
       WATCH.forEach((n) => { if (saved[n]) window[n] = saved[n]; });
     }
@@ -201,6 +210,9 @@ try {
   }
 
   assert.deepEqual(out.modules, ['object', 'object', 'object']);
+  assert.ok(out.listed.length >= 60, '一覧が短い: ' + out.listed.length);
+  assert.deepEqual(out.listed.filter((x) => x.error), [], 'AI に見せる一覧に、画面の ctx で置けない種類がある');
+  assert.ok(out.listed.some((x) => x.t === 'foundation') && !out.listed.some((x) => x.t === 'kitchen-unit'));
   assert.deepEqual(out.mismatch, [], '置けた物の種類名が読み取りと同じ');
   assert.ok(out.placed.length >= 35, '置けた分類が少なすぎる: ' + out.placed.length);
   // 分類名と古い種類名が同じ綴りの物は、分類名の側で引く(古い種類にならない)

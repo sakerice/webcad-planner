@@ -1,6 +1,7 @@
 // チャットで AI に渡すプランの要約を作る。画面にも Worker にも依存しない(グローバルに触らない)。
 //
-//   ChatPlanSummary.summarize(plan, {selectedIds, labelOf(type), kindOf(type), maxBytes}) → 文字列
+//   ChatPlanSummary.summarize(plan, {selectedIds, labelOf(type), kindOf(type), maxBytes, progressLines}) → 文字列
+//   progressLines は段階ごとの出来具合の行(PlanCoreProgress.progressLines)。見出しの次に入れ、長すぎて切るときも残す。
 //
 // 部屋・壁・物を1行ずつ、id・種類・階・中心・大きさ・回転の順に書く(worker/chat.mjs の CHAT_SYSTEM の
 // 「依頼文に付くプランの要約」と合わせてある)。座標は mm の整数で、部屋と物は中心(x+w/2, y+d/2)。
@@ -221,6 +222,8 @@
       var lines = [];
       var put = function (text, keep) { lines.push({ text: text, keep: !!keep }); };
       head.forEach(function (t) { put(t, true); });
+      // 段階ごとの出来具合(opts.progressLines。plan-core/progress.js の progressLines)。切るときも残す。
+      (opts.progressLines || []).forEach(function (t) { put(clean(t, 2000), true); });
       roomLines.forEach(function (t, i) { put(t, i === 0 || t.indexOf('[選択中] ') === 0); });
       wallLines.forEach(function (t, i) { put(t, i === 0 || t.indexOf('[選択中] ') === 0); });
       var names = order.filter(function (t) { return collapsed[t]; });

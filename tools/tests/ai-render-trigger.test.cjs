@@ -159,7 +159,6 @@ function harness(opts) {
     alert: function (msg) { calls.push('alert:' + msg); },
     // 入口が触るもの（開くときの同期）
     isUnityRenderFeatureEnabled: function () { return true; },
-    syncUnityRenderServerInput: function () { calls.push('syncUnityRenderServerInput'); },
     syncAiRenderSource: function () { calls.push('syncAiRenderSource'); },
     // 撮影まわり（ここが走ったかどうかが本題）
     setView: function (v) { calls.push('setView:' + v); ctxRef.ST.view = v; },

@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const Stream = require('../../assets/js/chat/claude-stream.js');
-const { sseFor, eventText } = require('./chat-sse-fixtures.cjs');
+const { sseFor, sseMaxTokens, eventText } = require('./chat-sse-fixtures.cjs');
 
 function feed(text, chunkSize, cb) {
   const a = Stream.createAssembler(cb || {});
@@ -100,6 +100,29 @@ test('壊れた partial_json は bad_json(例外を投げない)', () => {
   sse = sse.replace('"partial_json":"{\\"x\\":1}"', '"partial_json":"{\\"x\\":1"');
   const r = feed(sse);
   assert.equal(r.error.code, 'bad_json');
+});
+
+test('出力の上限で切れた返事(max_tokens): 切れた最後の道具だけを外し、完結した道具は残す(dropped に数)', () => {
+  const cutTool = { type: 'tool_use', id: 'toolu_03', name: 'addWall', input: { x1: 0, y1: 0, x2: 9100, y2: 0, floor: 1 } };
+  for (const opts of [{}, { noBlockStop: true }, { jsonPiece: 3 }]) {
+    const r = feed(sseMaxTokens(THINK_TOOLS.concat([cutTool]), opts), 11);
+    assert.equal(r.error, undefined, JSON.stringify(opts) + ' ' + JSON.stringify(r.error));
+    assert.equal(r.message.stop_reason, 'max_tokens');
+    assert.equal(JSON.stringify(r.message.content), JSON.stringify(THINK_TOOLS), '完結したブロックは1バイトも変えずに残す');
+    assert.equal(r.dropped, 1);
+  }
+  // 最後が署名の無い考え(途中で切れた考え)も外す。文の途中で切れたのはそのまま残す。
+  const think = feed(sseMaxTokens([THINK_TOOLS[2], { type: 'thinking', thinking: 'つぎに壁を足す', signature: 'x' }]));
+  assert.equal(think.error, undefined);
+  assert.deepEqual(think.message.content.map((b) => b.type), ['tool_use']);
+  assert.equal(think.dropped, 1);
+  const text = feed(sseMaxTokens([THINK_TOOLS[2], { type: 'text', text: '壁を足しました' }]));
+  assert.equal(text.error, undefined);
+  assert.deepEqual(text.message.content.map((b) => b.type), ['tool_use', 'text']);
+  assert.equal(text.dropped, 0);
+  // max_tokens でないのに入力が壊れていれば、今までどおり bad_json
+  const broken = sseMaxTokens(THINK_TOOLS.concat([cutTool])).replace('"stop_reason":"max_tokens"', '"stop_reason":"tool_use"');
+  assert.equal(feed(broken).error.code, 'bad_json');
 });
 
 test('入力の無い道具(inspect_plan)は input が {} になる', () => {

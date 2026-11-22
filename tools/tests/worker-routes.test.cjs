@@ -126,16 +126,15 @@ test('Google の鍵が無ければ、間取り読み取りは呼ばずに 503 �
   assert.match(body.message, /wrangler secret/, '何をすればよいかが書いてあること');
 });
 
-test('OpenAI の鍵が無ければ、レンダーは呼ばずに 503', async () => {
-  const res = await post('/api/ai/render', { image: PNG, prompt: 'x' }, {});
-  assert.equal(res.status, 503);
-  assert.equal((await res.json()).error, 'ai_not_configured');
+test('未実装だったレンダーの窓口(/api/ai/render)は無い', async () => {
+  const res = await post('/api/ai/render', { image: PNG, prompt: 'x' }, { OPENAI_API_KEY: 'k' });
+  assert.equal(res.status, 404);
+  assert.equal((await res.json()).error, 'not_found');
 });
 
 test('鍵はどの応答にも出てこない', async () => {
   const env = { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-secret-value' };
   const cases = [
-    ['/api/ai/render', { image: PNG, prompt: 'x' }],
     ['/api/ai/import-plan', { image: 'こわれた' }],
   ];
   for (const [path, body] of cases) {
@@ -154,12 +153,6 @@ test('画像が data URL でなければ、モデルを呼ぶ前に 400', async 
     assert.equal(res.status, 400, JSON.stringify(image) + ' が通ってしまった');
   }
   assert.equal(called, false, '弾くべきものでモデルを呼んでいる（お金がかかる）');
-});
-
-test('レンダーは指示文が無い・長すぎるものを 400 で弾く', async () => {
-  const env = { OPENAI_API_KEY: 'k' };
-  assert.equal((await post('/api/ai/render', { image: PNG, prompt: '   ' }, env)).status, 400);
-  assert.equal((await post('/api/ai/render', { image: PNG, prompt: 'あ'.repeat(9000) }, env)).status, 400);
 });
 
 // ── 国内処理の担保 ────────────────────────────────────────────────────
@@ -371,6 +364,8 @@ function quotaEnv(extra) {
   const stub = {
     fetch: async (url) => {
       const u = new URL(url);
+      // 精算（worker/ai-budget.mjs の settle）は数えない。
+      if (u.pathname === '/settle') return new Response(JSON.stringify({ ok: true }));
       const cost = Number(u.searchParams.get('cost'));
       const perDay = Number(u.searchParams.get('perDay'));
       seen.push({ cost, who: u.searchParams.get('who'), perDay, totalPerDay: Number(u.searchParams.get('totalPerDay')) });
@@ -409,7 +404,7 @@ test('上限を超えたら、AIを呼ばずに断る', async () => {
   assert.equal(called, 0, '上限を超えているのに AI を呼んでいる（費用が出ている）');
   const body = await res.json();
   assert.equal(body.error, 'ai_quota_exceeded');
-  assert.match(body.message, /使い切りました/, '利用者に何が起きたか伝わらない');
+  assert.match(body.message, /本日ぶんの AI は受付を終えました。.*9時から再開します。/, '利用者に何が起きたか伝わらない');
 });
 
 test('数の仕組みが無い環境では通す（機能まで止めない）', async () => {
@@ -505,7 +500,8 @@ test('残り回数は、数えずに見るだけ', async () => {
     const u = new URL(url);
     seen.push({ peek: u.searchParams.get('peek'), cost: Number(u.searchParams.get('cost')),
                 perDay: Number(u.searchParams.get('perDay')), totalPerDay: Number(u.searchParams.get('totalPerDay')) });
-    return new Response(JSON.stringify({ ok: true, scope: 'peek', remaining: 126, totalRemaining: 630 }));
+    // 金額の残りは十分（$20・$70）。金額の枠で先に止まらないときだけ回数を出す。
+    return new Response(JSON.stringify({ ok: true, scope: 'peek', remaining: 126, totalRemaining: 630, dayLeft: 20e6, monthLeft: 70e6 }));
   } };
   const env = { ...VERTEX_ENV, AI_QUOTA: { idFromName: () => 'id', get: () => stub } };
   const { handleAi } = await mod('worker/routes-ai.mjs');
@@ -516,8 +512,11 @@ test('残り回数は、数えずに見るだけ', async () => {
   assert.equal(seen[0].peek, '1', '見るだけになっていない（数えてしまう）');
   assert.equal(seen[0].cost, 0);
   assert.equal(body.left, 2, '残り126点 = 2回ぶん にならない');
+  // 既定は点で持つ（1人 168点・全体 700点）。回数にすると 2回・11回（端数は切り捨て）。
   assert.equal(body.perUser, 2, '既定は ひとり1日2回');
-  assert.equal(body.total, 5, '既定は 全体1日5回');
+  assert.equal(body.total, 11, '既定は 全体1日11回');
+  assert.equal(seen[0].perDay, 168);
+  assert.equal(seen[0].totalPerDay, 700);
 });
 
 test('上限は「回数」で設定する（点は内部の数え方）', async () => {

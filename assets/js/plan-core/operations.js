@@ -706,11 +706,350 @@
     return len > ROOM_NAME_MAX ? 'name は ' + ROOM_NAME_MAX + ' 字までにしてください（' + len + ' 字が来ました）' : null;
   }
 
+  // ── 白紙から家を作るための操作(部屋を壁で囲む・開口・屋根)──────────────────
+  // AI が白紙から家を作るとき、壁を1本ずつ・扉の座標を自分で計算して置くと、手数が多く、二重の壁や壁から外れた扉ができる。
+  // そこで部屋を単位にした操作を足す。どれも中で今の部品(makeWall・placeItem)を呼ぶので、できる物は画面で人が作る物と同じ。
+  //
+  // 線の重なり: 同じ向き(平行)で、線どうしの距離が LINE_TOL 以内の壁・辺を「同じ線の上」とみなす。
+  // 部屋の辺は軸に沿うので、扉と窓は軸に沿う辺だけを扱う。壁で囲む操作は多角形(斜めの辺)も受ける。
+  var LINE_TOL = 30;
+  var MIN_PIECE = 50;    // これより短い壁の切れ端は作らない(mm)
+  var SIDES = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
+  // 画面の屋根の設定欄の形(index.html の roofTypeOptions と同じ。plan-core-build-ops の検査が突き合わせる)。
+  var ROOF_TYPES = ['gable', 'gable-y', 'hip', 'hip-ridge', 'hip-ridge-long', 'flat', 'mono'];
+  var ROOF_OVERHANG = 450;   // 軒の出の既定(壁の芯から。既定の2階建てのプランと同じ)
+  // 吊り元と開く向きを持つ種類(plan-settable.js の SWING_TYPES と同じ)。折戸は開く側の印が逆(plan-free-apply.js と同じ)。
+  var SWING_TYPES = ['door-swing', 'door-swing-s', 'door-front', 'door-fold', 'door-fold-w'];
+
+  // 線分 p→q に沿った、壁(同じ階・同じ線の上)が覆う区間の並び [[t0,t1], …](t は p からの長さ mm)。
+  function coveredOnSegment(walls, floor, p, q) {
+    var L = Math.hypot(q.x - p.x, q.y - p.y);
+    if (L < 1) return [];
+    var ux = (q.x - p.x) / L, uy = (q.y - p.y) / L;
+    var out = [];
+    (walls || []).forEach(function (w) {
+      if (!w || (w.floor || 1) !== floor) return;
+      var wl = Math.hypot(w.x2 - w.x1, w.y2 - w.y1);
+      if (wl < 1) return;
+      var cross = ((w.x2 - w.x1) * uy - (w.y2 - w.y1) * ux) / wl;
+      if (Math.abs(cross) > 0.01) return;
+      var off = Math.abs((w.x1 - p.x) * uy - (w.y1 - p.y) * ux);
+      if (off > LINE_TOL) return;
+      var t1 = (w.x1 - p.x) * ux + (w.y1 - p.y) * uy, t2 = (w.x2 - p.x) * ux + (w.y2 - p.y) * uy;
+      var a = Math.max(0, Math.min(t1, t2)), b = Math.min(L, Math.max(t1, t2));
+      if (b - a > 1) out.push([a, b]);
+    });
+    return out;
+  }
+  // [0,L] から区間を引いた残り。
+  function subtractIntervals(L, cut) {
+    var parts = [[0, L]];
+    cut.forEach(function (c) {
+      var next = [];
+      parts.forEach(function (pp) {
+        if (c[1] <= pp[0] || c[0] >= pp[1]) { next.push(pp); return; }
+        if (c[0] > pp[0]) next.push([pp[0], c[0]]);
+        if (c[1] < pp[1]) next.push([c[1], pp[1]]);
+      });
+      parts = next;
+    });
+    return parts;
+  }
+  // 部屋の4辺(軸に沿う)。axis 'h' は東西に走る辺(位置 c は y、範囲 a〜b は x)、'v' は南北に走る辺。
+  function roomEdges(r) {
+    return [
+      { side: 'N', axis: 'h', c: r.y, a: r.x, b: r.x + r.w },
+      { side: 'S', axis: 'h', c: r.y + r.d, a: r.x, b: r.x + r.w },
+      { side: 'W', axis: 'v', c: r.x, a: r.y, b: r.y + r.d },
+      { side: 'E', axis: 'v', c: r.x + r.w, a: r.y, b: r.y + r.d }
+    ];
+  }
+  function edgeEnds(e, a, b) {
+    return e.axis === 'h' ? [{ x: a, y: e.c }, { x: b, y: e.c }] : [{ x: e.c, y: a }, { x: e.c, y: b }];
+  }
+  // 辺 e のうち、同じ階のほかの部屋の辺と重なる区間 [a, b, 相手の部屋](絶対の位置)。
+  function sharedWithRooms(plan, room, e) {
+    var out = [];
+    (plan.rooms || []).forEach(function (o) {
+      if (!o || o === room || (o.floor || 1) !== (room.floor || 1)) return;
+      roomEdges(o).forEach(function (f) {
+        if (f.axis !== e.axis || Math.abs(f.c - e.c) > LINE_TOL) return;
+        var a = Math.max(e.a, f.a), b = Math.min(e.b, f.b);
+        if (b - a > 1) out.push([a, b, o]);
+      });
+    });
+    return out;
+  }
+  function roomById(plan, id) {
+    var f = findById(plan, id);
+    if (f.error) return f;
+    if (f.coll !== 'rooms') return { error: 'id ' + label(id) + ' は部屋ではありません' };
+    return f;
+  }
+
+  // 部屋(ids)か多角形(points と floor)の外周に壁を作る。既にある壁(この呼び出しで作った壁を含む)と
+  // 同じ線の上で重なる区間は作らない。部屋の辺のうち、同じ階のほかの部屋と接する区間は間仕切り(thick)、
+  // それ以外は外周(outerThick。省くと thick)。多角形の辺はすべて外周の厚さ。
+  function addRoomWalls(plan, a, ctx, rec) {
+    var hasIds = a.ids !== undefined, hasPts = a.points !== undefined;
+    if (hasIds === hasPts) return fail('ids(部屋の id の配列)か points(多角形の頂点 {x,y} の配列)のどちらか一方を渡してください');
+    if (a.thick !== undefined && !isPositive(a.thick)) return fail('thick は 0 より大きい数で渡してください');
+    if (a.outerThick !== undefined && !isPositive(a.outerThick)) return fail('outerThick は 0 より大きい数で渡してください');
+    var inner = a.thick, outer = a.outerThick !== undefined ? a.outerThick : a.thick;
+    var segs = [];   // {p, q, floor, thick}
+    if (hasIds) {
+      if (!Array.isArray(a.ids) || !a.ids.length) return fail('ids は部屋の id の配列で渡してください');
+      for (var i = 0; i < a.ids.length; i++) {
+        var f = roomById(plan, a.ids[i]);
+        if (f.error) return fail(f.error);
+        var r = f.obj;
+        if (!isNum(r.x) || !isNum(r.y) || !isPositive(r.w) || !isPositive(r.d)) return fail('部屋 ' + label(r.id) + ' の位置か大きさが数ではありません');
+        roomEdges(r).forEach(function (e) {
+          // 辺を、ほかの部屋と接する区間と、外に面する区間に切り分ける。
+          var shared = sharedWithRooms(plan, r, e);
+          var cuts = [e.a, e.b];
+          shared.forEach(function (s) { cuts.push(s[0], s[1]); });
+          cuts.sort(function (x, y) { return x - y; });
+          for (var k = 0; k + 1 < cuts.length; k++) {
+            var s0 = cuts[k], s1 = cuts[k + 1];
+            if (s1 - s0 < 1) continue;
+            var mid = (s0 + s1) / 2;
+            var isShared = shared.some(function (s) { return mid > s[0] && mid < s[1]; });
+            var ends = edgeEnds(e, s0, s1);
+            segs.push({ p: ends[0], q: ends[1], floor: r.floor || 1, thick: isShared ? inner : outer });
+          }
+        });
+      }
+    } else {
+      var fe = floorError(a.floor, ctx);
+      if (fe) return fe;
+      var pts = a.points;
+      if (!Array.isArray(pts) || pts.length < 3) return fail('points は 3 つ以上の頂点 {x, y} の配列で渡してください');
+      for (var j = 0; j < pts.length; j++) {
+        if (!pts[j] || !isNum(pts[j].x) || !isNum(pts[j].y)) return fail('points[' + j + '] は {x, y}(数)で渡してください');
+      }
+      for (var m = 0; m < pts.length; m++) {
+        var p = pts[m], q = pts[(m + 1) % pts.length];
+        if (Math.hypot(q.x - p.x, q.y - p.y) >= 1) segs.push({ p: { x: p.x, y: p.y }, q: { x: q.x, y: q.y }, floor: a.floor || 1, thick: outer });
+      }
+    }
+    if (!plan.walls) plan.walls = [];
+    var made = 0;
+    var r1 = function (v) { return Math.round(v * 10) / 10; };
+    segs.forEach(function (sg) {
+      var L = Math.hypot(sg.q.x - sg.p.x, sg.q.y - sg.p.y);
+      var ux = (sg.q.x - sg.p.x) / L, uy = (sg.q.y - sg.p.y) / L;
+      subtractIntervals(L, coveredOnSegment(plan.walls, sg.floor, sg.p, sg.q)).forEach(function (pc) {
+        if (pc[1] - pc[0] < MIN_PIECE) return;
+        var w = Factories.makeWall({
+          x1: r1(sg.p.x + ux * pc[0]), y1: r1(sg.p.y + uy * pc[0]), x2: r1(sg.p.x + ux * pc[1]), y2: r1(sg.p.y + uy * pc[1]),
+          floor: sg.floor, thick: sg.thick
+        }, ctx);
+        plan.walls.push(w);
+        rec.change(w.id);
+        made++;
+      });
+    });
+    if (!made) rec.warnings.push('どの辺にも既に壁があるので、壁は作っていません');
+  }
+
+  // 部屋 room と、別の部屋 to(または外 'outside')のあいだの壁の上に、窓・扉を置く。
+  //   外に面した壁は side(N・E・S・W)で選ぶ。部屋どうしは共有する辺(side を渡せばその辺だけ)。
+  //   位置: 既定は使える区間の中央。offset を渡すと、区間の北か西の端から開口の端までの長さ(mm)。
+  //   hinge(吊り元の側)・opens(開く側)は N・E・S・W。決まりは読み取り(plan-free-apply.js)と lint(tools/lint_plan.py)と同じ:
+  //   物の軸 u(rot 0 で東、90 で南)の向きに吊り元があれば flipX、開く側が v(u を時計回りに 90°)なら flipY=false
+  //   (折戸は逆)。
+  function placeOpening(plan, a, ctx, rec) {
+    if (typeof a.type !== 'string' || !a.type) return fail('type(窓・扉の種類)を文字で渡してください');
+    var h = hooksOf(ctx);
+    var preset = typeof h.openingPreset === 'function' ? h.openingPreset(a.type) : null;
+    var baseType = preset ? preset.type : a.type;
+    if (!catIs(ctx, 'windowLike', baseType) && !catIs(ctx, 'doorLikeOpening', baseType)) {
+      return fail('種類 ' + label(a.type) + ' は窓・扉ではありません(窓・扉の種類を渡してください)');
+    }
+    var fr = roomById(plan, a.room);
+    if (fr.error) return fail(fr.error);
+    var room = fr.obj, floor = room.floor || 1;
+    if (a.side !== undefined && !SIDES[a.side]) return fail('side は N・E・S・W のどれかで渡してください');
+    var toOutside = a.to === undefined || a.to === 'outside';
+    var spans = [];   // {e, a, b}
+    if (toOutside) {
+      if (!a.side) return fail('外に面した壁に置くときは side(N・E・S・W)を渡してください');
+      roomEdges(room).forEach(function (e) {
+        if (e.side !== a.side) return;
+        var shared = sharedWithRooms(plan, room, e).map(function (s) { return [s[0] - e.a, s[1] - e.a]; });
+        subtractIntervals(e.b - e.a, shared).forEach(function (pc) {
+          if (pc[1] - pc[0] > 1) spans.push({ e: e, a: e.a + pc[0], b: e.a + pc[1] });
+        });
+      });
+      if (!spans.length) return fail('部屋 ' + label(room.id) + ' の ' + a.side + ' の辺は、外に面していません(ほかの部屋と接しています)。to に隣の部屋の id を渡してください');
+    } else {
+      var fo = roomById(plan, a.to);
+      if (fo.error) return fail(fo.error);
+      var other = fo.obj;
+      if ((other.floor || 1) !== floor) return fail('部屋 ' + label(room.id) + ' と ' + label(other.id) + ' は階が違います');
+      roomEdges(room).forEach(function (e) {
+        if (a.side && e.side !== a.side) return;
+        sharedWithRooms(plan, room, e).forEach(function (s) { if (s[2] === other) spans.push({ e: e, a: s[0], b: s[1] }); });
+      });
+      if (!spans.length) return fail('部屋 ' + label(room.id) + ' と ' + label(other.id) + ' は辺で接していません');
+    }
+    // 壁のある区間だけを使う。
+    var usable = [];
+    spans.forEach(function (sp) {
+      var ends = edgeEnds(sp.e, sp.a, sp.b);
+      coveredOnSegment(plan.walls, floor, ends[0], ends[1]).forEach(function (c) {
+        usable.push({ e: sp.e, a: sp.a + c[0], b: sp.a + c[1] });
+      });
+    });
+    if (!usable.length) return fail('その辺には壁がありません。先に addRoomWalls で壁を作ってから置いてください');
+    // 壁が細切れのときは、つながっている区間をまとめる(同じ辺の上で隣り合う区間)。
+    usable.sort(function (x, y) { return x.e === y.e ? x.a - y.a : 0; });
+    var merged = [];
+    usable.forEach(function (u0) {
+      var last = merged[merged.length - 1];
+      if (last && last.e === u0.e && u0.a <= last.b + 1) last.b = Math.max(last.b, u0.b);
+      else merged.push({ e: u0.e, a: u0.a, b: u0.b });
+    });
+    merged.sort(function (x, y) { return (y.b - y.a) - (x.b - x.a); });
+    var best = merged[0], e = best.e;
+    var cat = ctx.catalog || {};
+    if (a.width !== undefined && !isPositive(a.width)) return fail('width は 0 より大きい数で渡してください');
+    var size = typeof cat.defaultSize === 'function' ? cat.defaultSize(baseType) : null;
+    var width = a.width !== undefined ? a.width : (size && size.w) || 780;
+    if (a.offset !== undefined && !(isNum(a.offset) && a.offset >= 0)) return fail('offset は 0 以上の数で渡してください');
+    var start = a.offset !== undefined ? best.a + a.offset : (best.a + best.b) / 2 - width / 2;
+    if (start < best.a - 1 || start + width > best.b + 1) {
+      return fail('幅 ' + width + 'mm の開口は、使える壁(長さ ' + Math.round(best.b - best.a) + 'mm)に収まりません。offset は 0〜'
+        + Math.max(0, Math.round(best.b - best.a - width)) + ' にするか、width を小さくしてください');
+    }
+    var mid = start + width / 2;
+    var cx = e.axis === 'h' ? mid : e.c, cy = e.axis === 'h' ? e.c : mid;
+    var rot = e.axis === 'h' ? 0 : 90;
+    // 同じ壁の上の開口と重ならない。
+    var clash = (plan.items || []).filter(function (it) {
+      if (!it || (it.floor || 1) !== floor) return false;
+      if (!catIs(ctx, 'windowLike', it.type) && !catIs(ctx, 'doorLikeOpening', it.type)) return false;
+      var vertical = Math.round(normRot(it.rot || 0)) % 180 === 90;
+      if (vertical !== (e.axis === 'v')) return false;
+      var icx = it.x + it.w / 2, icy = it.y + it.d / 2;
+      if (Math.abs((e.axis === 'h' ? icy : icx) - e.c) > LINE_TOL + 200) return false;
+      var ic = e.axis === 'h' ? icx : icy;
+      return Math.min(ic + it.w / 2, start + width) - Math.max(ic - it.w / 2, start) > 1;
+    });
+    if (clash.length) return fail('その位置は既にある開口(id ' + clash.map(function (it) { return label(it.id); }).join(', ') + ')と重なります。offset で位置をずらしてください');
+    var u = e.axis === 'h' ? [1, 0] : [0, 1], v = e.axis === 'h' ? [0, 1] : [-1, 0];
+    var flipX, flipY;
+    if ((a.hinge !== undefined || a.opens !== undefined) && SWING_TYPES.indexOf(baseType) < 0) {
+      return fail('hinge・opens は開き戸・玄関ドア・折戸(' + SWING_TYPES.join(', ') + ')にだけ渡せます');
+    }
+    if (a.hinge !== undefined) {
+      var hd = SIDES[a.hinge];
+      if (!hd) return fail('hinge は N・E・S・W のどれかで渡してください');
+      var hu = hd[0] * u[0] + hd[1] * u[1];
+      if (!hu) return fail('hinge は壁に沿った向き(この壁では ' + (e.axis === 'h' ? 'E か W' : 'N か S') + ')で渡してください');
+      flipX = hu > 0;
+    }
+    if (a.opens !== undefined) {
+      var od = SIDES[a.opens];
+      if (!od) return fail('opens は N・E・S・W のどれかで渡してください');
+      var ov = od[0] * v[0] + od[1] * v[1];
+      if (!ov) return fail('opens は壁と直角の向き(この壁では ' + (e.axis === 'h' ? 'N か S' : 'E か W') + ')で渡してください');
+      flipY = baseType.indexOf('door-fold') === 0 ? ov > 0 : !(ov > 0);
+    }
+    var args = { type: a.type, x: cx, y: cy, rot: rot, floor: floor, w: width };
+    // 開き戸は奥行きが扉の幅と同じ(読み取りと同じ。PlanSettable の OPENINGS で d を持たない種類)。
+    var settable = ctx.settable;
+    var odef = settable && settable.OPENINGS ? settable.OPENINGS.filter(function (o) { return o.type === baseType; })[0] : null;
+    if (odef && odef.d === null) args.d = width;
+    var before = (plan.items || []).length;
+    var res = placeItem(plan, args, ctx, rec);
+    if (res && res.error) return res;
+    var it = plan.items[before];
+    if (flipX !== undefined) it.flipX = flipX;
+    if (flipY !== undefined) it.flipY = flipY;
+    // 扉は閉じた状態で置く(読み取りの plan-free-apply.js と同じ。開いた扉が並ぶと間取りが読みにくく、外観では玄関が開いて見える)。
+    // 画面の道具で人が置くとき(placeItem)の既定は変えない。
+    if (/^door-|^window-door/.test(baseType)) it.doorOpenState = 'closed';
+  }
+
+  // 屋根をかける。画面の屋根の道具と同じ物(placeItem の roof)を置き、画面の設定欄と同じ roofType・pitch を書く。
+  //   floor は屋根が載る階(その階の壁の上)。屋根の物は floor+1 に置く(画面・読み取りと同じ決まり)。
+  //   範囲: x・y・w・d(中心と大きさ、壁の芯で)を渡せばそこ、省けば floor の壁の外周。外周が長方形でなければ断る
+  //   (L字などを1枚の長方形で覆う近似はしない。部分ごとに範囲を渡してもらう)。overhang(軒の出)を四方に足す。
+  //   shape は画面の形(ROOF_TYPES)。切妻は ridge(EW・NS。省くと長い辺に沿う)、片流れは low(低い側。省くと N)。
+  //   片流れは rot=0 で低い側が北(読み取りと同じ)。東・西が低いときは 90°・270° 回し、幅と奥行きを入れ替える。
+  function addRoof(plan, a, ctx, rec) {
+    if (a.floor === undefined) return fail('floor(屋根が載る階)を渡してください');
+    var fe = floorError(a.floor, ctx);
+    if (fe) return fe;
+    var shape = a.shape;
+    if (ROOF_TYPES.indexOf(shape) < 0) return fail('shape は画面の屋根の形のどれかで渡してください', ROOF_TYPES.slice());
+    if (a.ridge !== undefined && (shape !== 'gable' || (a.ridge !== 'EW' && a.ridge !== 'NS'))) return fail('ridge は shape が gable のときだけ、EW か NS で渡せます');
+    if (a.low !== undefined && (shape !== 'mono' || !SIDES[a.low])) return fail('low は shape が mono のときだけ、N・E・S・W で渡せます');
+    if (a.pitch !== undefined && !isNum(a.pitch)) return fail('pitch は数(度)で渡してください');
+    if (a.overhang !== undefined && !(isNum(a.overhang) && a.overhang >= 0 && a.overhang <= 2000)) return fail('overhang は 0〜2000 の数(mm)で渡してください');
+    var rectKeys = ['x', 'y', 'w', 'd'].filter(function (k) { return a[k] !== undefined; });
+    var x0, y0, x1, y1;
+    if (rectKeys.length) {
+      if (rectKeys.length !== 4) return fail('範囲は x・y・w・d の4つをそろえて渡してください(省くと壁の外周)');
+      if (!isNum(a.x) || !isNum(a.y) || !isPositive(a.w) || !isPositive(a.d)) return fail('x・y は数、w・d は 0 より大きい数で渡してください');
+      x0 = a.x - a.w / 2; y0 = a.y - a.d / 2; x1 = a.x + a.w / 2; y1 = a.y + a.d / 2;
+    } else {
+      var walls = (plan.walls || []).filter(function (w) { return w && (w.floor || 1) === a.floor; });
+      if (!walls.length) return fail(a.floor + '階に壁がありません。先に壁を作るか、範囲(x・y・w・d)を渡してください');
+      x0 = Infinity; y0 = Infinity; x1 = -Infinity; y1 = -Infinity;
+      walls.forEach(function (w) {
+        x0 = Math.min(x0, w.x1, w.x2); x1 = Math.max(x1, w.x1, w.x2);
+        y0 = Math.min(y0, w.y1, w.y2); y1 = Math.max(y1, w.y1, w.y2);
+      });
+      var sides = [[{ x: x0, y: y0 }, { x: x1, y: y0 }], [{ x: x1, y: y0 }, { x: x1, y: y1 }], [{ x: x0, y: y1 }, { x: x1, y: y1 }], [{ x: x0, y: y0 }, { x: x0, y: y1 }]];
+      var rect = sides.every(function (sd) {
+        var L = Math.hypot(sd[1].x - sd[0].x, sd[1].y - sd[0].y);
+        var gap = subtractIntervals(L, coveredOnSegment(walls, a.floor, sd[0], sd[1])).reduce(function (s, pc) { return s + pc[1] - pc[0]; }, 0);
+        return L > 0 && gap <= L * 0.05;
+      });
+      if (!rect) return fail(a.floor + '階の壁の外周が長方形ではありません。屋根をかける長方形の範囲(x・y・w・d)を、部分ごとに渡してください');
+    }
+    var over = a.overhang !== undefined ? a.overhang : ROOF_OVERHANG;
+    x0 -= over; y0 -= over; x1 += over; y1 += over;
+    var W = x1 - x0, D = y1 - y0;
+    // 同じ階に重なる屋根があれば断る(二重にかけない)。
+    var dup = (plan.items || []).filter(function (it) {
+      if (!it || it.type !== 'roof' || (it.floor || 1) !== a.floor + 1) return false;
+      var turned = Math.round(normRot(it.rot || 0)) % 180 === 90;
+      var cx = it.x + it.w / 2, cy = it.y + it.d / 2, hw = (turned ? it.d : it.w) / 2, hd = (turned ? it.w : it.d) / 2;
+      var ox = Math.min(x1, cx + hw) - Math.max(x0, cx - hw), oy = Math.min(y1, cy + hd) - Math.max(y0, cy - hd);
+      return ox > 1 && oy > 1 && ox * oy > W * D * 0.01;
+    });
+    if (dup.length) return fail('その範囲には屋根が既にあります(id ' + dup.map(function (it) { return label(it.id); }).join(', ') + ')');
+    var roofType = shape, rot = 0, iw = W, id = D;
+    if (shape === 'gable') roofType = (a.ridge || (W >= D ? 'EW' : 'NS')) === 'NS' ? 'gable-y' : 'gable';
+    if (shape === 'mono') {
+      var low = a.low || 'N';
+      if (low === 'S') rot = 180;
+      if (low === 'E' || low === 'W') { rot = low === 'E' ? 90 : 270; iw = D; id = W; }
+    }
+    var args = { type: 'roof', x: (x0 + x1) / 2, y: (y0 + y1) / 2, w: iw, d: id, floor: a.floor + 1 };
+    if (rot) args.rot = rot;
+    var before = (plan.items || []).length;
+    var res = placeItem(plan, args, ctx, rec);
+    if (res && res.error) return res;
+    var it = plan.items[before];
+    it.roofType = roofType;
+    if (a.pitch !== undefined) {
+      var p = Math.max(5, Math.min(60, a.pitch));
+      if (p !== a.pitch) rec.warnings.push('pitch=' + a.pitch + ' は画面の範囲(5〜60°)の外なので ' + p + ' にしました');
+      it.pitch = p;
+    }
+  }
+
   var OPS = {
     addRoom: addRoom, resizeRoom: resizeRoom, renameRoom: renameRoom,
     addWall: addWall, removeWall: removeWall,
     placeItem: placeItem, moveObject: moveObject, rotateObject: rotateObject,
-    deleteObjects: deleteObjects, setProps: setProps
+    deleteObjects: deleteObjects, setProps: setProps,
+    addRoomWalls: addRoomWalls, placeOpening: placeOpening, addRoof: addRoof
   };
 
   function failure(plan, index, op, message, candidates) {
@@ -768,5 +1107,5 @@
   // プランの写し(applyOperations が写しに当てるときと同じ写し方)。チャットが依頼の始めに使う。
   function clonePlan(plan) { return cloneDeep(plan, new Map()); }
 
-  return { applyOperations: applyOperations, applyProp: applyProp, clonePlan: clonePlan, OPS: OPS, tidyName: tidyName, ROOM_NAME_MAX: ROOM_NAME_MAX };
+  return { applyOperations: applyOperations, applyProp: applyProp, clonePlan: clonePlan, OPS: OPS, ROOF_TYPES: ROOF_TYPES, tidyName: tidyName, ROOM_NAME_MAX: ROOM_NAME_MAX };
 }));
