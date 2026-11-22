@@ -14,7 +14,13 @@
 //   - AI_FALLBACK=off のとき（切り替えを止める手段）
 //   - AI_IMPORT_PROVIDER・AI_LOCATE_PROVIDER で提供元を名指ししているとき（名指しの振る舞いは変えない）
 //
-// 切り替えは1回まで。切り替え先も失敗したら、これまでどおりのエラーを返す。
+// 読み取り・見直し（import-plan・revise-plan）の順番は Claude → OpenAI → Gemini（2026-11-23 運営者の方針）。
+// 各提供元は1依頼につき1回まで。鍵の無い提供元は飛ばす。Gemini は AI_GEMINI_FALLBACK=on のときだけ
+// （無料の枠では送った内容が Google の製品の改善に使われるため。worker/gemini.mjs）。
+// 位置探し（find-plan）は Vertex → OpenAI の1回まで（失敗しても画面はページ全体で読むので、Gemini は足さない）。
+// チャットと、組み立てた家の見直し（review-plan-3d）は切り替えない。どちらも画面が Claude の流れ（SSE）を
+// そのまま読み、チャットは道具の呼び出しの往復を Claude の形で持ち回るため（途中から別の提供元へ移せない）。
+// 最後の提供元も失敗したら、これまでどおりのエラーを返す。
 // どの提供元をどこで使うか（モデルを比べた実測・Vertex は日本のリージョンだけ）は worker/routes-ai.mjs の判断のまま。
 
 // 切り替えてよい環境か。既定は切り替える。AI_FALLBACK=off で止める。

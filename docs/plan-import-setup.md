@@ -143,15 +143,25 @@ OpenAI は**先払いのクレジット**。残高が $0 になると API が止
 
 | 環境変数 | 既定 | 意味 |
 |---|---|---|
-| `AI_IMPORT_PROVIDER` | （鍵があれば openai） | `vertex` にすると Gemini で読む |
+| `AI_IMPORT_PROVIDER` | （鍵があれば openai） | `vertex` にすると Gemini で読む。`gemini` にすると Gemini API で読む（`AI_GEMINI_FALLBACK=on` も要る。鍵の確かめ用） |
 | `OPENAI_MODEL` | `gpt-6-astra` | 読み取りのモデル |
 | `AI_LOCATE_PROVIDER` | vertex | 位置探しの提供元 |
 | `AI_LOCATE_MODEL` | `gemini-2.5-flash` | 位置探しのモデル |
 | `AI_FALLBACK` | （切り替える） | `off` にすると、提供元が一時的に失敗しても別の提供元へ切り替えない |
+| `AI_GEMINI_FALLBACK` | （使わない） | `on` のときだけ、予備の3番目に Gemini API（秘密 `GEMINI_API_KEY`）を使う |
+| `GEMINI_MODEL` | `gemini-4-hydrogen` | 予備の Gemini のモデル |
 
-提供元が一時的に失敗したとき（通信の失敗・429・5xx・529・401・403）は、OpenAI の鍵があれば1回だけ OpenAI へ切り替える
-（worker/ai-fallback.mjs）。読み取りは Claude → これまでの読み取り（import-plan）→ OpenAI、位置探しは Vertex → OpenAI。
+提供元が一時的に失敗したとき（通信の失敗・429・5xx・529・401・403）は、次の提供元へ1回ずつ切り替える
+（worker/ai-fallback.mjs）。読み取りと見直しの順番は Claude → OpenAI → Gemini で、鍵の無い提供元は飛ばす。
+画面の読み取り（read-plan）で Claude が失敗したら、画面はこれまでの読み取り（import-plan）へ移り、そこでは Claude を
+もう一度呼ばずに OpenAI から始める。位置探しは Vertex → OpenAI。
 `AI_IMPORT_PROVIDER`・`AI_LOCATE_PROVIDER` で名指ししているときは切り替えない。チャットと、組み立てた家の見直し（review-plan-3d）は切り替えない。
+
+Gemini API は既定では使わない。無料の枠では、送った内容と答えが Google の製品の改善に使われ、人が読むことがある
+（https://aistudio.google.com/docs/terms の Unpaid Services）。請求アカウントが有効な Cloud プロジェクトの鍵なら改善に使われない
+（同 Paid Services）。鍵のプロジェクトが有料の段かは、Google AI Studio の Projects ページの Billing Tier の欄で見る
+（https://aistudio.google.com/docs/billing）。有料（Tier 1 以上）を確かめてから `AI_GEMINI_FALLBACK=on` にする。
+Gemini の分も月・1日・1人の額の枠に数える（単価は worker/ai-price.mjs の GEMINI_PRICES、有料の段の公表値）。
 
 ### 他の選択肢を採らなかった理由
 

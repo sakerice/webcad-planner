@@ -441,7 +441,7 @@
       if (!images.length) return { status: 400, body: { error: 'no_image' } };
       return readPlanStream(images, hint);
     }).then(function (r) {
-      if (r && r.unavailable) return runLegacyPlanImport(images, hint);
+      if (r && r.unavailable) return runLegacyPlanImport(images, hint, r.fallback);
       ST.busy = false;
       showProgress(false);
       if (!r || r.status !== 200) {
@@ -462,11 +462,14 @@
   }
 
   // これまでの読み取り（手順で縛った指示を1ページずつ。OpenAI / Vertex）。Claude の鍵が無い環境で使う。
-  function runLegacyPlanImport(images, hint) {
+  // afterRead … 短い指示の読み取りが AI 側の一時的な失敗で回ってきた。同じ AI をもう一度呼ばないよう Worker に伝える。
+  function runLegacyPlanImport(images, hint, afterRead) {
+    var payload = { images: images, hint: hint };
+    if (afterRead) payload.after = 'read-plan';
     fetch('/api/ai/import-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ images: images, hint: hint }),
+      body: JSON.stringify(payload),
     }).then(readReply).then(function (r) {
       return waitForJobs(r, { onProgress: function (done, total) {
         setStatus('読み取っています… ' + done + ' / ' + total + ' 枚が終わりました。');
@@ -604,7 +607,11 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
     }).then(function (res) {
-      if (res.status === 404) return { unavailable: true };
+      // fallback … AI 側の一時的な失敗で、これまでの読み取りへ回された（鍵が無い 404 とは別）。
+      if (res.status === 404) {
+        return res.json().then(function (b) { return { unavailable: true, fallback: !!(b && b.fallback) }; },
+          function () { return { unavailable: true, fallback: false }; });
+      }
       if (!res.ok || !res.body) return readReply(res);
       p.thought = ''; p.answer = ''; p.stopReason = ''; p.error = ''; p.stageOutput = 0;
       var reader = res.body.getReader(), decoder = new TextDecoder(), buf = '';

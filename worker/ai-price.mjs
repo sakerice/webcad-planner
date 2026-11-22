@@ -44,6 +44,18 @@ export const OTHER_PRICE = UNKNOWN_PRICE;
 export const FALLBACK_MODELS = Object.freeze(["claude-opus-5", "claude-opus-4-8"]);
 const FALLBACK_PRICE = maxOf(FALLBACK_MODELS.map((m) => PRICES[m]));
 
+// Gemini API（予備の3番目。worker/gemini.mjs）の単価。有料の段の Standard の値（思考の分は出力に含む）。
+// 2026-11-23 に https://aistudio.google.com/docs/pricing （ai.google.dev/gemini-api/docs/pricing の転送先）で確かめた。
+// 無料の段では 0 円だが、無料か有料かはこちらから見えないので、有料の値で数える（高めに数える側）。
+// 表に無いモデル（GEMINI_MODEL で替えたとき）は、上の表のいちばん高い単価で数える。
+export const GEMINI_PRICES = Object.freeze({
+  "gemini-4-hydrogen": Object.freeze({ in: 1.5, out: 7.5 }),
+  "gemini-3.5-flash-lite": Object.freeze({ in: 0.3, out: 2.5 }),
+});
+export function geminiPriceOf(model) {
+  return Object.prototype.hasOwnProperty.call(GEMINI_PRICES, String(model || "")) ? GEMINI_PRICES[model] : OTHER_PRICE;
+}
+
 export function priceOf(model) {
   return Object.prototype.hasOwnProperty.call(PRICES, String(model || "")) ? PRICES[model] : UNKNOWN_PRICE;
 }
@@ -81,9 +93,14 @@ export function imageTokens(images) {
 // （月初め約 $5.3）に読み取りが2回ほどしか入らず、普通の利用が止まる。そこで仮押さえは1回分にし、2回分
 // 課金されたときは精算で usage どおりの実額（2回分）を月と日に足す。仮押さえを超えた分で枠をはみ出すのは、
 // 同時に走っている要求の分だけ（1日の額の上限以内）なので、月の枠 $80 と $100 の間の余裕で受ける。
-export function holdUsd({ model, inputTokens, maxOutputTokens, other }) {
+// gemini にモデル名を渡すと、Gemini API の単価（geminiPriceOf）で数える。
+export function holdUsd({ model, inputTokens, maxOutputTokens, other, gemini }) {
   const input = Math.min(MAX_INPUT_TOKENS, Math.max(0, Number(inputTokens) || 0) + OVERHEAD_TOKENS);
   const out = Math.max(0, Number(maxOutputTokens) || 0);
+  if (gemini) {
+    const g = geminiPriceOf(gemini);
+    return (input * Math.max(g.in, g.cacheWrite || 0) + out * g.out) / 1e6;
+  }
   const own = priceOf(model);
   const p = other ? OTHER_PRICE : (own === UNKNOWN_PRICE ? UNKNOWN_PRICE : maxOf([own, FALLBACK_PRICE]));
   return (input * Math.max(p.in, p.cacheWrite) + out * p.out) / 1e6;
@@ -119,6 +136,15 @@ export function otherUsageUsd(usage) {
   const input = Number(usage.inputTokens), output = Number(usage.outputTokens);
   if (!Number.isFinite(input) || !Number.isFinite(output)) return null;
   return (input * OTHER_PRICE.in + output * OTHER_PRICE.out) / 1e6;
+}
+
+// Gemini API の usage（こちらの形。outputTokens は答えと思考の合計）から実額を出す。
+export function geminiUsageUsd(usage, model) {
+  if (!usage) return null;
+  const input = Number(usage.inputTokens), output = Number(usage.outputTokens);
+  if (!Number.isFinite(input) || !Number.isFinite(output)) return null;
+  const p = geminiPriceOf(model);
+  return (input * p.in + output * p.out) / 1e6;
 }
 
 // 米ドルを 100 万分の 1 ドルの整数にする（Durable Object では小数の足し引きをしない）。切り上げ。
