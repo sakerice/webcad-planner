@@ -31,11 +31,23 @@
 (function(root){
   'use strict';
 
+  // 2026-11-23: A8.net の「複数の工務店へ間取り作成・見積りを一括依頼【ハウジングバザール】」(プログラム s00000011766004、
+  // 掲載サイト 003 house-planner mobile)の素材。A8.net の「広告リンク作成」の HTML から写した。
   var PR_ADS = {
-    top: [],       // 画面の上端
-    library: [],   // 保存一覧のダイアログ
-    share: [],     // 共同編集(共有)のダイアログ
-    'export': []   // JIS 図面出力(書き出し)のダイアログ
+    top: [       // 画面の上端
+      { href: 'https://px.a8.net/svt/ejp?a8mat=4BGS10+3NKV0I+2ISC+NX735', img: 'https://www28.a8.net/svt/bgt?aid=261123300221&wid=003&eno=01&mid=s00000011766004018000&mc=1', w: 728, h: 90, px: 'https://www16.a8.net/0.gif?a8mat=4BGS10+3NKV0I+2ISC+NX735', name: '自然派住宅をつくる工務店紹介サイト ハウジングバザール' },
+      { href: 'https://px.a8.net/svt/ejp?a8mat=4BGS10+3NKV0I+2ISC+NXESX', img: 'https://www29.a8.net/svt/bgt?aid=261123300221&wid=003&eno=01&mid=s00000011766004019000&mc=1', w: 468, h: 60, px: 'https://www14.a8.net/0.gif?a8mat=4BGS10+3NKV0I+2ISC+NXESX', name: '自然派住宅をつくる工務店紹介サイト ハウジングバザール' },
+      { href: 'https://px.a8.net/svt/ejp?a8mat=4BGS10+3NKV0I+2ISC+NW4I9', img: 'https://www27.a8.net/svt/bgt?aid=261123300221&wid=003&eno=01&mid=s00000011766004013000&mc=1', w: 320, h: 50, px: 'https://www11.a8.net/0.gif?a8mat=4BGS10+3NKV0I+2ISC+NW4I9', name: '自然派住宅をつくる工務店紹介サイト ハウジングバザール' }
+    ],
+    library: [   // 保存一覧のダイアログ
+      { href: 'https://px.a8.net/svt/ejp?a8mat=4BGS10+3NKV0I+2ISC+NXMIP', img: 'https://www24.a8.net/svt/bgt?aid=261123300221&wid=003&eno=01&mid=s00000011766004020000&mc=1', w: 300, h: 250, px: 'https://www16.a8.net/0.gif?a8mat=4BGS10+3NKV0I+2ISC+NXMIP', name: '自然派住宅をつくる工務店紹介サイト ハウジングバザール' }
+    ],
+    share: [     // 共同編集(共有)のダイアログ
+      { href: 'https://px.a8.net/svt/ejp?a8mat=4BGS10+3NKV0I+2ISC+NXMIP', img: 'https://www24.a8.net/svt/bgt?aid=261123300221&wid=003&eno=01&mid=s00000011766004020000&mc=1', w: 300, h: 250, px: 'https://www16.a8.net/0.gif?a8mat=4BGS10+3NKV0I+2ISC+NXMIP', name: '自然派住宅をつくる工務店紹介サイト ハウジングバザール' }
+    ],
+    'export': [  // JIS 図面出力(書き出し)のダイアログ
+      { href: 'https://px.a8.net/svt/ejp?a8mat=4BGS10+3NKV0I+2ISC+NW4I9', img: 'https://www27.a8.net/svt/bgt?aid=261123300221&wid=003&eno=01&mid=s00000011766004013000&mc=1', w: 320, h: 50, px: 'https://www11.a8.net/0.gif?a8mat=4BGS10+3NKV0I+2ISC+NW4I9', name: '自然派住宅をつくる工務店紹介サイト ハウジングバザール' }
+    ]
   };
   var SLOTS = ['top', 'library', 'share', 'export'];
 
@@ -79,7 +91,10 @@
   }
   function source(){
     var o = root.__HP_PR_ADS__;
-    return (o && typeof o === 'object') ? o : PR_ADS;
+    if(o && typeof o === 'object') return o;
+    // 自動で動かしているブラウザ(検査・撮影)では、本物の素材を出さない。広告主の表示回数に、人が見ていない表示を数えさせないため
+    try { if(root.navigator && root.navigator.webdriver) return {}; } catch(_e){}
+    return PR_ADS;
   }
   function creatives(slot){
     var list = source()[slot];
