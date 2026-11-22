@@ -91,6 +91,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/third-person.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
+<script src="assets/js/pr-ads.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -3162,6 +3163,26 @@ input[type="reset"]:focus-visible{
 /* チェックボックスの行は2つのダイアログで同じ形にする(以前は画像側だけ
    インラインの style= で書かれており、余白も 6px/8px と食い違っていた)。 */
 .airx-dialog .airx-check{display:flex;align-items:center;gap:6px;margin-top:8px}
+/* ── 広告(PR)の枠。中身と出す条件は assets/js/pr-ads.js ──
+   素材が無いあいだは #pr-top も .pr-slot の中身も作られず、has-pr-top も付かないので、ここは何も効かない。
+   上端の帯が出ている間だけ、--safe-top(上の操作の段・サイドバー・右の欄が上端の基準にする値)に帯の高さ(--ad-h)を足し、
+   body の上に同じ高さの余白を取る。図の領域(#canvas-area。3D の画面もこの中)は帯の下から始まる。 */
+html.has-pr-top{--safe-top:calc(env(safe-area-inset-top,0px) + var(--ad-h,0px))}
+html.has-pr-top body{padding-top:var(--ad-h,0px)!important}
+/* 図の領域の中で領域に対して置く物(操作ガイド・座標・壁や照明の欄 など)は、領域ごと下がるので帯の高さを足さない。
+   領域の中でも画面に対して置く物(#surface-control)は足す */
+html.has-pr-top #canvas-area{--safe-top:env(safe-area-inset-top,0px)}
+html.has-pr-top #surface-control{--safe-top:calc(env(safe-area-inset-top,0px) + var(--ad-h,0px))}
+.pr-top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:var(--ad-h,0px);z-index:460;display:flex;justify-content:center;align-items:flex-start;padding-top:6px;background:var(--hp-bg,#f7f2eb);overflow:hidden}
+.pr-box{position:relative;max-width:100%;line-height:0}
+.pr-link{display:block;line-height:0}
+.pr-img{display:block;max-width:none;border:0}
+.pr-badge{position:absolute;left:0;top:0;padding:2px 5px;border-radius:0 0 5px 0;background:rgba(45,42,39,.78);color:#fff;font:600 10px/1.2 'Noto Sans JP',sans-serif;letter-spacing:.06em;pointer-events:none}
+.pr-px{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:0;top:0}
+/* ダイアログの中の枠。ボタンとの間を 24px 以上空ける */
+.pr-slot{display:flex;justify-content:center;margin-top:24px}
+.pr-slot[hidden]{display:none}
+.jis-dialog .pr-slot{flex:0 0 auto;margin:0;padding:24px 12px 12px;border-top:1px solid #ddd;background:#fff}
 </style>
 <link rel="stylesheet" href="assets/ui-refinement.css">
 <link rel="stylesheet" href="assets/chat.css">
@@ -3214,6 +3235,7 @@ input[type="reset"]:focus-visible{
       </details>
       <p class="share-ai-note">AIが直した分は、この画面を開いている間なら「元に戻す」で戻せます。AIアプリによっては、直す操作が使えないことがあります。</p>
     </section>
+    <div id="pr-slot-share" class="pr-slot" hidden></div>
   </div>
 </div>
 <div id="toolbar">
@@ -3729,6 +3751,7 @@ input[type="reset"]:focus-visible{
       <div id="jis-sheet-list"></div>
       <div id="jis-preview"></div>
     </div>
+    <div id="pr-slot-export" class="pr-slot" hidden></div>
   </div>
 </div>
 
@@ -19885,6 +19908,7 @@ function openShareDialog(){
   var name=document.getElementById('share-name');if(name){name.value=sharedDisplayName()==='ゲスト'?'':sharedDisplayName();setTimeout(function(){name.focus();},0);}
   var aiAddress=document.getElementById('share-ai-address');if(aiAddress)aiAddress.value=aiAppAddress();
   renderSharedUi();
+  if(window.PrAds) PrAds.fill(document.getElementById('pr-slot-share'),'share');
 }
 function closeShareDialog(){var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.remove('show');}
 function closeShareDialogOnBackdrop(e){if(e.target&&e.target.id==='share-overlay')closeShareDialog();}
@@ -24729,6 +24753,7 @@ function openJisDrawingDialog(){
   var sheets=JISDRAW.availableSheets();
   var ov=document.getElementById('jis-drawing-overlay');
   ov.style.display='flex';
+  if(window.PrAds) PrAds.fill(document.getElementById('pr-slot-export'),'export');
   if(!sheets.length){
     // 空プラン分岐: JIS_UI.sheetをクリアしないと、直後に閉じずに縮尺/用紙selectを操作した際
     // jisRerenderがstaleなsheetでの偽図面/古い階の出力に上書きしてしまう(印刷・DLも同様)。
