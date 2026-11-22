@@ -34,9 +34,10 @@ test('_headers は報告だけの CSP を全部の静的アセットに付け、
   assert.deepEqual(d['base-uri'], ["'self'"]);
   assert.deepEqual(d['form-action'], ["'self'"]);
   assert.deepEqual(d['report-uri'], ['/api/csp-report']);
-  // 外のホストは、書体と Cloudflare の計測だけ
+  // 外のホストは、書体と Cloudflare の計測と、広告(A8.net)の画像だけ。広告は画像(img-src)にだけ許す
   const hosts = Object.values(d).flat().filter((v) => /^https?:\/\//.test(v)).sort();
-  assert.deepEqual(hosts, ['https://cloudflareinsights.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://static.cloudflareinsights.com']);
+  assert.deepEqual(hosts, ['https://*.a8.net', 'https://cloudflareinsights.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://static.cloudflareinsights.com']);
+  assert.deepEqual(Object.keys(d).filter((k) => d[k].includes('https://*.a8.net')), ['img-src']);
   for (const k of ['script-src', 'connect-src', 'frame-src', 'img-src', 'default-src']) {
     assert.ok(d[k], k + ' が無い');
     assert.ok(!d[k].includes('*') && !d[k].includes('https:') && !d[k].includes('http:'), k + ' がどこでも許している');
