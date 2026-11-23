@@ -20,6 +20,7 @@ import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
 import { anthropicConfig, generate as anthropicGenerate, startStream } from "./anthropic.mjs";
+import { geminiConfig, generate as geminiGenerate } from "./gemini.mjs";
 import { FREE_SYSTEM, FREE_SCHEMA, buildFreePrompt, FREE_REVIEW_SYSTEM, buildFreeReviewPrompt } from "./plan-free.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
@@ -37,8 +38,9 @@ import {
   reserve, settle, takeJev, refusal, meterStream, streamCharge, originAllowed, askQuota, whoOf, moneyParams,
   dayLimitMessage, MONTH_LIMIT_MESSAGE,
 } from "./ai-budget.mjs";
-import { holdUsd, imageTokens, textTokens, anthropicUsageUsd, otherUsageUsd } from "./ai-price.mjs";
+import { holdUsd, imageTokens, textTokens, anthropicUsageUsd, otherUsageUsd, geminiUsageUsd } from "./ai-price.mjs";
 import { quotaLimits } from "./ai-quota.mjs";
+import { fallbackEnabled, transientKind, logFallback } from "./ai-fallback.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -191,6 +193,9 @@ function readingRefUsd(env) {
 const READ_MAX_OUTPUT_TOKENS = 64000;
 const ANTHROPIC_PLAN_OUTPUT_TOKENS = 32000;   // worker/anthropic.mjs の buildRequest の既定
 const OTHER_PLAN_OUTPUT_TOKENS = 32768 + 8192; // OpenAI・Vertex の既定（Vertex は考える分を足す）
+// Gemini API（予備の3番目）の出力の上限。思考の分もここに入る（gemini-4-hydrogen は思考を止められず、既定は high）。
+// 1回の上限 65,536（https://aistudio.google.com/docs/models/gemini-4-hydrogen）。思考で答えが切れないよう上限まで取る。
+const GEMINI_PLAN_OUTPUT_TOKENS = 65536;
 const LOCATE_MAX_OUTPUT_TOKENS = 512;
 
 // 断るとき・数えられないときの返事を作る。
@@ -216,10 +221,13 @@ function upstreamError(where, failed) {
 function askHoldUsd(provider, ask) {
   const other = provider.kind !== "anthropic";
   const docs = (ask.docs || [planKnowledge(), planSpec()]).map((d) => textTokens(String(d))).reduce((a, b) => a + b, 0);
+  const inputTokens = imageTokens(ask.images) + textTokens(ask.system) + textTokens(ask.text) + docs
+    + textTokens(JSON.stringify(PLAN_RESPONSE_SCHEMA));
+  if (provider.kind === "gemini") {
+    return holdUsd({ gemini: provider.config.model, inputTokens, maxOutputTokens: GEMINI_PLAN_OUTPUT_TOKENS });
+  }
   return holdUsd({
-    model: provider.config && provider.config.model, other,
-    inputTokens: imageTokens(ask.images) + textTokens(ask.system) + textTokens(ask.text) + docs
-      + textTokens(JSON.stringify(PLAN_RESPONSE_SCHEMA)),
+    model: provider.config && provider.config.model, other, inputTokens,
     maxOutputTokens: other ? OTHER_PLAN_OUTPUT_TOKENS : ANTHROPIC_PLAN_OUTPUT_TOKENS,
   });
 }
@@ -242,7 +250,9 @@ function usageUsd(provider, result, holdShare) {
       input: Math.max(0, (Number(u.inputTokens) || 0) - cw - cr), cacheWrite: cw, cacheRead: cr, output: u.outputTokens,
     });
   }
-  const usd = otherUsageUsd(result.usage);
+  const usd = provider.kind === "gemini"
+    ? geminiUsageUsd(result.usage, provider.config && provider.config.model)
+    : otherUsageUsd(result.usage);
   return usd === null ? holdShare : usd;
 }
 // 何回分かの結果をまとめて精算する。
@@ -292,6 +302,48 @@ function locateProvider(env) {
   return { kind: "vertex" };
 }
 
+// 位置探しの切り替え先（Vertex が一時的に失敗したとき。worker/ai-fallback.mjs）。
+// 名指し（AI_LOCATE_PROVIDER）があるとき・AI_FALLBACK=off・OpenAI の鍵が無いときは切り替えない。
+// モデルは上の locateProvider で OpenAI へ回すときと同じ考え（安いモデルで外すより、読み取りと同じモデルで当てる）。
+// AI_LOCATE_MODEL は Vertex のモデル名を入れる欄でもあるので、ここでは見ない。
+function locateFallback(env) {
+  if (!fallbackEnabled(env) || (env && env.AI_LOCATE_PROVIDER)) return null;
+  const openai = openaiConfig(env);
+  if (!openai.configured) return null;
+  return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
+}
+
+// 読み取り・見直し（これまでの読み取り）の予備の提供元。順番は Claude → OpenAI → Gemini（2026-11-23 運営者の方針）。
+// 名指し（AI_IMPORT_PROVIDER）があるとき・AI_FALLBACK=off のときは予備を使わない。鍵の無い提供元は飛ばす。
+// OpenAI のモデルは importProvider で OpenAI を選ぶときと同じ既定（gpt-6-astra）。
+// Gemini は鍵に加えて AI_GEMINI_FALLBACK=on のときだけ（学習に使われる条件の確認待ち。worker/gemini.mjs）。
+const FALLBACK_ORDER = ["anthropic", "openai", "gemini"];
+function openaiFallback(env) {
+  if (!fallbackEnabled(env) || (env && env.AI_IMPORT_PROVIDER)) return null;
+  const openai = openaiConfig(env);
+  if (!openai.configured) return null;
+  return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
+}
+function geminiFallback(env) {
+  if (!fallbackEnabled(env) || (env && env.AI_IMPORT_PROVIDER)) return null;
+  const gemini = geminiConfig(env);
+  if (!gemini.usable) return null;
+  return { kind: "gemini", config: gemini };
+}
+// primaryKind の後ろに回せる予備（順番どおり）。Vertex など順番の外の提供元には予備を付けない。
+function importFallbacks(env, primaryKind) {
+  const at = FALLBACK_ORDER.indexOf(primaryKind);
+  if (at < 0) return [];
+  return [openaiFallback(env), geminiFallback(env)].filter((p) => p && FALLBACK_ORDER.indexOf(p.kind) > at);
+}
+// 読み取り1回で試す提供元の並び。画面の読み取り（read-plan）で Claude が一時的に失敗して回ってきたとき
+// （after: "read-plan"）は、同じ Claude をもう一度呼ばず、予備から始める（予備が1つも無ければ Claude のまま）。
+function planChain(provider, env, payload) {
+  const rest = importFallbacks(env, provider.kind);
+  if (payload && payload.after === "read-plan" && provider.kind === "anthropic" && rest.length) return rest;
+  return [provider, ...rest];
+}
+
 // 図面の読み取りを、どこへ投げるか。
 //
 // 実測（同じ切り出し画像・同じ指示文・同じ仕様書、1階の図面1枚）:
@@ -313,6 +365,9 @@ function importProvider(env) {
   const openai = openaiConfig(env);
   if (want === "vertex") return { kind: "vertex" };
   if (want === "anthropic") return { kind: "anthropic", config: anthropicConfig(env) };
+  // Gemini API の名指し。予備の Gemini の鍵が効くかを、Claude を止めずに確かめるため（本番へ流さない版で使う）。
+  // 名指しでも AI_GEMINI_FALLBACK=on が無ければ送らない（resolveImportProvider が 503 で断る）。
+  if (want === "gemini") return { kind: "gemini", config: geminiConfig(env) };
   // 名指しが無く、Claude の鍵が入っていれば Claude を使う（2026-10-19 利用者決定）。
   // 鍵が無い環境では、これまでどおり OpenAI → Vertex の順に落ちる。
   if (!want && anthropicConfig(env).configured) return { kind: "anthropic", config: anthropicConfig(env) };
@@ -350,10 +405,27 @@ async function aiFindPlan(payload, env, deps, request) {
     maxOutputTokens: LOCATE_MAX_OUTPUT_TOKENS,
     fetchImpl: deps.fetchImpl,
   };
-  const result = provider.kind === "openai"
-    ? await openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(LOCATE_SCHEMA) } })
-    : await generate({ ...common, config: provider.config, responseSchema: LOCATE_SCHEMA, thinkingBudget: 0 });
+  const locate = (p) => p.kind === "openai"
+    ? openaiGenerate({ ...common, config: { ...p.config, schema: toJsonSchema(LOCATE_SCHEMA) } })
+    : generate({ ...common, config: p.config, responseSchema: LOCATE_SCHEMA, thinkingBudget: 0 });
+  let result = await locate(provider);
   await settleResults(env, quota.hold, { kind: provider.kind }, [result], [hold]);
+
+  // Vertex が一時的に失敗したら、OpenAI で1回だけやり直す（worker/ai-fallback.mjs）。
+  // 切り替え先の費用は別に仮押さえし（月・1日の額の枠をもう一度確かめる）、別に精算する。
+  // 点は1点だけ足す（数の持ち主は 0 点の確保を受けないため）。
+  const kind = provider.kind === "vertex" ? transientKind(result) : null;
+  const to = kind ? locateFallback(env) : null;
+  if (to) {
+    const second = await reserveAi(request, env, 1, hold);
+    if (second.ok) {
+      logFallback("find-plan", "vertex", "openai", kind);
+      const retried = await locate(to);
+      await settleResults(env, second.hold, { kind: to.kind }, [retried], [hold]);
+      if (retried.ok) result = retried;
+      else console.log(JSON.stringify({ ai_fallback_failed: { route: "find-plan", to: "openai", status: Number(retried.status) || 0 } }));
+    }
+  }
 
   if (!result.ok) return upstreamError("find-plan", result);
 
@@ -428,15 +500,11 @@ async function aiImportPlan(payload, env, deps, request) {
     fetchImpl: deps.fetchImpl,
   }));
 
-  // 使う前に数える。**送ってから断ると費用は戻らない。**
-  const holds = asks.map((ask) => askHoldUsd(provider, ask));
-  const quota = await reserveAi(request, env, images.length * COST_IMPORT_PAGE, sum(holds));
-  if (!quota.ok) return refuse(quota);
-  // OpenAI は投げるだけで答えは後から取りに行くので、実額が分からない。仮押さえのまま残す。
-  if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
-
-  const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
-  await settleResults(env, quota.hold, provider, results, holds);
+  // 使う前に数える。**送ってから断ると費用は戻らない。**（数え方は readWithFallbacks）
+  const read = await readWithFallbacks("import-plan", planChain(provider, env, payload), asks, env, request,
+    images.length * COST_IMPORT_PAGE);
+  if (read instanceof Response) return read;
+  const results = read.results;
   const pages = collectPages(results);
   if (pages.error) return withNextStep(pages.error, env, deps, { images });
   return withNextStep(finishImportedPlan(
@@ -490,6 +558,17 @@ async function aiReadPlan(payload, env, deps, request) {
   });
   if (!started.ok) {
     await settleNotStarted(env, quota.hold, started, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS, startedAt);
+    // Claude が一時的に失敗したら、画面をこれまでの読み取り（import-plan）へ回す。
+    // ここの答えは Claude の流れ（SSE）のまま画面が読むので、予備の提供元の答えをこの窓口から同じ形では返せない。
+    // 画面は 404 を見て import-plan へ移る（assets/js/plan-import.js の runLegacyPlanImport）。fallback を見た画面は
+    // after: "read-plan" を付けて送り、import-plan は Claude をもう一度呼ばずに OpenAI → Gemini の順で試す
+    // （readWithFallbacks。各提供元は1依頼につき1回）。予備が無ければ回さない（回しても同じ Claude になるため）。
+    // 答えが流れ始めたあとの失敗は、ここへ来ない（流れの中の error として画面に届き、二重には出ない）。
+    const kind = transientKind(started);
+    if (kind && importFallbacks(env, "anthropic").length) {
+      logFallback("read-plan", "anthropic", "import-plan", kind);
+      return json({ error: "not_available", fallback: "import-plan", message: "これまでの読み取りで続けます。" }, 404);
+    }
     return upstreamError("read-plan", started);
   }
   return new Response(meteredStream(env, deps, started.body, quota.hold, config.model, inputTokens, READ_MAX_OUTPUT_TOKENS), {
@@ -610,13 +689,10 @@ async function aiRevisePlan(payload, env, deps, request) {
     fetchImpl: deps.fetchImpl,
   }));
 
-  const holds = asks.map((ask) => askHoldUsd(provider, ask));
-  const quota = await reserveAi(request, env, pairs.length * COST_REVISE_PAGE, sum(holds));
-  if (!quota.ok) return refuse(quota);
-  if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
-
-  const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
-  await settleResults(env, quota.hold, provider, results, holds);
+  const read = await readWithFallbacks("revise-plan", planChain(provider, env, null), asks, env, request,
+    pairs.length * COST_REVISE_PAGE);
+  if (read instanceof Response) return read;
+  const results = read.results;
   const pages = collectPages(results);
   if (pages.error) return pages.error;
   return finishImportedPlan(
@@ -635,6 +711,9 @@ function resolveImportProvider(env) {
       error: "ai_not_configured",
       message: "AI の鍵がこの環境に設定されていません。 wrangler secret put ANTHROPIC_API_KEY で設定してください。",
     }, 503) };
+  }
+  if (provider.kind === "gemini" && !provider.config.usable) {
+    return { error: json({ error: "ai_not_configured", message: "AI の鍵がこの環境に設定されていません。" }, 503) };
   }
   if (provider.kind !== "vertex") return provider;
   const config = vertexConfig(env);
@@ -656,6 +735,65 @@ function resolveImportProvider(env) {
   return { ...provider, config };
 }
 
+// 読み取りを、並び（planChain）の先頭から順に試す。一時的な失敗（worker/ai-fallback.mjs の transientKind）の
+// ときだけ次へ進む。各提供元は1回まで。返すのは次のどちらか。
+//   Response … そのまま画面へ返す（断り・OpenAI の受付番号・OpenAI で受け付けられなかった失敗）
+//   { results, provider } … 同じ通信で答えが返る提供元（Claude・Gemini・Vertex）の結果。失敗も含む（呼び出し側が collectPages で読む）
+//
+// 費用の枠: 提供元ごとに別に仮押さえする（月・1日・1人の額の枠をそのたびに確かめる）。点は先頭だけが
+// 依頼の重さ（points）で、予備は1点ずつ足す（数の持ち主は 0 点の確保を受けないため）。
+//   Claude・Gemini … usage どおりに精算する（上流が 2xx 以外なら 0。届かなかったなら仮押さえの額）
+//   OpenAI … 受け付けられたら仮押さえのまま残す（答えは後から取りに行くので実額が分からない）。
+//            受け付けられなかったときは、受け付けられたページは仮押さえの額、ほかは上流の返事どおりで精算する
+// 予備の分が枠に入らなければ、送らずに前の失敗を返す。
+// 1ページでも一時的に失敗したら、全ページを次の提供元へ投げ直す（返事は「全ページの間取り」か
+// 「全ページの受付番号」のどちらかで、混ぜられないため。済んだページの費用も精算済み）。
+async function readWithFallbacks(route, chain, asks, env, request, points) {
+  let failure = null;
+  let kind = "";
+  let tried = "";   // 最後に送った提供元（ログ用）
+  for (let i = 0; i < chain.length; i++) {
+    const p = chain[i];
+    const holds = asks.map((ask) => askHoldUsd(p, ask));
+    const quota = await reserveAi(request, env, i === 0 ? points : 1, sum(holds));
+    if (!quota.ok) {
+      if (!failure) return refuse(quota);
+      // この予備の分が枠に入らない（OpenAI は表のいちばん高い単価で数えるので、ページが多いと1日の額の枠を超えやすい）。
+      // 送らずに次の予備を試す（次の予備の分も、そのとき枠を確かめる）。
+      continue;
+    }
+    if (tried) logFallback(route, tried, p.kind, kind);
+    tried = p.kind;
+
+    let failed = null;
+    if (p.kind === "openai") {
+      const started = await Promise.all(asks.map((ask) => startPlanJob(p, ask)));
+      if (started.every((r) => r.ok)) {
+        const jobs = [];
+        for (const one of started) jobs.push(await jobToken(one.id, env));
+        return json({ jobs });
+      }
+      const usd = started.map((r, j) => (r.ok ? holds[j] : resultUsd(p, r, holds[j]).usd));
+      await settle(env, quota.hold, sum(usd), undefined, started.every((r) => !r.ok && r.unbilled));
+      failed = started.find((r) => !r.ok);
+      failure = { response: failed };
+      kind = transientKind(failed) || "";
+    } else {
+      const results = await Promise.all(asks.map((ask) => askForPlan(p, ask)));
+      await settleResults(env, quota.hold, p, results, holds);
+      failed = results.find((r) => !r.ok) || null;
+      failure = { results, provider: p };
+      kind = results.map(transientKind).find(Boolean) || "";
+    }
+    if (i > 0 && failed) {
+      console.log(JSON.stringify({ ai_fallback_failed: { route, to: p.kind, status: Number(failed.status) || 0 } }));
+    }
+    if (!kind) break;
+  }
+  if (failure && failure.response) return upstreamError("start-job", failure.response);
+  return failure;
+}
+
 // 1回ぶんの問い合わせ。提供元による書き方の違いは、ここだけに閉じる。
 function askForPlan(provider, { system, text, images, docs, fetchImpl }) {
   const common = { system, docs: docs || [planKnowledge(), planSpec()], text, images, fetchImpl };
@@ -665,6 +803,10 @@ function askForPlan(provider, { system, text, images, docs, fetchImpl }) {
   // 出力の形の書き方は OpenAI と同じ JSON Schema（項目はすべて必須、余分な項目は不可）。
   if (provider.kind === "anthropic") {
     return anthropicGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
+  }
+  if (provider.kind === "gemini") {
+    return geminiGenerate({ ...common, config: provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA),
+      maxOutputTokens: GEMINI_PLAN_OUTPUT_TOKENS });
   }
   return generate({ ...common, config: provider.config, responseSchema: PLAN_RESPONSE_SCHEMA });
 }
@@ -682,16 +824,6 @@ function startPlanJob(provider, { system, text, images, docs, fetchImpl }) {
     config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) },
     system, docs: docs || [planKnowledge(), planSpec()], text, images, fetchImpl,
   });
-}
-
-// まとめて投げて、受付番号を返す。1回の通信は「投げる」ぶんだけで済む。
-async function startPlanJobs(provider, asks, env) {
-  const started = await Promise.all(asks.map((ask) => startPlanJob(provider, ask)));
-  const failed = started.find((r) => !r.ok);
-  if (failed) return upstreamError("start-job", failed);
-  const jobs = [];
-  for (const one of started) jobs.push(await jobToken(one.id, env));
-  return json({ jobs });
 }
 
 // 受付番号に署名を付ける。
@@ -733,8 +865,11 @@ async function aiPlanResult(payload, env, deps, request) {
   const tokens = Array.isArray(payload && payload.jobs) ? payload.jobs.slice(0, MAX_PAGES) : [];
   if (!tokens.length) return json({ error: "invalid_request", message: "jobs が無い" }, 400);
 
-  const provider = resolveImportProvider(env);
+  let provider = resolveImportProvider(env);
   if (provider.error) return provider.error;
+  // Claude から OpenAI へ切り替えた読み取り（readWithFallbacks）の受付番号も、ここで取りに行く。
+  // 受付番号には署名があるので、こちらが出した番号しか通らない。
+  if (provider.kind === "anthropic") provider = openaiFallback(env) || provider;
   if (provider.kind !== "openai") {
     return json({ error: "invalid_request", message: "この提供元は受付番号を使わない" }, 400);
   }

@@ -117,7 +117,8 @@ async function sendStream(config, bodyText, fetchImpl) {
       body: bodyText,
     }));
   } catch (e) {
-    return { ok: false, status: 502, message: "Anthropic へ届きませんでした: " + (e && e.message ? e.message : e) };
+    // network: 届かなかった（worker/ai-fallback.mjs が一時的な失敗として切り替える）。
+    return { ok: false, network: true, status: 502, message: "Anthropic へ届きませんでした: " + (e && e.message ? e.message : e) };
   }
   // unbilled: 上流が 2xx 以外を返した（生成が始まっていないので課金されない、という前提。worker/ai-budget.mjs が 0 で精算する）。
   if (!response.ok) return { ok: false, unbilled: true, status: response.status, message: safeReason(await response.text()) };
@@ -191,7 +192,7 @@ export async function generate({
     }));
   } catch (e) {
     const why = (e && e.cause && (e.cause.code || e.cause.message)) || "";
-    return { ok: false, status: 502, message: "Anthropic へ届きませんでした: " + (e && e.message ? e.message : e) + (why ? ` (${why})` : "") };
+    return { ok: false, network: true, status: 502, message: "Anthropic へ届きませんでした: " + (e && e.message ? e.message : e) + (why ? ` (${why})` : "") };
   }
 
   const raw = await response.text();
@@ -211,7 +212,8 @@ export function readResult(data) {
   // 断られても（2xx）入力と途中までの出力は課金されうるので、usage は付けて返す（精算に使う）。
   if (data.stop_reason === "refusal") {
     const why = data.stop_details && data.stop_details.explanation;
-    return { ok: false, status: 502, model: data.model || "", usage: usageOf(u),
+    // refused: 断られた。別の提供元へは切り替えない（worker/ai-fallback.mjs）。
+    return { ok: false, refused: true, status: 502, model: data.model || "", usage: usageOf(u),
       message: "Claude がこの依頼を断りました。" + (why ? ` (${String(why).slice(0, 200)})` : "") };
   }
   const out = [];
