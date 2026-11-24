@@ -177,6 +177,16 @@ try {
       // 床が変わることを、凍結間取りの古い形の写しで確かめる(operations.js の applyProp の後始末)。
       const legacy = (fixtureRooms) => fixtureRooms.filter((rm) => rm.texture && roomFloorMaterialKey(rm) === rm.texture).slice(0, 3);
       res.floorLegacyLeft = DATA.rooms.filter((rm) => rm.texture && roomFloorMaterialKey(rm) === rm.texture).length;
+      // 設定パネルの床の欄。床材(floorMaterial)と床の画像(texture)の両方を持つ部屋で画像を外せること、
+      // 床材だけの部屋でも柄の反転ボタンが出ること(古い形の部屋では出ていた)。
+      const panelHtml = (rm) => selectedRoomFloorFinishHtml(Object.assign({ type: 'room', n: 'LDK', w: 400, d: 400 }, rm));
+      res.floorPanel = {
+        imageOverMaterial: panelHtml({ floorMaterial: 'wood_floor', texture: 'data:image/png;base64,AAAA' }).includes('床テクスチャ解除'),
+        imageOnly: panelHtml({ texture: 'data:image/png;base64,AAAA' }).includes('床テクスチャ解除'),
+        materialOnlyNoClear: !panelHtml({ floorMaterial: 'wood_floor' }).includes('床テクスチャ解除'),
+        materialFlip: panelHtml({ floorMaterial: 'wood_oak' }).includes('左右反転'),
+        autoNoFlip: !panelHtml({}).includes('左右反転'),
+      };
       const oldForm = JSON.parse(JSON.stringify(DATA));
       oldForm.rooms.forEach((rm) => { if (roomFloorMaterialKey(rm) && !rm.texture) { rm.texture = rm.floorMaterial; delete rm.floorMaterial; } });
       res.floorMat = [];
@@ -274,6 +284,7 @@ try {
     assert.ok(m.decorElev > 0, m.surface + ' の上が台になっていない(小物が載らない)');
     assert.equal(m.elev, m.table, m.kind + ' を ' + m.surface + ' の上に置いても表の高さ');
   }
+  assert.deepEqual(out.floorPanel, { imageOverMaterial: true, imageOnly: true, materialOnlyNoClear: true, materialFlip: true, autoNoFlip: true }, '設定パネルの床の欄(画像の解除・反転ボタン)');
   assert.equal(out.floorLegacyLeft, 0, '開いたプランに、床材のキーを texture に持つ部屋が残っている');
   assert.equal(out.floorMat.length, 6, '床材を確かめる部屋が凍結間取りに足りない');
   for (const f of out.floorMat) assert.deepEqual([f.errors, f.drawn], [0, f.want], '部屋 ' + f.id + ' の床材を変えても描く床材が変わらない');
