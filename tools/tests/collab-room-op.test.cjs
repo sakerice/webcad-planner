@@ -142,6 +142,36 @@ test('/op 消す・壁を消す・設定を変える・部屋を足す・動か�
   assert.equal(last.plan.items.some((it) => it.id === sofa.id), false);
 });
 
+// 床材の欄を1つ(floorMaterial)に寄せる(2026-11-25)。ルームの元のプランが古い形(部屋の texture に床材のキー)でも、
+// 外の AI の操作で触った部屋は新しい形で届く(画面が開くときと同じ PlanSchema.normalizeFloorMaterials)。
+// 触っていない部屋は差分に入れない(画面も開くときに同じに寄せているので、送らなくても食い違わない)。
+test('/op 古い形の床材の部屋: 触った部屋だけが floorMaterial の形で届き、ほかの部屋は差分に入らない', async () => {
+  const ctx = await setup();
+  const p = plan();
+  const legacy = p.rooms.filter((r) => r.texture === 'wood_floor' || r.texture === 'tile_floor');
+  assert.ok(legacy.length >= 10, '凍結した間取りは古い形の部屋を持つ');
+  const target = legacy.find((r) => r.texture === 'wood_floor');
+  const mv = await applyAndCheck(ctx, 'moveObject', { id: target.id, dx: 0, dy: 10 });
+  assert.equal(mv.patch.collections.rooms.upserts.length, 1, '触った部屋だけが届く');
+  const sent = mv.patch.collections.rooms.upserts[0];
+  assert.equal(sent.id, target.id);
+  assert.equal(sent.floorMaterial, 'wood_floor', '床材は floorMaterial で届く(値はそのまま)');
+  assert.equal('texture' in sent, false, '床材のキーを texture に残さない');
+  // 床材を変える操作でも同じ(画面の床が変わる形で届く)
+  const other = legacy.find((r) => r.texture === 'tile_floor');
+  const sp = await applyAndCheck(ctx, 'setProps', { id: other.id, set: { floorMaterial: 'wood_oak' } });
+  const changed = sp.patch.collections.rooms.upserts;
+  assert.equal(changed.length, 1);
+  assert.equal(changed[0].floorMaterial, 'wood_oak');
+  assert.equal('texture' in changed[0], false);
+  assert.deepEqual(sp.res.warnings, []);
+  // 触っていない古い形の部屋は、ルームのプランでもそのまま(寄せただけの部屋を書き戻さない)
+  const last = await getPlan(ctx.env, ctx.roomId);
+  const untouched = last.plan.rooms.filter((r) => r.id !== target.id && r.id !== other.id && legacy.some((l) => l.id === r.id));
+  assert.equal(untouched.length, legacy.length - 2);
+  untouched.forEach((r) => assert.equal(r.texture, legacy.find((l) => l.id === r.id).texture));
+});
+
 test('/op 失敗する操作: 版が進まず、何も積まれず、誰にも届かず、R2 も変わらない', async () => {
   const p = plan();
   p.items[1].locked = true;

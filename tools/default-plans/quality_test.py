@@ -241,6 +241,19 @@ class StorageMeasurement(unittest.TestCase):
         self.assertFalse(removed & ids)
         self.assertTrue(added <= ids)
 
+    def test_both_presets_write_floor_material_in_one_field(self):
+        # 床材は floorMaterial の欄に書く(2026-11-25)。古い形は texture に床材のキーを書いていて、
+        # floorMaterial だけを書く経路(チャット・外の AI)で床を変えても画面の床が変わらなかった。
+        # 床の画像(玄関の porch_tile など)は texture のまま。
+        import sys
+        sys.path.insert(0, str(ROOT/'tools/default-plans'))
+        from plan_kit import FLOOR_MATERIAL_KEYS
+        for filename in ('default_plan.json', 'default_plan_3f.json'):
+            plan = json.loads((ROOT/'assets'/filename).read_text())
+            legacy = [r['id'] for r in plan['rooms'] if r.get('texture') in FLOOR_MATERIAL_KEYS]
+            self.assertEqual(legacy, [], filename)
+            self.assertGreater(sum(1 for r in plan['rooms'] if r.get('floorMaterial') in FLOOR_MATERIAL_KEYS), 20, filename)
+
     def test_both_presets_have_flush_interior_floors_and_inward_washers(self):
         for filename in ('default_plan.json', 'default_plan_3f.json'):
             plan = json.loads((ROOT/'assets'/filename).read_text())

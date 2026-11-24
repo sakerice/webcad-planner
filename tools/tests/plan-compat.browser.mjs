@@ -106,7 +106,36 @@ function fingerprint() {
       camStash: stable(ST._camStash === undefined ? null : ST._camStash),
       view2d: [Math.round(ST.zoom * 1000) / 1000, r(ST.panX), r(ST.panY)],
       camera: (typeof camExt !== 'undefined' && camExt && typeof orbit !== 'undefined' && orbit) ? { pos: cam(camExt.position), target: cam(orbit.target) } : null,
+      // 床の仕上げを、描画が実際に読む値で見る(2026-11-25 追加)。部屋の欄の値(roomsHash)とは別に持つのは、
+      // 床材の欄を1つ(floorMaterial)に寄せる変更で欄の形は変わっても、描く床は変わらないことを確かめるため。
+      floorFinish: floorFinishFingerprint(),
     };
+  }
+  // 部屋ごとに makeRoomFloorMaterial(3D の床)が引く画像の名前(床材の PBR・床の画像)と色、設定パネルの床材の欄が
+  // 選んでいる値と「床テクスチャ解除」の有無、階段の stairFloorMaterial:'match' が引く床。
+  // 画像の読み終わりを待たない(繰り返し・向きは読み終わってから決まるので、ここでは見ない)。
+  function floorFinishFingerprint() {
+    if (typeof THREE === 'undefined' || typeof makeRoomFloorMaterial !== 'function') return ['3D の部品が無い'];
+    const log = [];
+    const names = ['pbrTex', 'pbrTexLinear', 'getTexture3D', 'getTextureNormal3D'];
+    const saved = names.map((n) => window[n]);
+    names.forEach((n, i) => { window[n] = function (k) { log.push(n + ':' + String(k).slice(0, 60)); return saved[i].apply(this, arguments); }; });
+    const one = (make) => { log.length = 0; const m = make(); return m ? m.type + ' ' + (m.color ? m.color.getHexString() : '-') + ' ' + log.join(',') : 'null'; };
+    const out = [];
+    try {
+      DATA.rooms.forEach((rm) => {
+        out.push('room ' + rm.id + ' ' + one(() => makeRoomFloorMaterial(rm)));
+        const html = selectedRoomFloorFinishHtml(Object.assign({}, rm, { type: 'room' }));
+        const sel = (html.match(/<option value="([^"]*)" selected>/) || [])[1];
+        out.push('panel ' + rm.id + ' ' + sel + ' ' + (/床テクスチャ解除/.test(html) ? '画像あり' : '-'));
+      });
+      DATA.items.forEach((it) => {
+        if (it.type === 'stair' || it.type === 'stair-corner' || it.type === 'stair-landing') {
+          out.push('stair ' + it.id + ' ' + one(() => stairTreadFloorMaterial(Object.assign({}, it, { stairFloorMaterial: 'match' }), 1, 0.25)));
+        }
+      });
+    } finally { names.forEach((n, i) => { window[n] = saved[i]; }); }
+    return out.sort();
   }
   return {
     walls: DATA.walls.map((w) => [w.floor || 1, r(w.x1), r(w.y1), r(w.x2), r(w.y2), r(w.thick)].join(',')).sort(),

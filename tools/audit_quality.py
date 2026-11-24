@@ -186,7 +186,8 @@ def audit(path):
     print('\n■ B. カタログのモデルを使う家具: %d件' % len(modeled))
 
     # C. 素材の指定
-    no_tex = [r for r in rooms if not r.get('texture')]
+    # 床材は floorMaterial(古い形は texture に床材のキー)、床の画像は texture。どちらかがあれば指定あり
+    no_tex = [r for r in rooms if not (r.get('texture') or r.get('floorMaterial'))]
     print('\n■ C. 床テクスチャ未指定の部屋: %d/%d' % (len(no_tex), len(rooms)))
     for r in no_tex[:8]:
         print('   %dF %s' % (r.get('floor', 1), r.get('n') or '(無名)'))

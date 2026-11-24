@@ -92,6 +92,16 @@ test('窓・扉の既定の奥行きは、アプリの既定寸法と同じ', ()
 test('選択肢はアプリの選択肢と同じ', () => {
   const state = read('assets/js/app-state.js');
   assert.deepEqual(PlanSettable.FLOOR_MATERIALS.map((c) => c[0]), grab(state, 'ROOM_FLOOR_MATERIAL_OPTIONS').map((c) => c[0]), '床材');
+  // 床材を floorMaterial に寄せるときの一覧(画面と Worker の PlanSchema・既定プランの生成器 plan_kit.py)も、
+  // 描画が床材として読むキー(FLOOR_PBR_STEM)と同じであること。ずれると、寄せた後に描く床が変わるか、寄せ残る。
+  const sorted = (a) => a.slice().sort();
+  const stems = Object.keys(grab(read('index.html'), 'FLOOR_PBR_STEM'));
+  assert.deepEqual(sorted(PlanSettable.FLOOR_MATERIALS.map((c) => c[0])), sorted(stems), '設定できる床材と描画の床材');
+  const PlanSchema = require(join(ROOT, 'assets', 'js', 'plan-schema.js'));
+  assert.deepEqual(sorted(PlanSchema.FLOOR_MATERIAL_KEYS), sorted(stems), 'PlanSchema.FLOOR_MATERIAL_KEYS と描画の床材');
+  const kit = read('tools/default-plans/plan_kit.py').match(/FLOOR_MATERIAL_KEYS = \(([^)]*)\)/);
+  assert.ok(kit, 'plan_kit.py に FLOOR_MATERIAL_KEYS が無い');
+  assert.deepEqual(sorted([...kit[1].matchAll(/'([a-z_]+)'/g)].map((m) => m[1])), sorted(stems), 'plan_kit.py の FLOOR_MATERIAL_KEYS と描画の床材');
   assert.deepEqual(PlanSettable.SITE_SURFACES.map((c) => c[0]), Object.keys(grab(state, 'SITE_SURFACE_OPTIONS')), '敷地の地面');
   // パネルの <option value="…"> から、その項目の選択肢を拾う（直書きの選択肢）。
   const optionsOf = (key) => {

@@ -2545,6 +2545,8 @@ var PLAN_TIDY_LAST=null;
 function tidyLoadedPlan(plan,opts){
   if(typeof PlanSchema==='undefined'||!PlanSchema||typeof PlanSchema.tidyPlan!=='function') return null;
   var r=PlanSchema.tidyPlan(plan);
+  // 床材を floorMaterial の1つの欄に寄せる(古い形は texture に床材のキー)。見た目は変えない。済みの印は書かず毎回走る。
+  if(typeof PlanSchema.normalizeFloorMaterials==='function') PlanSchema.normalizeFloorMaterials(plan);
   PLAN_TIDY_LAST=r;
   if(r&&r.notes&&r.notes.length) console.warn('[WebCAD] プランの形をそろえました',r.notes);
   if(r&&r.lost>0&&!(opts&&opts.quiet)) showPlanNotice(planTidyNoticeText(r.lost));

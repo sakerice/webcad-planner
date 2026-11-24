@@ -498,6 +498,41 @@
     return true;
   }
 
+  // ── 部屋の床材を1つの欄(floorMaterial)に寄せる ───────────────────────────
+  //
+  // 床材の欄が2つあった。古い形は部屋の texture に床材のキー('wood_oak' など)を書き、新しい形(2026-09-26 から)は
+  // floorMaterial に書く。texture は本来「床の画像」(アップロードした画像・'porch_tile' のような画像名)の欄でもある。
+  // 描画(index.html の roomFloorMaterialKey)は texture の床材のキーを floorMaterial より先に読むので、floorMaterial だけを
+  // 書く経路(チャット・外の AI・設定パネル)で床を変えても、古い形の部屋は画面の床が変わらなかった(2026-11-25)。
+  //
+  // 決まり(見た目を変えないこと):
+  //   - 部屋の texture が床材のキー(FLOOR_MATERIAL_KEYS)なら、その値を floorMaterial へ移し、texture を消す。
+  //     floorMaterial が既にあっても texture の値を採る(今の描画で勝っているのは texture のため)。
+  //   - 床材のキーでない texture(床の画像)と、ほかの欄(textureFlipX/Y・floorColor など)は触らない。
+  //     向きの欄は床材の柄にも効いているので(index.html の cloneTextureWithRepeat)、そのまま残す。
+  //   - 済みの印は書かない。開くたびに走り、何度走っても同じ結果になる(印を書く1度きりの移行は、既定プランの
+  //     取り直しで中身だけ古い形に戻り、二度と走らなかったことがある)。
+  // 呼ぶ所: 画面の tidyLoadedPlan(app-state.js。tidyPlan のすぐ後。開く経路・共有・相手の差分を当てたあと・
+  // 取り込み・保存の復元のどれもここを通る)と、共同編集の部屋が外の AI の操作を当てる前(worker/collab-room.mjs の applyOp)。
+  // tidyPlan の中には入れない(あちらは「壊れた形だけを直し、正当なプランは1バイトも変えない」決まりで、検査もそれを見る)。
+  // 戻り値は移した部屋の数。
+  // 一覧は描画の FLOOR_PBR_STEM(index.html)のキーと同じ。plan-settable.test.cjs が一致を見る。
+  var FLOOR_MATERIAL_KEYS = ['wood_floor', 'wood_oak', 'tile_floor', 'mansion_herringbone_oak', 'mansion_marble_checker',
+    'kominka_old_pine_floor', 'kominka_doma', 'kominka_tatami'];
+  function isFloorMaterialKey(v) { return typeof v === 'string' && FLOOR_MATERIAL_KEYS.indexOf(v) >= 0; }
+  function normalizeFloorMaterials(plan) {
+    if (!isPlain(plan) || !Array.isArray(plan.rooms)) return 0;
+    var moved = 0;
+    for (var i = 0; i < plan.rooms.length; i++) {
+      var r = plan.rooms[i];
+      if (!isPlain(r) || !own(r, 'texture') || !isFloorMaterialKey(r.texture)) continue;
+      r.floorMaterial = r.texture;
+      delete r.texture;
+      moved++;
+    }
+    return moved;
+  }
+
   function countObjects(plan) {
     var total = 0;
     COLLECTIONS.forEach(function (name) { if (Array.isArray(plan[name])) total += plan[name].length; });
@@ -533,6 +568,8 @@
     normalizePlan: normalizePlan,
     summarize: summarize,
     tidyPlan: tidyPlan,
+    FLOOR_MATERIAL_KEYS: FLOOR_MATERIAL_KEYS,
+    normalizeFloorMaterials: normalizeFloorMaterials,
     TIDY_UNSAFE_IDS: TIDY_UNSAFE_IDS,
     SCALAR_KEYS: SCALAR_KEYS,
     TIDY_MAX_TEXT: TIDY_MAX_TEXT,

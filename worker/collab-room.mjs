@@ -15,7 +15,7 @@
 import {
   RETENTION_MS, AUTO_SAVE_IDLE_MS, AUTO_SAVE_MAX_MS,
   MAX_PLAN_BYTES, MAX_JOURNAL_ENTRY_BYTES,
-  json, roomKey, patchKey, validPlan, encodedSize, readJsonWithLimit, applyPatch,
+  json, roomKey, patchKey, validPlan, encodedSize, readJsonWithLimit, applyPatch, PlanSchema,
 } from "./shared.mjs";
 import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
@@ -548,6 +548,11 @@ export class CollaborationRoom {
     const materialized = await this.materializePlan(meta);
     if (!materialized) return roomNotFound();
     const before = materialized.plan;
+    // 床材を floorMaterial の1つの欄に寄せてから当てる(画面が開くときと同じ PlanSchema.normalizeFloorMaterials)。
+    // 古い形(部屋の texture に床材のキー)のままだと、床材を読む・書く操作の結果が画面と食い違う。
+    // before は materializePlan がその都度作る写しなので、ここで直してよい。差分(buildRoomPatch)は直した後の
+    // before と比べるので、寄せただけの部屋は差分に入らない(画面も開くときに同じに寄せている)。
+    PlanSchema.normalizeFloorMaterials(before);
     // 新しい物の id は、ルームの減らない連番(meta.nextId)とプランの最大 + 1 の大きいほうから数える
     // (消した物の id を使い回すと、画面に残っている選択・取り消しの履歴・送る印が別の物を指すため)。
     let result;

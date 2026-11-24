@@ -172,11 +172,22 @@ try {
       res.roomIds = two.changedIds;
       // 床材を変えると、描画が読む床材(roomFloorMaterialKey)が変わる。凍結間取りは既定プランと同じく
       // 床材のキーを texture に持っていて、以前は floorMaterial だけ書いて画面の床が変わらなかった(2026-11-25 の報告)。
-      res.floorMat = DATA.rooms.filter((rm) => rm.texture && roomFloorMaterialKey(rm) === rm.texture).slice(0, 3).map((rm) => {
-        const want = rm.texture === 'tile_floor' ? 'kominka_tatami' : 'tile_floor';
-        const r = PlanCoreOperations.applyOperations(DATA, [{ op: 'setProps', args: { id: String(rm.id), set: { floorMaterial: want } } }], planChatCtx());
-        const after = r.plan.rooms.find((x) => x.id === rm.id);
-        return { id: rm.id, errors: r.errors.length, want, drawn: roomFloorMaterialKey(after) };
+      // 画面に入れるときに floorMaterial へ寄せる(PlanSchema.normalizeFloorMaterials)ので、開いたプランの部屋は
+      // texture に床材のキーを持たない。寄せる前の形のまま操作に渡る場合(寄せる処理を通らない呼び出し)も
+      // 床が変わることを、凍結間取りの古い形の写しで確かめる(operations.js の applyProp の後始末)。
+      const legacy = (fixtureRooms) => fixtureRooms.filter((rm) => rm.texture && roomFloorMaterialKey(rm) === rm.texture).slice(0, 3);
+      res.floorLegacyLeft = DATA.rooms.filter((rm) => rm.texture && roomFloorMaterialKey(rm) === rm.texture).length;
+      const oldForm = JSON.parse(JSON.stringify(DATA));
+      oldForm.rooms.forEach((rm) => { if (roomFloorMaterialKey(rm) && !rm.texture) { rm.texture = rm.floorMaterial; delete rm.floorMaterial; } });
+      res.floorMat = [];
+      [['開いたプラン', DATA, DATA.rooms.filter((rm) => rm.floorMaterial).slice(0, 3)], ['古い形の写し', oldForm, legacy(oldForm.rooms)]].forEach(([where, plan, rooms]) => {
+        rooms.forEach((rm) => {
+          const cur = roomFloorMaterialKey(rm);
+          const want = cur === 'tile_floor' ? 'kominka_tatami' : 'tile_floor';
+          const r = PlanCoreOperations.applyOperations(plan, [{ op: 'setProps', args: { id: String(rm.id), set: { floorMaterial: want } } }], planChatCtx());
+          const after = r.plan.rooms.find((x) => x.id === rm.id);
+          res.floorMat.push({ id: where + ' ' + rm.id, errors: r.errors.length, want, drawn: roomFloorMaterialKey(after) });
+        });
       });
       // AI に見せる一覧の種類は、どれも置ける
       const empty = { walls: [], rooms: [], items: [] };
@@ -263,7 +274,8 @@ try {
     assert.ok(m.decorElev > 0, m.surface + ' の上が台になっていない(小物が載らない)');
     assert.equal(m.elev, m.table, m.kind + ' を ' + m.surface + ' の上に置いても表の高さ');
   }
-  assert.equal(out.floorMat.length, 3, '床材のキーを texture に持つ部屋が凍結間取りに無い');
+  assert.equal(out.floorLegacyLeft, 0, '開いたプランに、床材のキーを texture に持つ部屋が残っている');
+  assert.equal(out.floorMat.length, 6, '床材を確かめる部屋が凍結間取りに足りない');
   for (const f of out.floorMat) assert.deepEqual([f.errors, f.drawn], [0, f.want], '部屋 ' + f.id + ' の床材を変えても描く床材が変わらない');
   assert.equal(out.roomIds.length, 2);
   assert.notEqual(out.roomIds[0], out.roomIds[1]);
