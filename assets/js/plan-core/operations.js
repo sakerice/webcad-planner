@@ -267,6 +267,19 @@
     if (key === 'ceilingColor' && !value) delete obj.ceilingColor;
     if (key === 'floorColor' && !value) delete obj.floorColor;
     if (key === 'stairFloorMaterial' && !value) delete obj.stairFloorMaterial;
+    // 古いプラン(既定プランを含む)は床材のキーを texture に書いていて、描画(index.html の roomFloorMaterialKey)は
+    // texture を floorMaterial より先に読む。画面の床材の欄(app-state.js の updateSelectedRoomFloorMaterial)と同じく、
+    // texture が床材のキーなら消す(残すと、床材を書いても画面の床は元のまま)。床の画像(それ以外の texture)は
+    // 消さない。画像が床材より優先されて床材は画面に出ないので、そのことを警告で返す(AI が「変えた」と答えないように)。
+    if (key === 'floorMaterial' && obj.texture) {
+      var floorKeys = ctx.settable && Array.isArray(ctx.settable.FLOOR_MATERIALS)
+        ? ctx.settable.FLOOR_MATERIALS.map(function (c) { return c[0]; }) : [];
+      if (floorKeys.indexOf(obj.texture) >= 0) delete obj.texture;
+      else if (value && warnings) {
+        warnings.push('id ' + label(obj.id) + ' の床材を ' + value + ' にしましたが、この部屋には床の画像(' + obj.texture
+          + ')が設定されていて、画像が床材より優先されるため、画面の床は変わりません。床の画像は、利用者が設定パネルの「床テクスチャ解除」で外せます');
+      }
+    }
     if (key === 'ceilingTexture' && !value) {
       delete obj.ceilingTexture;
       delete obj.ceilingTextureFlipX;

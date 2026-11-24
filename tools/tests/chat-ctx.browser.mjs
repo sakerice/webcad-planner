@@ -170,6 +170,14 @@ try {
         { op: 'addRoom', args: { x: 30000, y: 0, w: 1000, d: 1000 } }, { op: 'addRoom', args: { x: 32000, y: 0, w: 1000, d: 1000 } },
       ], planChatCtx());
       res.roomIds = two.changedIds;
+      // 床材を変えると、描画が読む床材(roomFloorMaterialKey)が変わる。凍結間取りは既定プランと同じく
+      // 床材のキーを texture に持っていて、以前は floorMaterial だけ書いて画面の床が変わらなかった(2026-11-25 の報告)。
+      res.floorMat = DATA.rooms.filter((rm) => rm.texture && roomFloorMaterialKey(rm) === rm.texture).slice(0, 3).map((rm) => {
+        const want = rm.texture === 'tile_floor' ? 'kominka_tatami' : 'tile_floor';
+        const r = PlanCoreOperations.applyOperations(DATA, [{ op: 'setProps', args: { id: String(rm.id), set: { floorMaterial: want } } }], planChatCtx());
+        const after = r.plan.rooms.find((x) => x.id === rm.id);
+        return { id: rm.id, errors: r.errors.length, want, drawn: roomFloorMaterialKey(after) };
+      });
       // AI に見せる一覧の種類は、どれも置ける
       const empty = { walls: [], rooms: [], items: [] };
       const deps = { settable: PlanSettable, knowledge: ObjectKnowledge };
@@ -255,6 +263,8 @@ try {
     assert.ok(m.decorElev > 0, m.surface + ' の上が台になっていない(小物が載らない)');
     assert.equal(m.elev, m.table, m.kind + ' を ' + m.surface + ' の上に置いても表の高さ');
   }
+  assert.equal(out.floorMat.length, 3, '床材のキーを texture に持つ部屋が凍結間取りに無い');
+  for (const f of out.floorMat) assert.deepEqual([f.errors, f.drawn], [0, f.want], '部屋 ' + f.id + ' の床材を変えても描く床材が変わらない');
   assert.equal(out.roomIds.length, 2);
   assert.notEqual(out.roomIds[0], out.roomIds[1]);
   assert.ok(out.summaryLength > 1000 && out.summaryBytes <= 24 * 1024);

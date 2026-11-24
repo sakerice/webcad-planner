@@ -339,6 +339,44 @@ test('setProps set: 土間は hooks.set.floorLevel が無ければ errors、あ�
   assert.deepEqual([b.plan.rooms[0].floorRaiseMm, b.plan.rooms[0].floorMaterial], [-300, 'tile_floor']);
 });
 
+// 利用者の報告(2026-11-25):「AIに頼む」で床材を変えてと頼んでも変わらないのに、AI は変えたと答えた。
+// 既定プランを含む古いプランは床材のキーを texture に書いていて、描画(index.html の roomFloorMaterialKey)は
+// texture を floorMaterial より先に読む。set が floorMaterial だけを書くと、画面の床は元のまま。
+test('setProps set: 床材は、texture に入った古い床材のキーより優先されるように書く(画面の床材の欄と同じ)', () => {
+  const plan = basePlan();
+  plan.rooms[0].texture = 'wood_oak';
+  const r = run(plan, [{ op: 'setProps', args: { id: 'rm_a', set: { floorMaterial: 'tile_floor' } } }], makeCtx({ settable: PlanSettable }));
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.plan.rooms[0].floorMaterial, 'tile_floor');
+  assert.equal(r.plan.rooms[0].texture, undefined, 'texture に残った床材のキー(wood_oak)が、新しい床材より先に描かれる');
+});
+
+test('setProps set: 床の画像(床材のキーでない texture)は消さず、床材が画面に出ないことを警告で返す', () => {
+  const plan = basePlan();
+  plan.rooms[0].texture = 'porch_tile';
+  const r = run(plan, [{ op: 'setProps', args: { id: 'rm_a', set: { floorMaterial: 'tile_floor' } } }], makeCtx({ settable: PlanSettable }));
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.plan.rooms[0].texture, 'porch_tile');
+  assert.equal(r.plan.rooms[0].floorMaterial, 'tile_floor');
+  assert.ok(r.warnings.some((w) => /porch_tile/.test(w) && /床材/.test(w)), '床材が画面に出ないことを AI に知らせていない: ' + JSON.stringify(r.warnings));
+});
+
+// 凍結間取り(fixtures/house-2f.json)は、既定プランと同じく全部屋の床材のキーを texture に持つ。
+test('凍結間取り: どの部屋の床材を set で変えても、描画が読む床材(texture が床材のキーならそれ、無ければ floorMaterial)が変わる', () => {
+  const plan = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/house-2f.json'), 'utf8'));
+  const keys = PlanSettable.FLOOR_MATERIALS.map((c) => c[0]);
+  const drawn = (rm) => (keys.indexOf(rm.texture) >= 0 ? rm.texture : rm.floorMaterial);
+  const bad = [];
+  plan.rooms.forEach((room) => {
+    if (room.texture && keys.indexOf(room.texture) < 0) return; // 床の画像の部屋は上の検査
+    const want = drawn(room) === 'kominka_tatami' ? 'tile_floor' : 'kominka_tatami';
+    const r = run(plan, [{ op: 'setProps', args: { id: room.id, set: { floorMaterial: want } } }], makeCtx({ settable: PlanSettable }));
+    const after = r.plan.rooms.find((x) => x.id === room.id);
+    if (r.errors.length || drawn(after) !== want) bad.push(room.id + ' ' + room.n + ': ' + drawn(after));
+  });
+  assert.deepEqual(bad, []);
+});
+
 // ── Review Focus 2: 全部か無しか ───────────────────────────────────
 
 test('3件のうち2件めが失敗したら、渡したプランそのものを返し、1項目も変えない', () => {
