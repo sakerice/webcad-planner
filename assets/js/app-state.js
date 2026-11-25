@@ -633,7 +633,9 @@ var ROOM_FLOOR_MATERIAL_OPTIONS=[
 function selectedRoomFloorFinishHtml(it){
   if(!it||it.type!=='room') return '';
   var key=(typeof roomFloorMaterialKey==='function')?roomFloorMaterialKey(it):null;
-  var uploaded=!!(it.texture&&!key);
+  // 床の画像があるか。床材のキーでない texture が画像(描画 makeRoomFloorMaterial の優先と同じ見方)。
+  // key の有無で見ると、床材(floorMaterial)と画像の両方を持つ部屋で「床テクスチャ解除」が出なくなる。
+  var uploaded=!!(it.texture&&!(typeof FLOOR_PBR_STEM!=='undefined'&&ownGet(FLOOR_PBR_STEM,it.texture)));
   var hasColor=!!it.floorColor;
   var html='<div class="ph" style="margin-top:12px">床の仕上げ</div>';
   html+='<div class="pr"><div class="pl">床材</div><select class="pi" onchange="updateSelectedRoomFloorMaterial(this.value)">'+
@@ -646,7 +648,9 @@ function selectedRoomFloorFinishHtml(it){
   if(hasColor) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'floorColor\',null)">床カラー解除</button>';
   html+='<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
   if(uploaded) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">床テクスチャ解除</button>';
-  html+=selectedTextureFlipControlsHtml(it);
+  // 反転は床材の柄にも効く(index.html の applyTextureFlip)。古い形の部屋は texture に床材のキーがあったので
+  // ボタンが出ていた。床材を floorMaterial に寄せたあとも同じに出す(床材を選んである部屋では常に出す)。
+  html+=selectedTextureFlipControlsHtml(it,!!key);
   var note=uploaded
     ? 'テクスチャ（画像）を設定しているあいだ、床材は使われません。'
     : '床材の柄で描いています。画像を読み込むと、画像が床材より優先されます。';
@@ -1039,11 +1043,11 @@ function textureFlipControlsHtml(updateX, updateY, owner, disabled){
     + '<button class="pbtn sec '+(owner.textureFlipY?'active':'')+'" style="padding:3px 8px;margin-top:0" onclick="'+updateY+'"'+dis+'>上下反転</button>'
     + '</div>';
 }
-function selectedTextureFlipControlsHtml(it){
+function selectedTextureFlipControlsHtml(it,show){
   return textureFlipControlsHtml(
     'updateSelectedProp(\'textureFlipX\','+(!it.textureFlipX)+')',
     'updateSelectedProp(\'textureFlipY\','+(!it.textureFlipY)+')',
-    it,
+    (show&&!it.texture)?{texture:true,textureFlipX:it.textureFlipX,textureFlipY:it.textureFlipY}:it,
     false
   );
 }
@@ -2545,6 +2549,8 @@ var PLAN_TIDY_LAST=null;
 function tidyLoadedPlan(plan,opts){
   if(typeof PlanSchema==='undefined'||!PlanSchema||typeof PlanSchema.tidyPlan!=='function') return null;
   var r=PlanSchema.tidyPlan(plan);
+  // 床材を floorMaterial の1つの欄に寄せる(古い形は texture に床材のキー)。見た目は変えない。済みの印は書かず毎回走る。
+  if(typeof PlanSchema.normalizeFloorMaterials==='function') PlanSchema.normalizeFloorMaterials(plan);
   PLAN_TIDY_LAST=r;
   if(r&&r.notes&&r.notes.length) console.warn('[WebCAD] プランの形をそろえました',r.notes);
   if(r&&r.lost>0&&!(opts&&opts.quiet)) showPlanNotice(planTidyNoticeText(r.lost));

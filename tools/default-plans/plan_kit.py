@@ -56,6 +56,30 @@ def tidy_numbers(value):
     return value
 
 
+# 床材のキー。アプリの描画の FLOOR_PBR_STEM(index.html)・プランの形をそろえる処理の
+# FLOOR_MATERIAL_KEYS(assets/js/plan-schema.js)と同じ一覧(plan-settable.test.cjs が一致を見る)。
+FLOOR_MATERIAL_KEYS = ('wood_floor', 'wood_oak', 'tile_floor', 'mansion_herringbone_oak',
+                       'mansion_marble_checker', 'kominka_old_pine_floor', 'kominka_doma',
+                       'kominka_tatami')
+
+
+def floor_material_field(plan):
+    """部屋の床材を floorMaterial の欄に寄せる(アプリの PlanSchema.normalizeFloorMaterials と同じ決まり)。
+
+    古い形は texture に床材のキーを書いていた。アプリは開くたびに floorMaterial へ寄せるが、
+    出荷物も新しい形で書いておく(読む側が古い欄を見なくて済むように)。
+    texture が床材のキーの部屋だけ、欄の名前を floorMaterial に替える。欄の並びは保つ
+    (texture のあった位置に floorMaterial を置く)。床の画像('porch_tile' など)は触らない。
+    生成と手直しの取り込みが全部済んだあと、書き出しの直前に呼ぶ(手直し記録の before は古い形のため)。
+    """
+    rooms = plan.get("rooms") or []
+    for i, room in enumerate(rooms):
+        if room.get("texture") not in FLOOR_MATERIAL_KEYS:
+            continue
+        rooms[i] = {("floorMaterial" if k == "texture" else k): v
+                    for k, v in room.items() if k != "floorMaterial"}
+
+
 def wall_height_mm(floor):
     return WALL_MM.get(floor, WALL_MM_DEFAULT)
 

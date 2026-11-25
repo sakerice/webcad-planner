@@ -330,7 +330,10 @@ var CompareMode = (function(){
     status('触った側が編集中になります');
     // 左がブラウザの「前回のプラン」と同じ中身なら、保存済みと出す
     if(!PLAN_SAVE_INFO && !DIRTY) StorageAdapter.load().then(function(d){
-      var strip = function(o){ o = JSON.parse(JSON.stringify(o, function(k, v){ return k==='_texObj' ? undefined : v; })); delete o.viewState; return JSON.stringify(o); };
+      var strip = function(o){ o = JSON.parse(JSON.stringify(o, function(k, v){ return k==='_texObj' ? undefined : v; })); delete o.viewState;
+        // 保存枠は古い形(部屋の texture に床材のキー)のことがある。画面の DATA は開くときに floorMaterial へ寄せてあるので、同じに寄せてから比べる
+        if(typeof PlanSchema!=='undefined' && PlanSchema && typeof PlanSchema.normalizeFloorMaterials==='function') PlanSchema.normalizeFloorMaterials(o);
+        return JSON.stringify(o); };
       if(on && d && strip(d)===strip(panes[0].g.DATA)){
         panes[0].g.PLAN_SAVE_INFO = {where:'last', at:null};
         if(active===0) PLAN_SAVE_INFO = panes[0].g.PLAN_SAVE_INFO;

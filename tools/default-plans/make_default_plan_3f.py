@@ -548,6 +548,12 @@ apply_sample_audit_3f(plan)
 # 手直しの取り込み(plan.update)より後に置く。あちらに同じ鍵があると消える。
 from plan_kit import height_defaults
 from plan_kit import tidy_numbers
+# 床材は floorMaterial の欄に書く(古い形の texture から寄せる)。手直しの取り込みより後に置く。
+# これより上の手直し記録(apply_patch_file)は古い形(texture)を土台に取ってある。出荷物は新しい形なので、
+# 出荷物を土台に作る次の手直し記録は、この floor_material_field の呼び出しより後で取り込むこと
+# (前に置くと before が合わず Review baseline changed で止まる)。
+from plan_kit import floor_material_field
+floor_material_field(plan)
 plan["heightDefaults"], plan["floors"] = height_defaults((1, 2, 3, 4))
 with open(out, "w", encoding="utf-8") as f:
     # 出荷するファイルは詰めて書く(配信量)。生成器の出力が出荷物そのものに

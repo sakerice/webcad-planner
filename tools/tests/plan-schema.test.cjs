@@ -172,3 +172,54 @@ test('テスト用に凍結した間取りは1件も error を出さずに通る
   const s = summarize(plan);
   assert.ok(s.walls > 20 && s.rooms > 10 && s.items > 100, '足場として十分な大きさの間取りであること');
 });
+
+// ── 床材を floorMaterial の1つの欄に寄せる(normalizeFloorMaterials) ───────────────
+// 古い形は部屋の texture に床材のキーを書いていた。描画(index.html の roomFloorMaterialKey)は texture の床材のキーを
+// floorMaterial より先に読むので、floorMaterial だけを書く経路で床を変えても画面の床が変わらなかった(2026-11-25)。
+// 寄せた後も描く床が同じであることは、互換の検査(plan-compat.browser.mjs の floorFinish)が画面で見ている。
+test('床材のキーの texture は floorMaterial へ移り、texture は消える', () => {
+  const plan = { walls: [], items: [], rooms: [
+    { id: 'a', n: '洋室', texture: 'wood_oak', textureFlipX: true, floorColor: '#ff0000' },
+    { id: 'b', n: 'LDK', texture: 'tile_floor', floorMaterial: 'wood_floor' },   // 両方: 今の描画で勝つ texture を採る
+    { id: 'c', n: '玄関', texture: 'porch_tile', floorMaterial: 'wood_oak' },    // 床の画像は触らない
+    { id: 'd', n: '寝室', floorMaterial: 'kominka_tatami' },                      // 新しい形はそのまま
+    { id: 'e', n: '浴室', texture: 'data:image/png;base64,AAAA' },                // アップロード画像はそのまま
+    { id: 'f', n: '物置', texture: 'toString' },                                  // 継承の名前は床材のキーではない
+  ] };
+  assert.equal(PlanSchema.normalizeFloorMaterials(plan), 2);
+  assert.deepEqual(plan.rooms[0], { id: 'a', n: '洋室', textureFlipX: true, floorColor: '#ff0000', floorMaterial: 'wood_oak' });
+  assert.deepEqual(plan.rooms[1], { id: 'b', n: 'LDK', floorMaterial: 'tile_floor' });
+  assert.deepEqual(plan.rooms[2], { id: 'c', n: '玄関', texture: 'porch_tile', floorMaterial: 'wood_oak' });
+  assert.deepEqual(plan.rooms[3], { id: 'd', n: '寝室', floorMaterial: 'kominka_tatami' });
+  assert.equal(plan.rooms[4].texture, 'data:image/png;base64,AAAA');
+  assert.equal(plan.rooms[5].texture, 'toString');
+});
+
+test('床材の寄せは何度走っても同じ結果で、済みの印を書かない', () => {
+  const plan = { walls: [], items: [{ id: 1, type: 'custom-block', texture: 'wood_oak' }], rooms: [{ id: 'a', texture: 'wood_oak' }] };
+  PlanSchema.normalizeFloorMaterials(plan);
+  const once = JSON.stringify(plan);
+  assert.equal(PlanSchema.normalizeFloorMaterials(plan), 0);
+  assert.equal(JSON.stringify(plan), once);
+  assert.equal(plan.items[0].texture, 'wood_oak', '部屋でない物の texture は触らない');
+  assert.deepEqual(Object.keys(plan).sort(), ['items', 'rooms', 'walls'], 'プランに印の欄を足さない');
+  // 壊れた形でも例外にしない
+  [null, 1, 'x', [], { rooms: 'x' }, { rooms: [null, 1, 'x', []] }].forEach((p) => assert.equal(PlanSchema.normalizeFloorMaterials(p), 0));
+});
+
+test('凍結した間取りでは、寄せて変わるのは床材の欄の移動だけ', () => {
+  const files = ['compat/saved-2f.json', 'compat/saved-3f.json', 'compat/legacy-quirks.json', 'compat/legacy-no-heights.json',
+    'house-2f.json', 'review23-house-2f.json', 'raised-floor-plan.json'];
+  let moved = 0;
+  for (const f of files) {
+    const raw = readFileSync(join(ROOT, 'tools', 'tests', 'fixtures', f), 'utf8');
+    const plan = JSON.parse(raw);
+    moved += PlanSchema.normalizeFloorMaterials(plan);
+    const expect = JSON.parse(raw);
+    expect.rooms.forEach((r) => {
+      if (PlanSchema.FLOOR_MATERIAL_KEYS.indexOf(r.texture) >= 0) { r.floorMaterial = r.texture; delete r.texture; }
+    });
+    assert.deepEqual(plan, expect, f);
+  }
+  assert.ok(moved >= 100, '古い形の部屋が凍結した間取りに十分あること(' + moved + ')');
+});

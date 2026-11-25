@@ -16035,7 +16035,11 @@ var FLOOR_PBR_STEM = {
 //   r.floorMaterial … 床材のキー(FLOOR_PBR_STEM)。無ければ部屋名から自動
 //   r.floorColor    … 床材・テクスチャに掛ける色(乗算)。無ければ白 = 従来どおり
 //   r.texture       … アップロードした画像。床材より優先する
-// 古いプランは床材のキーを r.texture に書いていたので、そちらも床材として読む。
+// 古いプランは床材のキーを r.texture に書いていた。プランを画面に入れるときに floorMaterial へ寄せる
+// (assets/js/plan-schema.js の normalizeFloorMaterials。app-state.js の tidyLoadedPlan から、開く経路・共有・
+// 相手の差分のたびに走る)ので、
+// 画面の部屋はふつう floorMaterial だけを持つ。それでも texture の床材のキーを先に読むのを残してあるのは、
+// 寄せる前の形の部屋が来ても今までと同じ床で描くため(優先の順を変えると、両方を持つ古い部屋の床が変わる)。
 function roomFloorMaterialKey(r){
   if(r&&ownGet(FLOOR_PBR_STEM,r.texture)) return r.texture;
   if(r&&ownGet(FLOOR_PBR_STEM,r.floorMaterial)) return r.floorMaterial;
@@ -16065,7 +16069,9 @@ function stairTreadFloorMaterial(it,wM,dM){
 }
 function makeRoomFloorMaterial(r){
   var rw=r.w*U, rd=r.d*U;
-  var isWet=r.texture==='tile_floor'||r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
+  // 床材の指定が無い部屋の既定を決めるだけの判定。以前の r.texture==='tile_floor' は外した
+  // (そのときは roomFloorMaterialKey が 'tile_floor' を返すので、この判定は使われていなかった)。
+  var isWet=r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
   var tint=(r&&r.floorColor)||0xffffff;
   // 床材はキーからPBRの3枚組を引く。真偽値で分けると、床材を足すたびに
   // 「diffuse だけ新しくて法線と粗さは旧のまま」になる
