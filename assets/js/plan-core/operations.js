@@ -267,6 +267,17 @@
     if (key === 'ceilingColor' && !value) delete obj.ceilingColor;
     if (key === 'floorColor' && !value) delete obj.floorColor;
     if (key === 'stairFloorMaterial' && !value) delete obj.stairFloorMaterial;
+    // 階段の手すり「なし」・形「ひな壇」は既定なので、欄ごと消す(設定パネルは undefined を、AI の set は
+    // 'none'・'open' を渡す。どちらも同じ保存の形にする。描画の stairRailSides・stairStyleOf は、欄が無ければ
+    // 手すり無し・ひな壇)。
+    if (key === 'stairRail' && (!value || value === 'none')) delete obj.stairRail;
+    // 形を選んだら、古い欄 stairUnder('filled' なら箱型として読む)は消す。残すと「ひな壇」を選んで stairStyle を
+    // 消したとき、stairStyleOf が stairUnder を読んで箱型に戻り、ひな壇にできない。箱型・スケルトンは stairStyle が
+    // 先に読まれるので、消しても描画は変わらない。
+    if (key === 'stairStyle') {
+      if (!value || value === 'open') delete obj.stairStyle;
+      delete obj.stairUnder;
+    }
     // 古いプラン(既定プランを含む)は床材のキーを texture に書いていて、描画(index.html の roomFloorMaterialKey)は
     // texture を floorMaterial より先に読む。画面の床材の欄(app-state.js の updateSelectedRoomFloorMaterial)と同じく、
     // texture が床材のキーなら消す(残すと、床材を書いても画面の床は元のまま)。床の画像(それ以外の texture)は

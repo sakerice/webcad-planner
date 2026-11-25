@@ -32,7 +32,7 @@ const FUNCTIONS = [
   ['planChatKindType', 'kindType'],
   ['planCoreSuggestTypes', 'suggestTypes'],
   ['planCoreCtx', 'workerOpsCtx の catalog(defaultSize・defaultColor・model・is・canSetElevation・applyLightDefaults・contextExteriorHeight・contextFloors・constants)と plan'],
-  ['planOpsCtx', 'workerOpsCtx の snap と hooks(isLocked・canPlace・placeFloor・afterPlace・windowSill・normalizeWindow・ceilingElevation・shiftCeilingFixtures・prop・afterDelete)'],
+  ['planOpsCtx', 'workerOpsCtx の snap と hooks(isLocked・canPlace・placeFloor・afterPlace・windowSill・normalizeWindow・ceilingElevation・shiftCeilingFixtures・prop・afterDelete・set.floorLevel)'],
   ['bestFmpType', 'bestFmpType'],
   ['isFmpItemType', 'isFmpItemType'],
   ['getFmpItem', 'entry・isFmpItemType'],
@@ -91,6 +91,7 @@ const FUNCTIONS = [
   ['siteSetbackConfig', 'siteSetbackActive'],
   ['activeSetbackSites', 'setbackActive'],
   ['shiftRoomCeilingFixtures', 'hooks.ceilingElevation(天井に付いた器具の判定)'],
+  ['setRoomFloorRaiseMm', 'hooks.set.floorLevel(床の上下の範囲と、断る条件)'],
   // 置いた物の高さ(台の上)・柱の段差・屋内の印
   ['isInsideItem', 'insideItem'],
   ['findDefaultPlacementSurface', 'surfaceProblem'],

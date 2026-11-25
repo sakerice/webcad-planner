@@ -1425,7 +1425,9 @@ test('天井を書き換える経路は1か所(updateSelectedProp)を通る', ()
   assert.equal(dl.elev, g.roomCeilingElevationMm(up));
   // 段差・床上げも同じ規則へ寄せてある。
   assert.match(sliceFunction('updateSelectedRoomSkipLevel'), /followRoomCeiling\(/);
-  assert.match(sliceFunction('updateSelectedRoomFloor'), /followRoomCeiling\(/);
+  // 床上げは、設定パネル(updateSelectedRoomFloor)と AI の土間(planOpsCtx の hooks.set.floorLevel)が同じ setRoomFloorRaiseMm を通る
+  assert.match(sliceFunction('updateSelectedRoomFloor'), /setRoomFloorRaiseMm\(/);
+  assert.match(sliceFunction('setRoomFloorRaiseMm'), /followRoomCeiling\(/);
 });
 
 // ══ 10-e. 屋外の天井付け器具は、上の屋根の下面に付く ═══════════════════
