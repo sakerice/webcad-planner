@@ -1,0 +1,823 @@
+{
+  "user_review": "Sentinel_de871a608d388191b9e7aeea74d969e7 /2026-10-14 11:12 JST",
+  "status": "new style/accessory human review pending; Draft/InProgress; no Claude completion",
+  "method": "Official image_gen.imagegen for all6 calls; artwork names excluded from prompts. Source original homewear outfits/geometry locked; uploaded illustration only abstract face/eyes/locks/line/cel guide. No reference artwork pixels added to repo.",
+  "geometry_method": "Zero-based original1254pixel visible hair crown/chin/sole. Hidden skull cannot be measured. New style changes small outline/AA pixels, not true3D proportions. Record exact source/new differences rather than claiming pixel identity.",
+  "composition": "Only blank-margin crop, isotropic physical-height scaling, placement/labels of unredrawn original generated images.6px/cm, males1032px/females960px in each row.",
+  "images": [
+    {
+      "id": "style-male-a",
+      "source_file": "homewear-review-20261014/homewear-male-a-front.png",
+      "source_sha256": "2381c369eae4fa4d5438e8a2c8776b25e7147dcf7c32ca557990c631ebe9f81a",
+      "new_file": "style-male-a-front.png",
+      "new_sha256": "416d435b1275169c0bcce9dc75b385602a3a4a5dae3b17ed9adccc2f5d93f151",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "style-male-a",
+        "source": "homewear-male-a",
+        "height_cm": 172,
+        "sex": "male",
+        "name": "M-A／腕時計",
+        "accessory": "One plain graphic wristwatch on image-RIGHT wrist (character's LEFT wrist), just below yellow cuff. Broad DARK TEAL strap hugging wrist, one simple rounded-rectangle case with a single dark face and no numbers/text, no tiny dial marks, realistic small size about25px wide at1254. No chain/dangling pieces. Do not move cuff/hand/arm to display it.",
+        "intent": "短丈スウェット/ワイドパンツを保持。明快な眼・髪束・輪郭/2段セルと腕に沿う太い単純時計。"
+      },
+      "source_measurement": {
+        "crown_y": 15,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          34,
+          36,
+          33
+        ],
+        "sole_y": 1211,
+        "head_px": 181,
+        "full_height_px": 1196,
+        "head_units": 6.607735,
+        "bbox_inclusive": [
+          250,
+          15,
+          990,
+          1211
+        ]
+      },
+      "new_measurement": {
+        "crown_y": 14,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          24,
+          25,
+          23
+        ],
+        "sole_y": 1211,
+        "head_px": 182,
+        "full_height_px": 1197,
+        "head_units": 6.576923,
+        "bbox_inclusive": [
+          250,
+          14,
+          991,
+          1211
+        ]
+      },
+      "difference": {
+        "crown_px": -1,
+        "head_px": 1,
+        "full_height_px": 1,
+        "head_units_percent": -0.4663
+      },
+      "fingertip_y_old_new": [
+        [
+          699,
+          700
+        ],
+        [
+          700,
+          702
+        ]
+      ],
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "outfit_cut_palette_pose_review": "source/new originals displayed side by side; retained main cuts/hem/sleeves/footwear, geometry bounds/hand tips quantified; shadows/accessories/style intentionally differ",
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FDE0C7",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#544C49",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・虹彩/瞳",
+          "median_hex": "#1F1612",
+          "xy": [
+            595,
+            132
+          ]
+        },
+        {
+          "part": "トップス",
+          "median_hex": "#FEED9B",
+          "xy": [
+            620,
+            400
+          ]
+        },
+        {
+          "part": "パンツ",
+          "median_hex": "#46504A",
+          "xy": [
+            548,
+            895
+          ]
+        },
+        {
+          "part": "時計バンド",
+          "median_hex": "#325E65",
+          "xy": [
+            924,
+            591
+          ]
+        },
+        {
+          "part": "時計面",
+          "median_hex": "#494B4B",
+          "xy": [
+            942,
+            580
+          ]
+        }
+      ]
+    },
+    {
+      "id": "style-male-b",
+      "source_file": "homewear-review-20261014/homewear-male-b-front.png",
+      "source_sha256": "0af9bffaab709d3150b482f0a175f56aecc5e58f35ffc3b54165be7a0db8691d",
+      "new_file": "style-male-b-front.png",
+      "new_sha256": "628b7569620fa74ce8a2bab3774fdae889e5b0942583d0edf10121039d3ddbf0",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "style-male-b",
+        "source": "homewear-male-b",
+        "height_cm": 172,
+        "sex": "male",
+        "name": "M-B／ブレスレット",
+        "accessory": "One plain WARM OCHRE/GOLD soft cuff BRACELET on image-LEFT wrist (character's RIGHT wrist), a smooth broad band about14px thick hugging wrist, no beads, fine chains, charms, text or dangling parts. Same wrist/hand geometry and polo sleeve lengths.",
+        "intent": "五分袖ポロ/白裾/イージーパンツを保持。整理した髪/眼/輪郭と単純な幅のある腕輪。"
+      },
+      "source_measurement": {
+        "crown_y": 15,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          48,
+          47,
+          41
+        ],
+        "sole_y": 1215,
+        "head_px": 181,
+        "full_height_px": 1200,
+        "head_units": 6.629834,
+        "bbox_inclusive": [
+          250,
+          15,
+          990,
+          1215
+        ]
+      },
+      "new_measurement": {
+        "crown_y": 17,
+        "chin_xy": [
+          623,
+          196
+        ],
+        "chin_raw_rgb": [
+          77,
+          73,
+          62
+        ],
+        "sole_y": 1216,
+        "head_px": 179,
+        "full_height_px": 1199,
+        "head_units": 6.698324,
+        "bbox_inclusive": [
+          249,
+          17,
+          990,
+          1216
+        ]
+      },
+      "difference": {
+        "crown_px": 2,
+        "head_px": -2,
+        "full_height_px": -1,
+        "head_units_percent": 1.0331
+      },
+      "fingertip_y_old_new": [
+        [
+          699,
+          699
+        ],
+        [
+          699,
+          699
+        ]
+      ],
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "outfit_cut_palette_pose_review": "source/new originals displayed side by side; retained main cuts/hem/sleeves/footwear, geometry bounds/hand tips quantified; shadows/accessories/style intentionally differ",
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FEE1CB",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#635A53",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・虹彩/瞳",
+          "median_hex": "#3B3025",
+          "xy": [
+            595,
+            132
+          ]
+        },
+        {
+          "part": "ポロ",
+          "median_hex": "#C8DED3",
+          "xy": [
+            620,
+            400
+          ]
+        },
+        {
+          "part": "パンツ",
+          "median_hex": "#A7988C",
+          "xy": [
+            548,
+            895
+          ]
+        },
+        {
+          "part": "ブレスレット",
+          "median_hex": "#DB9C40",
+          "xy": [
+            313,
+            572
+          ]
+        }
+      ]
+    },
+    {
+      "id": "style-female-a",
+      "source_file": "homewear-review-20261014/homewear-female-a-front.png",
+      "source_sha256": "2ab9c7fde4efd8fc0f84fcced0559889934c531bb5bd881a007742ab79827061",
+      "new_file": "style-female-a-front.png",
+      "new_sha256": "887c0c2de441559d1b26c445ffe0c324bc4e0b7193eecbea339723785ae9a8de",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "style-female-a",
+        "source": "homewear-female-a",
+        "height_cm": 160,
+        "sex": "female",
+        "name": "F-A／ヘアクリップ",
+        "accessory": "One simple IVORY rounded-bar HAIR CLIP on image-RIGHT temple hair, a broad solid capsule about32x12px, lying flush within the existing brown bob silhouette. No bow/animal/icon/ornament, no external protrusion or added hair volume. Entire clip fits inside original hair outline. Face/head size unchanged.",
+        "intent": "深緑スウェット/白裾/クリームロングを保持。少数のボブ髪束・可愛い縦長眼と髪に沿う単純クリップ。"
+      },
+      "source_measurement": {
+        "crown_y": 19,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          59,
+          55,
+          48
+        ],
+        "sole_y": 1213,
+        "head_px": 178,
+        "full_height_px": 1194,
+        "head_units": 6.707865,
+        "bbox_inclusive": [
+          287,
+          19,
+          955,
+          1213
+        ]
+      },
+      "new_measurement": {
+        "crown_y": 19,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          136,
+          87,
+          65
+        ],
+        "sole_y": 1213,
+        "head_px": 178,
+        "full_height_px": 1194,
+        "head_units": 6.707865,
+        "bbox_inclusive": [
+          286,
+          19,
+          957,
+          1213
+        ]
+      },
+      "difference": {
+        "crown_px": 0,
+        "head_px": 0,
+        "full_height_px": 0,
+        "head_units_percent": 0.0
+      },
+      "fingertip_y_old_new": [
+        [
+          672,
+          672
+        ],
+        [
+          673,
+          673
+        ]
+      ],
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "outfit_cut_palette_pose_review": "source/new originals displayed side by side; retained main cuts/hem/sleeves/footwear, geometry bounds/hand tips quantified; shadows/accessories/style intentionally differ",
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FEE4D1",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#5B463C",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・虹彩/瞳",
+          "median_hex": "#3D3027",
+          "xy": [
+            598,
+            132
+          ]
+        },
+        {
+          "part": "トップス",
+          "median_hex": "#376451",
+          "xy": [
+            620,
+            400
+          ]
+        },
+        {
+          "part": "スカート",
+          "median_hex": "#FEF6EA",
+          "xy": [
+            620,
+            700
+          ]
+        },
+        {
+          "part": "ヘアクリップ",
+          "median_hex": "#FCF6EB",
+          "xy": [
+            678,
+            91
+          ]
+        }
+      ]
+    },
+    {
+      "id": "style-female-b",
+      "source_file": "homewear-review-20261014/homewear-female-b-front.png",
+      "source_sha256": "10a35d53afda27788b25464b7e2f4915e4cf7348569ed713ea4959b30d4a18d9",
+      "new_file": "style-female-b-front.png",
+      "new_sha256": "0777f67cb13d8275b649c7bc1cb645a83d01eaccc9ec0090a1f9fc48f463814c",
+      "size": [
+        1254,
+        1254
+      ],
+      "design": {
+        "id": "style-female-b",
+        "source": "homewear-female-b",
+        "height_cm": 160,
+        "sex": "female",
+        "name": "F-B／ネックレス",
+        "accessory": "One simple short NECKLACE over the ivory tee: a single smooth medium-thickness gold cord close to upper chest and one plain flat rounded-disc pendant about22px wide centered near y295. No chain-link detail, engraved pattern, text, gemstones, multiple layers or floating long ends. Pendant rests against tee. Cardigan/neckline/body geometry unchanged.",
+        "intent": "短いカーディガン/長い白T/テーパードを保持。整理した顔/髪/輪郭と大きめの単純な円形ペンダント。"
+      },
+      "source_measurement": {
+        "crown_y": 19,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          74,
+          76,
+          72
+        ],
+        "sole_y": 1211,
+        "head_px": 178,
+        "full_height_px": 1192,
+        "head_units": 6.696629,
+        "bbox_inclusive": [
+          287,
+          19,
+          955,
+          1211
+        ]
+      },
+      "new_measurement": {
+        "crown_y": 19,
+        "chin_xy": [
+          623,
+          197
+        ],
+        "chin_raw_rgb": [
+          25,
+          25,
+          19
+        ],
+        "sole_y": 1213,
+        "head_px": 178,
+        "full_height_px": 1194,
+        "head_units": 6.707865,
+        "bbox_inclusive": [
+          286,
+          19,
+          955,
+          1213
+        ]
+      },
+      "difference": {
+        "crown_px": 0,
+        "head_px": 0,
+        "full_height_px": 2,
+        "head_units_percent": 0.1678
+      },
+      "fingertip_y_old_new": [
+        [
+          672,
+          672
+        ],
+        [
+          674,
+          673
+        ]
+      ],
+      "visually_displayed": true,
+      "manual_digit_count": [
+        5,
+        5
+      ],
+      "outfit_cut_palette_pose_review": "source/new originals displayed side by side; retained main cuts/hem/sleeves/footwear, geometry bounds/hand tips quantified; shadows/accessories/style intentionally differ",
+      "colors": [
+        {
+          "part": "肌",
+          "median_hex": "#FEE5D2",
+          "xy": [
+            649,
+            165
+          ]
+        },
+        {
+          "part": "髪",
+          "median_hex": "#644E46",
+          "xy": [
+            620,
+            85
+          ]
+        },
+        {
+          "part": "目・虹彩/瞳",
+          "median_hex": "#3D2E27",
+          "xy": [
+            598,
+            132
+          ]
+        },
+        {
+          "part": "カーディガン",
+          "median_hex": "#ABB2CE",
+          "xy": [
+            548,
+            386
+          ]
+        },
+        {
+          "part": "インナー",
+          "median_hex": "#FFFAF2",
+          "xy": [
+            620,
+            345
+          ]
+        },
+        {
+          "part": "パンツ",
+          "median_hex": "#F3E8D6",
+          "xy": [
+            550,
+            895
+          ]
+        },
+        {
+          "part": "ペンダント",
+          "median_hex": "#DBB15C",
+          "xy": [
+            625,
+            279
+          ]
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "id": "style-male-a",
+      "row": 0,
+      "source_or_new": "source",
+      "uniform_scale": 0.862876254180602,
+      "placed_xy": [
+        77,
+        158
+      ],
+      "size": [
+        646,
+        1033
+      ],
+      "target_height_px": 1032,
+      "sole_y": 1190
+    },
+    {
+      "id": "style-male-a",
+      "row": 1,
+      "source_or_new": "new",
+      "uniform_scale": 0.8621553884711779,
+      "placed_xy": [
+        76,
+        1590
+      ],
+      "size": [
+        647,
+        1033
+      ],
+      "target_height_px": 1032,
+      "sole_y": 2622
+    },
+    {
+      "id": "style-male-b",
+      "row": 0,
+      "source_or_new": "source",
+      "uniform_scale": 0.86,
+      "placed_xy": [
+        878,
+        158
+      ],
+      "size": [
+        644,
+        1033
+      ],
+      "target_height_px": 1032,
+      "sole_y": 1190
+    },
+    {
+      "id": "style-male-b",
+      "row": 1,
+      "source_or_new": "new",
+      "uniform_scale": 0.8607172643869891,
+      "placed_xy": [
+        877,
+        1590
+      ],
+      "size": [
+        646,
+        1033
+      ],
+      "target_height_px": 1032,
+      "sole_y": 2622
+    },
+    {
+      "id": "style-female-a",
+      "row": 0,
+      "source_or_new": "source",
+      "uniform_scale": 0.8040201005025126,
+      "placed_xy": [
+        1728,
+        230
+      ],
+      "size": [
+        544,
+        961
+      ],
+      "target_height_px": 960,
+      "sole_y": 1190
+    },
+    {
+      "id": "style-female-a",
+      "row": 1,
+      "source_or_new": "new",
+      "uniform_scale": 0.8040201005025126,
+      "placed_xy": [
+        1726,
+        1662
+      ],
+      "size": [
+        547,
+        961
+      ],
+      "target_height_px": 960,
+      "sole_y": 2622
+    },
+    {
+      "id": "style-female-b",
+      "row": 0,
+      "source_or_new": "source",
+      "uniform_scale": 0.8053691275167785,
+      "placed_xy": [
+        2528,
+        230
+      ],
+      "size": [
+        545,
+        961
+      ],
+      "target_height_px": 960,
+      "sole_y": 1190
+    },
+    {
+      "id": "style-female-b",
+      "row": 1,
+      "source_or_new": "new",
+      "uniform_scale": 0.8040201005025126,
+      "placed_xy": [
+        2528,
+        1662
+      ],
+      "size": [
+        545,
+        961
+      ],
+      "target_height_px": 960,
+      "sole_y": 2622
+    }
+  ],
+  "unperformed": [
+    "human style/accessory approval",
+    "side/back expansion",
+    "3D anatomy/rig/motion",
+    "physical fit/leg-skirt/accessory collision",
+    "strict all-pixel flat-color equality (raster variation/AA)"
+  ],
+  "comparison": {
+    "file": "style-accessories-before-after.png",
+    "size": [
+      3200,
+      2840
+    ],
+    "sha256": "4356067dd60eeda5afe3dfb798ae05604346393d524bdc8017b2b0804b5b9648",
+    "bytes": 4256570,
+    "measured_heights_per_row_px": [
+      [
+        1032,
+        1032,
+        960,
+        960
+      ],
+      [
+        1032,
+        1032,
+        960,
+        960
+      ]
+    ],
+    "sole_baselines_y": [
+      1190,
+      2622
+    ],
+    "gender_difference_px": 72,
+    "gender_difference_cm": 12,
+    "visually_displayed": true
+  },
+  "library": {
+    "status": "succeeded",
+    "artifact": "style-accessories-before-after.png",
+    "library_file_id": "libfile_1565d10a6b2c8191b6af71a11ca45776",
+    "file_id": "file_00000000ff048230930d0f74e557a8ce",
+    "file_name": "style-accessories-before-after.png",
+    "path": "/style-accessories-before-after.png",
+    "current_version_number": 0,
+    "library_artifact_type": "image",
+    "file_size_bytes": 4256570,
+    "local_metadata_helper_exit": 0,
+    "exact_official_readback_matches_original": true,
+    "sha256": "4356067dd60eeda5afe3dfb798ae05604346393d524bdc8017b2b0804b5b9648",
+    "raw4fronts": "supporting originals in Draft PR; primaryLibrary deliverable is before/after comparison"
+  },
+  "reference_recheck": [
+    {
+      "library_file_id": "libfile_3253ef69c3e48191adcad3d317d9f8e2",
+      "file_id": "file_000000002acc81fd9f8b75bb01161424",
+      "name": "IMG_2852.jpeg",
+      "size_bytes": 122393,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2852.jpeg",
+      "visually_displayed": true,
+      "sha256": "dd8a0304cc9add3f4b31e1c32f47c0600396aaeddd1e7fb846a4579b5e04ece6",
+      "image_size": [
+        500,
+        667
+      ],
+      "local_library_id_verified": true,
+      "re_displayed_for_style_review": true
+    },
+    {
+      "library_file_id": "libfile_f3276731259881918d6185fa5d19d48e",
+      "file_id": "file_0000000038d481fd91b67058c062618e",
+      "name": "IMG_2851.jpeg",
+      "size_bytes": 106741,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2851.jpeg",
+      "visually_displayed": true,
+      "sha256": "adaaf3bd01a4ce60ba5312c4757c88c8ec59df63669e372c4ae98325ce5dea02",
+      "image_size": [
+        900,
+        1200
+      ],
+      "local_library_id_verified": true,
+      "re_displayed_for_style_review": true
+    },
+    {
+      "library_file_id": "libfile_a0c7eb07fefc8191960510321cfea30d",
+      "file_id": "file_0000000000c481f4a97db762de5d7bae",
+      "name": "IMG_2853.png",
+      "size_bytes": 366448,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2853.png",
+      "visually_displayed": true,
+      "sha256": "03915bd52a5b993fc888d835448c4ee65a4d63b3056abe38775067a36b5d91c8",
+      "image_size": [
+        514,
+        709
+      ],
+      "local_library_id_verified": true,
+      "re_displayed_for_style_review": true
+    },
+    {
+      "library_file_id": "libfile_778e637f86b8819199948d11c1aaeae8",
+      "file_id": "file_00000000a74c81f88f3dd83a937a88dd",
+      "name": "IMG_2854.webp",
+      "size_bytes": 376218,
+      "version": 0,
+      "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/homewear-review-20261014/IMG_2854.webp",
+      "visually_displayed": true,
+      "sha256": "e575c1470cf9f79d537be45fdf52e0c494a13c4bd687d90f26845566253eb190",
+      "image_size": [
+        1200,
+        1800
+      ],
+      "local_library_id_verified": true,
+      "re_displayed_for_style_review": true
+    }
+  ],
+  "extra_previous_quality_reference": {
+    "library_file_id": "libfile_2f425b7689988191a769cd823769fce5",
+    "local_path": "/Users/nariiwa/Documents/Codex/2026-10-14/task/reference/quality-reference.png",
+    "redisplayed": true,
+    "role": "background style observation only, not a new generation image input"
+  }
+}
