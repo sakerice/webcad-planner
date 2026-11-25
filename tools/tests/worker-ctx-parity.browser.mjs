@@ -58,7 +58,7 @@ try {
     const json = (v) => JSON.stringify(v, (k, x) => (k.charAt(0) === '_' ? undefined : x));
     const clone = (v) => JSON.parse(json(v));
     const realData = DATA, realJson = json(DATA), wallHSaved = WALL_H;
-    const res = { total: 0, same: 0, bothFailed: 0, refused: [], failures: [], byVariant: {}, deadFaces: [] };
+    const res = { total: 0, same: 0, bothFailed: 0, refused: [], failures: [], byVariant: {}, deadFaces: [], floorSame: [] };
 
     // ── 照らし合わせの1件 ──
     // op は操作1つか、続けて当てる操作の並び(土間にしてから戻す、など)。
@@ -89,7 +89,7 @@ try {
       if (c.errors.length) { res.failures.push({ variant, label, why: 'チャットだけが失敗', chat: c.errors[0].message }); return; }
       const a = json([w.plan, w.changedIds, w.removedIds, w.warnings]);
       const b = json([c.plan, c.changedIds, c.removedIds, c.warnings]);
-      if (a === b) { res.same++; v.same++; return; }
+      if (a === b) { res.same++; v.same++; if (/土間|normal/.test(label)) res.floorSame.push({ variant, label, changedIds: w.changedIds, plan: w.plan }); return; }
       // 決めて受け入れている違いは1つだけ: 消したあとの面ごとの外壁設定(exteriorWallSettings.faces)の片付け。
       // 画面は今の外面を幾何で求め直して当たらない行を消すが、Worker は消えた壁の行だけを消す
       // (求め直しは 1 階あたり数 ms〜十数 ms かかり、Worker の計算時間に収まらない)。
@@ -256,6 +256,56 @@ try {
       variants.push({ name: '斜線が効く', plan: p });
     }
 
+    // 床の上下(土間・土間をやめる normal)と、天井に付いた器具。画面は器具を床の上下ぶん動かす(followRoomCeiling)。
+    // 天井の形がいろいろな部屋(平天井・天井高の指定・勾配(上に部屋があり手書きの勾配/屋根の下で屋根から)・
+    // 吹き抜け・段差・2階・階高を超える天井高の指定)と、elev の無い器具、整数でない床の上下(Worker は断る)を作る。
+    const floorCases = [];   // [変種の名前, 部屋の id, 断るなら true]
+    const fixtureType = (t) => /^light-(ceiling|down|spot)$/.test(t) || t === 'fmp-CeilingFan01' || t === 'original-laundry-rail';
+    const inRoom = (r, it) => (it.floor || 1) === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d;
+    const v2 = (p) => { p.heightDefaults = Object.assign({}, p.heightDefaults || {}, { modelVersion: 2, perFloor: true, floorThickness: 220 }); p.floors = Object.assign({}, p.floors || {}, { 2: { floorThickness: 260 } }); return p; };
+    const room = (p, id) => p.rooms.find((r) => r.id === id);
+    {
+      const p = v2(clone(base));
+      room(p, 'r1022').ceiling = { type: 'flat', heightMm: 2300 };
+      room(p, 'r1025').ceiling = { type: 'sloped', lowMm: 2200, highMm: 3000, direction: 90 };
+      room(p, 'r1028').skipLevelMm = 400;
+      room(p, 'r1081').ceiling = { type: 'sloped', lowMm: 2200, highMm: 3200, direction: 0 };
+      room(p, 'r1086').ceiling = { type: 'flat', heightMm: 3400 };
+      room(p, 'r1030').floorRaiseMm = 60;
+      room(p, 'r1029').floorRaiseMm = 30.5;
+      const noElev = p.items.find((it) => fixtureType(it.type) && inRoom(room(p, 'r1084'), it));
+      delete noElev.elev;
+      variants.push({ name: '床の上下と器具', plan: p });
+      ['r1024', 'r1022', 'r1025', 'r1027', 'r1028', 'r1080', 'r1081', 'r1086', 'r1084', 'r1030'].forEach((id) => floorCases.push(['床の上下と器具', id, false]));
+      floorCases.push(['床の上下と器具', 'r1029', true]);
+    }
+    {
+      // 下の階の折り上げ天井(段差が上向きの天井の範囲)と重なる2階の部屋。床を下げられる下限が上がる。
+      // 天井の範囲の物(ceiling-area)と、古い形の部屋の ceilingAreas。下げ天井(offset が負)は効かない。
+      const p = v2(clone(base));
+      const area = (rid, x, y, w, d, offset, id) => { const r = room(p, rid); p.items.push({ id, type: 'ceiling-area', floor: 1, x: r.x + x, y: r.y + y, w, d, rot: 0, offset, color: '#e4ddd1' }); };
+      area('r1024', 765, 1220, 1200, 1200, 400, 99301);     // 主寝室 r1086 の下。天端が2階の床より上 → 下限が正
+      area('r1022', 765, 765, 1200, 1200, 150, 99302);      // 洋室B r1081 の下。下限が床厚の中
+      room(p, 'r1020').ceilingAreas = [{ id: 'ca1', x: 200, y: 200, w: 1000, d: 1000, offset: 300 }];   // 洋室A r1080 の下(古い形)
+      area('r1028', 100, 100, 600, 600, -200, 99303);       // ホール r1082 の下。下げ天井なので効かない
+      // 断る: 下の階の部屋が勾配天井(天井面が屋根・勾配から決まる)
+      room(p, 'r1025').ceiling = { type: 'sloped', lowMm: 2200, highMm: 3000, direction: 90 };
+      area('r1025', 100, 100, 600, 600, 200, 99304);        // 廊下 r1084 の下
+      // 断る: 重なりの帯が細い(60mm 以下。画面は帯に沿う壁を測って重なりから外すことがある)
+      p.items.push({ id: 99305, type: 'ceiling-area', floor: 1, x: 7240, y: 4600, w: 60, d: 800, rot: 0, offset: 300 });
+      variants.push({ name: '折り上げ天井の上', plan: p });
+      [['r1086', false], ['r1081', false], ['r1080', false], ['r1082', false], ['r1084', true], ['r1089', true], ['r1090', true]].forEach(([id, no]) => floorCases.push(['折り上げ天井の上', id, no]));
+    }
+    {
+      // 断る: 下の階に既定より高い壁がある(上の階の床が壁の天端まで持ち上がりうる。持ち上がるかは壁の位置で決まる)
+      const p = v2(clone(base));
+      const r = room(p, 'r1024');
+      p.items.push({ id: 99311, type: 'ceiling-area', floor: 1, x: r.x + 765, y: r.y + 1220, w: 1200, d: 1200, rot: 0, offset: 400 });
+      p.walls.find((w) => (w.floor || 1) === 1).wallHeight = 3000;
+      variants.push({ name: '折り上げ天井の上・高い壁', plan: p });
+      floorCases.push(['折り上げ天井の上・高い壁', 'r1086', true]);
+    }
+
     const kinds = Object.keys(ObjectKnowledge.KNOWLEDGE);
     const isizes = Object.keys(ISIZES);
     for (const V of variants) {
@@ -331,6 +381,7 @@ try {
       const sets = [
         [wall.id, { wallHeight: 2600 }], [wall.id, { thick: 150 }], [wall.id, { wallHeight: 9000 }],
         [r1.id, { floorMaterial: 'tile_floor' }], [r1.id, { floorLevel: 'doma' }], [r1.id, { floorLevel: 'normal' }],
+        [fixtureRoom && fixtureRoom.id, { floorLevel: 'doma' }],
         [plainRoom && plainRoom.id, { ceilingHeight: 2600 }], [plainRoom && plainRoom.id, { void: 'yes' }],
         [fixtureRoom && fixtureRoom.id, { ceilingHeight: 2200 }], [fixtureRoom && fixtureRoom.id, { floorMaterial: 'wood_oak' }],
       ];
@@ -362,8 +413,8 @@ try {
       check(V.name, p, { op: 'setProps', args: { id: r1.id, set: { ceilingHeight: 2500 } } }, '設定 天井高');
       // 土間: 深さは高さモデル・床の厚みで変わる。天井に付いた器具の無い部屋(1階・2階)と、大きい部屋(器具があれば Worker は断る)
       const hasFixture = (r) => p.items.some((it) => (/^light-/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail') && it.floor === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d);
-      // 土間にしてから normal で戻す並びも当てる。
-      [r1].concat([1, 2, 3].map((fl) => p.rooms.find((r) => r.floor === fl && !hasFixture(r)))).forEach((r) => {
+      // 器具のある部屋(1階・2階)も当てる。土間にしてから normal で戻す並びも当てる。
+      [r1].concat([1, 2, 3].map((fl) => p.rooms.find((r) => r.floor === fl && !hasFixture(r))), [1, 2].map((fl) => p.rooms.find((r) => r.floor === fl && hasFixture(r)))).forEach((r) => {
         if (!r) return;
         const doma = { op: 'setProps', args: { id: r.id, set: { floorLevel: 'doma' } } };
         const normal = { op: 'setProps', args: { id: r.id, set: { floorLevel: 'normal' } } };
@@ -381,6 +432,18 @@ try {
         check(V.name, p, { op: 'setProps', args: { id, set: { color: '#336699' } } }, '設定 古い種類 ' + it.type);
         check(V.name, p, { op: 'deleteObjects', args: { ids: [id] } }, '消す 古い種類 ' + it.type);
       }
+    }
+    // 床の上下と器具・折り上げ天井の上の部屋に、土間・normal・土間→normal を当てる。断るはずの部屋はラベルに [断る]。
+    for (const [vname, id, refuse] of floorCases) {
+      const V = variants.find((x) => x.name === vname);
+      WALL_H = V.wallH || wallHSaved;
+      const r = V.plan.rooms.find((x) => x.id === id);
+      const tag = (refuse ? '[断る] ' : '') + id + ' ' + r.n + (V.plan.items.some((it) => fixtureType(it.type) && inRoom(r, it)) ? ' 器具あり' : '');
+      const doma = { op: 'setProps', args: { id, set: { floorLevel: 'doma' } } };
+      const normal = { op: 'setProps', args: { id, set: { floorLevel: 'normal' } } };
+      check(vname, V.plan, doma, '設定 土間 ' + tag);
+      check(vname, V.plan, normal, '設定 normal ' + tag);
+      if (!refuse) check(vname, V.plan, [doma, normal], '設定 土間→normal ' + tag);
     }
     WALL_H = wallHSaved;
     // 照らし合わせが「どちらも何もしない」で一致していないことの確かめ(式で決める値が実際に入っている)
@@ -416,6 +479,21 @@ try {
           const r = p.rooms.find((x) => x.floor === 1 && !p.items.some((it) => /^light-/.test(it.type) && it.floor === 1 && it.x + it.w / 2 >= x.x && it.x + it.w / 2 <= x.x + x.w && it.y + it.d / 2 >= x.y && it.y + it.d / 2 <= x.y + x.d));
           const w = tools.workerApply(p, [{ op: 'setProps', args: { id: r.id, set: { floorLevel: 'doma' } } }]);
           return w.errors.length ? w.errors[0].message : w.plan.rooms.find((x) => x.id === r.id).floorRaiseMm;
+        })(),
+        // 折り上げ天井の上の部屋を土間にしたときの床の上下(下限で戻る)
+        recess: ['r1086', 'r1081', 'r1080', 'r1082'].map((id) => {
+          const p = variants.find((x) => x.name === '折り上げ天井の上').plan;
+          const w = tools.workerApply(p, [{ op: 'setProps', args: { id, set: { floorLevel: 'doma' } } }]);
+          return w.errors.length ? w.errors[0].message : w.plan.rooms.find((x) => x.id === id).floorRaiseMm;
+        }),
+        // 器具のある部屋を土間にしたとき、Worker が器具を動かして id を返すこと(洋室 r1024。床厚 220 → 器具は +200)
+        fixtureMove: (() => {
+          const p = variants.find((x) => x.name === '床の上下と器具').plan;
+          const r = p.rooms.find((x) => x.id === 'r1024');
+          const fx = p.items.filter((it) => fixtureType(it.type) && inRoom(r, it));
+          const w = tools.workerApply(p, [{ op: 'setProps', args: { id: 'r1024', set: { floorLevel: 'doma' } } }]);
+          if (w.errors.length) return w.errors[0].message;
+          return { changedIds: w.changedIds, elev: fx.map((it) => [it.elev, w.plan.items.find((x) => x.id === it.id).elev]) };
         })() };
     }
 
@@ -438,6 +516,16 @@ try {
       res.inspectBroken = json(tools.workerInspect(broken)) === json(PlanCoreInspect.inspectPlan(broken, { defaults: ISIZES }));
     }
     res.dataUntouched = DATA === realData && json(DATA) === realJson;
+    res.floorExpected = [];
+    floorCases.filter((c) => c[2]).forEach(([vname, id]) => {
+      const r = variants.find((x) => x.name === vname).plan.rooms.find((x) => x.id === id);
+      const lbl = (k) => vname + ': 設定 ' + k + ' [断る] ' + id + ' ' + r.n + (variants.find((x) => x.name === vname).plan.items.some((it) => fixtureType(it.type) && inRoom(r, it)) ? ' 器具あり' : '');
+      res.floorExpected.push(lbl('土間'));
+    });
+    res.floorRefusedExpected = res.floorExpected.length;
+    res.floorSameCount = res.floorSame.length;
+    res.floorSameIds = res.floorSame.filter((x) => x.changedIds.length > 1).length;
+    delete res.floorSame;
     return res;
   }, APP);
 
@@ -452,13 +540,23 @@ try {
     out.failures.slice(0, 40).forEach((f) => console.log(JSON.stringify(f).slice(0, 1500)));
   }
   console.log('式で決めた値: ' + JSON.stringify(out.formula));
+  console.log('床の上下: 一致 ' + out.floorSameCount + '(うち器具も動いた ' + out.floorSameIds + ')、断るはずの組 ' + out.floorRefusedExpected);
   assert.deepEqual(out.failures, [], 'Worker と画面のチャットの結果が食い違った');
   assert.equal(out.formula.column[0], 'under', '段差の部屋の柱が段差の下まで伸びていない');
   assert.ok(out.formula.light1 > 2000 && out.formula.light2 > 1800, '照明の高さが天井から決まっていない');
   assert.equal(out.formula.hood, 1650, 'レンジフードの取付の高さ');
   assert.equal(out.formula.hoodOnCounter, 1650, '調理台の上に置いたレンジフードも取付の高さ');
   assert.equal(out.formula.doma, -220, '土間の床の上下が床の厚みから決まっていない');
-  assert.deepEqual(out.refused.filter((r) => /土間/.test(r.label) && !/床の高さを変えると/.test(r.message)).map((r) => r.variant + ': ' + r.label + ' ' + r.message), [], '土間を、器具が動く以外の理由で断った');
+  // 床の上下(土間・normal)は、[断る] を付けた部屋だけで断り、それ以外では画面と同じに当たる
+  const floorRefused = out.refused.filter((r) => /土間|normal/.test(r.label));
+  assert.deepEqual(floorRefused.filter((r) => !/\[断る\]/.test(r.label)).map((r) => r.variant + ': ' + r.label + ' ' + r.message), [], '床の上下を断るはずのない部屋で断った');
+  assert.ok(out.floorRefusedExpected > 0, '[断る] の部屋が無い');
+  const refusedLabels = new Set(floorRefused.map((r) => r.variant + ': ' + r.label));
+  assert.deepEqual(out.floorExpected.filter((l) => !refusedLabels.has(l)), [], '断るはずの部屋で断らなかった(画面と同じ値を出せる保証が無い)');
+  assert.ok(out.floorSameCount >= 60, '床の上下で一致した組が少ない: ' + out.floorSameCount);
+  assert.deepEqual(out.formula.recess, [160, -90, 60, -240], '折り上げ天井の上の部屋の床の下限: ' + JSON.stringify(out.formula.recess));
+  assert.ok(out.formula.fixtureMove.changedIds && out.formula.fixtureMove.changedIds.length >= 2 && out.formula.fixtureMove.elev.every(([a, b]) => b === a + 200),
+    '器具のある部屋の土間で、Worker が器具を動かしていない: ' + JSON.stringify(out.formula.fixtureMove));
   assert.ok(out.formula.nestedLight[0] !== out.formula.nestedLight[1] && out.formula.nestedLight.every((v) => typeof v === 'number'), '入れ子の部屋の照明は、内側の部屋の天井から決まる: ' + JSON.stringify(out.formula.nestedLight));
   const lightRefusals = (v) => out.refused.filter((r) => r.variant === v && r.message.includes('照明の高さを画面でしか'));
   assert.deepEqual(lightRefusals('斜線の欄あり・効かない').map((r) => r.label), [], '斜線が効かない敷地で照明を断った');

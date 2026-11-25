@@ -172,9 +172,11 @@ test('/op 古い形の床材の部屋: 触った部屋だけが floorMaterial �
   untouched.forEach((r) => assert.equal(r.texture, legacy.find((l) => l.id === r.id).texture));
 });
 
-// 土間(floorLevel=doma)。深さは画面の設定パネル「玄関土間」と同じ HeightModel.domaFloorRaiseMm で、床の厚みで決まる。
-// 画面と同じに出せない部屋(天井に付いた器具が動く・下の階に折り上げ天井がある)は断る。
-test('/op 土間: 床の上下が床の厚みで決まる深さで届き、器具の動く部屋は断る', async () => {
+// 土間(floorLevel=doma)と、土間をやめる normal。深さは画面の設定パネル「玄関土間」と同じ HeightModel.domaFloorRaiseMm で、
+// 床の厚みで決まる。天井に付いた器具は床の上下ぶん動き(画面の followRoomCeiling と同じ)、下の階の折り上げ天井の上では
+// 床を下げられる下限が上がる(画面の CeilingDesigner.floorLoweringLimit と同じ)。画面と同じ値を式で出せない部屋
+// (下の階の天井が勾配天井など)は断る。
+test('/op 土間: 床の上下が床の厚みで決まる深さで届き、器具も動き、normal で戻る', async () => {
   const HeightModel = require('../../assets/js/height-model.js');
   const p = plan();
   p.heightDefaults = { modelVersion: 2, perFloor: true, floorThickness: 220 };
@@ -193,21 +195,38 @@ test('/op 土間: 床の上下が床の厚みで決まる深さで届き、器�
     assert.equal(sent.floorRaiseMm, want);
     assert.equal('floorLevel' in sent, false, 'アプリの部屋に floorLevel を残さない');
   }
+  // 器具のある部屋: 床が 200 下がると、器具は天井からの下がりを保って床から 200 遠くなる。normal で戻る
   const lit = p.rooms.find((r) => r.floor === 1 && p.items.some((it) => fixture(it) && inRoom(r)(it)));
-  const ws = connect(ctx.room, 'screen-b');
-  const res = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'setProps', { id: lit.id, set: { floorLevel: 'doma' } });
-  assert.equal(res.ok, false);
-  assert.match(res.errors[0].message, /画面で行ってください.*床の高さ/);
-  assert.equal(ws.sent.length, 0);
-  // 下の階に折り上げ天井(段差が上向きの天井の範囲)がある部屋は断る
+  const lights = p.items.filter((it) => fixture(it) && inRoom(lit)(it));
+  const down = await applyAndCheck(ctx, 'setProps', { id: lit.id, set: { floorLevel: 'doma' } });
+  assert.deepEqual(down.res.changedIds.map(String), [String(lit.id)].concat(lights.map((it) => String(it.id))));
+  lights.forEach((it) => assert.equal(down.patch.collections.items.upserts.find((x) => x.id === it.id).elev, (Number(it.elev) || 0) + 200));
+  const up = await applyAndCheck(ctx, 'setProps', { id: lit.id, set: { floorLevel: 'normal' } });
+  assert.equal(up.patch.collections.rooms.upserts.find((r) => r.id === lit.id).floorRaiseMm, 0);
+  lights.forEach((it) => assert.equal(up.patch.collections.items.upserts.find((x) => x.id === it.id).elev, Number(it.elev) || 0));
+  // 下の階に折り上げ天井(段差が上向きの天井の範囲)がある部屋: 下の階の天井が平らなら、下限まで下げる
   const p2 = plan();
   p2.heightDefaults = { modelVersion: 2 };
   const above = p2.rooms.find((r) => r.floor === 2 && !p2.items.some((it) => fixture(it) && inRoom(r)(it)));
   p2.items.push({ id: 99001, type: 'ceiling-area', floor: 1, x: above.x + 100, y: above.y + 100, w: 600, d: 600, rot: 0, offset: 150 });
   const ctx2 = await setup(p2);
-  const r2 = await ctx2.rooms.roomOp(ctx2.env, ctx2.roomId, 'setProps', { id: above.id, set: { floorLevel: 'doma' } });
-  assert.equal(r2.ok, false);
-  assert.match(r2.errors[0].message, /折り上げ天井/);
+  const r2 = await applyAndCheck(ctx2, 'setProps', { id: above.id, set: { floorLevel: 'doma' } });
+  // 床厚 180 の既定: 1階の天井(階高 2580 = 壁 2400+床厚 180 の天端)+段差 150+20 − (2階の床の構造面 2580+床厚 180) = −10。
+  // 土間の深さ −160 より浅いところで止まる(画面の CeilingDesigner.floorLoweringLimit と同じ)
+  assert.equal(r2.patch.collections.rooms.upserts.find((r) => r.id === above.id).floorRaiseMm, -10);
+  // 下の階の部屋が勾配天井だと、天井面が屋根・勾配から決まるので断る
+  const p3 = plan();
+  p3.heightDefaults = { modelVersion: 2 };
+  const below = p3.rooms.find((r) => r.floor === 1 && r.x <= above.x + 100 && above.x + 700 <= r.x + r.w && r.y <= above.y + 100 && above.y + 700 <= r.y + r.d);
+  assert.ok(below, '折り上げ天井を置く1階の部屋');
+  below.ceiling = { type: 'sloped', lowMm: 2200, highMm: 3000, direction: 90 };
+  p3.items.push({ id: 99001, type: 'ceiling-area', floor: 1, x: above.x + 100, y: above.y + 100, w: 600, d: 600, rot: 0, offset: 150 });
+  const ctx3 = await setup(p3);
+  const ws = connect(ctx3.room, 'screen-b');
+  const r3 = await ctx3.rooms.roomOp(ctx3.env, ctx3.roomId, 'setProps', { id: above.id, set: { floorLevel: 'doma' } });
+  assert.equal(r3.ok, false);
+  assert.match(r3.errors[0].message, /画面で行ってください.*折り上げ天井/);
+  assert.equal(ws.sent.length, 0);
 });
 
 test('/op 失敗する操作: 版が進まず、何も積まれず、誰にも届かず、R2 も変わらない', async () => {
