@@ -24,12 +24,20 @@ const T = { timeout: 60000 };
 const _pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 
-// _headers の /* に書いた見出し(名前は小文字に)
-const EXPECTED = {};
-for (const line of readFileSync(join(HERE, '..', '..', '_headers'), 'utf8').split('\n')) {
-  const m = line.match(/^\s+([A-Za-z-]+):\s*(.+)$/);
-  if (m) EXPECTED[m[1].toLowerCase()] = m[2].trim();
+// _headers の道ごとの見出し(名前は小文字に)。EXPECTED は /* に書いたもの(全部の静的アセットに付く)。
+const HEADERS_BY_PATH = {};
+{
+  let current = null;
+  for (const line of readFileSync(join(HERE, '..', '..', '_headers'), 'utf8').split('\n')) {
+    if (/^\//.test(line)) { current = HEADERS_BY_PATH[line.trim()] = {}; continue; }
+    const m = line.match(/^\s+([A-Za-z-]+):\s*(.+)$/);
+    if (m && current) current[m[1].toLowerCase()] = m[2].trim();
+  }
 }
+const EXPECTED = HEADERS_BY_PATH['/*'] || {};
+const APP_ORIGIN = 'capacitor://localhost';
+assert.equal((HEADERS_BY_PATH['/assets/models/*'] || {})['access-control-allow-origin'], APP_ORIGIN, '家具のモデル置き場の CORS が _headers に無い');
+assert.ok(!('access-control-allow-origin' in EXPECTED), '全部の静的アセットに CORS を開けている');
 for (const name of ['x-content-type-options', 'referrer-policy', 'permissions-policy', 'x-frame-options', 'content-security-policy', 'strict-transport-security', 'content-security-policy-report-only']) {
   assert.ok(EXPECTED[name], `_headers に ${name} が無い`);
 }
@@ -76,6 +84,56 @@ try {
   const created = await fetch(ORIGIN + '/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(PLAN) });
   assert.equal(created.headers.get('x-content-type-options'), 'nosniff', 'POST /api/rooms に nosniff が無い');
   await created.arrayBuffer();
+
+  // 2b. CORS(iPhone のアプリ版 capacitor://localhost から読む物)。単体の検査は tools/tests/worker-cors.test.cjs。
+  //  - 家具のモデル置き場(GLB・サムネイル・一覧の JSON)には付く。ほかの静的アセットには付かない。
+  //  - /api/* は許した出どころにだけ、送られた Origin を返す。許していない出どころ・Origin なし・/api/mcp には付かない。
+  for (const p of ['/assets/models/desk.glb', '/assets/models/previews-v2/context-light-ceiling-thumb.png', '/assets/models/asset-sets.json']) {
+    const r = await fetch(ORIGIN + p, { headers: { origin: APP_ORIGIN } });
+    assert.equal(r.status, 200, `${p} が ${r.status}`);
+    assert.equal(r.headers.get('access-control-allow-origin'), APP_ORIGIN, `${p} に CORS が無い`);
+    assert.equal(r.headers.get('access-control-allow-credentials'), null, `${p} に Allow-Credentials`);
+    assert.equal(r.headers.get('x-content-type-options'), 'nosniff', `${p} の /* の見出しが消えた`);
+    await r.arrayBuffer();
+  }
+  for (const p of ['/', '/index.html', '/' + asset[1], '/assets/default_plan.json']) {
+    const r = await fetch(ORIGIN + p, { headers: { origin: APP_ORIGIN } });
+    assert.equal(r.headers.get('access-control-allow-origin'), null, `${p} に CORS が付いた(モデル置き場だけのはず)`);
+    await r.arrayBuffer();
+  }
+  const pre = async (p, origin) => fetch(ORIGIN + p, { method: 'OPTIONS', headers: { origin, 'access-control-request-method': 'POST', 'access-control-request-headers': 'content-type' } });
+  {
+    const r = await pre('/api/rooms', APP_ORIGIN);
+    assert.equal(r.status, 204, '許した出どころの事前の問い合わせが 204 でない');
+    assert.equal(r.headers.get('access-control-allow-origin'), APP_ORIGIN);
+    assert.match(r.headers.get('access-control-allow-methods') || '', /POST/);
+    assert.match(r.headers.get('access-control-allow-headers') || '', /content-type/);
+    assert.match(r.headers.get('vary') || '', /Origin/);
+    await r.arrayBuffer();
+    const made = await fetch(ORIGIN + '/api/rooms', { method: 'POST', headers: { origin: APP_ORIGIN, 'content-type': 'application/json' }, body: JSON.stringify(PLAN) });
+    assert.equal(made.status, 201, 'アプリの出どころから部屋が作れない');
+    assert.equal(made.headers.get('access-control-allow-origin'), APP_ORIGIN);
+    const madeBody = await made.json();
+    const got = await fetch(ORIGIN + '/api/rooms/' + madeBody.roomId, { headers: { origin: APP_ORIGIN } });
+    assert.equal(got.status, 200);
+    assert.equal(got.headers.get('access-control-allow-origin'), APP_ORIGIN, '部屋の読み込み(Durable Object の応答)に CORS が無い');
+    assert.match(got.headers.get('access-control-expose-headers') || '', /x-room-version/, '部屋の版の見出しがアプリから読めない');
+    assert.equal(got.headers.get('x-content-type-options'), 'nosniff');
+    await got.arrayBuffer();
+  }
+  for (const [p, origin] of [['/api/rooms', 'https://evil.example'], ['/api/ai/chat', 'https://evil.example'], ['/api/mcp', APP_ORIGIN], ['/api/mcp', 'https://claude.ai']]) {
+    const r = await pre(p, origin);
+    assert.equal(r.headers.get('access-control-allow-origin'), null, `${origin} からの ${p} の事前の問い合わせに CORS が付いた`);
+    assert.notEqual(r.status, 204, `${origin} からの ${p} の事前の問い合わせに 204 を返した`);
+    await r.arrayBuffer();
+  }
+  {
+    // 許していない出どころの AI の呼び出しは、今までどおり 403 で、CORS も付かない(AI は呼ばれない)
+    const r = await fetch(ORIGIN + '/api/ai/chat', { method: 'POST', headers: { origin: 'https://evil.example', 'content-type': 'application/json' }, body: '{}' });
+    assert.equal(r.status, 403);
+    assert.equal(r.headers.get('access-control-allow-origin'), null);
+    await r.arrayBuffer();
+  }
 
   // 3. ブラウザ
   browser = await chromium.launch();
