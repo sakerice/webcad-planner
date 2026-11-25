@@ -41,3 +41,11 @@ https://github.com/coopercodes/bmwGLB
 追加確認: Unity公式サポート（2025-07-02更新）は他エンジン利用を認める一方、利用者がrawアセットにアクセス・抽出できる形での配布を禁止と説明している。
 https://support.unity.com/hc/en-us/articles/34387186019988-Can-I-use-assets-from-the-Asset-Store-with-other-engines
 本サイトは assets/models/furniture_mega/glb/*.glb をブラウザから直接読み込む設計。この実装は公式説明との整合に具体的な懸念があるため、公開運用前に提供元またはUnityへWeb配信方法を含めて確認すべき。Draco圧縮やURL難読化だけでライセンス問題が解消するとは扱わない。
+
+## 2026-11-25 追記（方針の変更）
+
+運営者が 2026-11-25 に決めた: Unity Asset Store 由来の家具（Furniture Mega Pack の 445 点と、同じパックから書き出した `assets/models/unity_exported/` の 16 点）は、提供元や Unity へ問い合わせて使い続ける道を取らない。近い形のモデルをオリジナルで作り直して置き換え、作り直すときにこちらの標準の仕様（`tools/blender/README.md` の「カタログのモデルを作るときの約束」）へ整える。
+
+この決定で、上の「公開運用前に提供元またはUnityへWeb配信方法を含めて確認すべき」と「Unityの本サービス用途に関する問い合わせは未送信」は取り下げた。問い合わせは今後も送らない。上の本文は 2026-09-08 時点の調査の記録として残す。
+
+置き換えの段取り（作る順番、保存プランの家具を描き続ける方法、受け入れの検査）はこれから作る。台帳 `docs/legal/model-replacement-ledger.json` の `currentDecision` も同じ内容に改めた。Interior Model 0.26.1（240 点）を同じ置き換えの対象に入れるかは、まだ決めていない。
