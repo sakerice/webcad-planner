@@ -42,8 +42,8 @@ const WHY = {
   lightCeiling: 'この部屋の天井(段差・天井の範囲・天井高の指定・斜線制限など)では、照明の高さを画面でしか決められません',
   ceilingFixtures: 'この部屋には天井に付いた照明や物干しがあり、天井高を変えると器具の高さも動くので、画面で変えてください',
   openingModel: '建具・窓のモデルを指定して置くことは画面でしかできません。door-swing・window などの種類で置いてください',
-  floorFixtures: 'この部屋には天井に付いた照明や物干しがあり、床の高さを変えると器具の高さも動くので、画面で変えてください',
-  floorLowering: '下の階の天井の範囲(折り上げ天井)と重なる部屋の床を下げられる深さは、画面でしか決められません',
+  floorFixtures: 'この部屋は床の高さが整数の mm でないなど、天井に付いた照明や物干しを床と一緒に動かす高さを画面でしか決められないので、画面で変えてください',
+  floorLowering: '下の階の天井の範囲(折り上げ天井)と重なる部屋の床を下げられる深さは、下の階の天井の形(勾配天井・吹き抜け・段差など)によっては画面でしか決められません',
 };
 function refusal(key) { return REFUSAL + '(' + WHY[key] + ')'; }
 function RefusalError(key) { var e = new Error(refusal(key)); e.workerRefusal = true; return e; }
@@ -282,25 +282,151 @@ export function createPlanCtxTools(deps) {
       return roomAtPointOnFloor(p, it.floor, it.x + it.w / 2, it.y + it.d / 2) === room;
     });
   }
-  // 下の階に、この部屋と平面で重なる折り上げ天井の範囲(段差が上向きの天井の範囲)があるか。
-  // 画面の CeilingDesigner.floorLoweringLimit が下げ幅を戻すのは、この範囲があるときだけ。
-  // 範囲は天井の範囲の物(ceiling-area)と、古い形の部屋の ceilingAreas(部屋からの相対位置)。
-  // 範囲を部屋の内側に切り詰めずに見る(重なりを広めにとり、断る側に倒す)。
-  function lowerCeilingRecessUnder(p, room) {
-    var fl = (room.floor || 1) - 1;
-    if (fl < 1) return false;
-    var hits = function (x, y, w, d) {
-      return Math.min(x + w, room.x + room.w) - Math.max(x, room.x) > 0 && Math.min(y + d, room.y + room.d) - Math.max(y, room.y) > 0;
-    };
-    var raised = function (a) { return Number(a && a.offset) > 0; };
-    if ((p.items || []).some(function (it) {
-      return it && it.type === 'ceiling-area' && (it.floor || 1) === fl && raised(it) && hits(Number(it.x), Number(it.y), Number(it.w), Number(it.d));
-    })) return true;
-    return (p.rooms || []).some(function (b) {
-      return b && b.floor === fl && Array.isArray(b.ceilingAreas) && b.ceilingAreas.some(function (a) {
-        return raised(a) && hits(b.x + (Number(a.x) || 0), b.y + (Number(a.y) || 0), Number(a.w) || 0, Number(a.d) || 0);
+  // ── 床の上下(土間・土間をやめる)で、画面の setRoomFloorRaiseMm と同じ値を出す ─────────────
+  // floorBaseY・foundationHeightM(app-constants.js)。
+  function foundationHeightM(p) { return foundationHeightMm(p) * U; }
+  function floorBaseY(p, floor) {
+    var f = (floor || 1), y = foundationHeightM(p), i;
+    if (f >= 1) {
+      for (i = 1; i + 1 <= f; i++) y += storyHeightM(p, i);
+      if (i < f) y += storyHeightM(p, i) * (f - i);
+    } else {
+      for (i = 1; i - 1 >= f; i--) y -= storyHeightM(p, i - 1);
+      if (i > f) y -= storyHeightM(p, i - 1) * (i - f);
+    }
+    return y;
+  }
+  // floorHasSkipLevel(app-constants.js)
+  function floorHasSkipLevel(p, floor) {
+    var rooms = p && p.rooms;
+    if (!rooms) return false;
+    var f = floor || 1;
+    for (var i = 0; i < rooms.length; i++) {
+      var r = rooms[i];
+      if (r && !r.hidden3D && (r.floor || 1) === f && roomSkipLevelMm(p, r) > 0) return true;
+    }
+    return false;
+  }
+  // localSupportTopY(floor, 部屋の矩形)(app-constants.js)を、下の階に既定より高い壁が無いと言い切れるときだけ出す。
+  // 画面は「矩形を跨ぐ高い壁」の天端まで持ち上げる(跨ぐかは壁の芯の長さで測る)。ここでは跨ぐかを測らず、
+  // 下の階に floorBaseY(floor) より高く届く壁が1本でもあれば null(式で同じ値を出せない)にする。段差のある階も
+  // 壁の足元が段差で上がる(wallSkipBaseMm)ので null。どちらも無ければ、画面の答えは floorBaseY(floor) そのもの。
+  // 比べる式(t と base の作り方・1e-9 の余裕)は画面と同じ。
+  function localSupportTopYIfFlat(p, floor) {
+    var f = floor || 1;
+    var base = floorBaseY(p, f);
+    if (f <= 1) return base;
+    var walls = p && p.walls;
+    if (!walls || !walls.length) return base;
+    var below = f - 1;
+    if (floorHasSkipLevel(p, below)) return null;
+    var belowTop = floorBaseY(p, below) + floorSlabHeightMForFloor(p, below);
+    for (var i = 0; i < walls.length; i++) {
+      var w = walls[i];
+      if ((w.floor || 1) !== below) continue;
+      var v = Number(w.wallHeight);
+      if (!isFinite(v) || v <= 0) continue;
+      var t = belowTop + (0 + Math.max(300, Math.min(6000, v))) * U;
+      if (t <= base + 1e-9) continue;
+      return null;
+    }
+    return base;
+  }
+  // roomsOverlapInPlan(app-constants.js)。重なりの帯が細い(60mm 以下)ときは、画面は帯に沿う壁を測って
+  // 重なりから外すことがある(overlapStripHiddenByWall)。そこは測らずに null(分からない)を返す。
+  function roomsOverlapInPlanIfWide(a, b) {
+    var x0 = Math.max(a.x, b.x), x1 = Math.min(a.x + a.w, b.x + b.w);
+    var y0 = Math.max(a.y, b.y), y1 = Math.min(a.y + a.d, b.y + b.d);
+    if (x1 - x0 <= 1 || y1 - y0 <= 1) return false;            // ROOM_OVERLAP_EPS_MM
+    if (Math.min(x1 - x0, y1 - y0) <= 60) return null;         // ROOM_OVERLAP_WALL_TOL_MM
+    return true;
+  }
+  // CeilingDesigner の roomFor と areas(ceiling-designer.js)。部屋の天井の範囲(古い形の ceilingAreas と、
+  // 天井の範囲の物 ceiling-area)を、部屋からの相対位置に直し、部屋の中に切り詰めた物。
+  function ceilingAreaRoomFor(p, it) {
+    return (p.rooms || []).find(function (r) {
+      return r.floor === it.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d;
+    });
+  }
+  function ceilingAreasOf(p, r) {
+    return ((r.ceilingAreas || []).concat((p.items || []).filter(function (it) {
+      return it && it.type === 'ceiling-area' && ceilingAreaRoomFor(p, it) === r;
+    }).map(function (it) { return Object.assign({}, it, { x: it.x - r.x, y: it.y - r.y }); }))).map(function (a) {
+      var x = Math.max(0, Number(a.x) || 0), y = Math.max(0, Number(a.y) || 0);
+      return Object.assign({}, a, { x: x, y: y, w: Math.min(Number(a.w) || 0, r.w - x), d: Math.min(Number(a.d) || 0, r.d - y),
+        offset: Math.max(-800, Math.min(800, Number(a.offset) || 0)) });
+    }).filter(function (a) { return a.w > 0 && a.d > 0 && a.offset; });
+  }
+  // CeilingDesigner の areaBaseY(r, a)(天井の範囲の段差の基準になる天井面、ワールド m)を、式で同じ値を出せる
+  // 部屋だけ出す。画面は roomCeilingProfile(r) が null なら floorBaseY(r.floor)+roomCeilingHeightM(r)。
+  // roomCeilingProfile が null になるのは、勾配天井を宣言しておらず(roomDeclaresSlopedCeiling)、斜線制限の屋根
+  // (setbackRoofsForRoom)が架からないとき。斜線は効く敷地があれば断る側に倒す(setbackActive)。
+  // roomCeilingHeightM は、吹き抜け(roomVoidCeilingMm)・段差(roomCeilingCapM が上の階の壁から決まる)・
+  // 階高を超える天井高の指定(丸めるかが上の階の部屋で決まる)を除けば、階高か天井高の指定(explicitCeilingM)。
+  // 出せないときは null。
+  function areaBaseYIfFlat(p, r) {
+    var c = r.ceiling;
+    if (c && (c.type === 'sloped' || c.type === 'void')) return null;
+    if (setbackActive(p)) return null;
+    if (roomSkipLevelMm(p, r) > 0) return null;
+    var storyM = storyHeightM(p, (r && r.floor) || 1);           // roomCeilingCapM(段差の無い部屋)
+    var h = explicitCeilingM(p, r);
+    if (h !== null && h > storyM) return null;
+    return floorBaseY(p, r.floor) + (h === null ? storyM : h);
+  }
+  // CeilingDesigner.floorLoweringLimit(r)(ceiling-designer.js)。床を下げられる下限(mm)。下の階の折り上げ天井
+  // (段差が上向きの天井の範囲)が平面で重なると、その天井の天端＋20mm まで下限が上がる(土間をやめて ±0 に
+  // 戻すときも、下限が 0 を超えていれば床はそこまでしか下がらない)。
+  // 下の階の部屋の天井の形・上の階を支える壁を式で出せないときは null(画面でしか決められない)。
+  function floorLoweringLimitMm(p, r) {
+    var min = -Math.max(0, floorSlabMmForFloor(p, r.floor) - 20);
+    var unknown = false;
+    (p.rooms || []).filter(function (b) { return b.floor === r.floor - 1; }).forEach(function (b) {
+      ceilingAreasOf(p, b).filter(function (a) { return a.offset > 0; }).forEach(function (a) {
+        if (unknown) return;
+        var rect = { x: b.x + a.x, y: b.y + a.y, w: a.w, d: a.d };
+        var over = roomsOverlapInPlanIfWide(r, rect);
+        if (over === null) { unknown = true; return; }
+        if (!over) return;
+        var base = areaBaseYIfFlat(p, b);
+        var support = localSupportTopYIfFlat(p, r.floor);
+        if (base === null || support === null) { unknown = true; return; }
+        var top = base + a.offset * U;
+        var floor = support + floorSlabHeightMForFloor(p, r.floor);
+        min = Math.max(min, Math.ceil((top + .02 - floor) / U - 1e-6));
       });
     });
+    return unknown ? null : min;
+  }
+  // followRoomCeiling(room, 床の上下を書く) と shiftRoomCeilingFixtures(app-state.js)。
+  // 画面は書く前後の roomCeilingElevationMm(room) の差だけ、天井に付いた器具の elev を動かす。
+  //   roomCeilingElevationMm = round(roomCeilingHeightM(room) − 床厚 − 天井の仕上げ厚) − (roomFloorOffsetMm + roomSkipLevelMm)
+  // 床の上下(floorRaiseMm)だけを書くとき、round(…) の項は変わらない(roomCeilingHeightM から届く関数は
+  // floorRaiseMm・roomFloorOffsetMm・roomFloorTopY を読まない。tools/tests/worker-ctx-sources.test.cjs が呼び出しを
+  // たどって見張る)。だから差は (変える前の roomFloorOffsetMm − 変えた後の roomFloorOffsetMm) で、天井高を
+  // 測らずに出せる。ただし浮動小数で画面と1ビットも違わないと言えるのは、床の上下が整数のときだけ
+  // (整数どうしの足し引きは丸めが起きない)。整数でないとき、部屋の位置・大きさが数でないとき
+  // (天井高の項が数にならないことがある)は null(式で同じ値を出せない)。
+  // 画面は部屋の x が数でない(isFinite でない)と天井高を測れず、器具を動かさない。ここも 0 を返す。
+  function floorRaiseFixtureDelta(p, room, before, after) {
+    if (!isFinite(room.x)) return 0;
+    if (!Number.isInteger(before) || !Number.isInteger(after)) return before === after ? 0 : null;
+    if (![room.x, room.y, room.w, room.d].every(function (v) { return typeof v === 'number' && isFinite(v); })) return null;
+    var skip = roomSkipLevelMm(p, room);
+    return (0 - (after + skip)) - (0 - (before + skip));
+  }
+  function shiftRoomCeilingFixtures(p, room, deltaMm, movedIds) {
+    if (!room || !deltaMm || !p || !p.items) return 0;
+    var n = 0;
+    p.items.forEach(function (it) {
+      if (!it) return;
+      if (!isCeilingFixtureType(it.type)) return;
+      if (roomAtPointOnFloor(p, it.floor, it.x + it.w / 2, it.y + it.d / 2) !== room) return;
+      it.elev = (Number(it.elev) || 0) + deltaMm;
+      n++;
+      if (movedIds) movedIds.push(it.id);
+    });
+    return n;
   }
   // 天井の形を式で出せない部屋か(出せないときは理由の鍵、出せるときは null)。
   // 照明を置いたときの高さ(defaultLightElevationMm → ceilingFinishElevationMm → roomCeilingElevationMm)を
@@ -692,8 +818,10 @@ export function createPlanCtxTools(deps) {
         afterDelete: function (p) { syncExteriorWallSettings(p || cur); },
         // planOpsCtx の hooks.set.floorLevel → setRoomFloorRaiseMm(app-constants.js)。深さは画面と同じ
         // HeightModel.floorLevelRaiseMm(共有の部品)で出し、範囲は updateSelectedRoomFloor と同じに寄せる。
-        // 画面はさらに、下の階の折り上げ天井(CeilingDesigner.floorLoweringLimit。3Dの形から測る)で下げ幅を戻し、
-        // 天井に付いた器具を床の上下ぶん動かす。どちらも式で同じに出せないので、当たる部屋では断る。
+        // 画面はさらに、下の階の折り上げ天井(CeilingDesigner.floorLoweringLimit)で下げ幅を戻し(floorLoweringLimitMm)、
+        // 天井に付いた器具を床の上下ぶん動かす(followRoomCeiling → floorRaiseFixtureDelta)。どちらも、式で画面と
+        // 同じ値を出せない部屋(下の階の天井が勾配・吹き抜け・段差・斜線、上の階を支える壁が高い、床の上下が整数でない
+        // など)では、違う値を書かずに断る。動いた器具の id を返す(画面の hooks と同じ)。
         set: {
           floorLevel: function (room, value, p) {
             var work = p || cur;
@@ -701,11 +829,17 @@ export function createPlanCtxTools(deps) {
             if (mm === null) throw new Error('床の高さ ' + String(value) + ' は使えません');
             var minimum = usesFinishedHeightModel(work) ? -Math.max(0, floorSlabMmForFloor(work, room.floor) - 20) : 0;
             var next = Math.max(minimum, Math.min(600, mm));
-            if (lowerCeilingRecessUnder(work, room)) throw RefusalError('floorLowering');
+            var limit = floorLoweringLimitMm(work, room);
+            if (limit === null) throw RefusalError('floorLowering');
+            next = Math.max(next, limit);
             var before = roomFloorOffsetMm(work, room);
-            if (next !== before && roomHasCeilingFixtures(work, room)) throw RefusalError('floorFixtures');
+            var after = roomFloorOffsetMm(work, { floor: room.floor, floorRaiseMm: next });
+            var delta = floorRaiseFixtureDelta(work, room, before, after);
+            if (delta === null && roomHasCeilingFixtures(work, room)) throw RefusalError('floorFixtures');
             room.floorRaiseMm = next;
-            return [];
+            var ids = [];
+            if (delta) shiftRoomCeilingFixtures(work, room, delta, ids);
+            return ids;
           }
         }
       },

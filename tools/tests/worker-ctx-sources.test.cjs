@@ -90,8 +90,18 @@ const FUNCTIONS = [
   ['defaultLightElevationMm', 'defaultLightElevationMm(下限 LIGHT_MIN_ELEV_MM=1800)'],
   ['siteSetbackConfig', 'siteSetbackActive'],
   ['activeSetbackSites', 'setbackActive'],
-  ['shiftRoomCeilingFixtures', 'hooks.ceilingElevation(天井に付いた器具の判定)'],
+  ['shiftRoomCeilingFixtures', 'hooks.ceilingElevation(天井に付いた器具の判定)・shiftRoomCeilingFixtures(床の上下で器具を動かす)'],
   ['setRoomFloorRaiseMm', 'hooks.set.floorLevel(床の上下の範囲と、断る条件)'],
+  // 床の上下(土間・土間をやめる)で、天井に付いた器具を動かす量と、下の階の折り上げ天井で決まる下限
+  ['followRoomCeiling', 'floorRaiseFixtureDelta(前後の天井高の差)'],
+  ['foundationHeightM', 'foundationHeightM'],
+  ['floorBaseY', 'floorBaseY'],
+  ['floorHasSkipLevel', 'floorHasSkipLevel'],
+  ['localSupportTopY', 'localSupportTopYIfFlat(高い壁が無いときだけ)'],
+  ['roomsOverlapInPlan', 'roomsOverlapInPlanIfWide(帯が細いときは分からないとする)'],
+  ['roomCeilingCapM', 'areaBaseYIfFlat(段差の無い部屋は階高)'],
+  ['roomCeilingProfile', 'areaBaseYIfFlat(勾配を宣言せず斜線も無い部屋は null)'],
+  ['roomDeclaresSlopedCeiling', 'areaBaseYIfFlat'],
   // 置いた物の高さ(台の上)・柱の段差・屋内の印
   ['isInsideItem', 'insideItem'],
   ['findDefaultPlacementSurface', 'surfaceProblem'],
@@ -115,6 +125,14 @@ const FUNCTIONS = [
   // 階段の吸着
   ['stairPartEdgesRaw', 'stairPartEdgesMm'],
   ['stairPartEdgesMm', 'stairPartEdgesMm'],
+];
+// 画面の関数のうち、ceiling-designer.js(CeilingDesigner の中。app-source.cjs のつなぎには入っていない)に在る物。
+const CEILING_DESIGNER = 'assets/js/ceiling-designer.js';
+const DESIGNER_FUNCTIONS = [
+  ['floorLoweringLimit', 'floorLoweringLimitMm'],
+  ['areas', 'ceilingAreasOf'],
+  ['roomFor', 'ceilingAreaRoomFor'],
+  ['areaBaseY', 'areaBaseYIfFlat'],
 ];
 const CONSTANTS = [
   ['U', 'U'],
@@ -153,9 +171,31 @@ function topLevelDecl(name, src) {
 }
 
 const sha = (text) => crypto.createHash('sha256').update(text, 'utf8').digest('hex');
+// ファイルの行頭の function NAME(…){…} を切り出す(topLevelFunction と同じ読み飛ばし)。
+function fileFunction(file, name) {
+  const src = fs.readFileSync(path.join(__dirname, '..', '..', file), 'utf8');
+  const at = src.indexOf('\nfunction ' + name + '(');
+  if (at < 0) throw new Error('function ' + name + ' が ' + file + ' に無い');
+  const start = at + 1;
+  let depth = 0, mode = null;
+  for (let i = src.indexOf('{', start); i < src.length; i++) {
+    const c = src[i], n = src[i + 1];
+    if (mode === 'line') { if (c === '\n') mode = null; continue; }
+    if (mode === 'block') { if (c === '*' && n === '/') { mode = null; i++; } continue; }
+    if (mode) { if (c === '\\') { i++; continue; } if (c === mode) mode = null; continue; }
+    if (c === '/' && n === '/') { mode = 'line'; i++; continue; }
+    if (c === '/' && n === '*') { mode = 'block'; i++; continue; }
+    if (c === '"' || c === "'" || c === '`') { mode = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) return src.slice(start, i + 1); }
+  }
+  throw new Error(name + ' の本体が閉じていない');
+}
+
 function current() {
   const out = { functions: {}, constants: {} };
   for (const [name] of FUNCTIONS) out.functions[name] = sha(topLevelFunction(name));
+  for (const [name] of DESIGNER_FUNCTIONS) out.functions['CeilingDesigner.' + name] = sha(fileFunction(CEILING_DESIGNER, name));
   for (const [name] of CONSTANTS) out.constants[name] = sha(topLevelDecl(name));
   return out;
 }
@@ -165,9 +205,9 @@ if (process.argv.includes('--write')) {
     _note: 'worker/plan-ctx-factory.mjs が書き写した画面の関数・定数の本文の SHA-256。tools/tests/worker-ctx-sources.test.cjs が比べる。作り直し: ' + WRITE,
   }, current());
   fs.writeFileSync(RECORD, JSON.stringify(body, null, 2) + '\n');
-  console.log('書いた: ' + path.relative(process.cwd(), RECORD) + '(関数 ' + FUNCTIONS.length + '・定数 ' + CONSTANTS.length + ')');
+  console.log('書いた: ' + path.relative(process.cwd(), RECORD) + '(関数 ' + (FUNCTIONS.length + DESIGNER_FUNCTIONS.length) + '・定数 ' + CONSTANTS.length + ')');
 } else {
-  const where = new Map(FUNCTIONS.concat(CONSTANTS));
+  const where = new Map(FUNCTIONS.concat(CONSTANTS, DESIGNER_FUNCTIONS.map(([n, w]) => ['CeilingDesigner.' + n, w])));
   const advice = (name) => '画面の ' + name + ' が変わりました。worker/plan-ctx-factory.mjs の対応する式(' + where.get(name)
     + ')を見直し、画面テスト worker-ctx-parity を走らせて通してから、' + WRITE + ' で記録を更新してください';
 
@@ -193,9 +233,49 @@ if (process.argv.includes('--write')) {
     assert.equal(decl, "var X = {a: 'x;y', b: [1, 2], c: function(){ return 1; }};");
   });
 
+  // Worker は床の上下を変えたときに動かす器具の量を、天井高を測らずに「床の上下の差」で出している
+  // (plan-ctx-factory.mjs の floorRaiseFixtureDelta)。それが画面と同じになる前提は、画面の roomCeilingHeightM
+  // (天井高の項)から届く関数が、部屋の床の上下(floorRaiseMm・roomFloorOffsetMm・roomFloorTopY)を読まないこと。
+  // 本文の見張り(上)は書き写した関数しか見ないので、届く関数をすべて名前でたどって確かめる。
+  // 落ちたら: 天井高が床の上下で変わるようになった。その種類の部屋では Worker の floorRaiseFixtureDelta で断る。
+  test('画面の天井高の計算から届く関数は、部屋の床の上下を読まない', () => {
+    const root = path.join(__dirname, '..', '..');
+    const files = ['index.html'].concat(fs.readdirSync(path.join(root, 'assets', 'js')).filter((f) => f.endsWith('.js')).map((f) => 'assets/js/' + f));
+    const bodies = {};
+    for (const f of files) {
+      const src = fs.readFileSync(path.join(root, f), 'utf8');
+      const re = /^function ([A-Za-z0-9_$]+)\s*\(/mg;
+      const starts = [];
+      let m;
+      while ((m = re.exec(src))) starts.push([m[1], m.index]);
+      starts.forEach(([n, i], k) => {
+        const body = src.slice(i, k + 1 < starts.length ? starts[k + 1][1] : src.length).replace(/\/\/[^\n]*/g, '');
+        (bodies[n] = bodies[n] || []).push(body);
+      });
+    }
+    const names = Object.keys(bodies);
+    const calls = (body) => names.filter((c) => body.indexOf(c + '(') >= 0 && new RegExp('\\b' + c.replace(/\$/g, '\\$') + '\\s*\\(').test(body));
+    const roots = ['roomCeilingHeightM', 'floorSlabHeightMForFloor', 'ceilingFinishThicknessM', 'roomSkipLevelMm'];
+    const seen = new Set(), from = {}, queue = roots.slice();
+    while (queue.length) {
+      const n = queue.shift();
+      if (seen.has(n) || !bodies[n]) continue;
+      seen.add(n);
+      bodies[n].forEach((b) => calls(b).forEach((c) => { if (!seen.has(c)) { if (!from[c]) from[c] = n; queue.push(c); } }));
+    }
+    assert.ok(seen.size > 50 && seen.has('roomRoofCeilingExtent') && seen.has('setbackRoofsOverRoom') && seen.has('roomVoidCeilingMm'), '呼び出しをたどれていない: ' + seen.size);
+    const READ = /\bfloorRaiseMm\b|\broomFloorOffsetMm\b|\broomFloorTopY\b/;
+    const reads = [...seen].filter((n) => bodies[n].some((b) => READ.test(b))).map((n) => {
+      const chain = [];
+      for (let x = n; x; x = from[x]) chain.unshift(x);
+      return chain.join(' → ');
+    });
+    assert.deepEqual(reads, [], '天井高の計算が床の上下を読むようになった:\n' + reads.join('\n'));
+  });
+
   test('plan-ctx-factory.mjs に、書き写し元の関数名が注釈で書いてある', () => {
     const src = fs.readFileSync(path.join(__dirname, '..', '..', 'worker', 'plan-ctx-factory.mjs'), 'utf8');
-    const missing = FUNCTIONS.concat(CONSTANTS).map(([name]) => name).filter((name) => !new RegExp('\\b' + name + '\\b').test(src));
+    const missing = FUNCTIONS.concat(CONSTANTS, DESIGNER_FUNCTIONS).map(([name]) => name).filter((name) => !new RegExp('\\b' + name + '\\b').test(src));
     assert.deepEqual(missing, [], '注釈に無い: ' + missing.join(', '));
   });
 }

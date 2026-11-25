@@ -1102,7 +1102,15 @@
   }
 
   function mergeExtra(made, extra) {
-    if (extra && typeof extra === 'object') Object.keys(extra).forEach(function (k) { made[k] = extra[k]; });
+    if (!extra || typeof extra !== 'object') return;
+    Object.keys(extra).forEach(function (k) {
+      made[k] = extra[k];
+      // 階段の手すり「なし」・形「ひな壇」は、設定パネル・AI の set と同じ保存の形(欄ごと消す)にする。
+      // 整え方は plan-core/operations.js の tidyStairProp の1か所に置き、applyProp と同じものを通す。
+      if ((k === 'stairRail' || k === 'stairStyle') && typeof PlanCoreOperations !== 'undefined' && PlanCoreOperations.tidyStairProp) {
+        PlanCoreOperations.tidyStairProp(made, k);
+      }
+    });
   }
 
   // その間取りに出てくる階。

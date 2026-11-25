@@ -88,7 +88,8 @@ function targetsFor(part, def) {
     if (def.key === 'void') return [{ coll: 'rooms', pick: 'void-ok-room' }];
     // 土間の深さは高さモデルで決まる。古い高さモデル(土台。土間は ±0)と、仕上げ基準の高さモデル(土台に
     // modelVersion 2 と階ごとの床厚を足した写し。土間は床厚の中まで下がる)の両方で、1階と2階の部屋に当てる。
-    if (def.key === 'floorLevel') return [{ coll: 'rooms', pick: 'floor1-room' }, { coll: 'rooms', pick: 'floor1-room', v2: true }, { coll: 'rooms', pick: 'floor2-room', v2: true }];
+    // 天井に付いた器具のある部屋(fixture-room)では、床を動かすと器具も一緒に動く(パネルと AI で同じに動くこと)。
+    if (def.key === 'floorLevel') return [{ coll: 'rooms', pick: 'floor1-room' }, { coll: 'rooms', pick: 'floor1-room', v2: true }, { coll: 'rooms', pick: 'floor2-room', v2: true }, { coll: 'rooms', pick: 'fixture-room', v2: true }];
     return [{ coll: 'rooms', pick: 'legacy-floor-room' }];
   }
   const kinds = def.for || null;
@@ -113,7 +114,8 @@ for (const part of Object.keys(PlanSettable.SETTINGS)) {
     const label = part + '.' + def.key;
     if (SKIP[label]) { skipped.push({ label, why: SKIP[label], def }); continue; }
     let values;
-    if (def.choices) values = def.choices.map((c) => c[0]);
+    // 編集だけの選択肢(土間をやめる normal。読み取りには出さない)も、パネルと AI で比べる。
+    if (def.choices) values = def.choices.concat(def.editChoices || []).map((c) => c[0]);
     else if (def.num) {
       assert.ok(Object.prototype.hasOwnProperty.call(NUM_VALUES, def.key), label + ' に入れる値を NUM_VALUES に足すこと');
       values = [NUM_VALUES[def.key]];
@@ -205,7 +207,19 @@ try {
     p.floors = Object.assign({}, p.floors || {}, { 2: { floorThickness: 260 } });
     return JSON.stringify(p);
   })();
-  const DOMA_MM = { 'floor1-room': -200, 'floor2-room': -240 };
+  const DOMA_MM = { 'floor1-room': -200, 'floor2-room': -240, 'fixture-room': -200 };
+  // 土間をやめる(normal)は、土間にした部屋から始める。土台の写しで、対象の部屋を設定パネルと同じ書き込み
+  // (setRoomFloorRaiseMm に土間の深さ。天井に付いた器具も一緒に動く)で土間にしておく。
+  const domaBase = (json, id) => page.evaluate(({ json, id }) => {
+    DATA = JSON.parse(json);
+    normalizeLoadedPlan({ resetHeights: false, restoreView: false });
+    const r = DATA.rooms.find((x) => String(x.id) === String(id));
+    setRoomFloorRaiseMm(r, domaFloorRaiseMm(r.floor));
+    return JSON.stringify(DATA, (k, v) => (k.charAt(0) === '_' ? undefined : v));
+  }, { json, id });
+  // 天井に付いた器具(照明・天井扇・物干し)が中にある1階の部屋
+  const fixtureIn = (plan, r) => plan.items.some((it) => (/^light-(ceiling|down|spot)$/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail')
+    && (it.floor || 1) === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d);
 
   // 区画の名前が setProps で書けないこと(書けるようになったら SKIP を外して比べる)
   const zoneProbe = await page.evaluate(() => {
@@ -216,9 +230,10 @@ try {
   assert.ok(zoneProbe, '区画の名前が setProps で書けるようになった。SKIP から外して比べること');
 
   for (const c of cases) {
-    const baseJson = c.target.v2 ? baseV2 : base.json;
+    let baseJson = c.target.v2 ? baseV2 : base.json;
     // 対象の物を土台から選ぶ(土台は毎回同じなので、2回とも同じ物になる)
-    const pickId = await page.evaluate(({ baseJson, target, legacyIds }) => {
+    const pickId = await page.evaluate(({ baseJson, target, legacyIds, fixtureSrc }) => {
+      const fixtureIn = new Function('return ' + fixtureSrc)();
       const plan = JSON.parse(baseJson);
       const list = plan[target.coll];
       let o = null;
@@ -227,12 +242,13 @@ try {
       else if (target.pick === 'image-floor-room') o = list.find((r) => legacyIds.image.indexOf(r.id) >= 0);
       else if (target.pick === 'floor1-room') o = list.find((r) => (r.floor || 1) === 1 && legacyIds.wood.indexOf(r.id) >= 0);
       else if (target.pick === 'floor2-room') o = list.find((r) => r.floor === 2 && legacyIds.wood.indexOf(r.id) >= 0);
+      else if (target.pick === 'fixture-room') o = list.find((r) => (r.floor || 1) === 1 && fixtureIn(plan, r));
       else if (target.pick === 'void-ok-room') {
         DATA = plan; o = list.find((r) => !r.ceiling && !roomVoidBlockReason(r)) || null;
       } else if (target.pick.indexOf('type:') === 0) o = list.find((it) => it.type === target.pick.slice(5));
       return o ? o.id : null;
     }, {
-      baseJson, target: c.target,
+      baseJson, target: c.target, fixtureSrc: fixtureIn.toString(),
       legacyIds: {
         wood: legacyRoomsBefore.filter((r) => r.texture === 'wood_floor').map((r) => r.id),
         image: legacyRoomsBefore.filter((r) => r.texture && !/^(wood_floor|tile_floor)$/.test(r.texture)).map((r) => r.id),
@@ -240,6 +256,7 @@ try {
     });
     const name = `${c.label}=${c.value} (${c.target.pick}${c.target.v2 ? ' 仕上げ基準の高さ' : ''}${pickId !== null ? ' id ' + pickId : ''})`;
     if (pickId === null) { failures.push(`${name}: 土台に対象の物が無い`); continue; }
+    if (c.key === 'floorLevel' && c.value === 'normal') baseJson = await domaBase(baseJson, pickId);
 
     const reset = () => page.evaluate(({ json, id }) => {
       DATA = JSON.parse(json);
@@ -297,7 +314,8 @@ try {
       if (!hits.length) return { error: 'パネルに入口 ' + needle + ' が無い' };
       // 選択欄を先に探し、選択肢に値があるものを使う。無ければ入力欄。
       let el = null, set = null;
-      const wantText = key === 'floorLevel' ? /玄関土間/ : null;
+      // 床の高さはプリセットの選択欄で選ぶ(土間 → 「玄関土間」、土間をやめる → 「床の構造面 ±0mm」)。
+      const wantText = key === 'floorLevel' ? (value === 'normal' ? /床の構造面 ±0mm/ : /玄関土間/) : null;
       const want = key === 'void' ? 'void' : String(value);
       for (const e of hits) {
         if (e.tagName === 'SELECT') {
@@ -361,10 +379,12 @@ try {
     }
     if (c.key === 'floorLevel') {
       // 描画が読む床の上下(roomFloorOffsetMm)が、土間の深さになっていること(欄に入っただけでなく、床が下がる)。
-      const want = c.target.v2 ? DOMA_MM[c.target.pick] : 0;
-      if (A.render !== want) problems.push(`パネルの土間で床の上下が ${want} にならない(${A.render})`);
-      if (B.render !== want) problems.push(`AI の土間で床の上下が ${want} にならない(${B.render})`);
-      if (c.target.v2 && before.render === B.render) problems.push('AI で土間にしても床の高さが変わらない');
+      const want = c.value === 'normal' ? 0 : c.target.v2 ? DOMA_MM[c.target.pick] : 0;
+      if (A.render !== want) problems.push(`パネルの${c.value}で床の上下が ${want} にならない(${A.render})`);
+      if (B.render !== want) problems.push(`AI の${c.value}で床の上下が ${want} にならない(${B.render})`);
+      if (c.target.v2 && before.render === B.render) problems.push(`AI で ${c.value} にしても床の高さが変わらない`);
+      // 器具のある部屋では、器具が床と一緒に動いている(変わり方が同じことは上で見ている。ここは動いたこと)
+      if (c.target.pick === 'fixture-room' && !aiDelta.some((d) => / elev: /.test(d))) problems.push('床を動かしても天井に付いた器具が動かない: ' + JSON.stringify(aiDelta));
     }
     if (c.key === 'floorMaterial') {
       // 選んだ床材が描画に届いていること(欄に入っただけでなく、画面の床が変わる)
@@ -378,6 +398,51 @@ try {
     }
     if (problems.length) failures.push(`${name}: ${problems.join('\n    ')}`);
     else console.log(`ok  ${name}`);
+  }
+  // AI で土間にした部屋を、AI の normal で戻す(2026-11-25 まで戻せなかった)。描画が読む床の上下(roomFloorOffsetMm)が 0 に戻り、
+  // 天井に付いた器具の高さ(elev)も土間にする前の値に戻ること。欄の値ではなく描画が読む値で見る。
+  {
+    const plan = JSON.parse(baseV2);
+    const room = plan.rooms.find((r) => (r.floor || 1) === 1 && fixtureIn(plan, r));
+    const ask = (set) => page.evaluate(async ({ steps }) => {
+      window.__chat.queue.push(...steps);
+      const calls0 = window.__chat.calls;
+      ChatUI.send('床の高さを変えて');
+      const t0 = Date.now();
+      while ((window.__chat.calls < calls0 + 2 || ChatUI.state().busy) && Date.now() - t0 < 15000) await new Promise((r) => setTimeout(r, 30));
+      const last = window.__chat.lastBody && window.__chat.lastBody.messages;
+      const m = last && last[last.length - 1];
+      const tr = m && Array.isArray(m.content) && m.content.find((b) => b.type === 'tool_result');
+      return { busy: ChatUI.state().busy, isError: !!(tr && tr.is_error), text: tr ? String(tr.content).slice(0, 200) : null };
+    }, { steps: [
+      sseFor([{ type: 'tool_use', id: 'tu-' + set.floorLevel, name: 'setProps', input: { id: room.id, set } }], { stop: 'tool_use' }),
+      sseFor([{ type: 'text', text: '変えました。' }], { stop: 'end_turn' }),
+    ] });
+    const look = () => page.evaluate((id) => {
+      const r = DATA.rooms.find((x) => String(x.id) === String(id));
+      const fx = DATA.items.filter((it) => (/^light-(ceiling|down|spot)$/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail')
+        && roomAtPointOnFloor(it.floor, it.x + it.w / 2, it.y + it.d / 2) === r).map((it) => [it.id, it.elev]);
+      return { offset: roomFloorOffsetMm(r), fixtures: fx };
+    }, room.id);
+    await page.evaluate(({ json, id }) => {
+      DATA = JSON.parse(json); nextId = id; _defaultPlanPending = false;
+      normalizeLoadedPlan({ resetHeights: false, restoreView: false }); clearEditHistory(); ST.selected = null;
+    }, { json: baseV2, id: base.nextId });
+    const s0 = await look();
+    const r1 = await ask({ floorLevel: 'doma' });
+    const s1 = await look();
+    const r2 = await ask({ floorLevel: 'normal' });
+    const s2 = await look();
+    const name = `AI で土間 → AI で normal(器具のある部屋 id ${room.id}、器具 ${s0.fixtures.length})`;
+    const p = [];
+    if (!s0.fixtures.length) p.push('器具のある部屋を選べていない');
+    if (r1.busy || r1.isError || r2.busy || r2.isError) p.push('AI の道具が失敗した: ' + JSON.stringify([r1, r2]));
+    if (s1.offset !== DOMA_MM['fixture-room']) p.push(`土間で床の上下が ${DOMA_MM['fixture-room']} にならない(${s1.offset})`);
+    if (JSON.stringify(s1.fixtures) === JSON.stringify(s0.fixtures)) p.push('土間にしても器具が動かない');
+    if (s2.offset !== 0) p.push(`normal で床の上下が 0 に戻らない(${s2.offset})`);
+    if (JSON.stringify(s2.fixtures) !== JSON.stringify(s0.fixtures)) p.push(`normal で器具の高さが戻らない: 前 ${JSON.stringify(s0.fixtures)} / 土間 ${JSON.stringify(s1.fixtures)} / 戻し ${JSON.stringify(s2.fixtures)}`);
+    if (p.length) failures.push(`${name}: ${p.join('\n    ')}`);
+    else console.log(`ok  ${name} 床 ${s0.offset}→${s1.offset}→${s2.offset} 器具 ${JSON.stringify(s0.fixtures)}→${JSON.stringify(s1.fixtures)}`);
   }
   if (errors.length) failures.push('ページで例外: ' + errors.slice(0, 5).join(' / '));
 } finally {

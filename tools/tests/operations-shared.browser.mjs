@@ -194,7 +194,71 @@ const cases = {
     const elevB = await r.b.evaluate((id) => Number(DATA.items.find((i) => String(i.id) === id).elev) || 0, pa.light);
     assert.equal(elevB, got.elevAfter, '相手の器具の高さが、天井を上げたあとの高さになっていない');
   },
+  // 床の高さ・段差も天井までの高さを変えるので、天井付けの器具が動く(followRoomCeiling)。設定パネルの
+  // この3つの操作は updateSelectedProp(applyOperations の包み)を通らず、自分で書き換えるので、
+  // 動いた器具に印が付くかを別に確かめる。
+  async '設定パネルで部屋の床の高さを変えると、その部屋の天井付けの器具の高さも相手に届く'(r) {
+    // 検査用プランの部屋は既に床上げ 150mm なので、別の値にする。
+    await roomFixtureCase(r, '床の高さ', { ceiling: true }, () => { updateSelectedRoomFloor('300'); });
+  },
+  async '床の高さのプリセット(玄関土間)を選ぶと、その部屋の天井付けの器具の高さも相手に届く'(r) {
+    // 「仕上げ床」の選択肢は、選んだ option の値で updateSelectedRoomFloor を呼ぶ。画面の選択肢から値を取る。
+    // (床材の欄 updateSelectedRoomFloorMaterial も名前の頭が同じなので、括弧まで含めて見分ける)
+    await roomFixtureCase(r, '床のプリセット', { ceiling: true }, () => {
+      updateProps();
+      const sel = Array.from(document.querySelectorAll('select')).find((s) => /updateSelectedRoomFloor\(/.test(s.getAttribute('onchange') || ''));
+      const opt = sel && Array.from(sel.options).find((o) => /玄関土間/.test(o.textContent));
+      if (!opt) throw new Error('床の高さのプリセットの欄が無い');
+      sel.value = opt.value; sel.dispatchEvent(new Event('change'));
+    });
+  },
+  async '設定パネルでスキップフロアの段差を変えると、その部屋の天井付けの器具の高さも相手に届く'(r) {
+    // 天井高を明示した部屋は天井も一緒に上がって器具が動かないので、天井高を明示しない部屋で確かめる。
+    await roomFixtureCase(r, '段差', { ceiling: false }, () => { updateSelectedRoomSkipLevel('400'); });
+  },
 };
+
+// 部屋を選んで op(画面の関数)で床の高さを変え、選んでいない天井付けの器具(吊り下げの照明)の高さと、
+// 部屋の床の高さ(roomFloorOffsetMm)が相手に届くことを確かめる。準備は天井を上げる検査と同じ
+// (吊り下げを使う理由もそちらの説明のとおり)。opt.ceiling が true なら天井高を 2100mm に明示する。
+async function roomFixtureCase(r, name, opt, op) {
+  const prep = (opt) => {
+    const room = DATA.rooms.find((x) => (x.floor || 1) === 1 && !x.ceiling && x.w >= 2000 && x.d >= 2000
+      && !roomSkipLevelMm(x) && roomCeilingElevationMm(x) !== null
+      && roomAtPointOnFloor(1, x.x + x.w / 2, x.y + x.d / 2) === x);
+    if (!room) return null;
+    if (opt.ceiling) followRoomCeiling(room, () => { room.ceiling = { type: 'flat', heightMm: 2100 }; });
+    const L = mkItem('light-ceiling', room.x + room.w / 2 - 200, room.y + room.d / 2 - 200, 0, 1);
+    L.id = 990002;
+    DATA.items.push(L);
+    L.elev = ceilingAttachElevationMm(L) - 500;
+    SHARED.baseline = sharedBaselineFrom(DATA); sharedResetDirtyTracking(); clearDirty(); clearEditHistory();
+    return { light: String(L.id), room: String(room.id), elev: L.elev };
+  };
+  const pa = await r.a.evaluate(prep, opt), pb = await r.b.evaluate(prep, opt);
+  assert.ok(pa, `${name}: 天井付けの器具を置ける部屋が見つからない`);
+  assert.deepEqual(pb, pa, `${name}: 2人の準備が食い違った`);
+  const got = await r.a.evaluate(({ p, src }) => {
+    const room = DATA.rooms.find((x) => String(x.id) === p.room);
+    const L = DATA.items.find((x) => String(x.id) === p.light);
+    const floorBefore = roomFloorOffsetMm(room) + roomSkipLevelMm(room), elevBefore = Number(L.elev) || 0;
+    ST.selected = room;
+    (0, eval)('(' + src + ')')();
+    return { elevBefore, elevAfter: Number(L.elev) || 0, floorBefore,
+      floorAfter: roomFloorOffsetMm(room) + roomSkipLevelMm(room), offset: roomFloorOffsetMm(room), skip: roomSkipLevelMm(room) };
+  }, { p: pa, src: op.toString() });
+  assert.notEqual(got.floorAfter, got.floorBefore, `${name}: 床の高さが変わらなかった`);
+  assert.notEqual(got.elevAfter, got.elevBefore, `${name}: 手元で器具が動いていない(この操作では天井までの高さが変わらない)`);
+  await settleAndCompare(r, name);
+  const b = await r.b.evaluate((p) => {
+    const room = DATA.rooms.find((x) => String(x.id) === p.room);
+    return { elev: Number(DATA.items.find((i) => String(i.id) === p.light).elev) || 0,
+      offset: roomFloorOffsetMm(room), skip: roomSkipLevelMm(room) };
+  }, pa);
+  assert.equal(b.offset, got.offset, `${name}: 相手の部屋の床の高さが届いていない`);
+  assert.equal(b.skip, got.skip, `${name}: 相手の部屋の段差が届いていない`);
+  assert.equal(b.elev, got.elevAfter, `${name}: 相手の器具の高さが、床を変えたあとの高さになっていない`);
+}
 
 const browser = await chromium.launch();
 let failed = 0;
