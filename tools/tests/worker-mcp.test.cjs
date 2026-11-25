@@ -95,6 +95,35 @@ async function createPlan(ctx, headers = {}) {
   return { url: m[1], id: m[2], result };
 }
 
+// 道具ごとの注釈（MCP の ToolAnnotations）。根拠は worker/mcp.mjs の OP_HINTS の前の注記。
+// 書き換える・消す道具は destructive、同じ引数で呼び直してもプランが変わらない道具は idempotent。openWorld はすべて false。
+const hint = (readOnlyHint, destructiveHint, idempotentHint) => ({ readOnlyHint, destructiveHint, idempotentHint, openWorldHint: false });
+const EXPECTED_ANNOTATIONS = {
+  open_plan: hint(true, false, true), get_plan: hint(true, false, true), inspect_plan: hint(true, false, true),
+  create_plan: hint(false, false, false),
+  addRoom: hint(false, false, false), addWall: hint(false, false, false), placeItem: hint(false, false, false),
+  addRoomWalls: hint(false, false, true), placeOpening: hint(false, false, true), addRoof: hint(false, false, true),
+  resizeRoom: hint(false, true, true), renameRoom: hint(false, true, true), setProps: hint(false, true, true),
+  moveObject: hint(false, true, false), rotateObject: hint(false, true, false),
+  removeWall: hint(false, true, true), deleteObjects: hint(false, true, true),
+};
+
+test('操作の定義にある道具は、どれも題（OP_TITLES）と注釈（OP_HINTS）を持つ', async () => {
+  const { OP_TITLES, OP_HINTS } = await mod('worker/mcp.mjs');
+  const Catalog = require(join(ROOT, 'assets', 'js', 'plan-core', 'operations-catalog.js'));
+  const deps = { settable: require(join(ROOT, 'assets', 'js', 'plan-settable.js')), knowledge: require(join(ROOT, 'assets', 'js', 'object-knowledge.js')) };
+  const names = Catalog.toMcpTools(deps).map((op) => op.name);
+  assert.ok(names.length > 0);
+  for (const name of names) {
+    assert.ok(typeof OP_TITLES[name] === 'string' && OP_TITLES[name].length > 0, name + ' の題が worker/mcp.mjs の OP_TITLES に無い');
+    assert.ok(OP_HINTS[name], name + ' の注釈が worker/mcp.mjs の OP_HINTS に無い');
+    assert.ok(EXPECTED_ANNOTATIONS[name], name + ' の注釈の期待値がこのテストの EXPECTED_ANNOTATIONS に無い');
+  }
+  // 使われない書き残しも置かない
+  assert.deepEqual(Object.keys(OP_TITLES).sort(), names.slice().sort());
+  assert.deepEqual(Object.keys(OP_HINTS).sort(), names.slice().sort());
+});
+
 test('古い版の話し方: initialize → initialized(202) → tools/list → tools/call、ping', async () => {
   const ctx = await setup();
   // 版の折り合い: 知っている版はそのまま、知らない版は自分の古い版の最新
@@ -127,11 +156,10 @@ test('古い版の話し方: initialize → initialized(202) → tools/list → 
     assert.equal(t.inputSchema.type, 'object', t.name);
     assert.equal(t.inputSchema.$schema, undefined, t.name);
     assert.ok(t.description.length > 20, t.name);
-    assert.deepEqual(Object.keys(t.annotations).sort(), ['destructiveHint', 'openWorldHint', 'readOnlyHint'], t.name);
-    assert.equal(t.annotations.openWorldHint, false, t.name);
-    const readOnly = ['open_plan', 'get_plan', 'inspect_plan'].includes(t.name);
-    assert.equal(t.annotations.readOnlyHint, readOnly, t.name);
-    assert.equal(t.annotations.destructiveHint, ['deleteObjects', 'removeWall'].includes(t.name), t.name);
+    // 題は道具名のままにしない（Anthropic のディレクトリは全道具に title を求める）
+    assert.ok(typeof t.title === 'string' && t.title.length > 0 && t.title !== t.name, t.name);
+    assert.deepEqual(Object.keys(t.annotations).sort(), ['destructiveHint', 'idempotentHint', 'openWorldHint', 'readOnlyHint'], t.name);
+    assert.deepEqual(t.annotations, EXPECTED_ANNOTATIONS[t.name], t.name);
     if (t.name === 'create_plan') {
       assert.deepEqual(t.inputSchema.properties, {});
     } else {

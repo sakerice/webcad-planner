@@ -128,12 +128,44 @@ const PLAN_PROP = Object.freeze({
   description: "対象のプラン。create_plan が返した URL か id、または利用者が渡した house-planner の共有の URL（…#room=… の形）をそのまま渡す",
 });
 
-const OP_TITLES = {
+// 道具の題（画面に出る名前）。operations-catalog.js に道具を足したら、ここにも足す（無いと tools/list の検査で落ちる）。
+export const OP_TITLES = Object.freeze({
   addRoom: "部屋を足す", resizeRoom: "部屋の大きさを変える", renameRoom: "部屋の名前を変える",
   addWall: "壁を足す", removeWall: "壁を消す", placeItem: "物を置く", moveObject: "動かす",
   rotateObject: "向きを変える", deleteObjects: "消す", setProps: "設定を変える",
-};
-const DESTRUCTIVE = new Set(["deleteObjects", "removeWall"]);
+  addRoomWalls: "部屋のまわりに壁を作る", placeOpening: "壁に窓・扉を付ける", addRoof: "屋根をかける",
+});
+
+// 道具の注釈（MCP の ToolAnnotations）。各社の定義に合わせる。
+// - destructiveHint: 既にある値を書き換える・消す道具は true（OpenAI は「deletion, overwriting」に true、元に戻せることは
+//   false の理由にならないと書く。Anthropic は「modify or delete data」に true）。足すだけの道具は false（MCP の「additive」）。
+// - idempotentHint: 同じ引数でもう一度呼んでもプランが変わらない道具は true。足す道具は同じ物が2つできるので false。
+//   ただし addRoomWalls（既にある壁の区間は作らない）・placeOpening（同じ位置の開口は断る）・addRoof（同じ範囲の屋根は断る）は true。
+//   moveObject（dx,dy）・rotateObject（by）は今の値に足す使い方があるので false。
+// - openWorldHint: すべて false。触るのは引数 plan で指した共有プランだけで、外のサイトへ送ったり公開の場に出したりしない。
+// 新しい道具は、ここに書くまで既定で「書き換える・やり直すと重なる」（destructive true・idempotent false）として申告する
+// （書き忘れは tools/tests/worker-mcp.test.cjs で落ちる）。
+export const OP_HINTS = Object.freeze({
+  addRoom: { destructive: false, idempotent: false },
+  addWall: { destructive: false, idempotent: false },
+  placeItem: { destructive: false, idempotent: false },
+  addRoomWalls: { destructive: false, idempotent: true },
+  placeOpening: { destructive: false, idempotent: true },
+  addRoof: { destructive: false, idempotent: true },
+  resizeRoom: { destructive: true, idempotent: true },
+  renameRoom: { destructive: true, idempotent: true },
+  setProps: { destructive: true, idempotent: true },
+  moveObject: { destructive: true, idempotent: false },
+  rotateObject: { destructive: true, idempotent: false },
+  removeWall: { destructive: true, idempotent: true },
+  deleteObjects: { destructive: true, idempotent: true },
+});
+function opAnnotations(name) {
+  const h = OP_HINTS[name] || { destructive: true, idempotent: false };
+  return { readOnlyHint: false, destructiveHint: h.destructive, idempotentHint: h.idempotent, openWorldHint: false };
+}
+// 読むだけの道具（open_plan・get_plan・inspect_plan）。
+const READ_ANNOTATIONS = Object.freeze({ readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false });
 
 const OP_PREFIX = "house-planner の共有プラン（引数 plan で指す）を直す。";
 const OP_SUFFIX = "\n\n【約束】座標・寸法は mm（x は東、y は南へ増える。図の上が北）。物と部屋の x,y は中心。回転は度で時計回り。"
@@ -174,7 +206,7 @@ const OP_TOOLS = OperationsCatalog.toMcpTools(DEPS).map((t) => ({
   title: OP_TITLES[t.name] || t.name,
   description: OP_PREFIX + t.description + OP_SUFFIX,
   inputSchema: mcpSchema(t),
-  annotations: { readOnlyHint: false, destructiveHint: DESTRUCTIVE.has(t.name), openWorldHint: false },
+  annotations: opAnnotations(t.name),
   _meta: EDIT_META,
 }));
 
@@ -194,20 +226,21 @@ const EXTRA_TOOLS = [
       + "利用者が既にプランの URL を持っているときは作らずに open_plan を使う。新しく作れる数には1日の上限がある。"
       + "プランは最後の変更から 60 日で消える。作ったら URL を利用者に伝える。",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
-    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+    // 呼ぶたびに新しいプランが1つできる（足すだけ・やり直すと増える）。
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     _meta: { "openai/toolInvocation/invoking": "プランを作っています", "openai/toolInvocation/invoked": "プランを作りました" },
   },
   { name: "open_plan", title: "プランを開く", description: OPEN_DESC, inputSchema: PLAN_ONLY,
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false }, _meta: READ_META },
+    annotations: READ_ANNOTATIONS, _meta: READ_META },
   { name: "get_plan", title: "プランの今の状態を読む", description: GET_DESC, inputSchema: PLAN_ONLY,
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false }, _meta: READ_META },
+    annotations: READ_ANNOTATIONS, _meta: READ_META },
   {
     name: "inspect_plan",
     title: "プランを検査する",
     description: "house-planner の共有プランを検査し、問題の一覧（errors と warnings）を返す。形の誤り・物の置かれ方の知識に合わない所"
       + "（浴槽が浴室に無い など）・上下の階の重なりを見る。プランは変えない。直し終えたあとに1回呼ぶとよい。" + MCP_TOOL_NOTE,
     inputSchema: PLAN_ONLY,
-    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    annotations: READ_ANNOTATIONS,
     _meta: READ_META,
   },
 ];
