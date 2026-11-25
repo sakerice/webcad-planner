@@ -98,6 +98,8 @@ function makeCtx() {
   });
   ctx.window = ctx;
   ctx.__sink = sink;
+  // 高さの読み取り(土間の深さなど)は画面と Worker が共有する部品。画面では <script> で先に載っている。
+  ctx.HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
   // 設定欄は setPropsBodyHtml で差し込む(ロック中の欄を無効にするため DOM を触る)。ここでは文字を取るだけ
   vm.runInContext('var __propsHtml=null; function setPropsBodyHtml(b,h){ __propsHtml=h; }', ctx);
   ctx.__loaded = new Set(['setPropsBodyHtml']);

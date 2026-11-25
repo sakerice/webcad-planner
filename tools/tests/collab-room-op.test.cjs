@@ -172,6 +172,44 @@ test('/op 古い形の床材の部屋: 触った部屋だけが floorMaterial �
   untouched.forEach((r) => assert.equal(r.texture, legacy.find((l) => l.id === r.id).texture));
 });
 
+// 土間(floorLevel=doma)。深さは画面の設定パネル「玄関土間」と同じ HeightModel.domaFloorRaiseMm で、床の厚みで決まる。
+// 画面と同じに出せない部屋(天井に付いた器具が動く・下の階に折り上げ天井がある)は断る。
+test('/op 土間: 床の上下が床の厚みで決まる深さで届き、器具の動く部屋は断る', async () => {
+  const HeightModel = require('../../assets/js/height-model.js');
+  const p = plan();
+  p.heightDefaults = { modelVersion: 2, perFloor: true, floorThickness: 220 };
+  p.floors = { 2: { floorThickness: 260 } };
+  const ctx = await setup(p);
+  const inRoom = (r) => (it) => (it.floor || 1) === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d;
+  const fixture = (it) => /^light-/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail';
+  const plain = p.rooms.filter((r) => !p.items.some((it) => fixture(it) && inRoom(r)(it)));
+  const plain1 = plain.find((r) => r.floor === 1), plain2 = plain.find((r) => r.floor === 2);
+  assert.ok(plain1 && plain2, '器具の無い部屋が1階・2階にある');
+  for (const [room, want] of [[plain1, -200], [plain2, -240]]) {
+    assert.equal(HeightModel.domaFloorRaiseMm(p, room.floor), want);
+    const sp = await applyAndCheck(ctx, 'setProps', { id: room.id, set: { floorLevel: 'doma' } });
+    assert.deepEqual(sp.res.changedIds.map(String), [String(room.id)]);
+    const sent = sp.patch.collections.rooms.upserts.find((r) => r.id === room.id);
+    assert.equal(sent.floorRaiseMm, want);
+    assert.equal('floorLevel' in sent, false, 'アプリの部屋に floorLevel を残さない');
+  }
+  const lit = p.rooms.find((r) => r.floor === 1 && p.items.some((it) => fixture(it) && inRoom(r)(it)));
+  const ws = connect(ctx.room, 'screen-b');
+  const res = await ctx.rooms.roomOp(ctx.env, ctx.roomId, 'setProps', { id: lit.id, set: { floorLevel: 'doma' } });
+  assert.equal(res.ok, false);
+  assert.match(res.errors[0].message, /画面で行ってください.*床の高さ/);
+  assert.equal(ws.sent.length, 0);
+  // 下の階に折り上げ天井(段差が上向きの天井の範囲)がある部屋は断る
+  const p2 = plan();
+  p2.heightDefaults = { modelVersion: 2 };
+  const above = p2.rooms.find((r) => r.floor === 2 && !p2.items.some((it) => fixture(it) && inRoom(r)(it)));
+  p2.items.push({ id: 99001, type: 'ceiling-area', floor: 1, x: above.x + 100, y: above.y + 100, w: 600, d: 600, rot: 0, offset: 150 });
+  const ctx2 = await setup(p2);
+  const r2 = await ctx2.rooms.roomOp(ctx2.env, ctx2.roomId, 'setProps', { id: above.id, set: { floorLevel: 'doma' } });
+  assert.equal(r2.ok, false);
+  assert.match(r2.errors[0].message, /折り上げ天井/);
+});
+
 test('/op 失敗する操作: 版が進まず、何も積まれず、誰にも届かず、R2 も変わらない', async () => {
   const p = plan();
   p.items[1].locked = true;

@@ -136,6 +136,19 @@ function planOpsCtx(extra){
       exteriorColor:function(w,v){ getExteriorWallSetting(w).color=v||null; },
       exteriorTexture:function(w,v){ getExteriorWallSetting(w).texture=v||null; }
     },
+    // setProps の set で、アプリの1項目に直せない項目(operations.js の SET_NEEDS_HOOK)。
+    // floorLevel(土間)は、深さを HeightModel.floorLevelRaiseMm(Worker と共有)で出し、設定パネルの
+    // 「床の高さ」と同じ setRoomFloorRaiseMm で書く(範囲・下の階の折り上げ天井・天井付けの器具の追従も同じ)。
+    // 一緒に動いた器具の id を返す。
+    set:{
+      floorLevel:function(room,value){
+        var mm=HeightModel.floorLevelRaiseMm(DATA,room.floor,value);
+        if(mm===null) throw new Error('床の高さ '+String(value)+' は使えません');
+        var ids=[];
+        setRoomFloorRaiseMm(room,mm,ids);
+        return ids;
+      }
+    },
     afterDelete:function(){ syncExteriorWallSettings(); }
   };
   if(extra) Object.keys(extra).forEach(function(k){ ctx[k]=extra[k]; });

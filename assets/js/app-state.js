@@ -123,12 +123,13 @@ function shiftRoomCeilingFixtures(room,deltaMm,movedIds){
   return n;
 }
 // 天井が動きうる書き換えを包む。前後の天井高を測り、差のぶんだけ器具を動かす。
-function followRoomCeiling(room,mutate){
+// movedIds(省略可)に、動かした器具の id を足す(shiftRoomCeilingFixtures と同じ)。
+function followRoomCeiling(room,mutate,movedIds){
   var before=roomCeilingElevationMm(room);
   mutate();
   if(before===null) return;
   var after=roomCeilingElevationMm(room);
-  if(after!==null&&after!==before) shiftRoomCeilingFixtures(room,after-before);
+  if(after!==null&&after!==before) shiftRoomCeilingFixtures(room,after-before,movedIds);
 }
 // 天井付けの器具が「くっつく面」の取付高さ(mm, **そのアイテムの足元から**)。
 //

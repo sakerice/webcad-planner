@@ -358,6 +358,11 @@ try {
       const w2 = p.walls.find((x) => x.floor === 2);
       check(V.name, p, { op: 'removeWall', args: { id: w2.id } }, '壁を消す 2階');
       check(V.name, p, { op: 'setProps', args: { id: r1.id, set: { ceilingHeight: 2500 } } }, '設定 天井高');
+      // 土間: 深さは高さモデル・床の厚みで変わる。天井に付いた器具の無い部屋(1階・2階)と、大きい部屋(器具があれば Worker は断る)
+      const hasFixture = (r) => p.items.some((it) => (/^light-/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail') && it.floor === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d);
+      [r1].concat([1, 2, 3].map((fl) => p.rooms.find((r) => r.floor === fl && !hasFixture(r)))).forEach((r) => {
+        if (r) check(V.name, p, { op: 'setProps', args: { id: r.id, set: { floorLevel: 'doma' } } }, '設定 土間 ' + r.floor + '階 ' + r.id);
+      });
       check(V.name, p, { op: 'setProps', args: { id: p.walls[1].id, set: { wallHeight: 2700 } } }, '設定 壁の高さ');
       const win = p.items.find((it) => it.type === 'window');
       check(V.name, p, { op: 'setProps', args: { id: win.id, set: { windowHeight: 2600 } } }, '設定 窓の高さ');
@@ -397,7 +402,14 @@ try {
       const outerLight = placedAt('入れ子・回転した台・古い種類', 'light-ceiling', 1, (p) => { const r = p.rooms.find((x) => x.id === 'rm_nested_1'); return { x: r.x + r.w + 300, y: r.y + 550 }; });
       res.formula = { column: [col.baseLevel, col.columnHeight], light1: light1.elev, light2: light2.elev, hood: hood.elev, washer: [washer.type, washer.floor, washer.indoor],
         hoodOnCounter: onCounter.errors.length ? onCounter.errors[0].message : onCounter.plan.items[onCounter.plan.items.length - 1].elev,
-        nestedLight: [nestedLight.elev, outerLight.elev] };
+        nestedLight: [nestedLight.elev, outerLight.elev],
+        // 土間: 仕上げ基準の高さの変種(1階の床厚 240)で、器具の無い1階の部屋の床の上下
+        doma: (() => {
+          const p = variants.find((x) => x.name === '高さの設定').plan;
+          const r = p.rooms.find((x) => x.floor === 1 && !p.items.some((it) => /^light-/.test(it.type) && it.floor === 1 && it.x + it.w / 2 >= x.x && it.x + it.w / 2 <= x.x + x.w && it.y + it.d / 2 >= x.y && it.y + it.d / 2 <= x.y + x.d));
+          const w = tools.workerApply(p, [{ op: 'setProps', args: { id: r.id, set: { floorLevel: 'doma' } } }]);
+          return w.errors.length ? w.errors[0].message : w.plan.rooms.find((x) => x.id === r.id).floorRaiseMm;
+        })() };
     }
 
     // 外壁の色・素材の受け口(props からしか呼ばれないので、applyProp を直接当てて比べる)
@@ -438,6 +450,8 @@ try {
   assert.ok(out.formula.light1 > 2000 && out.formula.light2 > 1800, '照明の高さが天井から決まっていない');
   assert.equal(out.formula.hood, 1650, 'レンジフードの取付の高さ');
   assert.equal(out.formula.hoodOnCounter, 1650, '調理台の上に置いたレンジフードも取付の高さ');
+  assert.equal(out.formula.doma, -220, '土間の床の上下が床の厚みから決まっていない');
+  assert.deepEqual(out.refused.filter((r) => /土間/.test(r.label) && !/床の高さを変えると/.test(r.message)).map((r) => r.variant + ': ' + r.label + ' ' + r.message), [], '土間を、器具が動く以外の理由で断った');
   assert.ok(out.formula.nestedLight[0] !== out.formula.nestedLight[1] && out.formula.nestedLight.every((v) => typeof v === 'number'), '入れ子の部屋の照明は、内側の部屋の天井から決まる: ' + JSON.stringify(out.formula.nestedLight));
   const lightRefusals = (v) => out.refused.filter((r) => r.variant === v && r.message.includes('照明の高さを画面でしか'));
   assert.deepEqual(lightRefusals('斜線の欄あり・効かない').map((r) => r.label), [], '斜線が効かない敷地で照明を断った');

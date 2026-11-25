@@ -97,6 +97,38 @@
     return 'CH ' + shape.heightMm;
   }
 
+  // ── 部屋の床の高さ(floorLevel)──────────────────────────────────────
+  // 設定パネルの「玄関土間」(app-constants.js の selectedRoomFloorHtml)・読み取りの取り込み(plan-import.js)・
+  // AI の setProps(画面の planOpsCtx と Worker の plan-ctx-factory.mjs の hooks.set.floorLevel)が、すべてここで
+  // 土間の深さを出す。計算を1か所にして、どれか1つだけ直して食い違うことを無くす。
+  //
+  // 仕上げ基準の高さモデル(heightDefaults.modelVersion === 2)か。app-constants.js の usesFinishedHeightModel と同じ。
+  function usesFinishedHeightModel(plan) {
+    return !!(plan && plan.heightDefaults && plan.heightDefaults.modelVersion === 2);
+  }
+  // その階の床の厚み(mm)。app-constants.js の defaultFloorThicknessMm と同じ(階ごとの設定 → 全体の既定 → 180)。
+  function floorThicknessMm(plan, floor) {
+    var hd = (plan && plan.heightDefaults) || {};
+    var floors = plan && plan.floors;
+    var e = null;
+    if (hd.perFloor && floors && typeof floors === 'object' && Object.prototype.hasOwnProperty.call(floors, String(floor))) {
+      var v = floors[String(floor)];
+      if (v && typeof v === 'object' && !Array.isArray(v)) e = v;
+    }
+    var n = Number(e && e.floorThickness !== undefined ? e.floorThickness : hd.floorThickness);
+    return isFinite(n) ? Math.max(20, Math.min(1000, n)) : 180;
+  }
+  // 玄関土間の床の上下(mm)。床の厚みの中まで下げて基礎の天端＋20mm に置く(床を下げられるいちばん下)。
+  // 床を下げられない高さモデル(modelVersion 2 でない保存プラン)では 0。
+  function domaFloorRaiseMm(plan, floor) {
+    return usesFinishedHeightModel(plan) ? -Math.max(0, floorThicknessMm(plan, floor) - 20) : 0;
+  }
+  // floorLevel(plan-settable.js の SETTINGS.room の選択肢)→ 床の上下(mm)。知らない値は null。
+  function floorLevelRaiseMm(plan, floor, level) {
+    if (level === 'doma') return domaFloorRaiseMm(plan, floor);
+    return null;
+  }
+
   return {
     DEFAULTS: DEFAULTS,
     MIN_STORY_HEIGHT_MM: MIN_STORY_HEIGHT_MM,
@@ -104,6 +136,9 @@
     skipLevelMm: skipLevelMm,
     ceilingHeightMm: ceilingHeightMm,
     ceilingShape: ceilingShape,
-    ceilingLabel: ceilingLabel
+    ceilingLabel: ceilingLabel,
+    floorThicknessMm: floorThicknessMm,
+    domaFloorRaiseMm: domaFloorRaiseMm,
+    floorLevelRaiseMm: floorLevelRaiseMm
   };
 }));

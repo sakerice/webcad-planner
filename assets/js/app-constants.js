@@ -1093,6 +1093,13 @@ function updateSelectedRoomFloor(value){
   if(isObjectLocked(r)){updateProps();return;}
   var n=Number(value);if(!Number.isFinite(n))return;
   saveState();
+  setRoomFloorRaiseMm(r,n);
+  markDirty();updateProps();draw2d();if(ren)rebuild3D();
+}
+// 部屋の床の上下(mm)を書く。設定パネル(updateSelectedRoomFloor)と、AI の setProps の floorLevel
+// (plan-data.js の planOpsCtx の hooks.set.floorLevel)が、同じこれを通す。グローバルの DATA の部屋を書く。
+// movedIds(省略可)に、天井に付いていて一緒に動いた器具の id を足す。
+function setRoomFloorRaiseMm(r,n,movedIds){
   // 床上げでは天井は動かないので、天井からの下がりを保つ = 世界での高さを保つ。
   // 意図して下げたペンダントもそのまま。追従の規則は followRoomCeiling の1か所。
   followRoomCeiling(r,function(){
@@ -1104,8 +1111,7 @@ function updateSelectedRoomFloor(value){
     if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.floorLoweringLimit)
       candidate=Math.max(candidate,CeilingDesigner.floorLoweringLimit(r));
     r.floorRaiseMm=candidate;
-  });
-  markDirty();updateProps();draw2d();if(ren)rebuild3D();
+  },movedIds);
 }
 // スキップフロアの段差を変える。床上げ(updateSelectedRoomFloor)と違うのは、
 // **明示された天井高を持つ部屋では天井も一緒に上がる**ことである。だから
@@ -1315,9 +1321,10 @@ function updateSelectedBaseFloor(value){
 // ほぼ同じ高さになる。以前の「玄関土間 ＋0mm」は床の構造面のままで、玄関ドアが
 // 外の基礎の天端から床の厚み(180mm)ぶん浮いて見えた(利用者の報告)。
 // 床を下げられない高さモデルでは 0。設定パネルの「玄関土間」と、読み取りの土間
-// (plan-import.js の toAppObjects)が同じこれを使う。
+// (plan-import.js の toAppObjects)と、AI の setProps の floorLevel=doma(plan-data.js の hooks.set.floorLevel)が
+// 同じこれを使う。計算は Worker と共有するため height-model.js の HeightModel.domaFloorRaiseMm に置いている。
 function domaFloorRaiseMm(floor){
-  return (typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())?-Math.max(0,floorSlabMmForFloor(floor)-20):0;
+  return HeightModel.domaFloorRaiseMm((typeof DATA!=='undefined')?DATA:null,floor);
 }
 function selectedRoomFloorHtml(r){
   var v=roomFloorOffsetMm(r);

@@ -42,6 +42,8 @@ const WHY = {
   lightCeiling: 'この部屋の天井(段差・天井の範囲・天井高の指定・斜線制限など)では、照明の高さを画面でしか決められません',
   ceilingFixtures: 'この部屋には天井に付いた照明や物干しがあり、天井高を変えると器具の高さも動くので、画面で変えてください',
   openingModel: '建具・窓のモデルを指定して置くことは画面でしかできません。door-swing・window などの種類で置いてください',
+  floorFixtures: 'この部屋には天井に付いた照明や物干しがあり、床の高さを変えると器具の高さも動くので、画面で変えてください',
+  floorLowering: '下の階の天井の範囲(折り上げ天井)と重なる部屋の床を下げられる深さは、画面でしか決められません',
 };
 function refusal(key) { return REFUSAL + '(' + WHY[key] + ')'; }
 function RefusalError(key) { var e = new Error(refusal(key)); e.workerRefusal = true; return e; }
@@ -272,6 +274,33 @@ export function createPlanCtxTools(deps) {
       return (a.r.w * a.r.d - b.r.w * b.r.d) || (stackOf(b.r) - stackOf(a.r)) || (b.i - a.i);
     });
     return out.length ? out[0].r : null;
+  }
+  // その部屋に、天井に付いた器具(照明・物干しなど。shiftRoomCeilingFixtures が動かす物)があるか。
+  function roomHasCeilingFixtures(p, room) {
+    return (p.items || []).some(function (it) {
+      if (!it || !isCeilingFixtureType(it.type)) return false;
+      return roomAtPointOnFloor(p, it.floor, it.x + it.w / 2, it.y + it.d / 2) === room;
+    });
+  }
+  // 下の階に、この部屋と平面で重なる折り上げ天井の範囲(段差が上向きの天井の範囲)があるか。
+  // 画面の CeilingDesigner.floorLoweringLimit が下げ幅を戻すのは、この範囲があるときだけ。
+  // 範囲は天井の範囲の物(ceiling-area)と、古い形の部屋の ceilingAreas(部屋からの相対位置)。
+  // 範囲を部屋の内側に切り詰めずに見る(重なりを広めにとり、断る側に倒す)。
+  function lowerCeilingRecessUnder(p, room) {
+    var fl = (room.floor || 1) - 1;
+    if (fl < 1) return false;
+    var hits = function (x, y, w, d) {
+      return Math.min(x + w, room.x + room.w) - Math.max(x, room.x) > 0 && Math.min(y + d, room.y + room.d) - Math.max(y, room.y) > 0;
+    };
+    var raised = function (a) { return Number(a && a.offset) > 0; };
+    if ((p.items || []).some(function (it) {
+      return it && it.type === 'ceiling-area' && (it.floor || 1) === fl && raised(it) && hits(Number(it.x), Number(it.y), Number(it.w), Number(it.d));
+    })) return true;
+    return (p.rooms || []).some(function (b) {
+      return b && b.floor === fl && Array.isArray(b.ceilingAreas) && b.ceilingAreas.some(function (a) {
+        return raised(a) && hits(b.x + (Number(a.x) || 0), b.y + (Number(a.y) || 0), Number(a.w) || 0, Number(a.d) || 0);
+      });
+    });
   }
   // 天井の形を式で出せない部屋か(出せないときは理由の鍵、出せるときは null)。
   // 照明を置いたときの高さ(defaultLightElevationMm → ceilingFinishElevationMm → roomCeilingElevationMm)を
@@ -652,12 +681,7 @@ export function createPlanCtxTools(deps) {
         // 天井高を変える前に呼ばれる。天井に付いた器具がある部屋は断る(器具を天井に合わせて動かす高さを
         // 画面と同じに出せないため)。器具が無ければ動かす物が無いので、天井高を測らずに null を返す。
         ceilingElevation: function (room, p) {
-          var work = p || cur;
-          var hit = (work.items || []).some(function (it) {
-            if (!it || !isCeilingFixtureType(it.type)) return false;
-            return roomAtPointOnFloor(work, it.floor, it.x + it.w / 2, it.y + it.d / 2) === room;
-          });
-          if (hit) throw RefusalError('ceilingFixtures');
+          if (roomHasCeilingFixtures(p || cur, room)) throw RefusalError('ceilingFixtures');
           return null;
         },
         shiftCeilingFixtures: function () { return []; },
@@ -665,7 +689,25 @@ export function createPlanCtxTools(deps) {
           exteriorColor: function (w, v, p) { getExteriorWallSetting(p || cur, w).color = v || null; },
           exteriorTexture: function (w, v, p) { getExteriorWallSetting(p || cur, w).texture = v || null; }
         },
-        afterDelete: function (p) { syncExteriorWallSettings(p || cur); }
+        afterDelete: function (p) { syncExteriorWallSettings(p || cur); },
+        // planOpsCtx の hooks.set.floorLevel → setRoomFloorRaiseMm(app-constants.js)。深さは画面と同じ
+        // HeightModel.floorLevelRaiseMm(共有の部品)で出し、範囲は updateSelectedRoomFloor と同じに寄せる。
+        // 画面はさらに、下の階の折り上げ天井(CeilingDesigner.floorLoweringLimit。3Dの形から測る)で下げ幅を戻し、
+        // 天井に付いた器具を床の上下ぶん動かす。どちらも式で同じに出せないので、当たる部屋では断る。
+        set: {
+          floorLevel: function (room, value, p) {
+            var work = p || cur;
+            var mm = HeightModel.floorLevelRaiseMm(work, room.floor, value);
+            if (mm === null) throw new Error('床の高さ ' + String(value) + ' は使えません');
+            var minimum = usesFinishedHeightModel(work) ? -Math.max(0, floorSlabMmForFloor(work, room.floor) - 20) : 0;
+            var next = Math.max(minimum, Math.min(600, mm));
+            if (lowerCeilingRecessUnder(work, room)) throw RefusalError('floorLowering');
+            var before = roomFloorOffsetMm(work, room);
+            if (next !== before && roomHasCeilingFixtures(work, room)) throw RefusalError('floorFixtures');
+            room.floorRaiseMm = next;
+            return [];
+          }
+        }
       },
       withPlan: function (work, run) {
         var saved = cur;

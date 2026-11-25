@@ -339,6 +339,36 @@ test('setProps set: 土間は hooks.set.floorLevel が無ければ errors、あ�
   assert.deepEqual([b.plan.rooms[0].floorRaiseMm, b.plan.rooms[0].floorMaterial], [-300, 'tile_floor']);
 });
 
+// 階段の手すり「なし」と形「ひな壇」は既定。設定パネル(props に undefined)と AI(set に 'none'・'open')で
+// 保存の形が違っていた(2026-11-25)。どちらも欄ごと消す。
+test('setProps: 階段の手すり「なし」・形「ひな壇」は、パネルからも set からも欄を消す', () => {
+  const plan = basePlan();
+  plan.items.push({ id: 30, type: 'stair', x: 0, y: 0, w: 900, d: 2700, rot: 0, floor: 1, stairRail: 'both', stairStyle: 'box' });
+  const ctx = makeCtx({ settable: PlanSettable });
+  const ai = run(plan, [{ op: 'setProps', args: { id: 30, set: { stairRail: 'none', stairStyle: 'open' } } }], ctx);
+  assert.deepEqual(ai.errors, []);
+  const sa = itemById(ai.plan, 30);
+  assert.ok(!('stairRail' in sa) && !('stairStyle' in sa), JSON.stringify(sa));
+  const panelPlan = basePlan();
+  panelPlan.items.push({ id: 30, type: 'stair', x: 0, y: 0, w: 900, d: 2700, rot: 0, floor: 1, stairRail: 'both', stairStyle: 'box' });
+  const panel = run(panelPlan, [{ op: 'setProps', args: { id: 30, props: { stairRail: undefined, stairStyle: undefined } } }], makeCtx({ allowProps: true }));
+  assert.deepEqual(panel.errors, []);
+  assert.equal(JSON.stringify(itemById(panel.plan, 30)), JSON.stringify(sa));
+});
+
+// 古い欄 stairUnder:'filled' の階段は、stairStyle が無ければ箱型として読む(app-constants.js の stairStyleOf)。
+// 設定パネルで「ひな壇」を選ぶと stairStyle を消すだけで stairUnder が残り、箱型のまま変えられなかった。
+test('setProps: 形を選ぶと古い欄 stairUnder を消す(ひな壇を選べば、ひな壇になる)', () => {
+  const plan = basePlan();
+  plan.items.push({ id: 31, type: 'stair', x: 0, y: 0, w: 900, d: 2700, rot: 0, floor: 1, stairUnder: 'filled' });
+  const r = run(plan, [{ op: 'setProps', args: { id: 31, props: { stairStyle: undefined } } }], makeCtx({ allowProps: true }));
+  assert.deepEqual(r.errors, []);
+  const s = itemById(r.plan, 31);
+  assert.ok(!('stairUnder' in s) && !('stairStyle' in s), JSON.stringify(s));
+  const b = run(plan, [{ op: 'setProps', args: { id: 31, set: { stairStyle: 'skeleton' } } }], makeCtx({ settable: PlanSettable }));
+  assert.deepEqual([itemById(b.plan, 31).stairStyle, 'stairUnder' in itemById(b.plan, 31)], ['skeleton', false]);
+});
+
 // 利用者の報告(2026-11-25):「AIに頼む」で床材を変えてと頼んでも変わらないのに、AI は変えたと答えた。
 // 既定プランを含む古いプランは床材のキーを texture に書いていて、描画(index.html の roomFloorMaterialKey)は
 // texture を floorMaterial より先に読む。set が floorMaterial だけを書くと、画面の床は元のまま。

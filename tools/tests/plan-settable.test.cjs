@@ -188,3 +188,22 @@ test('土間（floorLevel=doma）は、設定パネルの「玄関土間」と�
   assert.match(imp, /made\.floorLevel === 'doma'[^\n]*domaFloorRaiseMm\(floor\)/, '取り込みが domaFloorRaiseMm を使っていない');
   assert.match(imp, /delete made\.floorLevel/, 'アプリの部屋に floorLevel を残さない（保存の形を変えない）');
 });
+
+test('土間の深さは HeightModel の1か所で出す（画面のパネル・取り込み・AI・Worker が共有）', () => {
+  const HeightModel = require('../../assets/js/height-model.js');
+  assert.equal(HeightModel.domaFloorRaiseMm({}, 1), 0, '床を下げられない高さモデルでは 0');
+  assert.equal(HeightModel.domaFloorRaiseMm({ heightDefaults: { modelVersion: 2 } }, 1), -160, '床厚の既定 180 → 基礎の天端＋20');
+  const p = { heightDefaults: { modelVersion: 2, floorThickness: 220, perFloor: true }, floors: { 2: { floorThickness: 260 } } };
+  assert.deepEqual([HeightModel.domaFloorRaiseMm(p, 1), HeightModel.domaFloorRaiseMm(p, 2)], [-200, -240]);
+  assert.equal(HeightModel.domaFloorRaiseMm({ heightDefaults: { modelVersion: 2, floorThickness: 220 }, floors: { 2: { floorThickness: 260 } } }, 2), -200, '階ごとの設定は perFloor のときだけ');
+  // SETTINGS の floorLevel の選択肢は、すべて深さに直せる
+  const def = PlanSettable.SETTINGS.room.find((d) => d.key === 'floorLevel');
+  def.choices.forEach(([v]) => assert.equal(typeof HeightModel.floorLevelRaiseMm(p, 1, v), 'number', v));
+  assert.equal(HeightModel.floorLevelRaiseMm(p, 1, 'nope'), null);
+  // 画面(app-constants.js)と Worker は、深さを自分で計算せず HeightModel を呼ぶ
+  const constants = read('assets/js/app-constants.js');
+  const fn = constants.slice(constants.indexOf('function domaFloorRaiseMm'), constants.indexOf('function domaFloorRaiseMm') + 200);
+  assert.match(fn, /HeightModel\.domaFloorRaiseMm\(/);
+  assert.match(read('worker/plan-ctx-factory.mjs'), /HeightModel\.floorLevelRaiseMm\(work, room\.floor, value\)/);
+  assert.match(read('assets/js/plan-data.js'), /HeightModel\.floorLevelRaiseMm\(DATA,room\.floor,value\)/);
+});

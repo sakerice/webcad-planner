@@ -52,11 +52,9 @@ const SKIP = {
 // あることを確かめる(変われば落ちる。直したらここから消す)。
 //   kind 'stored-only': 保存される欄の値だけが違い、描画が読む値は同じ。違いはその項目の欄だけ。
 //   kind 'ai-refused' : AI(setProps)では当てられず、道具が失敗を返す(プランは変わらない)。パネルでは変わる。
-const KNOWN = {
-  'stair.stairRail=none': { kind: 'stored-only', why: 'パネルは「なし」で欄を消し(undefined)、AI は stairRail:"none" を書く。描画(stairRailSides)はどちらも手すり無し' },
-  'stair.stairStyle=open': { kind: 'stored-only', why: 'パネルは「ひな壇」で欄を消し(undefined)、AI は stairStyle:"open" を書く。描画(stairStyleOf)はどちらもひな壇(古い stairUnder:"filled" の階段だけは、欄を消すと箱型に戻る)' },
-  'room.floorLevel': { kind: 'ai-refused', why: '土間(floorLevel)は SETTINGS にあるが、画面と Worker の ctx に hooks.set.floorLevel が無く、setProps は「画面の計算が要ります」で断る。読み取りの取り込みだけが使える' },
-};
+// 2026-11-25 に、階段の手すり「なし」・形「ひな壇」の書き方の違いと、土間(floorLevel)を AI が当てられないことを直して、
+// ここは空になった(operations.js の applyProp で既定の値は欄ごと消す。土間は hooks.set.floorLevel)。
+const KNOWN = {};
 
 // 2つのプランの違いを「集まり id 欄: 前→後」の並びにする(物の並び順は見ない。足した・消した物も1行)。
 function diffPlans(aJson, bJson) {
@@ -88,7 +86,9 @@ function targetsFor(part, def) {
   if (part === 'room') {
     if (def.key === 'floorMaterial') return [{ coll: 'rooms', pick: 'legacy-floor-room' }, { coll: 'rooms', pick: 'image-floor-room' }];
     if (def.key === 'void') return [{ coll: 'rooms', pick: 'void-ok-room' }];
-    if (def.key === 'floorLevel') return [{ coll: 'rooms', pick: 'floor1-room' }];
+    // 土間の深さは高さモデルで決まる。古い高さモデル(土台。土間は ±0)と、仕上げ基準の高さモデル(土台に
+    // modelVersion 2 と階ごとの床厚を足した写し。土間は床厚の中まで下がる)の両方で、1階と2階の部屋に当てる。
+    if (def.key === 'floorLevel') return [{ coll: 'rooms', pick: 'floor1-room' }, { coll: 'rooms', pick: 'floor1-room', v2: true }, { coll: 'rooms', pick: 'floor2-room', v2: true }];
     return [{ coll: 'rooms', pick: 'legacy-floor-room' }];
   }
   const kinds = def.for || null;
@@ -198,6 +198,14 @@ try {
   console.log('土台に置き足した建具: ' + JSON.stringify(base.placed));
 
   const legacyRoomsBefore = JSON.parse(readFileSync(FIXTURE, 'utf8')).rooms;
+  // 仕上げ基準の高さモデルの土台(土間の深さが床厚で決まる)。1階は全体の床厚 220、2階は階ごとの床厚 260。
+  const baseV2 = (() => {
+    const p = JSON.parse(base.json);
+    p.heightDefaults = Object.assign({}, p.heightDefaults || {}, { modelVersion: 2, perFloor: true, floorThickness: 220 });
+    p.floors = Object.assign({}, p.floors || {}, { 2: { floorThickness: 260 } });
+    return JSON.stringify(p);
+  })();
+  const DOMA_MM = { 'floor1-room': -200, 'floor2-room': -240 };
 
   // 区画の名前が setProps で書けないこと(書けるようになったら SKIP を外して比べる)
   const zoneProbe = await page.evaluate(() => {
@@ -208,6 +216,7 @@ try {
   assert.ok(zoneProbe, '区画の名前が setProps で書けるようになった。SKIP から外して比べること');
 
   for (const c of cases) {
+    const baseJson = c.target.v2 ? baseV2 : base.json;
     // 対象の物を土台から選ぶ(土台は毎回同じなので、2回とも同じ物になる)
     const pickId = await page.evaluate(({ baseJson, target, legacyIds }) => {
       const plan = JSON.parse(baseJson);
@@ -217,18 +226,19 @@ try {
       else if (target.pick === 'legacy-floor-room') o = list.find((r) => legacyIds.wood.indexOf(r.id) >= 0 && !(r.ceiling) && (r.floor || 1) === 1);
       else if (target.pick === 'image-floor-room') o = list.find((r) => legacyIds.image.indexOf(r.id) >= 0);
       else if (target.pick === 'floor1-room') o = list.find((r) => (r.floor || 1) === 1 && legacyIds.wood.indexOf(r.id) >= 0);
+      else if (target.pick === 'floor2-room') o = list.find((r) => r.floor === 2 && legacyIds.wood.indexOf(r.id) >= 0);
       else if (target.pick === 'void-ok-room') {
         DATA = plan; o = list.find((r) => !r.ceiling && !roomVoidBlockReason(r)) || null;
       } else if (target.pick.indexOf('type:') === 0) o = list.find((it) => it.type === target.pick.slice(5));
       return o ? o.id : null;
     }, {
-      baseJson: base.json, target: c.target,
+      baseJson, target: c.target,
       legacyIds: {
         wood: legacyRoomsBefore.filter((r) => r.texture === 'wood_floor').map((r) => r.id),
         image: legacyRoomsBefore.filter((r) => r.texture && !/^(wood_floor|tile_floor)$/.test(r.texture)).map((r) => r.id),
       },
     });
-    const name = `${c.label}=${c.value} (${c.target.pick}${pickId !== null ? ' id ' + pickId : ''})`;
+    const name = `${c.label}=${c.value} (${c.target.pick}${c.target.v2 ? ' 仕上げ基準の高さ' : ''}${pickId !== null ? ' id ' + pickId : ''})`;
     if (pickId === null) { failures.push(`${name}: 土台に対象の物が無い`); continue; }
 
     const reset = () => page.evaluate(({ json, id }) => {
@@ -239,7 +249,7 @@ try {
       clearEditHistory();
       ST.selected = null;
       document.getElementById('props').classList.remove('show');
-    }, { json: base.json, id: base.nextId });
+    }, { json: baseJson, id: base.nextId });
 
     // 描画が読む値と、プラン全体
     const observe = (coll, id, key) => page.evaluate(({ coll, id, key }) => {
@@ -348,6 +358,13 @@ try {
       if (!sameDelta) problems.push(`変わり方が違う\n      パネル ${JSON.stringify(panelDelta)}\n      AI     ${JSON.stringify(aiDelta)}`);
       if (!sameRender) problems.push(`描画が読む値が違う: パネル ${JSON.stringify(A.render)} / AI ${JSON.stringify(B.render)}`);
       if (toolResult && toolResult.isError) problems.push('AI の道具が失敗した: ' + toolResult.text);
+    }
+    if (c.key === 'floorLevel') {
+      // 描画が読む床の上下(roomFloorOffsetMm)が、土間の深さになっていること(欄に入っただけでなく、床が下がる)。
+      const want = c.target.v2 ? DOMA_MM[c.target.pick] : 0;
+      if (A.render !== want) problems.push(`パネルの土間で床の上下が ${want} にならない(${A.render})`);
+      if (B.render !== want) problems.push(`AI の土間で床の上下が ${want} にならない(${B.render})`);
+      if (c.target.v2 && before.render === B.render) problems.push('AI で土間にしても床の高さが変わらない');
     }
     if (c.key === 'floorMaterial') {
       // 選んだ床材が描画に届いていること(欄に入っただけでなく、画面の床が変わる)
