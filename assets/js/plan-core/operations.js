@@ -207,6 +207,26 @@
   // ── applyProp: updateSelectedProp のキーごとの後始末 ─────────────────────
   // ロックの判定・saveState・描画・色選びの途中の扱いは画面側(呼ぶ側)に残る。
   // 戻り値の changed は、変えた物の id(天井を変えて動いた器具を含む)。
+  // 階段の手すり(stairRail)・形(stairStyle)を書いたあとの保存の形を整える。obj[key] に値を書いたあとに呼ぶ。
+  // 設定パネル・AI の set(applyProp)と、図面の読み取りの取り込み(plan-import.js の toAppObjects)が、
+  // 同じこの関数を通る。経路ごとに保存の形が違うと、描画は同じでも比べる検査・共同編集の差分・inspect の
+  // 答えが食い違うため(読み取りだけ stairRail:'none'・stairStyle:'open' を残していた)。
+  //
+  // 手すり「なし」・形「ひな壇」は既定なので、欄ごと消す(設定パネルは undefined を、AI の set と読み取りは
+  // 'none'・'open' を渡す。描画の stairRailSides・stairStyleOf は、欄が無ければ手すり無し・ひな壇)。
+  // 形を書いたら、古い欄 stairUnder('filled' なら箱型として読む)は消す。残すと「ひな壇」を選んで stairStyle を
+  // 消したとき、stairStyleOf が stairUnder を読んで箱型に戻り、ひな壇にできない。箱型・スケルトンは stairStyle が
+  // 先に読まれるので、消しても描画は変わらない。
+  function tidyStairProp(obj, key) {
+    if (!obj) return;
+    var value = obj[key];
+    if (key === 'stairRail' && (!value || value === 'none')) delete obj.stairRail;
+    if (key === 'stairStyle') {
+      if (!value || value === 'open') delete obj.stairStyle;
+      delete obj.stairUnder;
+    }
+  }
+
   function applyProp(obj, key, value, plan, ctx, warnings) {
     ctx = ctx || {};
     var h = hooksOf(ctx);
@@ -267,17 +287,7 @@
     if (key === 'ceilingColor' && !value) delete obj.ceilingColor;
     if (key === 'floorColor' && !value) delete obj.floorColor;
     if (key === 'stairFloorMaterial' && !value) delete obj.stairFloorMaterial;
-    // 階段の手すり「なし」・形「ひな壇」は既定なので、欄ごと消す(設定パネルは undefined を、AI の set は
-    // 'none'・'open' を渡す。どちらも同じ保存の形にする。描画の stairRailSides・stairStyleOf は、欄が無ければ
-    // 手すり無し・ひな壇)。
-    if (key === 'stairRail' && (!value || value === 'none')) delete obj.stairRail;
-    // 形を選んだら、古い欄 stairUnder('filled' なら箱型として読む)は消す。残すと「ひな壇」を選んで stairStyle を
-    // 消したとき、stairStyleOf が stairUnder を読んで箱型に戻り、ひな壇にできない。箱型・スケルトンは stairStyle が
-    // 先に読まれるので、消しても描画は変わらない。
-    if (key === 'stairStyle') {
-      if (!value || value === 'open') delete obj.stairStyle;
-      delete obj.stairUnder;
-    }
+    if (key === 'stairRail' || key === 'stairStyle') tidyStairProp(obj, key);
     // 古いプラン(既定プランを含む)は床材のキーを texture に書いていて、描画(index.html の roomFloorMaterialKey)は
     // texture を floorMaterial より先に読む。画面の床材の欄(app-state.js の updateSelectedRoomFloorMaterial)と同じく、
     // texture が床材のキーなら消す(残すと、床材を書いても画面の床は元のまま)。床の画像(それ以外の texture)は
@@ -1136,5 +1146,5 @@
   // プランの写し(applyOperations が写しに当てるときと同じ写し方)。チャットが依頼の始めに使う。
   function clonePlan(plan) { return cloneDeep(plan, new Map()); }
 
-  return { applyOperations: applyOperations, applyProp: applyProp, clonePlan: clonePlan, OPS: OPS, ROOF_TYPES: ROOF_TYPES, tidyName: tidyName, ROOM_NAME_MAX: ROOM_NAME_MAX };
+  return { applyOperations: applyOperations, applyProp: applyProp, tidyStairProp: tidyStairProp, clonePlan: clonePlan, OPS: OPS, ROOF_TYPES: ROOF_TYPES, tidyName: tidyName, ROOM_NAME_MAX: ROOM_NAME_MAX };
 }));
