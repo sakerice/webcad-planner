@@ -1093,7 +1093,12 @@ function updateSelectedRoomFloor(value){
   if(isObjectLocked(r)){updateProps();return;}
   var n=Number(value);if(!Number.isFinite(n))return;
   saveState();
-  setRoomFloorRaiseMm(r,n);
+  // 床を上下すると天井までの高さが変わり、その部屋の天井付けの器具(照明・物干し)も動く。saveState の印は
+  // 選んだ部屋にしか付かないので、動いた器具の id を受け取って共同編集で送る印を付ける
+  // (updateSelectedProp と同じ。付けないと器具の高さが相手に届かない)。
+  var moved=[];
+  setRoomFloorRaiseMm(r,n,moved);
+  if(typeof sharedMarkIdsDirty==='function') sharedMarkIdsDirty(moved);
   markDirty();updateProps();draw2d();if(ren)rebuild3D();
 }
 // 部屋の床の上下(mm)を書く。設定パネル(updateSelectedRoomFloor)と、AI の setProps の floorLevel
@@ -1126,10 +1131,13 @@ function updateSelectedRoomSkipLevel(value){
   if(typeof saveState==='function') saveState();
   // 段差では床も天井も動く。天井付けの器具は天井からの下がりを保つ
   // (天井が同じだけ上がれば動かない)。規則は followRoomCeiling の1か所。
+  // 動いた器具の id を受け取り、共同編集で送る印を付ける(updateSelectedRoomFloor と同じ理由)。
+  var moved=[];
   followRoomCeiling(r,function(){
     var v=Math.max(0,Math.min(SKIP_LEVEL_MAX_MM,Math.round(n/50)*50));
     if(v>0) r.skipLevelMm=v; else delete r.skipLevelMm;
-  });
+  },moved);
+  if(typeof sharedMarkIdsDirty==='function') sharedMarkIdsDirty(moved);
   markDirty();updateProps();draw2d();if(ren)rebuild3D();
 }
 // スキップフロアの欄。段差を持たない部屋にも出す -- 「ここから作れる」ことが
