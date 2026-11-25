@@ -52,7 +52,7 @@ test('existing furniture preserves physical facing and migration is idempotent',
  normalize();assert.equal(item.rot,270);assert.equal(item.modelFacingVersion,1);normalize();assert.equal(item.rot,270);
 });
 test('car migration preserves old placement while new car assets use +Z front',()=>{
- const {sourceYaw}=require('../../assets/js/model-quality.js');assert.equal(sourceYaw('assets/models/refined/car_sedan_v3.glb'),Math.PI);
+ const {sourceYaw}=require('../../assets/js/model-quality.js');assert.equal(sourceYaw('assets/models/refined/precision_car_v1.glb'),0);assert.equal(sourceYaw('assets/models/furniture_mega/glb/BathTub01.glb'),Math.PI);
  const item={type:'car',rot:0};const s={DATA:{items:[item]},snapCeilingFixturesToCeiling:()=>{},snapOutdoorCeilingFixturesToRoof:()=>{},snapCeilingLightsToAttachSurface:()=>{},ST:{selected:null},getFmpItem:()=>null,bestFmpType:t=>t};
  const normalize=loadFunction('normalizeLegacyFurnitureItems',s);normalize();assert.equal(item.rot,180);normalize();assert.equal(item.rot,180);
 });
