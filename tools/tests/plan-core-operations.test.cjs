@@ -339,6 +339,20 @@ test('setProps set: 土間は hooks.set.floorLevel が無ければ errors、あ�
   assert.deepEqual([b.plan.rooms[0].floorRaiseMm, b.plan.rooms[0].floorMaterial], [-300, 'tile_floor']);
 });
 
+// 土間をやめる normal は編集だけの選択肢。setProps では受けて hooks.set.floorLevel に渡し、選択肢の誤りの候補にも出す。
+test('setProps set: floorLevel=normal を hooks に渡し、選択肢の誤りの候補に normal も出す', () => {
+  const plan = basePlan();
+  const seen = [];
+  const ctx = makeCtx({ settable: PlanSettable, hooks: { set: { floorLevel: (room, v) => { seen.push(v); room.floorRaiseMm = v === 'normal' ? 0 : -300; return []; } } } });
+  const r = run(plan, [{ op: 'setProps', args: { id: 'rm_a', set: { floorLevel: 'doma' } } }, { op: 'setProps', args: { id: 'rm_a', set: { floorLevel: 'normal' } } }], ctx);
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual(seen, ['doma', 'normal']);
+  assert.equal(r.plan.rooms[0].floorRaiseMm, 0);
+  const bad = run(plan, [{ op: 'setProps', args: { id: 'rm_a', set: { floorLevel: 'up' } } }], ctx);
+  assert.equal(bad.errors.length, 1);
+  assert.deepEqual(bad.errors[0].candidates, ['doma', 'normal']);
+});
+
 // 階段の手すり「なし」と形「ひな壇」は既定。設定パネル(props に undefined)と AI(set に 'none'・'open')で
 // 保存の形が違っていた(2026-11-25)。どちらも欄ごと消す。
 test('setProps: 階段の手すり「なし」・形「ひな壇」は、パネルからも set からも欄を消す', () => {

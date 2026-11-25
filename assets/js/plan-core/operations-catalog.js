@@ -323,8 +323,10 @@
   }
   var PART_JA = { wall: '壁', room: '部屋', opening: '窓・扉', stair: '階段（stair・stair-corner）', object: '外構・敷地' };
 
+  // 編集(チャット・MCP)への説明なので、選択肢は編集だけの選択肢(editChoices。土間をやめる normal など)も書く。
+  // 読み取りの説明(PlanSettable.describe)には editChoices を出さない。
   function settingLine(part, s, settable) {
-    var range = s.num ? s.num[0] + '〜' + s.num[1] : s.text ? '文字' : s.choices.map(function (c) { return c[0] + '=' + c[1]; }).join(' / ');
+    var range = s.num ? s.num[0] + '〜' + s.num[1] : s.text ? '文字' : s.choices.concat(s.editChoices || []).map(function (c) { return c[0] + '=' + c[1]; }).join(' / ');
     var targets = forToTypes(part, s.for, settable);
     var to = targets === null ? '' : targets.length ? '　対象: ' + targets.join(', ') : '　対象なし（今は set では変えられない）';
     return '  ' + s.key + '（' + s.ja + '）: ' + range + to;

@@ -124,8 +124,10 @@
     return usesFinishedHeightModel(plan) ? -Math.max(0, floorThicknessMm(plan, floor) - 20) : 0;
   }
   // floorLevel(plan-settable.js の SETTINGS.room の選択肢)→ 床の上下(mm)。知らない値は null。
+  // normal(編集だけの選択肢。土間をやめる)は 0 = 設定パネルのプリセット「床の構造面 ±0mm」と同じ値。
   function floorLevelRaiseMm(plan, floor, level) {
     if (level === 'doma') return domaFloorRaiseMm(plan, floor);
+    if (level === 'normal') return 0;
     return null;
   }
 

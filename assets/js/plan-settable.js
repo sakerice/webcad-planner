@@ -73,6 +73,8 @@
   // 部位ごと。key は答えの set に書く名前（アプリの項目名と同じにしてある）。
   //   num: [最小, 最大]（mm など。範囲外は端に寄せる）
   //   choices: [[値, 説明], ...]（それ以外の値は捨てる）
+  //   editChoices: [[値, 説明], ...]（編集＝チャット・MCP の setProps だけで受ける選択肢。読み取りの説明 describe には
+  //     出さず、applySettings も ctx.edit === true のときだけ受ける。読み取りの挙動を変えずに、編集でだけ戻す手段を足すため）
   //   panel: 設定パネルでこの項目を変える入口（検査がパネルの中に在ることを確かめる）
   //   for: 対象の種類（無ければその部位すべて）
   var FLOOR_MATERIALS = [
@@ -97,7 +99,10 @@
       // 床の上下は設定パネルでは mm で入れるが、土間の深さは床の厚みで決まる（app-constants.js の
       // domaFloorRaiseMm）。mm で答えさせると階の床厚を知らない AI が数字を当てることになるので、
       // パネルのプリセット「玄関土間」と同じものを選ばせる。
-      { key: 'floorLevel', ja: '床の高さ', choices: [['doma', '土間（床を一段下げ、玄関ドアの外とほぼ同じ高さにする）']], panel: 'updateSelectedRoomFloor' },
+      // normal は、土間にした部屋を AI で元に戻すための選択肢（パネルのプリセット「床の構造面 ±0mm」と同じ）。
+      // 読み取りでは部屋は ±0 から作るので要らず、指示文に足すと読み取りの答えが変わりうるので、編集だけにする。
+      { key: 'floorLevel', ja: '床の高さ', choices: [['doma', '土間（床を一段下げ、玄関ドアの外とほぼ同じ高さにする）']],
+        editChoices: [['normal', '通常の高さ（土間をやめ、床を ±0 に戻す）']], panel: 'updateSelectedRoomFloor' },
     ],
     opening: [
       { key: 'windowKind', ja: '窓の種類', choices: [['sliding', '引違い'], ['casement', 'すべり出し'], ['fix', 'FIX（はめ殺し）']], for: ['window'], panel: 'windowKind' },
@@ -196,6 +201,12 @@
     return (SETTINGS[part] || []).filter(function (s) { return !s.for || s.for.indexOf(type) >= 0; });
   }
 
+  // 項目の選択肢。edit が真なら編集だけの選択肢（editChoices）も後ろに足す。
+  function choicesFor(def, edit) {
+    var base = (def && def.choices) || [];
+    return edit && def.editChoices ? base.concat(def.editChoices) : base;
+  }
+
   // 答えの set は「key=value; key=value」の文字列（答えの形を小さく保つため。配列でも受ける）。
   function parseSet(set) {
     if (Array.isArray(set)) return set;
@@ -208,6 +219,8 @@
   // 答えの set を、範囲・選択肢を確かめてから out に書く。知らない項目と
   // 範囲外の選択肢は入れない（変な値を入れない）。数は範囲の端に寄せる。
   // 入れなかった項目は ctx.rejected に「項目=値」で残す（黙って捨てない。見直しで AI に伝える）。
+  // ctx.edit === true（チャット・MCP の setProps。plan-core/operations.js の resolveSet）のときだけ、編集の選択肢
+  // （editChoices）も受ける。読み取り（plan-free-apply.js）は印を付けないので、今までどおり断る。
   // 部屋の天井（ceilingHeight / void）は、アプリの形 ceiling:{type, …} に直す。
   function applySettings(part, type, set, out, ctx) {
     var defs = settingsFor(part, type);
@@ -226,7 +239,7 @@
         if (!value) { reject(); return; }
       } else {
         value = String(kv.value);
-        if (!def.choices.some(function (c) { return c[0] === value; })) { reject(); return; }
+        if (!choicesFor(def, !!(ctx && ctx.edit === true)).some(function (c) { return c[0] === value; })) { reject(); return; }
       }
       if (part === 'room' && def.key === 'ceilingHeight') { if (!out.ceiling) out.ceiling = { type: 'flat', heightMm: value }; return; }
       if (part === 'room' && def.key === 'void') { out.ceiling = { type: 'void', toFloor: ((ctx && ctx.floor) || 1) + 1 }; return; }
@@ -241,7 +254,7 @@
     return null;
   }
 
-  // AI への説明（worker/plan-free.mjs の freeSpec が使う）。
+  // AI への説明（worker/plan-free.mjs の freeSpec が使う。読み取り用なので、編集だけの選択肢 editChoices は出さない）。
   function describe(part, label) {
     var rows = [];
     (SETTINGS[part] || []).forEach(function (s) {
@@ -279,6 +292,6 @@
     OPENINGS: OPENINGS, SWING_TYPES: SWING_TYPES, EXTERIOR: EXTERIOR, SITE: SITE, SETTINGS: SETTINGS,
     FLOOR_MATERIALS: FLOOR_MATERIALS, SITE_SURFACES: SITE_SURFACES,
     NOT_PASSED: NOT_PASSED, TYPES_NOT_PLACED: TYPES_NOT_PLACED,
-    settingsFor: settingsFor, applySettings: applySettings, parseSet: parseSet, exteriorByKind: exteriorByKind, describe: describe,
+    settingsFor: settingsFor, choicesFor: choicesFor, applySettings: applySettings, parseSet: parseSet, exteriorByKind: exteriorByKind, describe: describe,
   };
 }));

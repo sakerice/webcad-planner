@@ -190,3 +190,13 @@ test('plan-core/operations-catalog.js はグローバルに触らない', () => 
     assert.ok(!src.includes(w), w + ' が残っている');
   }
 });
+
+// 編集(チャット・MCP)の説明には、編集だけの選択肢(土間をやめる normal)も出す。読み取りの説明には出さない
+// (tools/tests/plan-settable.test.cjs が見る)。
+test('describeVocabulary は floorLevel の編集だけの選択肢 normal も書く', () => {
+  const text = C.describeVocabulary(deps);
+  const line = text.split('\n').find((l) => l.indexOf('floorLevel（') >= 0);
+  assert.ok(line, 'floorLevel の行が無い');
+  assert.match(line, /doma=/);
+  assert.match(line, /normal=/);
+});

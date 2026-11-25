@@ -207,3 +207,35 @@ test('土間の深さは HeightModel の1か所で出す（画面のパネル・
   assert.match(read('worker/plan-ctx-factory.mjs'), /HeightModel\.floorLevelRaiseMm\(work, room\.floor, value\)/);
   assert.match(read('assets/js/plan-data.js'), /HeightModel\.floorLevelRaiseMm\(DATA,room\.floor,value\)/);
 });
+
+// AI で土間にした部屋を、AI で通常の高さ(±0)に戻せなかった(2026-11-25)。戻す選択肢 normal は
+// 編集(チャット・MCP の setProps)だけで使い、読み取り(図面→間取り)の指示文と取り込みは1文字も変えない。
+test('土間をやめる normal は編集だけの選択肢で、読み取りの説明と取り込みには出ない', async () => {
+  const def = PlanSettable.SETTINGS.room.find((d) => d.key === 'floorLevel');
+  assert.deepEqual(def.choices.map((c) => c[0]), ['doma'], '読み取りの選択肢は土間だけのまま');
+  assert.ok(Array.isArray(def.editChoices) && def.editChoices.some((c) => c[0] === 'normal'), '編集の選択肢に normal がある');
+  // 読み取りの説明(describe と freeSpec)に normal は出ない
+  assert.doesNotMatch(PlanSettable.describe('room', 'rooms').join('\n'), /normal/);
+  const { buildFreePrompt } = await mod('worker/plan-free.mjs');
+  assert.doesNotMatch(buildFreePrompt({ pages: 1 }), /normal=/);
+  // 編集の印が無い(読み取りの)適用は断って rejected に残す。印があれば受ける
+  const rejected = [];
+  assert.deepEqual(PlanSettable.applySettings('room', null, 'floorLevel=normal', {}, { floor: 1, rejected }), {});
+  assert.deepEqual(rejected, ['floorLevel=normal']);
+  assert.deepEqual(PlanSettable.applySettings('room', null, 'floorLevel=normal', {}, { floor: 1, edit: true }), { floorLevel: 'normal' });
+  assert.deepEqual(PlanSettable.applySettings('room', null, 'floorLevel=doma', {}, { floor: 1, edit: true }), { floorLevel: 'doma' });
+  // 編集の印は true のときだけ(真っぽい値で読み取りが編集の選択肢を受けない)
+  assert.deepEqual(PlanSettable.applySettings('room', null, 'floorLevel=normal', {}, { edit: 'yes' }), {});
+});
+
+test('normal の深さは 0(設定パネルの「床の構造面 ±0mm」と同じ)', () => {
+  const HeightModel = require('../../assets/js/height-model.js');
+  const p = { heightDefaults: { modelVersion: 2, floorThickness: 220, perFloor: true }, floors: { 2: { floorThickness: 260 } } };
+  [p, {}].forEach((plan) => [1, 2].forEach((fl) => assert.equal(HeightModel.floorLevelRaiseMm(plan, fl, 'normal'), 0)));
+  const def = PlanSettable.SETTINGS.room.find((d) => d.key === 'floorLevel');
+  def.editChoices.forEach(([v]) => assert.equal(typeof HeightModel.floorLevelRaiseMm(p, 1, v), 'number', v));
+  // パネルの ±0 の選択肢は値 0
+  const constants = read('assets/js/app-constants.js');
+  const panel = constants.slice(constants.indexOf('function selectedRoomFloorHtml'), constants.indexOf('function selectedRoomFloorHtml') + 900);
+  assert.match(panel, /<option value="0">床の構造面 ±0mm<\/option>/);
+});

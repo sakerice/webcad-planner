@@ -442,7 +442,11 @@
   // アプリの1項目に直せず、画面の計算が要る項目。hooks.set[key] があるときだけ受ける。
   var SET_NEEDS_HOOK = { room: { floorLevel: true } };
 
-  function choicesOf(def) { return def.choices ? def.choices.map(function (c) { return c[0]; }) : undefined; }
+  // 選択肢の値の並び。setProps は編集なので、編集だけの選択肢(editChoices。土間をやめる normal など)も含める。
+  function choicesOf(def) {
+    if (!def.choices) return undefined;
+    return def.choices.concat(def.editChoices || []).map(function (c) { return c[0]; });
+  }
 
   // set を確かめて、アプリの項目の並び [{key, value, viaHook}] にする。書き込みはしない。
   function resolveSet(set, target, ctx, warnings) {
@@ -471,7 +475,8 @@
         return fail('set の「' + key + '」は、この ctx では設定できません(画面の計算が要ります)');
       }
       var rejected = [];
-      settable.applySettings(pk.part, pk.kind, [{ key: key, value: value }], out, { floor: target.obj.floor || 1, rejected: rejected });
+      // edit: 編集の印。PlanSettable は、これがあるときだけ編集だけの選択肢(editChoices)を受ける(読み取りは受けない)。
+      settable.applySettings(pk.part, pk.kind, [{ key: key, value: value }], out, { floor: target.obj.floor || 1, rejected: rejected, edit: true });
       if (rejected.length) {
         return fail('set の「' + key + '=' + String(value) + '」は使えません' + (def.num ? '(数で渡してください)' : def.text ? '(文字で渡してください)' : '(選択肢から選んでください)'),
           def.choices ? choicesOf(def) : undefined);

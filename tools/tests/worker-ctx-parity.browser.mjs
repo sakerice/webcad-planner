@@ -61,14 +61,16 @@ try {
     const res = { total: 0, same: 0, bothFailed: 0, refused: [], failures: [], byVariant: {}, deadFaces: [] };
 
     // ── 照らし合わせの1件 ──
+    // op は操作1つか、続けて当てる操作の並び(土間にしてから戻す、など)。
     function check(variant, plan, op, label) {
       res.total++;
+      const ops = Array.isArray(op) ? op : [op];
       const before = json(plan);
-      const w = tools.workerApply(plan, [op]);
+      const w = tools.workerApply(plan, ops);
       if (json(plan) !== before) { res.failures.push({ variant, label, why: 'Worker がプランを書き換えた' }); return; }
       nextId = F.firstNewId(plan);
       let c;
-      try { c = Ops.applyOperations(plan, [op], planChatCtx()); } catch (e) { c = { errors: [{ message: '例外: ' + e.message }] }; }
+      try { c = Ops.applyOperations(plan, ops, planChatCtx()); } catch (e) { c = { errors: [{ message: '例外: ' + e.message }] }; }
       const v = res.byVariant[variant] = res.byVariant[variant] || { total: 0, same: 0, bothFailed: 0, refused: 0 };
       v.total++;
       if (w.errors.length && c.errors.length) {
@@ -328,7 +330,7 @@ try {
       const plainRoom = p.rooms.find((r) => !p.items.some((it) => (/^light-/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail') && it.floor === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d));
       const sets = [
         [wall.id, { wallHeight: 2600 }], [wall.id, { thick: 150 }], [wall.id, { wallHeight: 9000 }],
-        [r1.id, { floorMaterial: 'tile_floor' }], [r1.id, { floorLevel: 'doma' }],
+        [r1.id, { floorMaterial: 'tile_floor' }], [r1.id, { floorLevel: 'doma' }], [r1.id, { floorLevel: 'normal' }],
         [plainRoom && plainRoom.id, { ceilingHeight: 2600 }], [plainRoom && plainRoom.id, { void: 'yes' }],
         [fixtureRoom && fixtureRoom.id, { ceilingHeight: 2200 }], [fixtureRoom && fixtureRoom.id, { floorMaterial: 'wood_oak' }],
       ];
@@ -360,8 +362,13 @@ try {
       check(V.name, p, { op: 'setProps', args: { id: r1.id, set: { ceilingHeight: 2500 } } }, '設定 天井高');
       // 土間: 深さは高さモデル・床の厚みで変わる。天井に付いた器具の無い部屋(1階・2階)と、大きい部屋(器具があれば Worker は断る)
       const hasFixture = (r) => p.items.some((it) => (/^light-/.test(it.type) || it.type === 'fmp-CeilingFan01' || it.type === 'original-laundry-rail') && it.floor === r.floor && it.x + it.w / 2 >= r.x && it.x + it.w / 2 <= r.x + r.w && it.y + it.d / 2 >= r.y && it.y + it.d / 2 <= r.y + r.d);
+      // 土間にしてから normal で戻す並びも当てる。
       [r1].concat([1, 2, 3].map((fl) => p.rooms.find((r) => r.floor === fl && !hasFixture(r)))).forEach((r) => {
-        if (r) check(V.name, p, { op: 'setProps', args: { id: r.id, set: { floorLevel: 'doma' } } }, '設定 土間 ' + r.floor + '階 ' + r.id);
+        if (!r) return;
+        const doma = { op: 'setProps', args: { id: r.id, set: { floorLevel: 'doma' } } };
+        const normal = { op: 'setProps', args: { id: r.id, set: { floorLevel: 'normal' } } };
+        check(V.name, p, doma, '設定 土間 ' + r.floor + '階 ' + r.id);
+        check(V.name, p, [doma, normal], '設定 土間→normal ' + r.floor + '階 ' + r.id);
       });
       check(V.name, p, { op: 'setProps', args: { id: p.walls[1].id, set: { wallHeight: 2700 } } }, '設定 壁の高さ');
       const win = p.items.find((it) => it.type === 'window');
