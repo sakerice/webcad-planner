@@ -25,3 +25,14 @@
   X-Frame-Options: SAMEORIGIN
   Content-Security-Policy: frame-ancestors 'self'
   Strict-Transport-Security: max-age=15552000
+
+# 家具のモデル置き場(GLB・サムネイルの PNG・一覧の JSON)を、iPhone のアプリ版(Capacitor)から読めるようにする(2026-11-25)。
+# アプリはモデルを同梱せず本番から読む。ページの出どころが capacitor://localhost なので、three.js の読み込み(fetch)と、
+# crossOrigin を付けた画像の読み込みは、この見出しが無いと WebView が中身を渡さない。
+# - 値は capacitor://localhost の1つだけ(`*` にしない)。_headers は送ってきた出どころで値を変えられないので、他は書けない。
+#   同じ出どころの Web 版は、この見出しを見ないので動きは変わらない。
+# - 範囲は /assets/models/* だけ。テクスチャ・空・JS などはアプリに同梱する見込みなので開けない。広げるときはここに足す。
+# - Cookie を使わないので Allow-Credentials は付けない。GET だけなので事前の問い合わせ(OPTIONS)は飛ばない。
+# 届き方は tools/tests/security-headers.browser.mjs が本物の Worker で確かめる。
+/assets/models/*
+  Access-Control-Allow-Origin: capacitor://localhost

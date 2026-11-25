@@ -8,6 +8,7 @@ import { handlesRooms, handleRooms } from "./routes-rooms.mjs";
 import { handlesAi, handleAi } from "./routes-ai.mjs";
 import { handlesMcp, handleMcp } from "./mcp.mjs";
 import { handlesCspReport, handleCspReport } from "./csp-report.mjs";
+import { corsOrigin, isPreflight, preflightResponse, withCors } from "./cors.mjs";
 
 // /api/ の応答に X-Content-Type-Options: nosniff を付ける。_headers の見出しは静的アセットにしか付かず、
 // Worker が返す応答には付かないため。WebSocket への切り替え(101)はそのまま返す。
@@ -41,6 +42,10 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
-    return withNosniff(await route(request, env, url, ctx));
+    // アプリ版(capacitor://localhost)など、許した別の出どころにだけ CORS の見出しを足す(worker/cors.mjs)。
+    // 同じ出どころ・Origin なし・許していない出どころ・/api/mcp は cors が null で、今までと同じ応答になる。
+    const cors = corsOrigin(request, url);
+    if (cors && isPreflight(request)) return withNosniff(preflightResponse(cors));
+    return withCors(withNosniff(await route(request, env, url, ctx)), cors);
   },
 };
