@@ -158,7 +158,7 @@
       mesh.material=Array.isArray(mesh.material)?mesh.material.map(finish):finish(mesh.material);
     });
   }
-  function sourceYaw(url){return (/assets\/models\/furniture_mega\//.test(url)||/assets\/models\/refined\/car_sedan_/.test(url))?Math.PI:0;}
+  function sourceYaw(url){return /assets\/models\/furniture_mega\//.test(url)?Math.PI:0;}
   function prepare(scene,url){
     // Canonical furniture front: +Z; up: +Y. Apply before bounding boxes/instances.
     if(scene.rotation && !(scene.userData&&scene.userData.facingNormalized)){
