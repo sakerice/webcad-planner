@@ -1,6 +1,6 @@
 // Task 29-2: 幅によって機能の入口が消えないこと。
 //
-// これは grep ではない。index.html の <style> を実際にパースして小さな CSS の
+// これは grep ではない。assets/app.css(もとは index.html の <style>)を実際にパースして小さな CSS の
 // 評価器を作り、マークアップから組み立てた要素ツリーに対して、320〜1400px の
 // 各幅で display を計算する。測るのは「その幅で、その機能を呼べるボタンが
 // 1つでも生きているか」という性質そのものであって、閾値の数字やクラス名では
@@ -17,11 +17,13 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = require('./app-source.cjs').appSource();
+const { appSource, appCss } = require('./app-source.cjs');
+const html = appSource();
 
-// ── 1. CSS: <style> を集めてルールへ分解する ──────────────────────────────
+// ── 1. CSS: 本体のスタイルシート(assets/app.css。もとは index.html の <style>)と
+//    index.html に残る <style> を、読む順に集めてルールへ分解する ─────────────
 function collectCss(src) {
-  let css = '';
+  let css = appCss() + '\n';
   let at = 0;
   for (;;) {
     const open = src.indexOf('<style', at);
@@ -319,7 +321,7 @@ test('入口の抽出そのものが機能している（12機能すべてにボ
   const stillIds = ENTRIES.openUnityRenderModal.map((n) => n.id).filter(Boolean);
   assert.ok(stillIds.indexOf('unity-render-toolbar-btn') >= 0,
     '画像AIレンダーの入口 unity-render-toolbar-btn が見えていない');
-  assert.equal(html.indexOf('unity-render-fab'), -1,
+  assert.equal((html + '\n' + appCss()).indexOf('unity-render-fab'), -1,
     '削除した浮きボタン #unity-render-fab が復活している');
 
 });

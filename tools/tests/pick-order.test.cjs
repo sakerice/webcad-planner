@@ -376,7 +376,7 @@ test('斜線制限の断り書きは畳む（消さずに、既定では出さ�
 });
 
 test('操作ガイドはクリックを通す（平面図の左上が永久に選べなくなっていた）', () => {
-  const m = html.match(/#help-box\{[^}]*\}/);
+  const m = require('./app-source.cjs').appCss().match(/#help-box\{[^}]*\}/);
   assert.notEqual(m, null);
   assert.match(m[0], /pointer-events:none/);
 });
