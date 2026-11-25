@@ -80,4 +80,26 @@ function installOwnHelpersInVm() {
   };
 }
 
-module.exports = { appSource, ownHelpersSource, installOwnHelpersInVm, EXTRACTED, ROOT };
+// アプリ本体のスタイルシート(assets/app.css)の中身。
+// もとは index.html の <style> 1枚だった(2026-11 に外のファイルへ出した)。
+// appSource() は CSS を含まないので、CSS を読むテスト(セレクタを解いて効く値を
+// 求めるもの、CSS の綴りを見るもの)はこれを使う。読む範囲は外へ出す前と同じで、
+// 後ろで読む ui-refinement.css・chat.css・ceiling-designer.css は含めない。
+const APP_CSS = 'assets/app.css';
+let cachedCss = null;
+function appCss() {
+  if (cachedCss === null) {
+    // テストは外のファイルを直接読むので、画面が実際にそれを読んでいることもここで確かめる。
+    // 読む順は ui-refinement.css より前(後ろの物が上書きする前提で書かれている)。
+    const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+    const at = html.indexOf('<link rel="stylesheet" href="' + APP_CSS + '">');
+    const next = html.indexOf('<link rel="stylesheet" href="assets/ui-refinement.css">');
+    if (at < 0 || next < 0 || at > next || html.indexOf('</head>') < at) {
+      throw new Error('index.html の <head> が ' + APP_CSS + ' を ui-refinement.css より前で読んでいない');
+    }
+    cachedCss = readFileSync(join(ROOT, APP_CSS), 'utf8');
+  }
+  return cachedCss;
+}
+
+module.exports = { appSource, appCss, ownHelpersSource, installOwnHelpersInVm, EXTRACTED, APP_CSS, ROOT };

@@ -2,7 +2,7 @@
 //
 // オーナーの指摘は「近しい機能なのにフォントサイズが違う・表記が揺れる」。
 // ここで見ているのは CSS の綴りではなく、**実際に効く文字の大きさ**である。
-// index.html のスタイルシートを読み、セレクタの詳細度と記述順で勝ち負けを決め、
+// assets/app.css(もとは index.html の <style>)を読み、セレクタの詳細度と記述順で勝ち負けを決め、
 // 2つのダイアログの中の要素それぞれについて px を1つに解決してから比べる。
 //
 // だから「片方のダイアログにだけ font-size を足す」と、その要素の役割の px が
@@ -13,7 +13,8 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = require('./app-source.cjs').appSource();
+const { appSource, appCss } = require('./app-source.cjs');
+const html = appSource();
 
 // ══ 1. HTML を木にする ════════════════════════════════════════════════════
 const VOID_TAGS = ['input', 'img', 'br', 'hr', 'meta', 'link', 'source'];
@@ -89,13 +90,14 @@ const VIDEO = cardOf('video-render-modal');
 const DIALOGS = [['画像AI', STILL], ['動画AI', VIDEO]];
 
 // ══ 2. CSS を読む ═════════════════════════════════════════════════════════
-// style ブロックを全部つなげ、コメントを外し、@media を条件つきの束にする。
+// 本体のスタイルシート(assets/app.css。もとは index.html の <style>)と、
+// index.html に残る style ブロックを読む順につなげ、コメントを外し、@media を条件つきの束にする。
 function styleSheets() {
-  const out = [];
+  const out = [appCss()];
+  assert.ok(/\S/.test(out[0]), 'assets/app.css が空');
   const re = /<style[^>]*>([\s\S]*?)<\/style>/g;
   let m;
   while ((m = re.exec(html))) out.push(m[1]);
-  assert.ok(out.length > 0, '<style> が無い');
   return out.join('\n');
 }
 const css = styleSheets().replace(/\/\*[\s\S]*?\*\//g, '');
@@ -463,10 +465,11 @@ test('出力欄の言い出しが2つのダイアログで揃っている', () =
   assert.equal(video, still, '2つのダイアログで待ち受けの文が違う');
 });
 
-test('画面に出る言葉から、旧称・略語が消えている（index.html 全体）', () => {
+test('画面に出る言葉から、旧称・略語が消えている（index.html 全体と assets/app.css）', () => {
+  const all = html + '\n' + appCss();
   ['一括DL', '詳細ガイド', '制御パッケージ', '制御画像', 'インスタンスID画像']
     .forEach((w) => {
-      assert.equal(html.indexOf(w), -1, '「' + w + '」が index.html に残っている');
+      assert.equal(all.indexOf(w), -1, '「' + w + '」が index.html か assets/app.css に残っている');
     });
 });
 

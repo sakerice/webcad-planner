@@ -62,6 +62,7 @@
 
 The product promise is 「スマホで、建てる前の暮らしを確かめる」. Prioritize readable dimensions, believable surfaces, and responsive navigation. See [quality review](docs/quality-review/README.md) for the findings and remaining model work.
 
+- Base app styles (formerly the inline `<style>` in `index.html`) live in `assets/app.css`. It is linked before `assets/ui-refinement.css`; keep that order, because the refinements override it.
 - Current workspace refinements and shared control tokens live in `assets/ui-refinement.css`.
 - Mobile uses a brand/floor row and a horizontally scrollable view/action row. Keep the first three views visible at 320px width.
 - Furniture catalogue cards show the model thumbnail at a useful size; retain model IDs and category structure.
