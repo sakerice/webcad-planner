@@ -21,7 +21,8 @@ const mod = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
 const HOST = 'https://cad-planner.example.test';
 const ENDPOINT = HOST + '/api/mcp';
 const MODERN = '2026-07-28';
-const ROOM_URL_RE = /house-planner で開く: (https:\/\/cad-planner\.example\.test\/#room=([A-Za-z0-9_-]{22}))/;
+// 返すリンクには、外の AI が返したリンクの印(&via=ai)が付く。画面はこの印で広告を出さない(assets/js/pr-ads.js)
+const ROOM_URL_RE = /house-planner で開く: (https:\/\/cad-planner\.example\.test\/#room=([A-Za-z0-9_-]{22})&via=ai)(?=\s|$)/;
 
 // 偽の AI_QUOTA: 本物の AiQuota を名前ごとに1つ作る。
 async function addQuota(env) {
@@ -294,7 +295,8 @@ test('新しい版の話し方: initialize なしで、版を載せた tools/lis
 test('通しの流れ: create_plan → addRoom → placeItem → get_plan に足した物がある → inspect_plan。画面にも届く', async () => {
   const ctx = await setup();
   const { id, url, result } = await createPlan(ctx);
-  assert.equal(url, HOST + '/#room=' + id);
+  assert.equal(url, HOST + '/#room=' + id + '&via=ai');
+  assert.equal((await mod('worker/mcp.mjs')).roomIdFrom(url), id, '印の付いたリンクから id を取り出せない');
   assert.match(textOf(result), /placeItem の type/, '作ったときに置ける物の一覧も返す');
   // 空のプランが R2 に置かれ、ルームが作られた
   const stored = JSON.parse(ctx.env.PLANS.objects.get('rooms/' + id + '.json').body);

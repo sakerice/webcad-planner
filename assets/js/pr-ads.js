@@ -1,4 +1,4 @@
-// 広告(PR)の枠。Web 版だけに出す。
+// 広告(PR)の枠。Web 版だけに出す。外の AI(Claude・ChatGPT など)が返したリンクで開いた画面には出さない。
 //
 // 出す場所は2つ。
 //   - 画面の上端の帯(PR_ADS.top)。2D でも 3D でも同じ位置。高さの低い画面(スマートフォンの横向き)では出さない。
@@ -59,15 +59,75 @@
   // 728×90 だと図の領域が 16% 減るため。468×60 があればそれ、無ければ 320×50。どちらも無ければ帯を出さない(728×90 には戻さない)
   var SHORT_SCREEN_H = 800, SHORT_AD_MAX_H = 60;
 
+  // ───── 外の AI(Claude・ChatGPT など)が返したリンクで開いた画面 ─────
+  // 外の AI は /api/mcp(worker/mcp.mjs)でプランを作り、共同編集のルームのリンクを利用者に返す。
+  // そのリンクで開いた画面には広告を出さない(2026-11-25 決定。設計書 3.5.1)。見分け方は2つを重ねる。
+  //   1. リンクの印。worker/mcp.mjs の roomUrl が #room=<id>&via=ai の形で返す(AI_MARK。両方で同じ値にする)。
+  //   2. このブラウザの覚え書き。印の付いたリンクで開いたルームの id を localStorage(AI_ROOMS_KEY)に残す。
+  //      印の無いリンク(#room=<id>)でも、保存一覧から開き直しても、覚えているルームなら出さない。
+  // 共有のダイアログの URL にも印を残す(roomHash。index.html の sharedUrl)ので、渡された相手の画面でも出ない。
+  // 一度 AI のリンクの画面だと分かったら、ページを読み直すまで戻さない(aiSeen。途中で帯が出て画面がずれないように)。
+  // 印を消して覚え書きも無ければ広告が出る、というだけの作り(不正への備えではない)。
+  var AI_MARK_KEY = 'via', AI_MARK_VAL = 'ai';
+  var AI_ROOMS_KEY = 'webcad-ai-rooms', AI_ROOMS_MAX = 200;
+  var ROOM_ID_RE = /^[A-Za-z0-9_-]{22}$/;
+  var aiSeen = false;
+  // アドレスのルームの id と印(index.html の sharedRoomFromLocation と同じ読み方: # が先、無ければ ?)
+  function locInfo(){
+    var out = { room: null, via: false };
+    try{
+      var loc = root.location || {};
+      var h = new URLSearchParams(String(loc.hash || '').replace(/^#/, ''));
+      var q = new URLSearchParams(String(loc.search || ''));
+      var id = h.get('room') || q.get('room');
+      out.room = ROOM_ID_RE.test(id || '') ? id : null;
+      out.via = h.get(AI_MARK_KEY) === AI_MARK_VAL || q.get(AI_MARK_KEY) === AI_MARK_VAL;
+    }catch(e){}
+    return out;
+  }
+  function aiRooms(){
+    try{
+      var list = JSON.parse(root.localStorage.getItem(AI_ROOMS_KEY) || '[]');
+      return Array.isArray(list) ? list.filter(function(id){ return typeof id === 'string' && ROOM_ID_RE.test(id); }) : [];
+    }catch(e){ return []; }
+  }
+  function isAiRoom(id){ return typeof id === 'string' && aiRooms().indexOf(id) !== -1; }
+  function rememberAiRoom(id){
+    if(typeof id !== 'string' || !ROOM_ID_RE.test(id)) return;
+    try{
+      var list = aiRooms().filter(function(x){ return x !== id; });
+      list.push(id);
+      root.localStorage.setItem(AI_ROOMS_KEY, JSON.stringify(list.slice(-AI_ROOMS_MAX)));
+    }catch(e){}
+  }
+  function fromAiLink(){
+    if(aiSeen) return true;
+    var at = locInfo();
+    if(at.via){ aiSeen = true; if(at.room) rememberAiRoom(at.room); }
+    else if(at.room && isAiRoom(at.room)) aiSeen = true;
+    return aiSeen;
+  }
+  // 共有の URL の # の中身。AI のリンクで開いたルームには印を残す
+  function roomHash(id){
+    return 'room=' + id + (isAiRoom(id) ? '&' + AI_MARK_KEY + '=' + AI_MARK_VAL : '');
+  }
+  // 画面がルームに入ったとき(index.html の installSharedPlan)。覚えているルームなら、出ている広告を片付ける
+  function noteRoom(id){
+    fromAiLink();
+    if(!aiSeen && isAiRoom(id)) aiSeen = true;
+    if(aiSeen && root.document) syncTop();
+  }
+
   // 'web': ブラウザ。A8.net の枠を出す。
   // 'app': Capacitor の中(アプリ版)。AdMob を使うので、ここの枠は出さない。
-  // 'off': そのほか(ファイルを直に開いた・ほかの画面に埋め込まれた など)。出さない。
+  // 'off': そのほか(外の AI が返したリンクで開いた・ファイルを直に開いた・ほかの画面に埋め込まれた など)。出さない。
   function adsMode(){
     try{
       var proto = (root.location && root.location.protocol) || '';
       if(root.Capacitor || proto === 'capacitor:' || proto === 'ionic:') return 'app';
       if(proto !== 'https:' && proto !== 'http:') return 'off';
       if(root.top && root.top !== root) return 'off';
+      if(fromAiLink()) return 'off';
     }catch(e){ return 'off'; }
     return 'web';
   }
@@ -227,7 +287,7 @@
     put();
   }
 
-  var api = { adsMode: adsMode, fill: fill, syncTop: syncTop, validCreative: validCreative, creatives: creatives, SLOTS: SLOTS };
+  var api = { adsMode: adsMode, fromAiLink: fromAiLink, roomHash: roomHash, noteRoom: noteRoom, fill: fill, syncTop: syncTop, validCreative: validCreative, creatives: creatives, SLOTS: SLOTS };
   root.PrAds = api;
   root.adsMode = adsMode;
 
