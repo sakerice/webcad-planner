@@ -189,6 +189,43 @@ try {
     await context.close();
   }
 
+  // ── 共同編集の表示(人数。押すと共有のダイアログが開く) ───────────────
+  // 共同編集中の状態は、画面が読む値(SHARED.roomId・SHARED.people)を入れて renderSharedUi() で作る。
+  // サーバーへは何も送らない(/api は open() が止めている)。
+  for (const name of ['ipad-landscape', 'ipad-portrait', 'phone-landscape', 'phone-portrait']) {
+    const { context, page } = await open(name);
+    const vp = DEVICES[name].viewport;
+    assert.equal(await shown(page, 'collab-indicator'), false, `${name}: 共同編集中でなければ、共同編集の表示は出ない`);
+    await page.evaluate(() => { SHARED.roomId = 'TouchLayoutTestRoom01'; SHARED.people = [{ name: 'A' }, { name: 'B' }, { name: 'C' }]; renderSharedUi(); });
+    if (name.startsWith('ipad')) {
+      assert.equal(await shown(page, 'collab-indicator'), true, `${name}: 共同編集中は、共同編集の表示が出る`);
+      assert.match(await page.evaluate(() => document.getElementById('collab-count').textContent), /3人で編集中/);
+      const r = await rect(page, 'collab-indicator'), tb = await rect(page, 'toolbar');
+      assert.ok(r.left >= 0 && r.right <= vp.width && r.top >= 0 && r.bottom <= vp.height, `${name}: 共同編集の表示が画面からはみ出している ${JSON.stringify(r)}`);
+      assert.ok(r.left >= tb.left && r.right <= tb.right && r.top >= tb.top && r.bottom <= tb.bottom, `${name}: 共同編集の表示が上の帯からはみ出している`);
+      // 帯のほかのボタン・階の欄・ロゴの文字と重ならない(横に送る段のボタンは、帯の中に見えている物だけ見る)
+      const hits = await page.evaluate(() => {
+        const me = document.getElementById('collab-indicator'), a = me.getBoundingClientRect(), out = [];
+        document.querySelectorAll('#toolbar .tbtn, #toolbar #floor-sel, #toolbar .brand-logo, #toolbar .brand-word').forEach((el) => {
+          if (el === me || getComputedStyle(el).display === 'none') return;
+          const b = el.getBoundingClientRect();
+          if (b.width <= 0 || b.height <= 0) return;
+          if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) out.push(el.id || el.className || el.textContent.trim());
+        });
+        return out;
+      });
+      assert.deepEqual(hits, [], `${name}: 共同編集の表示が帯のほかの部品と重なっている`);
+      // 送らなくても見えていて、押すと共有のダイアログが開く
+      assert.equal(await page.evaluate(() => { const b = document.getElementById('collab-indicator').getBoundingClientRect(); const el = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2); return !!el && !!el.closest('#collab-indicator'); }), true, `${name}: 共同編集の表示がほかの物の下に隠れている`);
+      await page.locator('#collab-indicator').tap();
+      assert.equal(await page.evaluate(() => document.getElementById('share-overlay').classList.contains('show')), true, `${name}: 共同編集の表示を押すと共有のダイアログが開く`);
+    } else {
+      // スマートフォン(幅 720px 以下・横向きで高さが低い)は今までどおり出さない
+      assert.equal(await shown(page, 'collab-indicator'), false, `${name}: スマートフォンでは共同編集の表示を出さない`);
+    }
+    await context.close();
+  }
+
   // ── 3. 操作の案内を閉じる ───────────────────────────────────────────
   for (const name of ['ipad-landscape', 'pc']) {
     const { context, page } = await open(name, { plan: false });

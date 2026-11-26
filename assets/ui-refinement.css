@@ -364,7 +364,18 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
      @media (min-width:769px) and (hover:hover), (min-width:769px) and (pointer:fine)
    で書く。JS は isMobileLayout()(index.html)が同じ条件を見る。
    幅だけで分けると、iPad と横向きのスマートフォンがマウス向けの画面になる。 */
-@media (hover:none) and (pointer:coarse){#collab-indicator{display:none!important}}
+/* 共同編集の表示(#collab-indicator。人数を出し、押すと共有のダイアログが開く)。
+   幅 721px 以上のタッチ端末(iPad)では、共同編集中だけ、上の帯の1段めの右(階の欄の左)に置く。
+   2段めは横に送る並びで、iPad 縦では画面の外に出て見えないため。
+   共同編集中でないときは出さない(.show が付かない。assets/app.css の #collab-indicator と同じ意図)。
+   幅 720px 以下(assets/app.css)と横向きのスマートフォンでは、今までどおり出さない。 */
+@media (hover:none) and (pointer:coarse){#toolbar #collab-indicator:not(.show){display:none!important}}
+@media (hover:none) and (pointer:coarse) and (min-width:721px){
+  #toolbar #collab-indicator.show{position:absolute;top:8px;right:calc(8px + 64px + 8px);z-index:1;
+    min-height:36px!important;height:36px;max-width:170px;padding:0 12px!important;font-size:12px!important}
+  /* ロゴの枠は1段めの幅いっぱいなので、表示の分だけ右を空ける */
+  #toolbar:has(#collab-indicator.show) .brand-mark{margin-right:186px!important}
+}
 /* 比較モードの帯と名前の札は、下のナビ(高さ 56px + 余白)の上へ上げる */
 @media (max-width:768px), (hover:none) and (pointer:coarse){.compare-bar{bottom:calc(72px + var(--safe-bot,0px))}.compare-tag{bottom:calc(124px + var(--safe-bot,0px))}}
 
@@ -393,6 +404,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
   #toolbar{grid-template-columns:auto 64px minmax(0,1fr)!important;align-items:center;min-height:0!important;padding:6px 8px!important}
   #toolbar .brand-word{display:none!important}
   #toolbar .toolbar-actions{grid-column:3!important;grid-row:1;padding:0!important}
+  #toolbar #collab-indicator{display:none!important}
   #help-box{top:calc(70px + var(--safe-top,0px))!important;max-width:min(300px,calc(100% - 250px))}
   #wall-panel,#light-panel{top:calc(70px + var(--safe-top,0px))!important}
   #props.show.prop-expanded{top:calc(70px + var(--safe-top,0px))!important}
