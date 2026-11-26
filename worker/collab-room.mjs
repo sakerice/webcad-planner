@@ -11,6 +11,11 @@
 // 画面はこの印を見て、外の AI の変更を「元に戻す」で戻せるようにする。印を知らない古い画面は今までどおり相手の差分として当てる。
 // 外の AI からの変更を受け付けるかどうか(meta.aiEditsOff。既定は受け付ける)は、画面から POST /ai-edits {off} で切り替える
 // (外の /api/rooms/:id/ai-edits。routes-rooms.mjs が転送する)。止めている間の /op は断る(/read は通す)。
+// 止めている間は、画面からでない /update・/save も断る(ルームの id を知った外の AI や道具が、/api/rooms/:id/update を
+// 素の HTTP で呼んでスイッチを素通りしないように)。スイッチの切り替え(/ai-edits)は、いつでも画面からだけ受ける
+// (外から「受け付ける」に戻されないように)。「画面から」は routes-rooms.mjs が Origin を見て付ける印(SCREEN_HEADER)で、
+// 画面の共同編集は今までどおり通る。Origin はブラウザの外からなら偽れるので、偽ってまで呼ぶ相手は止まらない
+// (見分け方と守れる範囲は worker/room-screen.mjs の冒頭)。
 // 呼ぶのは worker/routes-rooms.mjs の roomOp・roomRead(id の形を確かめてから Durable Object を引く)。
 import {
   RETENTION_MS, AUTO_SAVE_IDLE_MS, AUTO_SAVE_MAX_MS,
@@ -21,6 +26,7 @@ import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
 import { roomPatchProblem, roomPlanProblem, maxSameId, upsertKeyCounts } from "./room-guard.mjs";
+import { SCREEN_HEADER } from "./room-screen.mjs";
 
 // MCP 経由の差分の送り手の名前。画面の clientId は 24 桁の16進(index.html の sharedClientId)なので重ならない。
 export const MCP_CLIENT_ID = "mcp";
@@ -206,6 +212,12 @@ export class CollaborationRoom {
     // 外の AI の回数(メモリの中の数)。/op は {day, n}、/read は {start, n}(1分の窓)。
     this.mcpOps = { day: "", n: 0, del: 0 };
     this.mcpReads = { start: 0, n: 0 };
+  }
+
+  // 外の AI からの変更を止めている間、画面からでない書き込みを断る。通すときは null。
+  outsideWriteRefusal(request, meta) {
+    if (!meta.aiEditsOff || request.headers.get(SCREEN_HEADER) === "1") return null;
+    return json({ error: "ai_edits_off", message: MCP_AI_EDITS_OFF_MESSAGE }, 403);
   }
 
   // /op を1回数える。上限を超えていれば null(数を進めない)。進めた後の {day, n, del} を返す(del はその日に消えた物の数)。
@@ -490,6 +502,8 @@ export class CollaborationRoom {
   async update(request) {
     const meta = await this.getMeta();
     if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    const refusal = this.outsideWriteRefusal(request, meta);
+    if (refusal) return refusal;
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || payload.type !== "patch" || !payload.patch) return json({ error: "invalid_patch" }, 400);
@@ -633,10 +647,12 @@ export class CollaborationRoom {
 
   // POST /ai-edits {off: true|false}: 外の AI からの変更を止める・受け付ける。meta.aiEditsOff に持ち、全員へ配る。
   // 版・期限・書き戻しの予約は変えない(プランは変わらない)。同じ値なら書かずにそのまま返す。
-  // 返事 {aiEditsOff}。本文が読めない・形が違う 400、大きすぎ 413、ルームが無い・期限切れ 410。
+  // 返事 {aiEditsOff}。本文が読めない・形が違う 400、大きすぎ 413、ルームが無い・期限切れ 410、画面からでない 403。
   async setAiEdits(request) {
     const meta = await this.getMeta();
     if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    // 切り替えは画面からだけ受ける(止めたスイッチを、ルームの id を知った外の道具に戻されないように)
+    if (request.headers.get(SCREEN_HEADER) !== "1") return json({ error: "forbidden" }, 403);
     let payload;
     try { payload = await readJsonWithLimit(request, MAX_AI_EDITS_BODY_BYTES); } catch (response) { return response; }
     if (!payload || typeof payload !== "object" || Array.isArray(payload) || typeof payload.off !== "boolean") {
@@ -654,6 +670,8 @@ export class CollaborationRoom {
   async manualSave(request) {
     const meta = await this.getMeta();
     if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    const refusal = this.outsideWriteRefusal(request, meta);
+    if (refusal) return refusal;
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || !validPlan(payload.plan)) return json({ error: "invalid_plan" }, 400);
