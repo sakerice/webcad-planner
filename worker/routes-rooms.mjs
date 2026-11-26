@@ -19,6 +19,7 @@ import {
   json, roomKey, randomRoomId, validPlan, encodedSize, readJsonWithLimit,
 } from "./shared.mjs";
 import { roomPlanProblem } from "./room-guard.mjs";
+import { SCREEN_HEADER, isFromScreen } from "./room-screen.mjs";
 
 // この worker が扱うパスかどうか。router はこれを見て振り分ける。
 export function handlesRooms(pathname) {
@@ -38,7 +39,12 @@ export async function handleRooms(request, env, url) {
   const forwarded = new URL(request.url);
   forwarded.hostname = "room";
   forwarded.pathname = action;
-  return stub.fetch(new Request(forwarded, request));
+  // 画面からの要求かどうかを、ここで見てルームへ伝える(ルームの側は URL が書き換わっていて出どころを比べられない)。
+  // 外から同じ名前の見出しが付いてきても、消してから付け直す。
+  const toRoom = new Request(forwarded, request);
+  toRoom.headers.delete(SCREEN_HEADER);
+  if (isFromScreen(request)) toRoom.headers.set(SCREEN_HEADER, "1");
+  return stub.fetch(toRoom);
 }
 
 async function createRoom(request, env) {
