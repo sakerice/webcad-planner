@@ -116,12 +116,14 @@ export function roomIdFrom(value) {
   return ROOM_ID_RE.test(id || "") ? id : null;
 }
 
-// 共有の URL（createRoomWithPlan と同じ形）。
+// 利用者に返す共有の URL。createRoomWithPlan の形（#room=<id>）に、外の AI が返したリンクの印（&via=ai）を足す。
+// 画面はこの印のあるリンクで開かれたとき、広告を出さない（assets/js/pr-ads.js の AI_MARK。同じ値にする）。
+// 印があっても roomIdFrom は id を取り出せる。印は目印だけで、個人の情報は入れない。
 function roomUrl(origin, roomId) {
   const url = new URL(origin);
   url.pathname = "/";
   url.search = "";
-  url.hash = `room=${roomId}`;
+  url.hash = `room=${roomId}&via=ai`;
   return url.toString();
 }
 
@@ -445,7 +447,7 @@ async function callTool(name, args, env, request, origin) {
     return text([
       "空のプランを作りました。",
       "plan: " + made.roomId,
-      "house-planner で開く: " + made.url,
+      "house-planner で開く: " + roomUrl(origin, made.roomId),
       "以後の道具の plan には、この URL か id を渡してください。この URL を利用者に伝えてください。プランは最後の変更から 60 日で消えます。",
       "",
       VOCABULARY,

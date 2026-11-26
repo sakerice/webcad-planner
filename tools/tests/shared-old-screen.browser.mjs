@@ -12,6 +12,7 @@
 //   2. /api/mcp の addRoom(印の付いた差分)が古い画面に届き、古い画面が落ちない
 //   3. 新しい画面で外部 AI からの変更を止める・受け付ける(type "ai-edits" の知らせ)。古い画面が落ちず、その後の編集も届く
 //   4. 止めている部屋に古い画面が入り直す(入室の知らせに aiEditsOff)。開けて、編集が届く
+//   5. 止めている間の手動保存と編集が、古い画面からも新しい画面からも通る(部屋は画面からでない書き込みだけを断る)
 //
 // sh tools/run_browser_tests.sh shared-old-screen
 import assert from 'node:assert/strict';
@@ -99,6 +100,29 @@ try {
   await edit(oldA.page, t0 + 40);
   await thickIs(newB.page, t0 + 40);
   passed++; console.log('ok 4 止めている部屋に古い画面が入り直せて、編集が届く');
+
+  // 5. 止めている間の手動保存(/save)。止めている間、部屋は画面からでない書き込みを断る(worker/room-screen.mjs)。
+  //    古い画面の保存と、そのあとの編集(/update)が、画面からの要求として通ること。
+  await sleep(1200);
+  const [saved] = await Promise.all([
+    oldA.page.waitForResponse((res) => res.url().endsWith('/api/rooms/' + room.roomId + '/save'), T),
+    oldA.page.evaluate(() => { savePlanToStorage(); }),
+  ]);
+  assert.equal(saved.status(), 200, '止めている間の古い画面の手動保存が断られた');
+  const [updated] = await Promise.all([
+    oldA.page.waitForResponse((res) => res.url().endsWith('/api/rooms/' + room.roomId + '/update'), T),
+    edit(oldA.page, t0 + 50),
+  ]);
+  assert.equal(updated.status(), 200, '止めている間の古い画面の編集が断られた');
+  await thickIs(newB.page, t0 + 50);
+  // 新しい画面の手動保存も通る
+  await sleep(1200);
+  const [savedNew] = await Promise.all([
+    newB.page.waitForResponse((res) => res.url().endsWith('/api/rooms/' + room.roomId + '/save'), T),
+    newB.page.evaluate(() => { savePlanToStorage(); }),
+  ]);
+  assert.equal(savedNew.status(), 200, '止めている間の新しい画面の手動保存が断られた');
+  passed++; console.log('ok 5 止めている間も、古い画面と新しい画面の手動保存と編集が通る');
 
   assert.deepEqual(errors, { old: [], new: [] });
   console.log(`shared-old-screen: ${passed} 件 ok`);
