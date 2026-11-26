@@ -16913,8 +16913,10 @@ function sharedRoomFromLocation(){
   var id=new URLSearchParams(hash).get('room')||new URLSearchParams(location.search||'').get('room');
   return /^[A-Za-z0-9_-]{22}$/.test(id||'')?id:null;
 }
+// URL の # の中身。外の AI が返したリンクで開いたルームには、その印を残す(広告を出さない画面。assets/js/pr-ads.js)
+function sharedRoomHash(roomId){return (window.PrAds&&PrAds.roomHash)?PrAds.roomHash(roomId):'room='+roomId;}
 function sharedUrl(){
-  var url=new URL(location.href);url.searchParams.delete('room');url.hash=SHARED.roomId?'room='+SHARED.roomId:'';return url.toString();
+  var url=new URL(location.href);url.searchParams.delete('room');url.hash=SHARED.roomId?sharedRoomHash(SHARED.roomId):'';return url.toString();
 }
 function sharedSetStatus(message,isError){
   var el=document.getElementById('share-status');if(!el)return;el.textContent=message;el.classList.toggle('error',!!isError);
@@ -17398,6 +17400,7 @@ function installSharedPlan(loaded,roomId,resuming){
   if(SHARED.roomId!==roomId){SHARED.aiEditsOff=false;SHARED.aiGroup=null;SHARED.aiBarUntil=0;}
   _defaultPlanPending=false;clearStorageFromRoom();DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
   ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
+  if(window.PrAds&&PrAds.noteRoom)PrAds.noteRoom(roomId);
 }
 async function refreshSharedPlan(){
   if(!SHARED.roomId)return;
@@ -17447,7 +17450,7 @@ async function openSharedRoomFromList(roomId){
   if(!SHARED.roomId&&DIRTY&&!confirm('いま開いているプランに、保存していない変更があります。開くと失われます。開きますか？'))return false;
   if(SHARED.roomId&&!(await sharedFlushBeforeLeaving('ほかの共同編集を開くと')))return false;
   if(SHARED.roomId)await sharedDetach();
-  var url=new URL(location.href);url.searchParams.delete('room');url.hash='room='+roomId;history.replaceState(null,'',url.toString());
+  var url=new URL(location.href);url.searchParams.delete('room');url.hash=sharedRoomHash(roomId);history.replaceState(null,'',url.toString());
   var ok=await initSharedRoomFromUrl();
   if(ok){sharedSetStatus('共有されたプランに接続しました。');renderSharedUi();}
   return ok;
