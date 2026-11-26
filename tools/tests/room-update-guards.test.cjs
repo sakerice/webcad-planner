@@ -114,6 +114,7 @@ test('画面の書き込み: 全体の上限に当たると、どのルームも
     assert.equal(res.status, 429);
     const body = await res.json();
     assert.equal(body.error, 'write_limit');
+    assert.equal(res.headers.get('retry-after'), '600', '画面が送り直しを待つ長さ');
     assertUserText(body.message);
   }
   const save = await http(env, 'POST', `/api/rooms/${roomId}/save`, { clientId: 'x', baseVersion: 1, plan: plan() }, { ...SCREEN, ip: '203.0.113.5' });

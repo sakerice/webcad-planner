@@ -6,6 +6,10 @@
 // 共有の欄(#share-status)に出す。
 // 413(本文か当てたあとのプランが保存の上限を超える)も、待っても通らないので 400 と同じ扱いにする。
 // 429(多すぎる)・5xx・通信の失敗は、これまでどおり送り直す(この挙動は変えない)。
+// ただし「きょうの上限」(429 と error: write_limit。worker/room-quota.mjs)は、待っても当日は通らないので送り直し続けない。
+// 部屋の返した文を共有の欄に出し、返事の retry-after まで待ってから1回送る。その間も手元の編集と「ファイルに保存」は続けられ、
+// 送れていない変更は捨てず、再開したら送る。部屋の状態は取り直さない(手元の変更を消さないため)。
+// ルームの作成が上限(error: room_create_limit)で断られたときは、部屋の返した文を共有の欄に出す。
 // 取り直す前に、手元のプラン(断られた変更と、応答待ちの間の編集を含む)を「保存一覧」に
 // 「共同編集に反映できなかった変更（日時）」として残す。断られるたびに新しい項目として足し、この自動の項目は新しい 10 個まで
 // (利用者が保存し直した・名前を変えた項目は消さない)。
@@ -50,9 +54,10 @@ const notice = (page) => page.evaluate(() => ({
 async function openRoom(label, reply, width = 1280) {
   const context = await browser.newContext({ viewport: { width, height: width < 700 ? 812 : 900 } });
   const page = await context.newPage();
-  const st = { gets: 0, updates: 0, reply };
+  // body・headers を入れると、/update の返事の本文と見出しをそれに差し替える。saves は /save に届いた数、dialogs は出た箱の文。
+  const st = { gets: 0, updates: 0, saves: 0, dialogs: [], reply, body: null, headers: null };
   page.on('pageerror', (e) => errors.push(`[${label}] pageerror: ${e.message}`));
-  page.on('dialog', (d) => d.dismiss().catch(() => {}));
+  page.on('dialog', (d) => { st.dialogs.push(d.message()); d.dismiss().catch(() => {}); });
   await page.addInitScript(() => {
     class FakeWS { constructor(url) { this.url = url; this.readyState = 1; window.__ws = this; setTimeout(() => this.onopen && this.onopen(), 0); } send() {} close() { this.readyState = 3; } }
     window.WebSocket = FakeWS;
@@ -65,8 +70,12 @@ async function openRoom(label, reply, width = 1280) {
     st.updates++;
     if (st.reply === 'abort') return route.abort();
     const status = st.reply;
-    const body = status === 200 ? { ok: true, version: 2, expiresAt: Date.now() + 1e9 } : { error: status === 400 ? 'invalid_patch' : 'error' };
-    return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+    const body = status === 200 ? { ok: true, version: 2, expiresAt: Date.now() + 1e9 } : (st.body || { error: status === 400 ? 'invalid_patch' : 'error' });
+    return route.fulfill({ status, contentType: 'application/json', headers: status === 200 ? {} : (st.headers || {}), body: JSON.stringify(body) });
+  });
+  await page.route('**/api/rooms/' + ROOM + '/save', (route) => {
+    st.saves++;
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ version: 3, expiresAt: Date.now() + 1e9, savedAt: Date.now() }) });
   });
   await page.goto(APP + '#room=' + ROOM);
   await page.waitForFunction(() => window.SHARED && SHARED.roomId && window.__ws && DATA.walls.length > 10, null, T);
@@ -242,8 +251,94 @@ try {
     await context.close();
   }
 
+  // ── きょうの上限(429 write_limit): 送り直し続けず、部屋の文を出し、retry-after のあとに送る ──
+  {
+    const LIMIT_TEXT = '本日は共同編集への反映が混み合っているため、これ以上の変更を受け付けられません。明日の朝9時から再開します。いまのプランは「ファイルに保存」で手元に残せます。';
+    const { context, page, st } = await openRoom('上限', 429);
+    st.body = { error: 'write_limit', message: LIMIT_TEXT };
+    st.headers = { 'retry-after': '6' };
+    const gets0 = st.gets;
+    await editWall(page, serverThick + 30);
+    await sleep(3500);
+    let s = await state(page);
+    assert.equal(st.updates, 1, `上限: 送り直している(送った回数 ${st.updates})`);
+    assert.equal(s.status, LIMIT_TEXT, '上限: 部屋の文が共有の欄に出ていない');
+    assert.ok(s.error, '上限: 状態が失敗の色になっていない');
+    assert.doesNotMatch(s.status, /429/, '上限: 番号が出ている');
+    // 共有のダイアログを閉じていても分かるよう、知らせにも同じ文が出る
+    const n1 = await notice(page);
+    assert.equal(n1.hidden, false, '上限: 知らせが出ていない');
+    assert.equal(n1.text, LIMIT_TEXT);
+    assert.equal(s.thick, serverThick + 30, '上限: 手元の変更が消えた');
+    assert.equal(st.gets, gets0, '上限: 部屋の状態を取り直した(手元の変更が消える)');
+    assert.equal((await keptRows(page)).length, 0);
+    // 上限の間も手元の編集は続けられる。編集しても送り出さない
+    await page.evaluate((t) => { const w = DATA.walls[1]; w.thick = t; sharedMarkIdsDirty([w.id]); markDirty(); }, 222);
+    await sleep(1200);
+    assert.equal(st.updates, 1, '上限: 編集のたびに送っている');
+    assert.equal(await page.evaluate(() => DATA.walls[1].thick), 222);
+    // 「ファイルに保存」で手元に残せる(送れていない変更が入っている)
+    const [download] = await Promise.all([page.waitForEvent('download', T), page.evaluate(() => exportPlan())]);
+    const saved = JSON.parse(readFileSync(await download.path(), 'utf8'));
+    assert.equal(saved.walls[0].thick, serverThick + 30, '上限: 書き出したファイルに手元の変更が無い');
+    assert.equal(saved.walls[1].thick, 222);
+    // 保存ボタン: 部屋へは送らず、箱(alert)も出さず、ブラウザに保存したことと部屋の文を出す
+    await page.evaluate(() => savePlanToStorage());
+    await sleep(300);
+    assert.equal(st.saves, 0, '上限: 部屋へ保存を送った');
+    assert.equal(st.updates, 1, '上限: 保存のときに送り直した');
+    assert.deepEqual(st.dialogs, [], '上限: 失敗の箱が出た');
+    s = await state(page);
+    assert.equal(s.status, 'ブラウザには保存しました。' + LIMIT_TEXT);
+    assert.equal(s.tracked, true, '上限: 送れていない変更の印が消えた');
+    if (SHOT_DIR) { await page.evaluate(() => openShareDialog && openShareDialog()).catch(() => {}); await page.screenshot({ path: join(SHOT_DIR, 'write-limit-1280.png') }); }
+    // retry-after が過ぎると1回送る。まだ上限なら、また待つ(0.6 秒ごとには送らない)
+    await sleep(3000);
+    assert.equal(st.updates, 2, `上限: retry-after のあとに送っていない、または送りすぎ(送った回数 ${st.updates})`);
+    await sleep(2000);
+    assert.equal(st.updates, 2, '上限: 2回めに断られたあと、待たずに送り直した');
+    // 再開したら、ためていた変更が届く
+    st.reply = 200;
+    await sleep(5500);
+    const s2 = await state(page);
+    assert.equal(st.updates, 3);
+    assert.ok(!s2.error && /同期しました/.test(s2.status), `上限: 再開したあとも同期されない: ${s2.status}`);
+    assert.equal(s2.tracked, false);
+    assert.equal(s2.thick, serverThick + 30);
+    // 再開したあとは、ふだんの間合いで送る
+    await editWall(page, serverThick + 40);
+    await sleep(1500);
+    assert.equal(st.updates, 4, '上限: 再開したあとの編集が送られない');
+    console.log('ok  きょうの上限(429 write_limit): 部屋の文を出し、送り直しは retry-after まで待ち、手元の編集とファイルへの保存は続けられ、再開したら送った');
+    await context.close();
+  }
+
+  // ── ルームの作成が上限で断られた: 部屋の文を共有の欄に出す ──
+  {
+    const CREATE_TEXT = '本日は共同編集のルームをこれ以上作れません。明日の朝9時から再開します。';
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const page = await context.newPage();
+    page.on('pageerror', (e) => errors.push(`[作成の上限] pageerror: ${e.message}`));
+    let posts = 0;
+    await page.route('**/api/rooms', (route) => {
+      posts++;
+      return route.fulfill({ status: 429, contentType: 'application/json', body: JSON.stringify({ error: 'room_create_limit', message: CREATE_TEXT }) });
+    });
+    await page.goto(APP);
+    await page.waitForFunction(() => window.SHARED && window.DATA && typeof createSharedRoom === 'function', null, T);
+    await page.evaluate(() => createSharedRoom());
+    await sleep(300);
+    const got = await page.evaluate(() => { const el = document.getElementById('share-status'); return { text: el.textContent, error: el.classList.contains('error'), roomId: SHARED.roomId }; });
+    assert.equal(posts, 1);
+    assert.equal(got.text, CREATE_TEXT, '作成の上限: 部屋の文が出ていない');
+    assert.equal(got.error, true);
+    assert.equal(got.roomId, null);
+    console.log('ok  ルームの作成の上限(429 room_create_limit): 部屋の文を共有の欄に出した');
+    await context.close();
+  }
+
   assert.deepEqual(errors, [], 'ページの例外:\n' + errors.join('\n'));
 } finally {
   await browser.close();
 }
-console.log('共同編集: 400・413 は送り直さず取り直し、ほかの失敗はこれまでどおり送り直す');
+console.log('共同編集: 400・413 は送り直さず取り直し、きょうの上限は retry-after まで待ち、ほかの失敗はこれまでどおり送り直す');
