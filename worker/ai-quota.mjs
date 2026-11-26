@@ -74,10 +74,21 @@ export function jevLimits(env) {
 // AIレンダー（/api/ai/render）の1日の枚数。AI の点とは別の数で持つ（同じ Durable Object・別の鍵 render-total・render-who）。
 // 金額の枠（月・1日の額）は読み取りと共有する（/take に金額の欄を付けて呼ぶ）。
 //   1人 5枚・全体 30枚（2026-11-27 利用者決定）。環境変数 AI_RENDER_DAILY_PER_USER / AI_RENDER_DAILY_TOTAL で変えられる。
+//   どちらかを 0 にすると、レンダーだけを止める（worker/routes-render.mjs が数えずに断る。読み取り・jev は止めない）。
+//   未設定・空・数でない値・負の値は既定に戻す（0 だけが「止める」）。
 // 回数を戻す手段（取り消し）はこのクラスに無い。上流の失敗・安全上の停止でも、数えた 1 枚はそのまま残す。
 export function renderLimits(env) {
-  const n = (v, d) => { const x = Math.round(Number(v)); return x >= 1 ? x : d; };
+  const n = (v, d) => {
+    if (v === undefined || v === null || String(v).trim() === "") return d;
+    const x = Math.round(Number(v));
+    if (x === 0 && Number(v) >= 0) return 0;
+    return x >= 1 ? x : d;
+  };
   return { perUser: n(env && env.AI_RENDER_DAILY_PER_USER, 5), total: n(env && env.AI_RENDER_DAILY_TOTAL, 30) };
+}
+// レンダーを止めているか（renderLimits のどちらかが 0）。
+export function renderStopped(limits) {
+  return !!limits && (limits.perUser === 0 || limits.total === 0);
 }
 // AIレンダーの「問題を報告」（/api/ai/render-report）の1日の件数。1人 10件（別の鍵 report-total・report-who）。
 // 全体の上限は、1人の上限を超える接続元の数で R2 が埋まらないための歯止め（既定 500件）。

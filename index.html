@@ -669,6 +669,7 @@ window.addEventListener('load',function(){
             <button id="ai-render-again" class="pbtn sec" type="button" onclick="AiRenderInApp.start()">もう一度仕上げる</button>
             <button id="ai-render-report-open" class="pbtn sec" type="button" onclick="AiRenderInApp.openReport()">問題を報告</button>
           </div>
+          <div id="ai-render-save-hint" class="airx-source-note ai-render-save-hint" role="status" hidden>保存できないときは、絵を長押しして「写真に追加」を選んでください。</div>
           <div id="ai-render-note" class="airx-source-note">AI が仕上げた絵です。細部が実際の間取りと違うことがあります。</div>
           <div id="ai-render-report" class="ai-render-panel" role="group" aria-labelledby="ai-render-report-title" hidden>
             <div class="ph" id="ai-render-report-title">問題を報告</div>
@@ -20313,6 +20314,9 @@ function initTouchPressFeedback(){
   document.addEventListener('pointerdown',function(e){
     var el=e.target&&e.target.closest?e.target.closest(selector):null;
     if(!el) return;
+    // 押せないボタンには押した印を付けない。付けると .touch-pressing の水色の地・青い文字が、
+    // :disabled の薄い見た目に重なって出る(2026-11-27、上限に達した「写真のように仕上げる」で見つけた)。
+    if(el.disabled||el.getAttribute('aria-disabled')==='true') return;
     el.classList.add('touch-pressing');
   },{passive:true});
   ['pointerup','pointercancel','pointerleave'].forEach(function(type){

@@ -23,7 +23,10 @@ export const DEFAULT_RENDER_MODEL = "gemini-nano-banana-2.1";
 export const RENDER_TIMEOUT_MS = 90000;
 // 出力の上限。絵 1 枚（1K）は 1,120 トークン、考える分は試し生成で 500〜1,100 トークンだった。
 // 上限が無いと仮押さえの額（worker/ai-price.mjs の renderHoldUsd）に上限が無くなる。
-export const RENDER_MAX_OUTPUT_TOKENS = 8192;
+// 仮押さえは 1 日の額の枠（読み取り・チャットと共有）を呼んでいる間ふさぎ、利用者が途中で閉じて Worker が
+// 止まったときはその額のまま「精算されずに残った額」に積まれる。だから実際の 1 枚の 2 倍弱の 4096 に抑える
+// （8192 では仮押さえが約 $0.29、4096 で約 $0.17。2026-11-27）。
+export const RENDER_MAX_OUTPUT_TOKENS = 4096;
 
 // 採用モデルが受ける縦横比のうち、Worker が許すもの。極端な比（1:4・4:1・1:8・8:1）は 3D の画面から
 // 撮ることがないので外す。画面は、画面の縦横比にいちばん近いものを選んで、そこへ中央で切り抜いて送る。

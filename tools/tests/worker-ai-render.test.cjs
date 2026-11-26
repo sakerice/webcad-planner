@@ -228,6 +228,25 @@ test('指示文: preset と view の全部の組み合わせで組め、利用�
   assert.throws(() => buildRenderPrompt({ preset: 'life', view: 'aerial' }));
 });
 
+test('指示文: 天井の形と壁の折れを保ち、1 枚目に無い設備（火災報知器・ダウンライト・スイッチ・コンセント）を足さない', async () => {
+  // 2026-11-27 の本物の生成で、吹き抜け上部の傾いた天井が平らな天井と下がり壁に置き換わった。
+  const { buildRenderPrompt, RENDER_PRESET_IDS, RENDER_VIEWS } = await mod('worker/render-prompt.mjs');
+  for (const preset of RENDER_PRESET_IDS) {
+    for (const view of RENDER_VIEWS) {
+      const p = buildRenderPrompt({ preset, view });
+      assert.match(p, /ceiling/i);
+      assert.match(p, /slop/i, '傾いた天井');
+      assert.match(p, /double-height|void/i, '吹き抜け');
+      assert.match(p, /step/i, '天井の段差');
+      assert.match(p, /beam/i, '梁');
+      assert.match(p, /do not flatten|never flatten/i, '平らにしない');
+      assert.match(p, /drop(ped)? (wall|soffit)|bulkhead/i, '下がり壁を足さない');
+      assert.match(p, /corner|jog|turn/i, '壁の折れ');
+      for (const w of [/smoke (detector|alarm)/i, /downlight/i, /switch/i, /(socket|outlet)/i]) assert.match(p, w);
+    }
+  }
+});
+
 // ── 上限 ───────────────────────────────────────────────────────────
 
 test('1 接続元 1 日 5 枚まで。6 枚目は 429 scope user で、AI を呼ばない', async () => {
@@ -389,6 +408,96 @@ test('上流の待ちは時間で切り、502 ai_upstream_error', async () => {
   assert.ok(realNow() - started < 5000);
   const { RENDER_TIMEOUT_MS } = await mod('worker/vertex-render.mjs');
   assert.equal(RENDER_TIMEOUT_MS, 90000);
+});
+
+// ── 時間切れ・通信失敗の精算（1 日の額の枠は読み取り・チャットと共有するので、積む額を現実の 1 枚に近づける）──
+
+test('出力の上限は 4096 トークン。呼んでいる間の仮押さえ（途中で Worker が止まったら pend に残る額）は $0.17 未満', async () => {
+  at(T);
+  const { RENDER_MAX_OUTPUT_TOKENS } = await mod('worker/vertex-render.mjs');
+  assert.equal(RENDER_MAX_OUTPUT_TOKENS, 4096);
+  const q = await realQuota();
+  const env = { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_QUOTA: q.AI_QUOTA };
+  let holds = null;
+  const { sent, fetchImpl } = vertex(() => {
+    holds = [...q.data.entries()].filter(([k]) => String(k).startsWith('hold:')).map(([, v]) => v);
+    return okReply();
+  });
+  assert.equal((await render(BODY(), env, fetchImpl)).status, 200);
+  assert.equal(sent[0].body.generationConfig.maxOutputTokens, 4096);
+  assert.equal(holds.length, 1, '仮押さえが 1 件でない');
+  // 精算されずに期限が過ぎた仮押さえは、この額のまま pend に積まれる（worker/ai-quota.mjs の forgetOld）。
+  assert.ok(holds[0].usd > micro(0.1) && holds[0].usd < micro(0.17), '仮押さえの額: ' + holds[0].usd / 1e6);
+});
+
+test('時間切れ・届かない・usage の無い返事は、仮押さえの額でなく現実的な見積もり（約 $0.06）で精算する', async () => {
+  const { renderFailureUsd } = await mod('worker/ai-price.mjs');
+  const { buildRenderPrompt } = await mod('worker/render-prompt.mjs');
+  const expected = renderFailureUsd({ text: buildRenderPrompt({ preset: 'life', view: 'interior' }), images: 3 });
+  assert.ok(expected > 0.04 && expected < 0.08, '失敗の見積もり: ' + expected);
+  const hang = async (req) => {
+    const url = String(req.url);
+    if (url.includes('oauth2')) return new Response(JSON.stringify({ access_token: 't', expires_in: 3600 }), { status: 200 });
+    return new Promise((_, reject) => req.signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError'))));
+  };
+  const unreachable = async (req) => {
+    const url = String(req.url);
+    if (url.includes('oauth2')) return new Response(JSON.stringify({ access_token: 't', expires_in: 3600 }), { status: 200 });
+    throw new TypeError('network down');
+  };
+  const noUsage = vertex(() => new Response('<html>gateway</html>', { status: 200 })).fetchImpl;
+  for (const [name, fetchImpl, deps] of [['時間切れ', hang, { renderTimeoutMs: 50 }], ['届かない', unreachable, {}], ['usage が無い', noUsage, {}]]) {
+    at(T);
+    const q = await realQuota();
+    const env = { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_QUOTA: q.AI_QUOTA };
+    const res = await render(BODY(), env, fetchImpl, { deps });
+    assert.equal(res.status, 502, name);
+    assert.equal(q.data.get('usd-month:2026-11'), micro(expected), name + ': 月の額が見積もりどおりでない');
+    assert.equal(q.data.get('pend:2026-11-20:203.0.113.7'), micro(expected), name + ': 精算されずに残った額が見積もりどおりでない');
+    assert.equal([...q.data.keys()].filter((k) => k.startsWith('hold:')).length, 0, name + ': 仮押さえが残った');
+  }
+});
+
+// ── レンダーだけを止める ─────────────────────────────────────────────
+
+test('AI_RENDER_DAILY_TOTAL=0・AI_RENDER_DAILY_PER_USER=0 はレンダーを止める（429 scope total。AI も数も使わない）', async () => {
+  at(T);
+  for (const stop of [{ AI_RENDER_DAILY_TOTAL: '0' }, { AI_RENDER_DAILY_PER_USER: '0' }, { AI_RENDER_DAILY_TOTAL: 0 }]) {
+    const q = await realQuota();
+    const env = { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_QUOTA: q.AI_QUOTA, ...stop };
+    const { sent, fetchImpl } = vertex();
+    const res = await render(BODY(), env, fetchImpl);
+    assert.equal(res.status, 429, JSON.stringify(stop));
+    const b = await res.json();
+    assert.equal(b.error, 'ai_quota_exceeded');
+    assert.equal(b.scope, 'total');
+    assert.match(b.message, /使えません/);
+    assert.ok(!/\$|usd|token|トークン|AI_RENDER/i.test(b.message));
+    assert.equal(sent.length, 0, 'AI を呼んだ');
+    assert.equal([...q.data.keys()].length, 0, '数か額を使った');
+    // 残り枚数の欄は 0 と、断る文
+    const r = (await peek(env)).render;
+    assert.equal(r.left, 0);
+    assert.equal(r.message, b.message);
+    assert.equal(typeof r.perUser, 'number');
+    // 数える仕組みが無い環境（手元）でも止まる
+    const local = (await peek({ ...stop })).render;
+    assert.equal(local.left, 0);
+    assert.equal((await render(BODY(), { GOOGLE_SERVICE_ACCOUNT_JSON: SA, ...stop }, fetchImpl)).status, 429);
+    assert.equal(sent.length, 0);
+  }
+});
+
+test('上限の環境変数: 未設定・空・数でない値は既定（1 人 5・全体 30）。jev の数え方は変えない', async () => {
+  const { renderLimits, jevLimits } = await mod('worker/ai-quota.mjs');
+  assert.deepEqual(renderLimits({}), { perUser: 5, total: 30 });
+  assert.deepEqual(renderLimits({ AI_RENDER_DAILY_TOTAL: '', AI_RENDER_DAILY_PER_USER: '  ' }), { perUser: 5, total: 30 });
+  assert.deepEqual(renderLimits({ AI_RENDER_DAILY_TOTAL: 'abc', AI_RENDER_DAILY_PER_USER: 'x' }), { perUser: 5, total: 30 });
+  assert.deepEqual(renderLimits({ AI_RENDER_DAILY_TOTAL: '-3' }), { perUser: 5, total: 30 });
+  assert.deepEqual(renderLimits({ AI_RENDER_DAILY_TOTAL: '0' }), { perUser: 5, total: 0 });
+  assert.deepEqual(renderLimits({ AI_RENDER_DAILY_PER_USER: '0' }), { perUser: 0, total: 30 });
+  assert.deepEqual(renderLimits({ AI_RENDER_DAILY_TOTAL: '12', AI_RENDER_DAILY_PER_USER: '2' }), { perUser: 2, total: 12 });
+  assert.deepEqual(jevLimits({ AI_JEV_DAILY_TOTAL: '0', AI_JEV_DAILY_PER_USER: '0' }), jevLimits({}));
 });
 
 // ── 残り枚数 ───────────────────────────────────────────────────────

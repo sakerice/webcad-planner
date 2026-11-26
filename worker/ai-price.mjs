@@ -66,6 +66,20 @@ export function renderHoldUsd({ inputTokens, maxOutputTokens }) {
   const input = Math.min(MAX_INPUT_TOKENS, Math.max(0, Number(inputTokens) || 0) + OVERHEAD_TOKENS);
   return (input * RENDER_PRICE.in + Math.max(0, Number(maxOutputTokens) || 0) * RENDER_PRICE.imageOut) / 1e6;
 }
+// 時間切れ・届かない・usage の無い返事のときの精算額。課金されたかは分からないので、現実の 1 枚で数える。
+// 入力は画像 1 枚 1,120 トークン（試し生成の実測は 3 枚と指示文で約 3,550）と指示文のバイト数、
+// 出力は絵 1 枚（1K）1,120 トークンと思考 2,000 トークン（試し生成では 500〜1,100）。指示文 3KB で約 $0.058。
+// 仮押さえの額（出力を上限まで絵の単価で見る。約 $0.17）のまま精算すると、1 日の額の枠（読み取り・チャットと
+// 共有）を時間切れだけで食い尽くしうるため、2026-11-27 にこの見積もりへ替えた。
+export const RENDER_IMAGE_INPUT_TOKENS = 1120;
+export const RENDER_IMAGE_OUTPUT_TOKENS = 1120;
+export const RENDER_FAILURE_THOUGHT_TOKENS = 2000;
+export function renderFailureUsd({ text, images = 3 } = {}) {
+  const count = Array.isArray(images) ? images.length : Math.max(0, Number(images) || 0);
+  const input = count * RENDER_IMAGE_INPUT_TOKENS + textTokens(text);
+  return (input * RENDER_PRICE.in + RENDER_IMAGE_OUTPUT_TOKENS * RENDER_PRICE.imageOut +
+    RENDER_FAILURE_THOUGHT_TOKENS * RENDER_PRICE.textOut) / 1e6;
+}
 // usage（worker/vertex-render.mjs の形: inputTokens・outputTokens・thoughtTokens）から実額を出す。
 export function renderUsageUsd(usage) {
   if (!usage) return null;

@@ -12,14 +12,16 @@
 //   - 回数は AiQuota の pool=render（1 人 1 日 5 枚・全体 30 枚）。読み取りの点は使わない。
 //     金額の枠（月・1 日の額）は読み取りと共有し、呼ぶ前に仮押さえして usage で精算する。
 //   - 回数を戻す手段は AiQuota に無い。上流の失敗・安全上の停止でも 1 枚と数える（金額は usage どおり。
-//     上流が 2xx 以外を返したときは 0 で精算する）。
+//     上流が 2xx 以外を返したときは 0、時間切れ・届かない・usage の無い返事は現実の 1 枚の見積もり
+//     renderFailureUsd で精算する）。
+//   - AI_RENDER_DAILY_TOTAL か AI_RENDER_DAILY_PER_USER が 0 なら、レンダーだけを止める（数えずに 429 scope total）。
 //   - 上流のエラー本文は画面へ返さない（鍵の一部が入ることがある）。ログにも status だけを出す。
 //   - Worker は絵を保存しない。例外は、利用者が「問題を報告」で絵を送ったときだけ。
 import { json, readBytesWithLimit } from "./shared.mjs";
 import { buildRenderPrompt, isRenderPreset, isRenderView } from "./render-prompt.mjs";
 import { renderConfig, generateImage, RENDER_ASPECTS, RENDER_MAX_OUTPUT_TOKENS, RENDER_TIMEOUT_MS } from "./vertex-render.mjs";
-import { renderHoldUsd, renderUsageUsd, imageTokens, textTokens } from "./ai-price.mjs";
-import { renderLimits } from "./ai-quota.mjs";
+import { renderHoldUsd, renderUsageUsd, renderFailureUsd, imageTokens, textTokens } from "./ai-price.mjs";
+import { renderLimits, renderStopped } from "./ai-quota.mjs";
 import {
   reserveRender, takeReport, settle, askQuota, whoOf, moneyParams, randomId,
   dayLimitMessage, MONTH_LIMIT_MESSAGE, BUSY_MESSAGE,
@@ -42,6 +44,8 @@ const MAGIC = { "image/jpeg": "/9j/", "image/png": "iVBORw0KGgo", "image/webp": 
 const BAD_REQUEST_MESSAGE = "AIレンダーの依頼の形が正しくありません。画面を読み直してから、もう一度お試しください。";
 const BLOCKED_MESSAGE = "この画面は仕上げられませんでした。視点を変えてお試しください。";
 const UPSTREAM_MESSAGE = "AI から返事を受け取れませんでした。少し待ってから、もう一度お試しください。";
+// 運営者が環境変数でレンダーを止めているとき（renderLimits が 0）。
+export const RENDER_STOPPED_MESSAGE = "AIレンダーはいま使えません。しばらくしてから、もう一度お試しください。";
 
 // 1 日の枚数は UTC の日付で切るので、日本時間の朝 9 時に戻る。
 function againAt(now) {
@@ -117,6 +121,10 @@ export async function aiRender(request, env, deps = {}) {
     return json({ error: "ai_not_configured", message: "AIレンダーはいま使えません。" }, 503);
   }
 
+  if (renderStopped(renderLimits(env))) {
+    return json({ error: "ai_quota_exceeded", scope: "total", message: RENDER_STOPPED_MESSAGE }, 429);
+  }
+
   const text = buildRenderPrompt({ preset: input.preset, view: input.view });
   const holdUsd = renderHoldUsd({ inputTokens: imageTokens(input.images) + textTokens(text), maxOutputTokens: RENDER_MAX_OUTPUT_TOKENS });
   const quota = await reserveRender(request, env, holdUsd, holdUsd);
@@ -127,10 +135,12 @@ export async function aiRender(request, env, deps = {}) {
     fetchImpl: deps.fetchImpl || fetch, timeoutMs: deps.renderTimeoutMs || RENDER_TIMEOUT_MS,
   });
 
-  // 精算。上流が 2xx 以外なら 0、usage があればその額、どちらでもなければ仮押さえの額のまま（見積もり）。
+  // 精算。上流が 2xx 以外なら 0、usage があればその額、どちらでもなければ（時間切れ・届かない・usage の無い返事）
+  // 現実の 1 枚の見積もり。仮押さえの額のままにすると、時間切れが続いただけで 1 日の額の枠
+  // （読み取り・チャットと共有）を使い切り、全員の読み取りまで止まる。
   if (result.unbilled) await settle(env, quota.hold, 0, undefined, true);
   else if (result.usage) await settle(env, quota.hold, renderUsageUsd(result.usage), undefined, true);
-  else await settle(env, quota.hold, holdUsd, undefined, false);
+  else await settle(env, quota.hold, Math.min(holdUsd, renderFailureUsd({ text, images: input.images })), undefined, false);
 
   if (result.ok) {
     return json({ image: `data:${result.mimeType};base64,${result.base64}`, remaining: quota.remaining });
@@ -153,6 +163,7 @@ function renderRefusal(kind) {
 // 数えられないときは left: null（画面は数を隠す）。金額そのものは返さない。
 export async function renderQuota(env, request) {
   const limits = renderLimits(env);
+  if (renderStopped(limits)) return { left: 0, perUser: limits.perUser, message: RENDER_STOPPED_MESSAGE };
   const hidden = { left: null, perUser: limits.perUser };
   if (!env || !env.AI_QUOTA) return hidden;
   const who = whoOf(request);

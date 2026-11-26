@@ -60,7 +60,8 @@
     reportOpen: false,
     left: null,           // 今日あと何枚(分からなければ null)
     leftMessage: '',      // 0 枚のときの文(Worker が付けてくれば、それを出す)
-    memConsent: false     // localStorage が使えない端末では、開いている間だけ覚える
+    memConsent: false,    // localStorage が使えない端末では、開いている間だけ覚える
+    saveHint: false       // 共有シートにファイルを渡せなかったとき、長押しで保存する案内を出す
   };
 
   function $(id) { return document.getElementById(id); }
@@ -185,7 +186,9 @@
     }
     await waitFrame(50);
     // 3枚の撮影の間で await しない(視点や読み込みが進んで、絵とガイドがずれないように)。
+    // 内観か外観かも同じ区間で決める(輪郭を作る await の間に視点が切り替わると、絵と指示文が食い違う)。
     var base = captureCurrent3DDataUrl();
+    var view = aiCaptureViewMode();
     var instanceData = captureInstance3DData();
     var depth = captureAiOverrideGuideDataUrl('depth');
     var instance = instanceData && instanceData.dataUrl;
@@ -197,7 +200,7 @@
     var size = outSize(aspect);
     return {
       aspect: aspect,
-      view: aiCaptureViewMode(),
+      view: view,
       images: { base: cropTo(imgs[0], aspect, size), depth: cropTo(imgs[1], aspect, size), edge: cropTo(imgs[2], aspect, size) }
     };
   }
@@ -232,6 +235,7 @@
     S.compare = false;
     S.reportOpen = false;
     S.waitingBase = '';
+    S.saveHint = false;
     setText('ai-render-msg', '');
     paint();
     try {
@@ -285,6 +289,9 @@
     return 'ai-render-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + '.' + ext;
   }
   // 指で操作する端末(iPhone・iPad)では共有シートを先に出す(「画像を保存」で写真に入れられる)。
+  // 共有シートにファイルを渡せない端末(iOS のアプリ版の WebView など)では blob: の保存を試すが、
+  // 何も起きないことがあるので、結果の下に「絵を長押しして写真に追加」の案内を出す(結果の絵は <img> で、
+  // 長押しのメニュー(-webkit-touch-callout)は消していない)。
   function prefersShareSheet() {
     var ua = (navigator && navigator.userAgent) || '';
     var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
@@ -309,7 +316,8 @@
     var blob = dataUrlToBlobSync(S.result.image);
     if (!blob) { setText('ai-render-msg', MESSAGES.saveFail); return; }
     var name = fileName(blob.type || '');
-    if (prefersShareSheet() && typeof File === 'function' && navigator.share && navigator.canShare) {
+    var touch = prefersShareSheet();
+    if (touch && typeof File === 'function' && navigator.share && navigator.canShare) {
       var file = new File([blob], name, { type: blob.type || 'image/png' });
       var ok = false;
       try { ok = navigator.canShare({ files: [file] }); } catch (e) { ok = false; }
@@ -324,6 +332,7 @@
       }
     }
     downloadBlob(blob, name);
+    if (touch && !S.saveHint) { S.saveHint = true; paint(); }
   }
 
   // ── 報告 ────────────────────────────────────────────────
@@ -411,6 +420,7 @@
     }
 
     show('ai-render-result-tools', showResult);
+    show('ai-render-save-hint', showResult && S.saveHint);
     var cmp = $('ai-render-compare');
     if (cmp) {
       cmp.setAttribute('aria-pressed', S.compare ? 'true' : 'false');
@@ -421,11 +431,16 @@
     });
     show('ai-render-report', showResult && S.reportOpen);
     show('ai-render-revoke', hasConsent());
+    // 待っている間は取り消せない(送信中の依頼は止められないので、取り消しても今の1枚は送られてしまう)。
+    var revoke = $('ai-render-revoke');
+    if (revoke) revoke.disabled = S.busy;
   }
 
   // ── 押されたとき(index.html の onclick から) ────────────────────
   var api = {
     onOpen: function () {
+      // 前に開いていたときの一言(「報告を受け付けました」「同意を取り消しました」など)は、開き直したら消す。
+      setText('ai-render-msg', '');
       paint();
       fetchQuota();
     },
@@ -441,7 +456,8 @@
       run();
     },
     cancelConsent: function () { S.consentOpen = false; paint(); },
-    retry: function () { run(); },
+    // 「もう一度」も主ボタンと同じ入口を通る(同意を取り消したあとなら、送らずに同意の画面を出す)。
+    retry: function () { api.start(); },
     closeError: function () { S.error = null; paint(); },
     toggleCompare: function () { S.compare = !S.compare; paint(); },
     save: save,
@@ -453,8 +469,11 @@
     closeReport: function () { S.reportOpen = false; paint(); },
     sendReport: sendReport,
     revoke: function () {
+      if (S.busy) return;
       clearConsent();
       S.consentOpen = false;
+      // 失敗の表示(「もう一度」)を残すと、取り消した直後に押されて同意の画面に戻るだけになるので消す。
+      S.error = null;
       paint();
       setText('ai-render-msg', MESSAGES.revoked);
     },

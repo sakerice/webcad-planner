@@ -76,7 +76,14 @@ function makeServer() {
 }
 
 // ダイアログの中身がはみ出していないか・ボタンが指で押せる大きさか。
-const layoutProblems = (page) => page.evaluate(() => {
+// 押した直後のボタンは押した印(.touch-pressing の scale(.965))で一時的に低く測れるので、印が外れて
+// 動き(0.16 秒)が終わってから測る。測らずに進むと、押した直後に測る所だけがときどき落ちる。
+const layoutProblems = async (page) => {
+  await page.waitForFunction(() => !document.querySelector('#unity-render-modal .touch-pressing'), null, { timeout: 5000 });
+  await page.waitForTimeout(250);
+  return layoutProblemsNow(page);
+};
+const layoutProblemsNow = (page) => page.evaluate(() => {
   const card = document.querySelector('#unity-render-modal .unity-render-card');
   const cb = card.getBoundingClientRect();
   const out = [];
@@ -283,9 +290,20 @@ try {
     assert.equal(await page.evaluate(() => document.getElementById('ai-render-result-img').getBoundingClientRect().height > 0), true, '見比べから戻らない');
     assert.equal(await page.evaluate(() => document.getElementById('ai-render-result-img').getAttribute('src')), resultSrc);
 
+    // 結果の絵は長押しで「写真に追加」できる <img>（iPhone のアプリ版で共有も保存も効かないときの逃げ道）
+    const longPress = await page.evaluate(() => {
+      const img = document.getElementById('ai-render-result-img');
+      const cs = getComputedStyle(img);
+      return { tag: img.tagName, pe: cs.pointerEvents, callout: cs.webkitTouchCallout || cs.getPropertyValue('-webkit-touch-callout') || '' };
+    });
+    assert.equal(longPress.tag, 'IMG');
+    assert.notEqual(longPress.pe, 'none', '結果の絵が指の操作を受けない');
+    assert.notEqual(longPress.callout, 'none', '結果の絵の長押しメニューが消されている');
+    const SAVE_HINT = '保存できないときは、絵を長押しして「写真に追加」を選んでください。';
     // 保存: 共有シート（ファイル1枚）
     await page.locator('#ai-render-save').click();
     await page.waitForFunction(() => window.__shares.length === 1, null, { timeout: 5000 });
+    assert.equal(await visibleText(page, '#ai-render-save-hint'), null, '共有シートが出たのに長押しの案内が出ている');
     const share = await page.evaluate(() => window.__shares[0]);
     assert.equal(share.n, 1);
     assert.match(share.type, /^image\//);
@@ -306,15 +324,43 @@ try {
     const d1 = await dl;
     assert.match(d1.url(), /^blob:/, '保存が blob: でない: ' + d1.url());
     assert.match(d1.suggestedFilename(), /\.(png|jpe?g)$/);
+    // 指で操作する端末で共有シートにファイルを渡せないときは、blob: の保存を試したうえで長押しの案内を出す
+    assert.equal(await visibleText(page, '#ai-render-save-hint'), SAVE_HINT, '共有に失敗したのに長押しの案内が出ない');
+    assert.deepEqual(await layoutProblems(page), [], '長押しの案内（iPhone 縦）');
+    {
+      const below = await page.evaluate(() => document.getElementById('ai-render-result-img').getBoundingClientRect().bottom <= document.getElementById('ai-render-save-hint').getBoundingClientRect().top);
+      assert.ok(below, '長押しの案内が結果の絵の下に無い');
+    }
+    if (SHOT_DIR) { await page.locator('#ai-render-save-hint').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${SHOT_DIR}/inapp-iphone-save-hint.png` }); }
     await page.evaluate(() => { window.__shareMode = 'none'; });
     const dl2 = page.waitForEvent('download', { timeout: 5000 });
     await page.locator('#ai-render-save').click();
     assert.match((await dl2).url(), /^blob:/);
+    assert.equal(await visibleText(page, '#ai-render-save-hint'), SAVE_HINT, '共有シートが無い端末で長押しの案内が出ない');
+
+    // 内観か外観かは撮影と同じ同期の区間で決める。輪郭を作る await の間に視点が切り替わっても、撮った絵の view を送る
+    await page.evaluate(() => {
+      const origEdge = window.makeEdgeDataUrlFromSegmentation, origMode = window.aiCaptureViewMode;
+      window.__flip = false;
+      window.makeEdgeDataUrlFromSegmentation = async (u) => { const r = await origEdge(u); window.__flip = true; return r; };
+      window.aiCaptureViewMode = () => (window.__flip ? 'exterior' : origMode());
+      window.__restoreCapture = () => { window.makeEdgeDataUrlFromSegmentation = origEdge; window.aiCaptureViewMode = origMode; };
+    });
+    {
+      const before = server.renders.length;
+      await page.locator('#ai-render-again').click();
+      await waitResult(page);
+      assert.equal(server.renders.length, before + 1);
+      assert.equal(server.renders[before].view, 'interior', '撮影のあとに決めた view を送った');
+      await page.evaluate(() => window.__restoreCapture());
+      // 新しく仕上げたら、前の長押しの案内は消える
+      assert.equal(await visibleText(page, '#ai-render-save-hint'), null, '新しい結果に前の案内が残る');
+    }
 
     // もう一度仕上げる（同意は聞き直さない）
     await page.locator('#ai-render-again').click();
     await waitResult(page);
-    assert.equal(server.renders.length, 2, '「もう一度仕上げる」で送っていない');
+    assert.equal(server.renders.length, 3, '「もう一度仕上げる」で送っていない');
     assert.equal(await visibleText(page, '#ai-render-consent'), null);
 
     // ── 報告 ──
@@ -335,6 +381,11 @@ try {
     assert.equal(server.reports[0].reason, 'wrong_layout');
     assert.match(server.reports[0].image, /^data:image\//, '「この絵も送る」で絵が付いていない');
     assert.deepEqual(Object.keys(server.reports[0]).sort(), ['image', 'reason']);
+    // 閉じて開き直すと「報告を受け付けました」は消え、絵は残る
+    await page.evaluate(() => closeUnityRenderModal());
+    await openDialog(page);
+    assert.equal(await visibleText(page, '#ai-render-msg'), null, '開き直しても前の一言が残る');
+    assert.equal(await page.evaluate(() => document.getElementById('ai-render-result-img').getBoundingClientRect().height > 0), true, '開き直すと結果が消える');
     // 絵を送らない報告
     await page.locator('#ai-render-report-open').click();
     await page.locator('#ai-render-report input[value="inappropriate"]').check();
@@ -412,6 +463,16 @@ try {
     assert.equal(await visibleText(page, '#ai-render-left'), DAY_MSG, '上限のあと、残りの所に断りの文が出ていない');
     assert.equal(await page.evaluate(() => document.getElementById('ai-render-go').disabled), true, '上限のあとも主ボタンが押せる');
     assert.equal(await page.evaluate(() => document.getElementById('ai-render-again').disabled), true, '上限のあとも「もう一度仕上げる」が押せる');
+    // 押せない主ボタンを指で押しても、押した印(.touch-pressing の水色の地・青い文字)が付かない
+    {
+      const goBox = await page.locator('#ai-render-go').boundingBox();
+      await page.mouse.move(goBox.x + goBox.width / 2, goBox.y + goBox.height / 2);
+      await page.mouse.down();
+      const pressed = await page.evaluate(() => { const b = document.getElementById('ai-render-go'); return { cls: b.classList.contains('touch-pressing'), color: getComputedStyle(b).color }; });
+      await page.mouse.up();
+      assert.equal(pressed.cls, false, '押せない主ボタンに押した印が付く');
+      assert.equal(pressed.color, 'rgb(255, 255, 255)', '押せない主ボタンを押すと文字の色が変わる: ' + pressed.color);
+    }
 
     server.quota = { left: 3, counted: true, render: { left: 5, perUser: 5 } };
     // 閉じて開き直しても最後の1枚が残る
@@ -429,6 +490,39 @@ try {
     await page.waitForSelector('#ai-render-consent:not([hidden])', { timeout: 5000 });
     assert.equal(server.renders.length, nr, '取り消した後に聞かずに送った');
     await page.locator('#ai-render-consent-cancel').click();
+
+    // 待っている間は取り消せない(送信中の依頼は止められないため) → 失敗 → 取り消し → もう一度 → 同意の画面が出て、送られない
+    await page.locator('#ai-render-go').click();
+    await page.waitForSelector('#ai-render-consent:not([hidden])', { timeout: 5000 });
+    server.hold = true;
+    server.release = null;
+    await page.locator('#ai-render-consent-ok').click();
+    await page.waitForFunction(() => !document.getElementById('ai-render-wait').hidden, null, { timeout: 30000 });
+    assert.equal(await page.evaluate(() => document.getElementById('ai-render-revoke').disabled), true, '待っている間に同意を取り消せる');
+    await page.evaluate(() => AiRenderInApp.revoke());
+    assert.equal(await page.evaluate(() => AiRenderInApp.state().consent), true, '待っている間の取り消しが効いてしまう');
+    for (let i = 0; i < 100 && !server.release; i++) await page.waitForTimeout(100);
+    server.renderReplies.push({ status: 502, body: { error: 'ai_upstream_error' } });
+    server.hold = false;
+    server.release();
+    await waitResult(page);
+    assert.ok(await visibleText(page, '#ai-render-error-retry'), '失敗の「もう一度」が出ていない');
+    assert.equal(await page.evaluate(() => document.getElementById('ai-render-revoke').disabled), false, '待ち終わっても取り消せない');
+    await page.locator('#ai-render-revoke').click();
+    assert.equal(await visibleText(page, '#ai-render-error'), null, '取り消しても失敗の表示が残る');
+    {
+      const before = server.renders.length;
+      await page.evaluate(() => AiRenderInApp.retry());
+      await page.waitForSelector('#ai-render-consent:not([hidden])', { timeout: 5000 });
+      await page.waitForTimeout(300);
+      assert.equal(server.renders.length, before, '取り消したあと「もう一度」で聞かずに送った');
+      await page.locator('#ai-render-consent-cancel').click();
+      await page.locator('#ai-render-again').click();
+      await page.waitForSelector('#ai-render-consent:not([hidden])', { timeout: 5000 });
+      await page.waitForTimeout(300);
+      assert.equal(server.renders.length, before, '取り消したあと「もう一度仕上げる」で聞かずに送った');
+      await page.locator('#ai-render-consent-cancel').click();
+    }
 
     // ── 8. quota に残り枚数の欄が無い ──
     server.quota = { left: 3, counted: true };

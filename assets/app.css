@@ -2447,7 +2447,9 @@ body{
     touch-action:manipulation;
   }
   .tbtn:active,
-  .pbtn:active,
+  /* 押せないボタンは :active でも押した見た目にしない(Chromium は disabled のボタンにも :active を当てる。
+     2026-11-27、上限に達した「写真のように仕上げる」で、文字が青へ変わりかける途中の色を検査が拾った)。 */
+  .pbtn:not(:disabled):active,
   .stool:active,
   .asset-tile:active,
   .asset-subhdr:active,
@@ -3121,6 +3123,10 @@ html.has-pr-top #surface-control{--safe-top:calc(env(safe-area-inset-top,0px) + 
 @media (prefers-reduced-motion:reduce){.ai-render-spinner{animation-duration:3s}}
 #ai-render-result-tools{display:grid;gap:10px}
 #ai-render-note{color:var(--hp-muted,#958a80);line-height:1.5}
+/* 共有シートにファイルを渡せない端末で出す、長押しで保存する案内(ai-render-inapp.js の save)。 */
+.ai-render-save-hint{color:var(--hp-text,#2d2a27);font-weight:700;line-height:1.5;text-align:center}
+/* 待っている間は同意を取り消せない(送信中の依頼は止められない)。 */
+#ai-render-revoke:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
 .ai-render-choices{display:grid;gap:2px}
 .airx-dialog .ai-render-panel .airx-check{min-height:44px;margin-top:0;cursor:pointer}
 .ai-render-panel .airx-check input{width:20px;height:20px;flex:0 0 auto;accent-color:var(--hp-primary,#f24a2e)}

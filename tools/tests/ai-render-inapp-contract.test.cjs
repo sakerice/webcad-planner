@@ -45,3 +45,11 @@ test('送る絵の大きさの上限が Worker と同じ', async () => {
   assert.ok(m);
   assert.equal(Function('return ' + m[1])(), MAX_RENDER_IMAGE_CHARS);
 });
+
+test('結果の絵の長押しメニュー(-webkit-touch-callout)を消していない(iPhone で長押しから「写真に追加」できるように)', () => {
+  const css = readFileSync(join(ROOT, 'assets/app.css'), 'utf8');
+  for (const [name, src] of [['assets/app.css', css], ['index.html', html], ['ai-render-inapp.js', inapp]]) {
+    assert.doesNotMatch(src, /touch-callout\s*:\s*none/i, name + ' で長押しメニューを消している');
+  }
+  assert.match(html, /<img id="ai-render-result-img"/, '結果の絵が <img> でない');
+});

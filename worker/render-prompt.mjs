@@ -60,8 +60,12 @@ export function buildRenderPrompt({ preset, view }) {
     "",
     "Keep the design exactly as it is:",
     "- Same camera, perspective, framing, horizon and crop as image 1. Do not zoom out, widen the view or reveal anything beyond the edges of image 1.",
+    // 2026-11-27 の本物の生成で、吹き抜け上部の傾いた天井が、平らな天井と下がり壁（と、その奥の凹み）に置き換わった。
+    // 1 枚目の天井は陰の無い一色の面なので、形は輪郭（3 枚目）と深度（2 枚目）から読ませる。
+    "- The ceiling is part of the design. Its shape comes from images 1, 2 and 3 together: follow its edges in image 3 and its depth in image 2. A ceiling surface that is one continuous plane in image 1 stays one continuous plane with the same tilt: a sloped ceiling stays sloped at the same angle and meets the walls along the same lines, a high or double-height ceiling (a void open to the floor above) stays high and open. Never flatten a sloped or stepped ceiling into a flat one, and never split it into a flat ceiling plus a dropped wall (bulkhead or soffit) or a recessed void. Do not add a beam, a step or any ceiling edge that is not in image 3; keep the steps and beams that are there. Wherever a wall meets the ceiling in image 1, it meets it directly along that same line: do not insert a vertical band of wall, a soffit face or a recess between the top of a wall and the ceiling.",
     "- Every wall, ceiling, floor boundary, window, door, opening, stair, built-in fixture, appliance and piece of furniture stays at the same position, size, shape and count as in image 1. Count the chairs, windows and doors in image 1 and keep exactly that many.",
     "- Do not add, remove, move, resize, merge or split anything. Do not replace an object with a different kind of object.",
+    "- Every wall keeps each corner and jog where it turns at the same place as in image 1. Do not straighten a wall or add a new corner.",
     "- Objects cut off at the edges of image 1 (a door, a window, a wall, a piece of furniture), even a thin sliver of a frame, stay in the picture, cut off at the same place.",
     "- Keep the type of every fixture and appliance: an induction (IH) cooktop stays a flat induction cooktop, a range hood stays the same hood, a refrigerator stays a refrigerator.",
     "- Keep the colour of every surface as in image 1. Doors keep exactly their colour in image 1: a pale cream or yellow painted door stays pale cream or yellow and never becomes wood. Each wall keeps its own colour: a wall painted a different colour from the others (an accent wall) stays that colour and does not turn white. Window frames keep their colour and style (dark frames stay dark, sliding windows stay sliding). Floors, worktops, cabinets and fabrics keep their colour and material.",
@@ -77,6 +81,7 @@ export function buildRenderPrompt({ preset, view }) {
       : "- Crisp, photographic detail. Avoid painterly or illustration looks.",
     "",
     "Never add people, animals, vehicles, plants, decorative props, text, logos, signatures or watermarks.",
+    "Never add ceiling or wall equipment that image 1 does not show: no smoke detectors, no downlights or recessed lights, no ceiling lights, no light switches, no power sockets or outlets, no vents, air-conditioner units or sprinkler heads. Plain ceiling and wall surfaces in image 1 stay plain.",
   ];
   return lines.join("\n");
 }
