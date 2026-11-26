@@ -87,6 +87,15 @@ function text(s) { return s.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 
 const STILL = cardOf('unity-render-modal');
 const VIDEO = cardOf('video-render-modal');
+// 2026-11-27: 画像AI側は「AIレンダー」になり、これまでの「画像AI用データ」は折りたたみ(#ai-render-data)の中に移った。
+// 文字の大きさと言葉はダイアログ全体で見る(上の STILL)。並び(shapeOf)は、折りたたみの中身と動画側を比べる。
+const STILL_DATA = (() => {
+  const fold = STILL.kids.find((k) => k.id === 'ai-render-data');
+  assert.ok(fold, '画像AI用データの折りたたみ #ai-render-data が無い');
+  const body = fold.kids.find((k) => k.cls.indexOf('ai-render-data-body') >= 0);
+  assert.ok(body, '折りたたみの中に .ai-render-data-body が無い');
+  return body;
+})();
 const DIALOGS = [['画像AI', STILL], ['動画AI', VIDEO]];
 
 // ══ 2. CSS を読む ═════════════════════════════════════════════════════════
@@ -540,7 +549,7 @@ function shapeOf(card) {
 }
 
 test('2つのダイアログの並びが同じ（動画だけの設定を除いて）', () => {
-  const still = shapeOf(STILL);
+  const still = shapeOf(STILL_DATA);
   // 動画にしか無いのは「尺」と「ガイド画像を含める」の2項目。ここだけ取り除く。
   const video = shapeOf(VIDEO);
   const durAt = video.indexOf('スライダ');
@@ -549,6 +558,19 @@ test('2つのダイアログの並びが同じ（動画だけの設定を除い�
   const checkAt = video.indexOf('チェックの行');
   assert.notEqual(checkAt, -1, 'ガイド画像のチェックが動画側に無い');
   video.splice(checkAt, 1);
+  // 画像AI側の「参照の説明」と「表現」の選択は、アプリの中で仕上げる画面と共通なので、折りたたみの外
+  // (ダイアログの上、主ボタンの前)にある。動画側の設定からその3つを除き、画像AI側では上にあることを見る。
+  const setAt = video.indexOf('見出し:設定');
+  assert.deepEqual(video.slice(setAt + 1, setAt + 4), ['参照の説明', '設定の名前', '選択'], '動画側の設定の頭');
+  video.splice(setAt + 1, 3);
+  // 題と閉じるは、画像AI側ではダイアログの頭（折りたたみの外）にある。
+  assert.deepEqual(video.slice(0, 2), ['題', '閉じる']);
+  video.splice(0, 2);
+  assert.deepEqual(shapeOf(STILL).slice(0, 2), ['題', '閉じる'], '画像AI側の頭に題と閉じるが無い');
+  const top = shapeOf(STILL);
+  const go = top.indexOf('ボタン:作る');
+  assert.deepEqual(top.slice(0, go).filter((x) => ['参照の説明', '設定の名前', '選択'].indexOf(x) >= 0),
+    ['参照の説明', '設定の名前', '選択'], '画像AI側の表現の選択が主ボタンの前に無い');
 
   // 保存ボタンの顔ぶれは生成物の都合で違う（画像はガイド6枚、動画は参照1枚）。
   // ここで比べるのは「どの位置に保存ボタンの塊が来るか」なので、塊に潰す。
@@ -562,7 +584,7 @@ test('2つのダイアログの並びが同じ（動画だけの設定を除い�
 });
 
 test('どちらのダイアログも 設定 → データ作成 → データ出力 の順に見出しが並ぶ', () => {
-  [['画像AI', STILL], ['動画AI', VIDEO]].forEach(([name, card]) => {
+  [['画像AI', STILL_DATA], ['動画AI', VIDEO]].forEach(([name, card]) => {
     const heads = shapeOf(card).filter((s) => s.indexOf('見出し:') === 0);
     assert.deepEqual(heads,
       ['見出し:この機能について', '見出し:設定', '見出し:データ作成', '見出し:データ出力'], name);
@@ -572,7 +594,7 @@ test('どちらのダイアログも 設定 → データ作成 → データ出
 // データ作成のボタンより後ろにしか、保存ボタンと指示文の欄は出てこないこと。
 // 「押す前に出力欄が埋まっている」形に戻ると、押す意味が読めなくなる。
 test('指示文の欄と保存ボタンは、作るボタンより後ろにある', () => {
-  [['画像AI', STILL], ['動画AI', VIDEO]].forEach(([name, card]) => {
+  [['画像AI', STILL_DATA], ['動画AI', VIDEO]].forEach(([name, card]) => {
     const shape = shapeOf(card);
     const run = shape.indexOf('ボタン:作る');
     assert.notEqual(run, -1, name + ': 作るボタンが無い');

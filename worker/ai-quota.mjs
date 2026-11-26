@@ -71,6 +71,25 @@ export function jevLimits(env) {
   return { perUser: n(env && env.AI_JEV_DAILY_PER_USER, 30), total: n(env && env.AI_JEV_DAILY_TOTAL, 300) };
 }
 
+// AIレンダー（/api/ai/render）の1日の枚数。AI の点とは別の数で持つ（同じ Durable Object・別の鍵 render-total・render-who）。
+// 金額の枠（月・1日の額）は読み取りと共有する（/take に金額の欄を付けて呼ぶ）。
+//   1人 5枚・全体 30枚（2026-11-27 利用者決定）。環境変数 AI_RENDER_DAILY_PER_USER / AI_RENDER_DAILY_TOTAL で変えられる。
+// 回数を戻す手段（取り消し）はこのクラスに無い。上流の失敗・安全上の停止でも、数えた 1 枚はそのまま残す。
+export function renderLimits(env) {
+  const n = (v, d) => { const x = Math.round(Number(v)); return x >= 1 ? x : d; };
+  return { perUser: n(env && env.AI_RENDER_DAILY_PER_USER, 5), total: n(env && env.AI_RENDER_DAILY_TOTAL, 30) };
+}
+// AIレンダーの「問題を報告」（/api/ai/render-report）の1日の件数。1人 10件（別の鍵 report-total・report-who）。
+// 全体の上限は、1人の上限を超える接続元の数で R2 が埋まらないための歯止め（既定 500件）。
+export function reportLimits(env) {
+  const n = (v, d) => { const x = Math.round(Number(v)); return x >= 1 ? x : d; };
+  return { perUser: n(env && env.AI_RENDER_REPORTS_PER_USER, 10), total: n(env && env.AI_RENDER_REPORTS_TOTAL, 500) };
+}
+// /take の pool の名前と、鍵の前置き。無ければ AI の点。
+const POOLS = Object.freeze({ jev: "jev-", render: "render-", report: "report-" });
+// 金額の枠も数える pool（無名の AI の点と、レンダー）。
+const MONEY_POOLS = new Set(["", "render-"]);
+
 // ── 金額の枠（米ドルを 100 万分の 1 にした整数で持つ） ─────────────────
 //
 // 鍵:
@@ -179,8 +198,10 @@ export class AiQuota {
     const now = Date.now();
     if (url.pathname === "/ticket") return this.countTicket(url, now);
     if (url.pathname === "/settle") return this.settle(url);
-    // jev の窓口の回数は、AI の点とは別の鍵で数える（鍵の2つめが日付なので、古い日の掃除は同じ仕組みで済む）。
-    const pool = url.searchParams.get("pool") === "jev" ? "jev-" : "";
+    // jev の窓口の回数・レンダーの枚数・報告の件数は、AI の点とは別の鍵で数える（鍵の2つめが日付なので、
+    // 古い日の掃除は同じ仕組みで済む）。知らない pool の名前は AI の点として数える（今までどおり）。
+    const poolName = url.searchParams.get("pool") || "";
+    const pool = Object.prototype.hasOwnProperty.call(POOLS, poolName) ? POOLS[poolName] : "";
     const cost = Math.max(1, Math.min(64, Number(url.searchParams.get("cost")) || 1));
     const who = url.searchParams.get("who") || "unknown";
     const perDay = Math.max(1, Number(url.searchParams.get("perDay")) || 0);
@@ -188,7 +209,7 @@ export class AiQuota {
     // peek のときは数えずに残りだけ返す。画面に「本日あと何回」を出すため。
     const peek = url.searchParams.get("peek") === "1";
     const day = utcDay(now);
-    const money = pool ? null : readMoneyParams(url);
+    const money = MONEY_POOLS.has(pool) ? readMoneyParams(url) : null;
     if (money && money.bad) return this.reply({ ok: false, error: "bad_money" }, 400);
 
     const totalKey = `${pool}total:${day}`;
@@ -238,6 +259,7 @@ export class AiQuota {
     if (!total && !pool) await this.forgetOld(now);
     if (ticket) await this.forgetOldTickets(now);
     return this.reply({ ok: true, scope: "who", limit: perDay, remaining: perDay - mine - cost,
+      totalRemaining: totalPerDay - total - cost,
       ...(budget ? { usdLeft: Math.max(0, Math.min(budget.monthLeft, budget.dayLeft) - money.usd) } : {}),
       ...(ticket ? { grant } : {}) });
   }

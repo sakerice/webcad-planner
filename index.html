@@ -612,66 +612,135 @@ window.addEventListener('load',function(){
 </div>
 <div id="unity-render-modal" onclick="if(event.target===this)closeUnityRenderModal()">
   <!-- airx-dialog: 動画AI側と共通の型(文字サイズ4段階・チェック行の形)。
-       スタイルシート末尾の「共通の型 (Task 33)」だけが文字サイズを決める。 -->
+       スタイルシート末尾の「共通の型 (Task 33)」だけが文字サイズを決める。
+       上半分はアプリの中で仕上げる画面(動きは assets/js/ai-render-inapp.js、設計書
+       docs/superpowers/specs/2026-11-27-ai-render-in-app-design.md の「画面側」)。
+       下の折りたたみが、これまでの「画像AI用データ」(動きと id は変えていない)。 -->
   <div class="unity-render-card airx-dialog">
     <div class="unity-render-head">
-      <div class="unity-render-title">画像AI用データ</div>
+      <div class="unity-render-title">AIレンダー</div>
       <button class="unity-render-close" onclick="closeUnityRenderModal()">×</button>
     </div>
-    <!-- 見出しの並びは動画AI用データのダイアログと同じ順序に揃えてある(Task 29-3):
-         この機能について → 設定 → データ作成 → データ出力。見出しは既存の .ph、
-         中身も既存の unity-render-* クラスをそのまま使う。 -->
-    <div class="ph">この機能について</div>
-    <div class="unity-render-status">いま見ている外観3D・内観3D・ウォークスルーの画面を、画像生成AIで高品質化するためのデータを作ります。基準・エッジ・深度・法線・セグメント・部材IDのガイド画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
-    <div class="ph">設定</div>
-    <div class="unity-render-config">
-      <div class="ai-style-field">
+    <div id="ai-render-inapp" class="ai-render-inapp">
+      <div class="airx-field ai-render-preset-field">
         <div id="ai-render-source" class="airx-source-note"></div>
-        <div class="airx-field">
-          <label for="ai-render-preset">表現プリセット</label>
-          <select id="ai-render-preset" onchange="onAiRenderPresetChange()"></select>
-          <small>実写・水彩から選択。水彩ファサードは外観3Dでの使用を推奨します。</small>
+        <label for="ai-render-preset">表現</label>
+        <select id="ai-render-preset" onchange="onAiRenderPresetChange()"></select>
+        <small>実写・水彩から選べます。水彩ファサードは外観3Dに向いています。</small>
+      </div>
+      <button id="ai-render-go" class="pbtn ai-render-go" type="button" onclick="AiRenderInApp.start()">写真のように仕上げる</button>
+      <div id="ai-render-left" class="airx-source-note ai-render-left" hidden></div>
+      <div id="ai-render-msg" class="airx-source-note ai-render-msg" role="status" aria-live="polite"></div>
+      <!-- 初めて仕上げるときの同意。文面を変えたら ai-render-inapp.js の CONSENT_VERSION を上げる -->
+      <div id="ai-render-consent" class="ai-render-panel" role="group" aria-labelledby="ai-render-consent-title" hidden>
+        <div class="ph" id="ai-render-consent-title">AIに送るものを確かめてください</div>
+        <ul class="unity-render-status ai-render-consent-list">
+          <li>送るもの: いま見ている3D画面の絵と、その奥行き・輪郭の絵（3枚）。選んだ表現の種類。</li>
+          <li>送り先: Google の画像生成AI。処理は日本国外で行われます。</li>
+          <li>Google は送った絵をAIの学習に使いません。</li>
+          <li>送らないもの: 図面の原本、氏名、住所、仕上げメモ。</li>
+          <li>仕上がった絵はこの画面に出すだけで、サーバーには残しません。</li>
+        </ul>
+        <div class="ai-render-actions">
+          <button id="ai-render-consent-ok" class="pbtn" type="button" onclick="AiRenderInApp.agree()">同意して仕上げる</button>
+          <button id="ai-render-consent-cancel" class="pbtn sec" type="button" onclick="AiRenderInApp.cancelConsent()">やめる</button>
         </div>
-        <div class="airx-field">
-          <label for="ai-render-style-input">任意の仕上げメモ</label>
-          <input id="ai-render-style-input" type="text" placeholder="例: 明るい昼、モデルハウス風、白い壁紙を自然に">
-          <div id="ai-render-style-count" class="ai-input-count" hidden></div>
-          <small>空欄でもOKです。プリセットの後ろに足されます（プリセットを置き換えません）。</small>
+      </div>
+      <div id="ai-render-stage" class="ai-render-stage" hidden>
+        <div class="ai-render-figure">
+          <img id="ai-render-result-img" class="ai-render-img" alt="AIが仕上げた絵" hidden>
+          <img id="ai-render-base-img" class="ai-render-img" alt="元の3Dの絵" hidden>
+          <div id="ai-render-wait" class="ai-render-wait" role="status" hidden>
+            <span class="ai-render-spinner" aria-hidden="true"></span>
+            <span class="airx-source-note">写真のように仕上げています。そのままお待ちください</span>
+          </div>
+        </div>
+        <div id="ai-render-error" class="ai-render-panel" role="alert" hidden>
+          <div id="ai-render-error-text" class="unity-render-status"></div>
+          <div class="ai-render-actions">
+            <button id="ai-render-error-retry" class="pbtn" type="button" onclick="AiRenderInApp.retry()">もう一度</button>
+            <button id="ai-render-error-close" class="pbtn sec" type="button" onclick="AiRenderInApp.closeError()">閉じる</button>
+          </div>
+        </div>
+        <div id="ai-render-result-tools" hidden>
+          <div class="ai-render-actions ai-render-result-actions">
+            <button id="ai-render-compare" class="pbtn sec" type="button" aria-pressed="false" onclick="AiRenderInApp.toggleCompare()">元の3Dと見比べる</button>
+            <button id="ai-render-save" class="pbtn" type="button" onclick="AiRenderInApp.save()">画像を保存</button>
+            <button id="ai-render-again" class="pbtn sec" type="button" onclick="AiRenderInApp.start()">もう一度仕上げる</button>
+            <button id="ai-render-report-open" class="pbtn sec" type="button" onclick="AiRenderInApp.openReport()">問題を報告</button>
+          </div>
+          <div id="ai-render-note" class="airx-source-note">AI が仕上げた絵です。細部が実際の間取りと違うことがあります。</div>
+          <div id="ai-render-report" class="ai-render-panel" role="group" aria-labelledby="ai-render-report-title" hidden>
+            <div class="ph" id="ai-render-report-title">問題を報告</div>
+            <div class="ai-render-choices" role="radiogroup" aria-labelledby="ai-render-report-title">
+              <label class="airx-check"><input type="radio" name="ai-render-report-reason" value="inappropriate" checked> 不適切な内容が写っている</label>
+              <label class="airx-check"><input type="radio" name="ai-render-report-reason" value="wrong_layout"> 間取りや家具が元の3Dと違う</label>
+              <label class="airx-check"><input type="radio" name="ai-render-report-reason" value="other"> そのほか</label>
+            </div>
+            <label class="airx-check ai-render-report-image"><input type="checkbox" id="ai-render-report-image"> この絵も送る（確かめるために使います）</label>
+            <div id="ai-render-report-msg" class="airx-source-note" role="status"></div>
+            <div class="ai-render-actions">
+              <button id="ai-render-report-send" class="pbtn" type="button" onclick="AiRenderInApp.sendReport()">送る</button>
+              <button id="ai-render-report-cancel" class="pbtn sec" type="button" onclick="AiRenderInApp.closeReport()">やめる</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="ph">データ作成</div>
-    <!-- 進捗と結果はここへ。「この機能について」は書き換えない -->
-    <div id="unity-render-status" class="unity-render-status"></div>
-    <div class="unity-render-actions">
-      <button id="ai-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="generateAiRenderPackage()">画像AI用データを作る</button>
-    </div>
-    <div class="ph">データ出力</div>
-    <textarea id="ai-instructions-preview" class="ai-instructions-preview" readonly placeholder="作ると、AIへの指示文がここに出ます。"></textarea>
-    <div class="ai-instruction-actions">
-      <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="copyAiRenderPrompt()">AIへの指示文をコピー</button>
-    </div>
-    <img id="unity-render-img" class="unity-render-img" alt="画像AI用の基準画像プレビュー">
-    <div id="ai-package-preview" class="ai-package-preview">
-      <div class="ai-package-shot"><img id="ai-base-img" alt="base render"><span>基準画像</span></div>
-      <div class="ai-package-shot"><img id="ai-edge-img" alt="edge guide"><span>エッジ画像</span></div>
-      <div class="ai-package-shot"><img id="ai-seg-img" alt="segmentation guide"><span>セグメント画像</span></div>
-      <div class="ai-package-shot"><img id="ai-depth-img" alt="depth guide"><span>深度画像</span></div>
-      <div class="ai-package-shot"><img id="ai-normal-img" alt="normal guide"><span>法線画像</span></div>
-      <div class="ai-package-shot"><img id="ai-instance-img" alt="instance guide"><span>部材ID画像</span></div>
-    </div>
-    <div class="unity-render-actions">
-      <a id="ai-dl-bundle" class="pbtn disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">ZIPを保存</a>
-      <a id="ai-dl-json" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">パッケージJSON保存</a>
-      <a id="ai-dl-prompt" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">AIへの指示文を保存</a>
-      <a id="ai-dl-base" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">基準画像保存</a>
-      <a id="ai-dl-edge" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">エッジ画像保存</a>
-      <a id="ai-dl-segmentation" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">セグメント画像保存</a>
-      <a id="ai-dl-depth" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">深度画像保存</a>
-      <a id="ai-dl-normal" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">法線画像保存</a>
-      <a id="ai-dl-instance" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">部材ID画像保存</a>
-    </div>
-    <div class="unity-render-cmd">使い方: ZIPに入ったガイド画像6枚と「AIへの指示文」を、使いたい画像生成AIにまとめて渡してください。凡例JSONはセグメントと部材IDの対応を確かめるのに使います。</div>
+    <details id="ai-render-data" class="ai-render-data">
+      <summary>画像AI用データを保存する（ほかの画像AIで使う）</summary>
+      <div class="ai-render-data-body">
+      <!-- 見出しの並びは動画AI用データのダイアログと同じ順序に揃えてある(Task 29-3):
+           この機能について → 設定 → データ作成 → データ出力。見出しは既存の .ph、
+           中身も既存の unity-render-* クラスをそのまま使う。 -->
+      <div class="ph">この機能について</div>
+      <div class="unity-render-status">いま見ている外観3D・内観3D・ウォークスルーの画面を、画像生成AIで高品質化するためのデータを作ります。基準・エッジ・深度・法線・セグメント・部材IDのガイド画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
+      <div class="ph">設定</div>
+      <div class="unity-render-config">
+        <div class="ai-style-field">
+          <div class="airx-field">
+            <label for="ai-render-style-input">任意の仕上げメモ</label>
+            <input id="ai-render-style-input" type="text" placeholder="例: 明るい昼、モデルハウス風、白い壁紙を自然に">
+            <div id="ai-render-style-count" class="ai-input-count" hidden></div>
+            <small>空欄でもOKです。上で選んだ表現の後ろに足されます（表現を置き換えません）。「写真のように仕上げる」には送りません。</small>
+          </div>
+        </div>
+      </div>
+      <div class="ph">データ作成</div>
+      <!-- 進捗と結果はここへ。「この機能について」は書き換えない -->
+      <div id="unity-render-status" class="unity-render-status"></div>
+      <div class="unity-render-actions">
+        <button id="ai-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="generateAiRenderPackage()">画像AI用データを作る</button>
+      </div>
+      <div class="ph">データ出力</div>
+      <textarea id="ai-instructions-preview" class="ai-instructions-preview" readonly placeholder="作ると、AIへの指示文がここに出ます。"></textarea>
+      <div class="ai-instruction-actions">
+        <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="copyAiRenderPrompt()">AIへの指示文をコピー</button>
+      </div>
+      <img id="unity-render-img" class="unity-render-img" alt="画像AI用の基準画像プレビュー">
+      <div id="ai-package-preview" class="ai-package-preview">
+        <div class="ai-package-shot"><img id="ai-base-img" alt="base render"><span>基準画像</span></div>
+        <div class="ai-package-shot"><img id="ai-edge-img" alt="edge guide"><span>エッジ画像</span></div>
+        <div class="ai-package-shot"><img id="ai-seg-img" alt="segmentation guide"><span>セグメント画像</span></div>
+        <div class="ai-package-shot"><img id="ai-depth-img" alt="depth guide"><span>深度画像</span></div>
+        <div class="ai-package-shot"><img id="ai-normal-img" alt="normal guide"><span>法線画像</span></div>
+        <div class="ai-package-shot"><img id="ai-instance-img" alt="instance guide"><span>部材ID画像</span></div>
+      </div>
+      <div class="unity-render-actions">
+        <a id="ai-dl-bundle" class="pbtn disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">ZIPを保存</a>
+        <a id="ai-dl-json" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">パッケージJSON保存</a>
+        <a id="ai-dl-prompt" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">AIへの指示文を保存</a>
+        <a id="ai-dl-base" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">基準画像保存</a>
+        <a id="ai-dl-edge" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">エッジ画像保存</a>
+        <a id="ai-dl-segmentation" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">セグメント画像保存</a>
+        <a id="ai-dl-depth" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">深度画像保存</a>
+        <a id="ai-dl-normal" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">法線画像保存</a>
+        <a id="ai-dl-instance" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">部材ID画像保存</a>
+      </div>
+      <div class="unity-render-cmd">使い方: ZIPに入ったガイド画像6枚と「AIへの指示文」を、使いたい画像生成AIにまとめて渡してください。凡例JSONはセグメントと部材IDの対応を確かめるのに使います。</div>
+      </div>
+    </details>
+    <button id="ai-render-revoke" class="pbtn sec ai-render-revoke" type="button" onclick="AiRenderInApp.revoke()" hidden>AI への送信の同意を取り消す</button>
   </div>
 </div>
 
@@ -865,6 +934,8 @@ window.addEventListener('load',function(){
 <script src="assets/js/plan-free-apply.js"></script>
 <script src="assets/js/plan-snapshot.js"></script>
 <script src="assets/js/plan-import.js"></script>
+<!-- AIレンダー: アプリの中で仕上げる画面(#unity-render-modal の上半分)。撮る関数は index.html のものを呼ぶ -->
+<script src="assets/js/ai-render-inapp.js"></script>
 <!-- チャット(AI で間取りを直す)の部品。画面を持たない。チャット欄が使う -->
 <script src="assets/js/chat/claude-stream.js"></script>
 <script src="assets/js/chat/plan-summary.js"></script>
@@ -19630,6 +19701,8 @@ function openUnityRenderModal(){
   var m=document.getElementById('unity-render-modal');
   syncAiRenderSource();
   if(m) m.classList.add('show');
+  // アプリの中で仕上げる側(assets/js/ai-render-inapp.js)。開くときは残り枚数を聞くだけで、撮らない。
+  if(typeof AiRenderInApp!=='undefined') AiRenderInApp.onOpen();
 }
 function closeUnityRenderModal(){
   var m=document.getElementById('unity-render-modal');

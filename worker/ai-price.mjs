@@ -56,6 +56,24 @@ export function geminiPriceOf(model) {
   return Object.prototype.hasOwnProperty.call(GEMINI_PRICES, String(model || "")) ? GEMINI_PRICES[model] : OTHER_PRICE;
 }
 
+// AIレンダー（worker/vertex-render.mjs。Vertex AI の gemini-nano-banana-2.1）の単価。100 万トークンあたりの米ドル。
+// 入力 $1.5、絵の出力 $30、文と思考の出力 $7.5。2026-11-26 と 2026-11-27 に Gemini API の料金
+// （https://aistudio.google.com/docs/models/gemini-nano-banana-2.1）で確かめた値。Vertex AI でも同額かは確かめていない。
+// 返事の candidatesTokenCount は絵と文の合計なので、全部を絵の単価（高い方）で数える。1 枚（1K）は約 $0.045。
+export const RENDER_PRICE = Object.freeze({ in: 1.5, imageOut: 30, textOut: 7.5 });
+// 仮押さえ: 入力は画像 1 枚 8,000 トークン（imageTokens。実測は 1,120）と指示文、出力は上限まで絵の単価で出たとして数える。
+export function renderHoldUsd({ inputTokens, maxOutputTokens }) {
+  const input = Math.min(MAX_INPUT_TOKENS, Math.max(0, Number(inputTokens) || 0) + OVERHEAD_TOKENS);
+  return (input * RENDER_PRICE.in + Math.max(0, Number(maxOutputTokens) || 0) * RENDER_PRICE.imageOut) / 1e6;
+}
+// usage（worker/vertex-render.mjs の形: inputTokens・outputTokens・thoughtTokens）から実額を出す。
+export function renderUsageUsd(usage) {
+  if (!usage) return null;
+  const input = Number(usage.inputTokens), output = Number(usage.outputTokens), thought = Number(usage.thoughtTokens) || 0;
+  if (!Number.isFinite(input) || !Number.isFinite(output)) return null;
+  return (input * RENDER_PRICE.in + output * RENDER_PRICE.imageOut + thought * RENDER_PRICE.textOut) / 1e6;
+}
+
 export function priceOf(model) {
   return Object.prototype.hasOwnProperty.call(PRICES, String(model || "")) ? PRICES[model] : UNKNOWN_PRICE;
 }

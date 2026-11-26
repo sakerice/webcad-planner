@@ -101,6 +101,9 @@ L字の部屋も廻り階段も出ない。
 | `AI_CHAT_POINTS` | 21 | チャット1依頼の点 |
 | `AI_CHAT_MAX_OUTPUT_TOKENS` | 24000 | チャット1依頼（往復をまたぐ）の出力の合計 |
 | `AI_JEV_DAILY_PER_USER` / `AI_JEV_DAILY_TOTAL` | 30 / 300 | jev を呼ぶ窓口（仕上げ）の1日の回数 |
+| `AI_RENDER_DAILY_PER_USER` / `AI_RENDER_DAILY_TOTAL` | 5 / 30 | アプリ内の AIレンダー（`/api/ai/render`）の1日の枚数。読み取りの点とは別に数え、金額の枠は共有する |
+| `AI_RENDER_MODEL` | gemini-nano-banana-2.1 | AIレンダーの画像モデル（Vertex AI、場所 global。鍵は読み取りと同じ `GOOGLE_SERVICE_ACCOUNT_JSON`） |
+| `AI_RENDER_REPORTS_PER_USER` / `AI_RENDER_REPORTS_TOTAL` | 10 / 500 | AIレンダーの「問題を報告」の1日の件数。報告は R2 `PLANS` の `render-reports/<日本時間の日付>/` に入る |
 
 **月の金額の枠**（2026-11 に足した。worker/ai-budget.mjs・worker/ai-price.mjs）。AI を呼ぶ前に、
 その呼び出しの最悪額（入力の見積もり＋出力の上限×単価）を仮押さえし、枠を超えるなら呼ばずに断る。

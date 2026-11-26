@@ -41,6 +41,7 @@ import {
 import { holdUsd, imageTokens, textTokens, anthropicUsageUsd, otherUsageUsd, geminiUsageUsd } from "./ai-price.mjs";
 import { quotaLimits } from "./ai-quota.mjs";
 import { fallbackEnabled, transientKind, logFallback } from "./ai-fallback.mjs";
+import { aiRender, aiRenderReport, renderQuota } from "./routes-render.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -103,6 +104,9 @@ export async function handleAi(request, env, url, deps = {}) {
 
   // チャットは本文が小さい（256KB まで）。下の「約40MBまで読む」より前で分け、自分の上限で読む。
   if (url.pathname === "/api/ai/chat") return handleChat(request, env, deps);
+  // アプリの中の AIレンダー（worker/routes-render.mjs）。本文の上限が違うので、下の「約40MBまで読む」より前で分ける。
+  if (url.pathname === "/api/ai/render") return aiRender(request, env, deps);
+  if (url.pathname === "/api/ai/render-report") return aiRenderReport(request, env);
 
   let payload;
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
@@ -150,34 +154,40 @@ function readImage(value, field) {
 // **残りが分からないときは数を出さない。** 金額の枠は1回ごとの額で減り方が違う。金額の枠で先に止まりうる
 // （残りの額で、点の残りぶんの最悪の読み取りをまかなえない）ときは left: null・counted: false にし、画面は欄を隠す。
 // 金額そのものは返さない（外から金額が見える窓口は作らない）。
+// render … AIレンダーの残り枚数（worker/routes-render.mjs の renderQuota。2026-11-27 に足した）。{ left, perUser }、0 枚なら message も。
 async function aiQuota(env, request) {
+  const [reading, render] = await Promise.all([readingQuota(env, request), renderQuota(env, request)]);
+  return json({ ...reading, render });
+}
+
+async function readingQuota(env, request) {
   const limits = quotaLimits(env);
   const hidden = { left: null, perUser: limits.imports.perUser, total: limits.imports.total, counted: false };
-  if (!env || !env.AI_QUOTA) return json(hidden);
+  if (!env || !env.AI_QUOTA) return hidden;
   const seen = await askQuota(env, "/take", {
     cost: "0", peek: "1", who: whoOf(request),
     perDay: String(limits.points.perUser), totalPerDay: String(limits.points.total),
     ...moneyParams(env, 0, "", { who: whoOf(request) }),
   });
   // 数えられなかったことを「残り0回」と言わない（画面がボタンを閉じてしまう）。
-  if (!seen || seen.scope !== "peek") return json(hidden);
+  if (!seen || seen.scope !== "peek") return hidden;
   // いちばん小さな依頼も入らないときだけ「今月ぶん」「本日ぶん」と言い切る（大きな依頼だけが入らないなら数を隠す）。
   const min = minChatHoldUsd(env) * 1e6;
   if (Number(seen.monthLeft) < min) {
-    return json({ ...hidden, left: 0, counted: true, limit: "month", message: MONTH_LIMIT_MESSAGE });
+    return { ...hidden, left: 0, counted: true, limit: "month", message: MONTH_LIMIT_MESSAGE };
   }
   // その人の1日の使用額が上限を超えていれば、その人には「本日ぶん」（画面の残りの表示を断り方と合わせる）。
   if (Number(seen.dayLeft) < min || seen.spentOver === true) {
-    return json({ ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() });
+    return { ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() };
   }
   // 残りを回数にする。1回ぶんに満たない端数は切り捨てる。
   const byPoints = Math.floor(Number(seen.remaining) / POINTS_PER_IMPORT);
-  if (!Number.isFinite(byPoints)) return json(hidden);
-  if (byPoints <= 0) return json({ ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() });
+  if (!Number.isFinite(byPoints)) return hidden;
+  if (byPoints <= 0) return { ...hidden, left: 0, counted: true, limit: "day", message: dayLimitMessage() };
   const usdLeft = Math.min(Number(seen.monthLeft), Number(seen.dayLeft)) / 1e6;
   const byMoney = Math.floor(usdLeft / readingRefUsd(env));
-  if (!(byMoney >= byPoints)) return json(hidden);
-  return json({ ...hidden, left: byPoints, counted: true });
+  if (!(byMoney >= byPoints)) return hidden;
+  return { ...hidden, left: byPoints, counted: true };
 }
 
 // 「本日あと何回」を出してよいかの目安にする、1ページの読み取り（短い指示・Claude）の仮押さえの額。

@@ -45,6 +45,9 @@ const page = await b.newPage({ viewport: { width: 375, height: 780 } });
 const errors = [];
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text().slice(0, 200)); });
+// ここの静的サーバには Worker(/api/*)が居ない。AIレンダーのダイアログは開くと残り枚数(/api/ai/quota)を聞くので、
+// その 404 がコンソールに出ないよう、本番の Worker と同じく JSON を返しておく(中身は「数えていない」)。
+await page.route('**/api/**', r => r.fulfill({ status: 200, contentType: 'application/json', body: '{"left":null,"counted":false}' }));
 await page.goto('http://127.0.0.1:${PORT}/index.html', { waitUntil: 'load' });
 await page.waitForTimeout(3000);
 await page.evaluate(async () => {

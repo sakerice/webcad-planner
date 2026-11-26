@@ -3088,3 +3088,52 @@ html.has-pr-top #surface-control{--safe-top:calc(env(safe-area-inset-top,0px) + 
 .pr-slot{display:flex;justify-content:center;margin-top:24px}
 .pr-slot[hidden]{display:none}
 .jis-dialog .pr-slot{flex:0 0 auto;margin:0;padding:24px 12px 12px;border-top:1px solid #ddd;background:#fff}
+
+/* ══ AIレンダー: アプリの中で仕上げる画面 (#unity-render-modal の上半分) ══════════
+   動きは assets/js/ai-render-inapp.js、設計書は docs/superpowers/specs/2026-11-27-ai-render-in-app-design.md。
+   文字の大きさは上の「共通の型」(.airx-dialog の4段階)に乗せる。ここでは font-size を変数でしか書かない。
+   ボタンは指で押せるよう 44px 以上。iPhone の縦でも iPad でも、縦長の絵はカードの中のスクロールで全体が見える。 */
+.ai-render-inapp{display:grid;gap:10px;margin-bottom:12px}
+.ai-render-inapp [hidden],#ai-render-revoke[hidden]{display:none!important}
+.ai-render-preset-field{margin-top:0}
+.ai-render-preset-field select{min-height:44px}
+.airx-dialog .ai-render-go{width:100%;min-height:48px;margin:0;font-weight:800;letter-spacing:.04em}
+/* 待っている間・残り0枚のときは押せないと見て分かるように */
+.airx-dialog .ai-render-inapp .pbtn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.ai-render-left{color:var(--hp-text-soft,#6f6861);text-align:center;font-weight:700}
+.ai-render-msg:empty{display:none}
+.ai-render-msg{color:var(--hp-text-soft,#6f6861);text-align:center}
+.ai-render-panel{display:grid;gap:8px;padding:12px;border-radius:18px;background:var(--hp-surface-2,#f5eee8)}
+.ai-render-panel .ph{margin-bottom:0}
+.ai-render-consent-list{margin:0;padding:10px 10px 10px 28px;display:grid;gap:6px;line-height:1.6;white-space:normal}
+.ai-render-actions{display:flex;flex-wrap:wrap;gap:8px}
+.airx-dialog .ai-render-actions .pbtn{flex:1 1 140px;width:auto;min-height:44px;margin:0;padding:8px 14px}
+.ai-render-stage{display:grid;gap:10px}
+.ai-render-figure{position:relative;display:grid}
+.ai-render-figure:empty{display:none}
+/* 縦長の絵でもボタンまでが遠くならないよう、高さは画面の 72% まで(絵は欠けずに縮む)。幅はカードいっぱい。 */
+.ai-render-img{display:block;width:100%;height:auto;max-height:72dvh;object-fit:contain;border-radius:18px}
+.ai-render-img.is-waiting{opacity:.35;filter:saturate(.6)}
+.ai-render-wait{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;text-align:center}
+.ai-render-wait .airx-source-note{max-width:22em;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.92);color:var(--hp-text,#2d2a27);font-weight:700;line-height:1.5}
+.ai-render-spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--hp-border,#e2d6c6);border-top-color:var(--hp-primary,#f24a2e);animation:ai-render-spin 1s linear infinite}
+@keyframes ai-render-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.ai-render-spinner{animation-duration:3s}}
+#ai-render-result-tools{display:grid;gap:10px}
+#ai-render-note{color:var(--hp-muted,#958a80);line-height:1.5}
+.ai-render-choices{display:grid;gap:2px}
+.airx-dialog .ai-render-panel .airx-check{min-height:44px;margin-top:0;cursor:pointer}
+.ai-render-panel .airx-check input{width:20px;height:20px;flex:0 0 auto;accent-color:var(--hp-primary,#f24a2e)}
+#ai-render-report-msg:empty{display:none}
+/* 「画像AI用データ」の折りたたみ。中身は以前のダイアログそのまま。 */
+.ai-render-data{border-top:1px solid var(--hp-border,#e2d6c6);padding-top:4px}
+.ai-render-data > summary{min-height:44px;display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--hp-text-soft,#6f6861);font-weight:700;list-style:none}
+.airx-dialog .ai-render-data > summary{font-size:var(--airx-fs-body)}
+.ai-render-data > summary::-webkit-details-marker{display:none}
+.ai-render-data > summary::before{content:'';width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;flex:0 0 auto;margin:0 4px}
+.ai-render-data[open] > summary::before{transform:rotate(45deg)}
+.ai-render-data-body{padding-top:8px}
+.airx-dialog .ai-render-revoke{display:block;width:auto;min-height:44px;margin:12px auto 0;padding:8px 18px}
+@media (max-width:768px){
+  .ai-render-actions .pbtn{flex-basis:calc(50% - 4px)}
+}

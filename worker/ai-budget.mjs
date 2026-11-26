@@ -10,7 +10,7 @@
 //     数えずに通す（手元の検査のため）。それ以外のホストで束縛が無いのは設定の事故なので断る
 //   - 仮押さえ（最悪の額）を取ってから呼び、返事の usage で精算する。usage が取れなければ仮押さえのまま
 import { budgetConfig, toMicro, anthropicUsageUsd, inputHoldUsd, interruptedOutputTokens, priceOf } from "./ai-price.mjs";
-import { quotaLimits, jevLimits } from "./ai-quota.mjs";
+import { quotaLimits, jevLimits, renderLimits, reportLimits } from "./ai-quota.mjs";
 
 export const QUOTA_TIMEOUT_MS = 5000;
 
@@ -154,6 +154,44 @@ export async function takeJev(request, env) {
   const limits = jevLimits(env);
   const data = await askQuota(env, "/take", {
     pool: "jev", cost: "1", who: whoOf(request), perDay: String(limits.perUser), totalPerDay: String(limits.total),
+  });
+  if (!data) return { ok: false, kind: "unavailable" };
+  if (!data.ok) return { ok: false, kind: "day" };
+  return { ok: true };
+}
+
+// AIレンダーの枚数と金額をまとめて数える（枚数は pool=render。AI の点は使わない）。
+//   { ok: true, hold, remaining } … 通す。remaining はその接続元が今日あと何枚か（全体の残りも見た小さい方）。数えない環境では null
+//   { ok: false, kind: "user" | "total" | "month" | "day" | "busy" | "unavailable" }
+export async function reserveRender(request, env, usd, minUsd) {
+  if (quotaOptional(request, env)) return { ok: true, hold: null, remaining: null };
+  const limits = renderLimits(env);
+  const hold = randomId();
+  const who = whoOf(request);
+  const data = await askQuota(env, "/take", {
+    pool: "render", cost: "1", who, perDay: String(limits.perUser), totalPerDay: String(limits.total),
+    ...moneyParams(env, usd, hold, { minUsd, who }),
+  });
+  if (!data) return { ok: false, kind: "unavailable" };
+  if (!data.ok) {
+    if (data.scope === "who") return { ok: false, kind: "user" };
+    if (data.scope === "total") return { ok: false, kind: "total" };
+    if (data.scope === "month") return { ok: false, kind: "month" };
+    if (data.scope === "day" || data.scope === "spent") return { ok: false, kind: "day" };
+    if (data.scope === "busy" || data.scope === "pending") return { ok: false, kind: "busy" };
+    return { ok: false, kind: "unavailable" };
+  }
+  const mine = Number(data.remaining), all = Number(data.totalRemaining);
+  const remaining = Number.isFinite(all) ? Math.min(mine, all) : mine;
+  return { ok: true, hold, remaining: Number.isFinite(remaining) ? Math.max(0, remaining) : null };
+}
+
+// 「問題を報告」の件数（pool=report。金額は数えない）。{ ok: true } か { ok: false, kind: "day" | "unavailable" }。
+export async function takeReport(request, env) {
+  if (quotaOptional(request, env)) return { ok: true };
+  const limits = reportLimits(env);
+  const data = await askQuota(env, "/take", {
+    pool: "report", cost: "1", who: whoOf(request), perDay: String(limits.perUser), totalPerDay: String(limits.total),
   });
   if (!data) return { ok: false, kind: "unavailable" };
   if (!data.ok) return { ok: false, kind: "day" };
