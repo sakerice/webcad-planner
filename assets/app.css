@@ -28,7 +28,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .wk-height{left:62px;top:62px;font-size:11px;font-weight:700;line-height:1.15;letter-spacing:0;
   background:rgba(255,255,255,0.94);color:#2d2a27;border-color:rgba(22,33,62,0.22)}
 .wk-height:hover,.wk-height:active{background:var(--hp-primary,#f24a2e);color:#fff}
-@media (max-width:768px){#walk-minimap{width:160px;height:128px}#walk-dpad{right:14px;bottom:14px}}
+@media (max-width:768px), (hover:none) and (pointer:coarse){#walk-minimap{width:160px;height:128px}#walk-dpad{right:14px;bottom:14px}}
 /* ── MAIN LAYOUT ───────────────────────── */
 #main{display:flex;flex:1;overflow:hidden;min-height:0}
 #sidebar{width:175px;background:#16213e;border-right:2px solid #0f3460;overflow-y:auto;flex-shrink:0;transition:transform 0.28s cubic-bezier(.4,0,.2,1)}
@@ -301,10 +301,10 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .ai-edit-btn[hidden]{display:none}
 .ai-edit-stop{background:#a2242d;border-color:#a2242d;color:#fff}
 /* 電話・タブレットの幅では、右下の「AIに頼む」の丸いボタン(assets/chat.css の #chat-fab。右 12px・幅 48px)を隠さないよう、右に空ける */
-@media(max-width:768px){.plan-notice,.ai-edit-bar{right:calc(68px + var(--safe-r,0px));max-width:calc(100vw - 80px - var(--safe-r,0px))}}
+@media (max-width:768px), (hover:none) and (pointer:coarse){.plan-notice,.ai-edit-bar{right:calc(68px + var(--safe-r,0px));max-width:calc(100vw - 80px - var(--safe-r,0px))}}
 /* 幅が 769 以上では左に操作の枠(#sidebar。左 10〜14px・幅 208px)が出ている。電話の横向き(844x390 など)では知らせが
    その上に重なり、「Redo」「貼付」などが押せなかったので、枠の右から並べる */
-@media(min-width:769px){.plan-notice,.ai-edit-bar{left:calc(244px + var(--safe-l,0px));max-width:min(560px,calc(100vw - 256px - var(--safe-l,0px)))}}
+@media (min-width:769px) and (hover:hover), (min-width:769px) and (pointer:fine){.plan-notice,.ai-edit-bar{left:calc(244px + var(--safe-l,0px));max-width:min(560px,calc(100vw - 256px - var(--safe-l,0px)))}}
 .share-ai-allow{display:flex;align-items:center;gap:10px;margin-top:14px;min-height:40px;font-size:13px;font-weight:750;color:#24324a;cursor:pointer}
 .share-ai-allow input{width:20px;height:20px;flex:none;margin:0;accent-color:#24507f}
 @media (pointer:coarse){
@@ -323,7 +323,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 /* ════════════════════════════════════════
    MOBILE STYLES (≤ 768px)
    ════════════════════════════════════════ */
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   /* Viewport */
   body{height:100dvh;font-size:14px}
 
@@ -574,7 +574,7 @@ body{
   color:#fff!important;
   box-shadow:0 14px 28px rgba(255,63,39,0.30)!important;
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #toolbar{
     border-radius:999px!important;
   }
@@ -860,7 +860,7 @@ body{
 .bnav-btn.active{
   color:var(--hp-primary);
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #toolbar{
     min-height:50px;
     padding:6px 8px;
@@ -1031,7 +1031,7 @@ body{
   border-radius:999px;
   box-shadow:0 10px 28px rgba(63,45,28,0.09);
 }
-@media (min-width:769px){
+@media (min-width:769px) and (hover:hover), (min-width:769px) and (pointer:fine){
   #toolbar{
     width:auto;
     max-width:calc(100vw - 24px - var(--safe-l) - var(--safe-r));
@@ -1040,7 +1040,7 @@ body{
     max-height:calc(100dvh - 116px - var(--safe-top));
   }
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #toolbar{
     left:calc(8px + var(--safe-l));
     right:calc(8px + var(--safe-r));
@@ -1240,7 +1240,7 @@ body{
 .pbtn.sec .sicon,.tbtn .sicon{
   border-radius:50%;
 }
-@media (min-width:769px){
+@media (min-width:769px) and (hover:hover), (min-width:769px) and (pointer:fine){
   #sidebar{
     max-height:calc(100dvh - 116px - var(--safe-top));
   }
@@ -1249,7 +1249,7 @@ body{
     margin-bottom:10px;
   }
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #main{
     padding-left:0;
     padding-right:0;
@@ -1337,7 +1337,7 @@ body{
 #wall-panel,#light-panel{
   left:calc(242px + var(--safe-l))!important;
 }
-@media (max-width:920px) and (min-width:769px){
+@media (max-width:920px) and (min-width:769px) and (hover:hover), (max-width:920px) and (min-width:769px) and (pointer:fine){
   #toolbar{
     left:calc(8px + var(--safe-l));
     right:calc(8px + var(--safe-r));
@@ -1360,7 +1360,7 @@ body{
     max-width:calc(100vw - 252px - var(--safe-l) - var(--safe-r))!important;
   }
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #toolbar{
     z-index:470;
   }
@@ -1592,7 +1592,7 @@ body{
   background:var(--hp-primary-soft);
   color:var(--hp-primary);
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #toolbar{
     background:#fff;
   }
@@ -1836,7 +1836,7 @@ body{
     #f5f1eb;
   background-size:28px 28px,auto;
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #toolbar{
     min-height:50px;
     border-radius:20px;
@@ -1895,7 +1895,7 @@ body{
 #props::before{
   border-radius:24px 24px 0 0!important;
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #sidebar,
   #props{
     border-radius:26px 26px 0 0!important;
@@ -2369,7 +2369,7 @@ body{
   color:#fff!important;
   opacity:1!important;
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #toolbar{
     left:calc(8px + var(--safe-l))!important;
     right:calc(8px + var(--safe-r))!important;
@@ -2626,7 +2626,7 @@ body{
   padding-top:8px!important;
   border-top:1px solid var(--hp-border,#24385f)!important;
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   .mobile-data-tools{
     display:block!important;
   }
@@ -2788,7 +2788,7 @@ input[type="color"]::-moz-color-swatch{
    sheet is only 52px tall, so that shared padding pushed its header below the
    clipping edge on phones. Keep the sheet itself flush and let the header own
    its touch-friendly inset instead. */
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #props{
     padding:0!important;
     box-sizing:border-box!important;
@@ -2933,7 +2933,7 @@ input[type="reset"]:focus-visible{
   background:var(--hp-primary);
   color:#fff;
 }
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #walk-minimap{
     top:8px;
     right:8px;
@@ -2993,7 +2993,7 @@ input[type="reset"]:focus-visible{
 }
 .elev-snap-btn:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
 .elev-snap-btn:active{background:var(--hp-primary);color:#fff}
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   #elev-snap-fab{right:8px;bottom:8px}
 }
 
@@ -3013,7 +3013,7 @@ input[type="reset"]:focus-visible{
 .airx-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
 #video-render-duration{width:100%}
 .video-render-files{white-space:pre-wrap;min-height:0}
-@media (max-width:768px){
+@media (max-width:768px), (hover:none) and (pointer:coarse){
   /* スマホ: 縦持ちでも中身が全部見えること。カードは端まで使い、
      入力欄のタップ標的は 44px を割らない。 */
   #video-render-modal{padding:8px}

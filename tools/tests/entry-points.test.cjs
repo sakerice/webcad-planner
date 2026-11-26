@@ -91,6 +91,9 @@ function featureTrue(feat, env) {
   if (name === 'max-width') return env.width <= parseInt(val, 10);
   if (name === 'min-width') return env.width >= parseInt(val, 10);
   if (name === 'pointer') return val === 'coarse' ? env.coarse : !env.coarse;
+  // タッチ端末(スマートフォン・タブレット)は、指が主の入力で、かざす操作が無い。
+  // 「スマートフォン向けの画面にする条件」は (max-width:768px), (hover:none) and (pointer:coarse)。
+  if (name === 'hover') return val === 'none' ? env.coarse : !env.coarse;
   UNKNOWN_FEATURES.add(name);
   return false;
 }
@@ -382,7 +385,7 @@ test('768px の境目の両側で、画像AIと動画AIの入口がヘッダー�
 test('評価器が知らないメディア特性の上に display を載せていない', () => {
   // 上の掃引で当たったルールだけを見る。未知の特性は false 扱いなので、
   // そこに display が乗っていると見落としになる。
-  const known = /^\(?\s*(max-width|min-width|pointer)\s*:/;
+  const known = /^\(?\s*(max-width|min-width|pointer|hover)\s*:/;
   const risky = RULES.filter((r) => r.decls.display && r.media &&
     r.media.split(',').some((c) => c.split(/\s+and\s+/i).some((f) => !known.test(f.trim()))));
   const names = risky.map((r) => r.media + ' { ' + r.selector + ' }');

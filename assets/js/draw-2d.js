@@ -5,9 +5,30 @@
 var canvas=document.getElementById('c2d');
 var ctx=canvas.getContext('2d');
 
+// 平面図の裏地の画素は「CSS の画素 × 端末の倍率」で持つ(Retina で線と文字がぼやけないように)。
+// パン・ズーム・当たり判定・全体表示の計算は、これまでどおり CSS の画素で行う。
+// draw2dScene が描く前に倍率ぶんの変換を掛けるので、描く側は倍率を知らなくてよい。
+// 倍率 1 の画面では、裏地も変換もこれまでと同じになる。
+var PLAN2D_MAX_RATIO=3;
+function plan2dDeviceRatio(){
+  var r=(typeof window!=='undefined'&&Number(window.devicePixelRatio))||1;
+  if(!(r>0)||!isFinite(r)) r=1;
+  return Math.max(1,Math.min(PLAN2D_MAX_RATIO,r));
+}
+// cv を CSS の画素で cssW×cssH の大きさにする。裏地は倍率ぶん細かくする。
+function sizePlanCanvas(cv,cssW,cssH,ratio){
+  ratio=ratio||plan2dDeviceRatio();
+  cv._planRatio=ratio; cv._planCssW=cssW; cv._planCssH=cssH;
+  cv.width=Math.round(cssW*ratio); cv.height=Math.round(cssH*ratio);
+  if(cv.style){ cv.style.width=cssW+'px'; cv.style.height=cssH+'px'; }
+}
+function planCanvasRatio(cv){ return (cv&&cv._planRatio)||1; }
+// いま描いている平面図の、CSS の画素での幅と高さ。canvas.width / height(裏地の画素)の代わりに使う。
+function planCanvasW(){ return canvas._planCssW!=null?canvas._planCssW:canvas.width; }
+function planCanvasH(){ return canvas._planCssH!=null?canvas._planCssH:canvas.height; }
 function resize2d(){
   var a=document.getElementById('canvas-area');
-  canvas.width=a.clientWidth; canvas.height=a.clientHeight;
+  sizePlanCanvas(canvas,a.clientWidth,a.clientHeight);
   draw2d();
 }
 function w2c(wx,wy){return{cx:ST.panX+wx*ST.zoom*0.05, cy:ST.panY+wy*ST.zoom*0.05};}
@@ -238,7 +259,11 @@ function capturePlan2dDataUrl(options){
   var prevCapture=PLAN_CAPTURE;
   var prevFloor=ST.floor;
   var prevPanX=ST.panX, prevPanY=ST.panY, prevZoom=ST.zoom;
-  var prevW=canvas.width, prevH=canvas.height;
+  // 撮る画像の画素数は、端末の倍率に左右されないようにする(倍率 1 の画面と同じ画像になる)。
+  // 撮影中だけ裏地を「CSS の画素 × scale」に張り替え、finally で元の裏地へ戻す。
+  var prevRatio=canvas._planRatio, prevCssW=canvas._planCssW, prevCssH=canvas._planCssH;
+  var prevBackW=canvas.width, prevBackH=canvas.height;
+  var prevW=planCanvasW(), prevH=planCanvasH();
   var scale=Number(opt.scale)||1;
   if(!(scale>0)||!isFinite(scale)) scale=1;
   try{
@@ -251,11 +276,13 @@ function capturePlan2dDataUrl(options){
       var fitView=planFitViewFor(opt.fitBounds||planSubjectBoundsMm(ST.floor),prevW,prevH);
       if(fitView){ ST.panX=fitView.panX; ST.panY=fitView.panY; ST.zoom=fitView.zoom; }
     }
+    var capW=Math.round(prevW*scale), capH=Math.round(prevH*scale);
+    if(canvas.width!==capW) canvas.width=capW;
+    if(canvas.height!==capH) canvas.height=capH;
+    canvas._planRatio=1; canvas._planCssW=capW; canvas._planCssH=capH;
     if(scale!==1){
       // 画素だけを増やす。パン・ズームを同じ倍率で引き伸ばすので、フレームに
       // 対する構図は1倍のときと同じままになる。
-      canvas.width=Math.round(prevW*scale);
-      canvas.height=Math.round(prevH*scale);
       ST.panX*=scale; ST.panY*=scale; ST.zoom*=scale;
       PLAN_CAPTURE_SCALE=scale;
     }
@@ -273,8 +300,9 @@ function capturePlan2dDataUrl(options){
     PLAN_CAPTURE_SCALE=1;
     ST.floor=prevFloor;
     ST.panX=prevPanX; ST.panY=prevPanY; ST.zoom=prevZoom;
-    if(canvas.width!==prevW) canvas.width=prevW;
-    if(canvas.height!==prevH) canvas.height=prevH;
+    canvas._planRatio=prevRatio; canvas._planCssW=prevCssW; canvas._planCssH=prevCssH;
+    if(canvas.width!==prevBackW) canvas.width=prevBackW;
+    if(canvas.height!==prevBackH) canvas.height=prevBackH;
     if(!prevCapture){
       try{ draw2d(); }catch(e){}
     }
@@ -291,7 +319,9 @@ function draw2d(){
 }
 function draw2dScene(){
   ensureObjectIds();
-  var W=canvas.width,H=canvas.height;
+  var ratio=planCanvasRatio(canvas);
+  if(ctx.setTransform) ctx.setTransform(ratio,0,0,ratio,0,0);
+  var W=planCanvasW(),H=planCanvasH();
   ctx.clearRect(0,0,W,H);
   ctx.fillStyle='#f2f4f7'; ctx.fillRect(0,0,W,H);
   if(ST.showGrid && planCaptureShows('grid')) drawGrid();
@@ -416,12 +446,12 @@ function draw2dScene(){
     if(ST._snapState.snapX&&ST._snapState.snapXVal!==null){
       var sx=ST.panX+ST._snapState.snapXVal*sc3;
       ctx.strokeStyle='rgba(255,120,0,0.75)';
-      ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,canvas.height);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,planCanvasH());ctx.stroke();
     }
     if(ST._snapState.snapY&&ST._snapState.snapYVal!==null){
       var sy=ST.panY+ST._snapState.snapYVal*sc3;
       ctx.strokeStyle='rgba(255,120,0,0.75)';
-      ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(canvas.width,sy);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(planCanvasW(),sy);ctx.stroke();
     }
     ctx.setLineDash([]); ctx.restore();
   }
@@ -535,14 +565,14 @@ function drawGrid(){
   ctx.save();
   // 910mmモジュール線は建築製図の通り芯の慣例に倣い一点鎖線(細線)で表現する
   ctx.strokeStyle='rgba(40,60,90,0.16)'; ctx.lineWidth=1; ctx.setLineDash([9,3,1.5,3]);
-  for(var x=ox;x<canvas.width;x+=mg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
-  for(var y=oy;y<canvas.height;y+=mg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+  for(var x=ox;x<planCanvasW();x+=mg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,planCanvasH());ctx.stroke();}
+  for(var y=oy;y<planCanvasH();y+=mg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(planCanvasW(),y);ctx.stroke();}
   ctx.setLineDash([]);
   if(sc*455>10){
     var sg=455*sc,ox2=((ST.panX%sg)+sg)%sg,oy2=((ST.panY%sg)+sg)%sg;
     ctx.strokeStyle='rgba(0,0,0,0.05)'; ctx.setLineDash([1.5,3]);
-    for(var x=ox2;x<canvas.width;x+=sg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
-    for(var y=oy2;y<canvas.height;y+=sg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+    for(var x=ox2;x<planCanvasW();x+=sg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,planCanvasH());ctx.stroke();}
+    for(var y=oy2;y<planCanvasH();y+=sg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(planCanvasW(),y);ctx.stroke();}
     ctx.setLineDash([]);
   }
   ctx.restore();

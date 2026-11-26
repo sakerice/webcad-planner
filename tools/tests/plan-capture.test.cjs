@@ -279,6 +279,8 @@ function runCapture(data, opt) {
     topLevelFunction('planSubjectBoundsMm'),
     topLevelFunction('planFitViewFor'),
     topLevelFunction('planCaptureDefaults'),
+    topLevelFunction('planCanvasW'),
+    topLevelFunction('planCanvasH'),
     topLevelFunction('capturePlan2dDataUrl')
   ], {
     DATA: data, U: 0.001, canvas: canvas,
