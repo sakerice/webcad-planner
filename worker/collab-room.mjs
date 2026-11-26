@@ -11,6 +11,14 @@
 // 画面はこの印を見て、外の AI の変更を「元に戻す」で戻せるようにする。印を知らない古い画面は今までどおり相手の差分として当てる。
 // 外の AI からの変更を受け付けるかどうか(meta.aiEditsOff。既定は受け付ける)は、画面から POST /ai-edits {off} で切り替える
 // (外の /api/rooms/:id/ai-edits。routes-rooms.mjs が転送する)。止めている間の /op は断る(/read は通す)。
+// 止めている間は、画面からでない /update・/save も断る(ルームの id を知った外の AI や道具が、/api/rooms/:id/update を
+// 素の HTTP で呼んでスイッチを素通りしないように)。スイッチの切り替え(/ai-edits)は、いつでも画面からだけ受ける
+// (外から「受け付ける」に戻されないように)。「画面から」は routes-rooms.mjs が Origin を見て付ける印(SCREEN_HEADER)で、
+// 画面の共同編集は今までどおり通る。Origin はブラウザの外からなら偽れるので、偽ってまで呼ぶ相手は止まらない
+// (止めるには、読む URL とは別の「書くための鍵」が要る。worker/room-quota.mjs の isFromScreen の説明)。
+//
+// ルームをまたいだ全体の回数の上限(worker/room-quota.mjs)。画面からの書き込み(/update・/save・スイッチの切り替え)は
+// 20 回ぶんをまとめて取り、残りを meta.writeLease {day, left} に持つ。外の AI の /op は、積む直前に1回ずつ数える。
 // 呼ぶのは worker/routes-rooms.mjs の roomOp・roomRead(id の形を確かめてから Durable Object を引く)。
 import {
   RETENTION_MS, AUTO_SAVE_IDLE_MS, AUTO_SAVE_MAX_MS,
@@ -21,6 +29,11 @@ import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
 import { roomPatchProblem, roomPlanProblem, maxSameId, upsertKeyCounts } from "./room-guard.mjs";
+import {
+  SCREEN_HEADER, ROOM_WRITE_LEASE, takeScreenWriteLease, takeMcpOpAll,
+  writeLimitMessage, MCP_OP_LIMIT_ALL_MESSAGE, MCP_OP_BUSY_MESSAGE,
+} from "./room-quota.mjs";
+import { whoOf } from "./ai-budget.mjs";
 
 // MCP 経由の差分の送り手の名前。画面の clientId は 24 桁の16進(index.html の sharedClientId)なので重ならない。
 export const MCP_CLIENT_ID = "mcp";
@@ -194,6 +207,10 @@ export const BROKEN_PLAN_MESSAGE = "このプランには AI から扱えない�
 function roomNotFound() {
   return json({ ok: false, code: "room_not_found" }, 404);
 }
+// 画面からの書き込みが全体の上限に当たったときの返事。
+function writeLimited() {
+  return json({ error: "write_limit", message: writeLimitMessage() }, 429, { "retry-after": "600" });
+}
 function opFailure(messages, status = 200) {
   return json({ ok: false, errors: messages.map((m) => (typeof m === "string" ? { message: m } : m)) }, status);
 }
@@ -206,6 +223,35 @@ export class CollaborationRoom {
     // 外の AI の回数(メモリの中の数)。/op は {day, n}、/read は {start, n}(1分の窓)。
     this.mcpOps = { day: "", n: 0, del: 0 };
     this.mcpReads = { start: 0, n: 0 };
+    // 全体の上限で断った接続元と時刻(メモリ)。断ったあとの1分は、数える先へ聞き直さずに断る。
+    this.writeDenied = null;
+  }
+
+  // 外の AI からの変更を止めている間、画面からでない書き込みを断る。通すときは null。
+  outsideWriteRefusal(request, meta) {
+    if (!meta.aiEditsOff || request.headers.get(SCREEN_HEADER) === "1") return null;
+    return json({ error: "ai_edits_off", message: MCP_AI_EDITS_OFF_MESSAGE }, 403);
+  }
+
+  // 画面からの書き込みを1回数える(全体の上限。worker/room-quota.mjs)。
+  // 戻り値 {ok:true, meta: meta に足す欄 | null} か {ok:false}(上限。何も書かない)。
+  async takeScreenWrite(meta, request) {
+    if (!this.env || !this.env.AI_QUOTA) return { ok: true, meta: null };
+    const now = Date.now();
+    const day = utcDay(now);
+    const held = meta.writeLease && meta.writeLease.day === day ? Number(meta.writeLease.left) || 0 : 0;
+    if (held > 0) return { ok: true, meta: { writeLease: { day, left: held - 1 } } };
+    const who = whoOf(request);
+    const denied = this.writeDenied;
+    if (denied && denied.who === who && denied.day === day && now >= denied.at && now - denied.at < 60 * 1000) return { ok: false };
+    const got = await takeScreenWriteLease(this.env, request);
+    if (got === "exceeded") {
+      this.writeDenied = { who, day, at: now };
+      return { ok: false };
+    }
+    // 数えられなかったときは通す(共同編集を止めない)。残りは持たない
+    if (got !== "ok") return { ok: true, meta: null };
+    return { ok: true, meta: { writeLease: { day, left: ROOM_WRITE_LEASE - 1 } } };
   }
 
   // /op を1回数える。上限を超えていれば null(数を進めない)。進めた後の {day, n, del} を返す(del はその日に消えた物の数)。
@@ -490,13 +536,17 @@ export class CollaborationRoom {
   async update(request) {
     const meta = await this.getMeta();
     if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    const refusal = this.outsideWriteRefusal(request, meta);
+    if (refusal) return refusal;
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || payload.type !== "patch" || !payload.patch) return json({ error: "invalid_patch" }, 400);
     // 形を確かめてから積む(壊れた差分を1回受けると、ルームのプランが開けなくなる・相手の画面が壊れるため)
     const problem = roomPatchProblem(payload.patch);
     if (problem) return json({ error: "invalid_patch", reason: problem }, 400);
-    const next = await this.commitPatch(meta, payload.patch, payload.clientId);
+    const lease = await this.takeScreenWrite(meta, request);
+    if (!lease.ok) return writeLimited();
+    const next = await this.commitPatch(meta, payload.patch, payload.clientId, lease.meta);
     if (!next) return json({ error: "not_found" }, 404);
     if (next.tooLarge) return json({ error: "plan_too_large" }, 413);
     return json({
@@ -601,6 +651,10 @@ export class CollaborationRoom {
     if (roomPatchProblem(patch)) return opFailure([BROKEN_PLAN_MESSAGE]);
     const nextId = Math.max(Number(meta.nextId) || 0, Number(result.nextId) || 0);
     const mcpOps = { ...counted, del: counted.del + removedCount };
+    // ルームをまたいだ全体の数(積む直前に数える。引数の誤りや何も変わらない操作は数えない)
+    const all = await takeMcpOpAll(this.env);
+    if (all === "exceeded") return json({ ok: false, code: "op_limit_all", errors: [{ message: MCP_OP_LIMIT_ALL_MESSAGE }] }, 429);
+    if (all === "unavailable") return json({ ok: false, code: "op_busy", errors: [{ message: MCP_OP_BUSY_MESSAGE }] }, 503);
     const next = await this.commitPatch(meta, patch, MCP_CLIENT_ID, { nextId, mcpOps }, AI_SOURCE);
     if (!next) return roomNotFound();
     if (next.tooLarge) return opFailure(["この操作をするとプランが保存できる大きさ（10MB）を超えるため、行いませんでした"]);
@@ -633,10 +687,12 @@ export class CollaborationRoom {
 
   // POST /ai-edits {off: true|false}: 外の AI からの変更を止める・受け付ける。meta.aiEditsOff に持ち、全員へ配る。
   // 版・期限・書き戻しの予約は変えない(プランは変わらない)。同じ値なら書かずにそのまま返す。
-  // 返事 {aiEditsOff}。本文が読めない・形が違う 400、大きすぎ 413、ルームが無い・期限切れ 410。
+  // 返事 {aiEditsOff}。本文が読めない・形が違う 400、大きすぎ 413、ルームが無い・期限切れ 410、画面からでない 403。
   async setAiEdits(request) {
     const meta = await this.getMeta();
     if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    // 切り替えは画面からだけ受ける(止めたスイッチを、ルームの id を知った外の道具に戻されないように)
+    if (request.headers.get(SCREEN_HEADER) !== "1") return json({ error: "forbidden" }, 403);
     let payload;
     try { payload = await readJsonWithLimit(request, MAX_AI_EDITS_BODY_BYTES); } catch (response) { return response; }
     if (!payload || typeof payload !== "object" || Array.isArray(payload) || typeof payload.off !== "boolean") {
@@ -644,7 +700,9 @@ export class CollaborationRoom {
     }
     const off = payload.off;
     if (!!meta.aiEditsOff !== off) {
-      await this.state.storage.put("meta", { ...meta, aiEditsOff: off });
+      const lease = await this.takeScreenWrite(meta, request);
+      if (!lease.ok) return writeLimited();
+      await this.state.storage.put("meta", { ...meta, ...(lease.meta || {}), aiEditsOff: off });
       // 誰が切り替えたかは配らない(本文の clientId は名乗るだけの値で、他人を名乗れるため。画面は自分が押したかを手元で持つ)
       this.broadcast({ type: "ai-edits", off });
     }
@@ -654,6 +712,8 @@ export class CollaborationRoom {
   async manualSave(request) {
     const meta = await this.getMeta();
     if (!meta || meta.expiresAt <= Date.now()) return json({ error: "expired" }, 410);
+    const refusal = this.outsideWriteRefusal(request, meta);
+    if (refusal) return refusal;
     let payload;
     try { payload = await readJsonWithLimit(request); } catch (response) { return response; }
     if (!payload || !validPlan(payload.plan)) return json({ error: "invalid_plan" }, 400);
@@ -661,10 +721,13 @@ export class CollaborationRoom {
     if (problem) return json({ error: "invalid_plan", reason: problem }, 400);
     const encoded = JSON.stringify(payload.plan);
     if (encodedSize(encoded) > MAX_PLAN_BYTES) return json({ error: "plan_too_large" }, 413);
+    const lease = await this.takeScreenWrite(meta, request);
+    if (!lease.ok) return writeLimited();
     const now = Date.now();
     const entries = await this.listJournal();
     const next = {
       ...meta,
+      ...(lease.meta || {}),
       version: Number(meta.version || 0) + 1,
       updatedAt: now,
       expiresAt: now + RETENTION_MS,

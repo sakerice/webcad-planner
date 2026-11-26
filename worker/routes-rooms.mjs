@@ -1,6 +1,6 @@
 // 共有ルームの HTTP ルート。worker.mjs の fetch から中身を移した。
 //
-// /api/rooms            POST   間取りを預けてルームを作る
+// /api/rooms            POST   間取りを預けてルームを作る(1日の数を接続元ごと・全体で数える。worker/room-quota.mjs)
 // /api/rooms/:id        GET    いまの間取りを取る
 // /api/rooms/:id/socket GET    WebSocket をつなぐ
 // /api/rooms/:id/update POST   差分を送る
@@ -19,6 +19,7 @@ import {
   json, roomKey, randomRoomId, validPlan, encodedSize, readJsonWithLimit,
 } from "./shared.mjs";
 import { roomPlanProblem } from "./room-guard.mjs";
+import { SCREEN_HEADER, isFromScreen, takeScreenRoomCreate, roomCreateLimitMessage } from "./room-quota.mjs";
 
 // この worker が扱うパスかどうか。router はこれを見て振り分ける。
 export function handlesRooms(pathname) {
@@ -38,12 +39,23 @@ export async function handleRooms(request, env, url) {
   const forwarded = new URL(request.url);
   forwarded.hostname = "room";
   forwarded.pathname = action;
-  return stub.fetch(new Request(forwarded, request));
+  // 画面からの要求かどうかを、ここで見てルームへ伝える(ルームの側は URL が書き換わっていて出どころを比べられない)。
+  // 外から同じ名前の見出しが付いてきても、消してから付け直す。
+  const toRoom = new Request(forwarded, request);
+  toRoom.headers.delete(SCREEN_HEADER);
+  if (isFromScreen(request)) toRoom.headers.set(SCREEN_HEADER, "1");
+  return stub.fetch(toRoom);
 }
 
 async function createRoom(request, env) {
   let plan;
   try { plan = await readJsonWithLimit(request, MAX_PLAN_BYTES); } catch (response) { return response; }
+  // 形の違うプランは数えずに断る(下の createRoomWithPlan も同じ検査をする)。
+  if (!validPlan(plan) || roomPlanProblem(plan)) return json({ error: "invalid_plan" }, 400);
+  // 画面から作るルームの数を、接続元ごと・全体で数える(worker/room-quota.mjs)。数えられないときは通す。
+  if (await takeScreenRoomCreate(env, request) === "exceeded") {
+    return json({ error: "room_create_limit", message: roomCreateLimitMessage() }, 429);
+  }
   const made = await createRoomWithPlan(env, plan, request.url);
   if (made.error) return json({ error: made.error }, made.status);
   return json(made, 201);
