@@ -367,14 +367,25 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* 共同編集の表示(#collab-indicator。人数を出し、押すと共有のダイアログが開く)。
    幅 721px 以上のタッチ端末(iPad)では、共同編集中だけ、上の帯の1段めの右(階の欄の左)に置く。
    2段めは横に送る並びで、iPad 縦では画面の外に出て見えないため。
-   共同編集中でないときは出さない(.show が付かない。assets/app.css の #collab-indicator と同じ意図)。
-   幅 720px 以下(assets/app.css)と横向きのスマートフォンでは、今までどおり出さない。 */
-@media (hover:none) and (pointer:coarse){#toolbar #collab-indicator:not(.show){display:none!important}}
-@media (hover:none) and (pointer:coarse) and (min-width:721px){
+   共同編集中でないときは、どの画面でも出さない(.show が付かない。assets/app.css の #collab-indicator{display:none} は
+   上の #toolbar .tbtn{display:inline-flex} に負けるので、ここで決める。負けたままだと灰色の「接続中」が出る)。
+   幅 720px 以下(assets/app.css)と横向きのスマートフォンでは、今までどおり出さない。
+   スマートフォン向けの画面になる幅 721〜768px のマウスの画面も、帯の作りが iPad と同じなので同じ場所に置く。 */
+#toolbar #collab-indicator:not(.show){display:none!important}
+@media (hover:none) and (pointer:coarse) and (min-width:721px), (min-width:721px) and (max-width:768px){
   #toolbar #collab-indicator.show{position:absolute;top:8px;right:calc(8px + 64px + 8px);z-index:1;
     min-height:36px!important;height:36px;max-width:170px;padding:0 12px!important;font-size:12px!important}
   /* ロゴの枠は1段めの幅いっぱいなので、表示の分だけ右を空ける */
   #toolbar:has(#collab-indicator.show) .brand-mark{margin-right:186px!important}
+}
+/* マウス向けの画面(PC)。上の帯は1段で、ボタンが多く横に送る並び。HTML の順のままだと、共同編集中の表示は
+   「共同編集」の右(1440px の画面で左から 1600px)にあり、帯を横に送らないと見えない。
+   共同編集中だけ、並びの順を変えて階の欄のすぐ右へ出す(ほかのボタンはその分だけ右へずれる。消さない・重ねない)。
+   .toolbar-actions は display:contents なので、中のボタンも帯の直接の子と同じ並びに入る。 */
+@media (min-width:769px) and (hover:hover), (min-width:769px) and (pointer:fine){
+  #toolbar>.brand-mark,#toolbar>.tsep,#toolbar>#floor-sel{order:-3}
+  #toolbar #collab-indicator.show{order:-2;flex:0 0 auto}
+  #toolbar>#floor-sel~.tsep{order:-1}
 }
 /* 比較モードの帯と名前の札は、下のナビ(高さ 56px + 余白)の上へ上げる */
 @media (max-width:768px), (hover:none) and (pointer:coarse){.compare-bar{bottom:calc(72px + var(--safe-bot,0px))}.compare-tag{bottom:calc(124px + var(--safe-bot,0px))}}
