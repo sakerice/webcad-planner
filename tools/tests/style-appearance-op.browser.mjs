@@ -64,6 +64,10 @@ function installFakeChat() {
     try { window.__chat.lastBody = JSON.parse(init.body); } catch (e) { window.__chat.lastBody = null; }
     const step = window.__chat.queue.shift();
     if (!step) return Promise.resolve(new Response(JSON.stringify({ error: 'bad_request', code: 'bad_request' }), { status: 400 }));
+    // hold が立っていれば、その呼び出しの返事を release まで止める(依頼の途中で本物のプランを変えるため)
+    if (window.__chat.hold === window.__chat.calls) {
+      return new Promise((r) => { window.__chat.release = r; }).then(() => new Response(step, { status: 200, headers: { 'content-type': 'text/event-stream', 'x-chat-ticket': 'tk-h', 'x-chat-rounds-left': '5' } }));
+    }
     return Promise.resolve(new Response(step, { status: 200, headers: { 'content-type': 'text/event-stream', 'x-chat-ticket': 'tk-' + Math.random().toString(36).slice(2), 'x-chat-rounds-left': '5' } }));
   };
 }
@@ -143,7 +147,7 @@ try {
       const chatWall = screenWallColors();
       const chat = json(ch.plan);
       const w = tools.workerApply(JSON.parse(baseJson), [{ op: 'setAppearance', args: c.args }]);
-      res.appearance.push({ args: c.args, panelWall, chatWall, wall0: JSON.stringify([JSON.parse(wallColors0), JSON.parse(custom0)]), panelError, chatErrors: ch.errors, workerErrors: w.errors, changed: panel !== baseJson,
+      res.appearance.push({ args: c.args, panelWall, chatWall /* 写しに当てただけ(取り込む前) */, wall0: JSON.stringify([JSON.parse(wallColors0), JSON.parse(custom0)]), panelError, chatErrors: ch.errors, workerErrors: w.errors, changed: panel !== baseJson,
         samePanel: panel === chat, sameWorker: json(w.plan) === chat, diffPanel: panel === chat ? [] : diff(panel, chat), diffWorker: json(w.plan) === chat ? [] : diff(chat, json(w.plan)) });
     }
     {
@@ -258,6 +262,24 @@ try {
         applied: chat !== json(FIELDS.reduce((o, k) => { o[k] = JSON.parse(baseJson)[k]; return o; }, {})), same: chat === screen,
         diff: chat === screen ? [] : diff(screen, chat), roof: [screenRoof, roofMat()], wall: [screenWall, screenWallColors()] });
     }
+    // 取り込みを断られたら(依頼の途中で本物のプランが変わった)、WALL_COLORS も元のまま
+    {
+      reset();
+      const c = chatCases.find((x) => x.label === '外観の2階の色と素材');
+      window.__chat.queue.push(...c.steps);
+      const calls0 = window.__chat.calls;
+      window.__chat.hold = calls0 + 2;   // 2回めの返事(道具を当てたあとの文)を止める
+      ChatUI.send('変えて');
+      let t0 = Date.now();
+      while (!window.__chat.release && Date.now() - t0 < 20000) await new Promise((r) => setTimeout(r, 30));
+      const moved = DATA.items.find((it) => it.type !== 'roof');
+      moved.x += 10;   // 利用者が依頼の途中で物を動かした
+      window.__chat.release(); window.__chat.hold = null; window.__chat.release = null;
+      t0 = Date.now();
+      while (ChatUI.state().busy && Date.now() - t0 < 20000) await new Promise((r) => setTimeout(r, 30));
+      res.rejected = { wall: screenWallColors(), wall0: JSON.stringify([JSON.parse(wallColors0), JSON.parse(custom0)]),
+        exteriorUnchanged: json(DATA.exteriorWallSettings) === json(JSON.parse(baseJson).exteriorWallSettings), busy: ChatUI.state().busy };
+    }
     reset();
     return res;
   }, { plan: PLAN, app: APP, cases: APPEARANCE, chatCases: CHAT_CASES });
@@ -272,12 +294,13 @@ try {
     assert.ok(a.changed, JSON.stringify(a.args) + ' で画面の欄を押してもプランが変わらない');
     assert.equal(a.samePanel, true, JSON.stringify(a.args) + ' で画面の欄と違う: ' + JSON.stringify(a.diffPanel));
     assert.equal(a.sameWorker, true, JSON.stringify(a.args) + ' で Worker と違う: ' + JSON.stringify(a.diffWorker));
-    assert.equal(a.chatWall, a.panelWall, JSON.stringify(a.args) + ' で、画面の階の外壁色の既定(WALL_COLORS)が設定欄と違う');
+    // 写しに当てただけでは、画面だけの記憶(WALL_COLORS)は変えない(取り込んだときに変える。下のチャットの通り道で見る)
+    assert.equal(a.chatWall, a.wall0, JSON.stringify(a.args) + ' で、写しに当てただけで WALL_COLORS が変わった');
   }
-  // 外観の階の色を変えた組では、WALL_COLORS が実際に変わっている(比べた値が両方とも元のまま、ではない)
+  // 外観の階の色を変えた組では、設定欄で WALL_COLORS が実際に変わる(チャットの通り道でも同じ値になることを下で見る)
   const floorColor = out.appearance.find((a) => a.args.part === 'exterior' && a.args.floor && a.args.color);
   assert.notEqual(floorColor.panelWall, floorColor.wall0, '設定欄で外観の階の色を変えても WALL_COLORS が変わっていない');
-  assert.match(floorColor.chatWall, new RegExp('"' + floorColor.args.floor + '":"' + floorColor.args.color + '"'));
+  assert.match(floorColor.panelWall, new RegExp('"' + floorColor.args.floor + '":"' + floorColor.args.color + '"'));
   console.log('屋根の材質の色: ' + JSON.stringify(out.roof));
   assert.ok(out.roof.panel.every((c) => c.includes('d2691e')), '設定欄で屋根の色を変えても 3D の屋根の材質に届かない: ' + JSON.stringify(out.roof));
   assert.deepEqual(out.roof.ai, out.roof.panel, 'AI で屋根の色を変えたときの 3D の屋根の材質が、設定欄と違う');
@@ -291,6 +314,12 @@ try {
     assert.deepEqual(c.roof[1], c.roof[0], c.label + ' で 3D の屋根の材質が画面と違う');
     assert.equal(c.wall[1], c.wall[0], c.label + ' で画面の階の外壁色の既定が画面と違う');
   }
+  console.log('取り込みを断られた場合: ' + JSON.stringify(out.rejected));
+  assert.equal(out.rejected.busy, false);
+  assert.equal(out.rejected.exteriorUnchanged, true, '途中でプランを変えたのに取り込まれた(断る場面を作れていない)');
+  assert.equal(out.rejected.wall, out.rejected.wall0, '取り込みを断られたのに WALL_COLORS が変わった');
+  const ext2 = out.chat.find((c) => c.label === '外観の2階の色と素材');
+  assert.match(ext2.wall[1], /"2":"#223344"/, 'チャットで外観の2階の色を取り込んでも WALL_COLORS が変わらない');
   assert.ok(out.chat.find((c) => c.label === '屋根の色').roof[1].every((x) => x.includes('d2691e')), 'チャットで屋根の色を変えても 3D の屋根の材質に届かない');
   assert.equal(out.badTexture.chat.length, 1);
   assert.ok(out.badTexture.chat[0].candidates.includes('roof_tile'));

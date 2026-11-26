@@ -175,7 +175,13 @@ function planAppearanceCtx(){
       return ensureOf();
     },
     setValue:APPEARANCE_WRITE.setValue, normalize:APPEARANCE_WRITE.normalize, defaultFloor:APPEARANCE_WRITE.defaultFloor,
-    after:APPEARANCE_WRITE.after
+    // 画面だけの後処理(APPEARANCE_WRITE.after。階の外壁色の既定 WALL_COLORS)は、写しに当てる今は行わず、写しに印
+    // (_appearanceAfter。_ で始まる欄は保存・比べる対象にならない)として積む。チャットが本物のプランに取り込んだときに
+    // chat-ui.js の applyChatResult が同じ APPEARANCE_WRITE.after を順に呼ぶ(取り込みを断れば画面の記憶は変わらない)。
+    after:function(part,scope,key,value,floor){
+      var work=DATA;
+      (work._appearanceAfter||(work._appearanceAfter=[])).push([part,scope,key,value,floor]);
+    }
   };
 }
 // 建物の様式の切り替え(操作 applyBuildingStyle)に渡す、画面の「建物の仕上げを替える」と同じ部品(building-style.js)。

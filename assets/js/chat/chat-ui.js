@@ -531,6 +531,10 @@
     var snapshot = H0[H0.length - 1];
     try {
       APPLY_FIELDS.forEach(function (k) { if (work[k] !== undefined) DATA[k] = work[k]; });
+      // カラー設定の画面だけの後処理(階の外壁色の既定 WALL_COLORS など)。写しに当てたときに積んだ順に、設定欄と同じ
+      // APPEARANCE_WRITE.after を通す(plan-data.js の planAppearanceCtx)。取り込むときだけ行う。
+      var after = g('APPEARANCE_WRITE') && g('APPEARANCE_WRITE').after;
+      if (typeof after === 'function') (work._appearanceAfter || []).forEach(function (a) { after.apply(null, a); });
       root._defaultPlanPending = false;
       // 選択とドラッグの後始末は restoreHistorySnapshot と同じ。
       var ST = g('ST');
