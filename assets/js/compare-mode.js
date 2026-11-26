@@ -154,9 +154,9 @@ var CompareMode = (function(){
   function layout(){
     var hv = halves(), v = hv.v, W = hv.W, H = hv.h, half = hv.w, x = hv.x;
     if(ST.view==='2d'){
-      canvas.width = half; canvas.height = H;
+      sizePlanCanvas(canvas, half, H);
       canvas.style.left = x[active]+'px';
-      peer.width = half; peer.height = H;
+      sizePlanCanvas(peer, half, H);
       peer.style.left = x[1-active]+'px';
     }
     frames.forEach(function(f,i){
@@ -507,7 +507,7 @@ var CompareMode = (function(){
     resetView = function(){
       if(!on) return baseReset.apply(this, arguments);
       var b = planSubjectBoundsMm(ST.floor), v = visibleRect(), side = 16, top = v.top + 16, bottom = 150;
-      var fit = b && planFitViewFor(b, Math.max(48, canvas.width - side*2), Math.max(48, canvas.height - top - bottom));
+      var fit = b && planFitViewFor(b, Math.max(48, planCanvasW() - side*2), Math.max(48, planCanvasH() - top - bottom));
       if(fit){ ST.zoom = fit.zoom; ST.panX = side + fit.panX; ST.panY = top + fit.panY; }
       draw2d();
     };

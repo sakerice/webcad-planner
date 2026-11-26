@@ -5,8 +5,10 @@
 #surface-control[hidden]{display:none!important}
 #surface-context{font-size:11px;font-weight:600;color:#697480}
 #surface-control #surface-sel{min-height:36px;background:#f4f6f8;border-color:transparent}
-@media(max-width:768px){#surface-control{top:calc(124px + var(--safe-top,0px));right:calc(12px + var(--safe-r,0px));gap:8px;padding-left:12px}#surface-control #surface-sel{min-height:40px}}
+@media (max-width:768px), (hover:none) and (pointer:coarse){#surface-control{top:calc(124px + var(--safe-top,0px));right:calc(12px + var(--safe-r,0px));gap:8px;padding-left:12px}#surface-control #surface-sel{min-height:40px}}
 
 /* Stack with the existing right-hand properties card; retain mobile sheet behavior. */
-@media(min-width:769px){body:has(#surface-control:not([hidden])) #props{top:calc(140px + var(--safe-top,0px))!important}}
-@media(max-width:768px){body:has(#surface-control:not([hidden])) #help-box{top:calc(184px + var(--safe-top,0px))!important}}
+@media (min-width:769px) and (hover:hover), (min-width:769px) and (pointer:fine){body:has(#surface-control:not([hidden])) #props{top:calc(140px + var(--safe-top,0px))!important}}
+@media (max-width:768px), (hover:none) and (pointer:coarse){body:has(#surface-control:not([hidden])) #help-box{top:calc(184px + var(--safe-top,0px))!important}}
+/* 横向きのスマートフォン(上の帯が1段)。条件は assets/ui-refinement.css の同じ節と揃える。 */
+@media (hover:none) and (pointer:coarse) and (orientation:landscape) and (max-height:520px){#surface-control{top:calc(70px + var(--safe-top,0px))}body:has(#surface-control:not([hidden])) #help-box{top:calc(70px + var(--safe-top,0px))!important}}

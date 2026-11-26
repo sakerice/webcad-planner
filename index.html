@@ -384,6 +384,11 @@ window.addEventListener('load',function(){
       <label class="height-perfloor-toggle"><input type="checkbox" id="height-per-floor" onchange="setPerFloorHeights(this.checked)"><span>階ごとに設定する</span></label>
       <div id="height-defaults-body"></div>
       <div class="sidebar-settings-note">標準の階高＝壁の高さ＋床厚。室内高さ＝壁の高さ−部屋の床上げ−天井下げ。床の上下は部屋の設定で指定します。旧保存プランは、ここで高さを変更するまで従来の高さ基準を保持します。</div>
+      <!-- 閉じた操作の案内(#help-box・#joy-hint)を出し直す。1つも閉じていないあいだは出さない。 -->
+      <div id="hints-restore" hidden>
+        <div class="sidebar-settings-label">操作の案内</div>
+        <button id="hints-restore-btn" class="pbtn sec" type="button">操作の案内をもう一度表示</button>
+      </div>
     </div>
     <a class="sidebar-credits" href="assets/model-credits.html" target="_blank" rel="noopener">3D素材の出典</a>
   </div>
@@ -487,8 +492,9 @@ window.addEventListener('load',function(){
       <button class="pbtn" onclick="document.getElementById('light-panel').style.display='none'" style="margin-top:8px">閉じる</button>
     </div>
     <div id="wasd">WASD/矢印:移動 | ドラッグ:視点回転 | ESC:戻る</div>
-    <div id="joy-hint">1本指:視点回転 | 2本指ドラッグ:移動 | ピンチ:ズーム</div>
+    <div id="joy-hint"><span class="hint-text">1本指:視点回転 | 2本指ドラッグ:移動 | ピンチ:ズーム</span><button type="button" class="hint-close" data-hint-close="joy-hint" aria-label="操作の案内を閉じる"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div id="help-box">
+      <button type="button" class="hint-close" data-hint-close="help-box" aria-label="操作ガイドを閉じる"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <b style="color:#cce">操作ガイド</b><br>
       <span class="help-touch">タップで選択・配置 · 2本指で移動 · ピンチで拡大<br>
       同じ場所を続けてタップ: 重なっている次のものへ</span>
@@ -14466,11 +14472,11 @@ function positionWalkHud(){
   }
   // フローティングUI共通の画面端余白: PC 14px / モバイル 8px。
   // ヘッダーや下部ナビが重なる場合も、同じ余白を足して配置する。
-  var hudGap=window.innerWidth<=768?8:14;
+  var hudGap=isMobileLayout()?8:14;
   var topSafe=Math.max(hudGap,overlapTop('toolbar')+hudGap);
   var botSafe=Math.max(hudGap,overlapBottom('bottom-nav')+hudGap,overlapBottom('statusbar')+hudGap);
   // モバイルのサイドバーは非表示時も全幅の矩形を持つため、左余白計算には使わない。
-  var leftSafe=window.innerWidth<=768?hudGap:Math.max(hudGap,overlapLeft('sidebar')+hudGap);
+  var leftSafe=isMobileLayout()?hudGap:Math.max(hudGap,overlapLeft('sidebar')+hudGap);
   var mm=document.getElementById('walk-minimap');
   var ex=document.getElementById('walk-exit');
   var dp=document.getElementById('walk-dpad');
@@ -14493,7 +14499,7 @@ function positionElevSnapFab(){
     if(r.height<=0||r.top>=wr.bottom) return 0;
     return Math.max(0,wr.bottom-r.top);
   }
-  var gap=window.innerWidth<=768?8:14;
+  var gap=isMobileLayout()?8:14;
   var botSafe=Math.max(gap,overlapBottom('bottom-nav')+gap,overlapBottom('app-version')+gap,overlapBottom('statusbar')+gap);
   el.style.bottom=botSafe+'px';
 }
@@ -15223,18 +15229,40 @@ function toggleDim(){ST.showDim=!ST.showDim;draw2d();applySetbackDimVisibility()
 // 平面図の欄(#canvas-area)のうち、上・左・下の操作の枠と案内の箱に隠れない所の、四辺からの幅(CSS の画素)。
 // 「全体表示」(resetView)が間取りを収める所で、開いた直後の見え方の判定(planViewOffscreen)も同じ所を見る。
 function planViewSafeInsets(){
-  var isMobile=window.matchMedia&&window.matchMedia('(max-width:768px)').matches;
-  var isNarrow=window.matchMedia&&window.matchMedia('(max-width:920px)').matches;
+  var isMobile=isMobileLayout();
+  var isNarrow=isMobile||(window.matchMedia&&window.matchMedia('(max-width:920px)').matches);
   var safeLeft=isMobile?18:(isNarrow?236:256);
   var safeTop=isMobile?92:(isNarrow?136:102);
   var safeRight=isMobile?18:34;
   var safeBottom=isMobile?92:58;
   var help=document.getElementById('help-box');
-  if(help && getComputedStyle(help).display!=='none'){
+  var helpShown=!!(help && getComputedStyle(help).display!=='none');
+  // 横向きのスマートフォン(上の帯が1段になる高さ。assets/ui-refinement.css の「横向きで高さが低い」と同じ条件)。
+  // 縦に余裕が無いので、案内の箱と右上の表示の切り替えは、下ではなく横へよける。
+  var area=document.getElementById('canvas-area');
+  if(isMobile && window.matchMedia && window.matchMedia(MOBILE_SHORT_LANDSCAPE_QUERY).matches && area){
+    var ar=area.getBoundingClientRect();
+    var left=18, right=18;
+    if(helpShown) left=Math.max(left, help.getBoundingClientRect().right-ar.left+12);
+    var sel=document.getElementById('surface-control');
+    if(sel && !sel.hidden && getComputedStyle(sel).display!=='none') right=Math.max(right, ar.right-sel.getBoundingClientRect().left+12);
+    if(area.clientWidth-left-right-24>=200) return {left:left,top:66,right:right,bottom:72};
+    // 幅も足りない端末では、上の部品の下に収める
+    return {left:18,top:132,right:18,bottom:72};
+  }
+  if(helpShown){
     var guideW=help.offsetWidth||190;
     var guideH=help.offsetHeight||132;
     if(!isMobile) safeLeft=Math.max(safeLeft, help.offsetLeft+guideW+36);
     safeTop=Math.max(safeTop, help.offsetTop+guideH+36);
+  } else if(isMobile && area){
+    // 案内の箱を閉じたあとは、箱の代わりに上の帯と右上の表示の切り替えの下へ収める
+    var areaTop=area.getBoundingClientRect().top;
+    ['toolbar','surface-control'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(!el || el.hidden || getComputedStyle(el).display==='none') return;
+      safeTop=Math.max(safeTop, el.getBoundingClientRect().bottom-areaTop+12);
+    });
   }
   return {left:safeLeft,top:safeTop,right:safeRight,bottom:safeBottom};
 }
@@ -19055,12 +19083,12 @@ function planInstanceList(floor){
   });
   return out;
 }
-// 平面図を3D経路と同じ画素数で撮るための倍率。2Dキャンバスの裏地は等倍
-// (resize2d が clientWidth をそのまま使う) なので、3D側が devicePixelRatio に
-// 掛けるのと同じブーストをそのまま倍率にすれば、両経路の画素数が揃う。
+// 平面図を3D経路と同じ画素数で撮るための倍率。平面図を撮るときの裏地は等倍
+// (capturePlan2dDataUrl が端末の倍率を外して CSS の画素で撮る) なので、3D側が
+// devicePixelRatio に掛けるのと同じブーストをそのまま倍率にすれば、両経路の画素数が揃う。
 function planCaptureScaleForVideo(){
   var base=Math.min((window.devicePixelRatio||1),2);   // ren.setPixelRatio と同じ基準
-  return aiCaptureBoostedRatio(base,canvas.width,canvas.height);
+  return aiCaptureBoostedRatio(base,planCanvasW(),planCanvasH());
 }
 function videoPackageJson(state){
   return {
@@ -19940,7 +19968,16 @@ try {
 // ═══════════════════════════════════════════════
 var IS_MOBILE = isTouchInputDevice();
 
-function isMobileLayout(){return window.innerWidth<=768;}
+// スマートフォン向けの画面にする条件。assets/app.css の
+// 「@media (max-width:768px), (hover:none) and (pointer:coarse)」と同じにする。
+// 幅だけで分けていたときは、iPad と横向きのスマートフォンがマウス向けの画面になった。
+var MOBILE_LAYOUT_QUERY='(max-width:768px), (hover:none) and (pointer:coarse)';
+// 横向きのスマートフォン。上の帯を1段にして、図面に使える高さを残す(CSS も同じ条件)。
+var MOBILE_SHORT_LANDSCAPE_QUERY='(hover:none) and (pointer:coarse) and (orientation:landscape) and (max-height:520px)';
+function isMobileLayout(){
+  if(window.matchMedia) return window.matchMedia(MOBILE_LAYOUT_QUERY).matches;
+  return window.innerWidth<=768;
+}
 
 // Show mobile UI elements
 function applyMobileUI(){
@@ -19997,6 +20034,63 @@ function closeMobilePanels(){
   // Close props too
   document.getElementById('props').classList.remove('show');
 }
+
+// ───── 操作の案内(平面図の #help-box・内観3D の #joy-hint)を閉じる ─────
+// 閉じた案内の id を、この端末に覚えておく(プランには入れない)。出し直すのは設定欄の
+// 「操作の案内をもう一度表示」。表示・非表示そのものは CSS の .hint-off が決めるので、
+// setView が style.display を書き換えても、閉じた案内は出てこない。
+var HINTS_OFF_KEY='webcad-hints-off';
+var HINT_IDS=['help-box','joy-hint'];
+function hintsOffList(){
+  try{
+    var v=JSON.parse(localStorage.getItem(HINTS_OFF_KEY)||'[]');
+    return Array.isArray(v)?v.filter(function(id){return HINT_IDS.indexOf(id)>=0;}):[];
+  }catch(e){ return []; }
+}
+var _hintsOffMemory=null;   // localStorage が使えない端末でも、開いているあいだは閉じたままにする
+function hintsOffNow(){ return _hintsOffMemory||hintsOffList(); }
+function saveHintsOff(list){
+  _hintsOffMemory=list.slice();
+  try{
+    if(list.length) localStorage.setItem(HINTS_OFF_KEY,JSON.stringify(list));
+    else localStorage.removeItem(HINTS_OFF_KEY);
+  }catch(e){}
+}
+function applyHintsOff(){
+  var off=hintsOffNow();
+  HINT_IDS.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.classList.toggle('hint-off',off.indexOf(id)>=0);
+  });
+  var restore=document.getElementById('hints-restore');
+  if(restore) restore.hidden=!off.length;
+}
+function closeHint(id){
+  if(HINT_IDS.indexOf(id)<0) return;
+  var off=hintsOffNow().slice();
+  if(off.indexOf(id)<0) off.push(id);
+  saveHintsOff(off);
+  applyHintsOff();
+}
+function showHintsAgain(){
+  saveHintsOff([]);
+  applyHintsOff();
+}
+(function initHints(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-hint-close]'),function(btn){
+    btn.addEventListener('click',function(e){
+      e.preventDefault(); e.stopPropagation();
+      closeHint(btn.getAttribute('data-hint-close'));
+    });
+    // 図面の上に載っているので、押したときに下の図面へ操作が抜けないようにする
+    ['pointerdown','mousedown','touchstart'].forEach(function(t){
+      btn.addEventListener(t,function(e){ e.stopPropagation(); },{passive:true});
+    });
+  });
+  var again=document.getElementById('hints-restore-btn');
+  if(again) again.addEventListener('click',showHintsAgain);
+  applyHintsOff();
+})();
 
 // Update bottom nav active state
 var _origSetView = setView;
