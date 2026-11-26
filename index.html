@@ -104,6 +104,45 @@ window.dispatchEvent(new Event('three-ready'));
     <span id="app-loading-text">読み込み中</span>
   </div>
 </div>
+<script>
+// 画面のスタイルシート(assets/app.css)が読めなかったとき。
+// CSS は 2026-11 に index.html の外へ出したので、通信が途中で切れると、これだけ届かないことがある。
+// そのままだと、飾りの無い HTML と「読み込み中」が出たままになり、利用者には何が起きたか分からない。
+// 1回だけ読み直し、それでも読めなければ、理由と「再読み込み」を画面に出す。
+// この表示は CSS に頼れないので、見た目は要素に直接書く。
+window.addEventListener('load',function(){
+  var link=document.querySelector('link[rel="stylesheet"][href^="assets/app.css"]');
+  // 読めたかどうかは、app.css の決まりが実際に当たっているかで見る(#app-loading{position:fixed})。
+  // link.sheet は当てにならない(Chromium は、読めなかったときも空の sheet を返す)。
+  var probe=document.getElementById('app-loading');
+  if(probe&&getComputedStyle(probe).position==='fixed') return;
+  function tell(){
+    if(document.getElementById('app-css-failed')) return;
+    var box=document.createElement('div');
+    box.id='app-css-failed';
+    box.setAttribute('role','alert');
+    box.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;box-sizing:border-box;background:#fff;color:#2d2a27;font:16px/1.7 sans-serif;text-align:center';
+    var msg=document.createElement('p');
+    msg.style.cssText='margin:0;max-width:28em';
+    msg.textContent='画面の表示に必要なファイルを読み込めませんでした。通信の状態を確かめて、もう一度読み込んでください。';
+    var btn=document.createElement('button');
+    btn.type='button';
+    btn.textContent='再読み込み';
+    btn.style.cssText='min-height:44px;padding:0 24px;border:0;border-radius:999px;background:#e94560;color:#fff;font:700 16px/1 sans-serif;cursor:pointer';
+    btn.onclick=function(){location.reload();};
+    box.appendChild(msg);box.appendChild(btn);
+    document.body.appendChild(box);
+  }
+  var href=link?link.getAttribute('href'):'assets/app.css';
+  var again=document.createElement('link');
+  again.rel='stylesheet';
+  again.href=href+(href.indexOf('?')<0?'?':'&')+'retry=1';
+  again.onerror=tell;
+  // 読む順を保つ(後ろの ui-refinement.css などが上書きする前提で書かれている)
+  if(link&&link.parentNode) link.parentNode.insertBefore(again,link.nextSibling);
+  else document.head.insertBefore(again,document.head.querySelector('link[rel="stylesheet"]'));
+});
+</script>
 <div id="ai-edit-bar" class="ai-edit-bar" role="status" aria-live="polite" hidden><div class="ai-edit-text"><strong id="ai-edit-title">外部の AI が編集中です</strong><span id="ai-edit-sub">「元に戻す」で、AI が直す前に戻せます。</span></div><div class="ai-edit-actions"><button type="button" id="ai-edit-undo" class="ai-edit-btn" onclick="sharedUndoAiFromBar()">元に戻す</button><button type="button" id="ai-edit-stop" class="ai-edit-btn ai-edit-stop" onclick="sharedSetAiEdits(true)">止める</button><button type="button" class="plan-notice-close" onclick="sharedHideAiBar()" aria-label="閉じる">×</button></div></div>
 <div id="plan-notice" class="plan-notice" role="status" aria-live="polite" hidden><span id="plan-notice-text"></span><button type="button" id="plan-notice-action" class="plan-notice-action" hidden></button><button type="button" class="plan-notice-close" onclick="closePlanNotice()" aria-label="閉じる">×</button></div>
 <div id="share-overlay" class="share-overlay" role="dialog" aria-modal="true" aria-labelledby="share-title" onclick="closeShareDialogOnBackdrop(event)">
