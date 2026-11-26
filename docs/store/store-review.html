@@ -88,7 +88,7 @@ details[open] summary{margin-bottom:10px}
   <div class="tw"><table class="w640">
     <thead><tr><th>番号</th><th>決めること</th><th>勧める案</th><th>理由</th></tr></thead>
     <tbody>
-      <tr><td class="num">1</td><td>アイコンの方向（<a href="#icon">2章</a>）</td><td>A2（朱色の地に白い家と笑顔、青い指）</td><td>Web 版の顔とつながり、29px まで縮めても形が残る</td></tr>
+      <tr><td class="num">1</td><td>アイコンの方向（<a href="#icon">2章</a>）</td><td><span class="chip ok">決定 2026-11-26</span> 今の配色で出す。反転はサブアイコンとして残す</td><td>利用者の決定。反転は X の顔や告知の絵など、色の付いた地が要る場面で使う</td></tr>
       <tr><td class="num">2</td><td>ストア画像の体裁と並び（<a href="#shots">3章</a>）</td><td>体裁 P（上に見出し、下に画面）で 7 枚</td><td>見出しが画面を隠さず、7 枚で位置がそろう</td></tr>
       <tr><td class="num">3</td><td>撮る時期（<a href="#shots">3章</a>）</td><td>iPhone は今の画面で先に撮る。iPad は表示の直しを待つ</td><td>iPhone 縦は今のまま撮れる。iPad は開発向けの表示が写る</td></tr>
       <tr><td class="num">4</td><td>プレビュー動画の 6 場面（<a href="#pv">4章</a>）と、人力車・クラシックカーを見せてよいか</td><td>6 場面の並びで作る。車の差し替わりは見せる</td><td>平面図が 3D の家に変わる場面を先頭に置くと、音なしの自動再生でも伝わる</td></tr>
@@ -115,6 +115,7 @@ details[open] summary{margin-bottom:10px}
   <p>アイコンは今の絵のまま使う、ウォークスルーは女性を映して画角を広げる、間取り図を読み込んで 3D になる流れを推す、の 3 点を入れました。2章と 3章は 1 回目の案として残してあります。</p>
 
   <div class="sub">アイコン：今の配色と、朱色と白を入れ替えた版</div>
+  <p><strong>決定（2026-11-26）</strong>　App Store に出すアイコンは「今の配色」です。「反転」はサブアイコンとして残します。</p>
   <p>今の絵は描き直していません。今の配色を規定の 1024×1024 にした物と、色だけを入れ替えた物です。</p>
   <div class="icons">
     <figure><img src="img/icon-cur-1024.png" alt="今の配色のアイコン" width="1024" height="1024"><figcaption><span class="cap-h">今の配色</span><span>白い背景の上では外形が消え、家だけが浮いて見える。</span></figcaption></figure>
@@ -156,7 +157,7 @@ details[open] summary{margin-bottom:10px}
   <div class="tw"><table class="w640">
     <thead><tr><th>物</th><th>公式の要件</th><th>状態</th></tr></thead>
     <tbody>
-      <tr><td>アイコン</td><td>1024×1024、透過なし、角は丸めない。ダークやティントの版は任意</td><td><span class="chip mid">案あり</span> 今の画像は 1254×1254 で規定と合わない。方向を選んでもらってから仕上げる</td></tr>
+      <tr><td>アイコン</td><td>1024×1024、透過なし、角は丸めない。ダークやティントの版は任意</td><td><span class="chip ok">決定</span> 今の配色を 1024×1024 にした <code>AppIcon-1024.png</code> を使う。反転はサブアイコン</td></tr>
       <tr><td>iPhone のスクリーンショット</td><td>1206×2622 を最低 1 枚（最大 10 枚）。大きい画面の 1320×2868 は任意</td><td><span class="chip mid">案あり</span> 試作まで。本撮影はこれから</td></tr>
       <tr><td>iPad のスクリーンショット</td><td>iPad で動くなら 2064×2752 を最低 1 枚</td><td><span class="chip ng">待ち</span> iPad の表示を直す変更が本体に入ってから撮る</td></tr>
       <tr><td>プレビュー動画</td><td>任意。15〜30 秒、iPhone は 886×1920、アプリの画面の録画だけ</td><td><span class="chip mid">案あり</span> 絵コンテまで</td></tr>
@@ -386,170 +387,3 @@ details[open] summary{margin-bottom:10px}
 </section>
 
 </div>
-<!-- 画像ビューア ここから（</body> の直前、ほかのスクリプトより後ろに貼る。中身は書き換えない） -->
-<style>
-.zv{--zv-scrim:rgba(24,23,20,.74);--zv-card:#FFFFFF;--zv-ink:#21201C;--zv-muted:#6E6B63;--zv-line:rgba(33,32,28,.14);--zv-accent:var(--accent,#2F6FDE)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .zv{--zv-scrim:rgba(0,0,0,.78);--zv-card:#262522;--zv-ink:#F1EFE9;--zv-muted:#A9A59B;--zv-line:rgba(255,255,255,.16)}}
-:root[data-theme="dark"] .zv{--zv-scrim:rgba(0,0,0,.78);--zv-card:#262522;--zv-ink:#F1EFE9;--zv-muted:#A9A59B;--zv-line:rgba(255,255,255,.16)}
-img[data-zv]{cursor:zoom-in}
-img[data-zv]:focus-visible{outline:2px solid var(--accent,#2F6FDE);outline-offset:2px}
-.zv{position:fixed;inset:0;z-index:2147483000;background:var(--zv-scrim);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;flex-direction:column;
-  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
-  font-family:inherit;line-height:1.4}
-.zv[hidden]{display:none}
-.zv-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:var(--zv-card);color:var(--zv-ink);font-size:13.5px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.zv-size{margin-right:auto;color:var(--zv-muted);font-variant-numeric:tabular-nums;min-width:0}
-.zv-btn{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border:0;border-radius:10px;font:inherit;font-size:13.5px;
-  background:var(--zv-card);color:var(--zv-ink);box-shadow:inset 0 0 0 1px var(--zv-line);cursor:pointer}
-.zv-btn[hidden]{display:none}
-.zv-btn.primary{background:var(--zv-accent);color:#FFFFFF;box-shadow:none}
-.zv-btn:focus-visible{outline:2px solid var(--zv-accent);outline-offset:2px}
-.zv-note{flex-basis:100%;color:var(--zv-muted);font-size:12.5px}
-.zv-note:empty{display:none}
-.zv-stage{flex:1;min-height:0;overflow:auto;display:flex;padding:16px;overscroll-behavior:contain}
-.zv-stage img{margin:auto;display:block;flex:none;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:8px;cursor:zoom-in;user-select:none;-webkit-user-select:none}
-.zv.actual .zv-stage img{max-width:none;max-height:none;border-radius:0}
-</style>
-<div class="zv" id="zv" hidden role="dialog" aria-modal="true" aria-label="画像の拡大表示">
-  <div class="zv-bar">
-    <span class="zv-size" id="zv-size" aria-live="polite"></span>
-    <button class="zv-btn" id="zv-toggle" type="button">原寸で見る</button>
-    <button class="zv-btn" id="zv-save" type="button" hidden>画像を保存</button>
-    <button class="zv-btn primary" id="zv-close" type="button">閉じる</button>
-    <span class="zv-note" id="zv-note" aria-live="polite"></span>
-  </div>
-  <div class="zv-stage" id="zv-stage"><img id="zv-img" alt=""></div>
-</div>
-<script>
-// 画像ビューア。ページ内の <img> をクリック（または Enter / Space）すると拡大表示を開く。
-// 画面に合わせる → 原寸 → 2倍 と切り替えられ、拡大中はドラッグで見る位置を動かせる。
-// 「画像を保存」は公開時に capabilities: {downloads: true} を付けたときだけ出る。
-// 対象から外したい画像には data-no-zoom を付ける。リンクやボタンの中の画像、64px 以下の画像は対象にしない。
-(function(){
-  const zv = document.getElementById('zv'), img = document.getElementById('zv-img'), stage = document.getElementById('zv-stage');
-  const size = document.getElementById('zv-size'), toggle = document.getElementById('zv-toggle');
-  const saveBtn = document.getElementById('zv-save'), closeBtn = document.getElementById('zv-close'), note = document.getElementById('zv-note');
-
-  // 1. 対象の画像に印を付ける（あとから足された画像も拾う）
-  const mark = im => {
-    if (im.naturalWidth <= 64 && im.naturalHeight <= 64) return; // アイコン類
-    im.dataset.zv = ''; im.tabIndex = 0; im.setAttribute('role', 'button');
-    if (!im.getAttribute('aria-label')) im.setAttribute('aria-label', (im.alt || '画像') + '（拡大して見る）');
-  };
-  const arm = im => {
-    if (im.dataset.zv !== undefined || im.dataset.zvSeen) return;
-    if (zv.contains(im) || im.closest('a[href],button,[data-no-zoom]')) return;
-    im.dataset.zvSeen = '1';
-    if (im.complete && im.naturalWidth) mark(im); else im.addEventListener('load', () => mark(im), { once: true });
-  };
-  document.querySelectorAll('img').forEach(arm);
-  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => {
-    if (n.nodeType !== 1) return;
-    if (n.tagName === 'IMG') arm(n); else n.querySelectorAll('img').forEach(arm);
-  }))).observe(document.body, { childList: true, subtree: true });
-
-  // 2. 拡大表示
-  let opener = null, src = '', zoom = 0; // zoom: 0 = 画面に合わせる、1 = 原寸、2 = 2倍
-  const showSize = () => {
-    if (!img.naturalWidth) { size.textContent = '読み込み中…'; return; }
-    const w = img.naturalWidth, h = img.naturalHeight;
-    size.textContent = zoom === 0 ? `画面に合わせて表示中（原寸 ${w}×${h} px）`
-      : zoom === 1 ? `原寸 ${w}×${h} px・ドラッグで移動できます`
-      : `2倍に拡大中（原寸 ${w}×${h} px）・ドラッグで移動できます`;
-  };
-  const setZoom = z => {
-    zoom = z;
-    zv.classList.toggle('actual', z > 0);
-    toggle.textContent = z === 0 ? '原寸で見る' : z === 1 ? '2倍で見る' : '画面に合わせる';
-    if (z > 0 && img.naturalWidth) { img.style.width = img.naturalWidth * z + 'px'; img.style.height = img.naturalHeight * z + 'px'; }
-    else { img.style.width = ''; img.style.height = ''; }
-    img.style.cursor = z === 2 ? 'zoom-out' : 'zoom-in';
-    showSize();
-  };
-  const nextZoom = () => setZoom((zoom + 1) % 3);
-  let prevOverflow = '';
-  const open = im => {
-    opener = im; src = im.currentSrc || im.src;
-    img.alt = im.alt || '';
-    img.onload = () => setZoom(zoom);
-    img.src = src;
-    note.textContent = '';
-    setZoom(0);
-    zv.hidden = false;
-    prevOverflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    stage.scrollTo(0, 0);
-    closeBtn.focus();
-  };
-  const close = () => {
-    zv.hidden = true;
-    document.documentElement.style.overflow = prevOverflow;
-    img.removeAttribute('src');
-    if (opener && opener.isConnected) opener.focus();
-  };
-
-  document.addEventListener('click', e => {
-    const im = e.target.closest && e.target.closest('img[data-zv]');
-    if (!im || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    open(im);
-  });
-  document.addEventListener('keydown', e => {
-    if (zv.hidden) {
-      const im = e.target.matches && e.target.matches('img[data-zv]') ? e.target : null;
-      if (im && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open(im); }
-      return;
-    }
-    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
-    if (e.key === 'Tab') { // 拡大表示の中でフォーカスを回す
-      const f = [...zv.querySelectorAll('button')].filter(el => !el.hidden);
-      const first = f[0], last = f[f.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    }
-  });
-
-  // 拡大中はマウスのドラッグで見る位置を動かす（タッチは指でそのままスクロールできる）
-  let drag = null, dragged = false;
-  img.draggable = false;
-  stage.addEventListener('pointerdown', e => {
-    dragged = false;
-    if (!zoom || e.button !== 0 || e.pointerType !== 'mouse') return;
-    drag = { x: e.clientX, y: e.clientY, l: stage.scrollLeft, t: stage.scrollTop };
-  });
-  window.addEventListener('pointermove', e => {
-    if (!drag) return;
-    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-    if (Math.abs(dx) + Math.abs(dy) > 4) dragged = true;
-    if (dragged) { e.preventDefault(); stage.scrollLeft = drag.l - dx; stage.scrollTop = drag.t - dy; }
-  });
-  ['pointerup', 'pointercancel'].forEach(t => window.addEventListener(t, () => { drag = null; }));
-  img.addEventListener('click', e => { e.stopPropagation(); if (dragged) { dragged = false; return; } nextZoom(); });
-  toggle.addEventListener('click', nextZoom);
-  closeBtn.addEventListener('click', close);
-  stage.addEventListener('click', e => { if (dragged) { dragged = false; return; } if (e.target === stage) close(); });
-
-  // 3. 画像を保存（Artifact の downloads を使う。使えない場所ではボタンを出さない）
-  const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg' };
-  const fileName = blob => {
-    let name = /^(data|blob):/.test(src) ? '' : decodeURIComponent(src.split(/[?#]/)[0].split('/').pop() || '');
-    if (!name) name = 'image';
-    if (!/\.(png|jpe?g|webp|gif|svg)$/i.test(name)) name += '.' + (EXT[blob.type] || 'png');
-    return name;
-  };
-  if (window.claude && claude.use) claude.use('downloads').then(dl => {
-    if (!dl) return;
-    saveBtn.hidden = false;
-    saveBtn.addEventListener('click', () => {
-      note.textContent = '';
-      let name = '';
-      fetch(src).then(r => { if (!r.ok) throw new Error(r.status); return r.blob(); })
-        .then(b => { name = fileName(b); return dl.save({ filename: name, data: b }); })
-        .then(() => { note.textContent = '保存しました（' + name + '）。'; },
-          e => { note.textContent = e && e.code === 'declined' ? '保存を取りやめました。'
-            : 'この画面では保存できませんでした（' + ((e && (e.code || e.message)) || '理由不明') + '）。'; });
-    });
-  }).catch(() => {});
-})();
-</script>
-<!-- 画像ビューア ここまで -->

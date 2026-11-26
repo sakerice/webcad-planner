@@ -9,7 +9,8 @@ house-planner mobile を App Store に出すための検討の記録です。202
 | `privacy-labels.md` | App のプライバシーの申告の下書きと、端末の外へ出るデータの事実 |
 | `age-rating-and-compliance.md` | 年齢区分の答えの案、輸出コンプライアンス、コンテンツの権利 |
 | `review-notes.md` | 審査メモの下書き（日本語と英語） |
-| `app-icon/candidates/` | アイコンの方向の案（A・A2・B・C）と、縮小・ホーム画面の比較 |
+| `app-icon/` | 決まったアイコン。`AppIcon-1024.png`（今の配色）を App Store に出す。`AppIcon-inverted-1024.png`（朱色と白の反転）はサブアイコン。詳しくは `app-icon/README.md` |
+| `app-icon/candidates/` | 1 回目に出した描き直しの案（A・A2・B・C）。採っていない。記録として残す |
 | `screenshots/draft/` | 試し撮りの画面に見出しを載せた試作。`make.py` で作り直せる。1 枚ずつの PNG は置かず、一覧の JPG だけ置く |
 | `videos/pv-plan.md` | プレビュー動画・X 用の動画・紹介 PV の絵コンテ案 |
 | `store-review.html` | 上をまとめた検討ページの本文（画像は Artifact 側にある） |
