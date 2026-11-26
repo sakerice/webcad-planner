@@ -99,6 +99,7 @@ details[open] summary{margin-bottom:10px}
     </tbody>
   </table></div>
   <nav class="toc" aria-label="章の一覧">
+    <a href="#round3">3回目　AIレンダーを入れた案</a>
     <a href="#round2">2回目　いただいた指示を入れた案</a>
     <a href="#list">1章　登録に要る物の一覧</a>
     <a href="#icon">2章　アイコン</a>
@@ -108,6 +109,30 @@ details[open] summary{margin-bottom:10px}
     <a href="#decl">6章　申告と審査の情報</a>
     <a href="#todo">7章　あなたが行う手順</a>
   </nav>
+</section>
+
+<section id="round3">
+  <div class="chap-head"><span class="chap-no">3回目</span><h2>AIレンダーを入れた案（2026-11-27）</h2></div>
+  <p>3D の画面から「写真のように仕上げる」を押すと、今の視点が写真のような絵になってアプリの中に出る機能ができました（<a href="https://github.com/sakerice/webcad-planner/pull/162">PR #162</a>。まだ本番には入っていません）。その画面をストアの寸法で撮り、並びの 5 枚目に入れました。</p>
+
+  <div class="sub">元の 3D と、仕上がった絵</div>
+  <div class="one"><figure><img src="img/airender-before-after.jpg" alt="左が AI に送った元の 3D、右が仕上がった絵" width="1582" height="1376"><figcaption>左がアプリの 3D、右が仕上がった絵。既定の 2 階建ての 1 階 LDK です。扉 2 枚、テレビとテレビ台、キッチン、食卓と椅子 6 脚、ソファと緑の小卓の位置と数は元のままです。違う点は、奥の天井に小さなダウンライトが描かれたこと、壁が白っぽく明るくなったことです。絵は手で直していません。</figcaption></figure></div>
+
+  <div class="sub">ストアに載せる 1 枚の案</div>
+  <div class="one" style="max-width:420px">
+    <figure><img src="img/airender-pair.jpg" alt="ウォークスルーの画面と、仕上がった絵の画面を並べたストア画像の案" width="1320" height="2868"><figcaption>左上がウォークスルーの画面、右下が仕上がった絵の画面。どちらも実際の画面です。見出しは「歩いている3Dを、写真のような絵に。」としました。</figcaption></figure>
+  </div>
+
+  <div class="sub">8 枚の並び</div>
+  <div class="one"><figure><img src="img/contact-sheet-R3.jpg" alt="AIレンダーを 5 枚目に入れた 8 枚の並び" width="3604" height="996"><figcaption>4 枚目（内観 3D の LDK）の次に入れ、ほかは外していません。App Store は 10 枚まで出せます。検索結果に出る最初の 3 枚には入れていません。仕上がった絵は細部が間取りと違うことがあり、最初に置くと、アプリの 3D そのものが写真のように見えると受け取られるおそれがあるためです。</figcaption></figure></div>
+
+  <div class="sub">残っていること</div>
+  <ul>
+    <li>この機能は PR #162 が本番に入るまで使えません。本番に入れるかは、あなたの確認が要ります。</li>
+    <li>仕上がりは生成のたびに少し変わります。同じ場面で 2 枚生成し、テレビ台の色が変わりスイッチが足された 1 枚は使いませんでした。iPad の縦で生成した 1 枚は、天井が斜めに描き替えられたので使っていません。</li>
+    <li>iPhone のアプリ版で「画像を保存」が動くかは、アプリの入れ物がまだ無いので確かめていません。</li>
+    <li>掲載文・プライバシーの申告・審査メモには、この機能の分を足しました（5章・6章の元の文書。未確定の所には ★）。審査メモの貼る文は、足す前から欄の上限 4000 バイトを超えていて、縮める必要があります。</li>
+  </ul>
 </section>
 
 <section id="round2">
@@ -148,7 +173,7 @@ details[open] summary{margin-bottom:10px}
   </div>
 
   <div class="sub">AIレンダー</div>
-  <p>AIレンダーは、画像を生成する所までは作っていません。今あるのは、3D の画面からガイド画像 6 枚と AI への指示文を作って保存する所までで、生成は利用者が外の画像生成 AI で行います。結果をアプリの中に出す画面が無いので、今のままではストアの絵に結果を載せられません。アプリの中で生成して表示する機能を足す（本体の実装と、生成のたびの費用が要る）、ストアにはデータを作るダイアログだけ載せて結果の絵は X で見せる、X 用だけにする、の 3 つから選んでください。初版は後ろの 2 つのどちらかを勧めます。</p>
+  <p>2026-11-26 に「アプリの中で生成する」と決まり、機能ができました。上の「3回目」の章を見てください。</p>
 </section>
 
 <section id="list">
