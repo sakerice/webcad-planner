@@ -362,14 +362,17 @@ function opSuccessText(name, res, origin, roomId) {
   const gone = new Set(removed.map(String));
   const changed = (Array.isArray(res.changedIds) ? res.changedIds : []).filter((id) => !gone.has(String(id)));
   const warnings = Array.isArray(res.warnings) ? res.warnings : [];
+  // 物でなく設定表(内観・外観・屋根のカラー設定など)が変わったとき、変わった所の名前(collab-room の changedSettings)
+  const settings = Array.isArray(res.changedSettings) ? res.changedSettings : [];
   const lines = [];
   const data = [];
-  if (!changed.length && !removed.length) {
+  if (!changed.length && !removed.length && !settings.length) {
     lines.push("プランは変わりませんでした（" + OP_TITLES[name] + "。今と同じ値でした）。");
   } else {
     lines.push("プランを直しました（" + OP_TITLES[name] + "）。");
     if (changed.length) data.push("変わった物: " + changed.length + " 件（id: " + idList(changed) + "）");
     if (removed.length) data.push("消えた物: " + removed.length + " 件（id: " + idList(removed) + "）");
+    if (settings.length) data.push("変わった設定: " + settings.slice(0, 10).map(cleanLine).join("、"));
   }
   if (warnings.length) {
     lines.push("警告があります（囲みの中。意図と違えば直してください）。");

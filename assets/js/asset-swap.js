@@ -190,6 +190,17 @@
 
     items.forEach(function(it){
       if(frozen(it)||keep(it)||excluded(it)) return;                 // 替えない物(ロック・選ばれなかった物・除いた物)
+      // 選んだ物が、選んでいない台の替え先に含まれる物(洗面台の上の洗面ボウルなど)なら替えない。替えると元の台の上に
+      // 替え先の台が載って二重になる(画面の一括差し替えは全部を見るので、ここには来ない)
+      var onBase=baseOf[String(it.id)];
+      if(onBase&&(frozen(onBase)||keep(onBase)||excluded(onBase))){
+        var k1=(cfg.typeKinds&&cfg.typeKinds[it.type])||ctx.kindOf(it.type)||null;
+        var k2=(cfg.typeKinds&&cfg.typeKinds[onBase.type])||ctx.kindOf(onBase.type)||null;
+        if(k1&&k1===k2){
+          var kr={id:it.id,type:it.type,kind:k1,floor:it.floor||1,action:'keep',reason:'載っている台(id '+onBase.id+')の替え先に含まれる物なので、台 id '+onBase.id+' を一緒に選んでください'};
+          rows.push(kr); rowById[String(it.id)]=kr; return;
+        }
+      }
       if(String(it.type).indexOf(ctx.setId+'-')===0) return;        // もうこのセットの物
       var kind=(cfg.typeKinds&&cfg.typeKinds[it.type])||ctx.kindOf(it.type);
       if(!kind) return;                                              // カタログの家具ではない（壁・窓・照明など）

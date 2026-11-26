@@ -307,3 +307,34 @@ test('家具の部位の色は "" で既定に戻せる。全部の部位を戻�
   r = workerApply(p, [{ op: 'setProps', args: { id: it.id, set: { finishColors: { wood: 'y'.repeat(100000) } } } }]);
   assert.ok(r.errors[0].message.length < 400, '失敗文に送った値を丸ごと写さない: ' + r.errors[0].message.length);
 });
+
+test('一括差し替え: 洗面ボウルだけを選ぶと、替えずに「台 id を一緒に選んでください」と返す(元の洗面台の上に二重に載せない)', async () => {
+  const { workerApply } = await load();
+  const p = plan();
+  const vanity = p.items.find((it) => it.type === 'fmp-BathroomVanity07');
+  const bowl = p.items.find((it) => it.type === 'fmp-WashBasin01');
+  const r = workerApply(p, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion', ids: [String(bowl.id)] } }]);
+  assert.deepEqual(r.errors, []);
+  assert.equal(JSON.stringify(byId(r.plan, bowl.id)), JSON.stringify(bowl), 'ボウルはそのまま');
+  assert.equal(JSON.stringify(byId(r.plan, vanity.id)), JSON.stringify(vanity), '洗面台もそのまま');
+  assert.ok(r.warnings.some((w) => w.includes('台 id ' + vanity.id + ' を一緒に選んでください')), JSON.stringify(r.warnings));
+  const both = workerApply(p, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion', ids: [String(bowl.id), String(vanity.id)] } }]);
+  assert.ok(/^rpg-mansion-/.test(byId(both.plan, vanity.id).type), '両方を選べば替わる');
+});
+
+test('カラー設定: 結果に変わった設定(changedSettings)を載せる。階を書いて家全体が切れたら知らせる。無い階は失敗', async () => {
+  const { workerApply } = await load();
+  const p = plan();
+  let r = workerApply(p, [{ op: 'setAppearance', args: { part: 'interior', color: '#123456' } }]);
+  assert.deepEqual(r.changedSettings, ['内観（壁紙）の家全体']);
+  r = workerApply(r.plan, [{ op: 'setAppearance', args: { part: 'interior', floor: 2, color: '#654321' } }]);
+  assert.deepEqual(r.changedSettings, ['内観（壁紙）の2階']);
+  assert.ok(r.warnings.some((w) => /家全体の設定をやめて階ごとの設定にしました/.test(w)), JSON.stringify(r.warnings));
+  const same = workerApply(r.plan, [{ op: 'setAppearance', args: { part: 'interior', floor: 2, color: '#654321' } }]);
+  assert.equal(same.changedSettings, undefined, '同じ値なら変わった設定は無い');
+  r = workerApply(p, [{ op: 'setAppearance', args: { part: 'roof', floor: 4, color: '#000000' } }]);
+  assert.match(r.errors[0].message, /4 階はありません\(ある階: 1・2/);
+  const style = workerApply(p, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion' } }]);
+  assert.equal(style.changedSettings, undefined, '設定表を変えない操作の結果の形は今までどおり');
+});
+

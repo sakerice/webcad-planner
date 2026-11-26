@@ -174,7 +174,8 @@ function planAppearanceCtx(){
       var ensureOf={interior:ensureInteriorWallSettings,roof:ensureRoofAppearance,exterior:ensureExteriorWallSettings}[part];
       return ensureOf();
     },
-    setValue:APPEARANCE_WRITE.setValue, normalize:APPEARANCE_WRITE.normalize, defaultFloor:APPEARANCE_WRITE.defaultFloor
+    setValue:APPEARANCE_WRITE.setValue, normalize:APPEARANCE_WRITE.normalize, defaultFloor:APPEARANCE_WRITE.defaultFloor,
+    after:APPEARANCE_WRITE.after
   };
 }
 // 建物の様式の切り替え(操作 applyBuildingStyle)に渡す、画面の「建物の仕上げを替える」と同じ部品(building-style.js)。

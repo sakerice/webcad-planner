@@ -102,7 +102,8 @@ try {
       res.vanity = [];
       for (const [label, args, lock] of [['台だけ', { set: 'rpg-mansion', ids: [String(vanity.id)] }, false],
         ['ボウルを除く', { set: 'rpg-mansion', ids: [String(vanity.id)], except: [String(bowl.id)] }, false],
-        ['ボウルをロック', { set: 'rpg-mansion', ids: [String(vanity.id)] }, true]]) {
+        ['ボウルをロック', { set: 'rpg-mansion', ids: [String(vanity.id)] }, true],
+        ['ボウルだけ', { set: 'rpg-mansion', ids: [String(bowl.id)] }, false]]) {
         const q = JSON.parse(baseJson);
         if (lock) q.items.find((it) => it.id === bowl.id).locked = true;
         reset(JSON.stringify(q));
@@ -110,7 +111,7 @@ try {
         const w = tools.workerApply(q, [{ op: 'swapAssetSet', args }]);
         const v = c.plan.items.find((it) => it.id === vanity.id), b = c.plan.items.find((it) => it.id === bowl.id);
         res.vanity.push({ label, errors: c.errors, vanitySwapped: /^rpg-mansion-/.test(v.type), bowlLeft: !!b,
-          same: json([w.plan, w.changedIds, w.removedIds, w.warnings]) === json([c.plan, c.changedIds, c.removedIds, c.warnings]), warnings: c.warnings.filter((x) => x.includes('id ' + bowl.id)) });
+          same: json([w.plan, w.changedIds, w.removedIds, w.warnings]) === json([c.plan, c.changedIds, c.removedIds, c.warnings]), warnings: c.warnings.filter((x) => x.includes('id ' + bowl.id) || x.includes('台 id ' + vanity.id)) });
       }
     }
     // 知らないセット名
@@ -142,7 +143,7 @@ try {
   assert.ok(out.locked.changed > 0 && out.locked.errors.length === 0, 'ロックした物のほかは替わる');
   console.log('洗面台: ' + JSON.stringify(out.vanity));
   assert.deepEqual(out.vanity.map((v) => [v.label, v.errors.length, v.vanitySwapped, v.bowlLeft, v.same, v.warnings.length > 0]),
-    [['台だけ', 0, true, false, true, true], ['ボウルを除く', 0, false, true, true, true], ['ボウルをロック', 0, false, true, true, true]], '洗面台だけを選んだときの扱い');
+    [['台だけ', 0, true, false, true, true], ['ボウルを除く', 0, false, true, true, true], ['ボウルをロック', 0, false, true, true, true], ['ボウルだけ', 0, false, true, true, true]], '洗面台だけ・ボウルだけを選んだときの扱い');
   assert.equal(out.lockedNamed.length, 1);
   assert.match(out.lockedNamed[0], /ロック/);
   assert.equal(out.unknown.chat.length, 1);

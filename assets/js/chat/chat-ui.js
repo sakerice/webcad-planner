@@ -38,12 +38,13 @@
   var THINKING = '考えています…';
   var TAGS_WAITING = '家具の一覧を読み込んでいます…';
   var TAGS_WAIT_MS = 20000;
-  // 取り込む欄。壁・物・部屋と、操作の後始末(planOpsCtx の hooks)が書く外壁の設定表。
-  // 視点(viewState)・階・高さの既定・屋根の見た目など、操作が書かない欄は本物のまま残す。
-  var APPLY_FIELDS = ['walls', 'rooms', 'items', 'exteriorWallSettings'];
-  // 印から外す欄。外壁の設定表は、3D の作り直し(モデルの読み終わりなど)でも欄が足される。
-  // 利用者や相手の変更でなくても変わるので、比べると取り込みを誤って断る。
-  var FINGERPRINT_SKIP = { exteriorWallSettings: true };
+  // 取り込む欄。壁・物・部屋と、操作の後始末(planOpsCtx の hooks)が書く外壁の設定表、
+  // カラー設定・建物の様式の操作(setAppearance・applyBuildingStyle)が書く内観の設定表と屋根の見た目。
+  // 視点(viewState)・階・高さの既定など、操作が書かない欄は本物のまま残す。
+  var APPLY_FIELDS = ['walls', 'rooms', 'items', 'exteriorWallSettings', 'interiorWallSettings', 'roofAppearance'];
+  // 印から外す欄。外壁・内観の設定表は、3D の作り直し(面ごとの設定の行を足す)でも欄が足される。
+  // 利用者や相手の変更でなくても変わるので、比べると取り込みを誤って断る。屋根の見た目は描画では足されないので比べる。
+  var FINGERPRINT_SKIP = { exteriorWallSettings: true, interiorWallSettings: true };
 
   var S = {
     session: null,     // ChatSession(初めて開いたときに作る)
@@ -444,7 +445,8 @@
         // 途中で止まった依頼は、AI の文(あれば)のあとに、止まったことと続きの頼み方を書く。
         if (r.partial) text = (text ? text + '\n' : '') + PARTIAL_NOTE;
         var more = !!(r.partial || r.more);
-        if (r.changed > 0) {
+        // 物が変わらなくても、設定表(カラー設定・様式)が変われば取り込む
+        if (r.changed > 0 || (r.changedSettings && r.changedSettings.length)) {
           // 新しく取り込む前に、前の「元に戻す」を片付ける(古いボタンで新しい取り込みを戻さないように)。
           dropUndo();
           var res = applyChatResult(r);
@@ -517,7 +519,8 @@
   // 成功の結果の写しを本物のプランに入れる。戻り値 {applied, reason}。reason は 'unchanged'・'conflict'・'failed'。
   function applyChatResult(result) {
     if (!result || !result.ok || !result.plan) return { applied: false, reason: 'failed' };
-    if (!(result.changed > 0)) return { applied: false, reason: 'unchanged' };
+    // 物が変わらなくても、設定表(カラー設定・様式)が変われば取り込む
+    if (!(result.changed > 0) && !(result.changedSettings && result.changedSettings.length)) return { applied: false, reason: 'unchanged' };
     var DATA = g('DATA');
     if (!DATA || S.fp === null || fingerprint(DATA) !== S.fp) return { applied: false, reason: 'conflict' };
     var work = result.plan;

@@ -293,6 +293,26 @@ test('新しい版の話し方: initialize なしで、版を載せた tools/lis
   }
 });
 
+// 物でなく設定表だけを変える操作(setAppearance)は changedIds が空でも保存される。返事も「変わった設定」を書く
+// (2026-11-26 のレビュー: 保存されたのに「プランは変わりませんでした」と返していた)。
+test('setAppearance: 設定表が変わったら「変わった設定」を返し、同じ値をもう一度渡すと「変わりませんでした」', async () => {
+  const ctx = await setup();
+  const { url, id } = await createPlan(ctx);
+  const room = await call(ctx, 'addRoom', { plan: url, name: '和室', floor: 1, x: 2000, y: 2000, w: 2730, d: 3640 });
+  assert.equal(room.isError, false, textOf(room));
+  const a = await call(ctx, 'setAppearance', { plan: url, part: 'interior', color: '#336699' });
+  assert.equal(a.isError, false, textOf(a));
+  assert.match(textOf(a), /プランを直しました（壁紙・外壁・屋根の色と素材を変える）/);
+  assert.match(textOf(a), /変わった設定: 内観（壁紙）の家全体/);
+  const stored = await (await ctx.env.ROOMS.get(ctx.env.ROOMS.idFromName(id)).fetch('https://room/plan')).json();
+  assert.equal(stored.interiorWallSettings.whole.color, '#336699');
+  const again = await call(ctx, 'setAppearance', { plan: url, part: 'interior', color: '#336699' });
+  assert.match(textOf(again), /プランは変わりませんでした/);
+  const floor4 = await call(ctx, 'setAppearance', { plan: url, part: 'roof', floor: 4, color: '#000000' });
+  assert.equal(floor4.isError, true);
+  assert.match(textOf(floor4), /4 階はありません/);
+});
+
 test('通しの流れ: create_plan → addRoom → placeItem → get_plan に足した物がある → inspect_plan。画面にも届く', async () => {
   const ctx = await setup();
   const { id, url, result } = await createPlan(ctx);

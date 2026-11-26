@@ -1052,7 +1052,7 @@ export function createPlanCtxTools(deps) {
       } : undefined,
       // 一括差し替え(画面の planAssetSwapCtx と同じ形。決め方は swapPlan)。
       assetSwap: AssetSwap ? {
-        sets: function () { return (FUR.sets || []).map(function (s) { return { id: s.id, name: s.name }; }); },
+        sets: function () { return (FUR.sets || []).filter(function (s) { return s.swap; }).map(function (s) { return { id: s.id, name: s.name }; }); },
         find: function (name) { var s = AssetSwap.findSwapSet(FUR.sets, name); return s ? { id: s.id, name: s.name } : null; },
         plan: function (p, setId, o) { return swapPlan(p || cur, setId, o); },
         applyRows: AssetSwap.applyRows

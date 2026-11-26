@@ -5224,6 +5224,11 @@ var APPEARANCE_WRITE={
     if(part==='interior') return defaultInteriorFloorSetting();
     if(part==='roof') return defaultRoofFloorSetting();
     return defaultExteriorFloorSetting(floor);
+  },
+  // 画面だけの記憶(保存しない)。外観の階の色を、この画面を開いている間の階の外壁色の既定(WALL_COLORS)にも写す。
+  // 設定欄と AI の操作(setAppearance)の両方がここを通る。
+  after:function(part,scope,key,value,floor){
+    if(part==='exterior'&&scope==='floor'&&key==='color'){WALL_COLORS[floor]=value; WALL_COLOR_CUSTOM[floor]=true;}
   }
 };
 function updateInteriorSetting(scope,key,value,floor,noSave){
@@ -5686,8 +5691,6 @@ function updateExteriorSetting(scope,key,value,floor,wallId,noSave){
   else if(!noSave) saveState();
   if(scope==='whole'||scope==='floor'){
     PlanCoreOperations.writeAppearance(s,'exterior',scope,key,value,floor,APPEARANCE_WRITE);
-    // 画面だけの記憶(保存しない)。階の外壁色の既定として、この画面を開いている間だけ使う
-    if(scope==='floor'&&key==='color'){WALL_COLORS[floor]=value; WALL_COLOR_CUSTOM[floor]=true;}
   } else if(scope==='wall'){
     var w=DATA.walls.find(function(x){return x.id===wallId;});
     if(w){

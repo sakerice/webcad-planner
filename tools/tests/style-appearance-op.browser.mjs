@@ -16,6 +16,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const { sseFor } = require('./chat-sse-fixtures.cjs');
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PLAN = JSON.parse(readFileSync(join(HERE, 'fixtures', 'house-2f.json'), 'utf8'));
@@ -38,19 +42,46 @@ const APPEARANCE = [
   { mode: 'roof', args: { part: 'roof', floor: 2, sheen: 'satin' }, steps: [["updateRoofAppearance('floor','sheen',this.value||null,2)", 'satin']] },
 ];
 
+// チャットの通り道で当てる組(偽の AI が道具を呼ぶ。本物の AI には送らない)。取り込んだあとの DATA と 3D の屋根の材質を見る。
+// 2026-11-26 のレビューで、設定表だけを変える操作がチャットでは本物のプランに入っていなかった(取り込みが物の変化しか見ず、
+// 取り込む欄に内観の設定表と屋根の見た目が無かった)。操作の戻り値だけを比べる検査では拾えなかったので、ここで通り道ごと見る。
+const CHAT_CASES = [
+  { label: '内観の家全体の色', screen: { appearance: 0 }, name: 'setAppearance', input: { part: 'interior', color: '#336699' } },
+  { label: '外観の2階の色と素材', screen: { appearance: 6 }, name: 'setAppearance', input: { part: 'exterior', floor: 2, color: '#223344', texture: 'siding' } },
+  { label: '屋根の色', screen: { roof: '#d2691e' }, name: 'setAppearance', input: { part: 'roof', color: '#d2691e' } },
+  { label: '様式 洋館', screen: { style: ['rpg-mansion', []] }, name: 'applyBuildingStyle', input: { set: 'rpg-mansion' } },
+  { label: '様式 古民家 屋根と内壁だけ', screen: { style: ['kominka', ['exterior', 'floor', 'doors', 'windows']] }, name: 'applyBuildingStyle', input: { set: 'kominka', parts: ['roof', 'interior'] } },
+].map((c, i) => Object.assign(c, { steps: [
+  sseFor([{ type: 'tool_use', id: 'tu' + i, name: c.name, input: c.input }], { stop: 'tool_use' }),
+  sseFor([{ type: 'text', text: '変えました。' }], { stop: 'end_turn' }),
+] }));
+function installFakeChat() {
+  window.__chat = { queue: [], calls: 0 };
+  const realFetch = window.fetch.bind(window);
+  window.fetch = function (url, init) {
+    if (!String(url).includes('/api/ai/chat')) return realFetch(url, init);
+    window.__chat.calls++;
+    try { window.__chat.lastBody = JSON.parse(init.body); } catch (e) { window.__chat.lastBody = null; }
+    const step = window.__chat.queue.shift();
+    if (!step) return Promise.resolve(new Response(JSON.stringify({ error: 'bad_request', code: 'bad_request' }), { status: 400 }));
+    return Promise.resolve(new Response(step, { status: 200, headers: { 'content-type': 'text/event-stream', 'x-chat-ticket': 'tk-' + Math.random().toString(36).slice(2), 'x-chat-rounds-left': '5' } }));
+  };
+}
+
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   const errors = [];
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   page.on('dialog', (d) => d.accept());
+  await page.addInitScript(installFakeChat);
   await page.goto(APP + (APP.includes('?') ? '&' : '?') + 'preset=blank');
   await page.waitForFunction(() => window.ST && window.DATA && window.PRESET_CURRENT === 'blank', null, T);
   await page.waitForSelector('#app-loading', { state: 'hidden', ...T });
   await page.waitForFunction(() => typeof CATALOGUE_TAGS !== 'undefined' && CATALOGUE_TAGS && CATALOGUE_TAGS.items
     && AssetSets.sets().some((s) => s.style) && Object.keys(FMP_ITEMS).some((k) => k.indexOf('kominka-') === 0), null, T);
 
-  const out = await page.evaluate(async ({ plan, app, cases }) => {
+  const out = await page.evaluate(async ({ plan, app, cases, chatCases }) => {
     const F = await import(new URL('worker/plan-ctx-factory.mjs', app).href);
     const get = async (rel) => (await fetch(new URL(rel, app).href)).json();
     const tools = F.createPlanCtxTools({
@@ -64,7 +95,15 @@ try {
     // 画面で3つのカラー設定の欄を一度開いた状態(ensure* で欄がそろった状態)を土台にする
     ['interior', 'roof', 'exterior'].forEach((m) => renderExteriorWallPanel(m));
     const baseJson = json(DATA);
-    const reset = (p) => { DATA = JSON.parse(p || baseJson); nextId = F.firstNewId(DATA); ST.selected = null; };
+    // 画面だけの階の外壁色の既定(WALL_COLORS)も、毎回はじめの値に戻す
+    const wallColors0 = JSON.stringify(WALL_COLORS), custom0 = JSON.stringify(WALL_COLOR_CUSTOM);
+    const reset = (p) => {
+      DATA = JSON.parse(p || baseJson); nextId = F.firstNewId(DATA); ST.selected = null;
+      Object.keys(WALL_COLORS).forEach((k) => delete WALL_COLORS[k]); Object.assign(WALL_COLORS, JSON.parse(wallColors0));
+      Object.keys(WALL_COLOR_CUSTOM).forEach((k) => delete WALL_COLOR_CUSTOM[k]); Object.assign(WALL_COLOR_CUSTOM, JSON.parse(custom0));
+    };
+    // 3D の描画が読む、階の外壁色の既定(WALL_COLORS。外壁の材質の色の最後の拠り所)
+    const screenWallColors = () => JSON.stringify([WALL_COLORS, WALL_COLOR_CUSTOM]);
     const diff = (a, b) => {
       const A = JSON.parse(a), B = JSON.parse(b), d = [];
       Object.keys(Object.assign({}, A, B)).forEach((k) => {
@@ -98,11 +137,13 @@ try {
         el.dispatchEvent(new Event('change', { bubbles: true }));
       }
       const panel = json(DATA);
+      const panelWall = screenWallColors();
       reset();
       const ch = PlanCoreOperations.applyOperations(DATA, [{ op: 'setAppearance', args: c.args }], planChatCtx());
+      const chatWall = screenWallColors();
       const chat = json(ch.plan);
       const w = tools.workerApply(JSON.parse(baseJson), [{ op: 'setAppearance', args: c.args }]);
-      res.appearance.push({ args: c.args, panelError, chatErrors: ch.errors, workerErrors: w.errors, changed: panel !== baseJson,
+      res.appearance.push({ args: c.args, panelWall, chatWall, wall0: JSON.stringify([JSON.parse(wallColors0), JSON.parse(custom0)]), panelError, chatErrors: ch.errors, workerErrors: w.errors, changed: panel !== baseJson,
         samePanel: panel === chat, sameWorker: json(w.plan) === chat, diffPanel: panel === chat ? [] : diff(panel, chat), diffWorker: json(w.plan) === chat ? [] : diff(chat, json(w.plan)) });
     }
     {
@@ -110,6 +151,27 @@ try {
       const ch = PlanCoreOperations.applyOperations(DATA, [{ op: 'setAppearance', args: { part: 'roof', texture: 'siding' } }], planChatCtx());
       const w = tools.workerApply(JSON.parse(baseJson), [{ op: 'setAppearance', args: { part: 'roof', texture: 'siding' } }]);
       res.badTexture = { chat: ch.errors, same: json(ch.errors) === json(w.errors) };
+    }
+
+    // ── 屋根の色が 3D の屋根の材質に届くか(画面の 3D の屋根を作る build3DRoofItem を、描かずに呼んで材質の色を読む)──
+    {
+      const roofColors = () => DATA.items.filter((it) => it.type === 'roof').map((it) => {
+        const g = new THREE.Group();
+        build3DRoofItem(g, it, it.w * U, it.d * U);
+        const c = {};
+        g.traverse((o) => { if (o.isMesh && o.material && o.material.color) c[o.material.color.getHexString() + (o.material.map ? '+map' : '')] = true; });
+        return Object.keys(c).sort().join(',');
+      });
+      reset();
+      const before = roofColors();
+      updateRoofAppearance('whole', 'color', '#d2691e');
+      const panel = roofColors();
+      reset();
+      const ch = PlanCoreOperations.applyOperations(DATA, [{ op: 'setAppearance', args: { part: 'roof', color: '#d2691e' } }], planChatCtx());
+      DATA = ch.plan;
+      const ai = roofColors();
+      reset();
+      res.roof = { before, panel, ai };
     }
 
     // ── 建物の様式 ──
@@ -149,9 +211,56 @@ try {
       const w = tools.workerApply(JSON.parse(baseJson), [{ op: 'applyBuildingStyle', args: { set: 'ゴシック' } }]);
       res.unknownStyle = { chat: ch.errors, same: json(ch.errors) === json(w.errors), untouched: json(ch.plan) === baseJson };
     }
+    // ── チャットの通り道(ChatUI.send → 偽の AI が道具を呼ぶ → 写しに当てる → 本物のプランに取り込む)──
+    const FIELDS = ['walls', 'rooms', 'items', 'exteriorWallSettings', 'interiorWallSettings', 'roofAppearance'];
+    const pick = () => json(FIELDS.reduce((o, k) => { o[k] = DATA[k]; return o; }, {}));
+    const roofMat = () => DATA.items.filter((it) => it.type === 'roof').map((it) => {
+      const g = new THREE.Group();
+      build3DRoofItem(g, it, it.w * U, it.d * U);
+      const c = {};
+      g.traverse((o) => { if (o.isMesh && o.material && o.material.color) c[o.material.color.getHexString() + (o.material.map ? '+map' : '')] = true; });
+      return Object.keys(c).sort().join(',');
+    });
+    res.chat = [];
+    for (const c of chatCases) {
+      // 画面の欄で同じことをした結果(取り込みと同じ後始末 syncExteriorWallSettings を通して比べる)
+      reset();
+      if (c.screen.appearance !== undefined) {
+        const pc = cases[c.screen.appearance];
+        APPEARANCE_PANEL_MODE = pc.mode; renderExteriorWallPanel(pc.mode);
+        const body = document.getElementById('exterior-wall-panel-body');
+        for (const [needle, value] of pc.steps) {
+          const el = Array.from(body.querySelectorAll('[onchange],[oninput]')).find((e) => ((e.getAttribute('onchange') || '') + (e.getAttribute('oninput') || '')).indexOf(needle) >= 0);
+          if (el.type === 'checkbox') { if (el.checked === value) continue; el.checked = value; } else el.value = value;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      } else if (c.screen.roof) {
+        updateRoofAppearance('whole', 'color', c.screen.roof);
+      } else {
+        BuildingStyle.open(c.screen.style[0]);
+        document.querySelectorAll('#asset-swap-modal input[data-style-part]').forEach((x) => { if (c.screen.style[1].indexOf(x.dataset.stylePart) >= 0) x.checked = false; });
+        document.querySelector('#asset-swap-modal .asset-swap-apply').click();
+      }
+      syncExteriorWallSettings();
+      const screen = pick(), screenRoof = roofMat(), screenWall = screenWallColors();
+      // チャットの通り道
+      reset();
+      window.__chat.queue.push(...c.steps);
+      const calls0 = window.__chat.calls;
+      ChatUI.send('変えて');
+      const t0 = Date.now();
+      while ((window.__chat.calls < calls0 + 2 || ChatUI.state().busy) && Date.now() - t0 < 20000) await new Promise((r) => setTimeout(r, 30));
+      const last = window.__chat.lastBody && window.__chat.lastBody.messages;
+      const m = last && last[last.length - 1];
+      const tr = m && Array.isArray(m.content) && m.content.find((b) => b.type === 'tool_result');
+      const chat = pick();
+      res.chat.push({ label: c.label, busy: ChatUI.state().busy, toolError: !!(tr && tr.is_error), tool: tr ? String(tr.content).slice(0, 200) : null,
+        applied: chat !== json(FIELDS.reduce((o, k) => { o[k] = JSON.parse(baseJson)[k]; return o; }, {})), same: chat === screen,
+        diff: chat === screen ? [] : diff(screen, chat), roof: [screenRoof, roofMat()], wall: [screenWall, screenWallColors()] });
+    }
     reset();
     return res;
-  }, { plan: PLAN, app: APP, cases: APPEARANCE });
+  }, { plan: PLAN, app: APP, cases: APPEARANCE, chatCases: CHAT_CASES });
 
   out.appearance.forEach((a) => console.log(`setAppearance ${JSON.stringify(a.args)}: 画面と同じ ${a.samePanel}、Worker と同じ ${a.sameWorker}${a.panelError ? ' 欄: ' + a.panelError : ''}`));
   out.style.forEach((s) => console.log(`applyBuildingStyle ${s.label}: 画面と同じ ${s.same}、変わった物 ${s.changedIds}、Worker ${JSON.stringify(s.worker)}`));
@@ -163,7 +272,26 @@ try {
     assert.ok(a.changed, JSON.stringify(a.args) + ' で画面の欄を押してもプランが変わらない');
     assert.equal(a.samePanel, true, JSON.stringify(a.args) + ' で画面の欄と違う: ' + JSON.stringify(a.diffPanel));
     assert.equal(a.sameWorker, true, JSON.stringify(a.args) + ' で Worker と違う: ' + JSON.stringify(a.diffWorker));
+    assert.equal(a.chatWall, a.panelWall, JSON.stringify(a.args) + ' で、画面の階の外壁色の既定(WALL_COLORS)が設定欄と違う');
   }
+  // 外観の階の色を変えた組では、WALL_COLORS が実際に変わっている(比べた値が両方とも元のまま、ではない)
+  const floorColor = out.appearance.find((a) => a.args.part === 'exterior' && a.args.floor && a.args.color);
+  assert.notEqual(floorColor.panelWall, floorColor.wall0, '設定欄で外観の階の色を変えても WALL_COLORS が変わっていない');
+  assert.match(floorColor.chatWall, new RegExp('"' + floorColor.args.floor + '":"' + floorColor.args.color + '"'));
+  console.log('屋根の材質の色: ' + JSON.stringify(out.roof));
+  assert.ok(out.roof.panel.every((c) => c.includes('d2691e')), '設定欄で屋根の色を変えても 3D の屋根の材質に届かない: ' + JSON.stringify(out.roof));
+  assert.deepEqual(out.roof.ai, out.roof.panel, 'AI で屋根の色を変えたときの 3D の屋根の材質が、設定欄と違う');
+  assert.notDeepEqual(out.roof.before, out.roof.panel);
+  for (const c of out.chat) {
+    console.log(`チャットの通り道 ${c.label}: 取り込まれた ${c.applied}、画面と同じ ${c.same}、屋根の材質 ${JSON.stringify(c.roof)}`);
+    assert.equal(c.busy, false, c.label);
+    assert.equal(c.toolError, false, c.label + ': ' + c.tool);
+    assert.equal(c.applied, true, c.label + ' がチャットで本物のプランに取り込まれていない');
+    assert.equal(c.same, true, c.label + ' がチャットと画面で違う: ' + JSON.stringify(c.diff).slice(0, 1500));
+    assert.deepEqual(c.roof[1], c.roof[0], c.label + ' で 3D の屋根の材質が画面と違う');
+    assert.equal(c.wall[1], c.wall[0], c.label + ' で画面の階の外壁色の既定が画面と違う');
+  }
+  assert.ok(out.chat.find((c) => c.label === '屋根の色').roof[1].every((x) => x.includes('d2691e')), 'チャットで屋根の色を変えても 3D の屋根の材質に届かない');
   assert.equal(out.badTexture.chat.length, 1);
   assert.ok(out.badTexture.chat[0].candidates.includes('roof_tile'));
   assert.equal(out.badTexture.same, true, '知らない素材の失敗が Worker とチャットで違う');

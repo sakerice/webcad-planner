@@ -163,7 +163,12 @@
     return fail('id ' + label(obj.id) + ' はロックされているので変えられません(locked・hidden3D・vis3D だけ変えられます)');
   }
 
-  function Recorder() { this.changed = []; this.removed = []; this.warnings = []; }
+  // settings: 物でなく、プランの設定表(内観・外観・屋根のカラー設定)が変わったときの、変わった所の名前
+  // (「内観（壁紙）の家全体」など)。結果の changedSettings に載せ、チャットの取り込みと MCP の返事が「変わった」と分かるようにする。
+  function Recorder() { this.changed = []; this.removed = []; this.warnings = []; this.settings = []; }
+  Recorder.prototype.setting = function (name) {
+    if (this.settings.indexOf(name) < 0) this.settings.push(name);
+  };
   Recorder.prototype.change = function (id) {
     if (this.changed.indexOf(id) < 0) this.changed.push(id);
   };
@@ -1180,7 +1185,8 @@
   // 設定パネル(index.html の updateInteriorSetting・updateExteriorSetting・updateRoofAppearance)と、
   // AI の操作 setAppearance が共に使う書き込みの決まり。s は ensure 済みの設定表、part は interior/exterior/roof、
   // scope は whole/floor。h = {setValue(obj,key,value), normalize(obj), defaultFloor(part, floor)}(画面は
-  // setTextureSettingValue など、Worker は写した同じ式)。
+  // setTextureSettingValue など、Worker は写した同じ式)。h.after(part, scope, key, value, floor) があれば、書いたあとに呼ぶ
+  // (画面だけの後処理。外観の階の色を、画面の階の外壁色の既定 WALL_COLORS にも写す。設定欄と AI の操作が同じここを通る)。
   // 内観と屋根は、色・素材(屋根は質感も)を変えた所を効かせる(家全体なら家全体、階なら家全体を外してその階)。
   // 外観は linked を変えない(設定欄で「家全体」「階」の印を先に付ける)。
   function writeAppearance(s, part, scope, key, value, floor, h) {
@@ -1197,8 +1203,17 @@
         s.floors[floor].linked = true;
       }
     }
+    if (typeof h.after === 'function') h.after(part, scope, key, value, floor);
   }
   var APPEARANCE_PARTS = { interior: '内観（壁紙）', exterior: '外観（外壁）', roof: '屋根' };
+  var APPEARANCE_FIELDS = { interior: 'interiorWallSettings', exterior: 'exteriorWallSettings', roof: 'roofAppearance' };
+  function settingJson(v) { try { return JSON.stringify(v); } catch (e) { return String(Math.random()); } }
+  // プランにある階(壁・部屋・物の floor)。
+  function planFloors(plan) {
+    var seen = {};
+    ['walls', 'rooms', 'items'].forEach(function (k) { (plan[k] || []).forEach(function (o) { if (o) seen[o.floor || 1] = true; }); });
+    return Object.keys(seen).map(Number).sort(function (x, y) { return x - y; });
+  }
   // setAppearance {part, floor?, color?, texture?, sheen?}: 設定パネルの「内観／外観／屋根カラー設定」で、家全体か階の
   // 色・素材(・屋根の質感)を選ぶのと同じ書き込みを、パネルで押す順に行う。外観は、家全体なら「家全体」に印を付けてから、
   // 階なら「家全体」の印を外してその階に印を付けてから書く(パネルでは印が無いと欄が押せない)。
@@ -1213,6 +1228,8 @@
     var scope = 'whole';
     if (a.floor !== undefined) {
       if (!isNum(a.floor) || Math.floor(a.floor) !== a.floor || a.floor < 1 || a.floor > 4) return fail('floor(階)は 1〜4 の整数で渡してください(省くと家全体)');
+      var floors = planFloors(plan);
+      if (floors.indexOf(a.floor) < 0) return fail('このプランに ' + a.floor + ' 階はありません(ある階: ' + floors.join('・') + '。省くと家全体)', floors.map(String));
       scope = 'floor';
     }
     var writes = [];
@@ -1233,11 +1250,18 @@
     }
     if (!writes.length) return fail('color・texture' + (a.part === 'roof' ? '・sheen' : '') + ' のどれかを渡してください');
     var s = ap.ensure(plan, a.part);
+    var before = settingJson(s);
+    var wholeWasOn = !!(s.whole && s.whole.linked);
     if (a.part === 'exterior') {
       if (scope === 'whole') writes.unshift(['linked', true]);
       else { writeAppearance(s, 'exterior', 'whole', 'linked', false, null, ap); writes.unshift(['linked', true]); }
     }
     writes.forEach(function (w) { writeAppearance(s, a.part, scope, w[0], w[1], a.floor, ap); });
+    if (settingJson(s) !== before) rec.setting(APPEARANCE_PARTS[a.part] + 'の' + (scope === 'whole' ? '家全体' : a.floor + '階'));
+    // 階を書くと、設定欄と同じく家全体の設定が切れる(ほかの階は、その階の設定か既定になる)。知らせる。
+    if (scope === 'floor' && wholeWasOn && !s.whole.linked) {
+      rec.warnings.push(APPEARANCE_PARTS[a.part] + 'は、家全体の設定をやめて階ごとの設定にしました。' + a.floor + '階のほかの階は、それぞれの階の設定(無ければ既定)で表示されます');
+    }
   }
 
   // ── 建物の様式(画面の「建物の仕上げを替える」。assets/js/building-style.js)─────────────────
@@ -1268,8 +1292,13 @@
     }
     var p = bs.plan(plan, set.id);
     if (!p) return fail('セット ' + label(set.id) + ' には様式がありません', names);
+    var before = {};
+    Object.keys(APPEARANCE_FIELDS).forEach(function (k) { before[k] = settingJson(plan[APPEARANCE_FIELDS[k]]); });
     var ids = bs.apply(plan, p, parts, function (o) { return isLocked(o, ctx); });
     (ids || []).forEach(function (id) { rec.change(id); });
+    ['exterior', 'roof', 'interior'].forEach(function (k) {
+      if (settingJson(plan[APPEARANCE_FIELDS[k]]) !== before[k]) rec.setting(APPEARANCE_PARTS[k] + 'の設定');
+    });
   }
 
   var OPS = {
@@ -1319,7 +1348,10 @@
           var res = OPS[opName](target, args, ctx, rec);
           if (res && res.error) return failure(plan, i, opName, res.error, res.candidates);
         }
-        return { plan: target, changedIds: rec.changed, removedIds: rec.removed, warnings: rec.warnings, errors: [] };
+        var out = { plan: target, changedIds: rec.changed, removedIds: rec.removed, warnings: rec.warnings, errors: [] };
+        // 設定表が変わった操作だけ欄を足す(ほかの操作の結果の形は今までどおり)
+        if (rec.settings.length) out.changedSettings = rec.settings;
+        return out;
       };
       // 写しに当てるときだけ、写しを作ったあとの処理全体を ctx.withPlan(写し, run) の中で動かす
       // (画面のグローバルに依存する hooks に、写しを「今のプラン」として見せるため。画面の planChatCtx)。

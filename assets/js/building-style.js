@@ -263,9 +263,14 @@
   // 戻り値: 変わった部屋・物の id の並び。
   function applyPlan(D,p,parts,h){
     var changed=[];
-    var lockedWallKeys=[];
-    if(h.locked) (D.walls||[]).forEach(function(w){ if(h.locked(w)) lockedWallKeys.push(String(h.wallKey(w))+'_'); });
-    var faceLocked=function(k){ return lockedWallKeys.some(function(pre){ return String(k).indexOf(pre)===0; }); };
+    // 面の鍵は「壁の鍵_向き_始め_終わり」(index.html の interiorFaceKey・exteriorFaceKey)。後ろの3つを外した残りが壁の鍵と
+    // 同じ面を、その壁の面とみなす(前方一致にすると、id の無い壁の鍵「1_100_…」が id 1 の壁の面に見えてしまう)。
+    var lockedWallKeys={};
+    if(h.locked) (D.walls||[]).forEach(function(w){ if(h.locked(w)) lockedWallKeys[String(h.wallKey(w))]=true; });
+    var faceLocked=function(k){
+      var parts=String(k).split('_');
+      return parts.length>3&&Object.prototype.hasOwnProperty.call(lockedWallKeys,parts.slice(0,-3).join('_'));
+    };
     if(parts.exterior&&p.exterior.length){
       var s=h.ensureExteriorWallSettings();
       s.whole.linked=false;
