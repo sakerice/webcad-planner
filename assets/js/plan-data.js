@@ -58,6 +58,8 @@ function planCoreCtx(){
       applyLightDefaults:function(item){ return ensureLightDefaults(item); },
       contextExteriorHeight:function(type){ return defaultContextExteriorHeight(type); },
       contextFloors:function(type){ return defaultContextFloors(type); },
+      // 色を変えられる部位の名前の並び(設定パネルの「素材・カラー」と同じ getItemFinishModel の finishChannels)。無ければ空。
+      finishChannels:function(type){ return planCoreFinishChannels(type); },
       constants:{
         rulerThickness:RULER_THICKNESS_MM,
         walkRouteThickness:WALK_ROUTE_THICKNESS_MM,
@@ -70,6 +72,10 @@ function planCoreCtx(){
       foundationHeight:function(){ return foundationHeightMm(); }
     }
   };
+}
+function planCoreFinishChannels(type){
+  var model=(typeof getItemFinishModel==='function')?getItemFinishModel(type):null;
+  return (model&&Array.isArray(model.finishChannels))?model.finishChannels.map(function(c){ return c.key; }):[];
 }
 function planCoreSuggestTypes(type){
   var q=String(type||'').toLowerCase();
@@ -151,8 +157,25 @@ function planOpsCtx(extra){
     },
     afterDelete:function(){ syncExteriorWallSettings(); }
   };
+  // 一括差し替えの部品(下の planAssetSwapCtx)。検査が planOpsCtx だけを切り出して動かすときは無い。
+  ctx.assetSwap=typeof planAssetSwapCtx==='function'?planAssetSwapCtx():undefined;
   if(extra) Object.keys(extra).forEach(function(k){ ctx[k]=extra[k]; });
   return ctx;
+}
+// 家具の一括差し替え(操作 swapAssetSet。operations.js)に渡す、画面の一括差し替えの部品(asset-swap.js)。
+// 決め方は画面の「一括差し替え」と同じ AssetSwap.planFor(グローバルの DATA を見る)。当てているプランは DATA で
+// なければならない(チャットの写しは withPlan で DATA になっている。画面の操作は DATA そのもの)。
+function planAssetSwapCtx(){
+  if(typeof AssetSwap==='undefined'||typeof AssetSets==='undefined') return undefined;
+  return {
+    sets:function(){ return AssetSets.sets().filter(function(s){ return s.swap; }).map(function(s){ return {id:s.id,name:s.name}; }); },
+    find:function(name){ var s=AssetSwap.findSwapSet(AssetSets.sets(),name); return s?{id:s.id,name:s.name}:null; },
+    plan:function(p,setId,opts){
+      if(p!==DATA) throw new Error('一括差し替えは、画面のプラン(DATA)か withPlan で DATA にした写しにだけ当てられます');
+      return AssetSwap.planFor(setId,opts);
+    },
+    applyRows:AssetSwap.applyRows
+  };
 }
 // チャット(AI)が操作を「プランの写し」に当てるときの ctx。assets/js/chat/chat-session.js の ctxFor が使う。
 //
@@ -223,6 +246,8 @@ function planChatCtx(){
     applyLightDefaults:base.applyLightDefaults,
     contextExteriorHeight:function(type){ return base.contextExteriorHeight(resolve(type)); },
     contextFloors:function(type){ return base.contextFloors(resolve(type)); },
+    // 置いてある物の種類で引く(分類名を引き直さない。setProps の対象は既にある物)。
+    finishChannels:base.finishChannels,
     constants:base.constants
   };
   ctx.settable=typeof PlanSettable!=='undefined'?PlanSettable:undefined;
@@ -251,6 +276,7 @@ function planChatCtx(){
     if(tag && Object.prototype.hasOwnProperty.call(mount,tag.kind)) it.elev=mount[tag.kind];
   };
   ctx.hooks=hooks;
+  ctx.assetSwap=screen.assetSwap;
   ctx.withPlan=function(work,run){
     var saved=DATA;
     DATA=work;

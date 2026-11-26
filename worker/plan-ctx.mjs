@@ -10,6 +10,7 @@
 // 決めごとと、画面のどの関数に合わせたかは worker/plan-ctx-factory.mjs と
 // .superpowers/sdd/2026-11-18-stage5-mcp/task-2-report.md。
 import catalog from "../assets/data/worker-catalog.json" with { type: "json" };
+import furniture from "../assets/data/worker-furniture.json" with { type: "json" };
 import tags from "../assets/models/tags.json" with { type: "json" };
 import Operations from "../assets/js/plan-core/operations.js";
 import Inspect from "../assets/js/plan-core/inspect.js";
@@ -23,10 +24,11 @@ import Check from "../assets/js/plan-check.js";
 import Structure from "../assets/js/plan-structure.js";
 import SetbackLaw from "../assets/js/setback-law.js";
 import Progress from "../assets/js/plan-core/progress.js";
+import AssetSwap from "../assets/js/asset-swap.js";
 import { createPlanCtxTools, REFUSAL, firstNewId } from "./plan-ctx-factory.mjs";
 
 const tools = createPlanCtxTools({
-  catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure, SetbackLaw, Progress,
+  catalog, furniture, tags, AssetSwap, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure, SetbackLaw, Progress,
 });
 
 export const workerOpsCtx = tools.workerOpsCtx;

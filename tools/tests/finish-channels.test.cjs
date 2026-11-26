@@ -122,7 +122,9 @@ test('テクスチャは、壁と同じ資産・同じ実寸で貼る', () => {
 
 test('画面から素材を選べ、戻すと色・素材・艶がすべて戻る', () => {
   const src = read('assets/js/app-state.js');
-  assert.match(src, /var MODEL_FINISH_TEXTURES=/, '素材の選択肢が無い');
+  // 素材の選択肢は、AI の編集(setProps の finishTextures)と同じ一覧(plan-settable.js)から作る
+  assert.match(src, /PlanSettable\.modelFinishTextureOptions\(/, '素材の選択肢を共有の一覧から取っていない');
+  assert.ok(require('../../assets/js/plan-settable.js').MODEL_FINISH_TEXTURES.some((o) => o[0] === 'wood_oak'), '素材の選択肢が無い');
   assert.match(src, /function updateSelectedModelTexture/, '素材を変える窓口が無い');
   assert.match(src, /finish-texture-/, '部位ごとの素材の欄が無い');
   // 色だけ戻して柄が残ると、押したのに元に戻らない、という見え方になる

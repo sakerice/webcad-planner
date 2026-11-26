@@ -88,6 +88,7 @@ const SUCCESS = [
   ['addRoomWalls', { ids: ['rm_a'], thick: 105, outerThick: 150 }],
   ['placeOpening', { type: 'door-swing', room: 'rm_a', side: 'S', hinge: 'E', opens: 'S', offset: 100 }],
   ['addRoof', { floor: 2, shape: 'gable', ridge: 'NS', pitch: 30, overhang: 450 }],
+  ['swapAssetSet', { set: 'rpg-mansion', ids: ['12', 13], except: [] }],
   ['resizeRoom', { id: 'rm_a', w: 3000 }],
   ['resizeRoom', { id: 'rm_a', x: 5000, y: 6000, d: 2000 }],
   ['renameRoom', { id: 'rm_a', name: '書斎' }],

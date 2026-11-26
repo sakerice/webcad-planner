@@ -1347,7 +1347,8 @@ function updateProps(){
     }
     html += '<div class="pr"><div class="pl">サッシ規格 (LIXIL呼称)</div><select class="pi" onchange="applyWindowStdPreset(this.value)">'+stdOpts+'</select></div>';
     var sashColorOpts='<option value=""'+(!it.sashColor?' selected':'')+'>標準 (ダークグレー)</option>';
-    SASH_COLORS.forEach(function(sc){
+    // 選択肢は PlanSettable(plan-settable.js)の一覧。AI の編集(setProps の sashColor)も同じ一覧で確かめる。
+    PlanSettable.SASH_COLORS.forEach(function(sc){
       sashColorOpts+='<option value="'+escHtml(sc.hex)+'"'+(it.sashColor===sc.hex?' selected':'')+'>'+escHtml(sc.label)+'</option>';
     });
     html += '<div class="pr"><div class="pl">サッシ色</div><select class="pi" onchange="updateSelectedProp(\'sashColor\',this.value)">'+sashColorOpts+'</select></div>';
@@ -1370,7 +1371,8 @@ function updateProps(){
         html += '<option value="'+opt[0]+'" '+(doorOpenState(it)===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
       });
       html += '</select></div>';
-      if(isInteriorSwingDoorType(it.type)||it.type==='door-fold'||it.type==='door-fold-w') html+='<div class="pr"><label class="pl">パネル仕上げ</label><select class="pi" onchange="updateSelectedProp(\'doorFinish\',this.value)"><option value="">標準</option><option value="bath-clear" '+(it.doorFinish==='bath-clear'?'selected':'')+'>浴室・透明パネル</option></select></div>';
+      // 対象の種類と選択肢は PlanSettable(plan-settable.js)の一覧。AI の編集(setProps の doorFinish)も同じ一覧を使う。
+      if(PlanSettable.DOOR_FINISH_TYPES.indexOf(it.type)>=0) html+='<div class="pr"><label class="pl">パネル仕上げ</label><select class="pi" onchange="updateSelectedProp(\'doorFinish\',this.value)">'+PlanSettable.DOOR_FINISHES.map(function(o){return '<option value="'+escHtml(o[0])+'" '+((it.doorFinish||'')===o[0]&&o[0]?'selected':'')+'>'+escHtml(o[1])+'</option>';}).join('')+'</select></div>';
       // テクスチャにノブや窓が描かれている場合に3Dの造形と干渉しないようOFFにできる
       html += '<div class="pr"><div class="pl">ドアノブ・ハンドル</div><label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" '+(it.showDoorHandle!==false?'checked':'')+' onchange="updateSelectedProp(\'showDoorHandle\',this.checked)">3Dで表示する</label></div>';
       if(it.type==='door-front'){
@@ -1778,65 +1780,34 @@ function selectedModelFinishesHtml(it){
       html+='<option value="'+escHtml(option[0])+'" '+(texture===option[0]?'selected':'')+'>'+escHtml(option[1])+'</option>';
     });
     html+='</select></div>';
-    if(channel.key!=='fabric'&&channel.key!=='accent'){
+    if(PlanSettable.channelHasRoughness(channel.key)){
       var current=it.finishRoughness&&it.finishRoughness[channel.key];
       html+='<div class="pr"><label class="pl" for="finish-roughness-'+channel.key+'">'+escHtml(channel.label)+'の艶</label><select id="finish-roughness-'+channel.key+'" class="pi" onchange="updateSelectedModelRoughness(\''+channel.key+'\',this.value)">';
-      [['','既定の仕上げ'],['0.85','マット'],['0.48','サテン'],['0.22','艶あり']].forEach(function(option){html+='<option value="'+option[0]+'" '+((current===undefined?'':String(current))===option[0]?'selected':'')+'>'+option[1]+'</option>';});
+      PlanSettable.FINISH_ROUGHNESS.forEach(function(option){html+='<option value="'+option[0]+'" '+((current===undefined?'':String(current))===option[0]?'selected':'')+'>'+option[1]+'</option>';});
       html+='</select></div>';
     }
   });
   html+='<button class="pbtn sec" type="button" onclick="updateSelectedModelFinishReset()">素材の色を元に戻す</button>';
   return html;
 }
-// カタログのモデルに貼れる素材。**壁・床と同じ資産**(index.html の
-// ASSET_TEX_MAP)から、家具に載せて意味のあるものだけを並べる。
-// 地面(砂利・芝)や屋根瓦は出さない——家具に貼る理由が無い。
-var MODEL_FINISH_TEXTURES=[
-  ['','元の柄のまま'],
-  ['wood_oak','オーク'],
-  ['wood_floor','木目（複合）'],
-  ['wood_cedar','杉板'],
-  ['plaster','塗り壁'],
-  ['plaster_white','塗り壁（白）'],
-  ['tile_floor','タイル'],
-  ['concrete','コンクリート'],
-  ['galvalume_dark','ガルバ（黒）'],
-  ['stone','石']
-];
-// 屋根の部品(スレート切妻・マンサードなど)の「屋根面」は、屋根の設定欄と同じ屋根材から選ばせる。
-// 家具向けの一覧(オーク・塗り壁…)を屋根面に出しても意味が無く、逆に瓦を家具に出す理由も無い。
-var MODEL_ROOF_FINISH_TEXTURES=[
-  ['','元の柄のまま'],
-  ['roof_tile','瓦'],
-  ['roof_kawara_ibushi','日本瓦（いぶし銀）'],
-  ['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],
-  ['roof_flat_tile_charcoal','平板瓦（黒灰）'],
-  ['roof_colonial_gray','化粧スレート（コロニアル）'],
-  ['roof_standing_seam_silver','ガルバ立平（銀）'],
-  ['roof_copper_patina','銅板一文字（緑青）'],
-  ['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],
-  ['galvalume_dark','ガルバ（黒）'],
-  ['mansion_slate_roof','スレート（洋館）'],
-  ['kominka_kayabuki','茅葺き（古民家）']
-];
+// カタログのモデルに貼れる素材と、屋根の部品の屋根面(部位 roof)の屋根材の一覧は PlanSettable(plan-settable.js)にある。
+// AI の編集(setProps の finishTextures)も同じ一覧で確かめる。
 function modelFinishTextureOptions(channelKey){
-  return channelKey==='roof'?MODEL_ROOF_FINISH_TEXTURES:MODEL_FINISH_TEXTURES;
+  return PlanSettable.modelFinishTextureOptions(channelKey);
 }
 function updateSelectedModelTexture(channel,value){
   if(!ST.selected)return;
   var model=getItemFinishModel(ST.selected.type);
   if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;}))return;
   if(value!=='' && !modelFinishTextureOptions(channel).some(function(o){return o[0]===value;}))return;
-  var textures=Object.assign({},ST.selected.finishTextures||{});
-  if(value==='')delete textures[channel];else textures[channel]=value;
-  updateSelectedProp('finishTextures',Object.keys(textures).length?textures:null);
+  // 次の値の作り方は AI の編集と同じ(PlanSettable.nextFinishTextures)。
+  updateSelectedProp('finishTextures',PlanSettable.nextFinishTextures(ST.selected.finishTextures,channel,value));
 }
 function updateSelectedModelFinish(channel,value){
   if(!ST.selected || !/^#[0-9a-f]{6}$/i.test(value||'')) return;
   var model=getItemFinishModel(ST.selected.type);
   if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;})) return;
-  var colors=Object.assign({},ST.selected.finishColors||{});colors[channel]=value;
-  updateSelectedProp('finishColors',colors);
+  updateSelectedProp('finishColors',PlanSettable.nextFinishColors(ST.selected.finishColors,channel,value));
 }
 // **色だけでなく素材と艶も戻す。** 色だけ戻して柄が残ると、押したのに
 // 元に戻らない、という見え方になる。
@@ -1849,11 +1820,9 @@ function updateSelectedModelFinishReset(){
 function updateSelectedModelRoughness(channel,value){
   if(!ST.selected)return;
   var model=getItemFinishModel(ST.selected.type);
-  if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel&&c.key!=='fabric'&&c.key!=='accent';}))return;
-  if(value!=='' && ['0.85','0.48','0.22'].indexOf(String(value))<0)return;
-  var settings=Object.assign({},ST.selected.finishRoughness||{});
-  if(value==='')delete settings[channel];else settings[channel]=Number(value);
-  updateSelectedProp('finishRoughness',Object.keys(settings).length?settings:null);
+  if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel&&PlanSettable.channelHasRoughness(c.key);}))return;
+  if(value!=='' && !PlanSettable.FINISH_ROUGHNESS.some(function(o){return o[0]&&o[0]===String(value);}))return;
+  updateSelectedProp('finishRoughness',PlanSettable.nextFinishRoughness(ST.selected.finishRoughness,channel,String(value)));
 }
 // 階段の行き先を、接している1本の部材すべてに入れる。
 // 'upper' = 上の階 / 'level' = 同じ階の段差(自動) / 'to:<id>' = その床(踊り場・部屋)。

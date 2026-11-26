@@ -1,11 +1,11 @@
 {
   "_note": "worker/plan-ctx-factory.mjs が書き写した画面の関数・定数の本文の SHA-256。tools/tests/worker-ctx-sources.test.cjs が比べる。作り直し: node tools/tests/worker-ctx-sources.test.cjs --write",
   "functions": {
-    "planChatCtx": "e53029941b59fc92ece4ff0e5ba927ebdb77528f8d6822c8954c24428c37e6b8",
+    "planChatCtx": "70115ad9ece05e4d83c38e7d92d49ffe7632a15a16baca0c200caef9ada1dc15",
     "planChatKindType": "1d25f74d36c9db4a5b8540acf8ac31958bd25ce351391740480652d8aff465be",
     "planCoreSuggestTypes": "1682357946362d910034aefb766ecbcf53a732cdb63a8402cf3d1bd17996fff6",
-    "planCoreCtx": "33e1bfee51d775f1af5e141d1b1391c466e0de19ccc77614bfe5e15a482bccc5",
-    "planOpsCtx": "8374912d83f0164a1663c5a34667f5d475a2f6f135136418b689396420d70823",
+    "planCoreCtx": "63ef0c3c16c9e6bdf14b58b29ab3dfb8520681b1ed8b450241b86551ada94ce2",
+    "planOpsCtx": "ed32943ab8a09e7450d091c672add53a74d408c0433b817c28ada325837d4918",
     "bestFmpType": "672c5976aa0efa28e73566e22554326015b5e54e8789c886ed3786f86f01d065",
     "isFmpItemType": "855fb5e38f2096111e607c3cb02f69ccb27e8317d9726c7e916988eb0c289dcb",
     "getFmpItem": "9eb6b1499bbdb5cf58ba7acf5e6f69b822e92308cde57abcab271f114529b6ee",
@@ -90,10 +90,25 @@
     "normalizeWindowVerticalProps": "a93e42eb00c27b66cb367d80f4d02b0ac4d17ad10c95e14bde37c779194057f0",
     "stairPartEdgesRaw": "64b54e056314c7185ce171257f1656bfbe5426273fb90823cd0b5a2d7378b456",
     "stairPartEdgesMm": "257da64a9f067faf814b7c4af20ea3194defe4d5a27f7447ab3122acbfae101a",
+    "planCoreFinishChannels": "5a9dd458780097e79709f89c9b0f880a2bbfa6785c92305ba992f31a92f5876c",
+    "getItemFinishModel": "72c08d23bfa9d4fb8a533dd3a60de5dce9e3a59b272e47e9e3f13a4684bcc8c0",
+    "planAssetSwapCtx": "78ad149f04fa1680c44d3ec4701a926f646e9c13512adfd83994172cc91a08d5",
+    "getItemHeightValue": "7ecd5f365b951da70252cbc4a5d78ea4cf12729d481a6295462cde891f13ec94",
+    "getItemH": "84350089ab58bc3cf78f9a7e245c53f192463c09b07d050232c3aa10483ce46d",
+    "getCustomBlockHeight": "01698a33ff363358d2ecbdbb5375c587b846bf7866bc2ba2cde521cdade6e35b",
+    "balconySlabHeightMm": "bedcdf76b0ee2c0e4442eff6c6f71a33fa2bdf013af17055100fe715daaa45c9",
+    "shelfHeightMm": "811003a1835073c104c8151ebe2583662f499bbc1d68375ebdb8b469dbdc39ed",
+    "columnHeightMm": "3374b843083fbf3d24c6ca0ecb2711a4607fd9e67e5850419d594048e87ac957",
+    "getContextExteriorHeight": "d7d734004b0946b11a9e68455ac36300e41eb9f4d876876c32f61c4d888dee85",
+    "getContextFloors": "ee0a09754180a1866c3e6359f6bf3b57dd3190d731ee0fc8fb58715bee3636b6",
+    "clampContextFloors": "6ed39acd84ce43d71c21cd012696b870575dc980b7616d295c4994d459091327",
+    "contextRoofExtraHeightMm": "9089e610ef65cf3f83885229a2104ac7d2ca83e6e15228d9b3274be0d03c951f",
+    "nhRoofHeightM": "f8ad2f4d8a3f6a5cfcf6b1fe449edb3016c1b12bd059f606cc59417a71afa99e",
     "CeilingDesigner.floorLoweringLimit": "95aae11d803b559f13c1486514840e46fcf64db95620a4b795d1b072c61190be",
     "CeilingDesigner.areas": "2ff0627b6910144d34b6431e6d19b7e052d7b15115c1bc50e55c2a2e9ededd13",
     "CeilingDesigner.roomFor": "3cdfc88e33cdd444ae51642a70e1093b6631b0556b0bd6dac665eb7a642e8c06",
-    "CeilingDesigner.areaBaseY": "b131910cd2434a62d8273caa4950ebd30a4e72c3a0c2d29392e2bbda7789d3a5"
+    "CeilingDesigner.areaBaseY": "b131910cd2434a62d8273caa4950ebd30a4e72c3a0c2d29392e2bbda7789d3a5",
+    "AssetSwap.planFor": "6bce5a86be6a7bc507d31e2e20a638178f96dfa5ed3cd9260d5f820cc10a55ba"
   },
   "constants": {
     "U": "dd3ce9840419a20eff5b135a7e1a4fd934ee3bc6d84728571271d0ed9c7adff1",
@@ -105,6 +120,9 @@
     "CHAT_SKIP_KINDS": "3b6d4807caf8529aa8b9b2b2068dd825d91c5cc027648c1fa6d74aa0daedca6e",
     "CHAT_KITCHEN_UNIT_MESSAGE": "457577c54dffdb3907d2684e4dda63ec5a555f01f57c98e6102a1bf9cf1d2b6a",
     "ITEM_SURFACE_CATEGORIES": "f2836c7447a2c0c95a6921a1e5bf79f1d797b33ae178f34a576709a588ee7048",
-    "ITEM_SURFACE_TYPES": "8e981f24a9a21a7190e6e8d0d5d43f9b05c3ef23504584d4acc361c8a8a23829"
+    "ITEM_SURFACE_TYPES": "8e981f24a9a21a7190e6e8d0d5d43f9b05c3ef23504584d4acc361c8a8a23829",
+    "NH_ROOF_H": "9ecf444d65c5b980c0ff8b03027376e0b04eed3a091c9b455293682e680b5ce6",
+    "NH_ROOF_MAX_PITCH": "f3765a4ff1346802bc07e0567569ac8a87fd7b358a2af9b0e37fc84d3c58b279",
+    "NH_EAVE": "9b0cc745d610a1414b4ed08887d3fb6841ec10382107a5730b5af7ba1b3b342a"
   }
 }

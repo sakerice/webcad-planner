@@ -199,6 +199,78 @@ function buildCatalog() {
   return Object.assign({ version }, body);
 }
 
+// ── 家具の一括差し替えと、家具の部位の表(assets/data/worker-furniture.json)──────────────
+// worker-catalog.json は 100KB に収めるため追加のセットを入れない。一括差し替え(asset-swap.js)と家具の色・素材・艶
+// (setProps の finishColors など)に要る分は、こちらの表に分けて書く。どれも画面の関数を vm で呼んだ結果:
+//   sets   … 差し替えの設定(swap)を持つセット [{id, name, swap}](asset-sets.json の並び)
+//   types  … 追加のセットのモデルの種類(worker-catalog.json の types と同じ形。entryFor)。Worker は標準の後ろに足す
+//            (画面の FMP_ITEMS も、標準のマニフェストの後にセットのマニフェストを足す)
+//   fmp    … カタログのモデル全部(標準とセット)の、差し替えが引く欄: k=分類(kind)、mt=取付(mount)、h=高さ、
+//            de=既定の高さ(defaultElevation)、set=セット、r=引退。セットの物だけ nm=名前・w・d(差し替え先の候補の欄)
+//   fc     … 色を変えられる部位の名前の並び(getItemFinishModel(t).finishChannels の key)。部位の無い種類は書かない
+//   ih     … 寸法の表(ISIZES)の種類の getItemH(t)(モデルでない種類の既定の高さ)
+const FURNITURE_OUT = join(ROOT, 'assets', 'data', 'worker-furniture.json');
+const FURNITURE_FUNCTIONS = ['getItemH', 'balconySlabHeightMm'];
+
+function buildFurniture() {
+  const ctx = screenContext();
+  vm.runInContext(FURNITURE_FUNCTIONS.map(topLevelFunction).join('\n'), ctx);
+  const isizes = vm.runInContext('Object.keys(ISIZES)', ctx);
+  const standard = new Set(vm.runInContext('Object.keys(FMP_ITEMS)', ctx));
+  // 画面の AssetSets.load と同じ: 一覧の順に、manifest を持つセットの物へ assetSet を付けて、標準の後に取り込む。
+  const registry = readJson('assets/models/asset-sets.json').sets.filter((s) => s && s.id && s.name);
+  for (const s of registry) {
+    if (!s.manifest) continue;
+    const m = readJson(s.manifest);
+    (m.items || []).forEach((item) => { item.assetSet = s.id; });
+    ctx.__manifest = m;
+    vm.runInContext('mergeFurnitureMegaManifest(__manifest)', ctx);
+  }
+  delete ctx.__manifest;
+  const all = vm.runInContext('Object.keys(FMP_ITEMS)', ctx);
+  const types = {};
+  for (const t of all) if (!standard.has(t)) types[t] = entryFor(ctx, t, true);
+  const fmp = {};
+  for (const t of all) {
+    ctx.__t = t;
+    const it = vm.runInContext('FMP_ITEMS[__t]', ctx);
+    const e = {};
+    if (it.kind) e.k = it.kind;
+    if (it.mount) e.mt = it.mount;
+    if (it.h !== undefined) e.h = it.h;
+    if (it.defaultElevation) e.de = it.defaultElevation;
+    if (it.assetSet) { e.set = it.assetSet; e.nm = it.name; e.w = it.w; e.d = it.d; }
+    if (it.retired) e.r = 1;
+    fmp[t] = e;
+  }
+  const fc = {};
+  for (const t of isizes.concat(all)) {
+    ctx.__t = t;
+    const keys = vm.runInContext('(function(m){ return m&&Array.isArray(m.finishChannels)?m.finishChannels.map(function(c){return c.key;}):[]; })(getItemFinishModel(__t))', ctx);
+    if (keys.length) fc[t] = JSON.parse(JSON.stringify(keys));
+  }
+  const ih = {};
+  for (const t of isizes) { ctx.__t = t; ih[t] = vm.runInContext('getItemH(__t)', ctx); }
+  delete ctx.__t;
+  const sets = registry.filter((s) => s.swap).map((s) => ({ id: s.id, name: s.name, swap: s.swap }));
+  const body = { sets: JSON.parse(JSON.stringify(sets)), types, fmp, fc, ih };
+  const version = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex').slice(0, 12);
+  return Object.assign({ version }, body);
+}
+
+function serializeFurniture(cat) {
+  const lines = ['{', '"version":' + JSON.stringify(cat.version) + ',', '"sets":' + JSON.stringify(cat.sets) + ','];
+  const names = ['types', 'fmp', 'fc', 'ih'];
+  names.forEach((name, n) => {
+    const obj = cat[name], keys = Object.keys(obj);
+    lines.push(JSON.stringify(name) + ':{');
+    keys.forEach((k, i) => lines.push(JSON.stringify(k) + ':' + JSON.stringify(obj[k]) + (i < keys.length - 1 ? ',' : '')));
+    lines.push('}' + (n < names.length - 1 ? ',' : ''));
+  });
+  lines.push('}');
+  return lines.join('\n') + '\n';
+}
+
 // 1種類1行。差分が読めて、大きさも抑えられる形。
 function serialize(cat) {
   const lines = ['{', '"version":' + JSON.stringify(cat.version) + ','];
@@ -218,23 +290,28 @@ function serialize(cat) {
 
 function main(argv) {
   const text = serialize(buildCatalog());
+  const furniture = serializeFurniture(buildFurniture());
   if (argv.includes('--check')) {
-    let now = null;
-    try { now = readFileSync(OUT, 'utf8'); } catch (e) { /* 無ければ不一致 */ }
-    if (now !== text) {
-      console.error('assets/data/worker-catalog.json が画面のコードと食い違っています。node tools/build_worker_catalog.cjs で作り直してください');
-      return 1;
+    let bad = 0;
+    for (const [file, want] of [[OUT, text], [FURNITURE_OUT, furniture]]) {
+      let now = null;
+      try { now = readFileSync(file, 'utf8'); } catch (e) { /* 無ければ不一致 */ }
+      const rel = file.slice(ROOT.length + 1);
+      if (now !== want) { console.error(rel + ' が画面のコードと食い違っています。node tools/build_worker_catalog.cjs で作り直してください'); bad = 1; }
+      else console.log(rel + ' は最新です');
     }
-    console.log('assets/data/worker-catalog.json は最新です');
-    return 0;
+    return bad;
   }
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, text);
+  writeFileSync(FURNITURE_OUT, furniture);
   const cat = JSON.parse(text);
   console.log('書きました: assets/data/worker-catalog.json(種類 ' + Object.keys(cat.types).length + '、ほか ' + Object.keys(cat.others).length + '、' + Buffer.byteLength(text) + ' バイト、version ' + cat.version + ')');
+  const fur = JSON.parse(furniture);
+  console.log('書きました: assets/data/worker-furniture.json(セット ' + fur.sets.length + '、セットの種類 ' + Object.keys(fur.types).length + '、モデル ' + Object.keys(fur.fmp).length + '、' + Buffer.byteLength(furniture) + ' バイト、version ' + fur.version + ')');
   return 0;
 }
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));
 
-module.exports = { buildCatalog, serialize, OUT };
+module.exports = { buildCatalog, serialize, OUT, buildFurniture, serializeFurniture, FURNITURE_OUT };

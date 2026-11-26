@@ -41,6 +41,13 @@ const NUM_VALUES = {
   fenceHeight: 1500, latticeHeight: 1600, targetHeight: 300, accessSteps: 2,
 };
 const TEXT_VALUES = { name: '駐車スペース' };
+// 色の項目に入れる値(パネルの色の入力欄が書く #rrggbb)。解除("")はパネルでは色を付けたあとの「解除」ボタンなので、
+// ここでは比べず ai-style-ops.test.cjs と worker-ctx-parity で見る。
+const COLOR_VALUES = ['#336699'];
+// 家具の部位ごとの項目は、凍結間取りの中で木部(wood)を持つ家具に当てる(部位の一覧は Worker の表 worker-furniture.json と同じ出どころ)。
+const FURNITURE_TABLE = JSON.parse(readFileSync(join(HERE, '..', '..', 'assets', 'data', 'worker-furniture.json'), 'utf8'));
+const FINISH_TARGET = JSON.parse(readFileSync(FIXTURE, 'utf8')).items.find((it) => (FURNITURE_TABLE.fc[it.type] || []).includes('wood') && (FURNITURE_TABLE.fc[it.type] || []).includes('fabric'));
+const CHANNEL_VALUES = { color: [{ wood: '#336699' }], texture: [{ wood: 'wood_oak' }, { fabric: 'stone' }], roughness: [{ wood: '0.22' }] };
 // 比べない項目と理由。
 const SKIP = {
   // 区画(site-zone)は敷地(site-rect)の中の siteZones の1つで、物ではない。setProps は site-rect を 'site' として引くので、
@@ -94,6 +101,7 @@ function targetsFor(part, def) {
   }
   const kinds = def.for || null;
   if (part === 'opening') return (kinds || []).map((t) => ({ coll: 'items', pick: 'type:' + t }));
+  if (part === 'furniture') return FINISH_TARGET ? [{ coll: 'items', pick: 'type:' + FINISH_TARGET.type }] : [];
   if (part === 'stair') return ['stair', 'stair-corner'].map((t) => ({ coll: 'items', pick: 'type:' + t }));
   if (part === 'object') {
     const types = [];
@@ -116,6 +124,8 @@ for (const part of Object.keys(PlanSettable.SETTINGS)) {
     let values;
     // 編集だけの選択肢(土間をやめる normal。読み取りには出さない)も、パネルと AI で比べる。
     if (def.choices) values = def.choices.concat(def.editChoices || []).map((c) => c[0]);
+    else if (def.color) values = COLOR_VALUES;
+    else if (def.channelMap) values = CHANNEL_VALUES[def.channelMap];
     else if (def.num) {
       assert.ok(Object.prototype.hasOwnProperty.call(NUM_VALUES, def.key), label + ' に入れる値を NUM_VALUES に足すこと');
       values = [NUM_VALUES[def.key]];
@@ -125,7 +135,7 @@ for (const part of Object.keys(PlanSettable.SETTINGS)) {
     }
     const targets = targetsFor(part, def);
     assert.ok(targets.length, label + ' の対象の物の決まりが無い');
-    for (const target of targets) for (const value of values) cases.push({ part, key: def.key, panel: def.panel, value, target, label });
+    for (const target of targets) for (const value of values) cases.push({ part, key: def.key, panel: def.panel, value, target, label, channelMap: def.channelMap || null });
   }
 }
 
@@ -254,7 +264,7 @@ try {
         image: legacyRoomsBefore.filter((r) => r.texture && !/^(wood_floor|tile_floor)$/.test(r.texture)).map((r) => r.id),
       },
     });
-    const name = `${c.label}=${c.value} (${c.target.pick}${c.target.v2 ? ' 仕上げ基準の高さ' : ''}${pickId !== null ? ' id ' + pickId : ''})`;
+    const name = `${c.label}=${typeof c.value === 'object' ? JSON.stringify(c.value) : c.value} (${c.target.pick}${c.target.v2 ? ' 仕上げ基準の高さ' : ''}${pickId !== null ? ' id ' + pickId : ''})`;
     if (pickId === null) { failures.push(`${name}: 土台に対象の物が無い`); continue; }
     if (c.key === 'floorLevel' && c.value === 'normal') baseJson = await domaBase(baseJson, pickId);
 
@@ -287,6 +297,14 @@ try {
           stairRail: () => stairRailSides(o), stairStyle: () => stairStyleOf(o),
           fenceHeight: () => o.fenceHeight, fencePattern: () => o.fencePattern, latticeHeight: () => o.latticeHeight,
           targetHeight: () => o.targetHeight, accessSteps: () => o.accessSteps, surface: () => siteSurfaceType(o),
+          // 色・仕上げ: 描画が読む値(床の材質の色、天井の仕上げ、窓枠の色、扉の板の作り分け、モデルに掛ける部位の値)
+          floorColor: () => makeRoomFloorMaterial(o).color.getHexString(),
+          ceilingColor: () => JSON.stringify(resolveRoomCeilingAppearance(o)),
+          sashColor: () => (isWindowLikeType(o.type) ? (o.sashColor || null) : null),
+          doorFinish: () => o.doorFinish === 'bath-clear',
+          finishColors: () => JSON.stringify([o.finishColors, o.finishRoughness, o.finishTextures]),
+          finishTextures: () => JSON.stringify([o.finishColors, o.finishRoughness, o.finishTextures]),
+          finishRoughness: () => JSON.stringify([o.finishColors, o.finishRoughness, o.finishTextures]),
         };
         render = R[key] ? R[key]() : '(描画の読み方を決めていない)';
       } finally { names.forEach((n, i) => { window[n] = saved[i]; }); }
@@ -306,8 +324,19 @@ try {
     assert.ok(opened);
     const A0 = await observe(c.target.coll, pickId, c.key);
     diffPlans(before.plan, A0.plan).forEach((d) => { panelOpen[d.replace(/: .*/, '').replace(/ id \S+/, '')] = true; });
-    const panelRes = await page.evaluate(({ panel, key, value }) => {
+    const panelRes = await page.evaluate(({ panel, key, value, channelMap }) => {
       const props = document.getElementById('props');
+      // 家具の部位ごとの欄は、部位ごとの入力欄(id finish-…)。色は oninput、素材と艶は onchange で書き込む。
+      if (channelMap) {
+        const ch = Object.keys(value)[0];
+        const id = channelMap === 'color' ? 'finish-' + ch : channelMap === 'texture' ? 'finish-texture-' + ch : 'finish-roughness-' + ch;
+        const el = document.getElementById(id);
+        if (!el) return { error: 'パネルに部位の欄 #' + id + ' が無い' };
+        if (el.tagName === 'SELECT' && !Array.from(el.options).some((op) => op.value === value[ch])) return { error: '#' + id + ' に選択肢 ' + value[ch] + ' が無い' };
+        el.value = value[ch];
+        el.dispatchEvent(new Event(channelMap === 'color' ? 'input' : 'change', { bubbles: true }));
+        return { ok: true };
+      }
       const els = Array.from(props.querySelectorAll('[onchange],[onclick]'));
       const needle = /^[a-z]/.test(panel) && !/^update|^set|^apply/.test(panel) ? "updateSelectedProp('" + panel + "'" : panel + '(';
       const hits = els.filter((e) => (e.getAttribute('onchange') || e.getAttribute('onclick') || '').indexOf(needle) >= 0);
@@ -329,7 +358,7 @@ try {
       if (el.value !== (set !== null ? set : String(value))) return { error: 'パネルの欄に値 ' + value + ' が入らない' };
       el.dispatchEvent(new Event('change', { bubbles: true }));
       return { ok: true };
-    }, { panel: c.panel, key: c.key, value: c.value });
+    }, { panel: c.panel, key: c.key, value: c.value, channelMap: c.channelMap });
     if (panelRes.error) { failures.push(`${name}: ${panelRes.error}`); continue; }
     const A = await observe(c.target.coll, pickId, c.key);
 

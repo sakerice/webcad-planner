@@ -99,6 +99,7 @@
     addRoomWalls: '部屋を壁で囲んでいます',
     placeOpening: '窓や扉を付けています',
     addRoof: '屋根をかけています',
+    swapAssetSet: '家具をまとめて差し替えています',
     inspect_plan: '間取りを確かめています'
   };
   var TOOL_LABEL_OTHER = '間取りを直しています';

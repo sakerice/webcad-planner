@@ -116,7 +116,8 @@ test('選択肢はアプリの選択肢と同じ', () => {
   for (const part of ['opening', 'stair', 'object']) {
     for (const s of PlanSettable.SETTINGS[part]) {
       // 敷地の地面は表（SITE_SURFACE_OPTIONS）から作る選択欄なので、上で表どうしを突き合わせている。
-      if (!s.choices || s.choices === PlanSettable.SITE_SURFACES) continue;
+      // 編集だけの色・仕上げ（サッシの色・扉の仕上げ）は、パネルがこの表（PlanSettable の一覧）を読んで選択欄を作る（下の検査）。
+      if (!s.choices || s.choices === PlanSettable.SITE_SURFACES || s.editOnly) continue;
       const app = optionsOf(s.panel);
       for (const c of s.choices) assert.ok(app.has(c[0]), `${s.key} の選択肢 ${c[0]} が設定パネルに無い（パネル: ${[...app].join(', ')}）`);
     }
@@ -146,10 +147,29 @@ test('AI に教える物の種類は、すべて取り込みで何かに置け�
   assert.equal(new Set(OBJECT_KINDS).size, OBJECT_KINDS.length, '同じ種類を二度教えている');
 });
 
-test('AI への説明に、表の項目がすべて出る', async () => {
+test('色・仕上げの選択欄は、AI の編集と同じ一覧（PlanSettable）から作る（手で二重に書かない）', () => {
+  const state = read('assets/js/app-state.js');
+  assert.match(state, /PlanSettable\.SASH_COLORS\.forEach/, 'サッシの色');
+  assert.match(state, /PlanSettable\.DOOR_FINISH_TYPES\.indexOf\(it\.type\)/, '扉の仕上げの対象');
+  assert.match(state, /PlanSettable\.DOOR_FINISHES\.map/, '扉の仕上げの選択肢');
+  assert.match(state, /PlanSettable\.FINISH_ROUGHNESS\.forEach/, '家具の艶');
+  assert.match(state, /return PlanSettable\.modelFinishTextureOptions\(channelKey\)/, '家具の素材');
+  assert.doesNotMatch(read('assets/js/app-constants.js'), /var SASH_COLORS=/, 'サッシの色の一覧が画面に残っている');
+  // 編集だけの項目は、読み取りに渡さない理由（NOT_PASSED）も残っている
+  for (const part of Object.keys(PlanSettable.SETTINGS)) {
+    for (const s of PlanSettable.SETTINGS[part]) if (s.editOnly) assert.ok(PlanSettable.NOT_PASSED[s.panel], s.key + ' の読み取りに渡さない理由');
+  }
+});
+
+test('AI への説明に、表の項目がすべて出る（編集だけの項目は出ない）', async () => {
   const { buildFreePrompt } = await mod('worker/plan-free.mjs');
   const text = buildFreePrompt({ pages: 1 });
-  for (const part of Object.keys(PlanSettable.SETTINGS)) for (const s of PlanSettable.SETTINGS[part]) assert.ok(text.includes(s.key + '（'), s.key);
+  for (const part of Object.keys(PlanSettable.SETTINGS)) {
+    for (const s of PlanSettable.SETTINGS[part]) {
+      if (s.editOnly) assert.ok(!text.includes(s.key + '（'), s.key + ' は編集だけ');
+      else assert.ok(text.includes(s.key + '（'), s.key);
+    }
+  }
   for (const o of PlanSettable.OPENINGS) assert.ok(text.includes(o.type + ' = '), o.type);
   for (const e of PlanSettable.EXTERIOR.concat(PlanSettable.SITE)) assert.ok(text.includes(e.kind + ' = '), e.kind);
 });

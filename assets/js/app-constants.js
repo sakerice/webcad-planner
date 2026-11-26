@@ -2911,11 +2911,7 @@ var LIGHT_KELVIN_PRESETS=[
   {label:'昼白色', color:'#fff8f0'},
   {label:'昼光色', color:'#eef3ff'}
 ];
-var SASH_COLORS=[
-  {hex:'#9a9da1', label:'シャイングレー'},
-  {hex:'#22252a', label:'ブラック'},
-  {hex:'#f2f2f0', label:'ホワイト'}
-];
+// サッシの色の一覧は PlanSettable.SASH_COLORS(plan-settable.js。設定パネルと AI の編集が共に使う)。
 // 室内開きドアの規格幅プリセット(LIXIL実勢値ベース)
 var DOOR_STD_WIDTHS=[
   {w:650, label:'W650 (トイレ・洗面)'},

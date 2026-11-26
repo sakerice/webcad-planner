@@ -152,8 +152,17 @@
   function fitsOnSurface(h,ch){ return !(ch>Math.max(h*2.5,600)); }
 
   // items: プランの物。ctx: {kindOf(type), catalogue: 差し替え先のセットの物, swap: セットの swap 設定, setId,
-  //   mountOf(type), heightOf(type), itemHeightOf(item), ceilingAt(item): 天井の仕上げ面の高さ(mm)か null}
+  //   mountOf(type), heightOf(type), itemHeightOf(item), ceilingAt(item): 天井の仕上げ面の高さ(mm)か null,
+  //   frozen(item), keep(item)}
+  // ceilingAt は、壁・天井に付いた物を壁掛け・天井吊りの物に替えるときだけ呼ぶ(Worker は天井を測れない部屋で断るため、
+  // 要らない物では呼ばない)。
+  // frozen(item) が真の物(ロックされた物)は、行を作らない(替えない・外さない・高さも変えない)。台としては今のまま数える。
+  // keep(item) が真の物(AI が差し替える物を選んだときの、選ばれなかった物)は替えず、外さない。
+  // 載っている台が替わるときに高さを合わせる('adjust')ことだけはする。
+  // どちらも省けば今までどおり全部を見る(画面の一括差し替え)。
   function plan(items,ctx){
+    var frozen=function(it){ return !!(ctx.frozen&&ctx.frozen(it)); };
+    var keep=function(it){ return !!(ctx.keep&&ctx.keep(it)); };
     var cfg=ctx.swap||{}, cat=(ctx.catalogue||[]).filter(function(c){return !c.retired;});
     var byKind={};
     cat.forEach(function(c){ if(c.kind)(byKind[c.kind]||(byKind[c.kind]=[])).push(c); });
@@ -176,6 +185,7 @@
     });
 
     items.forEach(function(it){
+      if(frozen(it)||keep(it)) return;                               // 替えない物(ロック・選ばれなかった物)
       if(String(it.type).indexOf(ctx.setId+'-')===0) return;        // もうこのセットの物
       var kind=(cfg.typeKinds&&cfg.typeKinds[it.type])||ctx.kindOf(it.type);
       if(!kind) return;                                              // カタログの家具ではない（壁・窓・照明など）
@@ -213,7 +223,6 @@
         var pw=preferred?Math.min(pick.w,w||pick.w):w, pd=preferred?Math.min(pick.d,d||pick.d):d;
         row.parts=[{type:pick.id,w:pw||pick.w,d:pd||pick.d,h:Number(pick.h)||0,rot:Number(it.rot)||0,cx:c.x,cy:c.y,name:pick.name}];
         var candLifted=lifted(pick), oldElev=Number(it.elev)||0, newH=Number(pick.h)||0;
-        var ceil=ctx.ceilingAt?ctx.ceilingAt(it):null;
         if((cfg.topAlignKinds||[]).indexOf(kind)>=0&&h>0&&newH>0){
           // カーテン・ロールスクリーンは上端(レール・巻き取りの箱)の高さを保つ。下端を保つと、
           // 丈の違う物に替えたときに天井を突き抜けたり、窓の途中で切れたりする
@@ -239,6 +248,7 @@
         } else if(hung&&candLifted&&newH>0){
           // 壁掛け → 壁掛け: 中心の高さを保つ。天井吊り → 天井吊り: 天井から吊り直す。
           // どちらも天井に食い込まず、床より下がらない位置に収める
+          var ceil=ctx.ceilingAt?ctx.ceilingAt(it):null;
           var hasCeil=ceil!==null&&ceil!==undefined&&isFinite(ceil);
           var e=mount==='ceiling'&&hasCeil?ceil-newH:Math.round(oldElev+h/2-newH/2);
           if(hasCeil&&mount!=='ceiling') e=Math.min(e,ceil-CEILING_GAP_MM-newH);
@@ -300,13 +310,13 @@
     }
     items.forEach(function(it){
       var key=String(it.id), b=baseOf[key];
-      if(!b) return;
+      if(!b||frozen(it)) return;
       var r=rowById[key], br=rowById[String(b.id)];
       // 台と同じ分類の物（洗面台の上の洗面ボウルなど）は、台が替わるなら替え先に含まれる
       // とみなして外す。残すと据え置きの洗面台の上にもう一つ洗面器が載る
       var kind=(cfg.typeKinds&&cfg.typeKinds[it.type])||ctx.kindOf(it.type)||null;
       var baseKind=(cfg.typeKinds&&cfg.typeKinds[b.type])||ctx.kindOf(b.type)||null;
-      if(kind&&kind===baseKind&&br&&br.action==='swap'){
+      if(kind&&kind===baseKind&&br&&br.action==='swap'&&!keep(it)){
         if(!r){ r={id:it.id,type:it.type,kind:kind,floor:it.floor||1}; rows.push(r); rowById[key]=r; }
         r.action='remove'; r.label=br.label+'に含める'; delete r.reason; r.parts=[];
         return;
@@ -331,7 +341,60 @@
     return s;
   }
 
-  var api={plan:plan,summary:summary,_withinBounds:withinBounds};
+  // 決めた行をプラン D に書き込む(画面に依らない部分。画面の apply と AI の操作 swapAssetSet が共に使う)。
+  // makeItem(type,x,y,rot,floor,w,d) は分けて置き直す部品を作る関数(画面は mkItem)。
+  // 戻り値: {done: 書き込んだ行の数, changed: 変わった・足した物の id, removed: 外した物の id}
+  function applyRows(D,rows,makeItem){
+    var done=0, changed=[], removed=[];
+    rows.forEach(function(r){
+      var idx=-1;
+      for(var i=0;i<D.items.length;i++) if(String(D.items[i].id)===String(r.id)){ idx=i; break; }
+      if(idx<0) return;
+      var it=D.items[idx];
+      if(r.action==='expand'){
+        D.items.splice(idx,1);
+        removed.push(it.id);
+        r.parts.forEach(function(p){
+          var n=makeItem(p.type,p.cx-p.w/2,p.cy-p.d/2,((p.rot%360)+360)%360,it.floor||1,p.w,p.d);
+          D.items.push(n);
+          changed.push(n.id);
+        });
+      }else if(r.action==='adjust'){
+        // 台の上の物: 物は替えず、台の新しい天端に高さだけ合わせる
+        it.elev=r.parts[0].elev;
+        changed.push(it.id);
+      }else if(r.action==='remove'){
+        // 台の替え先に含まれる物（洗面台の上の洗面ボウルなど）は外す
+        D.items.splice(idx,1);
+        removed.push(it.id);
+      }else{
+        var p=r.parts[0];
+        it.type=p.type; it.w=p.w; it.d=p.d;
+        it.x=p.cx-p.w/2; it.y=p.cy-p.d/2;
+        if(typeof p.elev==='number') it.elev=p.elev;
+        if(p.elevAdd) it.elev=(Number(it.elev)||0)+p.elevAdd;
+        // 元の家具の色・素材の上書きは、差し替え先の部位と合わないので外す（差し替え先の既定の色になる）
+        it.colorCustom=false; delete it.finishColors; delete it.finishRoughness; delete it.finishTextures; it.texture=null;
+        changed.push(it.id);
+      }
+      done++;
+    });
+    return {done:done,changed:changed,removed:removed};
+  }
+
+  // セットの名前か id から、差し替えの設定(swap)を持つセットを引く。sets はセットの一覧(asset-sets.json の sets)。
+  // 一致が無ければ null。名前は前後の空白を除いて比べ、「古民家」のように名前の一部でも、当たるセットが1つだけなら引く。
+  function findSwapSet(sets,name){
+    var list=(sets||[]).filter(function(s){ return s&&s.swap; });
+    var q=String(name==null?'':name).trim();
+    if(!q) return null;
+    var hit=list.filter(function(s){ return s.id===q||s.name===q; })[0];
+    if(hit) return hit;
+    var part=list.filter(function(s){ return String(s.name).indexOf(q)>=0||q.indexOf(String(s.name))>=0; });
+    return part.length===1?part[0]:null;
+  }
+
+  var api={plan:plan,summary:summary,applyRows:applyRows,findSwapSet:findSwapSet,_withinBounds:withinBounds};
 
   // ── ここから画面（ブラウザだけ） ─────────────────────────────────────────
   // 差し替えの入口は、カタログの「表示するセット」の下に置く（差し替え設定を持つセットごとに1つ）。
@@ -349,10 +412,11 @@
     if(/[ぁ-んァ-ヶ一-龠]/.test(name)) return name;
     return (f.kindJa?f.kindJa+'（'+name+'）':name);
   }
-  function planFor(setId){
+  // opts.frozen・opts.keep は plan の同名の欄(AI の操作 swapAssetSet が渡す。画面の一括差し替えは渡さない)。
+  function planFor(setId,opts){
     var set=setCfg(setId); if(!set||!set.swap) return [];
     var cat=Object.keys(root.FMP_ITEMS||{}).map(function(k){return root.FMP_ITEMS[k];}).filter(function(i){return i.assetSet===setId;});
-    return plan(root.DATA.items,{setId:setId,catalogue:cat,swap:set.swap,mountOf:function(type){
+    return plan(root.DATA.items,{setId:setId,catalogue:cat,swap:set.swap,frozen:opts&&opts.frozen,keep:opts&&opts.keep,mountOf:function(type){
       var f=typeof root.getFmpItem==='function'?root.getFmpItem(type):null; return f&&f.mount;
     },heightOf:function(type){
       var f=typeof root.getFmpItem==='function'?root.getFmpItem(type):null; return f&&f.h;
@@ -471,35 +535,7 @@
     if(!rows.length) return 0;
     var D=root.DATA;
     root.saveState();
-    var done=0;
-    rows.forEach(function(r){
-      var idx=-1;
-      for(var i=0;i<D.items.length;i++) if(String(D.items[i].id)===String(r.id)){ idx=i; break; }
-      if(idx<0) return;
-      var it=D.items[idx];
-      if(r.action==='expand'){
-        D.items.splice(idx,1);
-        r.parts.forEach(function(p){
-          var n=root.mkItem(p.type,p.cx-p.w/2,p.cy-p.d/2,((p.rot%360)+360)%360,it.floor||1,p.w,p.d);
-          D.items.push(n);
-        });
-      }else if(r.action==='adjust'){
-        // 台の上の物: 物は替えず、台の新しい天端に高さだけ合わせる
-        it.elev=r.parts[0].elev;
-      }else if(r.action==='remove'){
-        // 台の替え先に含まれる物（洗面台の上の洗面ボウルなど）は外す
-        D.items.splice(idx,1);
-      }else{
-        var p=r.parts[0];
-        it.type=p.type; it.w=p.w; it.d=p.d;
-        it.x=p.cx-p.w/2; it.y=p.cy-p.d/2;
-        if(typeof p.elev==='number') it.elev=p.elev;
-        if(p.elevAdd) it.elev=(Number(it.elev)||0)+p.elevAdd;
-        // 元の家具の色・素材の上書きは、差し替え先の部位と合わないので外す（差し替え先の既定の色になる）
-        it.colorCustom=false; delete it.finishColors; delete it.finishRoughness; delete it.finishTextures; it.texture=null;
-      }
-      done++;
-    });
+    var done=applyRows(D,rows,root.mkItem).done;
     root.ST.selected=null;
     if(typeof root.ensureObjectIds==='function') root.ensureObjectIds();
     root.draw2d();

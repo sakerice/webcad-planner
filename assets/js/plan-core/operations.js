@@ -435,8 +435,9 @@
   //   壁(plan.walls)→ wall、部屋(plan.rooms)→ room、
   //   OPENINGS の type → opening(kind は type そのまま)、stair・stair-corner → stair(kind は type)、
   //   EXTERIOR・SITE の type → object(kind はその type を持つ最初の kind。wood-fence→fence、fence→block-wall、site-rect→site)。
-  // これ以外(カタログの家具・踊り場・照明など)は、読み取りの分類に引けないので set を受け付けない。
-  function partKindOf(found, settable) {
+  //   色を変えられる部位(finishChannels)を持つカタログのモデル → furniture(編集だけの項目。部位は ctx.catalog.finishChannels(type))。
+  // これ以外(部位の無い家具・踊り場・照明など)は、set を受け付けない。
+  function partKindOf(found, settable, ctx) {
     if (found.coll === 'walls') return { part: 'wall', kind: null };
     if (found.coll === 'rooms') return { part: 'room', kind: null };
     var type = found.obj.type;
@@ -445,6 +446,9 @@
     if (type === 'stair' || type === 'stair-corner') return { part: 'stair', kind: type };
     var ext = (settable.EXTERIOR || []).concat(settable.SITE || []);
     for (var i = 0; i < ext.length; i++) if (ext[i].type === type) return { part: 'object', kind: ext[i].kind };
+    var cat = ctx && ctx.catalog;
+    var channels = cat && typeof cat.finishChannels === 'function' ? cat.finishChannels(type) : null;
+    if (Array.isArray(channels) && channels.length && settable.SETTINGS && settable.SETTINGS.furniture) return { part: 'furniture', kind: null, channels: channels };
     return null;
   }
   // set の項目名 → アプリの項目名。ここに無いものは同じ名前。
@@ -463,7 +467,7 @@
     var settable = ctx.settable;
     if (!settable || typeof settable.applySettings !== 'function') return fail('set を使うには ctx.settable(PlanSettable)が要ります');
     if (!set || typeof set !== 'object' || Array.isArray(set)) return fail('set は {項目: 値} の形で渡してください');
-    var pk = partKindOf(target, settable);
+    var pk = partKindOf(target, settable, ctx);
     var type = target.obj.type;
     if (!pk) return fail('種類 ' + label(type) + ' には、set で設定できる項目がありません(props を使うか、種類を確かめてください)');
     var defs = settable.settingsFor(pk.part, pk.kind);
@@ -485,10 +489,15 @@
         return fail('set の「' + key + '」は、この ctx では設定できません(画面の計算が要ります)');
       }
       var rejected = [];
-      // edit: 編集の印。PlanSettable は、これがあるときだけ編集だけの選択肢(editChoices)を受ける(読み取りは受けない)。
-      settable.applySettings(pk.part, pk.kind, [{ key: key, value: value }], out, { floor: target.obj.floor || 1, rejected: rejected, edit: true });
+      // edit: 編集の印。PlanSettable は、これがあるときだけ編集だけの選択肢(editChoices)と編集だけの項目(editOnly。色・仕上げ)を
+      // 受ける(読み取りは受けない)。channels・current は部位ごとの項目(家具の色・素材・艶)の部位の並びと、重ねる元の今の物。
+      // 同じ set の中で同じ欄を2度書くことは無い(項目名が欄の名前なので)。
+      var actx = { floor: target.obj.floor || 1, rejected: rejected, edit: true, channels: pk.channels || [], current: target.obj };
+      settable.applySettings(pk.part, pk.kind, [{ key: key, value: value }], out, actx);
       if (rejected.length) {
-        return fail('set の「' + key + '=' + String(value) + '」は使えません' + (def.num ? '(数で渡してください)' : def.text ? '(文字で渡してください)' : '(選択肢から選んでください)'),
+        var shown = value !== null && typeof value === 'object' ? JSON.stringify(value) : String(value);
+        if (actx.why) return fail('set の「' + key + '=' + shown + '」は使えません(' + actx.why + ')', actx.candidates && actx.candidates.length ? actx.candidates : undefined);
+        return fail('set の「' + key + '=' + shown + '」は使えません' + (def.num ? '(数で渡してください)' : def.text ? '(文字で渡してください)' : '(選択肢から選んでください)'),
           def.choices ? choicesOf(def) : undefined);
       }
       if (def.num) {
@@ -1083,12 +1092,72 @@
     }
   }
 
+  // ── 一括差し替え(画面の「表示するセット」の下の「一括差し替え」と同じ。assets/js/asset-swap.js)────────────
+  // ctx.assetSwap = {sets() → [{id, name}], find(名前か id) → {id, name} か null, plan(plan, setId, {frozen, keep}) → 行,
+  //                  applyRows(plan, 行, makeItem) → {changed, removed}}
+  // 画面(plan-data.js の planAssetSwapCtx)は AssetSwap.planFor、Worker(plan-ctx-factory.mjs)は表から同じ計算をする。
+  // 差し替える物の決め方・大きさ・高さは画面の一括差し替えと同じ。違うのは次の2つだけ:
+  //   - ロックされた物は替えない・外さない・高さも変えない(画面の一括差し替えはロックを見ない)。ids でロックされた物を
+  //     名指ししたときは、ほかの操作と同じく失敗にする。
+  //   - ids(この物だけ)・except(この物を除く)で、替える物を選べる(画面の確認の一覧でチェックを外すのに当たる)。
+  //     選ばなかった物は替えないが、載っている台が替わるときは台の高さに合わせる。
+  function idList(v, what) {
+    if (v === undefined) return { list: null };
+    if (!Array.isArray(v)) return { error: what + ' は id の配列で渡してください' };
+    return { list: v.map(function (x) { return String(x); }) };
+  }
+  function swapAssetSet(plan, a, ctx, rec) {
+    var sw = ctx.assetSwap;
+    if (!sw || typeof sw.plan !== 'function') return fail('この ctx では家具の一括差し替えができません');
+    var names = (sw.sets() || []).map(function (s) { return s.id; });
+    if (typeof a.set !== 'string' || !a.set.trim()) return fail('set(差し替え先のセット)を文字で渡してください', names);
+    var set = sw.find(a.set);
+    if (!set) {
+      var shown = (sw.sets() || []).map(function (s) { return s.id + '（' + s.name + '）'; }).join('・');
+      return fail('差し替え先のセット ' + label(a.set) + ' はありません。使えるセット: ' + (shown || 'なし'), names);
+    }
+    var only = idList(a.ids, 'ids'), except = idList(a.except, 'except');
+    if (only.error) return fail(only.error);
+    if (except.error) return fail(except.error);
+    var items = plan.items || [];
+    var byId = {};
+    items.forEach(function (it) { if (it && it.id !== undefined) byId[String(it.id)] = it; });
+    var named = (only.list || []).concat(except.list || []);
+    for (var i = 0; i < named.length; i++) {
+      if (!Object.prototype.hasOwnProperty.call(byId, named[i])) return fail('id ' + label(named[i]) + ' の物が見つかりません(一括差し替えで選べるのは物だけです)');
+    }
+    for (var j = 0; only.list && j < only.list.length; j++) {
+      if (isLocked(byId[only.list[j]], ctx)) return lockedError(byId[only.list[j]]);
+    }
+    var frozen = function (it) { return isLocked(it, ctx); };
+    var keep = function (it) {
+      var id = String(it.id);
+      if (only.list && only.list.indexOf(id) < 0) return true;
+      return !!(except.list && except.list.indexOf(id) >= 0);
+    };
+    var rows = sw.plan(plan, set.id, { frozen: frozen, keep: (only.list || except.list) ? keep : undefined });
+    var change = rows.filter(function (r) { return r.action !== 'keep'; });
+    var kept = rows.filter(function (r) { return r.action === 'keep'; });
+    var made = sw.applyRows(plan, change, function (type, x, y, rot, floor, w, d) {
+      return Factories.makeItem(type, { x: x, y: y, rot: rot, floor: floor, w: w, d: d }, ctx);
+    });
+    made.changed.forEach(function (id) { rec.change(id); });
+    made.removed.forEach(function (id) { rec.remove(id); });
+    if (!change.length) rec.warnings.push(set.name + 'に差し替えられる家具がありませんでした(プランは変わっていません)');
+    if (kept.length) {
+      rec.warnings.push('そのまま残した物 ' + kept.length + ' 点: ' + kept.slice(0, 12).map(function (r) {
+        return 'id ' + label(r.id) + ' ' + r.type + '（' + r.reason + '）';
+      }).join('、') + (kept.length > 12 ? ' ほか' : ''));
+    }
+  }
+
   var OPS = {
     addRoom: addRoom, resizeRoom: resizeRoom, renameRoom: renameRoom,
     addWall: addWall, removeWall: removeWall,
     placeItem: placeItem, moveObject: moveObject, rotateObject: rotateObject,
     deleteObjects: deleteObjects, setProps: setProps,
-    addRoomWalls: addRoomWalls, placeOpening: placeOpening, addRoof: addRoof
+    addRoomWalls: addRoomWalls, placeOpening: placeOpening, addRoof: addRoof,
+    swapAssetSet: swapAssetSet
   };
 
   function failure(plan, index, op, message, candidates) {
