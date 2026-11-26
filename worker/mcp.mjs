@@ -138,6 +138,7 @@ export const OP_TITLES = Object.freeze({
   rotateObject: "向きを変える", deleteObjects: "消す", setProps: "設定を変える",
   addRoomWalls: "部屋のまわりに壁を作る", placeOpening: "壁に窓・扉を付ける", addRoof: "屋根をかける",
   swapAssetSet: "家具をまとめて差し替える",
+  setAppearance: "壁紙・外壁・屋根の色と素材を変える", applyBuildingStyle: "建物の様式を切り替える",
 });
 
 // 道具の注釈（MCP の ToolAnnotations）。各社の定義に合わせる。
@@ -165,6 +166,10 @@ export const OP_HINTS = Object.freeze({
   deleteObjects: { destructive: true, idempotent: true },
   // 置いてある家具を書き換える。もう一度呼んでも、替えた物は既にそのセットの物なので変わらない。
   swapAssetSet: { destructive: true, idempotent: true },
+  // 家全体・階の設定を書き換える。同じ値でもう一度呼んでも変わらない。
+  setAppearance: { destructive: true, idempotent: true },
+  // 外壁・屋根・内壁・床・建具を書き換える(面ごとの色を外す)。もう一度呼んでも同じ。この受け口からは画面で行うよう断る。
+  applyBuildingStyle: { destructive: true, idempotent: true },
 });
 function opAnnotations(name) {
   const h = OP_HINTS[name] || { destructive: true, idempotent: false };

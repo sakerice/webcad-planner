@@ -202,7 +202,7 @@ function buildCatalog() {
 // ── 家具の一括差し替えと、家具の部位の表(assets/data/worker-furniture.json)──────────────
 // worker-catalog.json は 100KB に収めるため追加のセットを入れない。一括差し替え(asset-swap.js)と家具の色・素材・艶
 // (setProps の finishColors など)に要る分は、こちらの表に分けて書く。どれも画面の関数を vm で呼んだ結果:
-//   sets   … 差し替えの設定(swap)を持つセット [{id, name, swap}](asset-sets.json の並び)
+//   sets   … 差し替えの設定(swap)か様式(style)を持つセット [{id, name, swap?, style?: true}](asset-sets.json の並び)
 //   types  … 追加のセットのモデルの種類(worker-catalog.json の types と同じ形。entryFor)。Worker は標準の後ろに足す
 //            (画面の FMP_ITEMS も、標準のマニフェストの後にセットのマニフェストを足す)
 //   fmp    … カタログのモデル全部(標準とセット)の、差し替えが引く欄: k=分類(kind)、mt=取付(mount)、h=高さ、
@@ -252,7 +252,8 @@ function buildFurniture() {
   const ih = {};
   for (const t of isizes) { ctx.__t = t; ih[t] = vm.runInContext('getItemH(__t)', ctx); }
   delete ctx.__t;
-  const sets = registry.filter((s) => s.swap).map((s) => ({ id: s.id, name: s.name, swap: s.swap }));
+  // style は中身を写さず、持っているかの印だけ(Worker は建物の様式を断るので、セットの名前と有無だけが要る)。
+  const sets = registry.filter((s) => s.swap || s.style).map((s) => Object.assign({ id: s.id, name: s.name }, s.swap ? { swap: s.swap } : {}, s.style ? { style: true } : {}));
   const body = { sets: JSON.parse(JSON.stringify(sets)), types, fmp, fc, ih };
   const version = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex').slice(0, 12);
   return Object.assign({ version }, body);

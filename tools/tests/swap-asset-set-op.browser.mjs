@@ -93,6 +93,26 @@ try {
       const named = PlanCoreOperations.applyOperations(DATA, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion', ids: [sofa.id] } }], planChatCtx());
       res.lockedNamed = named.errors.map((e) => e.message);
     }
+    // 洗面台だけを選ぶと、上の洗面ボウルも一緒に外す(全部を替えたときと同じ洗面台)。ボウルを除く・ロックすると台ごと残す。
+    // チャットと Worker で同じ JSON(2026-11-26 のレビューで、ボウルが浮いたまま二重に残っていた場面)。
+    {
+      const p = JSON.parse(baseJson);
+      const vanity = p.items.find((it) => it.type === 'fmp-BathroomVanity07');
+      const bowl = p.items.find((it) => it.type === 'fmp-WashBasin01');
+      res.vanity = [];
+      for (const [label, args, lock] of [['台だけ', { set: 'rpg-mansion', ids: [String(vanity.id)] }, false],
+        ['ボウルを除く', { set: 'rpg-mansion', ids: [String(vanity.id)], except: [String(bowl.id)] }, false],
+        ['ボウルをロック', { set: 'rpg-mansion', ids: [String(vanity.id)] }, true]]) {
+        const q = JSON.parse(baseJson);
+        if (lock) q.items.find((it) => it.id === bowl.id).locked = true;
+        reset(JSON.stringify(q));
+        const c = PlanCoreOperations.applyOperations(DATA, [{ op: 'swapAssetSet', args }], planChatCtx());
+        const w = tools.workerApply(q, [{ op: 'swapAssetSet', args }]);
+        const v = c.plan.items.find((it) => it.id === vanity.id), b = c.plan.items.find((it) => it.id === bowl.id);
+        res.vanity.push({ label, errors: c.errors, vanitySwapped: /^rpg-mansion-/.test(v.type), bowlLeft: !!b,
+          same: json([w.plan, w.changedIds, w.removedIds, w.warnings]) === json([c.plan, c.changedIds, c.removedIds, c.warnings]), warnings: c.warnings.filter((x) => x.includes('id ' + bowl.id)) });
+      }
+    }
     // 知らないセット名
     {
       reset();
@@ -120,6 +140,9 @@ try {
   assert.ok(!out.sets.find((s) => s.set === 'rpg-mansion').worker.refused, '洋館への差し替えを Worker が断った');
   assert.deepEqual([out.locked.chat, out.locked.worker], [true, true], 'ロックしたソファが替わった');
   assert.ok(out.locked.changed > 0 && out.locked.errors.length === 0, 'ロックした物のほかは替わる');
+  console.log('洗面台: ' + JSON.stringify(out.vanity));
+  assert.deepEqual(out.vanity.map((v) => [v.label, v.errors.length, v.vanitySwapped, v.bowlLeft, v.same, v.warnings.length > 0]),
+    [['台だけ', 0, true, false, true, true], ['ボウルを除く', 0, false, true, true, true], ['ボウルをロック', 0, false, true, true, true]], '洗面台だけを選んだときの扱い');
   assert.equal(out.lockedNamed.length, 1);
   assert.match(out.lockedNamed[0], /ロック/);
   assert.equal(out.unknown.chat.length, 1);

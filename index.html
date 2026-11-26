@@ -5072,22 +5072,15 @@ function ensureRoofAppearance(){
   return DATA.roofAppearance;
 }
 
+// 屋根の階ごとの設定の既定(設定欄で、まだ無い階を書くときに作る形)。
+function defaultRoofFloorSetting(){
+  return {linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
+}
 function updateRoofAppearance(scope,key,value,floor,noSave){
   var s=ensureRoofAppearance();
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
-  if(scope==='whole'){
-    setTextureSettingValue(s.whole,key,value);
-    if(key==='color'||key==='texture'||key==='sheen') s.whole.linked=true;
-  } else if(scope==='floor'){
-    s.floors[floor]=s.floors[floor]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
-    normalizeTextureOrientationTarget(s.floors[floor]);
-    setTextureSettingValue(s.floors[floor],key,value);
-    if(key==='color'||key==='texture'||key==='sheen'){
-      s.whole.linked=false;
-      s.floors[floor].linked=true;
-    }
-  }
+  PlanCoreOperations.writeAppearance(s,'roof',scope,key,value,floor,APPEARANCE_WRITE);
   if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   if(key!=='color') renderExteriorWallPanel();
   updateProps();
@@ -5121,9 +5114,7 @@ function resolveRoofAppearance(it){
 
 // 屋根の質感(粗さ・金属感)。素材ごとの既定と、設定欄の「質感」での上書き。
 // 以前はどの屋根も粗さ 0.92・金属感 0 で、ガルバの屋根も紙のように見えた。
-var ROOF_SHEEN_OPTIONS=[
-  ['','素材に合わせる'],['matte','マット'],['satin','半艶'],['metal','金属']
-];
+// 選択肢の一覧は PlanSettable.ROOF_SHEEN_OPTIONS(plan-settable.js。AI の操作 setAppearance も同じ一覧で確かめる)。
 var ROOF_SHEEN_PARAMS={
   matte:{roughness:0.92,metalness:0.0,envMapIntensity:0.06},
   satin:{roughness:0.55,metalness:0.0,envMapIntensity:0.22},
@@ -5224,22 +5215,22 @@ function resolveInteriorWallAppearance(w){
   return appearanceWithTextureOrientation(INTERIOR_WALL_DEFAULT,null,'default',null);
 }
 
+// 内観・外観・屋根のカラー設定(家全体・階ごと)の書き込みの決まりは PlanCoreOperations.writeAppearance
+// (plan-core/operations.js。AI の操作 setAppearance も同じ関数で書く)。ここは画面の部品を渡す包み。
+var APPEARANCE_WRITE={
+  setValue:function(o,k,v){ setTextureSettingValue(o,k,v); },
+  normalize:function(o){ return normalizeTextureOrientationTarget(o); },
+  defaultFloor:function(part,floor){
+    if(part==='interior') return defaultInteriorFloorSetting();
+    if(part==='roof') return defaultRoofFloorSetting();
+    return defaultExteriorFloorSetting(floor);
+  }
+};
 function updateInteriorSetting(scope,key,value,floor,noSave){
   var s=ensureInteriorWallSettings();
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
-  if(scope==='whole'){
-    setTextureSettingValue(s.whole,key,value);
-    if(key==='color'||key==='texture') s.whole.linked=true;
-  } else if(scope==='floor'){
-    s.floors[floor]=s.floors[floor]||defaultInteriorFloorSetting();
-    normalizeTextureOrientationTarget(s.floors[floor]);
-    setTextureSettingValue(s.floors[floor],key,value);
-    if(key==='color'||key==='texture'){
-      s.whole.linked=false;
-      s.floors[floor].linked=true;
-    }
-  }
+  PlanCoreOperations.writeAppearance(s,'interior',scope,key,value,floor,APPEARANCE_WRITE);
   if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   if(key!=='color') renderExteriorWallPanel();
   updateProps();
@@ -5479,18 +5470,10 @@ function setExteriorDetailValue(key,val){
   if(ren) rebuild3D();
 }
 // 用意してある素材から選ぶ欄。画像を読み込む欄と並べる(読み込んだ画像は「読み込んだ画像」として出す)。
-// 値は ASSET_TEX_MAP のキーで、設定の texture にそのまま入る。
-var PRESET_WALL_TEXTURES={
-  exterior:[['siding','サイディング'],['plaster','塗り壁'],['plaster_white','塗り壁（白）'],['galvalume_dark','ガルバ（黒）'],
-    ['wood_cedar','杉板'],['mansion_brick_red','赤レンガ（洋館）'],['mansion_ashlar_stone','切石（洋館）'],
-    ['kominka_yakisugi','焼杉板（古民家）'],['kominka_shikkui','白漆喰（古民家）']],
-  interior:[['wall_int','塗り壁'],['plaster_white','塗り壁（白）'],['wood_cedar','杉板'],
-    ['mansion_damask_wallpaper','ダマスク柄の壁紙（洋館）'],['mansion_white_subway_tile','白いタイル（洋館）'],
-    ['kominka_shikkui','白漆喰（古民家）'],['kominka_juraku','聚楽の土壁（古民家）']],
-  roof:[['roof_tile','瓦'],['roof_kawara_ibushi','日本瓦（いぶし銀）'],['roof_s_tile_terracotta','洋瓦（S形・素焼き）'],['roof_flat_tile_charcoal','平板瓦（黒灰）'],['roof_colonial_gray','化粧スレート（コロニアル）'],['roof_standing_seam_silver','ガルバ立平（銀）'],['roof_copper_patina','銅板一文字（緑青）'],['roof_asphalt_shingle_brown','アスファルトシングル（茶）'],['galvalume_dark','ガルバ（黒）'],['mansion_slate_roof','スレート（洋館）'],['kominka_kayabuki','茅葺き（古民家）']]
-};
+// 値は ASSET_TEX_MAP のキーで、設定の texture にそのまま入る。一覧は PlanSettable.APPEARANCE_TEXTURES
+// (plan-settable.js。AI の操作 setAppearance も同じ一覧で確かめる)。
 function presetTextureSelectHtml(kind,current,call,disabled){
-  var list=PRESET_WALL_TEXTURES[kind]||[];
+  var list=PlanSettable.APPEARANCE_TEXTURES[kind]||[];
   var known=list.some(function(o){return o[0]===current;});
   var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(disabled?0.45:1)+'"><span style="font-size:10px;color:#cce">素材</span>';
   html+='<select class="preset-texture-select" aria-label="素材" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'"'+(disabled?' disabled':'')+'>';
@@ -5502,7 +5485,7 @@ function presetTextureSelectHtml(kind,current,call,disabled){
 function roofSheenSelectHtml(current,call){
   var html='<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#cce">質感</span>';
   html+='<select class="roof-sheen-select" aria-label="屋根の質感" style="font-size:10px;flex:1;min-width:0" onchange="'+call.replace('VALUE','this.value||null')+'">';
-  ROOF_SHEEN_OPTIONS.forEach(function(o){ html+='<option value="'+escHtml(o[0])+'"'+((current||'')===o[0]?' selected':'')+'>'+escHtml(o[1])+'</option>'; });
+  PlanSettable.ROOF_SHEEN_OPTIONS.forEach(function(o){ html+='<option value="'+escHtml(o[0])+'"'+((current||'')===o[0]?' selected':'')+'>'+escHtml(o[1])+'</option>'; });
   return html+'</select></div>';
 }
 function renderExteriorWallPanel(mode){
@@ -5701,13 +5684,10 @@ function updateExteriorSetting(scope,key,value,floor,wallId,noSave){
   var s=ensureExteriorWallSettings();
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
-  if(scope==='whole'){
-    setTextureSettingValue(s.whole,key,value);
-  } else if(scope==='floor'){
-    s.floors[floor]=s.floors[floor]||defaultExteriorFloorSetting(floor);
-    normalizeTextureOrientationTarget(s.floors[floor]);
-    setTextureSettingValue(s.floors[floor],key,value);
-    if(key==='color'){WALL_COLORS[floor]=value; WALL_COLOR_CUSTOM[floor]=true;}
+  if(scope==='whole'||scope==='floor'){
+    PlanCoreOperations.writeAppearance(s,'exterior',scope,key,value,floor,APPEARANCE_WRITE);
+    // 画面だけの記憶(保存しない)。階の外壁色の既定として、この画面を開いている間だけ使う
+    if(scope==='floor'&&key==='color'){WALL_COLORS[floor]=value; WALL_COLOR_CUSTOM[floor]=true;}
   } else if(scope==='wall'){
     var w=DATA.walls.find(function(x){return x.id===wallId;});
     if(w){

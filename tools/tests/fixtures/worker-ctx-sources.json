@@ -1,11 +1,11 @@
 {
   "_note": "worker/plan-ctx-factory.mjs が書き写した画面の関数・定数の本文の SHA-256。tools/tests/worker-ctx-sources.test.cjs が比べる。作り直し: node tools/tests/worker-ctx-sources.test.cjs --write",
   "functions": {
-    "planChatCtx": "70115ad9ece05e4d83c38e7d92d49ffe7632a15a16baca0c200caef9ada1dc15",
+    "planChatCtx": "2e8563fc2814effda06011af6caaa7760c1a87f81e2890c75af17eedb6771673",
     "planChatKindType": "1d25f74d36c9db4a5b8540acf8ac31958bd25ce351391740480652d8aff465be",
     "planCoreSuggestTypes": "1682357946362d910034aefb766ecbcf53a732cdb63a8402cf3d1bd17996fff6",
     "planCoreCtx": "63ef0c3c16c9e6bdf14b58b29ab3dfb8520681b1ed8b450241b86551ada94ce2",
-    "planOpsCtx": "ed32943ab8a09e7450d091c672add53a74d408c0433b817c28ada325837d4918",
+    "planOpsCtx": "bcfa8a9148e02f4514075d7a46d74b4364b86b3e555f3d605741359e37406a37",
     "bestFmpType": "672c5976aa0efa28e73566e22554326015b5e54e8789c886ed3786f86f01d065",
     "isFmpItemType": "855fb5e38f2096111e607c3cb02f69ccb27e8317d9726c7e916988eb0c289dcb",
     "getFmpItem": "9eb6b1499bbdb5cf58ba7acf5e6f69b822e92308cde57abcab271f114529b6ee",
@@ -104,11 +104,18 @@
     "clampContextFloors": "6ed39acd84ce43d71c21cd012696b870575dc980b7616d295c4994d459091327",
     "contextRoofExtraHeightMm": "9089e610ef65cf3f83885229a2104ac7d2ca83e6e15228d9b3274be0d03c951f",
     "nhRoofHeightM": "f8ad2f4d8a3f6a5cfcf6b1fe449edb3016c1b12bd059f606cc59417a71afa99e",
+    "planAppearanceCtx": "b2dddabb78c3d027161ec9958f6424c7698659e93edd9a1145f06884430f108c",
+    "planBuildingStyleCtx": "f1abccb2be492c516f89d495c160cb439e951561a0bb6bd4181f1c24284f5952",
+    "ensureInteriorWallSettings": "fd83f8ccd77797a3c6fd4dbe8f7ed23f276f9173bafe11a78af9c99ef826b106",
+    "defaultInteriorFloorSetting": "8a81bb95d8c5dae85cc3ca4c754f954036403a179dceb0b11986e2f2285bb11a",
+    "ensureRoofAppearance": "261288c681d7c0c0f6359c7eddb55ca0047b949a909a0445f80b665595693c66",
+    "defaultRoofFloorSetting": "85c3cd1f69005250c8be7dd82a05010b8a13071239260ed0850ac60f92872850",
+    "setTextureSettingValue": "9c6e73cd45e3a791038412edb9ad56077c48f8ee8abd8c79efb28cb621bb3ef0",
     "CeilingDesigner.floorLoweringLimit": "95aae11d803b559f13c1486514840e46fcf64db95620a4b795d1b072c61190be",
     "CeilingDesigner.areas": "2ff0627b6910144d34b6431e6d19b7e052d7b15115c1bc50e55c2a2e9ededd13",
     "CeilingDesigner.roomFor": "3cdfc88e33cdd444ae51642a70e1093b6631b0556b0bd6dac665eb7a642e8c06",
     "CeilingDesigner.areaBaseY": "b131910cd2434a62d8273caa4950ebd30a4e72c3a0c2d29392e2bbda7789d3a5",
-    "AssetSwap.planFor": "6bce5a86be6a7bc507d31e2e20a638178f96dfa5ed3cd9260d5f820cc10a55ba"
+    "AssetSwap.planFor": "ea5a2537c757fcd65f24b047b22865e4d598e152be6e06165091d0f6abbc52ab"
   },
   "constants": {
     "U": "dd3ce9840419a20eff5b135a7e1a4fd934ee3bc6d84728571271d0ed9c7adff1",
@@ -123,6 +130,7 @@
     "ITEM_SURFACE_TYPES": "8e981f24a9a21a7190e6e8d0d5d43f9b05c3ef23504584d4acc361c8a8a23829",
     "NH_ROOF_H": "9ecf444d65c5b980c0ff8b03027376e0b04eed3a091c9b455293682e680b5ce6",
     "NH_ROOF_MAX_PITCH": "f3765a4ff1346802bc07e0567569ac8a87fd7b358a2af9b0e37fc84d3c58b279",
-    "NH_EAVE": "9b0cc745d610a1414b4ed08887d3fb6841ec10382107a5730b5af7ba1b3b342a"
+    "NH_EAVE": "9b0cc745d610a1414b4ed08887d3fb6841ec10382107a5730b5af7ba1b3b342a",
+    "INTERIOR_WALL_DEFAULT": "231e8c81dcd20d6d74629087061185f4271033c48604ff94049eaeb583e650a5"
   }
 }

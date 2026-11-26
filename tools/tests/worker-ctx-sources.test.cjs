@@ -141,6 +141,14 @@ const FUNCTIONS = [
   ['clampContextFloors', 'clampContextFloors'],
   ['contextRoofExtraHeightMm', 'contextRoofExtraHeightMm'],
   ['nhRoofHeightM', 'nhRoofHeightM'],
+  // 内観・外観・屋根のカラー設定(setAppearance)と建物の様式(applyBuildingStyle。Worker は断る)
+  ['planAppearanceCtx', 'workerOpsCtx の appearance'],
+  ['planBuildingStyleCtx', 'workerOpsCtx の buildingStyle(断る)'],
+  ['ensureInteriorWallSettings', 'ensureInteriorWallSettings'],
+  ['defaultInteriorFloorSetting', 'defaultInteriorFloorSetting'],
+  ['ensureRoofAppearance', 'ensureRoofAppearance'],
+  ['defaultRoofFloorSetting', 'defaultRoofFloorSetting'],
+  ['setTextureSettingValue', 'setTextureSettingValue'],
 ];
 // asset-swap.js の中(字下げした function)に在る、一括差し替えの画面の包み。
 const ASSET_SWAP = 'assets/js/asset-swap.js';
@@ -169,6 +177,7 @@ const CONSTANTS = [
   ['NH_ROOF_H', 'nhRoofHeightM(1.30)'],
   ['NH_ROOF_MAX_PITCH', 'nhRoofHeightM(0.55)'],
   ['NH_EAVE', 'nhRoofHeightM(0.200)'],
+  ['INTERIOR_WALL_DEFAULT', 'INTERIOR_WALL_DEFAULT'],
 ];
 
 // 行頭の var/let/const NAME = … ; を、文字列・コメント・括弧を読み飛ばして切り出す。

@@ -159,8 +159,42 @@ function planOpsCtx(extra){
   };
   // 一括差し替えの部品(下の planAssetSwapCtx)。検査が planOpsCtx だけを切り出して動かすときは無い。
   ctx.assetSwap=typeof planAssetSwapCtx==='function'?planAssetSwapCtx():undefined;
+  ctx.appearance=typeof planAppearanceCtx==='function'?planAppearanceCtx():undefined;
+  ctx.buildingStyle=typeof planBuildingStyleCtx==='function'?planBuildingStyleCtx():undefined;
   if(extra) Object.keys(extra).forEach(function(k){ ctx[k]=extra[k]; });
   return ctx;
+}
+// 内観・外観・屋根のカラー設定(操作 setAppearance)に渡す、設定欄と同じ部品(index.html の ensure* と APPEARANCE_WRITE)。
+// 当てているプランは DATA でなければならない(ensure* は DATA を見る。チャットの写しは withPlan で DATA になっている)。
+function planAppearanceCtx(){
+  if(typeof APPEARANCE_WRITE==='undefined') return undefined;
+  return {
+    ensure:function(p,part){
+      if(p!==DATA) throw new Error('カラー設定は、画面のプラン(DATA)か withPlan で DATA にした写しにだけ当てられます');
+      var ensureOf={interior:ensureInteriorWallSettings,roof:ensureRoofAppearance,exterior:ensureExteriorWallSettings}[part];
+      return ensureOf();
+    },
+    setValue:APPEARANCE_WRITE.setValue, normalize:APPEARANCE_WRITE.normalize, defaultFloor:APPEARANCE_WRITE.defaultFloor
+  };
+}
+// 建物の様式の切り替え(操作 applyBuildingStyle)に渡す、画面の「建物の仕上げを替える」と同じ部品(building-style.js)。
+// 決め方は BuildingStyle.planFor(壁の内観面・外観面を 3D の壁の幾何から求める)、書き込みは画面の apply と同じ applyPlan。
+function planBuildingStyleCtx(){
+  if(typeof BuildingStyle==='undefined'||typeof AssetSets==='undefined'||!BuildingStyle.applyPlan) return undefined;
+  var withStyle=function(){ return AssetSets.sets().filter(function(s){ return s.style; }); };
+  return {
+    sets:function(){ return withStyle().map(function(s){ return {id:s.id,name:s.name}; }); },
+    find:function(name){ var s=AssetSwap.findSet(AssetSets.sets(),name,'style'); return s?{id:s.id,name:s.name}:null; },
+    plan:function(p,setId){
+      if(p!==DATA) throw new Error('建物の様式は、画面のプラン(DATA)か withPlan で DATA にした写しにだけ当てられます');
+      return BuildingStyle.planFor(setId);
+    },
+    apply:function(p,plan,parts,locked){
+      return BuildingStyle.applyPlan(p,plan,parts||BuildingStyle.ALL_PARTS,{ensureExteriorWallSettings:ensureExteriorWallSettings,
+        defaultExteriorFloorSetting:defaultExteriorFloorSetting,ensureRoofAppearance:ensureRoofAppearance,
+        ensureInteriorWallSettings:ensureInteriorWallSettings,locked:locked,wallKey:wallSettingKey});
+    }
+  };
 }
 // 家具の一括差し替え(操作 swapAssetSet。operations.js)に渡す、画面の一括差し替えの部品(asset-swap.js)。
 // 決め方は画面の「一括差し替え」と同じ AssetSwap.planFor(グローバルの DATA を見る)。当てているプランは DATA で
@@ -277,6 +311,8 @@ function planChatCtx(){
   };
   ctx.hooks=hooks;
   ctx.assetSwap=screen.assetSwap;
+  ctx.appearance=screen.appearance;
+  ctx.buildingStyle=screen.buildingStyle;
   ctx.withPlan=function(work,run){
     var saved=DATA;
     DATA=work;

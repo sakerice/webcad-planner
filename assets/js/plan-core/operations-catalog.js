@@ -181,12 +181,35 @@
     {
       name: 'swapAssetSet',
       description: '置いてある家具を別のセット（洋館・古民家など）の物へまとめて差し替える（画面の「一括差し替え」と同じ）。'
-        + '同じ分類で大きさの近い物に替え、位置・向き・階・大きさは元のまま。代役（テレビ → 額絵）やテーブルセット・キッチンの分割もする。'
-        + '色・素材の上書きは外れる。合う物が無い物は残し、warnings に理由を書く。ids でその物だけ、except でその物を除いて替える。',
+        + '同じ分類で大きさの近い物は、中心・向き・階・幅と奥行きを保って替える（決め打ちの替え先は実物より大きい軸だけ縮める）。'
+        + '代役（テレビ → 額絵）は実物の大きさで少し高く掛け、テーブルセット・キッチンは食卓と椅子・流しと戸棚に分けて置き直す。'
+        + '台に含まれる上の物（洗面ボウルなど）は台と一緒に外す。色・素材の上書きは外れる。合う物が無い物は残し warnings に理由を書く。'
+        + 'ids でその物だけ、except でその物を除いて替える。',
       inputSchema: obj({
         set: str('差し替え先のセットの id か名前（使えるセットの一覧を見る）'),
         ids: { type: 'array', items: ID, description: '替える物の id の配列。省くと置いてある家具の全部' },
         except: { type: 'array', items: ID, description: '替えない物の id の配列' }
+      }, ['set'])
+    },
+    {
+      name: 'setAppearance',
+      description: '内観（壁紙）・外観（外壁）・屋根の色と素材を、家全体か階ごとに変える（画面の「内観／外観／屋根カラー設定」と同じ）。'
+        + 'floor を省くと家全体、渡すとその階だけ（家全体の設定より優先される）。壁ごと・面ごとには変えられない。',
+      inputSchema: obj({
+        part: str('interior（壁紙）/ exterior（外壁）/ roof（屋根）'),
+        floor: int('階（1〜4）。省くと家全体'),
+        color: str('"#rrggbb"'),
+        texture: str('素材（素材の一覧を見る）。"" で外して色だけにする'),
+        sheen: str('屋根の質感（屋根だけ）')
+      }, ['part'])
+    },
+    {
+      name: 'applyBuildingStyle',
+      description: '外壁・屋根・内壁・床・扉・窓を、セットの様式（洋館・古民家など）にまとめて切り替える（画面の「建物の仕上げを替える」と同じ）。'
+        + '部屋の名前で水まわりの床・壁を替え、開き戸・玄関ドア・窓をその様式の物にする。開口の大きさは変えない。面や壁ごとの色・素材は外れる。',
+      inputSchema: obj({
+        set: str('様式のセットの id か名前'),
+        parts: { type: 'array', items: str('exterior / roof / interior / floor / doors / windows'), description: '切り替える部位。省くと全部' }
       }, ['set'])
     }
   ];
@@ -342,7 +365,7 @@
   // 読み取りの説明(PlanSettable.describe)には editChoices を出さない。
   function choiceText(c) { return (c[0] === '' ? '""' : c[0]) + '=' + c[1]; }
   function channelRange(s, settable) {
-    if (s.channelMap === 'color') return '{部位: "#rrggbb"}';
+    if (s.channelMap === 'color') return '{部位: "#rrggbb"}（"" で既定の色）';
     if (s.channelMap === 'texture') {
       return '{部位: 値}。値は ' + (settable.MODEL_FINISH_TEXTURES || []).map(choiceText).join(' / ')
         + '。部位 roof は ' + (settable.MODEL_ROOF_FINISH_TEXTURES || []).map(choiceText).join(' / ');
@@ -404,17 +427,33 @@
       if (part === 'furniture') rows.push(FURNITURE_NOTE);
       settable.SETTINGS[part].forEach(function (s) { rows.push(settingLine(part, s, settable)); });
     });
-    var sets = assetSetsOf(deps);
+    var sets = assetSetsOf(deps, 'swap');
     if (sets.length) {
       rows.push('');
       rows.push('## 家具を差し替えられるセット（swapAssetSet の set）');
       sets.forEach(function (s) { rows.push('  ' + s.id + ' = ' + s.name); });
     }
+    var styles = assetSetsOf(deps, 'style');
+    if (styles.length) {
+      rows.push('');
+      rows.push('## 建物の様式（applyBuildingStyle の set）');
+      styles.forEach(function (s) { rows.push('  ' + s.id + ' = ' + s.name); });
+    }
+    var tex = settable.APPEARANCE_TEXTURES;
+    if (tex) {
+      rows.push('');
+      rows.push('## 内観・外観・屋根の素材（setAppearance の texture。"" で素材を外す）');
+      ['interior', 'exterior', 'roof'].forEach(function (part) {
+        rows.push('- ' + part + ': ' + (tex[part] || []).map(function (c) { return c[0] + '=' + c[1]; }).join(' / '));
+      });
+      if (settable.ROOF_SHEEN_OPTIONS) rows.push('- 屋根の質感（sheen）: ' + settable.ROOF_SHEEN_OPTIONS.map(choiceText).join(' / '));
+    }
     return rows.join('\n');
   }
   // 差し替えの設定を持つセット [{id, name}](deps.assetSets。worker/chat.mjs・mcp.mjs が worker-furniture.json の sets を渡す)。
-  function assetSetsOf(deps) {
-    return ((deps && deps.assetSets) || []).filter(function (s) { return s && s.id; }).map(function (s) { return { id: s.id, name: s.name }; });
+  // field を渡すと、その設定(swap=一括差し替え、style=建物の様式)を持つセットだけ。
+  function assetSetsOf(deps, field) {
+    return ((deps && deps.assetSets) || []).filter(function (s) { return s && s.id && (!field || s[field]); }).map(function (s) { return { id: s.id, name: s.name }; });
   }
 
   // 道具の説明に付ける短い一覧(名前だけ)。範囲・選択肢・寸法の例は describeVocabulary に書き、
@@ -427,8 +466,8 @@
       var kinds = knowledgeKinds(deps.knowledge);
       return '\n種類: ' + types.join(', ') + (kinds.length ? '\n家具・設備の分類: ' + kinds.join(', ') : '');
     }
-    if (name === 'swapAssetSet') {
-      var sets = assetSetsOf(deps);
+    if (name === 'swapAssetSet' || name === 'applyBuildingStyle') {
+      var sets = assetSetsOf(deps, name === 'swapAssetSet' ? 'swap' : 'style');
       return sets.length ? '\nセット: ' + sets.map(function (s) { return s.id + '（' + s.name + '）'; }).join(', ') : '';
     }
     if (name === 'setProps') {

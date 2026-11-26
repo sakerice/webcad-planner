@@ -100,6 +100,8 @@
     placeOpening: '窓や扉を付けています',
     addRoof: '屋根をかけています',
     swapAssetSet: '家具をまとめて差し替えています',
+    setAppearance: '壁や屋根の色を変えています',
+    applyBuildingStyle: '建物の様式を切り替えています',
     inspect_plan: '間取りを確かめています'
   };
   var TOOL_LABEL_OTHER = '間取りを直しています';

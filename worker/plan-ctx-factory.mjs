@@ -44,6 +44,7 @@ const WHY = {
   openingModel: '建具・窓のモデルを指定して置くことは画面でしかできません。door-swing・window などの種類で置いてください',
   floorFixtures: 'この部屋は床の高さが整数の mm でないなど、天井に付いた照明や物干しを床と一緒に動かす高さを画面でしか決められないので、画面で変えてください',
   floorLowering: '下の階の天井の範囲(折り上げ天井)と重なる部屋の床を下げられる深さは、下の階の天井の形(勾配天井・吹き抜け・段差など)によっては画面でしか決められません',
+  buildingStyle: '建物の様式の切り替えは、壁の内側・外側の面を 3D の壁の形から求めるので、画面でしか行えません',
   swapCeiling: '勾配天井・吹き抜け・段差・天井の範囲・斜線制限などのある部屋では、壁や天井に付けた家具を差し替えたあとの高さを画面でしか決められません',
 };
 function refusal(key) { return REFUSAL + '(' + WHY[key] + ')'; }
@@ -597,6 +598,85 @@ export function createPlanCtxTools(deps) {
     }
     return s;
   }
+  // ── 内観・屋根の設定表(index.html の ensureInteriorWallSettings・ensureRoofAppearance・defaultInteriorFloorSetting・
+  //    defaultRoofFloorSetting、app-state.js の setTextureSettingValue)。操作 setAppearance が使う。
+  const INTERIOR_WALL_DEFAULT = '#f4f0e8';   // app-constants.js
+  function defaultInteriorFloorSetting() {
+    return { linked: false, color: INTERIOR_WALL_DEFAULT, texture: null, textureFlipX: false, textureFlipY: false };
+  }
+  function defaultRoofFloorSetting() {
+    return { linked: false, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false };
+  }
+  function ensureInteriorWallSettings(p) {
+    repairSettingsShape(p, 'interiorWallSettings', ['whole', 'floors', 'walls', 'faces'], ['floors', 'walls', 'faces']);
+    if (!p.interiorWallSettings) {
+      p.interiorWallSettings = {
+        whole: { linked: false, color: INTERIOR_WALL_DEFAULT, texture: null, textureFlipX: false, textureFlipY: false },
+        floors: {},
+        faces: {}
+      };
+    }
+    var s = p.interiorWallSettings;
+    if (!s.whole) s.whole = { linked: false, color: INTERIOR_WALL_DEFAULT, texture: null, textureFlipX: false, textureFlipY: false };
+    normalizeTextureOrientationTarget(s.whole);
+    if (!s.floors) s.floors = {};
+    if (!s.faces) s.faces = {};
+    for (var f = 1; f <= 4; f++) {
+      if (!s.floors[f]) {
+        s.floors[f] = defaultInteriorFloorSetting();
+      } else {
+        if (s.floors[f].linked === undefined) s.floors[f].linked = false;
+        if (!s.floors[f].color) s.floors[f].color = INTERIOR_WALL_DEFAULT;
+        if (s.floors[f].texture === undefined) s.floors[f].texture = null;
+        normalizeTextureOrientationTarget(s.floors[f]);
+      }
+    }
+    return s;
+  }
+  function ensureRoofAppearance(p) {
+    repairSettingsShape(p, 'roofAppearance', ['whole', 'floors'], ['floors']);
+    if (!p.roofAppearance) {
+      p.roofAppearance = { whole: { linked: true, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false }, floors: {} };
+    }
+    if (p.roofAppearance.whole === undefined) {
+      p.roofAppearance = { whole: {
+        linked: p.roofAppearance.linked !== undefined ? p.roofAppearance.linked : true,
+        color: p.roofAppearance.color || '#2a2a30',
+        texture: p.roofAppearance.texture || null,
+        textureFlipX: !!p.roofAppearance.textureFlipX,
+        textureFlipY: !!p.roofAppearance.textureFlipY
+      }, floors: {} };
+    }
+    var r = p.roofAppearance;
+    if (!r.whole) r.whole = { linked: true, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false };
+    if (r.whole.linked === undefined) r.whole.linked = true;
+    if (!r.whole.color) r.whole.color = '#2a2a30';
+    if (r.whole.texture === undefined) r.whole.texture = null;
+    normalizeTextureOrientationTarget(r.whole);
+    if (!r.floors) r.floors = {};
+    for (var f = 1; f <= 4; f++) {
+      if (!r.floors[f]) {
+        r.floors[f] = { linked: false, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false };
+      } else {
+        if (r.floors[f].linked === undefined) r.floors[f].linked = false;
+        if (!r.floors[f].color) r.floors[f].color = '#2a2a30';
+        if (r.floors[f].texture === undefined) r.floors[f].texture = null;
+        normalizeTextureOrientationTarget(r.floors[f]);
+      }
+    }
+    return r;
+  }
+  function setTextureSettingValue(obj, key, value) {
+    if (!obj) return;
+    obj[key] = value;
+    if (key === 'texture' && !value) {
+      obj.textureFlipX = false;
+      obj.textureFlipY = false;
+    }
+    if (key === 'skirting' && (value === null || value === undefined)) delete obj.skirting;
+    if (key === 'skirtingColor' && !value) delete obj.skirtingColor;
+    if (key === 'sheen' && !value) delete obj.sheen;
+  }
   function wallSettingKey(w) {
     return String(w.id || [w.floor, Math.round(w.x1), Math.round(w.y1), Math.round(w.x2), Math.round(w.y2)].join('_'));
   }
@@ -786,7 +866,7 @@ export function createPlanCtxTools(deps) {
     if (!set || !set.swap || !AssetSwap) return [];
     return AssetSwap.plan(p.items, {
       setId: setId, catalogue: swapCatalogue(setId), swap: set.swap,
-      frozen: opts && opts.frozen, keep: opts && opts.keep,
+      frozen: opts && opts.frozen, keep: opts && opts.keep, excluded: opts && opts.excluded,
       mountOf: function (t) { var f = ownGet(FMP, t); return f ? (f.mt || null) : null; },
       heightOf: function (t) { var f = ownGet(FMP, t); return f ? f.h : null; },
       itemHeightOf: function (it) { return getItemHeightValue(p, it); },
@@ -954,6 +1034,22 @@ export function createPlanCtxTools(deps) {
           }
         }
       },
+      // カラー設定(画面の planAppearanceCtx と同じ形。書き込みの決まりは共有の PlanCoreOperations.writeAppearance)。
+      appearance: {
+        ensure: function (p, part) { var w = p || cur; return part === 'interior' ? ensureInteriorWallSettings(w) : part === 'roof' ? ensureRoofAppearance(w) : ensureExteriorWallSettings(w); },
+        setValue: setTextureSettingValue,
+        normalize: normalizeTextureOrientationTarget,
+        defaultFloor: function (part, floor) { return part === 'interior' ? defaultInteriorFloorSetting() : part === 'roof' ? defaultRoofFloorSetting() : defaultExteriorFloorSetting(floor); }
+      },
+      // 建物の様式(画面の planBuildingStyleCtx と同じ形)。様式の名前の確かめは画面と同じに行い、切り替えは理由つきで断る
+      // (壁の内観面・外観面の鍵と外壁のある階を、3D の壁の幾何(getWallExteriorSpans など)から求めるため。
+      // 床・扉・窓など幾何の要らない部分だけを当てると画面の結果と食い違うので、部分的にも当てない)。
+      buildingStyle: AssetSwap ? {
+        sets: function () { return (FUR.sets || []).filter(function (s) { return s.style; }).map(function (s) { return { id: s.id, name: s.name }; }); },
+        find: function (name) { var s = AssetSwap.findSet(FUR.sets, name, 'style'); return s ? { id: s.id, name: s.name } : null; },
+        plan: function () { throw RefusalError('buildingStyle'); },
+        apply: function () { throw RefusalError('buildingStyle'); }
+      } : undefined,
       // 一括差し替え(画面の planAssetSwapCtx と同じ形。決め方は swapPlan)。
       assetSwap: AssetSwap ? {
         sets: function () { return (FUR.sets || []).map(function (s) { return { id: s.id, name: s.name }; }); },

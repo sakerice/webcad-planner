@@ -133,10 +133,19 @@
   function channelHasRoughness(channel) { return NO_ROUGHNESS_CHANNELS.indexOf(channel) < 0; }
   // 設定パネルの部位ごとの書き込み(app-state.js の updateSelectedModelFinish・updateSelectedModelTexture・
   // updateSelectedModelRoughness)と AI の編集が共に使う、次の値の作り方。今の表 current に部位 channel の値を足した写しを返す。
-  // 色は書き足すだけ、素材と艶は '' で部位を外し、空になったら null(欄ごと既定)にする。
+  // 色・素材・艶とも、'' で部位を外して既定に戻し、空になったら null(欄ごと既定。パネルの「素材の色を元に戻す」と同じ形)にする。
+  // (設定パネルの色の欄は '' を書かないので、色を外すのは AI の編集だけ)
   function nextFinishColors(current, channel, value) {
-    var colors = Object.assign({}, current || {}); colors[channel] = value;
+    var colors = Object.assign({}, current || {});
+    if (value === '') { delete colors[channel]; return Object.keys(colors).length ? colors : null; }
+    colors[channel] = value;
     return colors;
+  }
+  // 失敗の文に写す、AI が送った値(80 字で切る)。
+  function shortText(v) {
+    var t = String(typeof v === 'string' ? v : JSON.stringify(v));
+    var chars = Array.from(t);
+    return chars.length > 80 ? chars.slice(0, 80).join('') + '…' : t;
   }
   function nextFinishTextures(current, channel, value) {
     var textures = Object.assign({}, current || {});
@@ -148,6 +157,19 @@
     if (value === '') delete settings[channel]; else settings[channel] = Number(value);
     return Object.keys(settings).length ? settings : null;
   }
+  // 内観(壁紙)・外観(外壁)・屋根の「カラー設定」の家全体・階ごとの素材(値は index.html の ASSET_TEX_MAP のキー)。
+  // 設定パネル(index.html の presetTextureSelectHtml)と AI の操作 setAppearance が共に使う。
+  var APPEARANCE_TEXTURES = {
+    exterior: [['siding', 'サイディング'], ['plaster', '塗り壁'], ['plaster_white', '塗り壁（白）'], ['galvalume_dark', 'ガルバ（黒）'],
+      ['wood_cedar', '杉板'], ['mansion_brick_red', '赤レンガ（洋館）'], ['mansion_ashlar_stone', '切石（洋館）'],
+      ['kominka_yakisugi', '焼杉板（古民家）'], ['kominka_shikkui', '白漆喰（古民家）']],
+    interior: [['wall_int', '塗り壁'], ['plaster_white', '塗り壁（白）'], ['wood_cedar', '杉板'],
+      ['mansion_damask_wallpaper', 'ダマスク柄の壁紙（洋館）'], ['mansion_white_subway_tile', '白いタイル（洋館）'],
+      ['kominka_shikkui', '白漆喰（古民家）'], ['kominka_juraku', '聚楽の土壁（古民家）']],
+    roof: [['roof_tile', '瓦'], ['roof_kawara_ibushi', '日本瓦（いぶし銀）'], ['roof_s_tile_terracotta', '洋瓦（S形・素焼き）'], ['roof_flat_tile_charcoal', '平板瓦（黒灰）'], ['roof_colonial_gray', '化粧スレート（コロニアル）'], ['roof_standing_seam_silver', 'ガルバ立平（銀）'], ['roof_copper_patina', '銅板一文字（緑青）'], ['roof_asphalt_shingle_brown', 'アスファルトシングル（茶）'], ['galvalume_dark', 'ガルバ（黒）'], ['mansion_slate_roof', 'スレート（洋館）'], ['kominka_kayabuki', '茅葺き（古民家）']]
+  };
+  // 屋根の質感(屋根カラー設定の「質感」)。'' は素材に合わせる。
+  var ROOF_SHEEN_OPTIONS = [['', '素材に合わせる'], ['matte', 'マット'], ['satin', '半艶'], ['metal', '金属']];
   // 画面の色の入力欄(input type=color)が書く形。大文字は小文字に直して受ける(入力欄は小文字で書くため)。
   var HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
@@ -198,7 +220,7 @@
     // 値は {部位: 値}。部位はモデルごとに違う(wood・metal・fabric など。applySettings の ctx.channels で受ける)。
     // 設定パネルと同じく、渡した部位だけを今の値に重ねる(ctx.current が今の物)。
     furniture: [
-      { key: 'finishColors', ja: '部位ごとの色 {部位: "#rrggbb"}', channelMap: 'color', editOnly: true, panel: 'updateSelectedModelFinish' },
+      { key: 'finishColors', ja: '部位ごとの色 {部位: "#rrggbb"}（"" でその部位を既定の色に戻す）', channelMap: 'color', editOnly: true, panel: 'updateSelectedModelFinish' },
       { key: 'finishTextures', ja: '部位ごとの素材 {部位: 値}（屋根の部品の部位 roof は屋根材の一覧から）', channelMap: 'texture', editOnly: true, panel: 'updateSelectedModelTexture' },
       { key: 'finishRoughness', ja: '部位ごとの艶 {部位: 値}（布 fabric・差し色 accent の部位には無い）', channelMap: 'roughness', editOnly: true, panel: 'updateSelectedModelRoughness' },
     ],
@@ -355,17 +377,17 @@
       var ok = channels.indexOf(ch) >= 0 && (def.channelMap !== 'roughness' || channelHasRoughness(ch));
       if (!ok) {
         var usable = def.channelMap === 'roughness' ? channels.filter(channelHasRoughness) : channels;
-        reject('部位「' + ch + '」はこの物には' + (def.channelMap === 'roughness' && channels.indexOf(ch) >= 0 ? '艶の設定がありません' : 'ありません'), usable);
+        reject('部位「' + shortText(ch) + '」はこの物には' + (def.channelMap === 'roughness' && channels.indexOf(ch) >= 0 ? '艶の設定がありません' : 'ありません'), usable);
         return undefined;
       }
       if (def.channelMap === 'color') {
-        if (typeof v !== 'string' || !HEX_COLOR_RE.test(v)) { reject('部位「' + ch + '」の色は "#rrggbb" の形で渡してください'); return undefined; }
+        if (v !== '' && (typeof v !== 'string' || !HEX_COLOR_RE.test(v))) { reject('部位「' + ch + '」の色は "#rrggbb" の形で渡してください("" で既定の色に戻す)'); return undefined; }
         current = nextFinishColors(current, ch, v.toLowerCase());
       } else {
         var list = def.channelMap === 'texture' ? modelFinishTextureOptions(ch) : FINISH_ROUGHNESS;
         var s = v === null ? '' : String(v);
         if (typeof v === 'number' && def.channelMap === 'roughness') s = String(v);
-        if (!list.some(function (c) { return c[0] === s; })) { reject('部位「' + ch + '」の値「' + s + '」は使えません', list.map(function (c) { return c[0]; })); return undefined; }
+        if (!list.some(function (c) { return c[0] === s; })) { reject('部位「' + ch + '」の値「' + shortText(s) + '」は使えません', list.map(function (c) { return c[0]; })); return undefined; }
         current = def.channelMap === 'texture' ? nextFinishTextures(current, ch, s) : nextFinishRoughness(current, ch, s);
       }
     }
@@ -417,6 +439,7 @@
     tidyText: tidyText,
     OPENINGS: OPENINGS, SWING_TYPES: SWING_TYPES, EXTERIOR: EXTERIOR, SITE: SITE, SETTINGS: SETTINGS,
     FLOOR_MATERIALS: FLOOR_MATERIALS, SITE_SURFACES: SITE_SURFACES,
+    APPEARANCE_TEXTURES: APPEARANCE_TEXTURES, ROOF_SHEEN_OPTIONS: ROOF_SHEEN_OPTIONS,
     SASH_COLORS: SASH_COLORS, DOOR_FINISHES: DOOR_FINISHES, DOOR_FINISH_TYPES: DOOR_FINISH_TYPES,
     MODEL_FINISH_TEXTURES: MODEL_FINISH_TEXTURES, MODEL_ROOF_FINISH_TEXTURES: MODEL_ROOF_FINISH_TEXTURES,
     FINISH_ROUGHNESS: FINISH_ROUGHNESS, modelFinishTextureOptions: modelFinishTextureOptions, channelHasRoughness: channelHasRoughness,

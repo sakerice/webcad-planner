@@ -166,7 +166,7 @@ test('一括差し替え: ロックされた物は替えない。名指しする
   assert.deepEqual(r.errors, []);
   assert.equal(byId(r.plan, chair.id).type, chair.type, 'except の物は替わらない');
   r = workerApply(q, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion', ids: [999999] } }]);
-  assert.match(r.errors[0].message, /見つかりません/);
+  assert.match(r.errors[0].message, /置いてある物の中にありません/);
 });
 
 test('一括差し替え: 知らないセットは、使えるセットを候補にして失敗する', async () => {
@@ -211,4 +211,99 @@ test('MCP の経路(ルームの /op): 家具の色と一括差し替えが積�
   res = await rooms.roomOp(env, made.roomId, 'swapAssetSet', { set: 'gothic' });
   assert.equal(res.ok, false);
   assert.deepEqual(res.errors[0].candidates, ['rpg-mansion', 'kominka']);
+});
+
+test('カラー設定(setAppearance): 家全体と階の色・素材・屋根の質感。外観は印を付けてから書く。知らない値は候補つきで失敗', async () => {
+  const { workerApply } = await load();
+  const p = plan();
+  let r = workerApply(p, [{ op: 'setAppearance', args: { part: 'exterior', color: '#33AA55', texture: 'siding' } }]);
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual([r.plan.exteriorWallSettings.whole.linked, r.plan.exteriorWallSettings.whole.color, r.plan.exteriorWallSettings.whole.texture], [true, '#33aa55', 'siding']);
+  r = workerApply(p, [{ op: 'setAppearance', args: { part: 'exterior', floor: 2, color: '#223344' } }]);
+  assert.deepEqual([r.plan.exteriorWallSettings.whole.linked, r.plan.exteriorWallSettings.floors[2].linked, r.plan.exteriorWallSettings.floors[2].color], [false, true, '#223344']);
+  r = workerApply(p, [{ op: 'setAppearance', args: { part: 'interior', floor: 1, texture: 'kominka_juraku' } }]);
+  assert.deepEqual([r.plan.interiorWallSettings.whole.linked, r.plan.interiorWallSettings.floors[1].linked, r.plan.interiorWallSettings.floors[1].texture], [false, true, 'kominka_juraku']);
+  r = workerApply(p, [{ op: 'setAppearance', args: { part: 'roof', sheen: 'metal' } }]);
+  assert.equal(r.plan.roofAppearance.whole.sheen, 'metal');
+  r = workerApply(r.plan, [{ op: 'setAppearance', args: { part: 'roof', sheen: '' } }]);
+  assert.ok(!('sheen' in r.plan.roofAppearance.whole), '"" で質感の欄ごと外す(設定欄と同じ)');
+  for (const [args, re] of [[{ part: 'roof', texture: 'siding' }, /屋根の素材にありません/], [{ part: 'interior', sheen: 'metal' }, /屋根\(part=roof\)だけ/],
+    [{ part: 'wall', color: '#000000' }, /interior・exterior・roof/], [{ part: 'roof', floor: 5, color: '#000000' }, /1〜4/], [{ part: 'roof' }, /どれかを渡して/]]) {
+    const e = workerApply(p, [{ op: 'setAppearance', args }]);
+    assert.match(e.errors[0].message, re, JSON.stringify(args));
+    assert.equal(e.plan, p);
+  }
+});
+
+test('建物の様式(applyBuildingStyle): Worker は理由つきで断る。知らない名前は候補つきで失敗する', async () => {
+  const { workerApply } = await load();
+  const p = plan();
+  let r = workerApply(p, [{ op: 'applyBuildingStyle', args: { set: '洋館' } }]);
+  assert.match(r.errors[0].message, /^この操作は house-planner の画面で行ってください\(建物の様式/);
+  assert.equal(r.plan, p);
+  r = workerApply(p, [{ op: 'applyBuildingStyle', args: { set: 'ゴシック' } }]);
+  assert.deepEqual(r.errors[0].candidates, ['rpg-mansion', 'kominka']);
+  r = workerApply(p, [{ op: 'applyBuildingStyle', args: { set: 'kominka', parts: ['roof', 'roofs'] } }]);
+  assert.match(r.errors[0].message, /roofs/);
+  const vocab = Catalog.describeVocabulary({ settable: PlanSettable, knowledge: Knowledge, assetSets: furniture.sets });
+  assert.match(vocab, /applyBuildingStyle の set/);
+  assert.match(vocab, /setAppearance の texture/);
+  assert.match(vocab, /mansion_brick_red=/);
+});
+
+// 2026-11-26 の独立レビューで見つかった場面(台だけを選ぶと上の物が二重に残る、家具でない物を選んでも理由が返らない)。
+test('一括差し替え: 洗面台だけを選ぶと、上の洗面ボウルも一緒に外す。ボウルがロック・除く物なら台ごと残す', async () => {
+  const { workerApply } = await load();
+  const p = plan();
+  const vanity = p.items.find((it) => it.type === 'fmp-BathroomVanity07');
+  const bowl = p.items.find((it) => it.type === 'fmp-WashBasin01');
+  assert.ok(vanity && bowl, '凍結間取りに洗面台と洗面ボウルがある');
+  let r = workerApply(p, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion', ids: [String(vanity.id)] } }]);
+  assert.deepEqual(r.errors, []);
+  assert.ok(/^rpg-mansion-/.test(byId(r.plan, vanity.id).type), '洗面台は替わる');
+  assert.equal(byId(r.plan, bowl.id), undefined, '上の洗面ボウルは一緒に外れる(全部を替えたときと同じ)');
+  assert.ok(r.removedIds.includes(bowl.id));
+  assert.ok(r.warnings.some((w) => w.includes('id ' + bowl.id) && /一緒に外しました/.test(w)), JSON.stringify(r.warnings));
+  const all = workerApply(p, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion' } }]);
+  assert.equal(JSON.stringify(byId(all.plan, vanity.id)), JSON.stringify(byId(r.plan, vanity.id)), '全部を替えたときと同じ洗面台');
+  // ボウルを除く・ロックすると、台ごと替えずに残す(浮いた物・二重の物を作らない)
+  for (const [label, args, prep] of [['除く', { set: 'rpg-mansion', ids: [String(vanity.id)], except: [String(bowl.id)] }, null],
+    ['ロック', { set: 'rpg-mansion', ids: [String(vanity.id)] }, (q) => { byId(q, bowl.id).locked = true; }]]) {
+    const q = plan();
+    if (prep) prep(q);
+    r = workerApply(q, [{ op: 'swapAssetSet', args }]);
+    assert.deepEqual(r.errors, [], label);
+    assert.equal(byId(r.plan, vanity.id).type, vanity.type, label + ': 洗面台は替えない');
+    assert.equal(JSON.stringify(byId(r.plan, bowl.id)), JSON.stringify(byId(q, bowl.id)), label + ': ボウルもそのまま');
+    assert.ok(r.warnings.some((w) => w.includes('id ' + bowl.id) && /台だけを替えられない/.test(w)), label + ' ' + JSON.stringify(r.warnings));
+  }
+});
+
+test('一括差し替え: 家具でない物を選ぶと、その id と理由を warnings に書く。空の ids・両方に書いた id・壁の id は失敗', async () => {
+  const { workerApply } = await load();
+  const p = plan();
+  const win = p.items.find((it) => it.type === 'window');
+  const chair = p.items.find((it) => /Chair/i.test(it.type) && !/Sofa/.test(it.type));
+  let r = workerApply(p, [{ op: 'swapAssetSet', args: { set: 'rpg-mansion', ids: [String(win.id), String(chair.id)] } }]);
+  assert.deepEqual(r.errors, []);
+  assert.ok(r.warnings.some((w) => w.includes('id ' + win.id) && /家具ではない/.test(w)), JSON.stringify(r.warnings));
+  for (const [args, re] of [[{ set: 'rpg-mansion', ids: [] }, /ids が空です/], [{ set: 'rpg-mansion', ids: [String(chair.id)], except: [chair.id] }, /両方にあります/],
+    [{ set: 'rpg-mansion', ids: [String(p.walls[0].id)] }, /壁・部屋は選べず/], [{ set: 'x'.repeat(5000) }, /…」はありません/]]) {
+    r = workerApply(p, [{ op: 'swapAssetSet', args }]);
+    assert.match(r.errors[0].message, re, JSON.stringify(args).slice(0, 80));
+    assert.ok(r.errors[0].message.length < 300, '失敗文に送った値を丸ごと写さない');
+  }
+});
+
+test('家具の部位の色は "" で既定に戻せる。全部の部位を戻すと欄ごと null(パネルの「素材の色を元に戻す」と同じ形)', async () => {
+  const { workerApply } = await load();
+  const p = plan();
+  const it = p.items.find((x) => (furniture.fc[x.type] || []).includes('wood') && (furniture.fc[x.type] || []).includes('fabric'));
+  let r = workerApply(p, [{ op: 'setProps', args: { id: it.id, set: { finishColors: { wood: '#112233', fabric: '#445566' } } } }]);
+  r = workerApply(r.plan, [{ op: 'setProps', args: { id: it.id, set: { finishColors: { wood: '' } } } }]);
+  assert.deepEqual(byId(r.plan, it.id).finishColors, { fabric: '#445566' });
+  r = workerApply(r.plan, [{ op: 'setProps', args: { id: it.id, set: { finishColors: { fabric: '' } } } }]);
+  assert.equal(byId(r.plan, it.id).finishColors, null);
+  r = workerApply(p, [{ op: 'setProps', args: { id: it.id, set: { finishColors: { wood: 'y'.repeat(100000) } } } }]);
+  assert.ok(r.errors[0].message.length < 400, '失敗文に送った値を丸ごと写さない: ' + r.errors[0].message.length);
 });

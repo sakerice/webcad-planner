@@ -153,16 +153,20 @@
 
   // items: プランの物。ctx: {kindOf(type), catalogue: 差し替え先のセットの物, swap: セットの swap 設定, setId,
   //   mountOf(type), heightOf(type), itemHeightOf(item), ceilingAt(item): 天井の仕上げ面の高さ(mm)か null,
-  //   frozen(item), keep(item)}
+  //   frozen(item), keep(item), excluded(item)}
   // ceilingAt は、壁・天井に付いた物を壁掛け・天井吊りの物に替えるときだけ呼ぶ(Worker は天井を測れない部屋で断るため、
   // 要らない物では呼ばない)。
   // frozen(item) が真の物(ロックされた物)は、行を作らない(替えない・外さない・高さも変えない)。台としては今のまま数える。
   // keep(item) が真の物(AI が差し替える物を選んだときの、選ばれなかった物)は替えず、外さない。
-  // 載っている台が替わるときに高さを合わせる('adjust')ことだけはする。
+  // 載っている台が替わるときに高さを合わせる('adjust')ことだけはする。台の替え先に含まれる物(洗面台の上の洗面ボウルなど)は、
+  // 選ばれていなくても台と一緒に外す(全部を替えたときと同じ見た目にする。行の base に台の id を書く)。
+  // excluded(item) が真の物(AI が替えない物として名指しした物)は keep と同じだが、外しもしない。
+  // 台に載っている物が frozen か excluded で、台を替えると浮く・埋まる・二重になるときは、台ごと替えずに残す(理由つき)。
   // どちらも省けば今までどおり全部を見る(画面の一括差し替え)。
   function plan(items,ctx){
     var frozen=function(it){ return !!(ctx.frozen&&ctx.frozen(it)); };
     var keep=function(it){ return !!(ctx.keep&&ctx.keep(it)); };
+    var excluded=function(it){ return !!(ctx.excluded&&ctx.excluded(it)); };
     var cfg=ctx.swap||{}, cat=(ctx.catalogue||[]).filter(function(c){return !c.retired;});
     var byKind={};
     cat.forEach(function(c){ if(c.kind)(byKind[c.kind]||(byKind[c.kind]=[])).push(c); });
@@ -185,7 +189,7 @@
     });
 
     items.forEach(function(it){
-      if(frozen(it)||keep(it)) return;                               // 替えない物(ロック・選ばれなかった物)
+      if(frozen(it)||keep(it)||excluded(it)) return;                 // 替えない物(ロック・選ばれなかった物・除いた物)
       if(String(it.type).indexOf(ctx.setId+'-')===0) return;        // もうこのセットの物
       var kind=(cfg.typeKinds&&cfg.typeKinds[it.type])||ctx.kindOf(it.type);
       if(!kind) return;                                              // カタログの家具ではない（壁・窓・照明など）
@@ -281,6 +285,21 @@
       rows.push(row); rowById[String(it.id)]=row;
     });
 
+    // 動かせない物(frozen)・外せない物(excluded で、台の替え先に含まれる物)が載っている台は、替えずに残す。
+    // (frozen も excluded も渡さない画面の一括差し替えでは、何も起きない)
+    items.forEach(function(it){
+      var b=baseOf[String(it.id)]; if(!b) return;
+      var br=rowById[String(b.id)];
+      if(!br||br.action==='keep'||br.action==='adjust'||br.action==='remove') return;
+      var kind=(cfg.typeKinds&&cfg.typeKinds[it.type])||ctx.kindOf(it.type)||null;
+      var baseKind=(cfg.typeKinds&&cfg.typeKinds[b.type])||ctx.kindOf(b.type)||null;
+      var included=kind&&kind===baseKind&&br.action==='swap';
+      if(frozen(it)||(excluded(it)&&included)){
+        br.action='keep'; delete br.parts; delete br.label;
+        br.reason='上に載っている物(id '+it.id+')を'+(frozen(it)?'ロックしている':'替えない物に選んでいる')+'ので、台だけを替えられない';
+      }
+    });
+
     // 台の上に載っている物は、台の新しい天端に合わせて高さを決め直す。
     // 台が低い座卓に替わればランプも下り、台が高い洗面台に替わればボウルも上がる。
     // 台が替わらなくても、台の台が替われば連鎖する（台の上の台の上の物）
@@ -316,9 +335,9 @@
       // とみなして外す。残すと据え置きの洗面台の上にもう一つ洗面器が載る
       var kind=(cfg.typeKinds&&cfg.typeKinds[it.type])||ctx.kindOf(it.type)||null;
       var baseKind=(cfg.typeKinds&&cfg.typeKinds[b.type])||ctx.kindOf(b.type)||null;
-      if(kind&&kind===baseKind&&br&&br.action==='swap'&&!keep(it)){
+      if(kind&&kind===baseKind&&br&&br.action==='swap'&&!excluded(it)){
         if(!r){ r={id:it.id,type:it.type,kind:kind,floor:it.floor||1}; rows.push(r); rowById[key]=r; }
-        r.action='remove'; r.label=br.label+'に含める'; delete r.reason; r.parts=[];
+        r.action='remove'; r.label=br.label+'に含める'; delete r.reason; r.parts=[]; r.base=b.id;
         return;
       }
       var e=Math.round(newElevOf(it));
@@ -384,8 +403,10 @@
 
   // セットの名前か id から、差し替えの設定(swap)を持つセットを引く。sets はセットの一覧(asset-sets.json の sets)。
   // 一致が無ければ null。名前は前後の空白を除いて比べ、「古民家」のように名前の一部でも、当たるセットが1つだけなら引く。
-  function findSwapSet(sets,name){
-    var list=(sets||[]).filter(function(s){ return s&&s.swap; });
+  function findSwapSet(sets,name){ return findSet(sets,name,'swap'); }
+  // field の設定(swap=一括差し替え、style=建物の様式)を持つセットから引く。
+  function findSet(sets,name,field){
+    var list=(sets||[]).filter(function(s){ return s&&s[field]; });
     var q=String(name==null?'':name).trim();
     if(!q) return null;
     var hit=list.filter(function(s){ return s.id===q||s.name===q; })[0];
@@ -394,7 +415,7 @@
     return part.length===1?part[0]:null;
   }
 
-  var api={plan:plan,summary:summary,applyRows:applyRows,findSwapSet:findSwapSet,_withinBounds:withinBounds};
+  var api={plan:plan,summary:summary,applyRows:applyRows,findSwapSet:findSwapSet,findSet:findSet,_withinBounds:withinBounds};
 
   // ── ここから画面（ブラウザだけ） ─────────────────────────────────────────
   // 差し替えの入口は、カタログの「表示するセット」の下に置く（差し替え設定を持つセットごとに1つ）。
@@ -412,11 +433,11 @@
     if(/[ぁ-んァ-ヶ一-龠]/.test(name)) return name;
     return (f.kindJa?f.kindJa+'（'+name+'）':name);
   }
-  // opts.frozen・opts.keep は plan の同名の欄(AI の操作 swapAssetSet が渡す。画面の一括差し替えは渡さない)。
+  // opts.frozen・opts.keep・opts.excluded は plan の同名の欄(AI の操作 swapAssetSet が渡す。画面の一括差し替えは渡さない)。
   function planFor(setId,opts){
     var set=setCfg(setId); if(!set||!set.swap) return [];
     var cat=Object.keys(root.FMP_ITEMS||{}).map(function(k){return root.FMP_ITEMS[k];}).filter(function(i){return i.assetSet===setId;});
-    return plan(root.DATA.items,{setId:setId,catalogue:cat,swap:set.swap,frozen:opts&&opts.frozen,keep:opts&&opts.keep,mountOf:function(type){
+    return plan(root.DATA.items,{setId:setId,catalogue:cat,swap:set.swap,frozen:opts&&opts.frozen,keep:opts&&opts.keep,excluded:opts&&opts.excluded,mountOf:function(type){
       var f=typeof root.getFmpItem==='function'?root.getFmpItem(type):null; return f&&f.mount;
     },heightOf:function(type){
       var f=typeof root.getFmpItem==='function'?root.getFmpItem(type):null; return f&&f.h;

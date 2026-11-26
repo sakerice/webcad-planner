@@ -256,30 +256,35 @@
   function finish(target,texture){
     target.color='#ffffff'; target.texture=texture; target.textureFlipX=false; target.textureFlipY=false;
   }
-  // 決めた内容を書き込む。Undo 1回で全部戻るよう、最初に1度だけ履歴を取る。
-  function apply(p,parts){
-    parts=parts||{exterior:true,roof:true,interior:true,floor:true,doors:true,windows:true};
-    if(!Object.keys(parts).some(function(k){return parts[k];})) return 0;
-    var D=root.DATA;
-    root.saveState();
+  // 決めた内容 p をプラン D に書き込む(画面の apply と、AI の操作 applyBuildingStyle が共に使う)。
+  // h: {ensureExteriorWallSettings, defaultExteriorFloorSetting(floor), ensureRoofAppearance, ensureInteriorWallSettings(どれも設定表を返す関数),
+  //     locked(物): ロックされた物か(省けば見ない。画面の一括の切り替えはロックを見ない), wallKey(壁): 面の鍵の頭(wallSettingKey)}
+  // ロックを見るときは、ロックされた部屋・扉・窓と、ロックされた壁の面(内観・外観)を変えない。
+  // 戻り値: 変わった部屋・物の id の並び。
+  function applyPlan(D,p,parts,h){
+    var changed=[];
+    var lockedWallKeys=[];
+    if(h.locked) (D.walls||[]).forEach(function(w){ if(h.locked(w)) lockedWallKeys.push(String(h.wallKey(w))+'_'); });
+    var faceLocked=function(k){ return lockedWallKeys.some(function(pre){ return String(k).indexOf(pre)===0; }); };
     if(parts.exterior&&p.exterior.length){
-      var s=root.ensureExteriorWallSettings();
+      var s=h.ensureExteriorWallSettings();
       s.whole.linked=false;
       p.exterior.forEach(function(e){
-        var fs=s.floors[e.floor]=s.floors[e.floor]||root.defaultExteriorFloorSetting(e.floor);
+        var fs=s.floors[e.floor]=s.floors[e.floor]||h.defaultExteriorFloorSetting(e.floor);
         fs.linked=true; finish(fs,e.texture);
       });
-      Object.keys(s.faces).forEach(function(k){ s.faces[k].mode='inherit'; });
+      Object.keys(s.faces).forEach(function(k){ if(!faceLocked(k)) s.faces[k].mode='inherit'; });
     }
     if(parts.roof&&p.roof){
-      var roof=root.ensureRoofAppearance();
+      var roof=h.ensureRoofAppearance();
       roof.whole.linked=true; finish(roof.whole,p.roof);
     }
     if(parts.interior&&p.interior){
-      var ins=root.ensureInteriorWallSettings();
+      var ins=h.ensureInteriorWallSettings();
       ins.whole.linked=true; finish(ins.whole,p.interior);
-      Object.keys(ins.faces).forEach(function(k){ ins.faces[k].mode='inherit'; });
+      Object.keys(ins.faces).forEach(function(k){ if(!faceLocked(k)) ins.faces[k].mode='inherit'; });
       p.faces.forEach(function(f){
+        if(faceLocked(f.key)) return;
         var fs=ins.faces[f.key]=ins.faces[f.key]||{};
         fs.mode='custom'; finish(fs,f.texture);
       });
@@ -287,22 +292,31 @@
     if(parts.floor){
       p.rooms.forEach(function(r){
         var room=D.rooms[r.id]; if(!room) return;
+        if(h.locked&&h.locked(room)) return;
         room.floorMaterial=r.texture;
         delete room.texture; delete room.floorColor; delete room.textureFlipX; delete room.textureFlipY;
+        if(room.id!==undefined&&changed.indexOf(room.id)<0) changed.push(room.id);
       });
     }
-    if(parts.doors){
-      (p.doors||[]).forEach(function(d){
+    ['doors','windows'].forEach(function(part){
+      if(!parts[part]) return;
+      (p[part]||[]).forEach(function(d){
         var it=(D.items||[]).find(function(x){ return x.id===d.id; });
-        if(it) it.openingModel=d.model;   // 開口の大きさはそのまま(applyOpeningModelToItem は幅を扉に合わせてしまう)
+        if(!it||(h.locked&&h.locked(it))) return;
+        it.openingModel=d.model;   // 開口の大きさはそのまま(扉・窓が開口に合わせて伸縮する)
+        if(changed.indexOf(it.id)<0) changed.push(it.id);
       });
-    }
-    if(parts.windows){
-      (p.windows||[]).forEach(function(w){
-        var it=(D.items||[]).find(function(x){ return x.id===w.id; });
-        if(it) it.openingModel=w.model;   // 開口の大きさはそのまま(窓が開口に合わせて伸縮する)
-      });
-    }
+    });
+    return changed;
+  }
+  var ALL_PARTS={exterior:true,roof:true,interior:true,floor:true,doors:true,windows:true};
+  // 決めた内容を書き込む。Undo 1回で全部戻るよう、最初に1度だけ履歴を取る。
+  function apply(p,parts){
+    parts=parts||ALL_PARTS;
+    if(!Object.keys(parts).some(function(k){return parts[k];})) return 0;
+    root.saveState();
+    applyPlan(root.DATA,p,parts,{ensureExteriorWallSettings:root.ensureExteriorWallSettings,defaultExteriorFloorSetting:root.defaultExteriorFloorSetting,
+      ensureRoofAppearance:root.ensureRoofAppearance,ensureInteriorWallSettings:root.ensureInteriorWallSettings});
     if(typeof root.markDirty==='function') root.markDirty();
     if(typeof root.updateProps==='function') root.updateProps();
     if(typeof root.syncExteriorWallPanel==='function') root.syncExteriorWallPanel();
@@ -311,6 +325,7 @@
     return 1;
   }
 
+  api.applyPlan=applyPlan; api.ALL_PARTS=ALL_PARTS;
   api.open=open; api.apply=apply; api.planFor=planFor; api.collect=collect;
   if(typeof module==='object'&&module.exports) module.exports=api;else root.BuildingStyle=api;
 })(typeof window==='object'?window:globalThis);
