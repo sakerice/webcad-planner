@@ -5,6 +5,7 @@
 //      画面(下のナビ)になり、座標・壁の本数・版の番号の帯が出ない。マウスの PC は今までどおり。
 //   2. 平面図(#c2d)の裏地が「CSS の画素 × 端末の倍率」になり、描く位置・タップの当たり・
 //      ドラッグ・壁の作図・画像の書き出しがずれない。
+//      何も操作しないあいだは描き直さない。
 //   3. 操作の案内(#help-box・#joy-hint)を閉じられ、開き直しても閉じたまま。設定欄から出し直せる。
 //
 // 間取りは凍結間取り tools/tests/fixtures/house-2f.json をファイル選択で読み込む。
@@ -109,6 +110,22 @@ try {
     const c = await page.evaluate(() => { const a = document.getElementById('canvas-area'), r = canvas.getBoundingClientRect(); return { w: canvas.width, h: canvas.height, cw: a.clientWidth, ch: a.clientHeight, rw: r.width, rh: r.height }; });
     assert.deepEqual([c.w, c.h], [Math.round(c.cw * dpr), Math.round(c.ch * dpr)], `${name}: 平面図の裏地は CSS の画素 × ${dpr}`);
     assert.deepEqual([c.rw, c.rh], [c.cw, c.ch], `${name}: 平面図の見た目の大きさは図の欄と同じ`);
+
+    // 何も操作しないあいだ、描き直しも裏地の張り替えも起きない(大きさ決めと描き直しが互いを呼び続けないこと)
+    const idle = await page.evaluate(async () => {
+      const real = window.draw2dScene; let draws = 0, changes = 0, w = canvas.width, h = canvas.height;
+      window.draw2dScene = function () { draws++; return real.apply(this, arguments); };
+      const end = performance.now() + 2000;
+      while (performance.now() < end) {
+        await new Promise((r) => requestAnimationFrame(r));
+        if (canvas.width !== w || canvas.height !== h) { changes++; w = canvas.width; h = canvas.height; }
+      }
+      window.draw2dScene = real;
+      return { draws, changes };
+    });
+    // (読み込みの直後は、絵が読めた知らせで 1〜2 回描き直すことがある。描き直しが回り続けると 2 秒で 100 回を超える)
+    assert.equal(idle.changes, 0, `${name}: 何もしない 2 秒間に平面図の裏地の大きさが変わった`);
+    assert.ok(idle.draws <= 5, `${name}: 何もしない 2 秒間に平面図を ${idle.draws} 回描き直した`);
 
     // 決まった物と壁だけの図面にして、位置を確かめる
     // (上の帯・案内の箱・下のナビに隠れない所へ図面を寄せる)
