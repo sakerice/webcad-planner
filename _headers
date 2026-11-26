@@ -36,3 +36,13 @@
 # 届き方は tools/tests/security-headers.browser.mjs が本物の Worker で確かめる。
 /assets/models/*
   Access-Control-Allow-Origin: capacitor://localhost
+
+# ドメインの確認用のファイル(2026-11-26)。中身は legal/site.json の値で、legal/build.cjs が書き出す(値が空なら置かず、404)。
+# 拡張子が無く、種類を決められないので、文字として返す。
+# - /.well-known/openai-apps-challenge … ChatGPT のアプリの申請で OpenAI が読む確認用の文字列。
+# - /.well-known/mcp-registry-auth     … 公式 MCP Registry の HTTP 方式の確認に使う1行。
+# 届き方は tools/tests/legal-pages.browser.mjs が本物の Worker で確かめる。
+/.well-known/openai-apps-challenge
+  Content-Type: text/plain; charset=utf-8
+/.well-known/mcp-registry-auth
+  Content-Type: text/plain; charset=utf-8
