@@ -15,7 +15,7 @@
 // 素の HTTP で呼んでスイッチを素通りしないように)。スイッチの切り替え(/ai-edits)は、いつでも画面からだけ受ける
 // (外から「受け付ける」に戻されないように)。「画面から」は routes-rooms.mjs が Origin を見て付ける印(SCREEN_HEADER)で、
 // 画面の共同編集は今までどおり通る。Origin はブラウザの外からなら偽れるので、偽ってまで呼ぶ相手は止まらない
-// (止めるには、読む URL とは別の「書くための鍵」が要る。worker/room-quota.mjs の isFromScreen の説明)。
+// (見分け方と守れる範囲は worker/room-screen.mjs の冒頭)。
 //
 // ルームをまたいだ全体の回数の上限(worker/room-quota.mjs)。画面からの書き込み(/update・/save・スイッチの切り替え)は
 // 20 回ぶんをまとめて取り、残りを meta.writeLease {day, left} に持つ。外の AI の /op は、積む直前に1回ずつ数える。
@@ -29,8 +29,9 @@ import PlanCorePatch from "../assets/js/plan-core/patch.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
 import { workerApply, workerSummarize, workerInspect, REFUSAL } from "./plan-ctx.mjs";
 import { roomPatchProblem, roomPlanProblem, maxSameId, upsertKeyCounts } from "./room-guard.mjs";
+import { SCREEN_HEADER } from "./room-screen.mjs";
 import {
-  SCREEN_HEADER, ROOM_WRITE_LEASE, takeScreenWriteLease, takeMcpOpAll,
+  ROOM_WRITE_LEASE, takeScreenWriteLease, takeMcpOpAll,
   writeLimitMessage, MCP_OP_LIMIT_ALL_MESSAGE, MCP_OP_BUSY_MESSAGE,
 } from "./room-quota.mjs";
 import { whoOf } from "./ai-budget.mjs";
@@ -227,12 +228,6 @@ export class CollaborationRoom {
     this.writeDenied = null;
   }
 
-  // 外の AI からの変更を止めている間、画面からでない書き込みを断る。通すときは null。
-  outsideWriteRefusal(request, meta) {
-    if (!meta.aiEditsOff || request.headers.get(SCREEN_HEADER) === "1") return null;
-    return json({ error: "ai_edits_off", message: MCP_AI_EDITS_OFF_MESSAGE }, 403);
-  }
-
   // 画面からの書き込みを1回数える(全体の上限。worker/room-quota.mjs)。
   // 戻り値 {ok:true, meta: meta に足す欄 | null} か {ok:false}(上限。何も書かない)。
   async takeScreenWrite(meta, request) {
@@ -252,6 +247,12 @@ export class CollaborationRoom {
     // 数えられなかったときは通す(共同編集を止めない)。残りは持たない
     if (got !== "ok") return { ok: true, meta: null };
     return { ok: true, meta: { writeLease: { day, left: ROOM_WRITE_LEASE - 1 } } };
+  }
+
+  // 外の AI からの変更を止めている間、画面からでない書き込みを断る。通すときは null。
+  outsideWriteRefusal(request, meta) {
+    if (!meta.aiEditsOff || request.headers.get(SCREEN_HEADER) === "1") return null;
+    return json({ error: "ai_edits_off", message: MCP_AI_EDITS_OFF_MESSAGE }, 403);
   }
 
   // /op を1回数える。上限を超えていれば null(数を進めない)。進めた後の {day, n, del} を返す(del はその日に消えた物の数)。

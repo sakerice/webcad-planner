@@ -19,7 +19,8 @@ import {
   json, roomKey, randomRoomId, validPlan, encodedSize, readJsonWithLimit,
 } from "./shared.mjs";
 import { roomPlanProblem } from "./room-guard.mjs";
-import { SCREEN_HEADER, isFromScreen, takeScreenRoomCreate, roomCreateLimitMessage } from "./room-quota.mjs";
+import { SCREEN_HEADER, isFromScreen } from "./room-screen.mjs";
+import { takeScreenRoomCreate, roomCreateLimitMessage } from "./room-quota.mjs";
 
 // この worker が扱うパスかどうか。router はこれを見て振り分ける。
 export function handlesRooms(pathname) {

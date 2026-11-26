@@ -40,7 +40,7 @@
 //   - 束縛(env.AI_QUOTA)が無い … 数えずに通す(手元の検査。本番には束縛がある)
 //   - 数える先が返らない・例外・形が違う … 画面は通す(共同編集を止めないほうを選ぶ)。外の AI は断る
 //     (ルームの作成と同じ止める側。worker/mcp.mjs の takeRoomCreate)
-import { askQuota, whoOf, originAllowed } from "./ai-budget.mjs";
+import { askQuota, whoOf } from "./ai-budget.mjs";
 
 export const ROOM_WRITES_TOTAL = 10000;
 export const ROOM_WRITES_PER_USER = 3000;
@@ -68,17 +68,6 @@ export function roomCreateLimitMessage(now = Date.now()) {
 }
 export const MCP_OP_LIMIT_ALL_MESSAGE = "本日は AI からの変更が混み合っているため、これ以上直せません。あすまたお試しいただくか、house-planner の画面で直してください。";
 export const MCP_OP_BUSY_MESSAGE = "いまは操作できませんでした。少し待ってからもう一度お試しください。";
-
-// ── 画面からの要求か ──────────────────────────────────────────────
-// ブラウザは、同じ出どころへの POST にも Origin を付ける。Origin が付いていて、自分の出どころ・本番のホスト・
-// アプリ版・手元の開発のホストのどれかなら「画面から」とみなす(worker/ai-budget.mjs の originAllowed)。
-// Origin はブラウザの外からなら好きに付けられるので、これで止まるのは、ルームの URL を知った外の AI や道具が
-// 素の HTTP で呼ぶ場合まで(止めるスイッチを素通りさせないための最低限の線)。
-export const SCREEN_HEADER = "x-room-screen";
-export function isFromScreen(request) {
-  const origin = request && request.headers.get("origin");
-  return origin !== null && origin !== undefined && origin !== "" && originAllowed(request);
-}
 
 // ── 数える ────────────────────────────────────────────────────────
 // 戻り値: "ok" | "exceeded" | "unavailable" | "uncounted"(束縛が無い)

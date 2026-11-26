@@ -1,14 +1,13 @@
-// 共同編集のルームの書き込みの守り(worker/collab-room.mjs・worker/routes-rooms.mjs・worker/room-quota.mjs)。
+// 共同編集のルームへの書き込みの、ルームをまたいだ全体の上限(worker/room-quota.mjs・worker/collab-room.mjs・worker/routes-rooms.mjs)。
 //
 // 見ていること:
-//   1. 利用者が「外部の AI からの変更を受け付ける」を止めている間、画面からでない(Origin の無い)
-//      /api/rooms/:id/update・/save は断られ、ルームは1つも変わらない。画面(Origin が自分の出どころ)の共同編集は通る。
-//      スイッチの切り替え(/ai-edits)は画面からだけ受ける(外から「受け付ける」に戻せない)。
-//      止めていないルームは、今までどおり Origin が無くても /update が通る。
-//   2. ルームをまたいだ全体の回数の上限。画面の書き込みは 20 回ぶんをまとめて数え、全体・接続元ごとの上限で断る。
-//      外の AI の操作は1回ずつ数え、全体の上限で断る。画面からのルームの作成も接続元ごと・全体で数える。
-//      数える先が壊れているとき、画面は通し、外の AI は断る。束縛が無いとき(手元の検査)は数えずに通す。
-//   3. 断るときの文は日本語で、開発の都合(行・費用・トークン)を出さない。
+//   - 画面の書き込み(/update・/save)は 20 回ぶんをまとめて数え、全体・接続元ごとの上限で 429(write_limit)で断る。
+//     断ったときルームは1つも変わらない。読むのは止めない。
+//   - 外の AI の操作(/op)は積んだ数を1回ずつ数え、全体の上限で断る。画面の数とは別に持つ。
+//   - 画面からのルームの作成も接続元ごと・全体で数える。
+//   - 数える先が壊れているとき、画面は通し、外の AI は断る。束縛が無いとき(手元の検査)は数えずに通す。
+//   - 断るときの文は日本語で、開発の都合(行・費用・トークン)を出さない。返事に retry-after が付く。
+// (止めるスイッチの素通りの検査は tools/tests/room-switch-bypass.test.cjs)
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -76,72 +75,7 @@ function assertUserText(s) {
   assert.doesNotMatch(s, /トークン|token|費用|料金|円|ドル|\$|行|Durable|quota|limit|\d{3,}/i, '開発の都合が出ている: ' + s);
 }
 
-// ── 1. 止めるスイッチ ────────────────────────────────────────────────
-test('止めている間、画面からでない /update・/save は断り、ルームは変わらない。画面の共同編集は通る', async () => {
-  const { env, roomId, room } = await setup();
-  const ws = connect(room, 'screen-a');
-  const off = await http(env, 'POST', `/api/rooms/${roomId}/ai-edits`, { off: true }, SCREEN);
-  assert.equal(off.status, 200);
-  ws.clear();
-  const before = snapshotRoom(env, room);
-
-  // ルームの id を知った外の道具が、素の HTTP で呼ぶ
-  const up = await http(env, 'POST', `/api/rooms/${roomId}/update`, wallPatch(155));
-  assert.equal(up.status, 403);
-  const body = await up.json();
-  assert.equal(body.error, 'ai_edits_off');
-  assertUserText(body.message);
-  const save = await http(env, 'POST', `/api/rooms/${roomId}/save`, { clientId: 'x', baseVersion: 1, plan: plan() });
-  assert.equal(save.status, 403);
-  assert.equal((await save.json()).error, 'ai_edits_off');
-  // 画面の印の見出しを自分で付けてきても通らない(受け口が消してから付け直す)
-  const forged = await http(env, 'POST', `/api/rooms/${roomId}/update`, wallPatch(155), { headers: { 'x-room-screen': '1' } });
-  assert.equal(forged.status, 403);
-  // よその出どころのページからも通らない
-  const other = await http(env, 'POST', `/api/rooms/${roomId}/update`, wallPatch(155), { origin: 'https://evil.example' });
-  assert.equal(other.status, 403);
-  assert.equal(snapshotRoom(env, room), before, 'ルームが変わった');
-  assert.deepEqual(ws.messages(), [], '部屋の人に何か配った');
-
-  // 画面(同じ出どころ・アプリ版)からは今までどおり通る
-  const screen = await http(env, 'POST', `/api/rooms/${roomId}/update`, wallPatch(155), SCREEN);
-  assert.equal(screen.status, 200);
-  assert.equal((await screen.json()).version, 2);
-  const app = await http(env, 'POST', `/api/rooms/${roomId}/update`, { ...wallPatch(160), baseVersion: 2 }, { origin: 'capacitor://localhost' });
-  assert.equal(app.status, 200);
-  const saved = await http(env, 'POST', `/api/rooms/${roomId}/save`, { clientId: 'x', baseVersion: 3, plan: plan() }, SCREEN);
-  assert.equal(saved.status, 200);
-  // 読むのは止めない
-  assert.equal((await http(env, 'GET', `/api/rooms/${roomId}`)).status, 200);
-});
-
-test('スイッチの切り替えは画面からだけ受ける(外から「受け付ける」に戻せない)', async () => {
-  const { env, rooms, roomId, room } = await setup();
-  await http(env, 'POST', `/api/rooms/${roomId}/ai-edits`, { off: true }, SCREEN);
-  const before = snapshotRoom(env, room);
-  const back = await http(env, 'POST', `/api/rooms/${roomId}/ai-edits`, { off: false });
-  assert.equal(back.status, 403);
-  const forged = await http(env, 'POST', `/api/rooms/${roomId}/ai-edits`, { off: false }, { headers: { 'x-room-screen': '1' } });
-  assert.equal(forged.status, 403);
-  assert.equal(snapshotRoom(env, room), before);
-  assert.equal((await room.storage.get('meta')).aiEditsOff, true);
-  const op = await rooms.roomOp(env, roomId, 'placeItem', { type: 'bed', x: 1365, y: 5460, floor: 2 });
-  assert.equal(op.code, 'ai_edits_off', '外の AI の操作が通った');
-  // 画面からは戻せる
-  const on = await http(env, 'POST', `/api/rooms/${roomId}/ai-edits`, { off: false }, SCREEN);
-  assert.equal(on.status, 200);
-  assert.deepEqual(await on.json(), { aiEditsOff: false });
-});
-
-test('止めていないルームは、今までどおり Origin が無くても /update・/save が通る', async () => {
-  const { env, roomId } = await setup();
-  const up = await http(env, 'POST', `/api/rooms/${roomId}/update`, wallPatch(155));
-  assert.equal(up.status, 200);
-  const save = await http(env, 'POST', `/api/rooms/${roomId}/save`, { clientId: 'x', baseVersion: 2, plan: plan() });
-  assert.equal(save.status, 200);
-});
-
-// ── 2. ルームをまたいだ全体の上限 ────────────────────────────────────
+// ── ルームをまたいだ全体の上限 ────────────────────────────────────
 test('画面の書き込み: 20 回ぶんをまとめて数え、残りは meta に持つ', async () => {
   const { env, roomId, room } = await setup({ quota: true });
   const Q = await mod('worker/room-quota.mjs');

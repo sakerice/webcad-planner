@@ -24,7 +24,7 @@ async function http(env, method, path, body) {
   const { handleRooms } = await mod('worker/routes-rooms.mjs');
   const url = new URL(path, ORIGIN);
   // 画面からの要求は Origin が付く(ブラウザは同じ出どころへの POST にも付ける)。スイッチの切り替えは画面からだけ受ける
-  // (Origin の無い呼び出しを断ることは tools/tests/room-update-guards.test.cjs)。
+  // (Origin の無い呼び出しを断ることは tools/tests/room-switch-bypass.test.cjs)。
   const init = { method, headers: { origin: ORIGIN } };
   if (body !== undefined) init.body = typeof body === 'string' ? body : JSON.stringify(body);
   return handleRooms(new Request(url, init), env, url);
