@@ -87,6 +87,92 @@
     ['concrete_new', 'コンクリート（金ゴテ）'], ['concrete_brush', 'コンクリート（刷毛引き）'], ['lawn', '芝生（手入れされた）'],
     ['interlocking', 'インターロッキング'], ['tile_gray', 'タイル（グレー）'], ['gravel_white', '化粧砂利（白）'],
   ];
+  // ── 色・仕上げの選択肢(設定パネルと AI の編集が、この一覧を共に使う。パネルはここを読んで選択欄を作る)──
+  // サッシの色(窓の「サッシ色」の欄。値は保存される色。'' は標準のダークグレー)
+  var SASH_COLORS = [
+    { hex: '#9a9da1', label: 'シャイングレー' },
+    { hex: '#22252a', label: 'ブラック' },
+    { hex: '#f2f2f0', label: 'ホワイト' }
+  ];
+  // 扉の「パネル仕上げ」の欄(開き戸・折戸)。'' は標準
+  var DOOR_FINISHES = [['', '標準'], ['bath-clear', '浴室・透明パネル']];
+  var DOOR_FINISH_TYPES = ['door-swing', 'door-swing-s', 'door-fold', 'door-fold-w'];
+  // カタログのモデルの部位に貼れる素材。**壁・床と同じ資産**(index.html の ASSET_TEX_MAP)から、
+  // 家具に載せて意味のあるものだけを並べる。地面(砂利・芝)や屋根瓦は出さない(家具に貼る理由が無い)。
+  var MODEL_FINISH_TEXTURES = [
+    ['', '元の柄のまま'],
+    ['wood_oak', 'オーク'],
+    ['wood_floor', '木目（複合）'],
+    ['wood_cedar', '杉板'],
+    ['plaster', '塗り壁'],
+    ['plaster_white', '塗り壁（白）'],
+    ['tile_floor', 'タイル'],
+    ['concrete', 'コンクリート'],
+    ['galvalume_dark', 'ガルバ（黒）'],
+    ['stone', '石']
+  ];
+  // 屋根の部品(スレート切妻・マンサードなど)の「屋根面」(部位 roof)は、屋根の設定欄と同じ屋根材から選ばせる。
+  var MODEL_ROOF_FINISH_TEXTURES = [
+    ['', '元の柄のまま'],
+    ['roof_tile', '瓦'],
+    ['roof_kawara_ibushi', '日本瓦（いぶし銀）'],
+    ['roof_s_tile_terracotta', '洋瓦（S形・素焼き）'],
+    ['roof_flat_tile_charcoal', '平板瓦（黒灰）'],
+    ['roof_colonial_gray', '化粧スレート（コロニアル）'],
+    ['roof_standing_seam_silver', 'ガルバ立平（銀）'],
+    ['roof_copper_patina', '銅板一文字（緑青）'],
+    ['roof_asphalt_shingle_brown', 'アスファルトシングル（茶）'],
+    ['galvalume_dark', 'ガルバ（黒）'],
+    ['mansion_slate_roof', 'スレート（洋館）'],
+    ['kominka_kayabuki', '茅葺き（古民家）']
+  ];
+  // 部位の艶。値は保存される粗さ(数)の文字。'' は既定の仕上げ。布(fabric)と差し色(accent)の部位には艶の欄が無い。
+  var FINISH_ROUGHNESS = [['', '既定の仕上げ'], ['0.85', 'マット'], ['0.48', 'サテン'], ['0.22', '艶あり']];
+  var NO_ROUGHNESS_CHANNELS = ['fabric', 'accent'];
+  function modelFinishTextureOptions(channel) { return channel === 'roof' ? MODEL_ROOF_FINISH_TEXTURES : MODEL_FINISH_TEXTURES; }
+  function channelHasRoughness(channel) { return NO_ROUGHNESS_CHANNELS.indexOf(channel) < 0; }
+  // 設定パネルの部位ごとの書き込み(app-state.js の updateSelectedModelFinish・updateSelectedModelTexture・
+  // updateSelectedModelRoughness)と AI の編集が共に使う、次の値の作り方。今の表 current に部位 channel の値を足した写しを返す。
+  // 色・素材・艶とも、'' で部位を外して既定に戻し、空になったら null(欄ごと既定。パネルの「素材の色を元に戻す」と同じ形)にする。
+  // (設定パネルの色の欄は '' を書かないので、色を外すのは AI の編集だけ)
+  function nextFinishColors(current, channel, value) {
+    var colors = Object.assign({}, current || {});
+    if (value === '') { delete colors[channel]; return Object.keys(colors).length ? colors : null; }
+    colors[channel] = value;
+    return colors;
+  }
+  // 失敗の文に写す、AI が送った値(80 字で切る)。
+  function shortText(v) {
+    var t = String(typeof v === 'string' ? v : JSON.stringify(v));
+    var chars = Array.from(t);
+    return chars.length > 80 ? chars.slice(0, 80).join('') + '…' : t;
+  }
+  function nextFinishTextures(current, channel, value) {
+    var textures = Object.assign({}, current || {});
+    if (value === '') delete textures[channel]; else textures[channel] = value;
+    return Object.keys(textures).length ? textures : null;
+  }
+  function nextFinishRoughness(current, channel, value) {
+    var settings = Object.assign({}, current || {});
+    if (value === '') delete settings[channel]; else settings[channel] = Number(value);
+    return Object.keys(settings).length ? settings : null;
+  }
+  // 内観(壁紙)・外観(外壁)・屋根の「カラー設定」の家全体・階ごとの素材(値は index.html の ASSET_TEX_MAP のキー)。
+  // 設定パネル(index.html の presetTextureSelectHtml)と AI の操作 setAppearance が共に使う。
+  var APPEARANCE_TEXTURES = {
+    exterior: [['siding', 'サイディング'], ['plaster', '塗り壁'], ['plaster_white', '塗り壁（白）'], ['galvalume_dark', 'ガルバ（黒）'],
+      ['wood_cedar', '杉板'], ['mansion_brick_red', '赤レンガ（洋館）'], ['mansion_ashlar_stone', '切石（洋館）'],
+      ['kominka_yakisugi', '焼杉板（古民家）'], ['kominka_shikkui', '白漆喰（古民家）']],
+    interior: [['wall_int', '塗り壁'], ['plaster_white', '塗り壁（白）'], ['wood_cedar', '杉板'],
+      ['mansion_damask_wallpaper', 'ダマスク柄の壁紙（洋館）'], ['mansion_white_subway_tile', '白いタイル（洋館）'],
+      ['kominka_shikkui', '白漆喰（古民家）'], ['kominka_juraku', '聚楽の土壁（古民家）']],
+    roof: [['roof_tile', '瓦'], ['roof_kawara_ibushi', '日本瓦（いぶし銀）'], ['roof_s_tile_terracotta', '洋瓦（S形・素焼き）'], ['roof_flat_tile_charcoal', '平板瓦（黒灰）'], ['roof_colonial_gray', '化粧スレート（コロニアル）'], ['roof_standing_seam_silver', 'ガルバ立平（銀）'], ['roof_copper_patina', '銅板一文字（緑青）'], ['roof_asphalt_shingle_brown', 'アスファルトシングル（茶）'], ['galvalume_dark', 'ガルバ（黒）'], ['mansion_slate_roof', 'スレート（洋館）'], ['kominka_kayabuki', '茅葺き（古民家）']]
+  };
+  // 屋根の質感(屋根カラー設定の「質感」)。'' は素材に合わせる。
+  var ROOF_SHEEN_OPTIONS = [['', '素材に合わせる'], ['matte', 'マット'], ['satin', '半艶'], ['metal', '金属']];
+  // 画面の色の入力欄(input type=color)が書く形。大文字は小文字に直して受ける(入力欄は小文字で書くため)。
+  var HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
+
   var SETTINGS = {
     wall: [
       { key: 'wallHeight', ja: '壁の高さ（mm）。天井まで届かない壁だけ', num: [300, 6000], panel: 'wallHeight' },
@@ -103,12 +189,19 @@
       // 読み取りでは部屋は ±0 から作るので要らず、指示文に足すと読み取りの答えが変わりうるので、編集だけにする。
       { key: 'floorLevel', ja: '床の高さ', choices: [['doma', '土間（床を一段下げ、玄関ドアの外とほぼ同じ高さにする）']],
         editChoices: [['normal', '通常の高さ（土間をやめ、床を ±0 に戻す）']], panel: 'updateSelectedRoomFloor' },
+      // ここから下の editOnly の項目は、編集(チャット・MCP の setProps)だけで受ける。色・仕上げは図面から読めないので、
+      // 読み取りの説明(describe)には出さず、applySettings も ctx.edit === true のときだけ受ける(NOT_PASSED にも理由を残す)。
+      { key: 'floorColor', ja: '床の色（床材・画像に重ねて掛ける。白で元の色のまま）', color: true, clearable: true, editOnly: true, panel: 'floorColor' },
+      { key: 'ceilingColor', ja: '天井の色', color: true, clearable: true, editOnly: true, panel: 'ceilingColor' },
     ],
     opening: [
       { key: 'windowKind', ja: '窓の種類', choices: [['sliding', '引違い'], ['casement', 'すべり出し'], ['fix', 'FIX（はめ殺し）']], for: ['window'], panel: 'windowKind' },
       { key: 'windowSill', ja: '窓の下端の高さ（床から mm）', num: [0, 3000], for: ['window', 'window-door'], panel: 'windowSill' },
       { key: 'windowHeight', ja: '窓の高さ（mm）', num: [200, 3000], for: ['window', 'window-door'], panel: 'windowHeight' },
       { key: 'doorHeight', ja: '扉・開口の高さ（mm）', num: [300, 3200], for: OPENINGS.map(function (o) { return o.type; }).filter(function (t) { return t.indexOf('door-') === 0; }), panel: 'doorHeight' },
+      { key: 'sashColor', ja: 'サッシの色', choices: [['', '標準（ダークグレー）']].concat(SASH_COLORS.map(function (c) { return [c.hex, c.label]; })),
+        for: ['window', 'window-door'], editOnly: true, panel: 'sashColor' },
+      { key: 'doorFinish', ja: '扉のパネルの仕上げ', choices: DOOR_FINISHES, for: DOOR_FINISH_TYPES, editOnly: true, panel: 'doorFinish' },
     ],
     stair: [
       { key: 'stairRail', ja: '手すり', choices: [['none', 'なし'], ['left', '左'], ['right', '右'], ['both', '両側']], panel: 'stairRail' },
@@ -122,6 +215,14 @@
       { key: 'accessSteps', ja: '段数', num: [1, 12], for: ['exterior-stair'], panel: 'accessSteps' },
       { key: 'surface', ja: '地面の仕上げ', choices: SITE_SURFACES, for: ['site', 'site-zone'], panel: 'siteSurface' },
       { key: 'name', ja: '区画の名前（駐車スペース・玄関アプローチなど）', text: 40, for: ['site-zone'], panel: 'updateSiteZone' },
+    ],
+    // カタログの家具・設備(色を変えられる部位 finishChannels を持つモデル)。編集だけ。
+    // 値は {部位: 値}。部位はモデルごとに違う(wood・metal・fabric など。applySettings の ctx.channels で受ける)。
+    // 設定パネルと同じく、渡した部位だけを今の値に重ねる(ctx.current が今の物)。
+    furniture: [
+      { key: 'finishColors', ja: '部位ごとの色 {部位: "#rrggbb"}（"" でその部位を既定の色に戻す）', channelMap: 'color', editOnly: true, panel: 'updateSelectedModelFinish' },
+      { key: 'finishTextures', ja: '部位ごとの素材 {部位: 値}（屋根の部品の部位 roof は屋根材の一覧から）', channelMap: 'texture', editOnly: true, panel: 'updateSelectedModelTexture' },
+      { key: 'finishRoughness', ja: '部位ごとの艶 {部位: 値}（布 fabric・差し色 accent の部位には無い）', channelMap: 'roughness', editOnly: true, panel: 'updateSelectedModelRoughness' },
     ],
   };
 
@@ -223,14 +324,29 @@
   // （editChoices）も受ける。読み取り（plan-free-apply.js）は印を付けないので、今までどおり断る。
   // 部屋の天井（ceilingHeight / void）は、アプリの形 ceiling:{type, …} に直す。
   function applySettings(part, type, set, out, ctx) {
+    var edit = !!(ctx && ctx.edit === true);
     var defs = settingsFor(part, type);
     parseSet(set).forEach(function (kv) {
       var def = null;
       for (var i = 0; i < defs.length; i++) if (defs[i].key === String(kv && kv.key)) def = defs[i];
-      var reject = function () { if (ctx && ctx.rejected) ctx.rejected.push(String(kv && kv.key) + '=' + String(kv && kv.value)); };
-      if (!def) { reject(); return; }
+      var shown = kv && kv.value !== null && typeof kv.value === 'object' ? JSON.stringify(kv.value) : String(kv && kv.value);
+      // why・candidates は、断った理由と候補(編集の setProps が errors に書く。読み取りは見ない)。
+      var reject = function (why, candidates) {
+        if (ctx && ctx.rejected) ctx.rejected.push(String(kv && kv.key) + '=' + shown);
+        if (ctx && why) { ctx.why = why; ctx.candidates = candidates; }
+      };
+      // 編集だけの項目は、読み取り(印 edit の無い呼び出し)では知らない項目と同じに断る。
+      if (!def || (def.editOnly && !edit)) { reject(); return; }
       var value;
-      if (def.num) {
+      if (def.channelMap) {
+        value = channelMapValue(def, kv.value, ctx, reject);
+        if (value === undefined) return;
+      } else if (def.color) {
+        // '' と null は「解除」(設定パネルの「床カラー解除」などと同じく null を書く)。
+        if (def.clearable && (kv.value === '' || kv.value === null)) value = null;
+        else if (typeof kv.value === 'string' && HEX_COLOR_RE.test(kv.value)) value = kv.value.toLowerCase();
+        else { reject('"#rrggbb" の形の色で渡してください（解除は ""）'); return; }
+      } else if (def.num) {
         var n = num(kv.value);
         if (n == null) { reject(); return; }
         value = Math.max(def.num[0], Math.min(def.num[1], Math.round(n)));
@@ -239,7 +355,7 @@
         if (!value) { reject(); return; }
       } else {
         value = String(kv.value);
-        if (!choicesFor(def, !!(ctx && ctx.edit === true)).some(function (c) { return c[0] === value; })) { reject(); return; }
+        if (!choicesFor(def, edit).some(function (c) { return c[0] === value; })) { reject(); return; }
       }
       if (part === 'room' && def.key === 'ceilingHeight') { if (!out.ceiling) out.ceiling = { type: 'flat', heightMm: value }; return; }
       if (part === 'room' && def.key === 'void') { out.ceiling = { type: 'void', toFloor: ((ctx && ctx.floor) || 1) + 1 }; return; }
@@ -248,16 +364,48 @@
     return out;
   }
 
+  // 部位ごとの値 {部位: 値} を確かめて、今の物(ctx.current)の値に重ねた次の値を返す。だめなら reject して undefined。
+  // ctx.channels はそのモデルの部位の名前の並び(画面は getItemFinishModel(type).finishChannels、Worker は表の fc)。
+  function channelMapValue(def, raw, ctx, reject) {
+    var channels = (ctx && ctx.channels) || [];
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) { reject('{部位: 値} の形で渡してください', channels); return undefined; }
+    var keys = Object.keys(raw);
+    if (!keys.length) { reject('部位を1つ以上渡してください', channels); return undefined; }
+    var current = ctx && ctx.current ? ctx.current[def.key] : null;
+    for (var i = 0; i < keys.length; i++) {
+      var ch = keys[i], v = raw[ch];
+      var ok = channels.indexOf(ch) >= 0 && (def.channelMap !== 'roughness' || channelHasRoughness(ch));
+      if (!ok) {
+        var usable = def.channelMap === 'roughness' ? channels.filter(channelHasRoughness) : channels;
+        reject('部位「' + shortText(ch) + '」はこの物には' + (def.channelMap === 'roughness' && channels.indexOf(ch) >= 0 ? '艶の設定がありません' : 'ありません'), usable);
+        return undefined;
+      }
+      if (def.channelMap === 'color') {
+        if (v !== '' && (typeof v !== 'string' || !HEX_COLOR_RE.test(v))) { reject('部位「' + ch + '」の色は "#rrggbb" の形で渡してください("" で既定の色に戻す)'); return undefined; }
+        current = nextFinishColors(current, ch, v.toLowerCase());
+      } else {
+        var list = def.channelMap === 'texture' ? modelFinishTextureOptions(ch) : FINISH_ROUGHNESS;
+        var s = v === null ? '' : String(v);
+        if (typeof v === 'number' && def.channelMap === 'roughness') s = String(v);
+        if (!list.some(function (c) { return c[0] === s; })) { reject('部位「' + ch + '」の値「' + shortText(s) + '」は使えません', list.map(function (c) { return c[0]; })); return undefined; }
+        current = def.channelMap === 'texture' ? nextFinishTextures(current, ch, s) : nextFinishRoughness(current, ch, s);
+      }
+    }
+    return current;
+  }
+
   function exteriorByKind(kind) {
     var all = EXTERIOR.concat(SITE);
     for (var i = 0; i < all.length; i++) if (all[i].kind === kind) return all[i];
     return null;
   }
 
-  // AI への説明（worker/plan-free.mjs の freeSpec が使う。読み取り用なので、編集だけの選択肢 editChoices は出さない）。
+  // AI への説明（worker/plan-free.mjs の freeSpec が使う。読み取り用なので、編集だけの選択肢 editChoices と
+  // 編集だけの項目 editOnly は出さない）。
   function describe(part, label) {
     var rows = [];
     (SETTINGS[part] || []).forEach(function (s) {
+      if (s.editOnly) return;
       var range = s.num ? s.num[0] + '〜' + s.num[1] : s.text ? '文字' : s.choices.map(function (c) { return c[0] + '=' + c[1]; }).join(' / ');
       rows.push('      ' + s.key + '（' + s.ja + '）: ' + range + (s.for ? '　対象: ' + s.for.join(', ') : ''));
     });
@@ -291,6 +439,11 @@
     tidyText: tidyText,
     OPENINGS: OPENINGS, SWING_TYPES: SWING_TYPES, EXTERIOR: EXTERIOR, SITE: SITE, SETTINGS: SETTINGS,
     FLOOR_MATERIALS: FLOOR_MATERIALS, SITE_SURFACES: SITE_SURFACES,
+    APPEARANCE_TEXTURES: APPEARANCE_TEXTURES, ROOF_SHEEN_OPTIONS: ROOF_SHEEN_OPTIONS,
+    SASH_COLORS: SASH_COLORS, DOOR_FINISHES: DOOR_FINISHES, DOOR_FINISH_TYPES: DOOR_FINISH_TYPES,
+    MODEL_FINISH_TEXTURES: MODEL_FINISH_TEXTURES, MODEL_ROOF_FINISH_TEXTURES: MODEL_ROOF_FINISH_TEXTURES,
+    FINISH_ROUGHNESS: FINISH_ROUGHNESS, modelFinishTextureOptions: modelFinishTextureOptions, channelHasRoughness: channelHasRoughness,
+    nextFinishColors: nextFinishColors, nextFinishTextures: nextFinishTextures, nextFinishRoughness: nextFinishRoughness,
     NOT_PASSED: NOT_PASSED, TYPES_NOT_PLACED: TYPES_NOT_PLACED,
     settingsFor: settingsFor, choicesFor: choicesFor, applySettings: applySettings, parseSet: parseSet, exteriorByKind: exteriorByKind, describe: describe,
   };

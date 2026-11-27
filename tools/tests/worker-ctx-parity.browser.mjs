@@ -50,8 +50,9 @@ try {
     const F = await import(new URL('worker/plan-ctx-factory.mjs', app).href);
     const catalog = await (await fetch(new URL('assets/data/worker-catalog.json', app).href)).json();
     const tags = await (await fetch(new URL('assets/models/tags.json', app).href)).json();
+    const furniture = await (await fetch(new URL('assets/data/worker-furniture.json', app).href)).json();
     const tools = F.createPlanCtxTools({
-      catalog, tags, Operations: PlanCoreOperations, Settable: PlanSettable, Knowledge: ObjectKnowledge, FreeApply: PlanFreeApply,
+      catalog, furniture, AssetSwap, tags, Operations: PlanCoreOperations, Settable: PlanSettable, Knowledge: ObjectKnowledge, FreeApply: PlanFreeApply,
       HeightModel, Summary: ChatPlanSummary, Inspect: PlanCoreInspect, Schema: PlanSchema, Check: PlanCheck, Structure: PlanStructure, SetbackLaw,
     });
     const Ops = PlanCoreOperations;
@@ -392,9 +393,40 @@ try {
         ['lattice-screen', { latticeHeight: 1200 }], ['exterior-stair', { targetHeight: 600 }], ['exterior-stair', { accessSteps: 4 }],
         ['site-rect', { surface: 'gravel' }], ['fence', { fenceHeight: 1000 }], ['car', { fenceHeight: 1000 }], ['fmp-Sofa16', { color: 'red' }],
         ['window', { windowKind: 'round' }],
+        // 色・仕上げ(編集だけの項目)
+        ['window', { sashColor: '#22252a' }], ['window-door', { sashColor: '' }], ['window', { sashColor: '#123456' }],
+        ['door-swing', { doorFinish: 'bath-clear' }], ['door-fold', { doorFinish: '' }], ['door-swing-s', { doorFinish: 'bath-clear' }], ['door-slide', { doorFinish: 'bath-clear' }],
+        ['fmp-Sofa16', { finishColors: { body: '#AA3300' } }], ['fmp-Sofa16', { finishTextures: { body: 'wood_oak' } }], ['fmp-Sofa16', { finishRoughness: { body: '0.48' } }],
+        ['fmp-Sofa16', { finishColors: { zzz: '#000000' } }], ['fmp-Sofa16', { finishTextures: { body: 'roof_tile' } }],
       ].forEach(([t, set]) => { const it = byType(t); if (it) sets.push([it.id, set]); });
+      sets.push([r1.id, { floorColor: '#336699' }], [r1.id, { ceilingColor: '#EEEEEE' }], [r1.id, { floorColor: '' }], [r1.id, { floorColor: 'red' }], [wall.id, { floorColor: '#336699' }]);
       for (const [id, set] of sets) if (id !== undefined && id !== null) check(V.name, p, { op: 'setProps', args: { id, set } }, '設定 ' + id + ' ' + JSON.stringify(set));
       check(V.name, p, { op: 'setProps', args: { id: wall.id, props: { color: '#fff' } } }, '設定 props');
+      // 家具の一括差し替え(画面の一括差し替えと同じ決め方)。古民家は、吹き抜けの部屋の壁掛けの物を壁掛けの物へ替えるので
+      // 天井の高さが要り、Worker は断る(下の「吹き抜けなし」の写しでは当たる)。
+      const sofa = p.items.find((it) => /Sofa/.test(it.type));
+      const tv = p.items.find((it) => (CATALOGUE_TAGS.items[it.type] || {}).kind === 'tv');
+      for (const args of [{ set: 'rpg-mansion' }, { set: '洋館' }, { set: 'kominka' }, { set: 'gothic' }, { set: 'rpg-mansion', ids: [sofa.id] },
+        { set: 'rpg-mansion', except: [sofa.id].concat(tv ? [tv.id] : []) }, { set: 'rpg-mansion', ids: [999999] }]) {
+        check(V.name, p, { op: 'swapAssetSet', args }, '差し替え ' + JSON.stringify(args));
+      }
+      // 内観・外観・屋根のカラー設定(家全体・階)と、建物の様式(Worker は理由つきで断る)
+      for (const args of [{ part: 'interior', color: '#336699' }, { part: 'interior', floor: 2, texture: 'kominka_juraku' }, { part: 'exterior', color: '#334455', texture: 'siding' },
+        { part: 'exterior', floor: 1, texture: 'mansion_ashlar_stone' }, { part: 'roof', floor: 2, color: '#5a2e1e', sheen: 'metal' }, { part: 'roof', texture: '' },
+        { part: 'roof', texture: 'siding' }, { part: 'interior', sheen: 'metal' }, { part: 'wall', color: '#000000' }]) {
+        check(V.name, p, { op: 'setAppearance', args }, 'カラー設定 ' + JSON.stringify(args));
+      }
+      for (const args of [{ set: 'rpg-mansion' }, { set: '古民家', parts: ['roof'] }, { set: 'gothic' }]) check(V.name, p, { op: 'applyBuildingStyle', args }, '様式 ' + JSON.stringify(args));
+      {
+        const q = clone(p);
+        q.rooms.forEach((r) => { if (r.ceiling && r.ceiling.type === 'void') delete r.ceiling; });
+        check('吹き抜けなし', q, { op: 'swapAssetSet', args: { set: 'kominka' } }, '差し替え 古民家');
+        check('吹き抜けなし', q, [{ op: 'swapAssetSet', args: { set: 'kominka' } }, { op: 'swapAssetSet', args: { set: 'rpg-mansion' } }], '差し替え 古民家→洋館');
+        const l = clone(p);
+        l.items.find((it) => it.id === sofa.id).locked = true;
+        check('ソファをロック', l, { op: 'swapAssetSet', args: { set: 'rpg-mansion' } }, '差し替え 洋館');
+        check('ソファをロック', l, { op: 'swapAssetSet', args: { set: 'rpg-mansion', ids: [sofa.id] } }, '差し替え 洋館 ロックした物を名指し');
+      }
     }
     // 変種でも、部屋・壁・設定の代表を当てる
     for (const V of variants.slice(1)) {
@@ -564,6 +596,14 @@ try {
   assert.deepEqual(out.refused.filter((r) => /range-hood|KitchenExhaust/.test(r.label)).map((r) => r.variant + ': ' + r.label), [], '取付の高さの分類を断った');
   assert.deepEqual(out.deadFaces.map((d) => d.variant).filter((v) => v !== '外壁の面・基礎なし'), [], '面ごとの外壁設定の残りは、その変種でしか起きない');
   assert.ok(out.same >= 500, '一致した操作が少なすぎる: ' + out.same);
+  // 家具の一括差し替え: 断ってよいのは、吹き抜けの部屋の壁掛けの物の高さが要る古民家だけ。吹き抜けの無い写しでは一致し、
+  // ロックした物を名指しすると両方とも同じ文で失敗する。
+  assert.deepEqual(out.refused.filter((r) => /差し替え/.test(r.label)).map((r) => r.variant + ': ' + r.label), ['house-2f: 差し替え {"set":"kominka"}'], '一括差し替えで断った組');
+  // 建物の様式は、Worker では知らない名前のほかは全部断る(部分的にも当てない)。カラー設定は断らない。
+  assert.deepEqual(out.refused.filter((r) => /^様式/.test(r.label)).map((r) => r.label), ['様式 {"set":"rpg-mansion"}', '様式 {"set":"古民家","parts":["roof"]}'], '建物の様式の断り方');
+  assert.deepEqual(out.refused.filter((r) => /^カラー設定/.test(r.label)).map((r) => r.label), [], 'カラー設定を Worker が断った');
+  assert.equal(out.byVariant['吹き抜けなし'].same, 2, '吹き抜けの無い写しの古民家への差し替えが一致しない: ' + JSON.stringify(out.byVariant['吹き抜けなし']));
+  assert.deepEqual([out.byVariant['ソファをロック'].same, out.byVariant['ソファをロック'].bothFailed], [1, 1], 'ロックした物のある差し替え: ' + JSON.stringify(out.byVariant['ソファをロック']));
   assert.equal(out.exterior, true, '外壁の色・素材の書き込みが違う');
   assert.equal(out.summary, true, '要約が違う');
   assert.equal(out.inspect, true, '検査が違う');

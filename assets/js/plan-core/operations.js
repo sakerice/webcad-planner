@@ -163,7 +163,12 @@
     return fail('id ' + label(obj.id) + ' はロックされているので変えられません(locked・hidden3D・vis3D だけ変えられます)');
   }
 
-  function Recorder() { this.changed = []; this.removed = []; this.warnings = []; }
+  // settings: 物でなく、プランの設定表(内観・外観・屋根のカラー設定)が変わったときの、変わった所の名前
+  // (「内観（壁紙）の家全体」など)。結果の changedSettings に載せ、チャットの取り込みと MCP の返事が「変わった」と分かるようにする。
+  function Recorder() { this.changed = []; this.removed = []; this.warnings = []; this.settings = []; }
+  Recorder.prototype.setting = function (name) {
+    if (this.settings.indexOf(name) < 0) this.settings.push(name);
+  };
   Recorder.prototype.change = function (id) {
     if (this.changed.indexOf(id) < 0) this.changed.push(id);
   };
@@ -435,8 +440,9 @@
   //   壁(plan.walls)→ wall、部屋(plan.rooms)→ room、
   //   OPENINGS の type → opening(kind は type そのまま)、stair・stair-corner → stair(kind は type)、
   //   EXTERIOR・SITE の type → object(kind はその type を持つ最初の kind。wood-fence→fence、fence→block-wall、site-rect→site)。
-  // これ以外(カタログの家具・踊り場・照明など)は、読み取りの分類に引けないので set を受け付けない。
-  function partKindOf(found, settable) {
+  //   色を変えられる部位(finishChannels)を持つカタログのモデル → furniture(編集だけの項目。部位は ctx.catalog.finishChannels(type))。
+  // これ以外(部位の無い家具・踊り場・照明など)は、set を受け付けない。
+  function partKindOf(found, settable, ctx) {
     if (found.coll === 'walls') return { part: 'wall', kind: null };
     if (found.coll === 'rooms') return { part: 'room', kind: null };
     var type = found.obj.type;
@@ -445,6 +451,9 @@
     if (type === 'stair' || type === 'stair-corner') return { part: 'stair', kind: type };
     var ext = (settable.EXTERIOR || []).concat(settable.SITE || []);
     for (var i = 0; i < ext.length; i++) if (ext[i].type === type) return { part: 'object', kind: ext[i].kind };
+    var cat = ctx && ctx.catalog;
+    var channels = cat && typeof cat.finishChannels === 'function' ? cat.finishChannels(type) : null;
+    if (Array.isArray(channels) && channels.length && settable.SETTINGS && settable.SETTINGS.furniture) return { part: 'furniture', kind: null, channels: channels };
     return null;
   }
   // set の項目名 → アプリの項目名。ここに無いものは同じ名前。
@@ -463,7 +472,7 @@
     var settable = ctx.settable;
     if (!settable || typeof settable.applySettings !== 'function') return fail('set を使うには ctx.settable(PlanSettable)が要ります');
     if (!set || typeof set !== 'object' || Array.isArray(set)) return fail('set は {項目: 値} の形で渡してください');
-    var pk = partKindOf(target, settable);
+    var pk = partKindOf(target, settable, ctx);
     var type = target.obj.type;
     if (!pk) return fail('種類 ' + label(type) + ' には、set で設定できる項目がありません(props を使うか、種類を確かめてください)');
     var defs = settable.settingsFor(pk.part, pk.kind);
@@ -485,10 +494,16 @@
         return fail('set の「' + key + '」は、この ctx では設定できません(画面の計算が要ります)');
       }
       var rejected = [];
-      // edit: 編集の印。PlanSettable は、これがあるときだけ編集だけの選択肢(editChoices)を受ける(読み取りは受けない)。
-      settable.applySettings(pk.part, pk.kind, [{ key: key, value: value }], out, { floor: target.obj.floor || 1, rejected: rejected, edit: true });
+      // edit: 編集の印。PlanSettable は、これがあるときだけ編集だけの選択肢(editChoices)と編集だけの項目(editOnly。色・仕上げ)を
+      // 受ける(読み取りは受けない)。channels・current は部位ごとの項目(家具の色・素材・艶)の部位の並びと、重ねる元の今の物。
+      // 同じ set の中で同じ欄を2度書くことは無い(項目名が欄の名前なので)。
+      var actx = { floor: target.obj.floor || 1, rejected: rejected, edit: true, channels: pk.channels || [], current: target.obj };
+      settable.applySettings(pk.part, pk.kind, [{ key: key, value: value }], out, actx);
       if (rejected.length) {
-        return fail('set の「' + key + '=' + String(value) + '」は使えません' + (def.num ? '(数で渡してください)' : def.text ? '(文字で渡してください)' : '(選択肢から選んでください)'),
+        // 今回足した編集だけの項目(色・仕上げ)の文では、写す値を短く切る。既存の項目の文は今までどおり。
+        var shown = def.editOnly ? short(value) : value !== null && typeof value === 'object' ? JSON.stringify(value) : String(value);
+        if (actx.why) return fail('set の「' + key + '=' + shown + '」は使えません(' + actx.why + ')', actx.candidates && actx.candidates.length ? actx.candidates : undefined);
+        return fail('set の「' + key + '=' + shown + '」は使えません' + (def.num ? '(数で渡してください)' : def.text ? '(文字で渡してください)' : '(選択肢から選んでください)'),
           def.choices ? choicesOf(def) : undefined);
       }
       if (def.num) {
@@ -1083,12 +1098,216 @@
     }
   }
 
+  // ── 一括差し替え(画面の「表示するセット」の下の「一括差し替え」と同じ。assets/js/asset-swap.js)────────────
+  // ctx.assetSwap = {sets() → [{id, name}], find(名前か id) → {id, name} か null, plan(plan, setId, {frozen, keep}) → 行,
+  //                  applyRows(plan, 行, makeItem) → {changed, removed}}
+  // 画面(plan-data.js の planAssetSwapCtx)は AssetSwap.planFor、Worker(plan-ctx-factory.mjs)は表から同じ計算をする。
+  // 差し替える物の決め方・大きさ・高さは画面の一括差し替えと同じ。違うのは次の2つだけ:
+  //   - ロックされた物は替えない・外さない・高さも変えない(画面の一括差し替えはロックを見ない)。ids でロックされた物を
+  //     名指ししたときは、ほかの操作と同じく失敗にする。
+  //   - ids(この物だけ)・except(この物を除く)で、替える物を選べる(画面の確認の一覧でチェックを外すのに当たる)。
+  //     選ばなかった物は替えないが、載っている台が替わるときは台の高さに合わせる。
+  function idList(v, what) {
+    if (v === undefined) return { list: null };
+    if (!Array.isArray(v)) return { error: what + ' は id の配列で渡してください' };
+    if (!v.length) return { error: what + ' が空です(省くと' + (what === 'ids' ? '置いてある家具の全部を替えます' : '除く物はありません') + ')' };
+    return { list: v.map(function (x) { return String(x); }) };
+  }
+  // 今回足した操作・項目の失敗文に写す、AI が送った値。長い値は 80 字で切る(既存の操作の文は変えない)。
+  function short(v) {
+    var t = typeof v === 'string' ? v : (function () { try { return JSON.stringify(v); } catch (e) { return String(v); } })();
+    t = String(t);
+    var chars = Array.from(t);
+    return chars.length > 80 ? chars.slice(0, 80).join('') + '…' : t;
+  }
+  function swapAssetSet(plan, a, ctx, rec) {
+    var sw = ctx.assetSwap;
+    if (!sw || typeof sw.plan !== 'function') return fail('この ctx では家具の一括差し替えができません');
+    var names = (sw.sets() || []).map(function (s) { return s.id; });
+    if (typeof a.set !== 'string' || !a.set.trim()) return fail('set(差し替え先のセット)を文字で渡してください', names);
+    var set = sw.find(a.set);
+    if (!set) {
+      var shown = (sw.sets() || []).map(function (s) { return s.id + '（' + s.name + '）'; }).join('・');
+      return fail('差し替え先のセット「' + short(a.set) + '」はありません。使えるセット: ' + (shown || 'なし'), names);
+    }
+    var only = idList(a.ids, 'ids'), except = idList(a.except, 'except');
+    if (only.error) return fail(only.error);
+    if (except.error) return fail(except.error);
+    var both = (only.list || []).filter(function (id) { return (except.list || []).indexOf(id) >= 0; });
+    if (both.length) return fail('id「' + short(both[0]) + '」が ids と except の両方にあります(替えるか替えないか、どちらか一方にしてください)');
+    var items = plan.items || [];
+    var byId = {};
+    items.forEach(function (it) { if (it && it.id !== undefined) byId[String(it.id)] = it; });
+    var named = (only.list || []).concat(except.list || []);
+    for (var i = 0; i < named.length; i++) {
+      if (!Object.prototype.hasOwnProperty.call(byId, named[i])) {
+        return fail('id「' + short(named[i]) + '」は置いてある物の中にありません(一括差し替えで選べるのは置いてある家具です。壁・部屋は選べず、窓・扉などの家具でない物は替わりません)');
+      }
+    }
+    for (var j = 0; only.list && j < only.list.length; j++) {
+      if (isLocked(byId[only.list[j]], ctx)) return lockedError(byId[only.list[j]]);
+    }
+    var frozen = function (it) { return isLocked(it, ctx); };
+    var keep = function (it) { return !!(only.list && only.list.indexOf(String(it.id)) < 0); };
+    var excluded = function (it) { return !!(except.list && except.list.indexOf(String(it.id)) >= 0); };
+    var rows = sw.plan(plan, set.id, { frozen: frozen, keep: only.list ? keep : undefined, excluded: except.list ? excluded : undefined });
+    var change = rows.filter(function (r) { return r.action !== 'keep'; });
+    var kept = rows.filter(function (r) { return r.action === 'keep'; });
+    var made = sw.applyRows(plan, change, function (type, x, y, rot, floor, w, d) {
+      return Factories.makeItem(type, { x: x, y: y, rot: rot, floor: floor, w: w, d: d }, ctx);
+    });
+    made.changed.forEach(function (id) { rec.change(id); });
+    made.removed.forEach(function (id) { rec.remove(id); });
+    if (!change.length) rec.warnings.push(set.name + 'に差し替えられる家具がありませんでした(プランは変わっていません)');
+    // 名指しした物のうち、差し替えの対象にならなかった物(家具でない物・もうこのセットの物)
+    var rowIds = {};
+    rows.forEach(function (r) { rowIds[String(r.id)] = true; });
+    (only.list || []).forEach(function (id) {
+      if (rowIds[id]) return;
+      var it = byId[id];
+      var why = String(it.type).indexOf(set.id + '-') === 0 ? 'もう' + set.name + 'の物です' : 'カタログの家具ではないので、差し替えの対象になりません';
+      rec.warnings.push('id ' + label(it.id) + '（' + it.type + '）は' + why);
+    });
+    // 選んだ台の替え先に含まれるので、選ばれていなくても一緒に外した物
+    change.forEach(function (r) {
+      if (r.action === 'remove' && only.list && only.list.indexOf(String(r.id)) < 0) {
+        rec.warnings.push('id ' + label(r.id) + '（' + r.type + '）は、選んだ台 id ' + label(r.base) + ' の替え先に含まれるので一緒に外しました');
+      }
+    });
+    if (kept.length) {
+      rec.warnings.push('そのまま残した物 ' + kept.length + ' 点: ' + kept.slice(0, 12).map(function (r) {
+        return 'id ' + label(r.id) + ' ' + r.type + '（' + r.reason + '）';
+      }).join('、') + (kept.length > 12 ? ' ほか' : ''));
+    }
+  }
+
+  // ── 内観・外観・屋根のカラー設定(家全体・階ごと)────────────────────────────
+  // 設定パネル(index.html の updateInteriorSetting・updateExteriorSetting・updateRoofAppearance)と、
+  // AI の操作 setAppearance が共に使う書き込みの決まり。s は ensure 済みの設定表、part は interior/exterior/roof、
+  // scope は whole/floor。h = {setValue(obj,key,value), normalize(obj), defaultFloor(part, floor)}(画面は
+  // setTextureSettingValue など、Worker は写した同じ式)。h.after(part, scope, key, value, floor) があれば、書いたあとに呼ぶ
+  // (画面だけの後処理。外観の階の色を、画面の階の外壁色の既定 WALL_COLORS にも写す。設定欄と AI の操作が同じここを通る)。
+  // 内観と屋根は、色・素材(屋根は質感も)を変えた所を効かせる(家全体なら家全体、階なら家全体を外してその階)。
+  // 外観は linked を変えない(設定欄で「家全体」「階」の印を先に付ける)。
+  function writeAppearance(s, part, scope, key, value, floor, h) {
+    var linkKeys = part === 'exterior' ? [] : part === 'roof' ? ['color', 'texture', 'sheen'] : ['color', 'texture'];
+    if (scope === 'whole') {
+      h.setValue(s.whole, key, value);
+      if (linkKeys.indexOf(key) >= 0) s.whole.linked = true;
+    } else if (scope === 'floor') {
+      s.floors[floor] = s.floors[floor] || h.defaultFloor(part, floor);
+      h.normalize(s.floors[floor]);
+      h.setValue(s.floors[floor], key, value);
+      if (linkKeys.indexOf(key) >= 0) {
+        s.whole.linked = false;
+        s.floors[floor].linked = true;
+      }
+    }
+    if (typeof h.after === 'function') h.after(part, scope, key, value, floor);
+  }
+  var APPEARANCE_PARTS = { interior: '内観（壁紙）', exterior: '外観（外壁）', roof: '屋根' };
+  var APPEARANCE_FIELDS = { interior: 'interiorWallSettings', exterior: 'exteriorWallSettings', roof: 'roofAppearance' };
+  function settingJson(v) { try { return JSON.stringify(v); } catch (e) { return String(Math.random()); } }
+  // プランにある階(壁・部屋・物の floor)。
+  function planFloors(plan) {
+    var seen = {};
+    ['walls', 'rooms', 'items'].forEach(function (k) { (plan[k] || []).forEach(function (o) { if (o) seen[o.floor || 1] = true; }); });
+    return Object.keys(seen).map(Number).sort(function (x, y) { return x - y; });
+  }
+  // setAppearance {part, floor?, color?, texture?, sheen?}: 設定パネルの「内観／外観／屋根カラー設定」で、家全体か階の
+  // 色・素材(・屋根の質感)を選ぶのと同じ書き込みを、パネルで押す順に行う。外観は、家全体なら「家全体」に印を付けてから、
+  // 階なら「家全体」の印を外してその階に印を付けてから書く(パネルでは印が無いと欄が押せない)。
+  // ctx.appearance = {ensure(plan, part) → 設定表, setValue, normalize, defaultFloor}(画面は plan-data.js の
+  // planAppearanceCtx、Worker は plan-ctx-factory.mjs)。
+  function setAppearance(plan, a, ctx, rec) {
+    var ap = ctx.appearance;
+    var settable = ctx.settable || {};
+    if (!ap || typeof ap.ensure !== 'function') return fail('この ctx では外観・内観・屋根の設定を変えられません');
+    var parts = Object.keys(APPEARANCE_PARTS);
+    if (typeof a.part !== 'string' || parts.indexOf(a.part) < 0) return fail('part「' + short(a.part) + '」は使えません。part は ' + parts.join('・') + ' のどれかで渡してください', parts);
+    var scope = 'whole';
+    if (a.floor !== undefined) {
+      if (!isNum(a.floor) || Math.floor(a.floor) !== a.floor || a.floor < 1 || a.floor > 4) return fail('floor(階)は 1〜4 の整数で渡してください(省くと家全体)');
+      var floors = planFloors(plan);
+      if (floors.indexOf(a.floor) < 0) return fail('このプランに ' + a.floor + ' 階はありません(ある階: ' + floors.join('・') + '。省くと家全体)', floors.map(String));
+      scope = 'floor';
+    }
+    var writes = [];
+    if (a.color !== undefined) {
+      if (typeof a.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(a.color)) return fail('color は "#rrggbb" の形の色で渡してください');
+      writes.push(['color', a.color.toLowerCase()]);
+    }
+    if (a.texture !== undefined) {
+      var list = ((settable.APPEARANCE_TEXTURES || {})[a.part] || []).map(function (c) { return c[0]; });
+      if (a.texture !== '' && list.indexOf(a.texture) < 0) return fail('texture「' + short(a.texture) + '」は' + APPEARANCE_PARTS[a.part] + 'の素材にありません("" で素材を外す)', list);
+      writes.push(['texture', a.texture || null]);
+    }
+    if (a.sheen !== undefined) {
+      if (a.part !== 'roof') return fail('sheen(質感)は屋根(part=roof)だけです');
+      var sheens = (settable.ROOF_SHEEN_OPTIONS || []).map(function (c) { return c[0]; });
+      if (sheens.indexOf(a.sheen) < 0) return fail('sheen「' + short(a.sheen) + '」は使えません', sheens);
+      writes.push(['sheen', a.sheen || null]);
+    }
+    if (!writes.length) return fail('color・texture' + (a.part === 'roof' ? '・sheen' : '') + ' のどれかを渡してください');
+    var s = ap.ensure(plan, a.part);
+    var before = settingJson(s);
+    var wholeWasOn = !!(s.whole && s.whole.linked);
+    if (a.part === 'exterior') {
+      if (scope === 'whole') writes.unshift(['linked', true]);
+      else { writeAppearance(s, 'exterior', 'whole', 'linked', false, null, ap); writes.unshift(['linked', true]); }
+    }
+    writes.forEach(function (w) { writeAppearance(s, a.part, scope, w[0], w[1], a.floor, ap); });
+    if (settingJson(s) !== before) rec.setting(APPEARANCE_PARTS[a.part] + 'の' + (scope === 'whole' ? '家全体' : a.floor + '階'));
+    // 階を書くと、設定欄と同じく家全体の設定が切れる(ほかの階は、その階の設定か既定になる)。知らせる。
+    if (scope === 'floor' && wholeWasOn && !s.whole.linked) {
+      rec.warnings.push(APPEARANCE_PARTS[a.part] + 'は、家全体の設定をやめて階ごとの設定にしました。' + a.floor + '階のほかの階は、それぞれの階の設定(無ければ既定)で表示されます');
+    }
+  }
+
+  // ── 建物の様式(画面の「建物の仕上げを替える」。assets/js/building-style.js)─────────────────
+  // ctx.buildingStyle = {sets() → [{id, name}], find(名前か id) → {id, name} か null, plan(plan, setId) → 決めた内容,
+  //                      apply(plan, 決めた内容, parts, locked) → 変わった物の id}
+  // 画面(plan-data.js の planBuildingStyleCtx)は画面の BuildingStyle.planFor と同じ書き込みを使う。壁の内観面・外観面の
+  // 鍵を 3D の壁の幾何から求めるので、Worker では plan が断る(理由つき)。
+  // 画面と違うのは、ロックされた部屋・扉・窓と、ロックされた壁の面を変えないことだけ。
+  var STYLE_PARTS = ['exterior', 'roof', 'interior', 'floor', 'doors', 'windows'];
+  function applyBuildingStyle(plan, a, ctx, rec) {
+    var bs = ctx.buildingStyle;
+    if (!bs || typeof bs.plan !== 'function') return fail('この ctx では建物の様式を切り替えられません');
+    var names = (bs.sets() || []).map(function (s) { return s.id; });
+    if (typeof a.set !== 'string' || !a.set.trim()) return fail('set(様式のセット)を文字で渡してください', names);
+    var set = bs.find(a.set);
+    if (!set) {
+      var shown = (bs.sets() || []).map(function (s) { return s.id + '（' + s.name + '）'; }).join('・');
+      return fail('様式のセット「' + short(a.set) + '」はありません。使えるセット: ' + (shown || 'なし'), names);
+    }
+    var parts = null;
+    if (a.parts !== undefined) {
+      if (!Array.isArray(a.parts) || !a.parts.length) return fail('parts は ' + STYLE_PARTS.join('・') + ' の配列で渡してください(省くと全部)', STYLE_PARTS);
+      parts = {};
+      for (var i = 0; i < a.parts.length; i++) {
+        if (STYLE_PARTS.indexOf(a.parts[i]) < 0) return fail('parts の「' + short(a.parts[i]) + '」は使えません', STYLE_PARTS);
+        parts[a.parts[i]] = true;
+      }
+    }
+    var p = bs.plan(plan, set.id);
+    if (!p) return fail('セット ' + label(set.id) + ' には様式がありません', names);
+    var before = {};
+    Object.keys(APPEARANCE_FIELDS).forEach(function (k) { before[k] = settingJson(plan[APPEARANCE_FIELDS[k]]); });
+    var ids = bs.apply(plan, p, parts, function (o) { return isLocked(o, ctx); });
+    (ids || []).forEach(function (id) { rec.change(id); });
+    ['exterior', 'roof', 'interior'].forEach(function (k) {
+      if (settingJson(plan[APPEARANCE_FIELDS[k]]) !== before[k]) rec.setting(APPEARANCE_PARTS[k] + 'の設定');
+    });
+  }
+
   var OPS = {
     addRoom: addRoom, resizeRoom: resizeRoom, renameRoom: renameRoom,
     addWall: addWall, removeWall: removeWall,
     placeItem: placeItem, moveObject: moveObject, rotateObject: rotateObject,
     deleteObjects: deleteObjects, setProps: setProps,
-    addRoomWalls: addRoomWalls, placeOpening: placeOpening, addRoof: addRoof
+    addRoomWalls: addRoomWalls, placeOpening: placeOpening, addRoof: addRoof,
+    swapAssetSet: swapAssetSet, setAppearance: setAppearance, applyBuildingStyle: applyBuildingStyle
   };
 
   function failure(plan, index, op, message, candidates) {
@@ -1129,7 +1348,10 @@
           var res = OPS[opName](target, args, ctx, rec);
           if (res && res.error) return failure(plan, i, opName, res.error, res.candidates);
         }
-        return { plan: target, changedIds: rec.changed, removedIds: rec.removed, warnings: rec.warnings, errors: [] };
+        var out = { plan: target, changedIds: rec.changed, removedIds: rec.removed, warnings: rec.warnings, errors: [] };
+        // 設定表が変わった操作だけ欄を足す(ほかの操作の結果の形は今までどおり)
+        if (rec.settings.length) out.changedSettings = rec.settings;
+        return out;
       };
       // 写しに当てるときだけ、写しを作ったあとの処理全体を ctx.withPlan(写し, run) の中で動かす
       // (画面のグローバルに依存する hooks に、写しを「今のプラン」として見せるため。画面の planChatCtx)。
@@ -1146,5 +1368,5 @@
   // プランの写し(applyOperations が写しに当てるときと同じ写し方)。チャットが依頼の始めに使う。
   function clonePlan(plan) { return cloneDeep(plan, new Map()); }
 
-  return { applyOperations: applyOperations, applyProp: applyProp, tidyStairProp: tidyStairProp, clonePlan: clonePlan, OPS: OPS, ROOF_TYPES: ROOF_TYPES, tidyName: tidyName, ROOM_NAME_MAX: ROOM_NAME_MAX };
+  return { applyOperations: applyOperations, applyProp: applyProp, writeAppearance: writeAppearance, STYLE_PARTS: STYLE_PARTS, tidyStairProp: tidyStairProp, clonePlan: clonePlan, OPS: OPS, ROOF_TYPES: ROOF_TYPES, tidyName: tidyName, ROOM_NAME_MAX: ROOM_NAME_MAX };
 }));

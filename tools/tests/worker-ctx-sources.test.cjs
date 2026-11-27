@@ -125,6 +125,35 @@ const FUNCTIONS = [
   // 階段の吸着
   ['stairPartEdgesRaw', 'stairPartEdgesMm'],
   ['stairPartEdgesMm', 'stairPartEdgesMm'],
+  // 家具の部位(setProps の finishColors など)
+  ['planCoreFinishChannels', 'finishChannelsOf'],
+  ['getItemFinishModel', 'finishChannelsOf(表 worker-furniture.json の fc)'],
+  // 一括差し替え(swapAssetSet)の決め方に渡す高さと天井
+  ['planAssetSwapCtx', 'workerOpsCtx の assetSwap'],
+  ['getItemHeightValue', 'getItemHeightValue'],
+  ['getItemH', 'getItemH'],
+  ['getCustomBlockHeight', 'getItemHeightValue(getCustomBlockHeight)'],
+  ['balconySlabHeightMm', 'getItemHeightValue(balconySlabHeightMm)'],
+  ['shelfHeightMm', 'getItemHeightValue(shelfHeightMm)'],
+  ['columnHeightMm', 'getItemHeightValue(columnHeightMm)'],
+  ['getContextExteriorHeight', 'getContextExteriorHeight'],
+  ['getContextFloors', 'getContextFloors'],
+  ['clampContextFloors', 'clampContextFloors'],
+  ['contextRoofExtraHeightMm', 'contextRoofExtraHeightMm'],
+  ['nhRoofHeightM', 'nhRoofHeightM'],
+  // 内観・外観・屋根のカラー設定(setAppearance)と建物の様式(applyBuildingStyle。Worker は断る)
+  ['planAppearanceCtx', 'workerOpsCtx の appearance'],
+  ['planBuildingStyleCtx', 'workerOpsCtx の buildingStyle(断る)'],
+  ['ensureInteriorWallSettings', 'ensureInteriorWallSettings'],
+  ['defaultInteriorFloorSetting', 'defaultInteriorFloorSetting'],
+  ['ensureRoofAppearance', 'ensureRoofAppearance'],
+  ['defaultRoofFloorSetting', 'defaultRoofFloorSetting'],
+  ['setTextureSettingValue', 'setTextureSettingValue'],
+];
+// asset-swap.js の中(字下げした function)に在る、一括差し替えの画面の包み。
+const ASSET_SWAP = 'assets/js/asset-swap.js';
+const ASSET_SWAP_FUNCTIONS = [
+  ['planFor', 'swapPlan・swapCatalogue・swapCeilingAt'],
 ];
 // 画面の関数のうち、ceiling-designer.js(CeilingDesigner の中。app-source.cjs のつなぎには入っていない)に在る物。
 const CEILING_DESIGNER = 'assets/js/ceiling-designer.js';
@@ -145,6 +174,10 @@ const CONSTANTS = [
   ['CHAT_KITCHEN_UNIT_MESSAGE', 'CHAT_KITCHEN_UNIT_MESSAGE'],
   ['ITEM_SURFACE_CATEGORIES', 'isPlacementSurfaceItem(種類の表の surface の印)'],
   ['ITEM_SURFACE_TYPES', 'isPlacementSurfaceItem(種類の表の surface の印)'],
+  ['NH_ROOF_H', 'nhRoofHeightM(1.30)'],
+  ['NH_ROOF_MAX_PITCH', 'nhRoofHeightM(0.55)'],
+  ['NH_EAVE', 'nhRoofHeightM(0.200)'],
+  ['INTERIOR_WALL_DEFAULT', 'INTERIOR_WALL_DEFAULT'],
 ];
 
 // 行頭の var/let/const NAME = … ; を、文字列・コメント・括弧を読み飛ばして切り出す。
@@ -172,9 +205,10 @@ function topLevelDecl(name, src) {
 
 const sha = (text) => crypto.createHash('sha256').update(text, 'utf8').digest('hex');
 // ファイルの行頭の function NAME(…){…} を切り出す(topLevelFunction と同じ読み飛ばし)。
-function fileFunction(file, name) {
+// indent を渡すと、その字下げの function を探す(asset-swap.js は全体を1つの関数で包んでいる)。
+function fileFunction(file, name, indent) {
   const src = fs.readFileSync(path.join(__dirname, '..', '..', file), 'utf8');
-  const at = src.indexOf('\nfunction ' + name + '(');
+  const at = src.indexOf('\n' + (indent || '') + 'function ' + name + '(');
   if (at < 0) throw new Error('function ' + name + ' が ' + file + ' に無い');
   const start = at + 1;
   let depth = 0, mode = null;
@@ -196,6 +230,7 @@ function current() {
   const out = { functions: {}, constants: {} };
   for (const [name] of FUNCTIONS) out.functions[name] = sha(topLevelFunction(name));
   for (const [name] of DESIGNER_FUNCTIONS) out.functions['CeilingDesigner.' + name] = sha(fileFunction(CEILING_DESIGNER, name));
+  for (const [name] of ASSET_SWAP_FUNCTIONS) out.functions['AssetSwap.' + name] = sha(fileFunction(ASSET_SWAP, name, '  '));
   for (const [name] of CONSTANTS) out.constants[name] = sha(topLevelDecl(name));
   return out;
 }
@@ -205,9 +240,9 @@ if (process.argv.includes('--write')) {
     _note: 'worker/plan-ctx-factory.mjs が書き写した画面の関数・定数の本文の SHA-256。tools/tests/worker-ctx-sources.test.cjs が比べる。作り直し: ' + WRITE,
   }, current());
   fs.writeFileSync(RECORD, JSON.stringify(body, null, 2) + '\n');
-  console.log('書いた: ' + path.relative(process.cwd(), RECORD) + '(関数 ' + (FUNCTIONS.length + DESIGNER_FUNCTIONS.length) + '・定数 ' + CONSTANTS.length + ')');
+  console.log('書いた: ' + path.relative(process.cwd(), RECORD) + '(関数 ' + (FUNCTIONS.length + DESIGNER_FUNCTIONS.length + ASSET_SWAP_FUNCTIONS.length) + '・定数 ' + CONSTANTS.length + ')');
 } else {
-  const where = new Map(FUNCTIONS.concat(CONSTANTS, DESIGNER_FUNCTIONS.map(([n, w]) => ['CeilingDesigner.' + n, w])));
+  const where = new Map(FUNCTIONS.concat(CONSTANTS, DESIGNER_FUNCTIONS.map(([n, w]) => ['CeilingDesigner.' + n, w]), ASSET_SWAP_FUNCTIONS.map(([n, w]) => ['AssetSwap.' + n, w])));
   const advice = (name) => '画面の ' + name + ' が変わりました。worker/plan-ctx-factory.mjs の対応する式(' + where.get(name)
     + ')を見直し、画面テスト worker-ctx-parity を走らせて通してから、' + WRITE + ' で記録を更新してください';
 

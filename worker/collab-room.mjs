@@ -608,6 +608,7 @@ export class CollaborationRoom {
       changedIds: result.changedIds,
       removedIds: result.removedIds,
       warnings: result.warnings,
+      ...(result.changedSettings && result.changedSettings.length ? { changedSettings: result.changedSettings } : {}),
     });
     if (!patch) return out(Number(meta.version || 0));
     // 画面の差分と同じ検査を通す(積まれる差分はすべて検査を通った、と言えるようにする)。

@@ -84,3 +84,17 @@ test('置ける種類は、寸法の表(ISIZES)とカタログ(標準のセッ�
   // 寸法の表の種類はモデルを持たない(重なりが無い)
   assert.ok(T.bath && !T.bath.m);
 });
+
+// 一括差し替え(swapAssetSet)と家具の部位(setProps の finishColors など)に使う、もう1つの表。
+test('家具の表(worker-furniture.json)も、今の画面のコードとセットの manifest から作った表と一致する', () => {
+  const { buildFurniture, serializeFurniture, FURNITURE_OUT } = require(join(ROOT, 'tools', 'build_worker_catalog.cjs'));
+  const fresh = buildFurniture();
+  assert.equal(readFileSync(FURNITURE_OUT, 'utf8'), serializeFurniture(fresh), '画面のコード・セットの manifest と表が食い違っています。' + REBUILD);
+  // 差し替えの設定を持つセット(洋館・古民家)と、その物が入っている
+  assert.deepEqual(fresh.sets.map((s) => s.id), ['rpg-mansion', 'kominka']);
+  assert.ok(Object.keys(fresh.types).some((t) => /^rpg-mansion-/.test(t)) && Object.keys(fresh.types).some((t) => /^kominka-/.test(t)));
+  // セットの物は標準の種類と重ならない(重なると Worker は標準を使い、画面と食い違う)
+  Object.keys(fresh.types).forEach((t) => assert.ok(!committed.types[t], t + ' が標準とセットの両方にある'));
+  // 部位: 張地(fabric)を持つ家具がある
+  assert.ok(Object.values(fresh.fc).some((list) => list.includes('fabric')));
+});

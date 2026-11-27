@@ -44,6 +44,8 @@ const WHY = {
   openingModel: '建具・窓のモデルを指定して置くことは画面でしかできません。door-swing・window などの種類で置いてください',
   floorFixtures: 'この部屋は床の高さが整数の mm でないなど、天井に付いた照明や物干しを床と一緒に動かす高さを画面でしか決められないので、画面で変えてください',
   floorLowering: '下の階の天井の範囲(折り上げ天井)と重なる部屋の床を下げられる深さは、下の階の天井の形(勾配天井・吹き抜け・段差など)によっては画面でしか決められません',
+  buildingStyle: '建物の様式の切り替えは、壁の内側・外側の面を 3D の壁の形から求めるので、画面でしか行えません',
+  swapCeiling: '勾配天井・吹き抜け・段差・天井の範囲・斜線制限などのある部屋では、壁や天井に付けた家具を差し替えたあとの高さを画面でしか決められません',
 };
 function refusal(key) { return REFUSAL + '(' + WHY[key] + ')'; }
 function RefusalError(key) { var e = new Error(refusal(key)); e.workerRefusal = true; return e; }
@@ -75,16 +77,26 @@ export function firstNewId(plan) {
   return maxId + 1;
 }
 
-// deps: {catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure, SetbackLaw}
+// deps: {catalog, furniture, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect, Schema, Check, Structure, SetbackLaw, AssetSwap}
 //   catalog … assets/data/worker-catalog.json の中身、tags … assets/models/tags.json の中身
+//   furniture … assets/data/worker-furniture.json の中身(追加のセットのモデル・一括差し替えの設定・家具の部位。
+//               省くと、一括差し替えと家具の色・素材・艶の set は使えない)
+//   AssetSwap … assets/js/asset-swap.js(一括差し替えの決め方と書き込み。画面の一括差し替えと同じ部品)
 //   ほかは UMD の部品(PlanCoreOperations・PlanSettable・ObjectKnowledge・PlanFreeApply・HeightModel・
 //   ChatPlanSummary・PlanCoreInspect・PlanSchema・PlanCheck・PlanStructure・SetbackLaw)
 // 表から引く物は、ここで1回だけ作る(Worker ではモジュールの読み込み時に1回)。
 export function createPlanCtxTools(deps) {
   const { catalog, tags, Operations, Settable, Knowledge, FreeApply, HeightModel, Summary, Inspect } = deps;
   const Law = deps.SetbackLaw || null;   // assets/js/setback-law.js(斜線制限の法令の表)
-  const TYPES = catalog.types, OTHERS = catalog.others || {}, LEGACY = catalog.legacy || {}, C = catalog.constants;
+  const FUR = deps.furniture || { sets: [], types: {}, fmp: {}, fc: {}, ih: {} };
+  const AssetSwap = deps.AssetSwap || null;
+  // 追加のセット(洋館・古民家)のモデルは、標準の種類の後ろに足す(画面の FMP_ITEMS も、標準の後にセットを取り込む)。
+  // 同じ種類が標準にあれば標準を使う。
+  const TYPES = Object.assign({}, catalog.types);
+  Object.keys(FUR.types || {}).forEach(function (t) { if (!Object.prototype.hasOwnProperty.call(TYPES, t)) TYPES[t] = FUR.types[t]; });
+  const OTHERS = catalog.others || {}, LEGACY = catalog.legacy || {}, C = catalog.constants;
   const TYPE_ORDER = Object.keys(TYPES);
+  const FMP = FUR.fmp || {}, FINISH_CHANNELS = FUR.fc || {}, ITEM_H = FUR.ih || {};
   const TAG_ITEMS = (tags && tags.items) || {};
   const KNOWLEDGE = (Knowledge && Knowledge.KNOWLEDGE) || {};
   const MOUNT = (FreeApply && FreeApply.MOUNT_ELEV_MM) || {};
@@ -586,6 +598,85 @@ export function createPlanCtxTools(deps) {
     }
     return s;
   }
+  // ── 内観・屋根の設定表(index.html の ensureInteriorWallSettings・ensureRoofAppearance・defaultInteriorFloorSetting・
+  //    defaultRoofFloorSetting、app-state.js の setTextureSettingValue)。操作 setAppearance が使う。
+  const INTERIOR_WALL_DEFAULT = '#f4f0e8';   // app-constants.js
+  function defaultInteriorFloorSetting() {
+    return { linked: false, color: INTERIOR_WALL_DEFAULT, texture: null, textureFlipX: false, textureFlipY: false };
+  }
+  function defaultRoofFloorSetting() {
+    return { linked: false, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false };
+  }
+  function ensureInteriorWallSettings(p) {
+    repairSettingsShape(p, 'interiorWallSettings', ['whole', 'floors', 'walls', 'faces'], ['floors', 'walls', 'faces']);
+    if (!p.interiorWallSettings) {
+      p.interiorWallSettings = {
+        whole: { linked: false, color: INTERIOR_WALL_DEFAULT, texture: null, textureFlipX: false, textureFlipY: false },
+        floors: {},
+        faces: {}
+      };
+    }
+    var s = p.interiorWallSettings;
+    if (!s.whole) s.whole = { linked: false, color: INTERIOR_WALL_DEFAULT, texture: null, textureFlipX: false, textureFlipY: false };
+    normalizeTextureOrientationTarget(s.whole);
+    if (!s.floors) s.floors = {};
+    if (!s.faces) s.faces = {};
+    for (var f = 1; f <= 4; f++) {
+      if (!s.floors[f]) {
+        s.floors[f] = defaultInteriorFloorSetting();
+      } else {
+        if (s.floors[f].linked === undefined) s.floors[f].linked = false;
+        if (!s.floors[f].color) s.floors[f].color = INTERIOR_WALL_DEFAULT;
+        if (s.floors[f].texture === undefined) s.floors[f].texture = null;
+        normalizeTextureOrientationTarget(s.floors[f]);
+      }
+    }
+    return s;
+  }
+  function ensureRoofAppearance(p) {
+    repairSettingsShape(p, 'roofAppearance', ['whole', 'floors'], ['floors']);
+    if (!p.roofAppearance) {
+      p.roofAppearance = { whole: { linked: true, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false }, floors: {} };
+    }
+    if (p.roofAppearance.whole === undefined) {
+      p.roofAppearance = { whole: {
+        linked: p.roofAppearance.linked !== undefined ? p.roofAppearance.linked : true,
+        color: p.roofAppearance.color || '#2a2a30',
+        texture: p.roofAppearance.texture || null,
+        textureFlipX: !!p.roofAppearance.textureFlipX,
+        textureFlipY: !!p.roofAppearance.textureFlipY
+      }, floors: {} };
+    }
+    var r = p.roofAppearance;
+    if (!r.whole) r.whole = { linked: true, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false };
+    if (r.whole.linked === undefined) r.whole.linked = true;
+    if (!r.whole.color) r.whole.color = '#2a2a30';
+    if (r.whole.texture === undefined) r.whole.texture = null;
+    normalizeTextureOrientationTarget(r.whole);
+    if (!r.floors) r.floors = {};
+    for (var f = 1; f <= 4; f++) {
+      if (!r.floors[f]) {
+        r.floors[f] = { linked: false, color: '#2a2a30', texture: null, textureFlipX: false, textureFlipY: false };
+      } else {
+        if (r.floors[f].linked === undefined) r.floors[f].linked = false;
+        if (!r.floors[f].color) r.floors[f].color = '#2a2a30';
+        if (r.floors[f].texture === undefined) r.floors[f].texture = null;
+        normalizeTextureOrientationTarget(r.floors[f]);
+      }
+    }
+    return r;
+  }
+  function setTextureSettingValue(obj, key, value) {
+    if (!obj) return;
+    obj[key] = value;
+    if (key === 'texture' && !value) {
+      obj.textureFlipX = false;
+      obj.textureFlipY = false;
+    }
+    if (key === 'skirting' && (value === null || value === undefined)) delete obj.skirting;
+    if (key === 'skirtingColor' && !value) delete obj.skirtingColor;
+    if (key === 'sheen' && !value) delete obj.sheen;
+  }
   function wallSettingKey(w) {
     return String(w.id || [w.floor, Math.round(w.x1), Math.round(w.y1), Math.round(w.x2), Math.round(w.y2)].join('_'));
   }
@@ -685,6 +776,105 @@ export function createPlanCtxTools(deps) {
     return 400;
   }
 
+  // ── 物の高さ(index.html の getItemHeightValue・getItemH と、その中で呼ぶ高さの関数)────────────────
+  // 一括差し替え(台の上に載っているか・床へ下ろすと重なるか)が使う。
+  function nhRoofHeightM(w3, d3) {                                  // nhRoofHeightM(index.html。NH_ROOF_H・NH_ROOF_MAX_PITCH・NH_EAVE)
+    var run = Math.min(w3, d3) / 2 + 0.200;
+    return Math.min(1.30, run * 0.55);
+  }
+  function clampContextFloors(t, floors) {                         // clampContextFloors(app-state.js)
+    var max = t === 'neighbor-building' ? 12 : (t === 'neighbor-house' ? 3 : 1);
+    return Math.max(1, Math.min(max, Math.round(Number(floors) || defaultContextFloors(t))));
+  }
+  function contextRoofExtraHeightMm(t, it) {                       // contextRoofExtraHeightMm(app-state.js)
+    if (t === 'neighbor-building') return 450;
+    if (t === 'neighbor-house') {
+      if (it && isFinite(Number(it.w)) && isFinite(Number(it.d)) && it.w > 0 && it.d > 0) return Math.round(nhRoofHeightM(Number(it.w) * U, Number(it.d) * U) / U);
+      var nh = entry('neighbor-house');
+      return Math.round(nhRoofHeightM(nh.w * U, nh.d * U) / U);
+    }
+    return 0;
+  }
+  function contextHeightFromFloors(p, t, floors, it) {             // contextHeightFromFloors(app-state.js)
+    floors = clampContextFloors(t, floors);
+    return Math.round(floors * contextStoryHeightMm(p) + contextRoofExtraHeightMm(t, it));
+  }
+  function getContextFloors(p, it) {                               // getContextFloors(app-state.js)
+    if (!it || (it.type !== 'neighbor-building' && it.type !== 'neighbor-house')) return 1;
+    if (isFinite(Number(it.contextFloors))) return clampContextFloors(it.type, it.contextFloors);
+    var h = Number(it.contextHeight);
+    if (isFinite(h)) return clampContextFloors(it.type, (h - contextRoofExtraHeightMm(it.type, it)) / Math.max(1, contextStoryHeightMm(p)));
+    return defaultContextFloors(it.type);
+  }
+  function getContextExteriorHeight(p, it) {                       // getContextExteriorHeight(app-state.js)
+    if (!it || !isContextExteriorType(it.type)) return 400;
+    if (it.type === 'neighbor-building' || it.type === 'neighbor-house') return contextHeightFromFloors(p, it.type, getContextFloors(p, it), it);
+    var h = Number(it.contextHeight);
+    if (!isFinite(h)) h = defaultContextExteriorHeight(p, it.type);
+    var max = it.type === 'road' ? 200 : 30000;
+    return Math.max(20, Math.min(max, h));
+  }
+  function getItemH(p, t) {                                         // getItemH(index.html)
+    var f = ownGet(FMP, t);
+    if (f) return f.h || 400;
+    if (isContextExteriorType(t)) return defaultContextExteriorHeight(p, t);
+    var v = ownGet(ITEM_H, t);
+    return v || 400;
+  }
+  function getItemHeightValue(p, it) {                             // getItemHeightValue(index.html)
+    var t = it && it.type;
+    if (it && t === 'custom-block') { var v = Number(it.customHeight); return isFinite(v) ? Math.max(10, Math.min(6000, v)) : 900; }   // getCustomBlockHeight
+    if (it && isLightType(t)) return 80;
+    if (it && isContextExteriorType(t)) return getContextExteriorHeight(p, it);
+    if (it && t === 'balcony') return Math.max(80, Math.min(400, C.floorSlabHeight || 180));                                          // balconySlabHeightMm
+    if (it && t === 'shelf-built-in') { var sh = Number(it.shelfHeight); return (isFinite(sh) && sh > 0) ? Math.max(150, Math.min(2700, Math.round(sh))) : 900; } // shelfHeightMm
+    if (it && isColumnType(t)) { var ch = Number(it.columnHeight); return (isFinite(ch) && ch > 0) ? Math.max(100, Math.min(6000, Math.round(ch))) : 2400; }   // columnHeightMm
+    if (it && t === 'wood-fence') return Math.max(300, Math.min(3000, it.fenceHeight || 1600));
+    if (it && t === 'lattice-screen') return Math.max(300, Math.min(3000, it.latticeHeight || 1600));
+    if (it && t === 'foundation') {
+      var fh = Number(it.foundationHeight);
+      if (!isFinite(fh)) fh = 450;
+      return Math.max(0, Math.min(2000, fh));
+    }
+    if (it && (t === 'exterior-stair' || t === 'ramp')) return Math.max(0, Math.min(2000, it.targetHeight || foundationHeightMm(p) || 450));
+    return getItemH(p, t);
+  }
+  // 色を変えられる部位の名前の並び(画面の planCoreFinishChannels。getItemFinishModel(type).finishChannels の key を表 fc に書いてある)。
+  function finishChannelsOf(t) { var v = ownGet(FINISH_CHANNELS, t); return Array.isArray(v) ? v.slice() : []; }
+
+  // ── 一括差し替え(asset-swap.js の planFor。画面のグローバルの代わりに、表とプラン p から引く)──────────
+  // planFor の kindOf・mountOf・heightOf・itemHeightOf・ceilingAt と、セットの物の並び(catalogue)を写したもの。
+  // 天井の高さ(ceilingFinishElevationMm)は、照明の高さと同じく式で出せる部屋だけで出し、出せない部屋では断る。
+  // asset-swap.js は、壁・天井に付いた物を壁掛け・天井吊りの物に替えるときだけ天井の高さを聞く。
+  function swapCeilingAt(p, it) {
+    var fl = it.floor || 1, cx = (Number(it.x) || 0) + (Number(it.w) || 0) / 2, cy = (Number(it.y) || 0) + (Number(it.d) || 0) / 2;
+    var r = roomAtPointOnFloor(p, fl, cx, cy);
+    if (!r) return null;
+    if (lightCeilingProblem(p, r)) throw RefusalError('swapCeiling');
+    return roomCeilingElevationMm(p, r);
+  }
+  function swapCatalogue(setId) {
+    return Object.keys(FMP).filter(function (t) { return FMP[t].set === setId; }).map(function (t) {
+      var e = FMP[t], c = { id: t, name: e.nm, kind: e.k, w: e.w, d: e.d, h: e.h };
+      if (e.de) c.defaultElevation = e.de;
+      if (e.r) c.retired = true;
+      return c;
+    });
+  }
+  function swapPlan(p, setId, opts) {
+    var set = (FUR.sets || []).filter(function (s) { return s.id === setId; })[0];
+    if (!set || !set.swap || !AssetSwap) return [];
+    return AssetSwap.plan(p.items, {
+      setId: setId, catalogue: swapCatalogue(setId), swap: set.swap,
+      frozen: opts && opts.frozen, keep: opts && opts.keep, excluded: opts && opts.excluded,
+      mountOf: function (t) { var f = ownGet(FMP, t); return f ? (f.mt || null) : null; },
+      heightOf: function (t) { var f = ownGet(FMP, t); return f ? f.h : null; },
+      itemHeightOf: function (it) { return getItemHeightValue(p, it); },
+      ceilingAt: function (it) { return swapCeilingAt(p, it); },
+      kindOf: function (t) { var f = ownGet(FMP, t); return (f && f.k && f.set !== setId) ? f.k : null; }
+    });
+  }
+
   // ── ctx ────────────────────────────────────────────────────────────────
   // plan: これから操作を当てるプラン(連番の始まりをここから数える)。
   // 写しに当てる(inPlace でない)ctx。applyOperations(plan, ops, ctx) は plan を変えず、結果の plan(写し)を返す。
@@ -751,6 +941,7 @@ export function createPlanCtxTools(deps) {
         },
         contextExteriorHeight: function (type) { return defaultContextExteriorHeight(cur, resolve(type)); },
         contextFloors: function (type) { return defaultContextFloors(resolve(type)); },
+        finishChannels: finishChannelsOf,
         constants: { rulerThickness: C.rulerThickness, walkRouteThickness: C.walkRouteThickness, walkDefaultSpeed: C.walkDefaultSpeed }
       },
       plan: {
@@ -843,6 +1034,29 @@ export function createPlanCtxTools(deps) {
           }
         }
       },
+      // カラー設定(画面の planAppearanceCtx と同じ形。書き込みの決まりは共有の PlanCoreOperations.writeAppearance)。
+      appearance: {
+        ensure: function (p, part) { var w = p || cur; return part === 'interior' ? ensureInteriorWallSettings(w) : part === 'roof' ? ensureRoofAppearance(w) : ensureExteriorWallSettings(w); },
+        setValue: setTextureSettingValue,
+        normalize: normalizeTextureOrientationTarget,
+        defaultFloor: function (part, floor) { return part === 'interior' ? defaultInteriorFloorSetting() : part === 'roof' ? defaultRoofFloorSetting() : defaultExteriorFloorSetting(floor); }
+      },
+      // 建物の様式(画面の planBuildingStyleCtx と同じ形)。様式の名前の確かめは画面と同じに行い、切り替えは理由つきで断る
+      // (壁の内観面・外観面の鍵と外壁のある階を、3D の壁の幾何(getWallExteriorSpans など)から求めるため。
+      // 床・扉・窓など幾何の要らない部分だけを当てると画面の結果と食い違うので、部分的にも当てない)。
+      buildingStyle: AssetSwap ? {
+        sets: function () { return (FUR.sets || []).filter(function (s) { return s.style; }).map(function (s) { return { id: s.id, name: s.name }; }); },
+        find: function (name) { var s = AssetSwap.findSet(FUR.sets, name, 'style'); return s ? { id: s.id, name: s.name } : null; },
+        plan: function () { throw RefusalError('buildingStyle'); },
+        apply: function () { throw RefusalError('buildingStyle'); }
+      } : undefined,
+      // 一括差し替え(画面の planAssetSwapCtx と同じ形。決め方は swapPlan)。
+      assetSwap: AssetSwap ? {
+        sets: function () { return (FUR.sets || []).filter(function (s) { return s.swap; }).map(function (s) { return { id: s.id, name: s.name }; }); },
+        find: function (name) { var s = AssetSwap.findSwapSet(FUR.sets, name); return s ? { id: s.id, name: s.name } : null; },
+        plan: function (p, setId, o) { return swapPlan(p || cur, setId, o); },
+        applyRows: AssetSwap.applyRows
+      } : undefined,
       withPlan: function (work, run) {
         var saved = cur;
         cur = work;

@@ -47,11 +47,13 @@ test('setProps は set の形だけを載せる(props は画面用で、AI に�
 
 // 道具の定義は毎回の呼び出しで送る(システムプロンプトと一緒にキャッシュされる)。2026-11-21 に、白紙から家を作る
 // 操作(addRoomWalls・placeOpening・addRoof)を足して 8,000 から 10,000 に上げた(壁を1本ずつ・扉の座標を計算して
-// 呼ぶより、往復と出力が減るため)。
-test('toClaudeTools は 10,000 文字以内で、enum と anyOf は合わせて 10 個以下', () => {
+// 呼ぶより、往復と出力が減るため)。2026-11-26 に、家具の一括差し替え・建物の様式・壁紙と外壁と屋根のカラー設定の
+// 操作(swapAssetSet・applyBuildingStyle・setAppearance)を足して 11,500 に上げた(画面でできる見た目の変更を AI からも
+// 頼めるようにするため。素材の一覧などの長い説明は道具の定義でなく describeVocabulary に置いている)。
+test('toClaudeTools は 11,500 文字以内で、enum と anyOf は合わせて 10 個以下', () => {
   const tools = C.toClaudeTools(deps);
   const text = JSON.stringify(tools);
-  assert.ok(text.length <= 10000, 'Claude の道具の定義が ' + text.length + ' 文字ある');
+  assert.ok(text.length <= 11500, 'Claude の道具の定義が ' + text.length + ' 文字ある');
   const n = countKeys(tools, ['enum', 'anyOf']);
   assert.ok(n <= 10, 'enum と anyOf が ' + n + ' 個ある');
   assert.equal(tools.length, C.OPERATIONS.length);
@@ -88,6 +90,9 @@ const SUCCESS = [
   ['addRoomWalls', { ids: ['rm_a'], thick: 105, outerThick: 150 }],
   ['placeOpening', { type: 'door-swing', room: 'rm_a', side: 'S', hinge: 'E', opens: 'S', offset: 100 }],
   ['addRoof', { floor: 2, shape: 'gable', ridge: 'NS', pitch: 30, overhang: 450 }],
+  ['swapAssetSet', { set: 'rpg-mansion', ids: ['12', 13], except: [] }],
+  ['setAppearance', { part: 'exterior', floor: 2, color: '#334455', texture: 'siding' }],
+  ['applyBuildingStyle', { set: 'kominka', parts: ['roof', 'floor'] }],
   ['resizeRoom', { id: 'rm_a', w: 3000 }],
   ['resizeRoom', { id: 'rm_a', x: 5000, y: 6000, d: 2000 }],
   ['renameRoom', { id: 'rm_a', name: '書斎' }],

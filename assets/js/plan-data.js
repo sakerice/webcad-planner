@@ -58,6 +58,8 @@ function planCoreCtx(){
       applyLightDefaults:function(item){ return ensureLightDefaults(item); },
       contextExteriorHeight:function(type){ return defaultContextExteriorHeight(type); },
       contextFloors:function(type){ return defaultContextFloors(type); },
+      // 色を変えられる部位の名前の並び(設定パネルの「素材・カラー」と同じ getItemFinishModel の finishChannels)。無ければ空。
+      finishChannels:function(type){ return planCoreFinishChannels(type); },
       constants:{
         rulerThickness:RULER_THICKNESS_MM,
         walkRouteThickness:WALK_ROUTE_THICKNESS_MM,
@@ -70,6 +72,10 @@ function planCoreCtx(){
       foundationHeight:function(){ return foundationHeightMm(); }
     }
   };
+}
+function planCoreFinishChannels(type){
+  var model=(typeof getItemFinishModel==='function')?getItemFinishModel(type):null;
+  return (model&&Array.isArray(model.finishChannels))?model.finishChannels.map(function(c){ return c.key; }):[];
 }
 function planCoreSuggestTypes(type){
   var q=String(type||'').toLowerCase();
@@ -151,8 +157,66 @@ function planOpsCtx(extra){
     },
     afterDelete:function(){ syncExteriorWallSettings(); }
   };
+  // 一括差し替えの部品(下の planAssetSwapCtx)。検査が planOpsCtx だけを切り出して動かすときは無い。
+  ctx.assetSwap=typeof planAssetSwapCtx==='function'?planAssetSwapCtx():undefined;
+  ctx.appearance=typeof planAppearanceCtx==='function'?planAppearanceCtx():undefined;
+  ctx.buildingStyle=typeof planBuildingStyleCtx==='function'?planBuildingStyleCtx():undefined;
   if(extra) Object.keys(extra).forEach(function(k){ ctx[k]=extra[k]; });
   return ctx;
+}
+// 内観・外観・屋根のカラー設定(操作 setAppearance)に渡す、設定欄と同じ部品(index.html の ensure* と APPEARANCE_WRITE)。
+// 当てているプランは DATA でなければならない(ensure* は DATA を見る。チャットの写しは withPlan で DATA になっている)。
+function planAppearanceCtx(){
+  if(typeof APPEARANCE_WRITE==='undefined') return undefined;
+  return {
+    ensure:function(p,part){
+      if(p!==DATA) throw new Error('カラー設定は、画面のプラン(DATA)か withPlan で DATA にした写しにだけ当てられます');
+      var ensureOf={interior:ensureInteriorWallSettings,roof:ensureRoofAppearance,exterior:ensureExteriorWallSettings}[part];
+      return ensureOf();
+    },
+    setValue:APPEARANCE_WRITE.setValue, normalize:APPEARANCE_WRITE.normalize, defaultFloor:APPEARANCE_WRITE.defaultFloor,
+    // 画面だけの後処理(APPEARANCE_WRITE.after。階の外壁色の既定 WALL_COLORS)は、写しに当てる今は行わず、写しに印
+    // (_appearanceAfter。_ で始まる欄は保存・比べる対象にならない)として積む。チャットが本物のプランに取り込んだときに
+    // chat-ui.js の applyChatResult が同じ APPEARANCE_WRITE.after を順に呼ぶ(取り込みを断れば画面の記憶は変わらない)。
+    after:function(part,scope,key,value,floor){
+      var work=DATA;
+      (work._appearanceAfter||(work._appearanceAfter=[])).push([part,scope,key,value,floor]);
+    }
+  };
+}
+// 建物の様式の切り替え(操作 applyBuildingStyle)に渡す、画面の「建物の仕上げを替える」と同じ部品(building-style.js)。
+// 決め方は BuildingStyle.planFor(壁の内観面・外観面を 3D の壁の幾何から求める)、書き込みは画面の apply と同じ applyPlan。
+function planBuildingStyleCtx(){
+  if(typeof BuildingStyle==='undefined'||typeof AssetSets==='undefined'||!BuildingStyle.applyPlan) return undefined;
+  var withStyle=function(){ return AssetSets.sets().filter(function(s){ return s.style; }); };
+  return {
+    sets:function(){ return withStyle().map(function(s){ return {id:s.id,name:s.name}; }); },
+    find:function(name){ var s=AssetSwap.findSet(AssetSets.sets(),name,'style'); return s?{id:s.id,name:s.name}:null; },
+    plan:function(p,setId){
+      if(p!==DATA) throw new Error('建物の様式は、画面のプラン(DATA)か withPlan で DATA にした写しにだけ当てられます');
+      return BuildingStyle.planFor(setId);
+    },
+    apply:function(p,plan,parts,locked){
+      return BuildingStyle.applyPlan(p,plan,parts||BuildingStyle.ALL_PARTS,{ensureExteriorWallSettings:ensureExteriorWallSettings,
+        defaultExteriorFloorSetting:defaultExteriorFloorSetting,ensureRoofAppearance:ensureRoofAppearance,
+        ensureInteriorWallSettings:ensureInteriorWallSettings,locked:locked,wallKey:wallSettingKey});
+    }
+  };
+}
+// 家具の一括差し替え(操作 swapAssetSet。operations.js)に渡す、画面の一括差し替えの部品(asset-swap.js)。
+// 決め方は画面の「一括差し替え」と同じ AssetSwap.planFor(グローバルの DATA を見る)。当てているプランは DATA で
+// なければならない(チャットの写しは withPlan で DATA になっている。画面の操作は DATA そのもの)。
+function planAssetSwapCtx(){
+  if(typeof AssetSwap==='undefined'||typeof AssetSets==='undefined') return undefined;
+  return {
+    sets:function(){ return AssetSets.sets().filter(function(s){ return s.swap; }).map(function(s){ return {id:s.id,name:s.name}; }); },
+    find:function(name){ var s=AssetSwap.findSwapSet(AssetSets.sets(),name); return s?{id:s.id,name:s.name}:null; },
+    plan:function(p,setId,opts){
+      if(p!==DATA) throw new Error('一括差し替えは、画面のプラン(DATA)か withPlan で DATA にした写しにだけ当てられます');
+      return AssetSwap.planFor(setId,opts);
+    },
+    applyRows:AssetSwap.applyRows
+  };
 }
 // チャット(AI)が操作を「プランの写し」に当てるときの ctx。assets/js/chat/chat-session.js の ctxFor が使う。
 //
@@ -223,6 +287,8 @@ function planChatCtx(){
     applyLightDefaults:base.applyLightDefaults,
     contextExteriorHeight:function(type){ return base.contextExteriorHeight(resolve(type)); },
     contextFloors:function(type){ return base.contextFloors(resolve(type)); },
+    // 置いてある物の種類で引く(分類名を引き直さない。setProps の対象は既にある物)。
+    finishChannels:base.finishChannels,
     constants:base.constants
   };
   ctx.settable=typeof PlanSettable!=='undefined'?PlanSettable:undefined;
@@ -251,6 +317,9 @@ function planChatCtx(){
     if(tag && Object.prototype.hasOwnProperty.call(mount,tag.kind)) it.elev=mount[tag.kind];
   };
   ctx.hooks=hooks;
+  ctx.assetSwap=screen.assetSwap;
+  ctx.appearance=screen.appearance;
+  ctx.buildingStyle=screen.buildingStyle;
   ctx.withPlan=function(work,run){
     var saved=DATA;
     DATA=work;

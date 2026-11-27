@@ -24,8 +24,9 @@
 //
 // 道具
 // ----
-// 段3の操作 10 個と、白紙から作る操作 3 つ（addRoomWalls・placeOpening・addRoof。assets/js/plan-core/operations-catalog.js の toMcpTools に、対象のルームを指す必須の
-// 引数 plan を足した物）と、create_plan・open_plan・get_plan・inspect_plan。操作の引数の検査（checkArgs・
+// 段3の操作 10 個と、白紙から作る操作 3 つ（addRoomWalls・placeOpening・addRoof）と、家具の一括差し替え swapAssetSet
+// （どれも assets/js/plan-core/operations-catalog.js の toMcpTools に、対象のルームを指す必須の引数 plan を足した物）と、
+// create_plan・open_plan・get_plan・inspect_plan。操作の引数の検査（checkArgs・
 // 大きさの上限）はルームの側（/op）が行う。ここでは plan を外した残りをそのまま渡す。
 //
 // 触れる物
@@ -34,6 +35,7 @@
 // 合わなければ Durable Object を引かない（roomOp・roomRead が見る）。ルームの作成は回数を数え、
 // 数えられないときは作らない（AiQuota を "room-create" の名前で使う。AI の回数 "ai-usage" とは別の数）。
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
+import furnitureTable from "../assets/data/worker-furniture.json" with { type: "json" };
 import PlanSettable from "../assets/js/plan-settable.js";
 import ObjectKnowledge from "../assets/js/object-knowledge.js";
 import ChatPlanSummary from "../assets/js/chat/plan-summary.js";
@@ -83,7 +85,8 @@ export const INSTRUCTIONS = [
   "操作が失敗したときはプランは変わりません。失敗の結果には、どちらの種類の失敗か（引数の誤り・この受け口では行えない操作・回数の上限・一時的な失敗）を書いてあります。",
 ].join("\n");
 
-const DEPS = { settable: PlanSettable, knowledge: ObjectKnowledge };
+// assetSets: 家具を差し替えられるセット(一括差し替え swapAssetSet の set。Worker の ctx と同じ表 worker-furniture.json)。
+const DEPS = { settable: PlanSettable, knowledge: ObjectKnowledge, assetSets: furnitureTable.sets };
 const VOCABULARY = OperationsCatalog.describeVocabulary(DEPS);
 
 // 空のプラン。画面の「白紙から始める」（assets/js/plan-data.js の chooseBlankPlan）が作る DATA と同じ欄。
@@ -136,6 +139,8 @@ export const OP_TITLES = Object.freeze({
   addWall: "壁を足す", removeWall: "壁を消す", placeItem: "物を置く", moveObject: "動かす",
   rotateObject: "向きを変える", deleteObjects: "消す", setProps: "設定を変える",
   addRoomWalls: "部屋のまわりに壁を作る", placeOpening: "壁に窓・扉を付ける", addRoof: "屋根をかける",
+  swapAssetSet: "家具をまとめて差し替える",
+  setAppearance: "壁紙・外壁・屋根の色と素材を変える", applyBuildingStyle: "建物の様式を切り替える",
 });
 
 // 道具の注釈（MCP の ToolAnnotations）。各社の定義に合わせる。
@@ -161,6 +166,12 @@ export const OP_HINTS = Object.freeze({
   rotateObject: { destructive: true, idempotent: false },
   removeWall: { destructive: true, idempotent: true },
   deleteObjects: { destructive: true, idempotent: true },
+  // 置いてある家具を書き換える。もう一度呼んでも、替えた物は既にそのセットの物なので変わらない。
+  swapAssetSet: { destructive: true, idempotent: true },
+  // 家全体・階の設定を書き換える。同じ値でもう一度呼んでも変わらない。
+  setAppearance: { destructive: true, idempotent: true },
+  // 外壁・屋根・内壁・床・建具を書き換える(面ごとの色を外す)。もう一度呼んでも同じ。この受け口からは画面で行うよう断る。
+  applyBuildingStyle: { destructive: true, idempotent: true },
 });
 function opAnnotations(name) {
   const h = OP_HINTS[name] || { destructive: true, idempotent: false };
@@ -351,14 +362,17 @@ function opSuccessText(name, res, origin, roomId) {
   const gone = new Set(removed.map(String));
   const changed = (Array.isArray(res.changedIds) ? res.changedIds : []).filter((id) => !gone.has(String(id)));
   const warnings = Array.isArray(res.warnings) ? res.warnings : [];
+  // 物でなく設定表(内観・外観・屋根のカラー設定など)が変わったとき、変わった所の名前(collab-room の changedSettings)
+  const settings = Array.isArray(res.changedSettings) ? res.changedSettings : [];
   const lines = [];
   const data = [];
-  if (!changed.length && !removed.length) {
+  if (!changed.length && !removed.length && !settings.length) {
     lines.push("プランは変わりませんでした（" + OP_TITLES[name] + "。今と同じ値でした）。");
   } else {
     lines.push("プランを直しました（" + OP_TITLES[name] + "）。");
     if (changed.length) data.push("変わった物: " + changed.length + " 件（id: " + idList(changed) + "）");
     if (removed.length) data.push("消えた物: " + removed.length + " 件（id: " + idList(removed) + "）");
+    if (settings.length) data.push("変わった設定: " + settings.slice(0, 10).map(cleanLine).join("、"));
   }
   if (warnings.length) {
     lines.push("警告があります（囲みの中。意図と違えば直してください）。");

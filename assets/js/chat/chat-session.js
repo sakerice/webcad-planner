@@ -99,6 +99,9 @@
     addRoomWalls: '部屋を壁で囲んでいます',
     placeOpening: '窓や扉を付けています',
     addRoof: '屋根をかけています',
+    swapAssetSet: '家具をまとめて差し替えています',
+    setAppearance: '壁や屋根の色を変えています',
+    applyBuildingStyle: '建物の様式を切り替えています',
     inspect_plan: '間取りを確かめています'
   };
   var TOOL_LABEL_OTHER = '間取りを直しています';
@@ -256,6 +259,7 @@
       });
       var changed = {};   // idKey → id(写しにある、足した・変えた物)
       var removed = {};   // idKey → id(元のプランにあって消した物)
+      var settings = [];  // 変わった設定表の所の名前(カラー設定・様式。操作の結果の changedSettings)
       var warnings = [];
       var summary = String(deps.summarize(work));
       var messages = [];
@@ -272,6 +276,7 @@
       var round = 0;
 
       function noteChange(res) {
+        (res.changedSettings || []).forEach(function (name) { if (settings.indexOf(name) < 0) settings.push(name); });
         (res.changedIds || []).forEach(function (id) { changed[idKey(id)] = id; });
         (res.removedIds || []).forEach(function (id) {
           delete changed[idKey(id)];
@@ -314,7 +319,9 @@
           work = res.plan;
           noteChange(res);
           (res.warnings || []).forEach(function (w) { warnings.push(w); });
-          return result({ ok: true, changedIds: res.changedIds || [], removedIds: res.removedIds || [], warnings: res.warnings || [] });
+          var okOut = { ok: true, changedIds: res.changedIds || [], removedIds: res.removedIds || [], warnings: res.warnings || [] };
+          if (res.changedSettings && res.changedSettings.length) okOut.changedSettings = res.changedSettings;
+          return result(okOut);
         } catch (e) {
           return result({ errors: ['道具を当てる途中で誤りが起きました'] }, true);
         }
@@ -326,7 +333,7 @@
         var changedIds = Object.keys(changed).map(function (k) { return changed[k]; });
         var removedIds = Object.keys(removed).map(function (k) { return removed[k]; });
         var out = { ok: true, plan: work, changedIds: changedIds, removedIds: removedIds, text: text,
-          changed: changedIds.length + removedIds.length, warnings: warnings, rounds: round };
+          changed: changedIds.length + removedIds.length, changedSettings: settings.slice(), warnings: warnings, rounds: round };
         var t = String(text || '').replace(/\s+$/, '');
         if (t.slice(-MORE_MARK.length) === MORE_MARK) {
           out.text = t.slice(0, -MORE_MARK.length).replace(/\s+$/, '');
@@ -337,7 +344,7 @@
       // 途中で止まった。1つでも変えていれば、ここまでを partial の成功として返す。何も変えていなければ失敗。
       function stopped(reason) {
         var r = finish(lastText);
-        if (!(r.changed > 0)) return failure(reason);
+        if (!(r.changed > 0) && !r.changedSettings.length) return failure(reason);
         r.partial = true;
         r.stop = reason;
         delete r.more;

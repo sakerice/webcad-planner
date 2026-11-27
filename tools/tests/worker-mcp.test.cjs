@@ -107,6 +107,7 @@ const EXPECTED_ANNOTATIONS = {
   resizeRoom: hint(false, true, true), renameRoom: hint(false, true, true), setProps: hint(false, true, true),
   moveObject: hint(false, true, false), rotateObject: hint(false, true, false),
   removeWall: hint(false, true, true), deleteObjects: hint(false, true, true),
+  swapAssetSet: hint(false, true, true), setAppearance: hint(false, true, true), applyBuildingStyle: hint(false, true, true),
 };
 
 test('操作の定義にある道具は、どれも題（OP_TITLES）と注釈（OP_HINTS）を持つ', async () => {
@@ -150,8 +151,8 @@ test('古い版の話し方: initialize → initialized(202) → tools/list → 
   const list = await legacy(ctx, 'tools/list', {});
   assert.equal(list.status, 200);
   const tools = list.json.result.tools;
-  assert.equal(tools.length, 17);
-  assert.deepEqual(tools.map((t) => t.name).sort(), ['addRoof', 'addRoom', 'addRoomWalls', 'addWall', 'create_plan', 'deleteObjects', 'get_plan', 'inspect_plan', 'moveObject', 'open_plan', 'placeItem', 'placeOpening', 'removeWall', 'renameRoom', 'resizeRoom', 'rotateObject', 'setProps'].sort());
+  assert.equal(tools.length, 20);
+  assert.deepEqual(tools.map((t) => t.name).sort(), ['addRoof', 'addRoom', 'addRoomWalls', 'addWall', 'create_plan', 'deleteObjects', 'get_plan', 'inspect_plan', 'moveObject', 'open_plan', 'placeItem', 'placeOpening', 'removeWall', 'renameRoom', 'resizeRoom', 'rotateObject', 'setProps', 'swapAssetSet', 'setAppearance', 'applyBuildingStyle'].sort());
   for (const t of tools) {
     assert.match(t.name, /^[A-Za-z0-9_.-]{1,128}$/);
     assert.equal(t.inputSchema.type, 'object', t.name);
@@ -202,7 +203,7 @@ test('古い版の話し方: initialize → initialized(202) → tools/list → 
   // 版の見出しが無い（2025-03-26 とみなす）ときも通る
   const noHeader = await send(ctx, { body: { jsonrpc: '2.0', id: 'x', method: 'tools/list' } });
   assert.equal(noHeader.status, 200);
-  assert.equal(noHeader.json.result.tools.length, 17);
+  assert.equal(noHeader.json.result.tools.length, 20);
   // 知らない版の見出しは 400
   const badHeader = await legacy(ctx, 'tools/list', {}, { 'mcp-protocol-version': '1999-01-01' });
   assert.equal(badHeader.status, 400);
@@ -215,7 +216,7 @@ test('新しい版の話し方: initialize なしで、版を載せた tools/lis
   const list = await modern(ctx, 'tools/list');
   assert.equal(list.status, 200, list.text);
   assert.equal(list.json.result.resultType, 'complete');
-  assert.equal(list.json.result.tools.length, 17);
+  assert.equal(list.json.result.tools.length, 20);
   assert.ok(list.json.result.ttlMs > 0);
   assert.equal(list.json.result.cacheScope, 'public');
   assert.equal(list.json.result._meta['io.modelcontextprotocol/serverInfo'].name, 'house-planner');
@@ -290,6 +291,26 @@ test('新しい版の話し方: initialize なしで、版を載せた tools/lis
     assert.equal(r.status, 404, m);
     assert.equal(r.json.error.code, -32601, m);
   }
+});
+
+// 物でなく設定表だけを変える操作(setAppearance)は changedIds が空でも保存される。返事も「変わった設定」を書く
+// (2026-11-26 のレビュー: 保存されたのに「プランは変わりませんでした」と返していた)。
+test('setAppearance: 設定表が変わったら「変わった設定」を返し、同じ値をもう一度渡すと「変わりませんでした」', async () => {
+  const ctx = await setup();
+  const { url, id } = await createPlan(ctx);
+  const room = await call(ctx, 'addRoom', { plan: url, name: '和室', floor: 1, x: 2000, y: 2000, w: 2730, d: 3640 });
+  assert.equal(room.isError, false, textOf(room));
+  const a = await call(ctx, 'setAppearance', { plan: url, part: 'interior', color: '#336699' });
+  assert.equal(a.isError, false, textOf(a));
+  assert.match(textOf(a), /プランを直しました（壁紙・外壁・屋根の色と素材を変える）/);
+  assert.match(textOf(a), /変わった設定: 内観（壁紙）の家全体/);
+  const stored = await (await ctx.env.ROOMS.get(ctx.env.ROOMS.idFromName(id)).fetch('https://room/plan')).json();
+  assert.equal(stored.interiorWallSettings.whole.color, '#336699');
+  const again = await call(ctx, 'setAppearance', { plan: url, part: 'interior', color: '#336699' });
+  assert.match(textOf(again), /プランは変わりませんでした/);
+  const floor4 = await call(ctx, 'setAppearance', { plan: url, part: 'roof', floor: 4, color: '#000000' });
+  assert.equal(floor4.isError, true);
+  assert.match(textOf(floor4), /4 階はありません/);
 });
 
 test('通しの流れ: create_plan → addRoom → placeItem → get_plan に足した物がある → inspect_plan。画面にも届く', async () => {

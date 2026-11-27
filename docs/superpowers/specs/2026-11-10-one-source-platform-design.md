@@ -87,6 +87,8 @@ house-planner mobile（https://cad-planner.srapps.us）を、次の3つの形で
    - `placeItem`（家財・建具・設備。カタログの種類名で指定する）
    - `moveObject` / `rotateObject` / `deleteObjects`
    - `setProps`（設定できる項目は `assets/js/plan-settable.js` の `SETTINGS` を正本として使う）
+   - （2026-11-21 に足した）`addRoomWalls` / `placeOpening` / `addRoof`（白紙から作る）
+   - （2026-11-26 に足した）`swapAssetSet`（家具の一括差し替え）・`setAppearance`（壁紙・外壁・屋根のカラー設定）・`applyBuildingStyle`（建物の様式）。下の「AI の操作の追加（2026-11-26）」
    吸着（扉窓を壁へ、階段、格子）は `DATA` でなく引数の `plan` を見るように直して、操作の中で使う。操作が失敗したら、その操作だけを `errors` に入れて残りは続けず、**プランは変えずに返す**（全部か無しか）。
    画面側の `placeItem` / `delSel` / `updateSelectedProp` は「`saveState` → 操作 → 描画」の薄い包みに変える。undo は今の JSON スナップショット方式のままにする。
 5. **検査** `inspectPlan(plan)`
@@ -230,6 +232,16 @@ house-planner mobile（https://cad-planner.srapps.us）を、次の3つの形で
   - AI の引数は、`applyOperations` の前に必ず `operations-catalog.js` の `checkArgs` を通す（定義に無い鍵を止める）。
   - `PlanCheck.knowledgeWarnings` はカタログの品番（`fmp-…`）を見ないので、アプリのプランではほとんど何も返さない。指摘の文も読み取り向けの言い方のまま。`validatePlan` の文は配列の番号で物を指すので、id に置き換える。
 - 見つけて直していないもの: 消しゴムで壁を消すと、外壁の設定表にその壁の行が残る。外壁の色・素材の欄名を壁以外の物に渡すと、その物に同じ名前の欄が書かれる（画面からは壁にしか渡さない）。`PlanStructure.floorsOverlap` は、壁が1本だけの階を比べない。plan-core のファイルの読み込みに失敗すると、配置・削除・設定変更ができなくなり、画面に知らせが出ない（段2の `factories.js` から同じ）。
+
+### AI の操作の追加（2026-11-26）
+
+利用者に「AI から一括差し替えが使えない。家具の配置しかできないのか」と言われ、画面でできる見た目の変更を AI（チャット・MCP）からも使えるようにした。今の AI の操作は 16 個（`operations-catalog.js` の `OPERATIONS`）。
+
+- `swapAssetSet {set, ids?, except?}`: 置いてある家具を別のセット（`rpg-mansion` 洋館・`kominka` 日本古民家）の物へまとめて差し替える。決め方は画面の「一括差し替え」と同じ `asset-swap.js` の `plan`、書き込みは同じ `applyRows`（画面の `apply` もこれを呼ぶ）。画面と違うのは、ロックした物を替えないことと、`ids`・`except` で替える物を選べること。選ばなかった物は替えず、載っている台が替わるときだけ高さを合わせる。選んだ台の替え先に含まれる上の物（洗面ボウルなど）は一緒に外し、その物がロック・`except` なら台ごと残す。Worker は `assets/data/worker-furniture.json`（`tools/build_worker_catalog.cjs` が画面の関数を呼んで作る）から引く。壁や天井に付けた物を壁掛け・天井吊りの物に替えるときに天井の高さが要り、勾配天井・吹き抜け・段差・天井の範囲・斜線制限のある部屋では Worker は断る（照明を置くときと同じ線）。
+- `setAppearance {part, floor?, color?, texture?, sheen?}`: 内観（壁紙）・外観（外壁）・屋根のカラー設定の、家全体か階ごとの色・素材・屋根の質感。書き込みの決まりは `PlanCoreOperations.writeAppearance` で、設定欄（`updateInteriorSetting`・`updateExteriorSetting`・`updateRoofAppearance`）も同じ関数を呼ぶ。外観は設定欄と同じく「家全体」「階」の印を付けてから書く。素材と質感の一覧は `PlanSettable.APPEARANCE_TEXTURES`・`ROOF_SHEEN_OPTIONS`（設定欄もここを読む）。
+- `applyBuildingStyle {set, parts?}`: 画面の「建物の仕上げを替える」と同じ。決め方は `BuildingStyle.planFor`、書き込みは画面の `apply` と共有にした `BuildingStyle.applyPlan`。ロックした部屋・扉・窓と、ロックした壁の面は変えない。Worker では、内観面・外観面の鍵と外壁のある階を 3D の壁の幾何から求められないので、理由つきで断る（幾何の要らない部位だけを当てることもしない。画面の結果と食い違うため）。
+- `setProps` の `set` に、編集だけの項目（`editOnly`）を足した: 部屋の `floorColor`・`ceilingColor`、窓の `sashColor`、開き戸・折戸の `doorFinish`、部位を持つカタログの家具の `finishColors`・`finishTextures`・`finishRoughness`（`{部位: 値}`、今の値に重ね、`""` でその部位を既定に戻す）。読み取りの指示文（`describe`）と取り込みには出ない。
+- まだ AI にできないこと: 壁ごと・面ごとの内観・外観の色と素材（面の鍵が 3D の壁の幾何から決まる）、外の AI（MCP・共同編集）からの建物の様式の切り替え、画面に読み込んだ画像を貼ること。
 
 段4の結果（2026-11-18）。画面の右下に「AIに頼む」のチャット欄ができた。言葉で頼むと AI が段3の操作を呼んでプランの写しを直し、終わったら本物のプランに入れる。1回の依頼は取り消し1回（チャット欄の「元に戻す」でも同じ）で丸ごと戻る。
 

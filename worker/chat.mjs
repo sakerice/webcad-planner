@@ -26,6 +26,7 @@
 import ObjectKnowledge from "../assets/js/object-knowledge.js";
 import PlanSettable from "../assets/js/plan-settable.js";
 import OperationsCatalog from "../assets/js/plan-core/operations-catalog.js";
+import furnitureTable from "../assets/data/worker-furniture.json" with { type: "json" };
 import { json } from "./shared.mjs";
 import { anthropicConfig, conversationBodyText, sendConversation } from "./anthropic.mjs";
 import { quotaLimits } from "./ai-quota.mjs";
@@ -103,7 +104,8 @@ export const CHAT_SYSTEM = [
   "考えている内容は日本語で書いてください（要約が利用者の画面に作業の様子として出ます）。",
 ].join("\n");
 
-const DEPS = { settable: PlanSettable, knowledge: ObjectKnowledge };
+// assetSets: 家具を差し替えられるセット(一括差し替え swapAssetSet の set。Worker の ctx と同じ表 worker-furniture.json)。
+const DEPS = { settable: PlanSettable, knowledge: ObjectKnowledge, assetSets: furnitureTable.sets };
 
 // 道具とシステムプロンプトは、モジュールの読み込み時に1回だけ作る。
 // **毎回同じバイト列にする**（時刻や乱数を入れない）。プロンプトキャッシュが効くため。

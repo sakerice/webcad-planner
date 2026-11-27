@@ -68,9 +68,9 @@ function center(o) { return [o.x + o.w / 2, o.y + o.d / 2]; }
 
 // ── 各操作の成功例 ───────────────────────────────────────────────────
 
-test('OPS に13個の操作がある(白紙から作る3つは plan-core-build-ops.test.cjs)', () => {
+test('OPS に16個の操作がある(白紙から作る3つは plan-core-build-ops.test.cjs、一括差し替え・カラー設定・様式は ai-style-ops.test.cjs)', () => {
   assert.deepEqual(Object.keys(O.OPS).sort(), ['addRoom', 'addWall', 'deleteObjects', 'moveObject', 'placeItem',
-    'removeWall', 'renameRoom', 'resizeRoom', 'rotateObject', 'setProps', 'addRoomWalls', 'placeOpening', 'addRoof'].sort());
+    'removeWall', 'renameRoom', 'resizeRoom', 'rotateObject', 'setProps', 'addRoomWalls', 'placeOpening', 'addRoof', 'swapAssetSet', 'setAppearance', 'applyBuildingStyle'].sort());
 });
 
 test('addRoom は中心と寸法から北西の角を出し、roomId を使う', () => {
