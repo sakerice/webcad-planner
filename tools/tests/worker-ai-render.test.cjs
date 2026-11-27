@@ -28,6 +28,9 @@ const JPEG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQg
 const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 const OUT_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJ';
 const BODY = () => ({ preset: 'life', view: 'interior', aspect: '3:2', images: { base: JPEG, depth: JPEG, edge: PNG } });
+// 4 枚目（面の向き＝法線の絵）を添えた形。normal は任意の欄。
+const NORMAL_JPEG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDB==';
+const BODY4 = () => ({ ...BODY(), images: { ...BODY().images, normal: NORMAL_JPEG } });
 
 const micro = (usd) => Math.ceil(usd * 1e6);
 
@@ -117,6 +120,13 @@ test('知らない preset・view・aspect、文章の欄、知らない欄、足
     // 種類の名乗りと中身が違う（PNG と名乗って JPEG の中身）
     { ...BODY(), images: { base: 'data:image/png;base64,/9j/4AAQ', depth: JPEG, edge: PNG } },
     { ...BODY(), images: { base: big, depth: JPEG, edge: PNG } },
+    // 法線（任意の 4 枚目）: 形が違う・空・ほかの欄と一緒・必須の欄が欠けている
+    { ...BODY(), images: { base: JPEG, depth: JPEG, edge: PNG, normal: 'data:image/gif;base64,R0lGODlh' } },
+    { ...BODY(), images: { base: JPEG, depth: JPEG, edge: PNG, normal: null } },
+    { ...BODY(), images: { base: JPEG, depth: JPEG, edge: PNG, normal: '' } },
+    { ...BODY(), images: { base: JPEG, depth: JPEG, edge: PNG, normal: JPEG, extra: PNG } },
+    { ...BODY(), images: { base: JPEG, depth: JPEG, normal: JPEG } },
+    { ...BODY(), images: { base: JPEG, depth: JPEG, edge: PNG, normal: big } },
     [],
     null,
   ];
@@ -185,6 +195,56 @@ test('成功: global の窓口へ、3 枚の絵と Worker が組んだ指示文�
   assert.ok(!JSON.stringify(body).includes('googleSearch'));
 });
 
+test('法線あり: 4 枚目として法線の絵を送り、指示文に 4 枚目の説明が入る。法線なしの指示文は今までと同じ', async () => {
+  at(T);
+  const q = await realQuota();
+  const env = { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_QUOTA: q.AI_QUOTA };
+  const { sent, fetchImpl } = vertex();
+  const res = await render(BODY4(), env, fetchImpl);
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).image, 'data:image/png;base64,' + OUT_B64);
+  const parts = sent[0].body.contents[0].parts;
+  assert.equal(parts.length, 5);
+  assert.deepEqual(parts.slice(0, 4).map((p) => p.inlineData.mimeType), ['image/jpeg', 'image/jpeg', 'image/png', 'image/jpeg']);
+  assert.equal(parts[3].inlineData.data, NORMAL_JPEG.split(',')[1], '4 枚目が法線の絵でない');
+  const { buildRenderPrompt } = await mod('worker/render-prompt.mjs');
+  assert.equal(parts[4].text, buildRenderPrompt({ preset: 'life', view: 'interior', withNormal: true }));
+  assert.match(parts[4].text, /Image 4/);
+
+  // 法線なし（3 枚）は 4 枚目に触れない
+  const three = vertex();
+  assert.equal((await render(BODY(), env, three.fetchImpl)).status, 200);
+  const t = three.sent[0].body.contents[0].parts;
+  assert.equal(t.length, 4);
+  assert.doesNotMatch(t[3].text, /Image 4|normal map/i);
+  assert.equal(t[3].text, buildRenderPrompt({ preset: 'life', view: 'interior' }));
+});
+
+test('光の出し方は環境変数 AI_RENDER_LIGHTING でだけ切り替わる（無い・知らない値は soft）。API の欄では変えられない', async () => {
+  at(T);
+  const q = await realQuota();
+  const { buildRenderPrompt } = await mod('worker/render-prompt.mjs');
+  const soft = buildRenderPrompt({ preset: 'life', view: 'interior' });
+  const sunlit = buildRenderPrompt({ preset: 'life', view: 'interior', lighting: 'sunlit' });
+  assert.notEqual(soft, sunlit);
+  const textOf = async (env, body = BODY()) => {
+    const v = vertex();
+    const res = await render(body, { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_QUOTA: q.AI_QUOTA, ...env }, v.fetchImpl);
+    return { status: res.status, text: v.sent.length ? v.sent[0].body.contents[0].parts.at(-1).text : null };
+  };
+  assert.equal((await textOf({})).text, soft);
+  assert.equal((await textOf({ AI_RENDER_LIGHTING: 'sunlit' })).text, sunlit);
+  assert.equal((await textOf({ AI_RENDER_LIGHTING: 'SUNLIT' })).text, soft);
+  assert.equal((await textOf({ AI_RENDER_LIGHTING: 'neon' })).text, soft);
+  // 法線ありでも同じ環境変数が効く
+  assert.equal((await textOf({ AI_RENDER_LIGHTING: 'sunlit' }, BODY4())).text,
+    buildRenderPrompt({ preset: 'life', view: 'interior', withNormal: true, lighting: 'sunlit' }));
+  // 本体に lighting の欄を足すと断る（決まった欄以外は 400）
+  const r = await textOf({}, { ...BODY(), lighting: 'sunlit' });
+  assert.equal(r.status, 400);
+  assert.equal(r.text, null);
+});
+
 test('モデルは AI_RENDER_MODEL で替えられる。読み取りの窓口は東京のまま', async () => {
   const env = { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_RENDER_MODEL: 'gemini-other-image' };
   const { sent, fetchImpl } = vertex();
@@ -229,7 +289,8 @@ test('指示文: preset と view の全部の組み合わせで組め、利用�
 });
 
 test('指示文: 天井の形と壁の折れを保ち、1 枚目に無い設備（火災報知器・ダウンライト・スイッチ・コンセント）を足さない', async () => {
-  // 2026-11-27 の本物の生成で、吹き抜け上部の傾いた天井が平らな天井と下がり壁に置き換わった。
+  // 傾いた天井や吹き抜けのあるプランで、天井の形を平らにしたり下がり壁を足したりさせないための文。
+  // （2026-11-27 に既定の 2 階建てで「傾いた天井が平らにされた」と見えたのは見誤りで、そこの天井は平らだった。）
   const { buildRenderPrompt, RENDER_PRESET_IDS, RENDER_VIEWS } = await mod('worker/render-prompt.mjs');
   for (const preset of RENDER_PRESET_IDS) {
     for (const view of RENDER_VIEWS) {
@@ -243,6 +304,86 @@ test('指示文: 天井の形と壁の折れを保ち、1 枚目に無い設備�
       assert.match(p, /drop(ped)? (wall|soffit)|bulkhead/i, '下がり壁を足さない');
       assert.match(p, /corner|jog|turn/i, '壁の折れ');
       for (const w of [/smoke (detector|alarm)/i, /downlight/i, /switch/i, /(socket|outlet)/i]) assert.match(p, w);
+    }
+  }
+});
+
+test('指示文（法線あり）: 4 枚目の色と向きの対応を、撮影（three.js の MeshNormalMaterial、カメラから見た向き）どおりに書く', async () => {
+  // 撮影は index.html の captureAiOverrideGuideDataUrl('normal')。色 = カメラから見た法線 × 0.5 + 0.5。
+  // 赤 = 右向き、緑 = 上向き、青 = カメラの方を向く。床（上向き）は緑が強く、平らな天井（下向き）は緑が無い。
+  const { buildRenderPrompt, RENDER_PRESET_IDS, RENDER_VIEWS } = await mod('worker/render-prompt.mjs');
+  for (const preset of RENDER_PRESET_IDS) {
+    for (const view of RENDER_VIEWS) {
+      const p = buildRenderPrompt({ preset, view, withNormal: true });
+      assert.match(p, /Image 4/);
+      assert.match(p, /more red = facing further to the right/i);
+      assert.match(p, /more green = facing up/i);
+      assert.match(p, /more blue = facing the camera/i);
+      assert.match(p, /flat floor is light green/i);
+      assert.match(p, /flat horizontal ceiling is purple \(no green\)/i);
+      assert.match(p, /never copy its colours/i);
+      assert.match(p, /tilt in image 4/i);
+      assert.match(p, /images 2, 3 and 4/i);
+      // 法線なしの指示文の決まり（天井・設備）は、法線ありでも全部残る
+      assert.match(p, /never flatten/i);
+      assert.match(p, /downlight/i);
+      // 法線を頼んでいない形（true 以外）は 4 枚目に触れない
+      assert.equal(buildRenderPrompt({ preset, view, withNormal: 'yes' }), buildRenderPrompt({ preset, view }));
+    }
+  }
+});
+
+test('指示文（sunlit）: 窓の形の日だまり・家具の影・面ごとの明るさの差を頼み、黒つぶれと白飛びを禁じる。形と色の決まりは soft と同じ', async () => {
+  // 2026-11-27 利用者「候補で出していた時のような、光がよく差し込み複雑な陰影ができる見た目の方が映える」。
+  const { buildRenderPrompt, RENDER_PRESET_IDS, RENDER_VIEWS, RENDER_LIGHTINGS } = await mod('worker/render-prompt.mjs');
+  assert.deepEqual([...RENDER_LIGHTINGS], ['soft', 'sunlit']);
+  for (const preset of RENDER_PRESET_IDS) {
+    for (const view of RENDER_VIEWS) {
+      for (const withNormal of [false, true]) {
+        const soft = buildRenderPrompt({ preset, view, withNormal });
+        const sun = buildRenderPrompt({ preset, view, withNormal, lighting: 'sunlit' });
+        // 既定は soft。知らない値も soft。
+        assert.equal(buildRenderPrompt({ preset, view, withNormal, lighting: 'soft' }), soft);
+        assert.equal(buildRenderPrompt({ preset, view, withNormal, lighting: 'noon' }), soft);
+        assert.notEqual(sun, soft);
+        // 変わるのは「光」の 2 行だけ。形・色・設備の決まりは 1 文字も変わらない。
+        const a = soft.split('\n'), b = sun.split('\n');
+        assert.equal(a.length, b.length);
+        const diff = a.map((l, i) => (l === b[i] ? -1 : i)).filter((i) => i >= 0);
+        assert.equal(diff.length, 2, `${preset}/${view}: 光の行以外が変わった`);
+        for (const i of diff) assert.ok(i > a.indexOf('Improve only light and material realism:'), '光の段より前が変わった');
+        assert.match(sun, /keep the hue and lightness of every surface/i);
+        if (view === 'interior') {
+          assert.match(sun, /direct sunlight/i);
+          assert.match(sun, /patches of sun that copy the shape of those windows/i, '窓の形の日だまり');
+          assert.match(sun, /casts a clear, well-defined shadow/i, '家具の影');
+          assert.match(sun, /own brightness/i, '面ごとの明るさの差');
+          assert.match(sun, /nothing turns black/i, '黒つぶれ');
+          assert.match(sun, /never blown out/i, '白飛び');
+          assert.doesNotMatch(sun, /soft fill light/i);
+        } else {
+          assert.match(sun, /sunny/i);
+          assert.match(sun, /never black/i);
+        }
+      }
+    }
+  }
+});
+
+test('指示文: 3 枚目（輪郭）に描かれた照明器具はその位置に描いてよく、3 枚目に無いダウンライトは足さない（soft・sunlit とも）', async () => {
+  // 図面のダウンライト（light-down）は 3D の絵に写らず、輪郭の絵にだけ輪として出る（2026-11-27 に確かめた）。
+  // 以前の「ダウンライトを足すな」は 3 枚目と食い違っていた。
+  const { buildRenderPrompt, RENDER_PRESET_IDS, RENDER_VIEWS } = await mod('worker/render-prompt.mjs');
+  for (const preset of RENDER_PRESET_IDS) {
+    for (const view of RENDER_VIEWS) {
+      for (const lighting of ['soft', 'sunlit']) {
+        const p = buildRenderPrompt({ preset, view, lighting });
+        assert.match(p, /neither image 1 nor image 3 shows/i);
+        assert.match(p, /light fitting that image 3 draws on the ceiling/i);
+        assert.match(p, /at exactly that spot/i);
+        assert.match(p, /add no downlights or recessed lights anywhere else/i);
+        assert.doesNotMatch(p, /no downlights or recessed lights, no ceiling lights/i, '古い「ダウンライトを足すな」が残っている');
+      }
     }
   }
 });
@@ -428,6 +569,22 @@ test('出力の上限は 4096 トークン。呼んでいる間の仮押さえ�
   assert.equal(holds.length, 1, '仮押さえが 1 件でない');
   // 精算されずに期限が過ぎた仮押さえは、この額のまま pend に積まれる（worker/ai-quota.mjs の forgetOld）。
   assert.ok(holds[0].usd > micro(0.1) && holds[0].usd < micro(0.17), '仮押さえの額: ' + holds[0].usd / 1e6);
+
+  // 法線あり（4 枚）は、入力の絵 1 枚分だけ多く仮押さえする
+  at(T);
+  const q4 = await realQuota();
+  let holds4 = null;
+  const v4 = vertex(() => {
+    holds4 = [...q4.data.entries()].filter(([k]) => String(k).startsWith('hold:')).map(([, v]) => v);
+    return okReply();
+  });
+  assert.equal((await render(BODY4(), { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_QUOTA: q4.AI_QUOTA }, v4.fetchImpl)).status, 200);
+  assert.equal(holds4.length, 1);
+  const { renderHoldUsd, imageTokens } = await mod('worker/ai-price.mjs');
+  const oneImage = renderHoldUsd({ inputTokens: imageTokens([{}]), maxOutputTokens: 0 }) - renderHoldUsd({ inputTokens: 0, maxOutputTokens: 0 });
+  assert.ok(holds4[0].usd > holds[0].usd, '法線ありの仮押さえが増えていない');
+  assert.ok(Math.abs((holds4[0].usd - holds[0].usd) - micro(oneImage)) <= micro(0.002), '差が絵 1 枚分でない: ' + (holds4[0].usd - holds[0].usd) / 1e6);
+  assert.ok(holds4[0].usd < micro(0.19), '法線ありの仮押さえの額: ' + holds4[0].usd / 1e6);
 });
 
 test('時間切れ・届かない・usage の無い返事は、仮押さえの額でなく現実的な見積もり（約 $0.06）で精算する', async () => {
@@ -456,6 +613,14 @@ test('時間切れ・届かない・usage の無い返事は、仮押さえの�
     assert.equal(q.data.get('pend:2026-11-20:203.0.113.7'), micro(expected), name + ': 精算されずに残った額が見積もりどおりでない');
     assert.equal([...q.data.keys()].filter((k) => k.startsWith('hold:')).length, 0, name + ': 仮押さえが残った');
   }
+  // 法線あり（4 枚）は、入力の絵 1 枚分（と長くなった指示文の分）だけ多く見積もる
+  const expected4 = renderFailureUsd({ text: buildRenderPrompt({ preset: 'life', view: 'interior', withNormal: true }), images: 4 });
+  assert.ok(expected4 > expected && expected4 < 0.08, '法線ありの失敗の見積もり: ' + expected4);
+  at(T);
+  const q4 = await realQuota();
+  const res4 = await render(BODY4(), { GOOGLE_SERVICE_ACCOUNT_JSON: SA, AI_QUOTA: q4.AI_QUOTA }, unreachable);
+  assert.equal(res4.status, 502);
+  assert.equal(q4.data.get('usd-month:2026-11'), micro(expected4), '法線あり: 月の額が見積もりどおりでない');
 });
 
 // ── レンダーだけを止める ─────────────────────────────────────────────

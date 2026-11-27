@@ -1,6 +1,6 @@
 // アプリの中で生成する AIレンダーの窓口。
 //
-//   POST /api/ai/render         今の視点の 3 枚（3D の絵・深度・輪郭）から、写真のような絵を 1 枚作る
+//   POST /api/ai/render         今の視点の 3 枚（3D の絵・深度・輪郭）と、任意の 4 枚目（法線）から、写真のような絵を 1 枚作る
 //   POST /api/ai/render-report  生成した絵の「問題を報告」を R2 に残す（App Store 審査指針 1.2 への備え）
 //   GET  /api/ai/quota の render 欄（renderQuota。worker/routes-ai.mjs の aiQuota が足す）
 //
@@ -18,7 +18,7 @@
 //   - 上流のエラー本文は画面へ返さない（鍵の一部が入ることがある）。ログにも status だけを出す。
 //   - Worker は絵を保存しない。例外は、利用者が「問題を報告」で絵を送ったときだけ。
 import { json, readBytesWithLimit } from "./shared.mjs";
-import { buildRenderPrompt, isRenderPreset, isRenderView } from "./render-prompt.mjs";
+import { buildRenderPrompt, isRenderLighting, isRenderPreset, isRenderView } from "./render-prompt.mjs";
 import { renderConfig, generateImage, RENDER_ASPECTS, RENDER_MAX_OUTPUT_TOKENS, RENDER_TIMEOUT_MS } from "./vertex-render.mjs";
 import { renderHoldUsd, renderUsageUsd, renderFailureUsd, imageTokens, textTokens } from "./ai-price.mjs";
 import { renderLimits, renderStopped } from "./ai-quota.mjs";
@@ -29,13 +29,15 @@ import {
 
 // 1 枚あたりの上限（base64 の文字数）。画面は長辺 1536px の JPEG に縮めて送るので、ふつうは 0.5MB ほど。
 export const MAX_RENDER_IMAGE_CHARS = 3 * 1024 * 1024;
-const MAX_RENDER_BODY_BYTES = 3 * MAX_RENDER_IMAGE_CHARS + 64 * 1024;
+const MAX_RENDER_BODY_BYTES = 4 * MAX_RENDER_IMAGE_CHARS + 64 * 1024;
 // 報告に付ける絵（生成した 1K の PNG）は 3MB を超えうるので、少し大きく取る。
 const MAX_REPORT_IMAGE_CHARS = 6 * 1024 * 1024;
 const MAX_REPORT_BODY_BYTES = MAX_REPORT_IMAGE_CHARS + 16 * 1024;
 
 const RENDER_KEYS = ["aspect", "images", "preset", "view"];
-const IMAGE_KEYS = ["base", "depth", "edge"];
+// base・depth・edge は必ず要る。normal（面の向きの絵）は任意（無ければ 3 枚で生成する）。これ以外の欄は断る。
+export const IMAGE_KEYS = Object.freeze(["base", "depth", "edge"]);
+export const IMAGE_KEYS_WITH_NORMAL = Object.freeze(["base", "depth", "edge", "normal"]);
 export const REPORT_REASONS = Object.freeze(["inappropriate", "wrong_layout", "other"]);
 
 // 中身の先頭の印（base64 のまま見る）。名乗った種類と中身が違うものは断る。
@@ -89,20 +91,23 @@ async function readBody(request, maxBytes) {
   try { return { value: JSON.parse(new TextDecoder().decode(bytes)) }; } catch { return { error: true }; }
 }
 
-// 入力を検める。{ preset, view, aspect, images: [base, depth, edge] } か null。
+// 入力を検める。{ preset, view, aspect, images: [base, depth, edge(, normal)], withNormal } か null。
 function readRenderInput(payload) {
   if (!isPlainObject(payload) || !sameKeys(payload, RENDER_KEYS)) return null;
   const { preset, view, aspect, images } = payload;
   if (!isRenderPreset(preset) || !isRenderView(view)) return null;
   if (typeof aspect !== "string" || !RENDER_ASPECTS.includes(aspect)) return null;
-  if (!isPlainObject(images) || !sameKeys(images, IMAGE_KEYS)) return null;
+  if (!isPlainObject(images)) return null;
+  const withNormal = Object.prototype.hasOwnProperty.call(images, "normal");
+  const keys = withNormal ? IMAGE_KEYS_WITH_NORMAL : IMAGE_KEYS;
+  if (!sameKeys(images, keys)) return null;
   const list = [];
-  for (const k of ["base", "depth", "edge"]) {
+  for (const k of keys) {
     const im = readDataUrl(images[k], ["image/jpeg", "image/png"], MAX_RENDER_IMAGE_CHARS);
     if (!im) return null;
     list.push(im);
   }
-  return { preset, view, aspect, images: list };
+  return { preset, view, aspect, images: list, withNormal };
 }
 
 function logUpstream(where, result) {
@@ -125,7 +130,10 @@ export async function aiRender(request, env, deps = {}) {
     return json({ error: "ai_quota_exceeded", scope: "total", message: RENDER_STOPPED_MESSAGE }, 429);
   }
 
-  const text = buildRenderPrompt({ preset: input.preset, view: input.view });
+  // 光の出し方（soft / sunlit）は、利用者が決めるまで API の欄にせず、運営者の環境変数でだけ切り替える。
+  // 無い・知らない値なら soft（今の既定）。
+  const lighting = isRenderLighting(env && env.AI_RENDER_LIGHTING) ? env.AI_RENDER_LIGHTING : "soft";
+  const text = buildRenderPrompt({ preset: input.preset, view: input.view, withNormal: input.withNormal, lighting });
   const holdUsd = renderHoldUsd({ inputTokens: imageTokens(input.images) + textTokens(text), maxOutputTokens: RENDER_MAX_OUTPUT_TOKENS });
   const quota = await reserveRender(request, env, holdUsd, holdUsd);
   if (!quota.ok) return renderRefusal(quota.kind);
@@ -172,8 +180,8 @@ export async function renderQuota(env, request) {
     ...moneyParams(env, 0, "", { who }),
   });
   if (!seen || seen.scope !== "peek") return hidden;
-  // 1 枚の仮押さえの額（指示文はいちばん長いもので見る必要は無い。差は数百トークン）。
-  const hold = renderHoldUsd({ inputTokens: imageTokens([{}, {}, {}]) + 2000, maxOutputTokens: RENDER_MAX_OUTPUT_TOKENS }) * 1e6;
+  // 1 枚の仮押さえの額。絵は多い方の 4 枚（法線あり）で見る（指示文はいちばん長いもので見る必要は無い。差は数百トークン）。
+  const hold = renderHoldUsd({ inputTokens: imageTokens([{}, {}, {}, {}]) + 2000, maxOutputTokens: RENDER_MAX_OUTPUT_TOKENS }) * 1e6;
   const now = Date.now();
   if (Number(seen.monthLeft) < hold) return { ...hidden, left: 0, message: MONTH_LIMIT_MESSAGE };
   if (Number(seen.dayLeft) < hold || seen.spentOver === true) return { ...hidden, left: 0, message: dayLimitMessage(now) };

@@ -46,6 +46,17 @@ test('送る絵の大きさの上限が Worker と同じ', async () => {
   assert.equal(Function('return ' + m[1])(), MAX_RENDER_IMAGE_CHARS);
 });
 
+test('画面が送る絵の欄(base・depth・edge と任意の normal)を、Worker が受ける', async () => {
+  const { IMAGE_KEYS, IMAGE_KEYS_WITH_NORMAL } = await import(pathToFileURL(join(ROOT, 'worker/routes-render.mjs')).href);
+  const m = inapp.match(/var images = \{([^}]*)\};/);
+  assert.ok(m, 'ai-render-inapp.js に送る絵の組み立て(var images = {...})が無い');
+  const required = [...m[1].matchAll(/\b([a-z]+):/g)].map((x) => x[1]).sort();
+  assert.deepEqual(required, [...IMAGE_KEYS].sort(), '必ず送る絵の欄が Worker と違う');
+  const optional = [...inapp.matchAll(/\bimages\.([a-z]+) = /g)].map((x) => x[1]);
+  assert.deepEqual(optional, ['normal'], '任意で足す絵の欄');
+  assert.deepEqual([...IMAGE_KEYS_WITH_NORMAL].sort(), [...required, ...optional].sort(), '法線ありの欄が Worker と違う');
+});
+
 test('結果の絵の長押しメニュー(-webkit-touch-callout)を消していない(iPhone で長押しから「写真に追加」できるように)', () => {
   const css = readFileSync(join(ROOT, 'assets/app.css'), 'utf8');
   for (const [name, src] of [['assets/app.css', css], ['index.html', html], ['ai-render-inapp.js', inapp]]) {

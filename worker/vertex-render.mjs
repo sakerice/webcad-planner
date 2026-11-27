@@ -25,7 +25,7 @@ export const RENDER_TIMEOUT_MS = 90000;
 // 上限が無いと仮押さえの額（worker/ai-price.mjs の renderHoldUsd）に上限が無くなる。
 // 仮押さえは 1 日の額の枠（読み取り・チャットと共有）を呼んでいる間ふさぎ、利用者が途中で閉じて Worker が
 // 止まったときはその額のまま「精算されずに残った額」に積まれる。だから実際の 1 枚の 2 倍弱の 4096 に抑える
-// （8192 では仮押さえが約 $0.29、4096 で約 $0.17。2026-11-27）。
+// （8192 では仮押さえが約 $0.29、4096 で約 $0.17。法線の 4 枚目を添えると約 $0.18。2026-11-27）。
 export const RENDER_MAX_OUTPUT_TOKENS = 4096;
 
 // 採用モデルが受ける縦横比のうち、Worker が許すもの。極端な比（1:4・4:1・1:8・8:1）は 3D の画面から
@@ -59,7 +59,7 @@ export function renderConfig(env) {
   };
 }
 
-// 絵を 1 枚作る。images は [{ mimeType, base64 }]（3D の絵・深度・輪郭の順）。
+// 絵を 1 枚作る。images は [{ mimeType, base64 }]（3D の絵・深度・輪郭の順。法線があれば 4 枚目）。
 // 返り値:
 //   { ok: true, mimeType, base64, usage }
 //   { ok: false, blocked: true, usage }       安全上の停止

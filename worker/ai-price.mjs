@@ -62,6 +62,7 @@ export function geminiPriceOf(model) {
 // 返事の candidatesTokenCount は絵と文の合計なので、全部を絵の単価（高い方）で数える。1 枚（1K）は約 $0.045。
 export const RENDER_PRICE = Object.freeze({ in: 1.5, imageOut: 30, textOut: 7.5 });
 // 仮押さえ: 入力は画像 1 枚 8,000 トークン（imageTokens。実測は 1,120）と指示文、出力は上限まで絵の単価で出たとして数える。
+// 絵の枚数は送られた数で数える（3 枚で約 $0.168、法線の 4 枚目を添えると約 $0.182。2026-11-27）。
 export function renderHoldUsd({ inputTokens, maxOutputTokens }) {
   const input = Math.min(MAX_INPUT_TOKENS, Math.max(0, Number(inputTokens) || 0) + OVERHEAD_TOKENS);
   return (input * RENDER_PRICE.in + Math.max(0, Number(maxOutputTokens) || 0) * RENDER_PRICE.imageOut) / 1e6;
@@ -69,6 +70,7 @@ export function renderHoldUsd({ inputTokens, maxOutputTokens }) {
 // 時間切れ・届かない・usage の無い返事のときの精算額。課金されたかは分からないので、現実の 1 枚で数える。
 // 入力は画像 1 枚 1,120 トークン（試し生成の実測は 3 枚と指示文で約 3,550）と指示文のバイト数、
 // 出力は絵 1 枚（1K）1,120 トークンと思考 2,000 トークン（試し生成では 500〜1,100）。指示文 3KB で約 $0.058。
+// 絵の枚数は送られた数で数える（法線の 4 枚目を添えると、3 枚より約 $0.003 多い）。
 // 仮押さえの額（出力を上限まで絵の単価で見る。約 $0.17）のまま精算すると、1 日の額の枠（読み取り・チャットと
 // 共有）を時間切れだけで食い尽くしうるため、2026-11-27 にこの見積もりへ替えた。
 export const RENDER_IMAGE_INPUT_TOKENS = 1120;

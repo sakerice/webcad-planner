@@ -4,9 +4,10 @@
 // 画面の部品は index.html の #unity-render-modal の上半分(id は ai-render-*)。下の折りたたみの
 // 「画像AI用データ」は index.html の generateAiRenderPackage がそのまま受け持つ(ここからは触らない)。
 //
-// 流れ: 主ボタン → (初回だけ)同意 → 撮る(3Dの絵・深度・輪郭の3枚) → 縦横比をそろえて中央で切り抜き、
+// 流れ: 主ボタン → (初回だけ)同意 → 撮る(3Dの絵・深度・輪郭の3枚と、面の向き(法線)の4枚目) → 縦横比をそろえて中央で切り抜き、
 // 長辺 1536px の JPEG に縮める → POST /api/ai/render → 結果を出す。
 // 送るのは preset・view・aspect・images の4つだけ。**文章の欄は送らない**(指示文は Worker が組み立てる)。
+// images は base・depth・edge が必ず。normal(法線)は撮れたときだけ足す(撮れなくても3枚で送る。Worker は任意の欄として受ける)。
 //
 // 撮る関数は index.html のもの(captureCurrent3DDataUrl・captureInstance3DData・captureAiOverrideGuideDataUrl・
 // makeEdgeDataUrlFromSegmentation)を呼ぶ。「画像AI用データ」と同じ絵である。
@@ -146,7 +147,7 @@
       img.src = url;
     });
   }
-  // 中央で aspect に切り抜いて、size に縮めた JPEG。3枚とも同じ割合の範囲を切るので、写る範囲がそろう。
+  // 中央で aspect に切り抜いて、size に縮めた JPEG。どの絵も同じ割合の範囲を切るので、写る範囲がそろう。
   // Worker の上限(1枚 3MB)を超えるときだけ、画質を下げて詰め直す(大きさと範囲は変えない)。
   function cropTo(img, aspect, size) {
     var iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
@@ -185,24 +186,28 @@
       if (!isAiCaptureView()) return { error: MESSAGES.noView };
     }
     await waitFrame(50);
-    // 3枚の撮影の間で await しない(視点や読み込みが進んで、絵とガイドがずれないように)。
+    // 撮影の間で await しない(視点や読み込みが進んで、絵とガイドがずれないように)。
     // 内観か外観かも同じ区間で決める(輪郭を作る await の間に視点が切り替わると、絵と指示文が食い違う)。
     var base = captureCurrent3DDataUrl();
     var view = aiCaptureViewMode();
     var instanceData = captureInstance3DData();
     var depth = captureAiOverrideGuideDataUrl('depth');
+    // 面の向き(法線)。天井や壁の傾きを AI に伝える手がかり。撮れなければ3枚で送る。
+    var normal = '';
+    try { normal = captureAiOverrideGuideDataUrl('normal'); } catch (e) { normal = ''; }
+    if (!normal || normal.length < 1000) normal = '';
     var instance = instanceData && instanceData.dataUrl;
     if ([base, depth, instance].some(function (u) { return !u || u.length < 1000; })) return { error: MESSAGES.capture };
     var edge = await makeEdgeDataUrlFromSegmentation(instance);
     if (!edge || edge.length < 100) return { error: MESSAGES.capture };
     var imgs = await Promise.all([loadImage(base), loadImage(depth), loadImage(edge)]);
+    var normalImg = null;
+    if (normal) { try { normalImg = await loadImage(normal); } catch (e) { normalImg = null; } }
     var aspect = pickAspect(imgs[0].naturalWidth || imgs[0].width, imgs[0].naturalHeight || imgs[0].height);
     var size = outSize(aspect);
-    return {
-      aspect: aspect,
-      view: view,
-      images: { base: cropTo(imgs[0], aspect, size), depth: cropTo(imgs[1], aspect, size), edge: cropTo(imgs[2], aspect, size) }
-    };
+    var images = { base: cropTo(imgs[0], aspect, size), depth: cropTo(imgs[1], aspect, size), edge: cropTo(imgs[2], aspect, size) };
+    if (normalImg) images.normal = cropTo(normalImg, aspect, size);
+    return { aspect: aspect, view: view, images: images };
   }
 
   function selectedPresetId() {

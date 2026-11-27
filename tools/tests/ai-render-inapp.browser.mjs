@@ -3,7 +3,8 @@
 // AI は呼ばない。Worker の返事（/api/ai/render・/api/ai/render-report・/api/ai/quota）を差し替える。
 // 見ること:
 //   1. 初めて押すと同意の画面が出て、同意するまで何も送らない。「やめる」で何も送らずに戻る。同意は版つきで localStorage に残る
-//   2. 送る本体は preset・view・aspect・images(base/depth/edge) だけで、文章の欄が無い。3枚の縦横比が aspect と同じで、長辺が 1536px
+//   2. 送る本体は preset・view・aspect・images(base/depth/edge/normal) だけで、文章の欄が無い。どの絵も縦横比が aspect と同じで、長辺が 1536px。
+//      法線(normal)が撮れないときは、それを抜いた3枚で送る(Worker は normal を任意の欄として受ける)
 //   3. 待っている間は、撮った絵を薄く出して「写真のように仕上げています」を出し、主ボタンを押せない
 //   4. 結果・「今日はあと◯枚」・注記・見比べ・保存（共有シート→だめなら blob: の保存）・もう一度・問題を報告
 //   5. 失敗の文（上限・全体の上限・数えられない・AI が絵を返さない・上流の失敗・通信の失敗）。どれも「もう一度」か「閉じる」で戻れる
@@ -226,13 +227,13 @@ try {
     assert.equal(server.renders.length, 1, '1回押して1回だけ送る');
     const sent = server.renders[0];
     assert.deepEqual(Object.keys(sent).sort(), ['aspect', 'images', 'preset', 'view'], '送る本体の欄: ' + Object.keys(sent));
-    assert.deepEqual(Object.keys(sent.images).sort(), ['base', 'depth', 'edge']);
+    assert.deepEqual(Object.keys(sent.images).sort(), ['base', 'depth', 'edge', 'normal']);
     assert.equal(sent.preset, 'life');
     assert.equal(sent.view, 'interior');
     assert.ok(ASPECTS.includes(sent.aspect), '受けない縦横比: ' + sent.aspect);
     const [aw, ah] = sent.aspect.split(':').map(Number);
     assert.ok(aw < ah, 'iPhone の縦画面なのに縦長の比になっていない: ' + sent.aspect);
-    for (const k of ['base', 'depth', 'edge']) {
+    for (const k of ['base', 'depth', 'edge', 'normal']) {
       assert.match(sent.images[k], /^data:image\/jpeg;base64,/, k + ' が JPEG でない');
       const sz = await imageSize(page, sent.images[k]);
       assert.equal(Math.max(sz.w, sz.h), 1536, `${k} の長辺 ${sz.w}x${sz.h}`);
@@ -559,7 +560,8 @@ try {
     for (let i = 0; i < 100 && !server.release; i++) await page.waitForTimeout(100);
     const sent = server.renders[0];
     const [aw, ah] = sent.aspect.split(':').map(Number);
-    for (const k of ['base', 'depth', 'edge']) {
+    assert.deepEqual(Object.keys(sent.images).sort(), ['base', 'depth', 'edge', 'normal'], `${tag}: 送る絵`);
+    for (const k of ['base', 'depth', 'edge', 'normal']) {
       const sz = await imageSize(page, sent.images[k]);
       assert.ok(Math.abs(sz.w / sz.h - aw / ah) / (aw / ah) < 0.01, `${tag}: ${k} の縦横比 ${sz.w}x${sz.h} が ${sent.aspect} と違う`);
     }
@@ -573,8 +575,15 @@ try {
     if (SHOT_DIR) { await page.locator('#ai-render-report').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${SHOT_DIR}/inapp-${tag}-report.png` }); }
     await page.locator('#ai-render-report-cancel').click();
     server.renderReplies.push({ status: 422, body: { error: 'render_blocked' } });
+    // 法線が撮れないとき(空を返す)は、3枚で送る
+    await page.evaluate(() => {
+      const orig = window.captureAiOverrideGuideDataUrl;
+      window.captureAiOverrideGuideDataUrl = function (kind) { return kind === 'normal' ? '' : orig.apply(this, arguments); };
+    });
     await page.locator('#ai-render-again').click();
     await waitResult(page);
+    assert.equal(server.renders.length, 2, `${tag}: もう一度で送っていない`);
+    assert.deepEqual(Object.keys(server.renders[1].images).sort(), ['base', 'depth', 'edge'], `${tag}: 法線が撮れないときの送る絵`);
     assert.deepEqual(await layoutProblems(page), [], `失敗の画面（${tag}）`);
     if (SHOT_DIR) { await page.locator('#ai-render-error').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${SHOT_DIR}/inapp-${tag}-error.png` }); }
     assert.deepEqual(errors, [], `${tag} のページのエラー`);
