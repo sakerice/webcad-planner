@@ -4020,6 +4020,7 @@ function apply3DGizmoDrag(e){
 
 function finish3DGizmoDrag(){
   var usedPartial=!!(GIZMO_DRAG.partialRoots&&GIZMO_DRAG.partialRoots.length);
+  var edited=!!GIZMO_DRAG.saved;
   GIZMO_DRAG.active=false;
   GIZMO_DRAG.axis=null;
   GIZMO_DRAG.ref=null;
@@ -4030,7 +4031,7 @@ function finish3DGizmoDrag(){
   draw2d();
   if(!usedPartial) rebuild3D();
   else if(typeof invalidate3D==='function') invalidate3D();
-  queueSharedSync(80);
+  sharedSyncAfterDrag(edited);
 }
 
 function getSelectionBox3D(ref){
@@ -15537,7 +15538,7 @@ canvas.addEventListener('mouseup',function(){
   if(wasDragging) snapMovedCeilingLightsToAttachSurface();   // 別の部屋・軒下へ動かした照明を取付面へ
   if(wasDragging) updateProps();
   if(ren)build3D();
-  if(wasDragging) queueSharedSync(80);
+  if(wasDragging) sharedSyncAfterDrag(!!DRAG.saved);
   if(ST.tool==='select') advancePickCycleOnClick();
 });
 // Complete a gesture even when the pointer leaves the canvas.
@@ -16885,10 +16886,26 @@ function sharedRememberEditTargets(){
   if(!SHARED.roomId||SHARED.applying)return;
   // 自分の編集で履歴が積まれたあと、外部 AI の知らせの「元に戻す」を出し直す(saveState はこのあと履歴を積む)
   if(SHARED.aiBarUntil>Date.now())setTimeout(sharedRenderAiBar,0);
+  sharedMarkSelectionDirty();
+}
+// 選んでいる物(複数選択を含む)に、送る候補の印を付ける。何も選んでいなければ全件を比べ直す。
+function sharedMarkSelectionDirty(){
   var targets=[];
   if(ST.selected)targets.push(ST.selected);
   if(Array.isArray(ST.multiSelected))targets=targets.concat(ST.multiSelected);
   if(targets.length)sharedMarkObjectsDirty(targets);else SHARED.forceScan=true;
+}
+// ドラッグ(2D のつかんで移動・取っ手・壁の端、3D の矢印)を離したときの送信。
+// ドラッグは動かし始めに1度だけ saveState を呼ぶので、印が付くのはそのときだけ。0.7 秒より長くつかんでいると、
+// markDirty が予約した送信がドラッグの途中で出て印が消え、そのあとの動きには印が付かない。
+// 印の無いまま送ると「変更なし」になり、相手の画面にドラッグ途中の位置が残る。離した時点で印を付け直してから送る。
+// ドラッグが動かすのは選んでいる物だけなので、付け直す先は saveState と同じ(選んでいる物)。
+// 途中の送信のあと動かしていなければ、中身は基準と同じで何も送られない(送信の回数は増えない)。
+// edited: このドラッグで実際に編集を始めたか(saveState を呼んだか)。つかんだだけなら印は付けない。
+function sharedSyncAfterDrag(edited){
+  if(!SHARED.roomId||SHARED.applying)return;
+  if(edited)sharedMarkSelectionDirty();
+  queueSharedSync(80);
 }
 function sharedForceFullSync(){if(SHARED.roomId&&!SHARED.applying)SHARED.forceScan=true;}
 function sharedResetDirtyTracking(){SHARED.forceScan=false;SHARED.dirtyIds={walls:{},items:{},rooms:{}};SHARED.pending=false;}
