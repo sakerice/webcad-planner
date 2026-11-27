@@ -163,8 +163,8 @@ const readObj = (page, g) => page.evaluate((g) => {
   const o = DATA[g.coll].find((i) => String(i.id) === g.id);
   return o ? JSON.stringify(o, (k, v) => (k === '_texObj' ? undefined : v)) : null;
 }, g);
-// A が送った回数。since は、数え始める前に済んでいた回数(選んだだけで出る送信を除くため)
-const sendsFromA = (r, since = 0) => r.log.filter((l) => l.from === 'A').length - since;
+// A が送った回数。選んだだけでは何も送られないので、ケースの最初から通しで数える
+const sendsFromA = (r) => r.log.filter((l) => l.from === 'A').length;
 
 // 本物のマウスでつかんで右へ動かし、離す。moveMs の間に steps 回動かし、holdMs だけ止めてから離す。
 async function drag(page, from, { dx = 96, dy = 0, moveMs = 1600, steps = 16, holdMs = 0 } = {}) {
@@ -179,7 +179,7 @@ async function drag(page, from, { dx = 96, dy = 0, moveMs = 1600, steps = 16, ho
 }
 
 // 長いドラッグ: 離した位置が相手に届く。送信は途中の1回と離したときの1回で、2回まで。
-async function longDragCase(r, name, g, opts, since = 0) {
+async function longDragCase(r, name, g, opts) {
   assert.ok(g, `${name}: つかめる物がテスト用のプランに見つからない`);
   const before = await readObj(r.a, g);
   await drag(r.a, g, opts);
@@ -187,7 +187,7 @@ async function longDragCase(r, name, g, opts, since = 0) {
   assert.notEqual(after, before, `${name}: ドラッグで動いていない(テストの操作が効いていない)`);
   await assertSame(r, name);
   assert.equal(await readObj(r.b, g), after, `${name}: 相手の画面の位置が、離した位置と違う`);
-  const n = sendsFromA(r, since);
+  const n = sendsFromA(r);
   assert.ok(n >= 1 && n <= 2, `${name}: 送信は2回までのはずが ${n} 回`);
   return n;
 }
@@ -248,9 +248,11 @@ const cases = {
       return { handle: hitWallHandle(w, c.cx, c.cy), x: rect.left + c.cx, y: rect.top + c.cy };
     }, g.id);
     assert.ok(end && end.handle === 'wall-a', '壁の端の取っ手をつかめる位置が取れない');
-    // 壁を選ぶと、外壁の設定の欄が補われて1回送られることがある。ドラッグの送信と分けて数える
+    // 壁を選んだだけでは何も送られない(以前は、外壁の設定に空の欄が補われて1回送られていた)。
+    // 送信の回数は、選んだところから通しで数える
     await settle(r);
-    await longDragCase(r, '壁の端の長いドラッグ', { ...g, x: end.x, y: end.y }, { dx: 70, dy: 50 }, sendsFromA(r));
+    assert.equal(sendsFromA(r), 0, `壁を選んだだけなのに ${sendsFromA(r)} 回送られた`);
+    await longDragCase(r, '壁の端の長いドラッグ', { ...g, x: end.x, y: end.y }, { dx: 70, dy: 50 });
   },
   async '部屋を長くドラッグして離すと、離した位置が相手に届く'(r) {
     await longDragCase(r, '部屋の長いドラッグ', await findGrab(r.a, 'roomLabel'));
@@ -275,8 +277,10 @@ const cases = {
       return null;
     }, g.id);
     assert.ok(h, '大きさを変える取っ手をつかめる位置が取れない');
+    // 家具を選んだだけでは何も送られない。送信の回数は、選んだところから通しで数える
     await settle(r);
-    await longDragCase(r, '大きさの長いドラッグ', { ...g, x: h.x, y: h.y }, undefined, sendsFromA(r));
+    assert.equal(sendsFromA(r), 0, `家具を選んだだけなのに ${sendsFromA(r)} 回送られた`);
+    await longDragCase(r, '大きさの長いドラッグ', { ...g, x: h.x, y: h.y });
   },
   async '3D の矢印で家具を長くドラッグして離すと、離した位置が相手に届く'(r) {
     // 3D の矢印に当たったかの判定(pickGizmoAxis3D)だけを差し替え、つかむ・動かす・離すは本物の関数を通す。

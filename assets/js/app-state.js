@@ -1262,7 +1262,7 @@ function updateProps(){
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">この壁は両面が外観カラー対象です。</div>';
       }
       faces.forEach(function(face,idx){
-        var fs=getInteriorFaceSetting(it,face);
+        var fs=peekInteriorFaceSetting(it,face);
         var faceKey=interiorFaceKey(it,face);
         var ap=resolveInteriorFaceAppearance(it,face);
         html += '<div class="face-card"'+faceCardAttrs(it,faceKey)+'>';
@@ -1276,7 +1276,7 @@ function updateProps(){
       if(extFaces.length){
         html += '<div class="ph" style="margin-top:12px">外観カラー（外観面）</div>';
         extFaces.forEach(function(face,idx){
-          var efs=getExteriorFaceSetting(it,face);
+          var efs=peekExteriorFaceSetting(it,face);
           var faceKey=exteriorFaceKey(it,face);
           var ap=resolveExteriorFaceAppearance(it,face);
           html += '<div class="face-card"'+faceCardAttrs(it,faceKey)+'>';
@@ -1482,7 +1482,7 @@ function updateProps(){
     }
   }
   if(canSetItemElevation(it)) {
-    if(it.elev === undefined || isNaN(it.elev)) it.elev = 0;
+    // 選んだだけでプランに elev:0 を書かない(書き出す JSON に入り、共同編集で手元と相手が食い違う)。読む側はどこも (it.elev||0)。
     html += '<div class="pr"><div class="pl">高さ Z (mm)</div><input class="pi" type="number" step="10" value="'+escHtml(Math.round(it.elev||0))+'" onchange="updateSelectedProp(\'elev\',+this.value)"></div>';
   }
   if(it.flipX === undefined && it.type && it.type!=='room' && it.type!=='site-rect' && it.type!=='foundation') it.flipX=false;
