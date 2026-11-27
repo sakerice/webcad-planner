@@ -5143,11 +5143,28 @@ function interiorFaceKey(w,face){
   return wallSettingKey(w)+'_'+face.sign+'_'+Math.round(face.a*1000)+'_'+Math.round(face.b*1000);
 }
 
+// 壁の面ごと・壁ごとの設定は、「読むだけ」(peek…)と「書くために欄を作る」(get…)を分けている。
+//   peek…Setting … 設定欄を描く・3D を組む・書き出す、など読むだけの所で使う。欄が無ければ、プランには入れずに
+//                   既定値の入れ物を返す。**返った入れ物に書き込まないこと**(欄が無いときはどこにも残らない)。
+//   get…Setting  … 利用者が値を変えたとき(update…Setting・AI の操作)だけ使う。欄が無ければプランに作る。
+// 以前は読む所も get… を呼んでいて、壁を選んだだけ・3D に切り替えただけで空の欄がプランに増え、
+// 共同編集では設定が丸ごと相手へ送られていた(相手の取り消しの履歴と複数選択が消える)。
+// 鍵はプランの壁の id から作る。__proto__ などの鍵を継承元と取り違えないよう、読むのは ownGet、作るのは ownSlot。
+function defaultWallFaceSetting(){
+  return {mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false};
+}
+function peekWallFaceSetting(faces,key){
+  var cur=ownGet(faces,key);
+  return (cur&&typeof cur==='object')?cur:defaultWallFaceSetting();
+}
+function peekInteriorFaceSetting(w,face){
+  return peekWallFaceSetting(ensureInteriorWallSettings().faces,interiorFaceKey(w,face));
+}
 function getInteriorFaceSetting(w,face){
   var s=ensureInteriorWallSettings();
   var key=interiorFaceKey(w,face);
   // 鍵はプランの壁の id から作る。__proto__ などでも自分の欄として作る(ownSlot)。
-  var slot=ownSlot(s.faces,key,function(){ return {mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false}; });
+  var slot=ownSlot(s.faces,key,defaultWallFaceSetting);
   normalizeTextureOrientationTarget(slot);
   return slot;
 }
@@ -5170,7 +5187,7 @@ function resolveInteriorFaceAppearance(w,face){
   var s=ensureInteriorWallSettings();
   var fl=w.floor||1;
   var fs=ownGet(s.floors,fl)||defaultInteriorFloorSetting();
-  var faceSetting=face?getInteriorFaceSetting(w,face):null;
+  var faceSetting=face?peekInteriorFaceSetting(w,face):null;
   if(faceSetting && faceSetting.mode==='custom'){
     return appearanceWithTextureOrientation(faceSetting.color||INTERIOR_WALL_DEFAULT,faceSetting.texture||null,'face',faceSetting);
   }
@@ -5199,7 +5216,7 @@ function resolveInteriorFaceAppearance(w,face){
 // 色の null は「壁紙のその面の色に合わせる」(描画側 addSkirting が面材から取る)。
 function resolveSkirtingForFace(w,face){
   var s=ensureInteriorWallSettings();
-  var fs=face?getInteriorFaceSetting(w,face):null;
+  var fs=face?peekInteriorFaceSetting(w,face):null;
   var fl=ownGet(s.floors,w.floor||1)||null;
   var on=(fs&&fs.skirting!==undefined)?fs.skirting!==false
        :(fl&&fl.skirting!==undefined)?fl.skirting!==false
@@ -5278,10 +5295,13 @@ function exteriorFaceKey(w,face){
   return wallSettingKey(w)+'_'+face.sign+'_'+Math.round(face.a*1000)+'_'+Math.round(face.b*1000);
 }
 
+function peekExteriorFaceSetting(w,face){
+  return peekWallFaceSetting(ensureExteriorWallSettings().faces,exteriorFaceKey(w,face));
+}
 function getExteriorFaceSetting(w,face){
   var s=ensureExteriorWallSettings();
   var key=exteriorFaceKey(w,face);
-  var slot=ownSlot(s.faces,key,function(){ return {mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false}; });
+  var slot=ownSlot(s.faces,key,defaultWallFaceSetting);
   normalizeTextureOrientationTarget(slot);
   return slot;
 }
@@ -5290,7 +5310,7 @@ function resolveExteriorFaceAppearance(w,face){
   var s=ensureExteriorWallSettings();
   var fl=w.floor||1;
   var fs=ownGet(s.floors,fl)||defaultExteriorFloorSetting(fl);
-  var faceSetting=face?getExteriorFaceSetting(w,face):null;
+  var faceSetting=face?peekExteriorFaceSetting(w,face):null;
   if(faceSetting && faceSetting.mode==='custom'){
     return appearanceWithTextureOrientation(faceSetting.color||'#e8e0cc',faceSetting.texture||null,'face',faceSetting);
   }
@@ -5377,6 +5397,18 @@ function wallSettingKey(w){
   return String(w.id || [w.floor,Math.round(w.x1),Math.round(w.y1),Math.round(w.x2),Math.round(w.y2)].join('_'));
 }
 
+// 読むだけの版。get… が欄へ写す壁の古い持ち方(w.exteriorColor など)は、プランに書かず、返す写しの上で同じように重ねる。
+// 返すのは写しなので、書き込んでもプランには残らない(書くときは getExteriorWallSetting)。
+function peekExteriorWallSetting(w){
+  var cur=ownGet(ensureExteriorWallSettings().walls,wallSettingKey(w));
+  cur=(cur&&typeof cur==='object')?cur:null;
+  return {
+    color:(cur&&cur.color)||w.exteriorColor||null,
+    texture:(cur&&cur.texture)||w.exteriorTexture||null,
+    textureFlipX:w.exteriorTextureFlipX?true:!!(cur&&cur.textureFlipX),
+    textureFlipY:w.exteriorTextureFlipY?true:!!(cur&&cur.textureFlipY)
+  };
+}
 function getExteriorWallSetting(w){
   var s=ensureExteriorWallSettings();
   var key=wallSettingKey(w);
@@ -5444,7 +5476,7 @@ function resolveExteriorWallAppearance(w){
   var s=ensureExteriorWallSettings();
   var fl=w.floor||1;
   var fs=ownGet(s.floors,fl)||defaultExteriorFloorSetting(fl);
-  var ws=getExteriorWallSetting(w);
+  var ws=peekExteriorWallSetting(w);
   if(s.whole && s.whole.linked){
     return appearanceWithTextureOrientation(s.whole.color||'#e8e0cc',s.whole.texture||null,'whole',s.whole);
   }
@@ -5658,7 +5690,7 @@ function renderExteriorWallPanel(mode){
     if(!s.whole.linked && !fs.linked){
       walls.forEach(function(w,idx){
         var ap=resolveExteriorWallAppearance(w);
-        var ws=getExteriorWallSetting(w);
+        var ws=peekExteriorWallSetting(w);
         // 壁の id はプランの値なので onclick の JS に書かない。data-wall-id に入れ、
         // ハンドラは wallIdFromEl(this) で読む(押したときの結果は以前と同じ)。
         var wid='wallIdFromEl(this)';

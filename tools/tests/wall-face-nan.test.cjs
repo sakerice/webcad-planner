@@ -119,7 +119,7 @@ const FNS = [ 'ownGet', 'ownSlot', 'isPlainObj', 'repairSettingsShape',
   'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
   'getWallBandRange', 'wallBandWorldRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
-  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallCrossingFacePositionsM', 'snapExteriorSpanDrawEnds', 'interiorFaceDrawRange', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D', 'stepAwareSamples'
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallCrossingFacePositionsM', 'snapExteriorSpanDrawEnds', 'interiorFaceDrawRange', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'defaultWallFaceSetting', 'peekWallFaceSetting', 'peekInteriorFaceSetting', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D', 'stepAwareSamples'
 
 ];
 
