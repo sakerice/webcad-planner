@@ -126,10 +126,12 @@ test('Google の鍵が無ければ、間取り読み取りは呼ばずに 503 �
   assert.match(body.message, /wrangler secret/, '何をすればよいかが書いてあること');
 });
 
-test('未実装だったレンダーの窓口(/api/ai/render)は無い', async () => {
+// /api/ai/render は 2026-11-27 に、文章の欄を受け取らない形で作った（tools/tests/worker-ai-render.test.cjs）。
+// 昔の形（任意の指示文 prompt）は断る。
+test('レンダーの窓口(/api/ai/render)は、指示文の欄つきの依頼を 400 で断る', async () => {
   const res = await post('/api/ai/render', { image: PNG, prompt: 'x' }, { OPENAI_API_KEY: 'k' });
-  assert.equal(res.status, 404);
-  assert.equal((await res.json()).error, 'not_found');
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'bad_request');
 });
 
 test('鍵はどの応答にも出てこない', async () => {

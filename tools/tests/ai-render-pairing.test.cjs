@@ -85,7 +85,18 @@ function roleSequence(card) {
   });
 }
 
-const STILL = cardOf('unity-render-modal');
+// 2026-11-27(アプリの中で仕上げる画面を足した): 画像AI側のダイアログは「AIレンダー」になり、
+// これまでの「画像AI用データ」の一式は折りたたみ(#ai-render-data)の中に移った。対に見えるべきなのは、
+// その折りたたみの中身と動画AI用データのダイアログである。中身の並びと言葉はこれまでと同じものを見る。
+function dataBodyOf(card) {
+  const fold = childrenOf(card.inner).find((c) => c.attrs.id === 'ai-render-data');
+  assert.ok(fold, '画像AI用データの折りたたみ #ai-render-data が無い');
+  const body = childrenOf(fold.inner).find((c) => (c.attrs.class || '').indexOf('ai-render-data-body') >= 0);
+  assert.ok(body, '折りたたみの中に .ai-render-data-body が無い');
+  return body;
+}
+const STILL_CARD = cardOf('unity-render-modal');
+const STILL = dataBodyOf(STILL_CARD);
 const VIDEO = cardOf('video-render-modal');
 
 // ── 29-3: 節の順序が同じであること ────────────────────────────────────────
@@ -146,7 +157,11 @@ test('ダイアログの題が対になっている', () => {
   const title = (card) => text(childrenOf(childrenOf(card.inner)
     .find((c) => (c.attrs.class || '').indexOf('unity-render-head') >= 0).inner)
     .find((c) => (c.attrs.class || '').indexOf('unity-render-title') >= 0).inner);
-  assert.equal(title(STILL), '画像AI用データ');
+  // 画像AI側の題は「AIレンダー」(設計書 2026-11-27)。「画像AI用データ」は折りたたみの見出しに残る。
+  assert.equal(title(STILL_CARD), 'AIレンダー');
+  const fold = childrenOf(STILL_CARD.inner).find((c) => c.attrs.id === 'ai-render-data');
+  const summary = childrenOf(fold.inner).find((c) => c.tag === 'summary');
+  assert.match(text(summary.inner), /^画像AI用データ/);
   assert.equal(title(VIDEO), '動画AI用データ');
 });
 

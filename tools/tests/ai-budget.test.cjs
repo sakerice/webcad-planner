@@ -407,7 +407,7 @@ test('/api/ai/quota: 月の枠が尽きたら 0 と月の文。金額の枠で�
   assert.match(full.message, /今月ぶん/);
   const fresh = await peek(await realQuota());
   assert.equal(fresh.left, 2, '金額に余裕があるのに回数を出さない');
-  assert.deepEqual(Object.keys(fresh).sort(), ['counted', 'left', 'perUser', 'total']);
+  assert.deepEqual(Object.keys(fresh).sort(), ['counted', 'left', 'perUser', 'render', 'total']);
   const thin = await peek(await realQuota({ seed: { 'usd-day:2026-11-20:2026-11': micro(6) } }));
   assert.equal(thin.left, null, '金額の枠で先に止まりうるのに回数を出している');
   assert.equal(thin.counted, false);
