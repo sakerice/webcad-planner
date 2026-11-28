@@ -1,0 +1,414 @@
+<title>ストア登録の検討</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 1列の検討書。計画ページ（公開と整理の計画）と同じ紙色と朱色。朱色は「勧める案」と「決めること」だけに使う */
+:root{
+  --paper:#F4F6F8; --surface:#FFFFFF; --ink:#1A2130; --muted:#586273; --line:#D7DCE4;
+  --accent:#C8432A; --rec-bg:#EEF4EC; --rec-ink:#2D5A2A;
+  --ok:#2F7A3B; --mid:#8A6512; --ng:#B3342A; --chip-ok:#E3F1E4; --chip-mid:#F6EDD6; --chip-ng:#F8E1DE;
+  --code-bg:#EBEEF3;
+  --f-body:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#11151B; --surface:#1A2029; --ink:#E5E9EF; --muted:#9BA6B6; --line:#2E3744;
+  --accent:#FF8A6B; --rec-bg:#1B2A1C; --rec-ink:#A9D8A4;
+  --ok:#7FCB86; --mid:#E2BF6A; --ng:#FF9488; --chip-ok:#1D3320; --chip-mid:#3A2F14; --chip-ng:#3D1E1B;
+  --code-bg:#232A35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11151B; --surface:#1A2029; --ink:#E5E9EF; --muted:#9BA6B6; --line:#2E3744;
+  --accent:#FF8A6B; --rec-bg:#1B2A1C; --rec-ink:#A9D8A4;
+  --ok:#7FCB86; --mid:#E2BF6A; --ng:#FF9488; --chip-ok:#1D3320; --chip-mid:#3A2F14; --chip-ng:#3D1E1B;
+  --code-bg:#232A35; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3,h4{text-wrap:balance;line-height:1.4;margin:0}
+h1{font-size:26px;font-weight:800}
+h2{font-size:21px;font-weight:800}
+h3{font-size:17px;font-weight:700;margin-top:8px}
+h4{font-size:15px;font-weight:700}
+p,ul,ol{margin:0}
+ul,ol{padding-left:1.4em;display:flex;flex-direction:column;gap:4px}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--code-bg);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+.muted{color:var(--muted)} .small{font-size:13px}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+header.top{display:flex;flex-direction:column;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:18px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted);font-family:var(--f-mono)}
+.lead{font-size:16px}
+.chap-head{display:flex;align-items:baseline;gap:12px;border-top:2px solid var(--ink);padding-top:14px}
+.chap-no{font-family:var(--f-mono);font-size:13px;color:var(--accent);font-weight:700;white-space:nowrap}
+.sub{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line);padding-bottom:4px;margin-top:6px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.6}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:700;background:var(--code-bg);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+table.w640{min-width:640px}
+td.num{font-family:var(--f-mono);white-space:nowrap}
+tr.pick td{background:var(--rec-bg)}
+.rec{background:var(--rec-bg);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.rec .tag{font-size:12px;font-weight:800;color:var(--rec-ink);letter-spacing:.06em}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.chip.ok{background:var(--chip-ok);color:var(--ok)} .chip.mid{background:var(--chip-mid);color:var(--mid)} .chip.ng{background:var(--chip-ng);color:var(--ng)}
+.toc{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px}
+.icons figure,.shots figure,.board figure,.one figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.icons img{width:100%;height:auto;aspect-ratio:1;border-radius:22.4%;border:1px solid var(--line);background:var(--surface);display:block}
+figcaption{font-size:12.5px;line-height:1.6;display:flex;flex-direction:column;gap:3px}
+.cap-h{font-weight:700;font-size:13px}
+.one img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);display:block;background:var(--surface)}
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.shots img,.board img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);display:block;background:var(--surface)}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px}
+.board .t{font-family:var(--f-mono);font-size:12px;color:var(--accent);font-weight:700}
+pre.copy{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f-body);font-size:14px;line-height:1.8;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+details{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 14px}
+summary{cursor:pointer;font-weight:700}
+details[open] summary{margin-bottom:10px}
+.steps{counter-reset:s;list-style:none;padding:0;gap:8px}
+.steps>li{counter-increment:s;position:relative;padding-left:30px}
+.steps>li::before{content:counter(s);position:absolute;left:0;width:20px;font-family:var(--f-mono);font-weight:700;color:var(--accent);text-align:right}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">house-planner mobile / App Store 登録 / 2026-11-26</div>
+  <h1>ストア登録の検討</h1>
+  <p class="lead">App Store に出すために要る物を公式の現行の要件で洗い出し、アイコン・スクリーンショット・動画・掲載文・申告の案を作りました。下の表の 8 つを決めてもらえれば、合意した形で本番の素材を作ります。</p>
+  <p class="small muted">このページの「Claude」は作業をする AI、「あなた」は運営者を指します。画像はどれも押すと拡大できます。スクリーンショットと動画の絵は 2026-11-25 の試し撮りを使った試作で、本撮影はまだしていません。App Store Connect や AdMob への登録・入力は何もしていません。</p>
+</header>
+
+<section id="decide">
+  <h2>決めてほしいこと</h2>
+  <div class="tw"><table class="w640">
+    <thead><tr><th>番号</th><th>決めること</th><th>勧める案</th><th>理由</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>アイコンの方向（<a href="#icon">2章</a>）</td><td><span class="chip ok">決定 2026-11-26</span> 今の配色で出す。反転はサブアイコンとして残す</td><td>利用者の決定。反転は X の顔や告知の絵など、色の付いた地が要る場面で使う</td></tr>
+      <tr><td class="num">2</td><td>ストア画像の体裁と並び（<a href="#shots">3章</a>）</td><td>体裁 P（上に見出し、下に画面）で 7 枚</td><td>見出しが画面を隠さず、7 枚で位置がそろう</td></tr>
+      <tr><td class="num">3</td><td>撮る時期（<a href="#shots">3章</a>）</td><td>iPhone は今の画面で先に撮る。iPad は表示の直しを待つ</td><td>iPhone 縦は今のまま撮れる。iPad は開発向けの表示が写る</td></tr>
+      <tr><td class="num">4</td><td>プレビュー動画の 6 場面（<a href="#pv">4章</a>）と、人力車・クラシックカーを見せてよいか</td><td>6 場面の並びで作る。車の差し替わりは見せる</td><td>平面図が 3D の家に変わる場面を先頭に置くと、音なしの自動再生でも伝わる</td></tr>
+      <tr><td class="num">5</td><td>アプリ名と、ホーム画面に出る短い名前（<a href="#listing">5章</a>）</td><td><code>house-planner mobile - 間取り3D</code>、短い名前は <code>間取り3D</code></td><td>Web 版の名前を保ち、検索される語が名前に入る</td></tr>
+      <tr><td class="num">6</td><td>図面とチャットの文を、App のプライバシーで申告するか（<a href="#decl">6章</a>）</td><td>申告する（ユーザコンテンツ、アプリの機能、ユーザに結びつかない）</td><td>当方は残さないが AI の事業者が一定期間残すので、申告した方が説明と食い違わない</td></tr>
+      <tr><td class="num">7</td><td>審査の間、AI の 1 日の上限をどうするか（<a href="#decl">6章</a>）</td><td>上げずに、審査メモに上限があることを書く。あわせて試し用の図面を 1 枚用意する</td><td>費用の歯止めを外さずに済む。上限に当たっても作図と 3D は動く</td></tr>
+      <tr><td class="num">8</td><td>外部由来の家具（Furniture Mega Pack 445 点）の置き換えの前に出すか（<a href="#decl">6章</a>）</td><td>第1波の置き換えが入ってから出す</td><td>「コンテンツの権利」の問いに、確かめの済んだ状態で答えられる</td></tr>
+    </tbody>
+  </table></div>
+  <nav class="toc" aria-label="章の一覧">
+    <a href="#round3">3回目　AIレンダーを入れた案</a>
+    <a href="#round2">2回目　いただいた指示を入れた案</a>
+    <a href="#list">1章　登録に要る物の一覧</a>
+    <a href="#icon">2章　アイコン</a>
+    <a href="#shots">3章　スクリーンショット</a>
+    <a href="#pv">4章　プレビュー動画と X 用の動画</a>
+    <a href="#listing">5章　掲載文</a>
+    <a href="#decl">6章　申告と審査の情報</a>
+    <a href="#todo">7章　あなたが行う手順</a>
+  </nav>
+</section>
+
+<section id="round3">
+  <div class="chap-head"><span class="chap-no">3回目</span><h2>AIレンダーを入れた案（2026-11-27）</h2></div>
+  <p>3D の画面から「写真のように仕上げる」を押すと、今の視点が写真のような絵になってアプリの中に出る機能ができました（<a href="https://github.com/sakerice/webcad-planner/pull/162">PR #162</a>。まだ本番には入っていません）。その画面をストアの寸法で撮り、並びの 5 枚目に入れました。</p>
+
+  <div class="sub">元の 3D と、仕上がった絵</div>
+  <div class="one"><figure><img src="img/airender-before-after.jpg" alt="左が AI に送った元の 3D、右が仕上がった絵" width="1582" height="1376"><figcaption>左がアプリの 3D、右が仕上がった絵。既定の 2 階建ての 1 階 LDK です。扉 2 枚、テレビとテレビ台、キッチン、食卓と椅子 6 脚、ソファと緑の小卓の位置と数は元のままです。違う点は、奥の天井に小さなダウンライトが描かれたこと、壁が白っぽく明るくなったことです。絵は手で直していません。</figcaption></figure></div>
+
+  <div class="sub">ストアに載せる 1 枚の案</div>
+  <div class="one" style="max-width:420px">
+    <figure><img src="img/airender-pair.jpg" alt="ウォークスルーの画面と、仕上がった絵の画面を並べたストア画像の案" width="1320" height="2868"><figcaption>左上がウォークスルーの画面、右下が仕上がった絵の画面。どちらも実際の画面です。見出しは「歩いている3Dを、写真のような絵に。」としました。</figcaption></figure>
+  </div>
+
+  <div class="sub">8 枚の並び</div>
+  <div class="one"><figure><img src="img/contact-sheet-R3.jpg" alt="AIレンダーを 5 枚目に入れた 8 枚の並び" width="3604" height="996"><figcaption>4 枚目（内観 3D の LDK）の次に入れ、ほかは外していません。App Store は 10 枚まで出せます。検索結果に出る最初の 3 枚には入れていません。仕上がった絵は細部が間取りと違うことがあり、最初に置くと、アプリの 3D そのものが写真のように見えると受け取られるおそれがあるためです。</figcaption></figure></div>
+
+  <div class="sub">残っていること</div>
+  <ul>
+    <li>この機能は PR #162 が本番に入るまで使えません。本番に入れるかは、あなたの確認が要ります。</li>
+    <li>仕上がりは生成のたびに少し変わります。同じ場面で 2 枚生成し、テレビ台の色が変わりスイッチが足された 1 枚は使いませんでした。iPad の縦で生成した 1 枚は、天井が斜めに描き替えられたので使っていません。</li>
+    <li>iPhone のアプリ版で「画像を保存」が動くかは、アプリの入れ物がまだ無いので確かめていません。</li>
+    <li>掲載文・プライバシーの申告・審査メモには、この機能の分を足しました（5章・6章の元の文書。未確定の所には ★）。審査メモの貼る文は、足す前から欄の上限 4000 バイトを超えていて、縮める必要があります。</li>
+  </ul>
+</section>
+
+<section id="round2">
+  <div class="chap-head"><span class="chap-no">2回目</span><h2>いただいた指示を入れた案（2026-11-26）</h2></div>
+  <p>アイコンは今の絵のまま使う、ウォークスルーは女性を映して画角を広げる、間取り図を読み込んで 3D になる流れを推す、の 3 点を入れました。2章と 3章は 1 回目の案として残してあります。</p>
+
+  <div class="sub">アイコン：今の配色と、朱色と白を入れ替えた版</div>
+  <p><strong>決定（2026-11-26）</strong>　App Store に出すアイコンは「今の配色」です。「反転」はサブアイコンとして残します。</p>
+  <p>今の絵は描き直していません。今の配色を規定の 1024×1024 にした物と、色だけを入れ替えた物です。</p>
+  <div class="icons">
+    <figure><img src="img/icon-cur-1024.png" alt="今の配色のアイコン" width="1024" height="1024"><figcaption><span class="cap-h">今の配色</span><span>白い背景の上では外形が消え、家だけが浮いて見える。</span></figcaption></figure>
+    <figure><img src="img/icon-inv-1024.png" alt="朱色と白を入れ替えたアイコン" width="1024" height="1024"><figcaption><span class="cap-h">反転</span><span>どの背景でも朱色の四角として残る。手の白い縁取りは残した。</span></figcaption></figure>
+  </div>
+  <div class="one">
+    <figure><img src="img/icon2-sizes.png" alt="今の配色と反転を 180px から 29px まで縮めた比較" width="1004" height="1540"><figcaption>3 段目の「縁も朱」は、手の縁取りまで朱色にした版です。手が地にくっついて見えるので、2 段目を本命にしています。</figcaption></figure>
+    <figure><img src="img/icon2-home.png" alt="ホーム画面に置いた比較" width="1860" height="1868"><figcaption>ホーム画面に置いた見え方。</figcaption></figure>
+  </div>
+
+  <div class="sub">間取り図を読み込むと、3D の家になる</div>
+  <p>既定の 2 階建ての間取りを、アプリの図面出力で 1 階と 2 階の平面図にして 1 枚に並べ、それを本番の読み取りに 1 回かけました。24 室すべてが名前と寸法つきで再現され、壁・扉・窓・階段・吹き抜けも元の図どおりです。結果は手で直していません。元の図に家具が無いので、取り込んだ家にも家具はありません（浴槽・洗面台・キッチン・便器は置かれました）。元の図との違いは、2 階のホールが 2 つに分かれた点です。</p>
+  <div class="one">
+    <figure><img src="img/sample-floorplan.png" alt="読み込ませた間取り図。1階と2階の平面図" width="2270" height="1160"><figcaption>読み込ませた間取り図（アプリ自身の図面出力から作った物）。</figcaption></figure>
+    <figure><img src="img/import-sheet.jpg" alt="図面を選んだ画面、読み取り中、取り込んだ平面図、外観3D、内観3D" width="2440" height="1036"><figcaption>左から、図面を選んだ画面、読み取り中、取り込んだあとの平面図、外観 3D、内観 3D。どれも実際の画面です。ファイルを選ぶボタンが英語の「Choose File」のまま写っています。</figcaption></figure>
+  </div>
+
+  <div class="sub">女性を映したウォークスルー</div>
+  <p>画角は、製品の 2 本指のピンチで広げられました（既定 68 度、上限 100 度）。1 枚目が既定、あとは 80〜100 度です。カメラと人物の距離は 2.4m で固定なので、人物はいつも画面の中央に大きく入ります。部屋をもっと広く見せるには、この距離を変えられるようにする本体の変更が要ります。</p>
+  <div class="one"><figure><img src="img/walk-sheet.jpg" alt="三人称のウォークスルーの候補8枚" width="3880" height="1036"><figcaption>左から 1〜8。勧めは 3（正面向き、食卓・ソファ・高窓が入る）と 5（いちばん広い）。光が平たいこと、画面の上 3 割が天井になることは残っています。</figcaption></figure></div>
+
+  <div class="sub">並びの 2 回目の案</div>
+  <div class="one">
+    <figure><img src="img/first3-R2.jpg" alt="2回目の案の最初の3枚" width="1532" height="1096"><figcaption>検索結果に並ぶ最初の 3 枚。2 枚目を「間取り図を読み込むと 3D の家に」、3 枚目を女性のウォークスルーにしました。</figcaption></figure>
+    <figure><img src="img/contact-sheet-R2.jpg" alt="2回目の案の7枚" width="3162" height="996"><figcaption>7 枚の並び。4 枚目以降は、内観 3D、平面図を描く、AIに頼む、様式の切り替えです。</figcaption></figure>
+  </div>
+  <div class="shots">
+    <figure><img src="img/R2-02.jpg" alt="2枚目の拡大" width="1320" height="2868"><figcaption><span class="cap-h">2. 読み込むと 3D の家に</span><span>2 つの画面を 1 枚に並べた形。図面を選んだ画面と、取り込んだ家の外観 3D。</span></figcaption></figure>
+    <figure><img src="img/R2-03.jpg" alt="3枚目の拡大" width="1320" height="2868"><figcaption><span class="cap-h">3. 家の中を歩ける</span><span>候補の 3 番（画角 90 度）。</span></figcaption></figure>
+  </div>
+
+  <div class="sub">AIレンダー</div>
+  <p>2026-11-26 に「アプリの中で生成する」と決まり、機能ができました。上の「3回目」の章を見てください。</p>
+</section>
+
+<section id="list">
+  <div class="chap-head"><span class="chap-no">1章</span><h2>登録に要る物の一覧</h2></div>
+  <p>Apple と Google の公式のページを 2026-11-26 に開いて確かめました。寸法と枚数は 2026-11-25 の調査と同じでした。出典つきの全体は、リポジトリの <code>docs/store/checklist.md</code> にあります。</p>
+  <div class="tw"><table class="w640">
+    <thead><tr><th>物</th><th>公式の要件</th><th>状態</th></tr></thead>
+    <tbody>
+      <tr><td>アイコン</td><td>1024×1024、透過なし、角は丸めない。ダークやティントの版は任意</td><td><span class="chip ok">決定</span> 今の配色を 1024×1024 にした <code>AppIcon-1024.png</code> を使う。反転はサブアイコン</td></tr>
+      <tr><td>iPhone のスクリーンショット</td><td>1206×2622 を最低 1 枚（最大 10 枚）。大きい画面の 1320×2868 は任意</td><td><span class="chip mid">案あり</span> 試作まで。本撮影はこれから</td></tr>
+      <tr><td>iPad のスクリーンショット</td><td>iPad で動くなら 2064×2752 を最低 1 枚</td><td><span class="chip ng">待ち</span> iPad の表示を直す変更が本体に入ってから撮る</td></tr>
+      <tr><td>プレビュー動画</td><td>任意。15〜30 秒、iPhone は 886×1920、アプリの画面の録画だけ</td><td><span class="chip mid">案あり</span> 絵コンテまで</td></tr>
+      <tr><td>名前・サブタイトル・説明・キーワード・宣伝文</td><td>30 字・30 字・4000 字・100 バイト・170 字</td><td><span class="chip mid">案あり</span> 下書きあり</td></tr>
+      <tr><td>プライバシーポリシーとサポートの URL</td><td>どちらも必須</td><td><span class="chip ng">待ち</span> ページを作る PR #156 が未マージ。マージはあなたの確認が要る</td></tr>
+      <tr><td>App のプライバシーの申告</td><td>自分と、組み込んだ広告 SDK が集める物を申告する</td><td><span class="chip mid">案あり</span> 下書きあり。入力と公開はあなた</td></tr>
+      <tr><td>年齢区分</td><td>質問票に全部答える。広告の有無を答える問いがある</td><td><span class="chip mid">案あり</span> 答えの案あり（4+ の見込み）。回答はあなた</td></tr>
+      <tr><td>審査メモ</td><td>4000 バイトまで。使う外部の AI、試した端末と OS も書く</td><td><span class="chip mid">案あり</span> 日本語と英語の下書きあり。未実装の所は空けてある</td></tr>
+      <tr><td>アプリの入れ物（Capacitor）、AdMob、AI に送る前の確認の画面</td><td>審査の指針 4.2、2.5.18、5.1.2(i)</td><td><span class="chip ng">まだ無い</span> 本体を担当するセッションの作業。この検討では触らない</td></tr>
+      <tr><td>配信地域・価格・審査の連絡先・AdMob の登録</td><td>審査に出す前に設定が要る</td><td><span class="chip ng">あなた</span> 入力する値は <a href="#todo">7章</a></td></tr>
+      <tr><td>DSA のトレーダーの申告、Xcode と SDK の版</td><td>EU で配らなくても申告が要る。Xcode 26 以降</td><td><span class="chip ok">できている</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="small muted">新しく分かったこと。年齢区分に AI を名指しする問いはありません。Google は 2026-12-02 から広告 SDK の新しい版を CocoaPods に出さないので、アプリの入れ物を作るときに入れ方を確かめる必要があります。iPhone Duo のスクリーンショットは初版では任意で、2027 年 4 月からの更新で必須になります。</p>
+</section>
+
+<section id="icon">
+  <div class="chap-head"><span class="chap-no">2章</span><h2>アイコン</h2></div>
+  <p>今のアイコン（Web 版の favicon とロゴ）と、方向の違う 3 つの案です。A は地の色違いを 2 枚出しました。方向を選ぶための案なので、線や手の形は選んだあとに詰めます。</p>
+  <div class="icons">
+    <figure><img src="img/icon-now.png" alt="今のアイコン。白地に朱色の家と笑顔、青い指" width="256" height="256"><figcaption><span class="cap-h">今のアイコン</span><span>白地。家が小さく、余白が広い。</span></figcaption></figure>
+    <figure><img src="img/A.png" alt="A案。生成りの地に朱色の家と笑顔、青い指" width="1024" height="1024"><figcaption><span class="cap-h">A　今の顔を育てる</span><span>今の絵を大きく描き直した物。白い背景の上では縁が消える。</span></figcaption></figure>
+    <figure><img src="img/A2.png" alt="A2案。朱色の地に白い家と笑顔、青い指" width="1024" height="1024"><figcaption><span class="cap-h">A2　朱色の地</span><span class="chip ok">勧める</span><span>色の面が大きく、いちばん小さくしても家と顔が残る。</span></figcaption></figure>
+    <figure><img src="img/B.png" alt="B案。青い地に、間取りの板の上に立つ赤い家" width="1024" height="1024"><figcaption><span class="cap-h">B　間取りが家になる</span><span>機能が絵で伝わる。40px 以下では間取りの線がつぶれて白い板に見える。</span></figcaption></figure>
+    <figure><img src="img/C.png" alt="C案。水色の地に、製品が描いた実物の2階建ての家" width="1024" height="1024"><figcaption><span class="cap-h">C　実物の 3D の家</span><span>製品が描いた既定の家そのもの。小さくすると黒い屋根が勝って暗い箱に見える。</span></figcaption></figure>
+  </div>
+  <div class="sub">縮めたときの見え方</div>
+  <div class="one"><figure><img src="img/compare-sizes.png" alt="各案を 180px から 29px まで縮めて、白地と濃い地に並べた比較" width="907" height="2020"><figcaption>180・120・80・58・40・29px。上が白い背景、下が濃い背景。設定や検索の一覧では 29〜40px で出ます。</figcaption></figure></div>
+  <div class="sub">ホーム画面に置いたときの見え方</div>
+  <div class="one"><figure><img src="img/compare-home.png" alt="明るい壁紙と暗い壁紙のホーム画面に各案を置いた絵" width="1860" height="1868"><figcaption>まわりのマスは色だけの仮の物です。下の名前は仮に「間取り3D」と置いています。</figcaption></figure></div>
+  <div class="rec"><span class="tag">勧める案</span><p>A2 です。Web 版で見慣れた顔のまま、ホーム画面で色の面として目に入ります。機能を絵で伝えたいなら B ですが、小さいと何の絵かが読みにくくなります。A2 を選ぶ場合、Web 版の favicon とロゴも同じ絵にそろえるかをあとで聞きます。</p></div>
+</section>
+
+<section id="shots">
+  <div class="chap-head"><span class="chap-no">3章</span><h2>スクリーンショット</h2></div>
+  <p>画面は実際の画面をそのまま使い、見出しは画面の外に置きます。下は試し撮りの画面で作った試作です。本撮影では、画面に重なっている操作の案内を出さずに撮り、平面図は家が中央に来るように撮り直します。</p>
+  <div class="sub">体裁の 2 案（検索結果に並ぶ最初の 3 枚）</div>
+  <div class="one">
+    <figure><img src="img/first3-P.jpg" alt="体裁P。上に2行の見出し、下に角丸の画面" width="1532" height="1096"><figcaption><span class="cap-h">P　上に見出し、下に画面</span><span class="chip ok">勧める</span><span>見出しが大きく、画面のどこも隠さない。</span></figcaption></figure>
+    <figure><img src="img/first3-Q.jpg" alt="体裁Q。画面を全面に使い、帯に1行の見出し" width="1532" height="1096"><figcaption><span class="cap-h">Q　画面いっぱいと帯</span><span>画面は大きいが、帯を置ける空きが画面ごとに違い、下の字が透ける。</span></figcaption></figure>
+  </div>
+  <div class="sub">7 枚の並び（体裁 P）</div>
+  <div class="one"><figure><img src="img/contact-sheet-P.jpg" alt="7枚を横に並べた一覧" width="3162" height="996"><figcaption>最初の 3 枚で「間取りを描くと、3D の家になって、中を歩ける」が伝わる並びです。</figcaption></figure></div>
+  <div class="shots">
+    <figure><img src="img/P-01.jpg" alt="1枚目 外観3D" width="1320" height="2868"><figcaption><span class="cap-h">1. 外観 3D</span><span>別案「スマホで描いた間取りが、3Dの家になる。」</span></figcaption></figure>
+    <figure><img src="img/P-02.jpg" alt="2枚目 平面図" width="1320" height="2868"><figcaption><span class="cap-h">2. 平面図</span><span>壁は始点と終点を押して引く操作なので、はじめの案「指でなぞって」を「指先で」に直した。</span></figcaption></figure>
+    <figure><img src="img/P-03.jpg" alt="3枚目 一人称のウォークスルー" width="1320" height="2868"><figcaption><span class="cap-h">3. ウォークスルー</span><span>室内の光が平たい。本体の描画が良くなれば撮り直す。</span></figcaption></figure>
+    <figure><img src="img/P-04.jpg" alt="4枚目 内観3D" width="1320" height="2868"><figcaption><span class="cap-h">4. 内観 3D</span><span>別案「ソファもテレビも、置いて確かめる。」</span></figcaption></figure>
+    <figure><img src="img/P-05.jpg" alt="5枚目 AIに頼む" width="1320" height="2868"><figcaption><span class="cap-h">5. AIに頼む</span><span>画面の例の文とつながる見出し。</span></figcaption></figure>
+    <figure><img src="img/P-06.jpg" alt="6枚目 起動直後の選択画面" width="1320" height="2868"><figcaption><span class="cap-h">6. 図面の写真から</span><span>別案「もらった間取り図を、撮って取り込む。」本撮影では読み取った結果の画面に替える手もある。</span></figcaption></figure>
+    <figure><img src="img/P-07.jpg" alt="7枚目 古民家の様式の外観" width="1320" height="2868"><figcaption><span class="cap-h">7. 様式の切り替え</span><span>古民家では車が人力車に替わる。見せてよいかは決めること 4。</span></figcaption></figure>
+  </div>
+  <div class="sub">iPad</div>
+  <p>iPad の試し撮りは、左の操作パネルに PC 向けの操作ガイド、下の帯に座標と壁の本数が写っていて、ストアには使えません。表示を直す変更が本体に入ってから、横向きで同じ 7 場面を撮ります。iPad は画面が広いので、平面図と 3D を並べる比較モードを 1 枚入れる案です。</p>
+  <div class="rec"><span class="tag">勧める案</span><p>体裁 P の 7 枚で、iPhone を先に撮ります。寸法は 1320×2868 と 1206×2622 の 2 つを用意します。見出しの別案は各枚 2〜3 個を <code>docs/store/screenshots/draft/captions.md</code> に書いてあります。</p></div>
+</section>
+
+<section id="pv">
+  <div class="chap-head"><span class="chap-no">4章</span><h2>プレビュー動画と X 用の動画</h2></div>
+  <p>作る動画は 3 種類です。App Store のプレビュー動画（縦 886×1920、27 秒）、X 用の 3 本（縦、各 15 秒前後）、紹介 PV（横、40 秒。2026-11-25 に決まった「図面の写真から住める家まで」）。プレビュー動画は、Apple の決まりでアプリの画面の録画だけにします。紙の図面を撮る実写の場面は紹介 PV にだけ入れます。</p>
+  <div class="sub">プレビュー動画の絵コンテ（27 秒・6 場面）</div>
+  <div class="board">
+    <figure><img src="img/t-01.jpg" alt="平面図" width="660" height="1434"><figcaption><span class="t">0–4 秒</span><span>平面図で壁を引き、部屋が増える。「指先で、間取りを描く。」</span></figcaption></figure>
+    <figure><img src="img/t-20.jpg" alt="外観3D" width="660" height="1434"><figcaption><span class="t">4–9 秒</span><span>外観 3D に替わり、家が半周回る。「そのまま、3Dの家になる。」</span></figcaption></figure>
+    <figure><img src="img/t-21.jpg" alt="内観3D" width="660" height="1434"><figcaption><span class="t">9–13 秒</span><span>内観 3D で LDK へ寄る。「家具の置き方まで、立体で。」</span></figcaption></figure>
+    <figure><img src="img/t-22.jpg" alt="一人称のウォークスルー" width="660" height="1434"><figcaption><span class="t">13–17 秒</span><span>玄関から LDK へ歩く。「建てる前に、歩いて確かめる。」</span></figcaption></figure>
+    <figure><img src="img/t-28.jpg" alt="人物の後ろからの視点" width="660" height="1434"><figcaption><span class="t">17–20 秒</span><span>人物の後ろからの視点に替える。</span></figcaption></figure>
+    <figure><img src="img/t-06.jpg" alt="AIに頼む" width="660" height="1434"><figcaption><span class="t">20–24 秒</span><span>「ソファを置いて」と頼み、置かれる。「言葉で頼んでも、直せる。」</span></figcaption></figure>
+    <figure><img src="img/t-07.jpg" alt="洋館の様式" width="660" height="1434"><figcaption><span class="t">24–25 秒</span><span>洋館の様式に替える。</span></figcaption></figure>
+    <figure><img src="img/t-27.jpg" alt="古民家の様式" width="660" height="1434"><figcaption><span class="t">25–27 秒</span><span>古民家の様式に替える。「家の雰囲気も、ひと押しで。」</span></figcaption></figure>
+  </div>
+  <p class="small muted">絵は試し撮りの静止画です。動画では操作の案内を出さず、カメラの位置を決めて撮ります。止まっているときに出る 1 こまは、外観 3D にします。</p>
+  <div class="sub">X 用の 3 本</div>
+  <ol>
+    <li>平面図が、そのまま家になる。平面図から外観 3D に替えて家の周りを半周し、玄関に入る。冒頭の文は「スマホで描いた間取り、こうなります。」</li>
+    <li>建てる前に、家の中を歩く。人物の後ろからの視点で玄関から LDK まで歩き、吹き抜けを見上げる。冒頭の文は「新居の LDK、歩いてみた。」</li>
+    <li>ひと押しで、洋館にも古民家にも。同じ家の外観を標準・洋館・古民家と替える。冒頭の文は「同じ間取りで、家の雰囲気だけ変えてみた。」</li>
+  </ol>
+  <div class="sub">撮る前に要ること</div>
+  <ul>
+    <li>3D の見せ場は、こまごとに書き出す既存の撮影の道具で撮ります。指の操作は iOS シミュレーターで録ります。アプリの入れ物ができるまでは Safari の画面になるので、プレビュー動画の本番は入れ物ができてから録り直します。</li>
+    <li>室内とウォークスルーは、今は全体が灰色がかって平たく見えます。本体の描画の作業が進んでから撮ると見栄えが上がります。</li>
+    <li>紹介 PV の最初に撮る紙の図面は、第三者の図面を使えないので、自作の間取りを印刷した物にします。</li>
+    <li>曲を付けるかは決めていません。プレビュー動画は音なしで出せます。</li>
+  </ul>
+</section>
+
+<section id="listing">
+  <div class="chap-head"><span class="chap-no">5章</span><h2>掲載文</h2></div>
+  <p>相手は、家を建てる・買う・直すことを考えている一般の人です。使う人の得と、開く場面が浮かぶ言葉を先に置きました。全文は <code>docs/store/listing.md</code> にあります。</p>
+  <div class="sub">アプリ名（30 字まで）</div>
+  <div class="tw"><table class="w640">
+    <thead><tr><th>案</th><th>良い所</th><th>弱い所</th></tr></thead>
+    <tbody>
+      <tr class="pick"><td><code>house-planner mobile - 間取り3D</code></td><td>Web 版の名前と同じで、検索される「間取り」「3D」が入る</td><td>英字が長く、検索結果で後ろが切れることがある</td></tr>
+      <tr><td><code>間取り3D - house-planner mobile</code></td><td>日本語が先で、何のアプリかがすぐ分かる</td><td>Web 版と並びが変わる</td></tr>
+      <tr><td><code>house-planner mobile</code></td><td>Web 版と完全に同じ</td><td>検索の語が名前に入らない</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">ホーム画面のアイコンの下に出る名前は別に決めます。<code>house-planner mobile</code> は長くて切れるので、<code>間取り3D</code> を勧めます。</p>
+  <div class="sub">サブタイトル（30 字まで）</div>
+  <pre class="copy">描いた間取りを、3Dで歩いて確かめる</pre>
+  <p class="small muted">ほかの案は「間取り図が、歩ける3Dの家になる」「家づくりの間取りを、建てる前に体験」。</p>
+  <div class="sub">宣伝文（170 字まで。審査なしで後から変えられる）</div>
+  <pre class="copy">もらった間取り図、住んだらどうなる？ スマホで間取りを描くと、そのまま3Dの家になり、玄関からリビングまで歩いて確かめられます。間取り図の写真から下書きを作ることも、「ソファを置いて」と言葉で頼むこともできます。</pre>
+  <div class="sub">キーワード</div>
+  <pre class="copy">家づくり,マイホーム,注文住宅,新築,リフォーム,リノベ,図面,平面図,設計,住宅,家具配置,レイアウト,模様替え,インテリア,ウォークスルー,内覧,二階建て,平屋,部屋,CAD,AI</pre>
+  <p class="small muted">公式のヘルプは上限を 100 バイトと書いていますが、かさねてと東京バズマップの入力では欄が文字で数えていました。受け付けなければ、86 バイトの短い版（<code>docs/store/listing.md</code>）にします。</p>
+  <details><summary>説明文（約 950 字）</summary>
+<pre class="copy">スマホで描いた間取りが、そのまま3Dの家になり、中を歩いて確かめられるアプリです。
+
+「この間取り、住んだらどうなるんだろう」「リビングにこのソファは入るかな」「キッチンから子ども部屋は見えるかな」。平面の図だけでは分かりにくいことを、建てる前に自分の目で確かめられます。
+
+■ 指先で、間取りを描く
+壁を引き、ドアと窓を付け、部屋を並べていきます。部屋の広さは畳数で出ます。1階と2階を分けて描けます。
+
+■ 描いた間取りが、すぐ3Dの家になる
+外から見た家の形と、屋根を外して上から見た室内を、3Dで確かめられます。向きを変えて、東西南北のどこからでも見られます。
+
+■ 建てる前に、家の中を歩ける
+玄関から入り、廊下を通ってリビングへ。自分の目の高さで歩けます。人物の後ろから見る視点にも切り替えられます。座ったときの目線にもできます。
+
+■ 間取り図の写真から、下書きを作る
+手元の間取り図を撮った写真や画像から、AIが壁と部屋を読み取って下書きを作ります。一から描かなくても、直す所から始められます。
+
+■ 言葉で頼んで、直す
+「リビングにソファとテレビを置いて」「寝室を少し広くして」。言葉で頼むと、AIが間取りを直します。気に入らなければ、ひと押しで元に戻せます。
+
+■ 家具を置いて、暮らしを思い描く
+ソファ、ベッド、テーブル、キッチン、浴室などを置けます。置いた家具は3Dにも歩く視点にも出ます。
+
+■ 家の雰囲気を、ひと押しで変える
+同じ間取りのまま、外壁・屋根・内装をまとめて洋館や古民家の様式に替えられます。
+
+■ 2つの案を、並べて比べる
+間取りを2案並べて、見比べながらどちらも直せます。
+
+■ 家族と一緒に直す
+リンクを送ると、同じ間取りを一緒に開いて直せます。
+
+■ 図面にして残す（アプリ版での動きを確かめてから確定）
+描いた間取りを、図面の画像として保存できます。
+
+■ 広告について（広告の実装ができてから確定）
+画面の下に広告を表示します。間取りを保存したあとなどに、全画面の広告が出ることがあります。描いている途中や歩いている途中には、全画面の広告を出しません。
+
+■ ご注意
+・間取り図の読み取りと、言葉で頼む機能は、インターネットにつながっているときに使えます。選んだ図面と入力した文は、読み取りのためにAIの事業者に送ります。1日に使える回数には上限があります。
+・AIが作る下書きは、元の図面と違うことがあります。寸法や部屋の並びは、ご自身で確かめて直してください。
+・このアプリの3Dと寸法は、暮らしを思い描くための目安です。建築の確認や工事には、設計者・施工者の図面を使ってください。</pre>
+  </details>
+  <div class="tw"><table class="w640">
+    <thead><tr><th>欄</th><th>案</th><th>備考</th></tr></thead>
+    <tbody>
+      <tr><td>主カテゴリ</td><td>ライフスタイル</td><td>家づくりを考える一般の人が相手のため。別の候補はグラフィック／デザイン、仕事効率化</td></tr>
+      <tr><td>著作権</td><td><code>2026 SRApps Lab</code></td><td>かさねて・東京バズマップと同じ</td></tr>
+      <tr><td>プライバシーポリシー URL</td><td><code>https://srapps.us/legal/privacy</code> か、PR #156 が作る cad-planner.srapps.us 側のページ</td><td>どちらにするかは PR #156 のマージのときに決める。今はどちらにも house-planner mobile の記載が無い</td></tr>
+      <tr><td>サポート URL</td><td><code>https://cad-planner.srapps.us/support</code></td><td>PR #156 のマージ後に開ける。今は 404</td></tr>
+      <tr><td>マーケティング URL</td><td><code>https://cad-planner.srapps.us</code></td><td>AdMob はこのサイトの最上位で app-ads.txt を探す。無ければ srapps.us の物を見る</td></tr>
+      <tr><td>言語・価格・地域</td><td>日本語のみ・無料・日本だけ</td><td>決定済み</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">説明文に「ChatGPT や Claude などの AI アプリからも間取りを直せる」と書くかも聞きたい点です。機能は本番にありますが、他社の名前を出すと審査で指摘されることがあるので、初版では書かない案を勧めます。</p>
+</section>
+
+<section id="decl">
+  <div class="chap-head"><span class="chap-no">6章</span><h2>申告と審査の情報</h2></div>
+  <p>事実は 2026-11-26 の main のコードと設計書で確かめました。アプリの入れ物・AdMob・AI に送る前の確認の画面はまだ無いので、その部分は「できてから確かめ直す」と印を付けてあります。全文は <code>docs/store/privacy-labels.md</code>、<code>age-rating-and-compliance.md</code>、<code>review-notes.md</code> です。</p>
+  <div class="sub">端末の外へ出る物（コードで確かめた事実）</div>
+  <div class="tw"><table class="w640">
+    <thead><tr><th>何を</th><th>どこへ</th><th>当方の保存</th></tr></thead>
+    <tbody>
+      <tr><td>選んだ間取り図の画像・PDF と補足の文</td><td>当方のサーバーを通して Anthropic へ。PDF の図面探しは Google の Vertex AI（日本の拠点）へ。どちらかが一時的に失敗したときだけ、同じ図面を OpenAI へ</td><td>保存しない</td></tr>
+      <tr><td>「AIに頼む」に入れた文と、そのときの間取り</td><td>当方のサーバーを通して Anthropic へ</td><td>保存しない</td></tr>
+      <tr><td>共同編集に出した間取り（壁に貼った画像を含む）</td><td>当方のサーバー</td><td>最後の変更から 60 日。利用者が消す操作は今は無い</td></tr>
+      <tr><td>IP アドレス</td><td>当方のサーバー</td><td>AI の回数を数えるために当日と前日の分。呼び出しの記録には 3〜7 日</td></tr>
+      <tr><td>広告</td><td>Web 版は A8.net（アプリの中では出さない）。アプリの AdMob はまだ無い</td><td>当方は関わらない</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small muted">ログイン・アカウント・位置情報・連絡先・解析の道具は使っていません。2026-11-25 の調査メモの「PDF の図面探しは OpenAI」は誤りで、Vertex AI が先、OpenAI は予備でした。</p>
+  <div class="sub">App のプライバシーの申告の案</div>
+  <div class="tw"><table class="w640">
+    <thead><tr><th>データの種類</th><th>用途</th><th>結びつくか</th><th>トラッキング</th><th>出どころ</th></tr></thead>
+    <tbody>
+      <tr><td>おおよその場所</td><td>第三者の広告ほか</td><td>はい</td><td>いいえ</td><td>AdMob</td></tr>
+      <tr><td>デバイス ID</td><td>第三者の広告ほか</td><td>はい</td><td>はい</td><td>AdMob</td></tr>
+      <tr><td>製品の操作、広告データ</td><td>第三者の広告ほか</td><td>はい</td><td>いいえ</td><td>AdMob</td></tr>
+      <tr><td>クラッシュ・パフォーマンス・その他の診断</td><td>分析ほか</td><td>いいえ</td><td>いいえ</td><td>AdMob</td></tr>
+      <tr class="pick"><td>写真またはビデオ（間取り図の画像）</td><td>アプリの機能</td><td>いいえ</td><td>いいえ</td><td>図面の読み取り</td></tr>
+      <tr class="pick"><td>その他のユーザコンテンツ（補足の文、チャットの文、共有した間取り）</td><td>アプリの機能</td><td>いいえ</td><td>いいえ</td><td>読み取り・チャット・共同編集</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">色を付けた 2 行が、決めること 6 です。AdMob の行は、かさねてで申告した形を元にしています。Google の今の案内（SDK 13.12.0）は種類を 6 つ挙げていて、かさねての記録と 1 行ずつ比べる作業が残っています。</p>
+  <div class="sub">年齢区分</div>
+  <p>暴力・性的な内容などはすべて「なし」、広告は「はい」、制限のない Web アクセスは「いいえ」、利用者どうしのメッセージは「いいえ」で、4+ の見込みです。共同編集を「ユーザー生成コンテンツ」と答えるかは迷う所で、案は「いいえ」です（URL を知る相手だけが見る物で、かさねても同じ答えで通っています）。どちらでも 4+ です。</p>
+  <div class="sub">審査メモに書くこと</div>
+  <ul>
+    <li>ログインもアカウントも無いこと。</li>
+    <li>AI に送る物と送り先（Anthropic、Google の Vertex AI、予備の OpenAI）と、送る前に確認の画面を出すこと。確認の画面はまだ無いので、できてから書きます。</li>
+    <li>共同編集は URL を知る人だけが入れ、一覧も検索も無く、60 日で消えること。</li>
+    <li>広告の出る場面。AdMob ができてから書きます。</li>
+    <li>AI には 1 日の上限があり、当たっても作図と 3D は使えること。今の上限では、同じ回線からチャットなら 8 回ほど、図面の読み取りなら数回でその日の分が尽きます。</li>
+    <li>試した端末と OS。</li>
+  </ul>
+  <div class="sub">コンテンツの権利（決めること 8）</div>
+  <p>App Store Connect は、第三者のコンテンツを含むか、使う権利があるかを尋ねます。家具のうち Furniture Mega Pack の 445 点は、オリジナルへの置き換えを決めて第1波を制作中です。置き換えの前に出すこともできますが、権利の確かめが済んでいない物が残った状態で「権利がある」と答えることになります。</p>
+</section>
+
+<section id="todo">
+  <div class="chap-head"><span class="chap-no">7章</span><h2>あなたが行う手順</h2></div>
+  <p>登録・入力・提出はあなたにしかできません。今すぐできるのは 1 と 2 で、残りはアプリの入れ物ができてからです。値が決まっていない所は、このページの決めることの答えで埋まります。</p>
+  <ol class="steps">
+    <li>App Store Connect でアプリを作る。名前は決めること 5 の答え、主言語は日本語、バンドル ID は <code>us.srapps.houseplanner</code>（一度作ると変えられない）、SKU は <code>houseplanner-ios</code>。</li>
+    <li>AdMob に iOS アプリを「未公開」で登録し、バナーと全画面（インタースティシャル）の広告ユニットを 1 つずつ作る。アプリ ID と 2 つのユニット ID を、アプリの入れ物を作るセッションに渡す。広告の内容の上限は G。</li>
+    <li>価格を無料、配信地域を「特定の国または地域」で日本だけにする。</li>
+    <li>App 情報に、サブタイトル・カテゴリ・著作権・3 つの URL（5章の表）を入れる。</li>
+    <li>「App のプライバシー」に 6章の表を入れて「公開」を押す。</li>
+    <li>年齢区分の質問票に、6章の答えで答える。</li>
+    <li>バージョンのページに、宣伝文・説明・キーワード、スクリーンショット（iPhone 2 寸法と iPad 13 インチ）、プレビュー動画を入れる。</li>
+    <li>審査の連絡先（電話は <code>+81</code> から）と審査メモを入れる。サインイン情報は「不要」。</li>
+    <li>輸出コンプライアンスは「免除（OS の暗号だけ）」、コンテンツの権利は決めること 8 の答えで答える。</li>
+    <li>ビルドを選んで審査に出す。</li>
+    <li>公開されたら、AdMob でアプリをストアに関連付ける。</li>
+  </ol>
+  <div class="sub">この先の順番</div>
+  <p>決めることの答えをもらったら、アイコンを仕上げ、iPhone のスクリーンショット 7 枚と X 用の 3 本を撮ります。iPad のスクリーンショット、プレビュー動画の本番、申告と審査メモの確定は、本体の作業（iPad の表示の直し、アプリの入れ物、AdMob、確認の画面）が入ってからです。</p>
+</section>
+
+</div>
