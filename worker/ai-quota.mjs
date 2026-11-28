@@ -32,7 +32,10 @@
 // 同じクラスを、別の名前のインスタンスで別の物を数えるのにも使う（数は名前ごとに別々に持つ）。
 //   idFromName("ai-usage")     AI の点（読み取り・チャット）
 //   idFromName("room-create")  外の AI（/api/mcp の create_plan）が作るルームの数。/take を cost=1 で呼ぶ
-//                              （worker/mcp.mjs。画面からの POST /api/rooms は数えない）
+//                              （worker/mcp.mjs）
+//   idFromName("room-create-screen")・("room-writes")・("room-ops")
+//                              画面から作るルームの数、画面からのルームへの書き込み、外の AI の操作の数
+//                              （ルームをまたいだ全体の上限。worker/room-quota.mjs）
 
 // 1日の上限。**回数ではなく「点」で数える**（点の重さは worker/routes-ai.mjs の COST_* と
 // worker/chat.mjs の AI_CHAT_POINTS）。

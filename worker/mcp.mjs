@@ -301,6 +301,8 @@ function failureKind(res, messages) {
   if (res && res.code === "op_limit") return "limit";
   if (res && res.code === "delete_limit") return "delete_limit";
   if (res && res.code === "read_limit") return "busy";
+  if (res && res.code === "op_busy") return "busy";
+  if (res && res.code === "op_limit_all") return "limit_all";
   if (res && res.code === "ai_edits_off") return "stopped";
   if (!messages.length || messages.every((m) => m === ROOM_UNAVAILABLE_MESSAGE)) return "busy";
   if (messages.some((m) => m.includes(REFUSAL))) return "refused";
@@ -310,6 +312,7 @@ const KIND_LINE = {
   args: "失敗の種類: 引数の誤り（引数を直せば通ります）",
   refused: "失敗の種類: この受け口では行えない操作（house-planner の画面でだけ行えます）",
   limit: "失敗の種類: 回数の上限（このプランは、きょうはこの受け口から直せません）",
+  limit_all: "失敗の種類: 回数の上限（きょうは、この受け口からの変更が全体の上限に達しました）",
   delete_limit: "失敗の種類: 消す数の上限（このプランは、きょうはこの受け口からこれ以上消せません。消さない操作はできます）",
   busy: "失敗の種類: 一時的な失敗",
   stopped: "失敗の種類: 利用者が外部 AI からの変更を止めています（プランを読むことはできます）",
@@ -335,7 +338,7 @@ function failureText(res, origin, roomId) {
     lines.push("理由に、引数を変えたやり方（別の種類など）が書かれていれば、それは引数を直せば通る失敗です。直してやり直してください。"
       + "書かれていなければ、この受け口では行えない操作です。利用者に、下の URL を開いて house-planner の画面で行うよう伝えてください。");
     lines.push(openLine(origin, roomId));
-  } else if (kind === "limit" || kind === "delete_limit") {
+  } else if (kind === "limit" || kind === "limit_all" || kind === "delete_limit") {
     lines.push("利用者に、あすまた試すか、下の URL を開いて house-planner の画面で直すよう伝えてください。");
     lines.push(openLine(origin, roomId));
   } else if (kind === "stopped") {

@@ -16729,8 +16729,13 @@ async function savePlanToStorage(){
     if(inRoom)await StorageAdapter.saveRoom(SHARED.roomId,DATA);else await StorageAdapter.save(DATA);
     browserSaved=true;
     if(SHARED.roomId){
+      // きょうの上限で断られている間は、部屋へは送らない(ブラウザへの保存は上で済んでいる)。
+      if(sharedLimitWaitMs()){var waitError=new Error(SHARED.limitText||'本日は共同編集への反映を受け付けられません。');waitError.limited=true;throw waitError;}
       await flushSharedChanges();
+      if(sharedLimitWaitMs()){var flushError=new Error(SHARED.limitText||'本日は共同編集への反映を受け付けられません。');flushError.limited=true;throw flushError;}
       var response=await fetch('/api/rooms/'+SHARED.roomId+'/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({clientId:sharedClientId(),baseVersion:SHARED.version,plan:DATA},function(k,v){return k==='_texObj'?undefined:v;})});
+      var saveLimit=response.ok?null:await sharedLimitReply(response);
+      if(saveLimit){SHARED.limitUntil=Date.now()+saveLimit.waitMs;SHARED.limitText=saveLimit.message;var saveLimitError=new Error(saveLimit.message);saveLimitError.limited=true;throw saveLimitError;}
       if(!response.ok) throw new Error(response.status===413?'プランが10MBを超えています。':'クラウド保存に失敗しました（'+response.status+'）');
       var result=await response.json();
       SHARED.version=Math.max(SHARED.version,Number(result.version||0));
@@ -16744,7 +16749,11 @@ async function savePlanToStorage(){
     clearDirty();
   }catch(e){
     var message=(e&&e.message?e.message:e);
-    if(browserSaved&&SHARED.roomId){
+    if(browserSaved&&SHARED.roomId&&e&&e.limited){
+      // きょうの上限。失敗の箱(alert)は出さず、状態の欄に部屋の文を出す。プランはブラウザに保存してある。
+      sharedSetStatus('ブラウザには保存しました。'+message,true);
+      showPlanNotice('ブラウザには保存しました。'+message);
+    }else if(browserSaved&&SHARED.roomId){
       sharedSetStatus('ブラウザには保存しましたが、クラウド保存に失敗しました。',true);
       alert('ブラウザには保存しましたが、クラウド保存に失敗しました: '+message);
     }else{
@@ -17282,9 +17291,24 @@ async function sharedSetAiEdits(off){
   }
   renderSharedUi();sharedRenderAiBar();
 }
+// 部屋が「きょうの上限」で断った返事(429 と error: write_limit・room_create_limit。worker/room-quota.mjs)から、
+// 利用者に見せる文と、次に送ってよいまでの時間を取り出す。上限の返事でなければ null。
+// 待つ時間は返事の retry-after(秒)に従う。無い・読めないときは 10 分。1 秒〜1 時間に収める。
+async function sharedLimitReply(response){
+  if(!response||response.status!==429)return null;
+  var body=null;try{body=await response.json();}catch(e){body=null;}
+  if(!body||(body.error!=='write_limit'&&body.error!=='room_create_limit'))return null;
+  var sec=Number(response.headers.get('retry-after'));if(!(sec>0))sec=600;
+  var text=typeof body.message==='string'&&body.message?body.message.slice(0,200):'本日は共同編集への反映を受け付けられません。時間をおいてもう一度お試しください。';
+  return {message:text,waitMs:Math.min(3600000,Math.max(1000,Math.round(sec*1000)))};
+}
+// 上限で断られている間か(SHARED.limitUntil は次に送ってよい時刻。手元の編集は続けられ、送れていない変更は再開したら送る)。
+function sharedLimitWaitMs(){var left=Number(SHARED.limitUntil||0)-Date.now();return left>0?left:0;}
 function queueSharedSync(delay){
   if(!SHARED.roomId||SHARED.applying)return;
-  clearTimeout(SHARED.timer);SHARED.timer=setTimeout(function(){SHARED.timer=null;sharedSyncNow();},delay===undefined?500:delay);
+  // 上限の間は、0.6 秒ごとの送り直しも、編集のたびの送り出しもしない。再開の時刻に1回送る。
+  var wait=Math.max(delay===undefined?500:delay,sharedLimitWaitMs());
+  clearTimeout(SHARED.timer);SHARED.timer=setTimeout(function(){SHARED.timer=null;sharedSyncNow();},wait);
 }
 async function sharedSyncNow(){
   if(!SHARED.roomId||SHARED.applying)return;
@@ -17294,8 +17318,11 @@ async function sharedSyncNow(){
   sharedResetDirtyTracking();SHARED.sending=true;var sendEntry=sharedBeginSend(patch);
   SHARED.sendPromise=(async function(){try{
     var response=await fetch('/api/rooms/'+SHARED.roomId+'/update',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'patch',clientId:sharedClientId(),baseVersion:SHARED.version,patch:patch})});
-    if(!response.ok){var sendError=new Error('同期できませんでした（'+response.status+'）');sendError.rejected=response.status===400||response.status===413;sendError.tooLarge=response.status===413;throw sendError;}
-    var result=await response.json();SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;sharedCommitSend(sendEntry);sharedSetStatus('変更を同期しました。操作が止まると自動保存します。');renderSharedUi();
+    if(!response.ok){
+      var limit=await sharedLimitReply(response);
+      if(limit){var limitError=new Error(limit.message);limitError.limited=true;limitError.waitMs=limit.waitMs;throw limitError;}
+      var sendError=new Error('同期できませんでした（'+response.status+'）');sendError.rejected=response.status===400||response.status===413;sendError.tooLarge=response.status===413;throw sendError;}
+    var result=await response.json();SHARED.limitUntil=0;SHARED.limitShown=false;SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;sharedCommitSend(sendEntry);sharedSetStatus('変更を同期しました。操作が止まると自動保存します。');renderSharedUi();
   }catch(e){sharedAbortSend(sendEntry);
     if(e&&e.rejected){
       // 400 は差分の形が部屋に合わない、413 は本文か当てたあとのプランが保存の上限を超える(worker/collab-room.mjs の
@@ -17310,6 +17337,12 @@ async function sharedSyncNow(){
       sharedSetStatus(head+tail,true);
       showPlanNotice(head+tail,keep.ok?null:{label:'ファイルに保存',run:function(){downloadJsonFile(keep.json,sharedKeepFileName(keep.at));}});
       await refreshSharedPlan();
+    }else if(e&&e.limited){
+      // きょうの上限。手元の変更は捨てず(forceScan で次に全件を比べ直す)、送り直しは返事の retry-after まで待つ。
+      // 文は部屋が返した物をそのまま出す(再開の時刻と「ファイルに保存」で残せることが書いてある)。
+      SHARED.forceScan=true;SHARED.limitUntil=Date.now()+e.waitMs;SHARED.limitText=e.message;sharedSetStatus(e.message,true);SHARED.pending=true;renderSharedUi();
+      // 共有のダイアログを閉じて編集している人にも分かるよう、上限に当たった最初の1回だけ知らせを出す(待ったあとの送り直しでは出さない)。
+      var limitOverlay=document.getElementById('share-overlay');if(!SHARED.limitShown&&!(limitOverlay&&limitOverlay.classList.contains('show')))showPlanNotice(e.message);SHARED.limitShown=true;
     }else{SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
   }
   finally{SHARED.sending=false;if(SHARED.sendEntry===sendEntry)SHARED.sendEntry=null;if(SHARED.pending||sharedHasTrackedChanges()){SHARED.pending=false;queueSharedSync(600);}}})();
@@ -17523,7 +17556,7 @@ async function createSharedRoom(){
   try{
     normalizeLegacyFurnitureItems();ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();captureViewState();
     var response=await fetch('/api/rooms',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;})});
-    if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'共同編集ルームを作成できませんでした。');
+    if(!response.ok){var createLimit=await sharedLimitReply(response);throw new Error(createLimit?createLimit.message:response.status===413?'プランが10MBを超えています。':'共同編集ルームを作成できませんでした。');}
     var result=await response.json();SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();history.replaceState(null,'',result.url);connectSharedSocket();clearDirty();renderSharedUi();
     // 作った時点で部屋の枠へ入れる(編集せずに閉じても、保存一覧の「共同編集」と起動時の知らせから開けるように)
     StorageAdapter.saveRoom(result.roomId,DATA).catch(function(){});sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();

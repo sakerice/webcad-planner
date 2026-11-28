@@ -424,7 +424,7 @@ test('Review Focus 1: plan の形が違う・別のサイト・../・無いル�
   }
 });
 
-test('Review Focus 4: 同じ接続元の 21 回めの create_plan は断る。全体の上限。数えられないと作らない。画面の POST /api/rooms は数えない', async () => {
+test('Review Focus 4: 同じ接続元の 21 回めの create_plan は断る。全体の上限。数えられないと作らない。画面の POST /api/rooms は別の数で数える', async () => {
   const ctx = await setup();
   const ip = { 'cf-connecting-ip': '203.0.113.5' };
   for (let i = 0; i < 20; i++) await createPlan(ctx, ip);
@@ -467,13 +467,15 @@ test('Review Focus 4: 同じ接続元の 21 回めの create_plan は断る。�
   assert.equal(none.isError, true);
   assert.equal(ctx3.env.PLANS.puts.length, 0);
 
-  // 画面からの POST /api/rooms は今までどおり数えない（25 回作れて、数える先も作られない）
+  // 画面からの POST /api/rooms は、外の AI の数（room-create）を使わない。別の数（room-create-screen）で数える
+  // （上限は tools/tests/room-update-guards.test.cjs）。同じ接続元が画面から 25 個作ったあとも、create_plan は 20 回できる。
   const ctx4 = await setup();
   for (let i = 0; i < 25; i++) {
     const r = await send(ctx4, { url: HOST + '/api/rooms', body: { walls: [], items: [], rooms: [] }, headers: ip });
     assert.equal(r.status, 201);
   }
-  assert.deepEqual(ctx4.env.AI_QUOTA.created, []);
+  assert.deepEqual(ctx4.env.AI_QUOTA.created, ['room-create-screen']);
+  for (let i = 0; i < 20; i++) await createPlan(ctx4, ip);
 });
 
 test('Review Focus 5: 知らないメソッド・壊れた JSON・配列・64KB 超・GET・許していない Origin で、決めた状態と誤りの番号を返す', async () => {
