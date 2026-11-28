@@ -27,6 +27,9 @@ cp index.html dist/
 cp _headers dist/
 # 無いパスに返す案内(wrangler.toml の not_found_handling = "404-page")。
 cp 404.html dist/
+# プライバシーポリシー・利用規約・サポート(/privacy・/terms・/support)と、ドメインの確認用のファイル(/.well-known/…)。
+# 運営者が決める値(legal/site.json)が入るまで、本番のビルドではページを書き出さない。くわしくは legal/build.cjs の冒頭。
+node legal/build.cjs dist
 cp -r assets/. dist/assets/
 # 編集用の元データと macOS のごみは配信しない。
 find dist \( -name '*.blend' -o -name '.DS_Store' \) -delete

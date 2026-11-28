@@ -1,0 +1,14 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "us.srapps.cad-planner/house-planner",
+  "title": "house-planner",
+  "description": "Create, read, and edit home floor plans, then open them in a browser as 2D and 3D views.",
+  "version": "1.0.0",
+  "websiteUrl": "https://cad-planner.srapps.us/support",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://cad-planner.srapps.us/api/mcp"
+    }
+  ]
+}
