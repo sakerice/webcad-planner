@@ -17416,6 +17416,19 @@ async function fetchSharedPlan(roomId){
 }
 // resuming=true は「既に参加中のセッションで取り直しただけ」の意味。
 // 生きているソケットを張り直さず、編集中の視点も動かさない。
+// 部屋に入ったとき(installSharedPlan)の基準のうち、id の無かった物に振った id だけを「未送信」に戻す。
+// before は id を振る前、after は補完を済ませたあとの基準。after にだけある id(振った id)は基準から外して次の送信で送り、
+// before にだけある鍵(id の無かった物の "undefined" など)は基準に残して、次の送信で部屋から外す。
+// 部屋のプランは全体の保存(作成・/save)では id の無い物を断らない(worker/room-guard.mjs)。振った id を送らないと、
+// 画面ごとに別の id を振ったまま、相手と物の対応が取れなくなる。送るのは今まで(基準を補完の前に取っていたとき)と同じ形。
+function sharedBaselineKeepIdFills(before,after){
+  PlanCorePatch.COLLECTIONS.forEach(function(name){
+    var pre=before.collections[name]||{},post=after.collections[name]||(after.collections[name]={});
+    Object.keys(post).forEach(function(id){if(pre[id]===undefined)delete post[id];});
+    Object.keys(pre).forEach(function(id){if(post[id]===undefined)post[id]=pre[id];});
+  });
+  return after;
+}
 function installSharedPlan(loaded,roomId,resuming){
   // 開けない桁なら入れずに断る(呼ぶ側が文を共有の欄に出す)。時間がかかる大きさなら、初めて入るときだけ確かめる
   // (取り直し・再接続では聞かない。差分で部屋が大きくなっても、入っている人は続けられ、新しく入る人は「はい」で入れる)。
@@ -17430,8 +17443,14 @@ function installSharedPlan(loaded,roomId,resuming){
   if(SHARED.roomId!==roomId&&typeof PLAN_LIBRARY_ID!=='undefined'){PLAN_LIBRARY_ID=null;PLAN_SAVE_INFO=null;}
   // 別の部屋に入るときは、外部 AI の状態を持ち越さない(入った部屋の状態は welcome で届く)
   if(SHARED.roomId!==roomId){SHARED.aiEditsOff=false;SHARED.aiGroup=null;SHARED.aiBarUntil=0;}
-  _defaultPlanPending=false;clearStorageFromRoom();DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedForgetSends();sharedResetDirtyTracking();
-  ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
+  _defaultPlanPending=false;clearStorageFromRoom();DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;
+  // 手元の補完(外壁・内観・屋根の既定値、古い家具の形など)は部屋へ送らない。開いた画面がそれぞれ同じように補う。
+  // そのため基準は補完を済ませたあとに取る(先に取ると、補った既定値が未送信の差になり、最初のクリックで部屋へ送っていた)。
+  // ただし id の無い物に振った id(ensureObjectIds)は、今までどおり送る(sharedBaselineKeepIdFills)。
+  var unfilled=sharedBaselineFrom(DATA);
+  ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();
+  SHARED.baseline=sharedBaselineKeepIdFills(unfilled,sharedBaselineFrom(DATA));sharedForgetSends();sharedResetDirtyTracking();
+  if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
   if(window.PrAds&&PrAds.noteRoom)PrAds.noteRoom(roomId);
 }
 async function refreshSharedPlan(){
